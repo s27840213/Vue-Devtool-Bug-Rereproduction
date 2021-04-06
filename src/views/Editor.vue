@@ -8,7 +8,7 @@
         div(class="bg-gray-6")
           div(class="content__blank bg-white")
           div
-            canvas-view
+            editor-view
             frames
 </template>
 
@@ -17,7 +17,7 @@ import Vue from 'vue';
 import Sidebar from '@/components/editor/Sidebar.vue';
 import EditorHeader from '@/components/editor/EditorHeader.vue';
 import FunctionPanel from '@/components/editor/FunctionPanel.vue';
-import CanvasView from '@/components/editor/CanvasView.vue';
+import EditorView from '@/components/editor/EditorView.vue';
 import Frames from '@/components/editor/Frames.vue';
 
 export default Vue.extend({
@@ -26,7 +26,7 @@ export default Vue.extend({
     Sidebar,
     EditorHeader,
     FunctionPanel,
-    CanvasView,
+    EditorView,
     Frames
   },
   data() {

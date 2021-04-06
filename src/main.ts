@@ -2,6 +2,8 @@ import Vue from 'vue';
 import VueKonva from 'vue-konva'
 import SvgIcon from '@/components/SvgIcon.vue'
 import TmpImages from '@/components/TmpImages.vue'
+import ActionBar from '@/components/ActionBar.vue'
+import PropertyBar from '@/components/PropertyBar.vue'
 import Btn from '@/components/Btn.vue'
 import App from './App.vue';
 import router from './router';
@@ -10,6 +12,8 @@ import store from './store';
 Vue.component('svg-icon', SvgIcon)
 Vue.component('tmp-images', TmpImages)
 Vue.component('btn', Btn)
+Vue.component('action-bar', ActionBar)
+Vue.component('property-bar', PropertyBar)
 Vue.use(VueKonva)
 Vue.config.productionTip = false;
 

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel")
+  div(class="panel p-20")
     component(:is="panelComponents[currPanel]")
     img(class="btn-pack" :src="require('@/assets/img/svg/pack-up.svg')")
 </template>
@@ -68,7 +68,6 @@ export default Vue.extend({
 .panel {
   position: relative;
   @include size(320px, 100%);
-  padding: 10px;
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.05);

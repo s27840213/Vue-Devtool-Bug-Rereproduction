@@ -1,5 +1,4 @@
 
-$spacer: 5;
 
 .full-width {
   width: 100%;
@@ -8,10 +7,37 @@ $spacer: 5;
   height: 100%;
 }
 
+.disp-flex {
+  display: flex
+}
+
+
+.flex-around {
+  justify-content: space-around;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-evenly {
+  justify-content: space-evenly;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+// padding and margin
+
+$spacer: 5;
 
 @for $i from 1 through 12 {
   $space: ($spacer * $i);
-  // margin
   .mt-#{$space} {
     margin-top: $space*1px;
   }
@@ -60,4 +86,32 @@ $spacer: 5;
   .p-#{$space} {
     padding: $space*1px;
   }
+}
+
+
+
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.text-justify {
+  text-align: justify;
+}
+
+.align-top {
+  vertical-align: top;
+}
+.align-bottom {
+  vertical-align: bottom;
+}
+.align-middle {
+  vertical-align: middle;
+}
+.align-baseline {
+  vertical-align: baseline;
 }
