@@ -1,0 +1,8 @@
+
+@function setColor($color, $opacity: 1) {
+  @return rgba(map-get($colors, $color), $opacity);
+}
+
+@function setZindex($value) {
+  @return index($zindex, $value);
+}
