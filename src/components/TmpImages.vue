@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="temp__content")
     img(class="temp__item"
-      v-for="i in 12" :src="require('@/assets/img/svg/img-tmp.svg')")
+      v-for="i in 24" :src="require('@/assets/img/svg/img-tmp.svg')")
 </template>
 
 <script lang="ts">
@@ -19,13 +19,14 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .temp {
   &__content {
-    max-height: 100%;
+    height: 100%;
     display: grid;
     grid-auto-rows: auto;
     grid-template-columns: repeat(2, 1fr);
     row-gap: 20px;
     column-gap: 20px;
-    margin: 20px 0px;
+    padding-top: 20px;
+    box-sizing: border-box;
     overflow-y: scroll;
     &::-webkit-scrollbar {
       display: none;

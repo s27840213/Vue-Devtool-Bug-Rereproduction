@@ -18,5 +18,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-photo {
   @include size(100%, 100%);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: 1fr;
 }
 </style>

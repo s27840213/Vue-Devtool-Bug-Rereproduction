@@ -5,17 +5,19 @@ import { IEditorState, PanelType } from '../types';
 Vue.use(Vuex);
 
 const getDefaultState = (): IEditorState => ({
-  frameList: null,
-  currFrame: null,
+  pages: [{
+    width: 1200,
+    height: 800,
+    backgroundColor: '#ffffff',
+    name: 'Default Page',
+    layers: []
+  }],
   currPanelType: PanelType.template
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, any> = {
-  getFrameList(state) {
-    return state.frameList
-  },
-  getCurrFrame(state) {
-    return state.currFrame
+  getPages(state) {
+    return state.pages
   },
   getCurrPanelType(state) {
     return state.currPanelType
@@ -31,9 +33,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   COPY_frame(state) {
     return state
-  },
-  SET_currFrame(state, frame) {
-    state.currFrame = frame
   },
   SET_currPanelType(state, type) {
     state.currPanelType = type

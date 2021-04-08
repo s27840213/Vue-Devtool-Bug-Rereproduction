@@ -70,7 +70,7 @@ export default Vue.extend({
   @include size(320px, 100%);
   box-sizing: border-box;
   z-index: setZindex("function-panel");
-  box-shadow: 1px 0 4px setColor(blue-1, 0.05);
+  box-shadow: 1px 0 4px setColor(blue-1, 0.1);
 }
 
 .btn-pack {
@@ -79,6 +79,7 @@ export default Vue.extend({
   top: 50%;
   right: 0;
   transform: translate3d(100%, -70%, 0);
+  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.05));
   cursor: pointer;
 }
 </style>

@@ -1,12 +1,11 @@
-import { IFrame, IFrameList } from '@/interfaces/frame'
+import { IPage } from '@/interfaces/page'
 
 export interface IState {
   temp: string | null
 }
 
 export interface IEditorState {
-  frameList: IFrameList | null,
-  currFrame: IFrame | null,
+  pages: Array<IPage> | null,
   currPanelType: number | null
 }
 
@@ -23,16 +22,3 @@ export enum PanelType {
   pageSetting,
   photoSetting
 }
-
-// export enum PanelType {
-//   template = 'template',
-//   photo = 'photo',
-//   background = 'background',
-//   text = 'text',
-//   file = 'file',
-//   group = 'group',
-//   textSetting = 'textSetting',
-//   colorPicker = 'colorPicker',
-//   pageSetting = 'pageSetting',
-//   photoSetting = 'photoSetting'
-// }
