@@ -44,6 +44,7 @@ export default Vue.extend({
 .page-section {
   min-width: 100%;
   min-height: 100%;
+  padding: 30px;
   position: absolute;
   box-sizing: border-box;
   @include flexCenter;
