@@ -10,7 +10,27 @@ const getDefaultState = (): IEditorState => ({
     height: 800,
     backgroundColor: '#ffffff',
     name: 'Default Page',
-    layers: []
+    layers: [
+      // {
+      //   type: 'text',
+      //   text: 'Tesing Font',
+      //   styles: {
+      //     width: 200,
+      //     height: 40,
+      //     fontFamily: 'Lobster',
+      //     fontWeight: 'bold',
+      //     textAlign: 'left',
+      //     lineHeight: 20,
+      //     color: '#000000',
+      //     fontSize: 72,
+      //     x: 600,
+      //     y: 806,
+      //     scaleX: 0,
+      //     scaleY: 0,
+      //     rotate: 0
+      //   }
+      // }
+    ]
   }],
   currPanelType: PanelType.template
 })

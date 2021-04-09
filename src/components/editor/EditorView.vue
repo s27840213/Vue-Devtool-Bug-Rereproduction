@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-view bg-gray-6")
     div(class="page-section")
-      page(v-for="(page,index) in pages"
+      nu-page(v-for="(page,index) in pages"
         :key="`page-${index}`"
         :config="page" :index="index")
 </template>
@@ -9,11 +9,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
-import Page from '@/components/editor/components/Page.vue'
 
 export default Vue.extend({
   components: {
-    Page
   },
   data() {
     return {

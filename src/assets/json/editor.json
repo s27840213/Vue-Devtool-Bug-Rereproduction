@@ -9,46 +9,54 @@
 				{
 					"type": "shape",
 					"shapeType": "rectangle",
-					"color": "#C4C4C4",
-					"x": 343,
-					"y": 320,
-					"scaleX": 0,
-					"scaleY": 0,
-					"rotate": 0,
-					"width": 629,
-					"height": 629
+					"styles": {
+						"color": "#C4C4C4",
+						"x": 343,
+						"y": 320,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 629,
+						"height": 629
+					}
 				},
 				{
 					"type": "group",
-					"x": 327,
-					"y": 320,
-					"scaleX": 0,
-					"scaleY": 0,
-					"rotate": 0,
-					"width": 906,
-					"height": 1221,
+					"styles": {
+						"x": 327,
+						"y": 320,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 906,
+						"height": 1221
+					},
 					"layers": [
 						{
 							"type": "shape",
 							"shapeType": "rectangle",
-							"color": "0xC4C4C4",
-							"x": 16,
-							"y": 0,
-							"scaleX": 0,
-							"scaleY": 0,
-							"rotate": 0,
-							"width": 629,
-							"height": 629
+							"styles": {
+								"color": "0xC4C4C4",
+								"x": 16,
+								"y": 0,
+								"scaleX": 0,
+								"scaleY": 0,
+								"rotate": 0,
+								"width": 629,
+								"height": 629
+							}
 						},
 						{
 							"type": "shape",
 							"shapeType": "ellipse",
-							"radius": "453 / 453",
-							"color": "0xE12323",
-							"x": 0,
-							"y": 315,
-							"width": 906,
-							"height": 906
+							"styles": {
+								"radius": "453 / 453",
+								"color": "0xE12323",
+								"x": 0,
+								"y": 315,
+								"width": 906,
+								"height": 906
+							}
 						}
 					]
 				},
@@ -67,31 +75,35 @@
 				},
 				{
 					"type": "text",
-					"font": "Mulish",
-					"weight": "bold",
-					"justification": "left",
-					"lineHeight": 20,
-					"color": "#000000",
-					"size": 72,
-					"x": 600,
-					"y": 806,
-					"scaleX": 0,
-					"scaleY": 0,
-					"rotate": 0,
-					"width": 200,
-					"height": 40,
-					"text": "測試用文字"
+					"text": "測試用文字",
+					"style": {
+						"font": "Mulish",
+						"weight": "bold",
+						"justification": "left",
+						"lineHeight": 20,
+						"color": "#000000",
+						"size": 72,
+						"x": 600,
+						"y": 806,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 200,
+						"height": 40
+					}
 				},
 				{
 					"type": "image",
 					"src": "img.png",
-					"x": 274,
-					"y": 666,
-					"scaleX": 0,
-					"scaleY": 0,
-					"rotate": 0,
-					"width": 300,
-					"height": 400
+					"style": {
+						"x": 274,
+						"y": 666,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 300,
+						"height": 400
+					}
 				}
 			]
 		}

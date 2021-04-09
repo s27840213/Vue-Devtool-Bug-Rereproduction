@@ -1,5 +1,4 @@
-export interface ILayer {
-  type: string,
+export interface IStyle {
   x: number,
   y: number,
   scaleX: number,
@@ -8,28 +7,30 @@ export interface ILayer {
   width: number,
   height: number
 }
-export interface IShape extends ILayer {
-  radius?: string,
-}
 
-export interface IText extends ILayer {
-  font: string,
-  weight: string,
-  justification: string,
+export interface ITextStyle extends IStyle {
+  fontFamily: string,
+  fontWeight: string,
+  textAlign: string,
   lineHeight: number,
   color: string,
-  size: number,
+  fontSize: number
+}
+export interface ILayer<T extends IStyle = IStyle> {
+  type: string,
+  styles: T
+}
+export interface IText extends ILayer<ITextStyle> {
   text: string
 }
 
-export interface IImage extends ILayer {
-  src: string
+export interface IShape extends ILayer<IStyle> {
+  radius?: string,
 }
 
-// export interface ILayers {
-//   layers: Array<IShape | IText | IImage>
-// }
-
-export interface IGroup extends ILayer {
+export interface IImage extends ILayer<IStyle> {
+  src: string
+}
+export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage>
 }

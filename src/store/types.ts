@@ -22,3 +22,11 @@ export enum PanelType {
   pageSetting,
   photoSetting
 }
+
+export enum LayerType {
+  'nu-clipper',
+  'nu-image',
+  'nu-shape',
+  'nu-text',
+  'nu-group'
+}

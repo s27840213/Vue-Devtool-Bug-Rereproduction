@@ -3,6 +3,9 @@
     div(class="page-title text-left text-gray-3")
       span {{config.name}}
     div(class="page-content" :style="styles()")
+      nu-layer(v-for="(layer,index) in config.layers"
+        :key="`layer-${index}`"
+        :config="layer")
 </template>
 
 <script lang="ts">
