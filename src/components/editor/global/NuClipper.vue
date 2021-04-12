@@ -21,8 +21,5 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-clipper {
   overflow: hidden;
-  &:hover {
-    background-color: red;
-  }
 }
 </style>

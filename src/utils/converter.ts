@@ -28,24 +28,26 @@ const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'size', 'c
 
 export function convertTransformStyle(x: number, y: number, scale: number, scaleX: number, scaleY: number, rotate: number): { transform?: string } {
   const tmpArr = []
-  if (x !== 0) {
+  if (x !== 0 && x) {
     tmpArr.push(`translateX(${x}px)`)
   }
-  if (y !== 0) {
-    tmpArr.push(`translateY(${x}px)`)
+  if (y !== 0 && y) {
+    tmpArr.push(`translateY(${y}px)`)
   }
-  if (scale !== 0) {
+  if (scale !== 0 && scale !== undefined) {
     tmpArr.push(`scale(${scale})`)
   }
-  if (scaleX !== 0) {
+  if (scaleX !== 0 && scaleX !== undefined) {
     tmpArr.push(`scaleX(${scaleX})`)
   }
-  if (scaleY !== 0) {
+  if (scaleY !== 0 && scaleY !== undefined) {
     tmpArr.push(`scaleY(${scaleY})`)
   }
-  if (rotate !== 0) {
+  if (rotate !== 0 && rotate !== undefined) {
     tmpArr.push(`rotate(${rotate}deg)`)
   }
+
+  console.log(tmpArr)
   return tmpArr.length > 0 ? {
     transform: tmpArr.join(' ')
   } : {}

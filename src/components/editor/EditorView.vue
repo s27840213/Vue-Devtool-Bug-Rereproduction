@@ -3,7 +3,7 @@
     div(class="page-section")
       nu-page(v-for="(page,index) in pages"
         :key="`page-${index}`"
-        :config="page" :index="index")
+        :config="page" :index="index" )
 </template>
 
 <script lang="ts">

@@ -35,8 +35,8 @@ const getDefaultState = (): IEditorState => ({
         type: 'text',
         text: 'Tesing Font',
         styles: {
-          width: 'auto',
-          height: 'auto',
+          width: 120,
+          height: 120,
           x: 300,
           y: 200,
           scale: 0,

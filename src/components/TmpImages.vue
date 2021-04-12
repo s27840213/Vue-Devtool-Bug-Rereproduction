@@ -1,19 +1,39 @@
 <template lang="pug">
-  div(class="temp__content")
-    img(class="temp__item"
-      v-for="i in 24" :src="require('@/assets/img/svg/img-tmp.svg')")
+.temp__content
+  img.temp__item(
+    v-for="i in 24",
+    :src="require('@/assets/img/svg/img-tmp.svg')",
+    draggable="true",
+    @dragstart="dragstart"
+  )
 </template>
 
 <script lang="ts">
-
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
-import Vue from 'vue'
+import Vue from 'vue';
 
 export default Vue.extend({
+  methods: {
+    dragstart(e: any) {
+      console.log('drag start!');
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.effectAllowed = 'move';
 
-})
+      const rect = e.target.getBoundingClientRect();
+      const data = {
+        geometry: {
+          left: e.clientX - rect.x,
+          top: e.clientY - rect.y
+        },
+        src: '@/assets/img/svg/img-tmp.svg'
+      };
+
+      e.dataTransfer.setData('data', JSON.stringify(data));
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>
