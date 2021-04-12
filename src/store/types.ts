@@ -6,7 +6,8 @@ export interface IState {
 
 export interface IEditorState {
   pages: Array<IPage> | null,
-  currPanelType: number | null
+  currPanelType: number | null,
+  pageScaleRatio: number
 }
 
 export enum PanelType {

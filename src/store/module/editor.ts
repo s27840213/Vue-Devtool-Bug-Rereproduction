@@ -1,8 +1,8 @@
-import Vue from 'vue';
+import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IEditorState, PanelType } from '../types';
+import { IEditorState, PanelType } from '../types'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
   pages: [{
@@ -11,28 +11,49 @@ const getDefaultState = (): IEditorState => ({
     backgroundColor: '#ffffff',
     name: 'Default Page',
     layers: [
-      // {
-      //   type: 'text',
-      //   text: 'Tesing Font',
-      //   styles: {
-      //     width: 200,
-      //     height: 40,
-      //     fontFamily: 'Lobster',
-      //     fontWeight: 'bold',
-      //     textAlign: 'left',
-      //     lineHeight: 20,
-      //     color: '#000000',
-      //     fontSize: 72,
-      //     x: 600,
-      //     y: 806,
-      //     scaleX: 0,
-      //     scaleY: 0,
-      //     rotate: 0
-      //   }
-      // }
+      {
+        type: 'text',
+        text: 'Tesing Font',
+        styles: {
+          width: 'auto',
+          height: 'auto',
+          x: 20,
+          y: 0,
+          scale: 0,
+          scaleX: 0,
+          scaleY: 0,
+          rotate: 0,
+          font: 'Lobster',
+          weight: 'bold',
+          align: 'left',
+          lineHeight: 20,
+          color: '#000000',
+          size: 72
+        }
+      },
+      {
+        type: 'text',
+        text: 'Tesing Font',
+        styles: {
+          width: 'auto',
+          height: 'auto',
+          x: 300,
+          y: 200,
+          scale: 0,
+          scaleX: 0,
+          scaleY: 0,
+          rotate: 0,
+          font: 'Lobster',
+          weight: 'bold',
+          align: 'left',
+          color: '#000000',
+          size: 72
+        }
+      }
     ]
   }],
-  currPanelType: PanelType.template
+  currPanelType: PanelType.template,
+  pageScaleRatio: 50
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, any> = {
@@ -41,21 +62,18 @@ const getters: GetterTree<IEditorState, any> = {
   },
   getCurrPanelType(state) {
     return state.currPanelType
+  },
+  getPageScaleRatio(state) {
+    return state.pageScaleRatio
   }
 }
 
 const mutations: MutationTree<IEditorState> = {
-  DELETE_frame(state) {
-    return state
-  },
-  ADD_frame(state) {
-    return state
-  },
-  COPY_frame(state) {
-    return state
-  },
   SET_currPanelType(state, type) {
     state.currPanelType = type
+  },
+  SET_pageScaleRatio(state, ratio) {
+    state.pageScaleRatio = ratio
   }
 }
 
@@ -69,4 +87,4 @@ export default {
   getters,
   mutations,
   actions
-};
+}

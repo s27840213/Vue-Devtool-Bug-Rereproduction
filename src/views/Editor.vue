@@ -5,13 +5,13 @@
       editor-header
       div(class="content")
         function-panel
-        div
+        div(class="content__main")
           div(class="content__blank bg-white")
             div(class="test-nav")
               div(v-for="nav in testNav" @click="setPanelType(PanelType[nav])") {{nav}}
-          div
+          div(class="content__editor")
             editor-view
-            //- frames
+            size-editor
 </template>
 
 <script lang="ts">
@@ -21,6 +21,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import Frames from '@/components/editor/Frames.vue'
+import SizeEditor from '@/components/editor/SizeEditor.vue'
 import { mapMutations } from 'vuex'
 import { PanelType } from '@/store/types'
 
@@ -31,7 +32,8 @@ export default Vue.extend({
     EditorHeader,
     FunctionPanel,
     EditorView,
-    Frames
+    Frames,
+    SizeEditor
   },
   data() {
     return {
@@ -73,16 +75,10 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: auto 1fr;
-  > div:nth-child(2) {
+  &__main {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: 1fr;
-    > div:nth-child(2) {
-      height: 100%;
-      display: grid;
-      grid-template-rows: minmax(0, 1fr);
-      grid-template-columns: 1fr auto;
-    }
   }
   &__blank {
     @include size(100%, 50px);
@@ -90,6 +86,21 @@ export default Vue.extend({
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
     z-index: setZindex("default-1");
   }
+  &__editor {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.size-editor::v-deep {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: setZindex("size-editor");
 }
 
 .test-nav {

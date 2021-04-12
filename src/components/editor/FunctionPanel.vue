@@ -35,7 +35,7 @@ export default Vue.extend({
     PanelPageSetting,
     PanelPhotoSetting
   },
-  data() {
+  data () {
     return {
       PanelType,
       panelComponents: [
@@ -53,7 +53,7 @@ export default Vue.extend({
       ]
     }
   },
-  mounted() {
+  mounted () {
     console.log(this.currPanel)
   },
   computed: {

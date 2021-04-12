@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="page-container")
+  div(class="nu-page")
     div(class="page-title text-left text-gray-3")
       span {{config.name}}
     div(class="page-content" :style="styles()")
@@ -18,7 +18,8 @@ export default Vue.extend({
   },
   props: {
     config: Object,
-    index: Number
+    index: Number,
+    pageScaleRatio: Number
   },
   methods: {
     styles() {
@@ -33,6 +34,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.page-container {
+.nu-page {
+}
+
+.page-content {
+  position: relative;
 }
 </style>
