@@ -2,7 +2,7 @@
   div(class="panel-group")
     btn(class="full-width" :type="'primary-lg'") Group
     action-bar(class="flex-between")
-      svg-icon(v-for="(icon,index) in mappingIconSet('align')"
+      svg-icon(v-for="icon in mappingIconSet('align')"
         :key="`align-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'24px'" :iconColor="'gray-2'")

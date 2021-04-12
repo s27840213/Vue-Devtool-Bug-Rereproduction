@@ -15,14 +15,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Sidebar from '@/components/editor/Sidebar.vue';
-import EditorHeader from '@/components/editor/EditorHeader.vue';
-import FunctionPanel from '@/components/editor/FunctionPanel.vue';
-import EditorView from '@/components/editor/EditorView.vue';
-import Frames from '@/components/editor/Frames.vue';
+import Vue from 'vue'
+import Sidebar from '@/components/editor/Sidebar.vue'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
+import FunctionPanel from '@/components/editor/FunctionPanel.vue'
+import EditorView from '@/components/editor/EditorView.vue'
+import Frames from '@/components/editor/Frames.vue'
 import { mapMutations } from 'vuex'
-import { PanelType } from '@/store/types';
+import { PanelType } from '@/store/types'
 
 export default Vue.extend({
   name: 'Editor',
