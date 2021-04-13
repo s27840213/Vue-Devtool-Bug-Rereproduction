@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-clipper" :style="styles()")
+  div(class="nu-clipper")
     slot
 </template>
 
@@ -14,19 +14,12 @@ export default Vue.extend({
   props: {
     config: Object,
     index: Number
-  },
-  methods: {
-    styles() {
-      return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`
-      }
-    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .nu-clipper {
+  overflow: hidden;
 }
 </style>

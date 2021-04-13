@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from 'vue'
 
 export default Vue.extend({
   props: {
@@ -11,7 +11,7 @@ export default Vue.extend({
   },
   data() {
     return {
-    };
+    }
   },
   methods: {
     styles() {
@@ -22,16 +22,18 @@ export default Vue.extend({
       }
     }
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>
 .nu-highlighter {
+  // @include size(100px, 100px);
+  // border: 1px solid setColor(blue-1);
   position: absolute;
   background-color: rgb(216, 236, 143);
 
   &:hover {
-    cursor:pointer;
+    cursor: pointer;
   }
 }
 </style>

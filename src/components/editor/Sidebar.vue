@@ -24,7 +24,7 @@ import { PanelType } from '@/store/types';
 export default Vue.extend({
   components: {
   },
-  data() {
+  data () {
     return {
       PanelType,
       navItem: [
@@ -46,7 +46,7 @@ export default Vue.extend({
     ...mapMutations({
       SET_currPanelType: 'editor/SET_currPanelType'
     }),
-    switchNav(index: number): void {
+    switchNav (index: number): void {
       this.SET_currPanelType(index)
     }
   }

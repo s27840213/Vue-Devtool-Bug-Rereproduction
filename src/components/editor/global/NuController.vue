@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from 'vue'
 
 export default Vue.extend({
   props: {
@@ -26,7 +26,7 @@ export default Vue.extend({
         initWidth: `${this.config.styles.width}px`,
         initHeight: `${this.config.styles.height}px`
       }
-    };
+    }
   },
   methods: {
     styles() {
@@ -37,35 +37,33 @@ export default Vue.extend({
       }
     },
     moveStart(event: MouseEvent) {
-      this.transform.initialX = event.clientX;
-      this.transform.initialY = event.clientY;
+      this.transform.initialX = event.clientX
+      this.transform.initialY = event.clientY
       if (event.target === this.$refs.body) {
-        const el = event.target as HTMLElement;
-        el.addEventListener('mouseup', this.moveEnd);
+        const el = event.target as HTMLElement
+        el.addEventListener('mouseup', this.moveEnd)
 
-        window.addEventListener('mousemove', this.moving);
-        this.transform.active = true;
+        window.addEventListener('mousemove', this.moving)
+        this.transform.active = true
       }
     },
     moving(event: MouseEvent) {
-      console.log(`${event.clientX}, ${event.clientY}`);
       if (this.transform.active) {
-        event.preventDefault();
-        const xPos = event.clientX - this.transform.initialX + this.transform.xOffset;
-        const yPos = event.clientY - this.transform.initialY + this.transform.yOffset;
+        event.preventDefault()
+        const xPos = event.clientX - this.transform.initialX + this.transform.xOffset
+        const yPos = event.clientY - this.transform.initialY + this.transform.yOffset
 
-        const el = this.$el as HTMLElement;
-        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        const el = this.$el as HTMLElement
+        el.style.transform = `translate(${xPos}px, ${yPos}px)`
+
+        this.$store.commit('updateStyle', this.updateStyles());
       }
     },
     moveEnd(event: MouseEvent) {
       if (this.transform.active) {
-        this.transform.xOffset += event.clientX - this.transform.initialX;
-        this.transform.yOffset += event.clientY - this.transform.initialY;
-
-        this.transform.active = false;
-
-        this.$store.commit('updateStyle', this.updateStyles());
+        this.transform.xOffset += event.clientX - this.transform.initialX
+        this.transform.yOffset += event.clientY - this.transform.initialY
+        this.transform.active = false
 
         document.documentElement.removeEventListener('mouseup', this.moveEnd);
         window.removeEventListener('mousemove', this.moving);
@@ -73,46 +71,46 @@ export default Vue.extend({
     },
 
     scaleStart(event: MouseEvent) {
-      if (event.target !== this.$refs.scaler) return;
-      this.scale.initialX = event.clientX;
-      this.scale.initialY = event.clientY;
+      if (event.target !== this.$refs.scaler) return
+      this.scale.initialX = event.clientX
+      this.scale.initialY = event.clientY
 
-      document.documentElement.addEventListener('mousemove', this.scaling, false);
-      document.documentElement.addEventListener('mouseup', this.scaleEnd, false);
+      document.documentElement.addEventListener('mousemove', this.scaling, false)
+      document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
     },
     scaling(event: MouseEvent) {
-      event.preventDefault();
-      const width = `${parseInt(this.scale.initWidth, 10) + event.movementX}px`;
-      const height = `${parseInt(this.scale.initHeight, 10) + event.movementY}px`;
+      event.preventDefault()
+      const width = `${parseInt(this.scale.initWidth, 10) + event.movementX}px`
+      const height = `${parseInt(this.scale.initHeight, 10) + event.movementY}px`
+      const element = this.$el as HTMLElement
+      element.style.width = width
+      element.style.height = height
 
-      this.$el.style.width = width;
-      this.$el.style.height = height;
-
-      this.scale.initWidth = width;
-      this.scale.initHeight = height;
+      this.scale.initWidth = width
+      this.scale.initHeight = height
+      this.$store.commit('updateStyle', this.updateStyles());
     },
     scaleEnd() {
-      this.$store.commit('updateStyle', this.updateStyles());
-      console.log('asdad');
       document.documentElement.removeEventListener('mousemove', this.scaling, false);
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false);
     },
     updateStyles() {
-      console.log(this.$el.style.left);
-      console.log(this.$el.style.top);
+      const matrix = window.getComputedStyle(this.$el).transform;
+      const matrixValues = matrix.match(/matrix.*\((.+)\)/)[1].split(', ');
+      const a = window.getComputedStyle(this.$el).width;
       return {
         color: '0xC4C4C4',
-        x: this.$el.style.left,
-        y: this.$el.style.top,
+        x: matrixValues[4],
+        y: matrixValues[5],
         scaleX: 0,
         scaleY: 0,
         rotate: 0,
-        width: '10px',
-        height: this.$el.style.height
+        width: this.$el.style.width.match(/\d+/)[0],
+        height: this.$el.style.height.match(/\d+/)[0]
       }
     }
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>
@@ -123,14 +121,16 @@ export default Vue.extend({
     border: 1.5px solid rgb(174, 46, 190);
   }
   &:hover {
-    cursor:pointer;
+    cursor: pointer;
   }
 }
 .scaler {
-  width: 10px; height: 10px;
-  background: black; position:absolute;
-  right: 0; bottom: 0;
-  cursor: se-resize;
+  width: 10px;
+  height: 10px;
+  background: black;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
 }
-
 </style>

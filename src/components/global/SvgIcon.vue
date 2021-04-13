@@ -30,12 +30,12 @@ export default Vue.extend({
       default: 'blue-1'
     }
   },
-  data() {
+  data () {
     return {
     }
   },
   methods: {
-    iconStyles() {
+    iconStyles () {
       return {
         width: this.iconWidth,
         height: this.iconWidth

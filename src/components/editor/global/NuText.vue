@@ -1,20 +1,19 @@
 <template lang="pug">
-  div(class="nu-text" :style="styles()")
-    span {{config.text}}
+  div(class="nu-text")
+    span(:style="fontStyles()") {{config.text}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { convertFontStyle } from '@/utils/converter'
 
 export default Vue.extend({
   props: {
     config: Object
   },
   methods: {
-    styles() {
-      return {
-        ...this.config.styles
-      }
+    fontStyles() {
+      return convertFontStyle(this.config.styles)
     }
   }
 })
@@ -22,5 +21,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-text {
+  text-align: left;
 }
 </style>

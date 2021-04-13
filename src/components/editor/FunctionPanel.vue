@@ -53,7 +53,7 @@ export default Vue.extend({
       ]
     }
   },
-  mounted() {
+  mounted () {
     console.log(this.currPanel)
   },
   computed: {

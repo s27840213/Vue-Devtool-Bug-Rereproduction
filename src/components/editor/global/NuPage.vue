@@ -1,18 +1,19 @@
 <template lang="pug">
-.page-container
-  .page-title.text-left.text-gray-3
-    span {{ config.name }}
-
-  #page.page-content(
-    :style="styles()",
-    @drop="onDrop",
-    @dragover.prevent,
-    @dragenter.prevent
-  )
-    template(v-for="(layer, index) in testLayers")
-      nu-layer(:key="`layer-${index}`" :config="layer")
-      nu-controller(:key="`controller-${index}`"
-      :config="layer")
+  div(class="nu-page")
+    div(class="page-title text-left text-gray-3")
+      span {{config.name}}
+    div(class="page-content"
+        :style="styles()"
+        @drop="onDrop"
+        @dragover.prevent,
+        @dragenter.prevent)
+      nu-layer(v-for="(layer,index) in config.layers"
+        :key="`layer-${index}`"
+        :config="layer")
+      div(v-for="(layer, index) in testLayers")
+        nu-layer(:key="`layer-${index}`" :config="layer")
+        nu-controller(:key="`controller-${index}`"
+        :config="layer")
 
 </template>
 
@@ -23,43 +24,45 @@ import { mapState } from 'vuex';
 export default Vue.extend({
   data() {
     return {
-      testLayers: []
-    };
+      testLayers: [] as any
+    }
   },
   props: {
     config: Object,
-    index: Number
+    index: Number,
+    pageScaleRatio: Number
   },
   mounted() {
-    console.log(this.config);
+    console.log(this.config)
   },
   methods: {
     test() {
-      console.log('sync style');
+      console.log('sync style')
     },
     styles() {
       return {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor
-      };
+      }
     },
     onDrop(e: DragEvent) {
       if (e.dataTransfer != null) {
-        const data = JSON.parse(e.dataTransfer.getData('data'));
+        const data = JSON.parse(e.dataTransfer.getData('data'))
         /* TODO: use the 'getData' to append complete item data */
-        /* how to Q: import an img, svg, etc.. Q: as a child-component to the layer */
-        const img = document.createElement('img');
-        img.src = require('@/assets/img/svg/img-tmp.svg');
-        img.draggable = false;
+        /* Q: How to import an img, svg, etc.. */
+        const img = document.createElement('img')
+        img.src = require('@/assets/img/svg/img-tmp.svg')
+        img.draggable = false
 
-        const page = e.target as HTMLElement;
-        const pageLeft = page.getBoundingClientRect().left;
-        const pageTop = page.getBoundingClientRect().top;
+        const page = e.target as HTMLElement
+        const pageLeft = page.getBoundingClientRect().left
+        const pageTop = page.getBoundingClientRect().top
 
-        const left = e.clientX - pageLeft - data.geometry.left;
-        const top = e.clientY - pageTop - data.geometry.top;
+        const left = e.clientX - pageLeft - data.geometry.left
+        const top = e.clientY - pageTop - data.geometry.top
 
+        // MARK: This is a test-used case for layer
         const testLayer = {
           active: true,
           shown: false,
@@ -74,11 +77,9 @@ export default Vue.extend({
             width: 150,
             height: 150
           }
-        };
+        }
 
-        // Q: how to use the data array to dynamically appending the components.
-        console.log(testLayer);
-        this.testLayers.push(testLayer);
+        this.testLayers.push(testLayer)
       }
     }
   },
@@ -96,18 +97,20 @@ export default Vue.extend({
           layer.styles.y = newValue.y;
           layer.styles.width = newValue.width;
           layer.styles.height = newValue.height;
-          console.log(layer);
-          console.log('testetete');
         }
       });
     }
     /* eslint-enable no-param-reassign */
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>
-.page-container {
+.nu-page {
+}
+
+.page-content {
+  position: relative;
 }
 .page-content {
   position: absolute;

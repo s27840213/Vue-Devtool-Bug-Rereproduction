@@ -1,29 +1,29 @@
 module.exports = {
-  root: true,
+    root: true,
 
-  env: {
-    node: true,
-  },
+    env: {
+        node: true
+    },
 
-  extends: [
-    'plugin:vue/essential',
-    '@vue/airbnb',
-    '@vue/typescript/recommended',
-  ],
+    extends: [
+        'plugin:vue/essential',
+        '@vue/standard',
+        '@vue/typescript/recommended'
+    ],
+    parserOptions: {
+        ecmaVersion: 2020
+    },
 
-  parserOptions: {
-    ecmaVersion: 2020,
-  },
-
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'comma-dangle': ['error', 'never'],
-    semi: 'off',
-    'import/no-dynamic-require': 'off',
-    'global-require': 0,
-    'no-shadow': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-  },
-
+    rules: {
+        'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+        'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+        "space-before-function-paren": ['error', 'never'],
+        'semi': 0
+            // 'comma-dangle': ['error', 'never'],
+            // semi: 'off',
+            // 'import/no-dynamic-require': 'off',
+            // 'global-require': 0,
+            // 'no-shadow': 'off',
+            // '@typescript-eslint/no-explicit-any': 'off'
+    },
 };

@@ -1,20 +1,22 @@
 export interface IStyle {
+  [key: string]: number | string | undefined,
   x: number,
   y: number,
+  scale: number
   scaleX: number,
   scaleY: number,
   rotate: number,
-  width: number,
-  height: number
+  width: number | string,
+  height: number | string
 }
 
 export interface ITextStyle extends IStyle {
-  fontFamily: string,
-  fontWeight: string,
-  textAlign: string,
-  lineHeight: number,
-  color: string,
-  fontSize: number
+  fontFamily?: string,
+  fontWeight?: string,
+  textAlign?: string,
+  lineHeight?: number,
+  color?: string,
+  fontSize?: number
 }
 export interface ILayer<T extends IStyle = IStyle> {
   type: string,

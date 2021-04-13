@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 import SvgIcon from '@/components/global/SvgIcon.vue'
 import TmpImages from '@/components/TmpImages.vue'

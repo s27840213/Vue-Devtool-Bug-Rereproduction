@@ -11,5 +11,6 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   overflow: hidden;
+  user-select: none;
 }
 </style>
