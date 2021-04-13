@@ -14,7 +14,6 @@
         nu-layer(:key="`layer-${index}`" :config="layer")
         nu-controller(:key="`controller-${index}`"
         :config="layer")
-
 </template>
 
 <script lang="ts">
