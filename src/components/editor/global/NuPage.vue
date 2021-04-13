@@ -13,7 +13,9 @@
             :key="`layer-${index}`"
             :config="layer")
         div(class="page-control" :style="styles('control')")
-          nu-controller(v-for="(layer,index) in config.layers" :key="`controller-${index}`" :config="layer")
+        nu-controller(v-for="(layer,index) in config.layers"
+          :key="`controller-${index}`"
+          :config="layer")
 </template>
 
 <script lang="ts">
@@ -33,6 +35,7 @@ export default Vue.extend({
   },
   mounted() {
     console.log(this.scaleRatio)
+    console.log('page' + this.pageIndex);
   },
   computed: {
     ...mapGetters({
@@ -53,9 +56,6 @@ export default Vue.extend({
     ...mapMutations({
       ADD_newLayer: 'ADD_newLayer'
     }),
-    test() {
-      console.log('sync style')
-    },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,
@@ -72,8 +72,7 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       if (e.dataTransfer != null) {
         const data = JSON.parse(e.dataTransfer.getData('data'))
-        /* TODO: use the 'getData' to append complete item data */
-        /* how to Q: import an img, svg, etc.. Q: as a child-component to the layer */
+
         const page = e.target as HTMLElement
         const pageLeft = page.getBoundingClientRect().left
         const pageTop = page.getBoundingClientRect().top
@@ -85,7 +84,7 @@ export default Vue.extend({
           type: 'image',
           pageIndex: this.config.pageIndex,
           src: require('@/assets/img/svg/img-tmp.svg'),
-          active: false,
+          active: true,
           shown: false,
           styles: {
             x: left,

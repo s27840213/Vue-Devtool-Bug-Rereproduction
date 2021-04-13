@@ -18,26 +18,19 @@ import { convertDefaultStyle } from '@/utils/converter'
 
 export default Vue.extend({
   props: {
-    config: Object
+    config: Object,
+    pageIndex: Number
   },
   data() {
     return {
       LayerType
     }
   },
-  // methods: {
-  //   styles() {
-  //     return {
-  //       transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px)`,
-  //       width: `${this.config.styles.width}px`,
-  //       height: `${this.config.styles.height}px`
-  //     }
-  //   }
-  // },
   methods: {
     styles() {
-      console.log(this.config.styles)
-      console.log(convertDefaultStyle(this.config.styles))
+      // console.log('this.config.styles : ')
+      // console.log(this.config.styles)
+      // console.log(convertDefaultStyle(this.config.styles))
       return convertDefaultStyle(this.config.styles)
     }
   }

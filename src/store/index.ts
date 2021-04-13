@@ -88,7 +88,17 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].layers.push(updateInfo.layer)
   },
   Update_LayerPos(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, x: number, y: number }) {
-    Object.assign(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex], updateInfo.x, updateInfo.y)
+    // console.log('updated!' + updateInfo.x)
+    // console.log(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x);
+    // Object.assign(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles, updateInfo.x, updateInfo.y)
+    // console.log(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x);
+
+    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x = updateInfo.x
+    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.y = updateInfo.y
+  },
+  Update_LayerSize(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, width: number, height: number }) {
+    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.width = `${updateInfo.width}`
+    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.height = `${updateInfo.height}`
   }
 }
 
