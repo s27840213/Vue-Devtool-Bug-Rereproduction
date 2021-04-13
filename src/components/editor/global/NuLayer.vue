@@ -18,7 +18,8 @@ import { convertDefaultStyle } from '@/utils/converter'
 
 export default Vue.extend({
   props: {
-    config: Object
+    config: Object,
+    pageIndex: Number
   },
   data() {
     return {

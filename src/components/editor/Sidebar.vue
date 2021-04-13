@@ -19,12 +19,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { PanelType } from '@/store/types';
+import { PanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
   },
-  data () {
+  data() {
     return {
       PanelType,
       navItem: [
@@ -39,14 +39,14 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'editor/getCurrPanelType'
+      currPanel: 'getCurrPanelType'
     })
   },
   methods: {
     ...mapMutations({
-      SET_currPanelType: 'editor/SET_currPanelType'
+      SET_currPanelType: 'SET_currPanelType'
     }),
-    switchNav (index: number): void {
+    switchNav(index: number): void {
       this.SET_currPanelType(index)
     }
   }

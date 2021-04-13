@@ -2,7 +2,7 @@
   img(class="nu-image" ref="body"
   :style="styles()"
   draggable="false"
-  :src="require('@/assets/img/svg/img-tmp.svg')")
+  :src="config.src")
 </template>
 
 <script lang="ts">

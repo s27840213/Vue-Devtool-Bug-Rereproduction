@@ -18,7 +18,7 @@ import PanelColorPicker from '@/components/editor/panel/PanelColorPicker.vue'
 import PanelPageSetting from '@/components/editor/panel/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
 import { mapGetters } from 'vuex'
-import { PanelType } from '@/store/types';
+import { PanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
 
 export default Vue.extend({
@@ -53,12 +53,12 @@ export default Vue.extend({
       ]
     }
   },
-  mounted () {
+  mounted() {
     console.log(this.currPanel)
   },
   computed: {
     ...mapGetters({
-      currPanel: 'editor/getCurrPanelType'
+      currPanel: 'getCurrPanelType'
     })
   }
 })

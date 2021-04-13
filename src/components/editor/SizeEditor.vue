@@ -1,9 +1,13 @@
 <template lang="pug">
   div(class="size-editor")
-    svg-icon(class="pointer" :iconName="'minus-square'" :iconColor="'gray-2'" iconWidth="22px")
+    svg-icon(class="pointer"
+      :iconName="'minus-square'" :iconColor="'gray-2'" iconWidth="22px"
+      @click.native="minus()")
     div(class="size-editor__percentage")
       span(class="text-gray-2") {{pageScaleRatio}}%
-    svg-icon(class="pointer" :iconName="'plus-square'" :iconColor="'gray-2'" iconWidth="22px")
+    svg-icon(class="pointer" @click.native="plus()"
+      :iconName="'plus-square'" :iconColor="'gray-2'" iconWidth="22px"
+      )
 </template>
 
 <script lang="ts">
@@ -12,11 +16,23 @@ import { mapGetters, mapMutations } from 'vuex'
 export default Vue.extend({
   computed: {
     ...mapGetters({
-      pageScaleRatio: 'editor/getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio'
     })
   },
   methods: {
-    ...mapMutations
+    ...mapMutations({
+      setScaleRatio: 'SET_pageScaleRatio'
+    }),
+    plus() {
+      console.log('plus')
+      this.setScaleRatio(this.pageScaleRatio + 10)
+    },
+    minus() {
+      console.log('minus')
+      if (this.pageScaleRatio > 10) {
+        this.setScaleRatio(this.pageScaleRatio - 10)
+      }
+    }
   }
 })
 </script>

@@ -3,7 +3,7 @@
     use(:xlink:href="`#${iconName}`"  )
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import Vue from 'vue'
 
 /**
  * 這個 Components 我把它註冊在全域，使用時可以用不Import
@@ -30,12 +30,12 @@ export default Vue.extend({
       default: 'blue-1'
     }
   },
-  data () {
+  data() {
     return {
     }
   },
   methods: {
-    iconStyles () {
+    iconStyles() {
       return {
         width: this.iconWidth,
         height: this.iconWidth

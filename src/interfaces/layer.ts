@@ -7,7 +7,7 @@ export interface IStyle {
   scaleY: number,
   rotate: number,
   width: number | string,
-  height: number | string
+  height: number | string,
 }
 
 export interface ITextStyle extends IStyle {
@@ -20,6 +20,9 @@ export interface ITextStyle extends IStyle {
 }
 export interface ILayer<T extends IStyle = IStyle> {
   type: string,
+  pageIndex: number,
+  active: boolean,
+  shown: boolean,
   styles: T
 }
 export interface IText extends ILayer<ITextStyle> {
