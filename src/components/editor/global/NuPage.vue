@@ -2,17 +2,18 @@
   div(class="nu-page" ref="page-container")
     div(class="page-title text-left text-gray-3 mb-10" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
-    div(class="pages" :style="`transform: scale(${scaleRatio/100})`")
-      div(class="page-content"
-          :style="styles('content')"
-          @drop="onDrop"
-          @dragover.prevent,
-          @dragenter.prevent)
-        nu-layer(v-for="(layer,index) in config.layers"
-          :key="`layer-${index}`"
-          :config="layer")
-      div(class="page-control" :style="styles('control')")
-        nu-controller(v-for="(layer,index) in config.layers" :key="`controller-${index}`" :config="layer")
+    div(class='pages-wrapper' :style="styles()")
+      div(class="pages" :style="`transform: scale(${scaleRatio/100})`")
+        div(class="page-content"
+            :style="styles('content')"
+            @drop="onDrop"
+            @dragover.prevent,
+            @dragenter.prevent)
+          nu-layer(v-for="(layer,index) in config.layers"
+            :key="`layer-${index}`"
+            :config="layer")
+        div(class="page-control" :style="styles('control')")
+          nu-controller(v-for="(layer,index) in config.layers" :key="`controller-${index}`" :config="layer")
 </template>
 
 <script lang="ts">
@@ -56,10 +57,16 @@ export default Vue.extend({
       console.log('sync style')
     },
     styles(type: string) {
-      return {
+      return type === 'content' ? {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
-        backgroundColor: type === 'content' ? this.config.backgroundColor : 'none'
+        backgroundColor: this.config.backgroundColor
+      } : type === 'control' ? {
+        width: `${this.config.width}px`,
+        height: `${this.config.height}px`
+      } : {
+        width: `${this.config.width * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
     },
     onDrop(e: DragEvent) {
@@ -106,18 +113,39 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-page {
-  display: inline-block;
+  @include flexCenter;
+  min-height: 100%;
+  min-width: 100%;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid red;
+  flex: 1;
+}
+
+.page-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: absolute;
+  top: 0px;
+  left: 0;
+}
+.pages-wrapper {
   position: relative;
-  padding: 30px;
+  border: 1px solid red;
 }
 .pages {
   display: flex;
   flex-direction: column;
+  top: 0;
+  left: 0;
   position: relative;
+  border: 1px solid blue;
+  transform-origin: top left;
 }
 .page-content {
-  position: relative;
   overflow: hidden;
+  border: 1px solid green;
 }
 .page-control {
   position: absolute;
