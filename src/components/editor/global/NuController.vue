@@ -28,9 +28,6 @@ export default Vue.extend({
       }
     }
   },
-  mounted() {
-    console.log('12345' + this.$el)
-  },
   methods: {
     styles() {
       return {
@@ -92,7 +89,7 @@ export default Vue.extend({
       this.scale.initWidth = width
       this.scale.initHeight = height
     },
-    scaleEnd(event: MouseEvent) {
+    scaleEnd() {
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     }

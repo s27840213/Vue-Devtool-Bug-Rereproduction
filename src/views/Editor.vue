@@ -48,7 +48,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      SET_currPanelType: 'editor/SET_currPanelType'
+      SET_currPanelType: 'SET_currPanelType'
     }),
     setPanelType(type: number) {
       this.SET_currPanelType(type)
