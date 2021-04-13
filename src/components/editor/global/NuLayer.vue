@@ -20,8 +20,6 @@ export default Vue.extend({
   props: {
     config: Object
   },
-  mounted() {
-  },
   data() {
     return {
       LayerType

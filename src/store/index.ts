@@ -6,8 +6,13 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    layerStyle: Object
   },
   mutations: {
+    updateStyle(state, style) {
+      state.layerStyle = style;
+      console.log(style);
+    }
   },
   actions: {
   },

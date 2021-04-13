@@ -65,6 +65,8 @@ export default Vue.extend({
 
         this.transform.active = false;
 
+        this.$store.commit('updateStyle', this.updateStyles());
+
         document.documentElement.removeEventListener('mouseup', this.moveEnd);
         window.removeEventListener('mousemove', this.moving);
       }
@@ -89,9 +91,25 @@ export default Vue.extend({
       this.scale.initWidth = width;
       this.scale.initHeight = height;
     },
-    scaleEnd(event: MouseEvent) {
+    scaleEnd() {
+      this.$store.commit('updateStyle', this.updateStyles());
+      console.log('asdad');
       document.documentElement.removeEventListener('mousemove', this.scaling, false);
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false);
+    },
+    updateStyles() {
+      console.log(this.$el.style.left);
+      console.log(this.$el.style.top);
+      return {
+        color: '0xC4C4C4',
+        x: this.$el.style.left,
+        y: this.$el.style.top,
+        scaleX: 0,
+        scaleY: 0,
+        rotate: 0,
+        width: '10px',
+        height: this.$el.style.height
+      }
     }
   }
 });

@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { mapState } from 'vuex';
 
 export default Vue.extend({
   data() {
@@ -60,7 +61,7 @@ export default Vue.extend({
         const top = e.clientY - pageTop - data.geometry.top;
 
         const testLayer = {
-          active: false,
+          active: true,
           shown: false,
           type: 'image',
           styles: {
@@ -80,6 +81,27 @@ export default Vue.extend({
         this.testLayers.push(testLayer);
       }
     }
+  },
+  computed: {
+    ...mapState([
+      'layerStyle'
+    ])
+  },
+  watch: {
+    /* eslint-disable no-param-reassign */
+    layerStyle(newValue) {
+      this.testLayers.forEach((layer) => {
+        if (layer.active) {
+          layer.styles.x = newValue.x;
+          layer.styles.y = newValue.y;
+          layer.styles.width = newValue.width;
+          layer.styles.height = newValue.height;
+          console.log(layer);
+          console.log('testetete');
+        }
+      });
+    }
+    /* eslint-enable no-param-reassign */
   }
 });
 </script>
