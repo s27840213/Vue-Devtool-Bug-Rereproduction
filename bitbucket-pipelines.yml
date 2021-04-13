@@ -20,6 +20,7 @@ pipelines:
     - step:
         name: 'Deploy to S3 test environment'
         deployment: test
+        trigger: manual
         script:
           - pipe: atlassian/aws-s3-deploy:0.5.0
             variables:
