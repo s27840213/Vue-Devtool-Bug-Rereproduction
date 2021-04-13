@@ -79,9 +79,9 @@ export default Vue.extend({
         el.style.transform = `translate(${xPos}px, ${yPos}px)`
 
         const matrix = window.getComputedStyle(this.$el).transform;
-        const matrixValues = matrix.match(/matrix.*\((.+)\)/)[1].split(', ');
+        const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
 
-        this.updateLayerPos(0, 2, matrixValues[4], matrixValues[5])
+        this.updateLayerPos(0, 2, parseInt(matrixValues[4]), parseInt(matrixValues[5]))
       }
     },
     moveEnd(event: MouseEvent) {
