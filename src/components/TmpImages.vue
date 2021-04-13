@@ -12,28 +12,29 @@
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
-import Vue from 'vue';
+import Vue from 'vue'
 
 export default Vue.extend({
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dragstart(e: any) {
-      console.log('drag start!');
-      e.dataTransfer.dropEffect = 'move';
-      e.dataTransfer.effectAllowed = 'move';
+      console.log('drag start!')
+      e.dataTransfer.dropEffect = 'move'
+      e.dataTransfer.effectAllowed = 'move'
 
-      const rect = e.target.getBoundingClientRect();
+      const rect = e.target.getBoundingClientRect()
       const data = {
         geometry: {
           left: e.clientX - rect.x,
           top: e.clientY - rect.y
         },
         src: '@/assets/img/svg/img-tmp.svg'
-      };
+      }
 
-      e.dataTransfer.setData('data', JSON.stringify(data));
+      e.dataTransfer.setData('data', JSON.stringify(data))
     }
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>
