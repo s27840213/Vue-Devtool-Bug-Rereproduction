@@ -1,8 +1,10 @@
-import Vue from 'vue'
+import Vue, { VueConstructor } from 'vue'
 import '@/globalComponents'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import { Store } from 'vuex'
+import { IEditorState } from './store/types'
 
 Vue.config.productionTip = false
 
@@ -15,3 +17,14 @@ new Vue({
   store,
   render: (h) => h(App)
 }).$mount('#app')
+
+// Here is a testing code to export whole porject as a Library
+export default {
+  install(Vue: { component: (arg0: string, arg1: VueConstructor<Vue>) => void }, options: { store: { registerModule: (arg0: string, arg1: Store<IEditorState>) => void } }): void {
+    if (!options || !options.store) {
+      throw new Error('Please initialise plugin with a Vuex store.')
+    }
+    options.store.registerModule('nu-editor', store)
+    Vue.component('nu-editor', App as VueConstructor<Vue>)
+  }
+}

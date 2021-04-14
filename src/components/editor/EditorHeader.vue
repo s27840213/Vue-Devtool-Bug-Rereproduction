@@ -17,14 +17,36 @@
       btn(:hasIcon="true"
         :iconName="'download'"
         :iconWidth="'15px'"
-        :type="'primary-mid'") download
+        :type="'primary-mid'"
+        @click.native="importJsonFile()") Import JSON
+      btn(:hasIcon="true"
+        :iconName="'download'"
+        :iconWidth="'15px'"
+        :type="'primary-mid'"
+        @click.native="exportJsonFile()") Export JSON
+      btn(:hasIcon="true"
+        :iconName="'download'"
+        :iconWidth="'15px'"
+        :type="'primary-mid'") Download
       img(:src="require('@/assets/img/svg/avatar.svg')")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import FileHandler from '@/utils/FileHandler'
 
 export default Vue.extend({
+  computed: {
+
+  },
+  methods: {
+    exportJsonFile() {
+      FileHandler.export()
+    },
+    importJsonFile() {
+      FileHandler.import()
+    }
+  }
 })
 </script>
 
@@ -48,7 +70,7 @@ export default Vue.extend({
     }
     &:nth-child(2) {
       display: grid;
-      grid-template-columns: repeat(3, auto);
+      grid-template-columns: repeat(5, auto);
       grid-template-rows: 1fr;
       column-gap: 15px;
       justify-items: center;

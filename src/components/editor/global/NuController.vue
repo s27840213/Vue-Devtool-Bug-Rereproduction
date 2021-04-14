@@ -78,8 +78,8 @@ export default Vue.extend({
         const el = this.$el as HTMLElement
         el.style.transform = `translate(${xPos}px, ${yPos}px)`
 
-        const matrix = window.getComputedStyle(this.$el).transform;
-        const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
+        const matrix = window.getComputedStyle(this.$el).transform
+        const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ')
 
         this.updateLayerPos(0, 2, parseInt(matrixValues[4]), parseInt(matrixValues[5]))
       }
@@ -90,8 +90,8 @@ export default Vue.extend({
         this.transform.yOffset += event.clientY - this.transform.initialY
         this.transform.active = false
 
-        document.documentElement.removeEventListener('mouseup', this.moveEnd);
-        window.removeEventListener('mousemove', this.moving);
+        document.documentElement.removeEventListener('mouseup', this.moveEnd)
+        window.removeEventListener('mousemove', this.moving)
       }
     },
 
@@ -117,8 +117,8 @@ export default Vue.extend({
       this.updateLayerSize(0, 2, width, height)
     },
     scaleEnd() {
-      document.documentElement.removeEventListener('mousemove', this.scaling, false);
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false);
+      document.documentElement.removeEventListener('mousemove', this.scaling, false)
+      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     }
   }
 })

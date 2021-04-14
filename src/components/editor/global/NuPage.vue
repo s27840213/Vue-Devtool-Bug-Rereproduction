@@ -1,9 +1,10 @@
 <template lang="pug">
-  div(class="nu-page" ref="page-container")
-    div(class="page-title text-left text-gray-3 mb-10" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+  div(class="nu-page")
+    div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
-    div(class='pages-wrapper' :style="styles()")
-      div(class="pages" :style="`transform: scale(${scaleRatio/100})`")
+    //- div(class='pages-wrapper' :style="styles()")
+    div(class='pages-wrapper' :style="wrapperStyles()")
+      div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="page-content"
             :style="styles('content')"
             @drop="onDrop"
@@ -13,9 +14,9 @@
             :key="`layer-${index}`"
             :config="layer")
         div(class="page-control" :style="styles('control')")
-        nu-controller(v-for="(layer,index) in config.layers"
-          :key="`controller-${index}`"
-          :config="layer")
+          nu-controller(v-for="(layer,index) in config.layers"
+            :key="`controller-${index}`"
+            :config="layer")
 </template>
 
 <script lang="ts">
@@ -35,7 +36,7 @@ export default Vue.extend({
   },
   mounted() {
     console.log(this.scaleRatio)
-    console.log('page' + this.pageIndex);
+    console.log('page' + this.pageIndex)
   },
   computed: {
     ...mapGetters({
@@ -44,7 +45,6 @@ export default Vue.extend({
   },
   watch: {
     scaleRatio() {
-      // const pageContainer = this.$refs['page-container'] as HTMLElement
       const pageContainer = document.querySelector('.nu-page') as HTMLElement
       if (pageContainer !== null) {
         console.log(pageContainer.offsetWidth)
@@ -61,10 +61,13 @@ export default Vue.extend({
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor
-      } : type === 'control' ? {
+      } : {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`
-      } : {
+      }
+    },
+    wrapperStyles() {
+      return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
@@ -117,34 +120,30 @@ export default Vue.extend({
   min-width: 100%;
   flex-direction: column;
   box-sizing: border-box;
-  border: 1px solid red;
-  flex: 1;
+  // border: 1px solid red;
 }
 
 .page-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  position: absolute;
-  top: 0px;
-  left: 0;
 }
 .pages-wrapper {
   position: relative;
-  border: 1px solid red;
+  // border: 1px solid red;
 }
-.pages {
-  display: flex;
-  flex-direction: column;
-  top: 0;
-  left: 0;
+.scale-container {
+  width: 0px;
+  height: 0px;
   position: relative;
-  border: 1px solid blue;
-  transform-origin: top left;
+  // border: 1px solid blue;
+  box-sizing: border-box;
+  transform-origin: 0 0;
 }
 .page-content {
   overflow: hidden;
-  border: 1px solid green;
+  // border: 5px solid green;
+  box-sizing: border-box;
 }
 .page-control {
   position: absolute;

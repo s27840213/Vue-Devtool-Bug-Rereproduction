@@ -27,8 +27,6 @@ export default Vue.extend({
     width: 100%;
     margin-right: 10px;
     background-color: transparent;
-    outline: none;
-    border: none;
   }
 }
 </style>
