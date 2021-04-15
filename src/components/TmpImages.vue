@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="temp__content")
-  img(class="temp__item")(
+  img(class="temp__item"
     v-for="i in 24",
     :src="require('@/assets/img/svg/img-tmp.svg')",
     draggable="true",
