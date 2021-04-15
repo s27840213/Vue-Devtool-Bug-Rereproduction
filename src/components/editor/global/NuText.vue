@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { convertFontStyle } from '@/utils/converter'
+import CssConveter from '@/utils/cssConverter'
 
 export default Vue.extend({
   props: {
@@ -13,7 +13,7 @@ export default Vue.extend({
   },
   methods: {
     fontStyles() {
-      return convertFontStyle(this.config.styles)
+      return CssConveter.convertFontStyle(this.config.styles)
     }
   }
 })

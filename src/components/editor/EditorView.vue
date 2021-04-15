@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view bg-gray-6")
+  div(class="editor-view bg-blue-3")
     nu-page(v-for="(page,index) in pages"
       :key="`page-${index}`"
       :pageIndex="index"
@@ -29,11 +29,9 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .editor-view {
   @include size(100%, 100%);
+  box-sizing: border-box;
   position: relative;
-  max-width: 100%;
-  max-height: 100%;
   z-index: setZindex("editor-view");
-  position: relative;
-  overflow-y: scroll;
+  overflow: scroll;
 }
 </style>

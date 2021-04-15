@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import PropsTransformer from '@/utils/propsTransformer'
 import { mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 
@@ -28,12 +29,20 @@ export default Vue.extend({
         yOffset: this.config.styles.y
       },
       scale: {
-        event: {},
+        event: {} as any,
         initialX: 0,
         initialY: 0,
         initWidth: `${this.config.styles.width}px`,
         initHeight: `${this.config.styles.height}px`
       }
+    }
+  },
+  computed: {
+    getLayerX() {
+      return this.config.styles.x
+    },
+    getLayerY() {
+      return this.config.styles.y
     }
   },
   methods: {
@@ -69,10 +78,11 @@ export default Vue.extend({
     moveStart(event: MouseEvent) {
       this.translate.initialX = event.clientX
       this.translate.initialY = event.clientY
+      this.translate.xOffset = this.getLayerX
+      this.translate.yOffset = this.getLayerY
       if (event.target === this.$refs.body) {
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
-
         window.addEventListener('mousemove', this.moving)
         this.translate.active = true
       }
@@ -80,26 +90,24 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.translate.active) {
         event.preventDefault()
-        const x = event.clientX - this.translate.initialX + this.translate.xOffset
-        const y = event.clientY - this.translate.initialY + this.translate.yOffset
+        const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.translate.initialX, event.clientY - this.translate.initialY)
+        const x = moveOffset.offsetX + this.translate.xOffset
+        const y = moveOffset.offsetY + this.translate.yOffset
 
         const el = this.$el as HTMLElement
         el.style.transform = `translate(${x}px, ${y}px)`
 
-        const matrix = window.getComputedStyle(this.$el).transform;
-        const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
+        const matrix = window.getComputedStyle(this.$el).transform
+        const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ')
 
         this.updateLayerPos(0, 2, parseInt(matrixValues[4]), parseInt(matrixValues[5]))
       }
     },
-    moveEnd(event: MouseEvent) {
+    moveEnd() {
       if (this.translate.active) {
-        this.translate.xOffset += event.clientX - this.translate.initialX
-        this.translate.yOffset += event.clientY - this.translate.initialY
         this.translate.active = false
-
-        document.documentElement.removeEventListener('mouseup', this.moveEnd);
-        window.removeEventListener('mousemove', this.moving);
+        document.documentElement.removeEventListener('mouseup', this.moveEnd)
+        window.removeEventListener('mousemove', this.moving)
       }
     },
 

@@ -1,20 +1,22 @@
 <template lang="pug">
-  div(class="nu-page" ref="page-container")
-    div(class="page-title text-left text-gray-3 mb-10" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+  div(class="nu-page")
+    div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
-    div(class="pages" :style="`transform: scale(${scaleRatio/100})`")
-      div(class="page-content"
-          :style="styles('content')"
-          @drop="onDrop"
-          @dragover.prevent,
-          @dragenter.prevent)
-        nu-layer(v-for="(layer,index) in config.layers"
-          :key="`layer-${index}`"
-          :config="layer")
-      div(class="page-control" :style="styles('control')")
-        nu-controller(v-for="(layer,index) in config.layers"
-          :key="`controller-${index}`"
-          :config="layer")
+    //- div(class='pages-wrapper' :style="styles()")
+    div(class='pages-wrapper' :style="wrapperStyles()")
+      div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
+        div(class="page-content"
+            :style="styles('content')"
+            @drop="onDrop"
+            @dragover.prevent,
+            @dragenter.prevent)
+          nu-layer(v-for="(layer,index) in config.layers"
+            :key="`layer-${index}`"
+            :config="layer")
+        div(class="page-control" :style="styles('control')")
+          nu-controller(v-for="(layer,index) in config.layers"
+            :key="`controller-${index}`"
+            :config="layer")
 </template>
 
 <script lang="ts">
@@ -34,7 +36,7 @@ export default Vue.extend({
   },
   mounted() {
     console.log(this.scaleRatio)
-    console.log('page' + this.pageIndex);
+    console.log('page' + this.pageIndex)
   },
   computed: {
     ...mapGetters({
@@ -43,7 +45,6 @@ export default Vue.extend({
   },
   watch: {
     scaleRatio() {
-      // const pageContainer = this.$refs['page-container'] as HTMLElement
       const pageContainer = document.querySelector('.nu-page') as HTMLElement
       if (pageContainer !== null) {
         console.log(pageContainer.offsetWidth)
@@ -56,10 +57,19 @@ export default Vue.extend({
       ADD_newLayer: 'ADD_newLayer'
     }),
     styles(type: string) {
-      return {
+      return type === 'content' ? {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
-        backgroundColor: type === 'content' ? this.config.backgroundColor : 'none'
+        backgroundColor: this.config.backgroundColor
+      } : {
+        width: `${this.config.width}px`,
+        height: `${this.config.height}px`
+      }
+    },
+    wrapperStyles() {
+      return {
+        width: `${this.config.width * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
     },
     onDrop(e: DragEvent) {
@@ -70,8 +80,8 @@ export default Vue.extend({
         const pageLeft = page.getBoundingClientRect().x
         const pageTop = page.getBoundingClientRect().y
 
-        const left = (e.clientX - pageLeft - data.geometry.left) * (this.scaleRatio / 100)
-        const top = (e.clientY - pageTop - data.geometry.top) * (this.scaleRatio / 100)
+        const left = (e.clientX - pageLeft - data.geometry.left) * (100 / this.scaleRatio)
+        const top = (e.clientY - pageTop - data.geometry.top) * (100 / this.scaleRatio)
 
         const layerInfo = {
           type: 'image',
@@ -105,18 +115,48 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-page {
-  display: inline-block;
-  position: relative;
-  padding: 30px;
-}
-.pages {
-  display: flex;
+  @include flexCenter;
+  min-height: 100%;
+  min-width: 100%;
   flex-direction: column;
+  box-sizing: border-box;
+  // border: 1px solid red;
+}
+
+.page-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pages-wrapper {
   position: relative;
+  // border: 1px solid red;
+  &:hover::after {
+    border: 1px solid red;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+}
+.scale-container {
+  width: 0px;
+  height: 0px;
+  position: relative;
+  // border: 1px solid blue;
+  box-sizing: border-box;
+  transform-origin: 0 0;
 }
 .page-content {
-  position: relative;
   overflow: hidden;
+  position: absolute;
+  // border: 5px solid green;
+  box-sizing: border-box;
 }
 .page-control {
   position: absolute;
@@ -124,7 +164,6 @@ export default Vue.extend({
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
-
   .nu-controller::v-deep {
     // We want to prevent the page-control div from blocking all the event of page-content,
     // but still allow event on nu-controller, so set this property on controller to initial

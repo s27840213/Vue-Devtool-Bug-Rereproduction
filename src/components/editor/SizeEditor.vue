@@ -6,8 +6,7 @@
     div(class="size-editor__percentage")
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
-      :iconName="'plus-square'" :iconColor="'gray-2'" iconWidth="22px"
-      )
+      :iconName="'plus-square'" :iconColor="'gray-2'" iconWidth="22px")
 </template>
 
 <script lang="ts">
@@ -24,11 +23,9 @@ export default Vue.extend({
       setScaleRatio: 'SET_pageScaleRatio'
     }),
     plus() {
-      console.log('plus')
       this.setScaleRatio(this.pageScaleRatio + 10)
     },
     minus() {
-      console.log('minus')
       if (this.pageScaleRatio > 10) {
         this.setScaleRatio(this.pageScaleRatio - 10)
       }
