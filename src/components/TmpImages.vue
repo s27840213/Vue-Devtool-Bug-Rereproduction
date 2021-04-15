@@ -1,11 +1,10 @@
 <template lang="pug">
-.temp__content
-  img.temp__item(
+div(class="temp__content")
+  img(class="temp__item")(
     v-for="i in 24",
     :src="require('@/assets/img/svg/img-tmp.svg')",
     draggable="true",
-    @dragstart="dragstart"
-  )
+    @dragstart="dragstart")
 </template>
 
 <script lang="ts">
@@ -16,13 +15,13 @@ import Vue from 'vue'
 
 export default Vue.extend({
   methods: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dragstart(e: any) {
+    dragstart(e: DragEvent) {
       console.log('drag start!')
-      e.dataTransfer.dropEffect = 'move'
-      e.dataTransfer.effectAllowed = 'move'
+      const dataTransfer = e.dataTransfer as DataTransfer
+      dataTransfer.dropEffect = 'move'
+      dataTransfer.effectAllowed = 'move'
 
-      const rect = e.target.getBoundingClientRect()
+      const rect = (e.target as Element).getBoundingClientRect()
       const data = {
         geometry: {
           left: e.clientX - rect.x,
@@ -31,7 +30,7 @@ export default Vue.extend({
         src: '@/assets/img/svg/img-tmp.svg'
       }
 
-      e.dataTransfer.setData('data', JSON.stringify(data))
+      dataTransfer.setData('data', JSON.stringify(data))
     }
   }
 })

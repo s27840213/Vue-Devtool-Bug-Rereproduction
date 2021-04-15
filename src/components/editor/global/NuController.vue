@@ -6,6 +6,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import PropsTransformer from '@/utils/propsTransformer'
 import { mapMutations } from 'vuex'
 export default Vue.extend({
   props: {
@@ -26,6 +27,14 @@ export default Vue.extend({
         initWidth: `${this.config.styles.width}px`,
         initHeight: `${this.config.styles.height}px`
       }
+    }
+  },
+  computed: {
+    getLayerX() {
+      return this.config.styles.x
+    },
+    getLayerY() {
+      return this.config.styles.y
     }
   },
   methods: {
@@ -61,10 +70,11 @@ export default Vue.extend({
     moveStart(event: MouseEvent) {
       this.transform.initialX = event.clientX
       this.transform.initialY = event.clientY
+      this.transform.xOffset = this.getLayerX
+      this.transform.yOffset = this.getLayerY
       if (event.target === this.$refs.body) {
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
-
         window.addEventListener('mousemove', this.moving)
         this.transform.active = true
       }
@@ -72,8 +82,9 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.transform.active) {
         event.preventDefault()
-        const xPos = event.clientX - this.transform.initialX + this.transform.xOffset
-        const yPos = event.clientY - this.transform.initialY + this.transform.yOffset
+        const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.transform.initialX, event.clientY - this.transform.initialY)
+        const xPos = moveOffset.offsetX + this.transform.xOffset
+        const yPos = moveOffset.offsetY + this.transform.yOffset
 
         const el = this.$el as HTMLElement
         el.style.transform = `translate(${xPos}px, ${yPos}px)`
@@ -84,12 +95,9 @@ export default Vue.extend({
         this.updateLayerPos(0, 2, parseInt(matrixValues[4]), parseInt(matrixValues[5]))
       }
     },
-    moveEnd(event: MouseEvent) {
+    moveEnd() {
       if (this.transform.active) {
-        this.transform.xOffset += event.clientX - this.transform.initialX
-        this.transform.yOffset += event.clientY - this.transform.initialY
         this.transform.active = false
-
         document.documentElement.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }

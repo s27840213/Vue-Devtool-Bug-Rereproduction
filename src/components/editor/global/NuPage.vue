@@ -80,8 +80,8 @@ export default Vue.extend({
         const pageLeft = page.getBoundingClientRect().left
         const pageTop = page.getBoundingClientRect().top
 
-        const left = (e.clientX - pageLeft - data.geometry.left) * (this.scaleRatio / 100)
-        const top = (e.clientY - pageTop - data.geometry.top) * (this.scaleRatio / 100)
+        const left = (e.clientX - pageLeft - data.geometry.left) * (100 / this.scaleRatio)
+        const top = (e.clientY - pageTop - data.geometry.top) * (100 / this.scaleRatio)
 
         const layerInfo = {
           type: 'image',
@@ -131,6 +131,18 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   // border: 1px solid red;
+  &:hover::after {
+    border: 1px solid red;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
 }
 .scale-container {
   width: 0px;
@@ -142,6 +154,7 @@ export default Vue.extend({
 }
 .page-content {
   overflow: hidden;
+  position: absolute;
   // border: 5px solid green;
   box-sizing: border-box;
 }
@@ -151,7 +164,6 @@ export default Vue.extend({
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
-
   .nu-controller::v-deep {
     // We want to prevent the page-control div from blocking all the event of page-content,
     // but still allow event on nu-controller, so set this property on controller to initial

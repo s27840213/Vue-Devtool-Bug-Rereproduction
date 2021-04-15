@@ -1,8 +1,11 @@
+/**
+ * This typescript file is used to import/export JSON.
+ */
 import store from '@/store'
 class FileHandler {
   import() {
     // Because inputNode won't be appended to DOM, so we don't need to release it
-    // It will be remove by JS garbage collection system
+    // It will be remove by JS garbage collection system sooner or later
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', 'application/json')
