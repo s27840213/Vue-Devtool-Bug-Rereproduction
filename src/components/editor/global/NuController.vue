@@ -133,8 +133,8 @@ export default Vue.extend({
           this.scale.initWidth = `${width}px`
           this.scale.initHeight = `${height}px`
 
-          const matrix = window.getComputedStyle(this.$el).transform;
-          const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
+          const matrix = window.getComputedStyle(this.$el).transform
+          const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ')
           const x = xSign < 0 ? parseInt(matrixValues[4]) + event.movementX : parseInt(matrixValues[4])
           const y = ySign < 0 ? parseInt(matrixValues[5]) + event.movementY : parseInt(matrixValues[5])
           element.style.transform = `translate(${x}px, ${y}px)`
@@ -148,8 +148,8 @@ export default Vue.extend({
       }
     },
     scaleEnd() {
-      document.documentElement.removeEventListener('mousemove', this.scale.event.eventHandler, false);
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false);
+      document.documentElement.removeEventListener('mousemove', this.scale.event.eventHandler, false)
+      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     }
   }
 })
