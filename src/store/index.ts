@@ -97,6 +97,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.y = updateInfo.y
   },
   Update_LayerSize(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, width: number, height: number }) {
+    console.log('dsds')
     state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.width = `${updateInfo.width}`
     state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.height = `${updateInfo.height}`
   }

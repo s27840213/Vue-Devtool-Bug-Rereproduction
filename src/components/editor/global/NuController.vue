@@ -1,19 +1,26 @@
 <template lang="pug">
   div(class="nu-controller" ref="body"
   :style="styles()" @mousedown="moveStart")
-    div(class="scaler" ref="scaler" @mousedown="scaleStart")
+    div(v-for="(controlPoint,index) in controlPoints"
+    class="scaler"
+    :key="index"
+    :style="controlPoint.styles"
+    @mousedown="scaleStart($event, controlPoint.xSign, controlPoint.ySign)")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations } from 'vuex'
+import { ControlPoints } from '@/store/types'
+
 export default Vue.extend({
   props: {
     config: Object
   },
   data() {
     return {
-      transform: {
+      controlPoints: ControlPoints,
+      translate: {
         active: false,
         initialX: 0,
         initialY: 0,
@@ -21,6 +28,7 @@ export default Vue.extend({
         yOffset: this.config.styles.y
       },
       scale: {
+        event: {},
         initialX: 0,
         initialY: 0,
         initWidth: `${this.config.styles.width}px`,
@@ -59,24 +67,24 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      this.transform.initialX = event.clientX
-      this.transform.initialY = event.clientY
+      this.translate.initialX = event.clientX
+      this.translate.initialY = event.clientY
       if (event.target === this.$refs.body) {
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
 
         window.addEventListener('mousemove', this.moving)
-        this.transform.active = true
+        this.translate.active = true
       }
     },
     moving(event: MouseEvent) {
-      if (this.transform.active) {
+      if (this.translate.active) {
         event.preventDefault()
-        const xPos = event.clientX - this.transform.initialX + this.transform.xOffset
-        const yPos = event.clientY - this.transform.initialY + this.transform.yOffset
+        const x = event.clientX - this.translate.initialX + this.translate.xOffset
+        const y = event.clientY - this.translate.initialY + this.translate.yOffset
 
         const el = this.$el as HTMLElement
-        el.style.transform = `translate(${xPos}px, ${yPos}px)`
+        el.style.transform = `translate(${x}px, ${y}px)`
 
         const matrix = window.getComputedStyle(this.$el).transform;
         const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
@@ -85,39 +93,54 @@ export default Vue.extend({
       }
     },
     moveEnd(event: MouseEvent) {
-      if (this.transform.active) {
-        this.transform.xOffset += event.clientX - this.transform.initialX
-        this.transform.yOffset += event.clientY - this.transform.initialY
-        this.transform.active = false
+      if (this.translate.active) {
+        this.translate.xOffset += event.clientX - this.translate.initialX
+        this.translate.yOffset += event.clientY - this.translate.initialY
+        this.translate.active = false
 
         document.documentElement.removeEventListener('mouseup', this.moveEnd);
         window.removeEventListener('mousemove', this.moving);
       }
     },
 
-    scaleStart(event: MouseEvent) {
-      if (event.target !== this.$refs.scaler) return
+    scaleStart(event: MouseEvent, xSign: number, ySign: number) {
       this.scale.initialX = event.clientX
       this.scale.initialY = event.clientY
-
-      document.documentElement.addEventListener('mousemove', this.scaling, false)
+      this.scale.event = this.scaling(xSign, ySign)
+      document.documentElement.addEventListener('mousemove', this.scale.event.eventHandler, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
     },
-    scaling(event: MouseEvent) {
-      event.preventDefault()
-      const width = parseInt(this.scale.initWidth, 10) + event.movementX
-      const height = parseInt(this.scale.initHeight, 10) + event.movementY
-      const element = this.$el as HTMLElement
-      element.style.width = `${width}px`
-      element.style.height = `${height}px`
+    scaling(xSign: number, ySign: number) {
+      return {
+        eventHandler: (event: MouseEvent) => {
+          event.preventDefault()
+          const width = parseInt(this.scale.initWidth, 10) + xSign * event.movementX
+          const height = parseInt(this.scale.initHeight, 10) + ySign * event.movementY
+          if (width <= 20 || height <= 20) return
 
-      this.scale.initWidth = `${width}px`
-      this.scale.initHeight = `${height}px`
+          const element = this.$el as HTMLElement
+          element.style.width = `${width}px`
+          element.style.height = `${height}px`
 
-      this.updateLayerSize(0, 2, width, height)
+          this.scale.initWidth = `${width}px`
+          this.scale.initHeight = `${height}px`
+
+          const matrix = window.getComputedStyle(this.$el).transform;
+          const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ');
+          const x = xSign < 0 ? parseInt(matrixValues[4]) + event.movementX : parseInt(matrixValues[4])
+          const y = ySign < 0 ? parseInt(matrixValues[5]) + event.movementY : parseInt(matrixValues[5])
+          element.style.transform = `translate(${x}px, ${y}px)`
+
+          this.translate.xOffset += xSign < 0 ? event.movementX : 0
+          this.translate.yOffset += ySign < 0 ? event.movementY : 0
+
+          this.updateLayerSize(0, 2, width, height)
+          this.updateLayerPos(0, 2, x, y)
+        }
+      }
     },
     scaleEnd() {
-      document.documentElement.removeEventListener('mousemove', this.scaling, false);
+      document.documentElement.removeEventListener('mousemove', this.scale.event.eventHandler, false);
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false);
     }
   }
@@ -126,6 +149,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   border: 1px solid blue;
   &:active {
@@ -136,12 +162,9 @@ export default Vue.extend({
   }
 }
 .scaler {
+  position: absolute;
   width: 10px;
   height: 10px;
-  background: black;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: nwse-resize;
+  background-color: red;
 }
 </style>

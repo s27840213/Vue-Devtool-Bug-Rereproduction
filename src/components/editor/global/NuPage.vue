@@ -67,8 +67,8 @@ export default Vue.extend({
         const data = JSON.parse(e.dataTransfer.getData('data'))
 
         const page = e.target as HTMLElement
-        const pageLeft = page.getBoundingClientRect().left
-        const pageTop = page.getBoundingClientRect().top
+        const pageLeft = page.getBoundingClientRect().x
+        const pageTop = page.getBoundingClientRect().y
 
         const left = (e.clientX - pageLeft - data.geometry.left) * (this.scaleRatio / 100)
         const top = (e.clientY - pageTop - data.geometry.top) * (this.scaleRatio / 100)
