@@ -2,7 +2,6 @@
   div(class="nu-page")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
-    //- div(class='pages-wrapper' :style="styles()")
     div(class='pages-wrapper' :style="wrapperStyles()")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="page-content"
@@ -15,6 +14,7 @@
             :config="layer")
         div(class="page-control" :style="styles('control')")
           nu-controller(v-for="(layer,index) in config.layers"
+            data-identifier="controller"
             :key="`controller-${index}`"
             :config="layer")
 </template>
@@ -27,6 +27,7 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 export default Vue.extend({
   data() {
     return {
+
     }
   },
   props: {
@@ -34,23 +35,10 @@ export default Vue.extend({
     pageIndex: Number,
     pageScaleRatio: Number
   },
-  mounted() {
-    console.log(this.scaleRatio)
-    console.log('page' + this.pageIndex)
-  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     })
-  },
-  watch: {
-    scaleRatio() {
-      const pageContainer = document.querySelector('.nu-page') as HTMLElement
-      if (pageContainer !== null) {
-        console.log(pageContainer.offsetWidth)
-        console.log(pageContainer.offsetHeight)
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -120,6 +108,7 @@ export default Vue.extend({
   min-width: 100%;
   flex-direction: column;
   box-sizing: border-box;
+  position: relative;
   // border: 1px solid red;
 }
 

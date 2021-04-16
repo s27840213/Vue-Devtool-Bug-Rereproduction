@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-controller" ref="body"
-  :style="styles()" @mousedown="moveStart")
+  :style="styles()" @mousedown.stop="moveStart")
     div(v-for="(controlPoint,index) in controlPoints"
     class="scaler"
     :key="index"
