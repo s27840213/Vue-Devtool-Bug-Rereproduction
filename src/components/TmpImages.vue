@@ -4,7 +4,7 @@ div(class="temp__content")
     v-for="i in 24",
     :src="require('@/assets/img/svg/img-tmp.svg')",
     draggable="true",
-    @dragstart="dragstart")
+    @dragstart="dragStart")
 </template>
 
 <script lang="ts">
@@ -15,7 +15,7 @@ import Vue from 'vue'
 
 export default Vue.extend({
   methods: {
-    dragstart(e: DragEvent) {
+    dragStart(e: DragEvent) {
       console.log('drag start!')
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'

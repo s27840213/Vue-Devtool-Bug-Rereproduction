@@ -112,6 +112,9 @@ const mutations: MutationTree<IEditorState> = {
   Update_LayerSize(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, width: number, height: number }) {
     state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.width = `${updateInfo.width}`
     state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.height = `${updateInfo.height}`
+  },
+  Update_LayerRotate(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, rotate: number }) {
+    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.rotate = updateInfo.rotate
   }
 }
 
