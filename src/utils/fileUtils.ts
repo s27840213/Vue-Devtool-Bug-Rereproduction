@@ -1,8 +1,9 @@
 /**
  * This typescript file is used to import/export JSON.
+ * May implement futhter file export feature in the future
  */
 import store from '@/store'
-class FileHandler {
+class FileUtils {
   import() {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
@@ -34,4 +35,4 @@ function handleFileSelect(evt: any) {
   }
   reader.readAsText(file)
 }
-export default new FileHandler()
+export default new FileUtils()
