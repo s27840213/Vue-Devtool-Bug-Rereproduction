@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view bg-gray-5"  @mousedown="selectStart($event)" @scroll="scrollUpdate($event)")
+  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     nu-page(v-for="(page,index) in pages"
       :key="`page-${index}`"
       :pageIndex="index"
@@ -27,11 +27,6 @@ export default Vue.extend({
   },
   methods: {
     selectStart(e: MouseEvent) {
-      // this.selectionArea.x = e.clientX
-      // this.selectionArea.y = e.clientY
-      // this.selectionArea.width = 0
-      // this.selectionArea.height = 0
-
       this.initialAbsPos = this.currentAbsPos = this.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = this.getMouseRelPoint(e, this.editorView)
 

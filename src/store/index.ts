@@ -100,21 +100,23 @@ const mutations: MutationTree<IEditorState> = {
   ADD_newLayer(state: IEditorState, updateInfo: { pageIndex: number, layer: IShape | IText | IImage | IGroup }) {
     state.pages[updateInfo.pageIndex].layers.push(updateInfo.layer)
   },
-  Update_LayerPos(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, x: number, y: number }) {
-    // console.log('updated!' + updateInfo.x)
-    // console.log(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x);
-    // Object.assign(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles, updateInfo.x, updateInfo.y)
-    // console.log(state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x);
-
-    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.x = updateInfo.x
-    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.y = updateInfo.y
+  Update_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean } }) {
+    /**
+     * This Mutation is used to update the layer's properties excluding styles
+     */
+    Object.entries(updateInfo.props).forEach(([k, v]) => {
+      state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
+    })
   },
-  Update_LayerSize(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, width: number, height: number }) {
-    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.width = `${updateInfo.width}`
-    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.height = `${updateInfo.height}`
-  },
-  Update_LayerRotate(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, rotate: number }) {
-    state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles.rotate = updateInfo.rotate
+  Update_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
+    /**
+     * TODO: type check -> To check the properties is in the certain interface or not
+     * ex: weight properties is not allowed in Img Layer
+     * keywords: user-type-guard in TypeScript or using type predicates
+     */
+    Object.entries(updateInfo.styles).forEach(([k, v]) => {
+      state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
+    })
   }
 }
 

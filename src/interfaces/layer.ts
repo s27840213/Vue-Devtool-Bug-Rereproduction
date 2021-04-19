@@ -19,6 +19,7 @@ export interface ITextStyle extends IStyle {
   fontSize?: number
 }
 export interface ILayer<T extends IStyle = IStyle> {
+  [key: string]: unknown,
   type: string,
   pageIndex: number,
   active: boolean,

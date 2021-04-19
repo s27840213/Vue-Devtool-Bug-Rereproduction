@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import FileHandler from '@/utils/FileHandler'
+import FileHandler from '@/utils/fileHandler'
 
 export default Vue.extend({
   computed: {

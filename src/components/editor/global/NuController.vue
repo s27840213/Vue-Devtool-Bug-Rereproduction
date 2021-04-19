@@ -58,31 +58,35 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      Update_LayerPos: 'Update_LayerPos',
-      Update_LayerSize: 'Update_LayerSize',
-      Update_LayerRotate: 'Update_LayerRotate'
+      updateLayerStyles: 'Update_layerStyles'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
-      this.Update_LayerPos({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        x,
-        y
+        styles: {
+          x,
+          y
+        }
       })
     },
     updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number) {
-      this.Update_LayerSize({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        width,
-        height
+        styles: {
+          width,
+          height
+        }
       })
     },
     updateLayerRotate(pageIndex: number, layerIndex: number, rotate: number) {
-      this.Update_LayerRotate({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        rotate
+        styles: {
+          rotate
+        }
       })
     },
 
@@ -198,8 +202,10 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: setZindex("nu-controller");
   position: absolute;
   border: 1px solid blue;
+  box-sizing: border-box;
   &:active {
     border: 1.5px solid rgb(174, 46, 190);
   }

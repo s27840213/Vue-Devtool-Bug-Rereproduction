@@ -2,20 +2,31 @@
   div(class="nu-page")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
-    div(class='pages-wrapper' :style="wrapperStyles()")
+    div(class='pages-wrapper'
+        :style="wrapperStyles()")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="page-content"
             :style="styles('content')"
             @drop="onDrop"
             @dragover.prevent,
-            @dragenter.prevent)
+            @dragenter.prevent
+            @mouseover="togglePageHighlighter(true)"
+            @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
-            :config="layer")
+            :config="layer"
+            @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)"
+            @mouseout.native.stop="toggleHighlighter(pageIndex,index,false)")
+        div(v-if="pageIsHover"
+          class="page-highlighter"
+          :style="styles()")
         div(class="page-control" :style="styles('control')")
           nu-controller(v-for="(layer,index) in config.layers"
             data-identifier="controller"
             :key="`controller-${index}`"
+            :config="layer")
+          nu-highlighter(v-for="(layer,index) in config.layers"
+            :key="`highlighter-${index}`"
             :config="layer")
 </template>
 
@@ -27,7 +38,7 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 export default Vue.extend({
   data() {
     return {
-
+      pageIsHover: false
     }
   },
   props: {
@@ -42,7 +53,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      ADD_newLayer: 'ADD_newLayer'
+      ADD_newLayer: 'ADD_newLayer',
+      updateLayerProps: 'Update_layerProps'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -96,6 +108,20 @@ export default Vue.extend({
         pageIndex,
         layer
       })
+    },
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      console.log(shown)
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props: {
+          shown
+        }
+      })
+    },
+    togglePageHighlighter(isHover: boolean) {
+      console.log('sadas')
+      this.pageIsHover = isHover
     }
   }
 })
@@ -109,7 +135,6 @@ export default Vue.extend({
   flex-direction: column;
   box-sizing: border-box;
   position: relative;
-  // border: 1px solid red;
 }
 
 .page-title {
@@ -119,19 +144,7 @@ export default Vue.extend({
 }
 .pages-wrapper {
   position: relative;
-  // border: 1px solid red;
-  &:hover::after {
-    border: 1px solid red;
-  }
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
+  box-sizing: content-box;
 }
 .scale-container {
   width: 0px;
@@ -146,6 +159,13 @@ export default Vue.extend({
   position: absolute;
   // border: 5px solid green;
   box-sizing: border-box;
+}
+.page-highlighter {
+  position: absolute;
+  border: 2px solid setColor(blue-2, 0.5);
+  box-sizing: border-box;
+  z-index: 5;
+  pointer-events: none;
 }
 .page-control {
   position: absolute;

@@ -1,9 +1,5 @@
 import { IPage } from '@/interfaces/page'
 
-export interface IState {
-  temp: string | null
-}
-
 export interface IEditorState {
   pages: Array<IPage>,
   currPanelType: number,
