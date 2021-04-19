@@ -69,7 +69,11 @@ const getDefaultState = (): IEditorState => ({
     }
   ],
   currPanelType: PanelType.template,
-  pageScaleRatio: 100
+  pageScaleRatio: 100,
+  currSelectedLayers: {
+    pageIndex: -1,
+    layers: []
+  }
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -117,6 +121,40 @@ const mutations: MutationTree<IEditorState> = {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
+  },
+  ADD_selectedLayer(state: IEditorState, { layerIndexs, pageIndex }) {
+    let pIndex = state.currSelectedLayers.pageIndex
+
+    // If selected array is empty
+    if (pIndex === -1) {
+      state.currSelectedLayers.pageIndex = pageIndex
+      pIndex = pageIndex
+    } else if (pIndex !== pageIndex) {
+      console.warn('Warning: Could not manipulate layers in different pages at the same time')
+      return
+    }
+
+    layerIndexs.forEach((layerIndex: number) => {
+      if (!state.currSelectedLayers.layers.includes(layerIndex)) {
+        state.pages[pIndex].layers[layerIndex].active = true
+        state.currSelectedLayers.layers.push(layerIndex)
+      }
+    })
+  },
+  UPDATE_currPageIndex(state, pageIndex) {
+    state.currSelectedLayers.pageIndex = pageIndex
+  },
+  CLEAR_currSelectedLayers(state: IEditorState) {
+    const pageIndex = state.currSelectedLayers.pageIndex
+
+    // Set all selected layers' active property to false
+    state.currSelectedLayers.layers.forEach((layerIndex) => {
+      state.pages[pageIndex].layers[layerIndex].active = false
+      state.currSelectedLayers.layers.push(layerIndex)
+    })
+
+    state.currSelectedLayers.pageIndex = -1
+    state.currSelectedLayers.layers = []
   }
 }
 

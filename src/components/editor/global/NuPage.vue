@@ -10,6 +10,7 @@
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
+            @click="clearSelectedLayers()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
@@ -24,6 +25,8 @@
           nu-controller(v-for="(layer,index) in config.layers"
             data-identifier="controller"
             :key="`controller-${index}`"
+            :layerIndex="index"
+            :pageIndex="pageIndex"
             :config="layer")
           nu-highlighter(v-for="(layer,index) in config.layers"
             :key="`highlighter-${index}`"
@@ -54,7 +57,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayer: 'ADD_newLayer',
-      updateLayerProps: 'Update_layerProps'
+      updateLayerProps: 'Update_layerProps',
+      clearSelectedLayers: 'CLEAR_currSelectedLayers'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -87,7 +91,7 @@ export default Vue.extend({
           type: 'image',
           pageIndex: this.config.pageIndex,
           src: require('@/assets/img/svg/img-tmp.svg'),
-          active: true,
+          active: false,
           shown: false,
           styles: {
             x: left,
@@ -120,7 +124,6 @@ export default Vue.extend({
       })
     },
     togglePageHighlighter(isHover: boolean) {
-      console.log('sadas')
       this.pageIsHover = isHover
     }
   }

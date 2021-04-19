@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -26,6 +26,9 @@ export default Vue.extend({
     this.editorView = document.querySelector('.editor-view') as HTMLElement
   },
   methods: {
+    ...mapMutations({
+      clearSelectedLayers: 'CLEAR_currSelectedLayers'
+    }),
     selectStart(e: MouseEvent) {
       this.initialAbsPos = this.currentAbsPos = this.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = this.getMouseRelPoint(e, this.editorView)
@@ -50,6 +53,7 @@ export default Vue.extend({
     },
     selectEnd() {
       this.isSelecting = false
+      this.clearSelectedLayers()
       document.documentElement.removeEventListener('mousemove', this.selecting)
       document.documentElement.removeEventListener('scroll', this.scrollUpdate)
       document.documentElement.removeEventListener('mouseup', this.selectEnd)
@@ -87,7 +91,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .editor-view {
   width: 100%;
-  background: green;
   box-sizing: border-box;
   position: relative;
   z-index: setZindex("editor-view");
