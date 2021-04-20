@@ -10,7 +10,6 @@
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
-            @click.self="clearSelectedLayers()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
