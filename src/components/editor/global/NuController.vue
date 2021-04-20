@@ -156,7 +156,6 @@ export default Vue.extend({
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
         if (!event.metaKey && !this.currSelectedLayers.layers.includes(this.layerIndex)) {
-          console.log('fuck')
           this.clearSelectedLayers()
         }
         this.addSelectedLayer()
@@ -165,9 +164,11 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.isActive) {
         event.preventDefault()
-        const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.initialX, event.clientY - this.initialY)
-        this.initialX += moveOffset.offsetX
-        this.initialY += moveOffset.offsetY
+        const xOffset = event.clientX - this.initialX
+        const yOffset = event.clientY - this.initialY
+        const moveOffset = PropsTransformer.getActualMoveOffset(xOffset, yOffset)
+        this.initialX += xOffset
+        this.initialY += yOffset
         // const x = moveOffset.offsetX + this.initTranslate.x
         // const y = moveOffset.offsetY + this.initTranslate.y
         this.updateSelectedLayers({
