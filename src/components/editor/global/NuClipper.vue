@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-clipper")
+  div(class="nu-clipper" :style="styles()")
     slot
 </template>
 
@@ -13,7 +13,15 @@ export default Vue.extend({
   },
   props: {
     config: Object,
-    index: Number
+    pageIndex: Number
+  },
+  methods: {
+    styles() {
+      return {
+        width: `${this.config.styles.width}px`,
+        height: `${this.config.styles.height}px`
+      }
+    }
   }
 })
 </script>

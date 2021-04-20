@@ -34,7 +34,7 @@ export default Vue.extend({
   top: 0;
   left: 0;
   display: inline-block;
-  box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
+  // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
   background-color: white;

@@ -53,9 +53,6 @@ export default Vue.extend({
       ]
     }
   },
-  mounted() {
-    console.log(this.currPanel)
-  },
   computed: {
     ...mapGetters({
       currPanel: 'getCurrPanelType'

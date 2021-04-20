@@ -1,13 +1,13 @@
 <template lang="pug">
   div(class="nu-controller" ref="body"
-  :style="styles()" @mousedown="moveStart")
-    div(v-for="(controlPoint, index) in controlPoints.positions"
-    class="scaler"
-    :key="index"
-    :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
-    @mousedown="scaleStart")
-    div(class="rotaterWrapper")
-      div(class="rotater" @mousedown="rotateStart")
+  :style="styles()" @mousedown.stop="moveStart")
+    div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
+      class="scaler"
+      :key="index"
+      :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
+      @mousedown.stop="scaleStart")
+    div(v-if="isActive" class="rotaterWrapper")
+      div(class="rotater" @mousedown.stop="rotateStart")
 </template>
 
 <script lang="ts">
@@ -18,7 +18,9 @@ import { ControlPoints } from '@/store/types'
 
 export default Vue.extend({
   props: {
-    config: Object
+    config: Object,
+    layerIndex: Number,
+    pageIndex: Number
   },
   data() {
     return {
@@ -34,9 +36,6 @@ export default Vue.extend({
       initTranslate: {
         x: 0,
         y: 0
-      },
-      translate: {
-        active: false
       },
       scale: {
         xSign: 1,
@@ -55,6 +54,9 @@ export default Vue.extend({
   computed: {
     getControlPoints() {
       return this.config.controlPoints
+    },
+    isActive() {
+      return this.config.active
     },
     getLayerX() {
       return this.config.styles.x
@@ -86,31 +88,38 @@ export default Vue.extend({
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
     ...mapMutations({
-      Update_LayerPos: 'Update_LayerPos',
-      Update_LayerSize: 'Update_LayerSize',
-      Update_LayerRotate: 'Update_LayerRotate'
+      updateLayerStyles: 'Update_layerStyles',
+      updateLayerProps: 'Update_layerProps',
+      addLayer: 'ADD_selectedLayer',
+      clearSelectedLayers: 'CLEAR_currSelectedLayers'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
-      this.Update_LayerPos({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        x,
-        y
+        styles: {
+          x,
+          y
+        }
       })
     },
     updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number) {
-      this.Update_LayerSize({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        width,
-        height
+        styles: {
+          width,
+          height
+        }
       })
     },
     updateLayerRotate(pageIndex: number, layerIndex: number, rotate: number) {
-      this.Update_LayerRotate({
+      this.updateLayerStyles({
         pageIndex,
         layerIndex,
-        rotate
+        styles: {
+          rotate
+        }
       })
     },
 
@@ -123,21 +132,21 @@ export default Vue.extend({
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        this.translate.active = true
+        this.clearSelectedLayers()
+        this.addSelectedLayer()
       }
     },
     moving(event: MouseEvent) {
-      if (this.translate.active) {
+      if (this.isActive) {
         event.preventDefault()
         const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.initialX, event.clientY - this.initialY)
         const x = moveOffset.offsetX + this.initTranslate.x
         const y = moveOffset.offsetY + this.initTranslate.y
-        this.updateLayerPos(0, 2, x, y)
+        this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
       }
     },
     moveEnd() {
-      if (this.translate.active) {
-        this.translate.active = false
+      if (this.isActive) {
         document.documentElement.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
@@ -222,8 +231,8 @@ export default Vue.extend({
       const x = this.initTranslate.x + (origin.x - this.scale.initOrigin.x)
       const y = this.initTranslate.y + (origin.y - this.scale.initOrigin.y)
 
-      this.updateLayerSize(0, 2, width, height)
-      this.updateLayerPos(0, 2, x, y)
+      this.updateLayerSize(this.pageIndex, this.layerIndex, width, height)
+      this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
     },
     scaleEnd() {
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
@@ -261,13 +270,19 @@ export default Vue.extend({
 
         this.initialX = event.clientX
         this.initialY = event.clientY
-        this.updateLayerRotate(0, 2, angle)
+        this.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
         console.log('angle:  ' + angle)
       }
     },
     rotateEnd() {
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
+    },
+    addSelectedLayer() {
+      this.addLayer({
+        layerIndexs: [this.layerIndex],
+        pageIndex: this.pageIndex
+      })
     }
   }
 })
@@ -278,10 +293,12 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: setZindex("nu-controller");
   position: absolute;
-  border: 1px solid blue;
+  border: 1px solid setColor(blue-2);
+  box-sizing: border-box;
   &:active {
-    border: 1.5px solid rgb(174, 46, 190);
+    border: 1px solid rgb(174, 46, 190);
   }
   &:hover {
     cursor: pointer;
@@ -291,7 +308,8 @@ export default Vue.extend({
   position: absolute;
   width: 10px;
   height: 10px;
-  background-color: red;
+  background-color: setColor(white);
+  border: 2px solid setColor(blue-2);
 }
 .rotaterWrapper {
   position: absolute;

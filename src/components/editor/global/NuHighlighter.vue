@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-highlighter" :style="styles()" )
+  div(v-if="config.shown" class="nu-highlighter" :style="styles()" )
 </template>
 
 <script lang="ts">
@@ -27,11 +27,13 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-highlighter {
-  // @include size(100px, 100px);
-  // border: 1px solid setColor(blue-1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
-  background-color: rgb(216, 236, 143);
-
+  border: 3px solid setColor(blue-2);
+  z-index: setZindex("nu-highlighter");
+  box-sizing: border-box;
   &:hover {
     cursor: pointer;
   }

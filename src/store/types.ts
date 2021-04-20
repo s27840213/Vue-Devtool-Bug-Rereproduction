@@ -1,13 +1,18 @@
 import { IPage } from '@/interfaces/page'
 
-export interface IState {
-  temp: string | null
-}
-
+/**
+ * @param {object} currcurrSelectedLayers - used to record the info of selected layers
+ *    @param {number} pageIndex - used to record where page the selected layers is
+ *    @param {number[]} layers - all indexs of selected layers
+ */
 export interface IEditorState {
   pages: Array<IPage>,
   currPanelType: number,
   pageScaleRatio: number,
+  currSelectedLayers: {
+    pageIndex: number,
+    layers: number[]
+  }
 }
 
 export enum PanelType {

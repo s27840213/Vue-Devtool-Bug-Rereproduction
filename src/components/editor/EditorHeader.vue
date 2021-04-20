@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import FileHandler from '@/utils/FileHandler'
+import FileUtils from '@/utils/fileUtils'
 
 export default Vue.extend({
   computed: {
@@ -41,10 +41,10 @@ export default Vue.extend({
   },
   methods: {
     exportJsonFile() {
-      FileHandler.export()
+      FileUtils.export()
     },
     importJsonFile() {
-      FileHandler.import()
+      FileUtils.import()
     }
   }
 })
