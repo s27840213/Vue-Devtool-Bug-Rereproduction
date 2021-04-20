@@ -5,11 +5,11 @@
       :style="styles()"
       @mousedown.stop="moveStart"
       @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
-    div(v-if="isActive" v-for="(controlPoint,index) in controlPoints"
+    div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
       class="scaler"
       :key="index"
-      :style="controlPoint.styles"
-      @mousedown.stop="scaleStart($event, controlPoint.xSign, controlPoint.ySign)")
+      :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
+      @mousedown.stop="scaleStart")
     div(v-if="isActive" class="rotaterWrapper")
       div(class="rotater" @mousedown.stop="rotateStart")
 </template>
@@ -31,16 +31,27 @@ export default Vue.extend({
       controlPoints: ControlPoints,
       initialX: 0,
       initialY: 0,
-      translate: {
-        xOffset: this.config.styles.x,
-        yOffset: this.config.styles.y
+      initWidth: 0,
+      initHeight: 0,
+      center: {
+        x: 0,
+        y: 0
+      },
+      initTranslate: {
+        x: 0,
+        y: 0
       },
       scale: {
-        eventHandler: {} as any
-      },
-      rotate: {
-        centerX: 0,
-        centerY: 0
+        xSign: 1,
+        ySign: 1,
+        anchorPoint: {
+          x: 0,
+          y: 0
+        },
+        initOrigin: {
+          x: 0,
+          y: 0
+        }
       }
     }
   },
@@ -48,6 +59,9 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedLayers: 'getCurrSelectedLayers'
     }),
+    getControlPoints(): any {
+      return this.config.controlPoints
+    },
     isActive(): boolean {
       return this.config.active
     },
@@ -71,6 +85,11 @@ export default Vue.extend({
     }
   },
   methods: {
+    cursorStyles(index: number, rotateAngle: number) {
+      const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+        : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+      return { cursor: this.controlPoints.cursors[cursorIndex] }
+    },
     ...mapMutations({
       updateLayerStyles: 'Update_layerStyles',
       updateLayerProps: 'Update_layerProps',
@@ -116,24 +135,21 @@ export default Vue.extend({
       })
     },
     styles() {
-      console.log(this.isActive || this.isShown ? 'initial' : 'none')
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
         'pointer-events': this.isActive || this.isShown ? 'initial' : 'none'
-        // 'pointer-events': this.isActive ? 'initial' : 'none'
       }
     },
 
     moveStart(event: MouseEvent) {
       this.initialX = event.clientX
       this.initialY = event.clientY
-      this.translate.xOffset = this.getLayerX
-      this.translate.yOffset = this.getLayerY
-      console.log(this.$refs.body)
-      if (event.target === (this.$refs.body)) {
+      this.initTranslate.x = this.getLayerX
+      this.initTranslate.y = this.getLayerY
+      if (event.target === this.$refs.body) {
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
@@ -145,8 +161,8 @@ export default Vue.extend({
       if (this.isActive) {
         event.preventDefault()
         const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.initialX, event.clientY - this.initialY)
-        const x = moveOffset.offsetX + this.translate.xOffset
-        const y = moveOffset.offsetY + this.translate.yOffset
+        const x = moveOffset.offsetX + this.initTranslate.x
+        const y = moveOffset.offsetY + this.initTranslate.y
         this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
       }
     },
@@ -157,40 +173,100 @@ export default Vue.extend({
       }
     },
 
-    scaleStart(event: MouseEvent, xSign: number, ySign: number) {
+    scaleStart(event: MouseEvent) {
       this.initialX = event.clientX
       this.initialY = event.clientY
-      this.scale.eventHandler = this.scaling(xSign, ySign)
-      document.documentElement.addEventListener('mousemove', this.scale.eventHandler, false)
+
+      const body = this.$el as HTMLElement
+      this.initWidth = parseInt(body.style.width, 10)
+      this.initHeight = parseInt(body.style.height, 10)
+
+      const rect = this.$el.getBoundingClientRect()
+      this.center = {
+        x: rect.left + rect.width / 2 - window.pageXOffset,
+        y: rect.top + rect.height / 2 - window.pageYOffset
+      }
+
+      this.scale.xSign = (event.clientX - this.center.x > 0) ? 1 : -1
+      this.scale.ySign = (event.clientY - this.center.y > 0) ? 1 : -1
+
+      this.scale.initOrigin.x = this.center.x - parseInt(body.style.width) / 2
+      this.scale.initOrigin.y = this.center.y - parseInt(body.style.height) / 2
+      this.initTranslate = {
+        x: this.getLayerX,
+        y: this.getLayerY
+      }
+
+      const angleInRad = this.getLayerRotate * Math.PI / 180
+      let vectX = event.clientX - this.center.x
+      let vectY = event.clientY - this.center.y
+
+      // Get client point while no rotation
+      const clientP = {
+        x: vectX * Math.cos(-angleInRad) - vectY * Math.sin(-angleInRad) + this.center.x,
+        y: vectY * Math.cos(-angleInRad) + vectX * Math.sin(-angleInRad) + this.center.y
+      }
+      const anchorP = {
+        x: clientP.x < this.center.x ? clientP.x + this.initWidth : clientP.x - this.initWidth,
+        y: clientP.y < this.center.y ? clientP.y + this.initHeight : clientP.y - this.initHeight
+      }
+      vectX = anchorP.x - this.center.x
+      vectY = anchorP.y - this.center.y
+      this.scale.anchorPoint = {
+        x: vectX * Math.cos(angleInRad) - vectY * Math.sin(angleInRad) + this.center.x,
+        y: vectY * Math.cos(angleInRad) + vectX * Math.sin(angleInRad) + this.center.y
+      }
+
+      document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
     },
-    scaling(xSign: number, ySign: number) {
-      return (event: MouseEvent) => {
-        event.preventDefault()
-        const width = this.getLayerWidth + xSign * event.movementX
-        const height = this.getLayerHeight + ySign * event.movementY
-        if (width <= 20 || height <= 20) return
+    scaling(event: MouseEvent) {
+      event.preventDefault()
 
-        const x = xSign < 0 ? this.getLayerX + event.movementX : this.getLayerX
-        const y = ySign < 0 ? this.getLayerY + event.movementY : this.getLayerY
+      let width = this.getLayerWidth
+      let height = this.getLayerHeight
+      const offsetWidth = this.scale.xSign * (event.clientX - this.initialX)
+      const offsetHeight = this.scale.ySign * (event.clientY - this.initialY)
 
-        this.translate.xOffset += xSign < 0 ? event.movementX : 0
-        this.translate.yOffset += ySign < 0 ? event.movementY : 0
-
-        this.updateLayerSize(this.pageIndex, this.layerIndex, width, height)
-        this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
+      if ((width + offsetWidth) / this.initWidth >= (height + offsetHeight) / this.initHeight) {
+        width = offsetWidth + this.initWidth
+        height = width * this.initHeight / this.initWidth
+      } else {
+        height = offsetHeight + this.initHeight
+        width = height * this.initWidth / this.initHeight
       }
+      if (width <= 20 || height <= 20) return
+
+      const ratio = width / this.initWidth
+      const center = {
+        x: (this.center.x - this.scale.anchorPoint.x) * ratio + this.scale.anchorPoint.x,
+        y: (this.center.y - this.scale.anchorPoint.y) * ratio + this.scale.anchorPoint.y
+      }
+
+      // const anchorP = this.scale.anchorPoint
+      const origin = {
+        x: center.x - width / 2,
+        y: center.y - height / 2
+      }
+
+      const x = this.initTranslate.x + (origin.x - this.scale.initOrigin.x)
+      const y = this.initTranslate.y + (origin.y - this.scale.initOrigin.y)
+
+      this.updateLayerSize(this.pageIndex, this.layerIndex, width, height)
+      this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
     },
     scaleEnd() {
-      document.documentElement.removeEventListener('mousemove', this.scale.eventHandler, false)
+      document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     },
 
     rotateStart(event: MouseEvent) {
       const body = this.$el
       const rect = body.getBoundingClientRect()
-      this.rotate.centerX = rect.left + rect.width / 2 - window.pageXOffset
-      this.rotate.centerY = rect.top + rect.height / 2 - window.pageYOffset
+      this.center = {
+        x: rect.left + rect.width / 2 - window.pageXOffset,
+        y: rect.top + rect.height / 2 - window.pageYOffset
+      }
 
       this.initialX = event.clientX
       this.initialY = event.clientY
@@ -199,8 +275,8 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      const [lineAx, lineAy] = [this.initialX - this.rotate.centerX, this.initialY - this.rotate.centerY]
-      const [lineBx, lineBy] = [event.clientX - this.rotate.centerX, event.clientY - this.rotate.centerY]
+      const [lineAx, lineAy] = [this.initialX - this.center.x, this.initialY - this.center.y]
+      const [lineBx, lineBy] = [event.clientX - this.center.x, event.clientY - this.center.y]
 
       const lineA = Math.sqrt(Math.pow(lineAx, 2) + Math.pow(lineAy, 2))
       const lineB = Math.sqrt(Math.pow(lineBx, 2) + Math.pow(lineBy, 2))
@@ -240,9 +316,10 @@ export default Vue.extend({
   align-items: center;
   z-index: setZindex("nu-controller");
   position: absolute;
+  border: 1px solid setColor(blue-2);
   box-sizing: border-box;
   &:active {
-    border: 1.5px solid rgb(174, 46, 190);
+    border: 1px solid rgb(174, 46, 190);
   }
   &:hover {
     cursor: pointer;
