@@ -10,14 +10,13 @@
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
-            @click="clearSelectedLayers()"
+            @click.self="clearSelectedLayers()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
             :config="layer"
-            @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)"
-            @mouseout.native.stop="toggleHighlighter(pageIndex,index,false)")
+            @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)")
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
@@ -28,15 +27,13 @@
             :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer")
-          nu-highlighter(v-for="(layer,index) in config.layers"
-            :key="`highlighter-${index}`"
-            :config="layer")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+// import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   data() {
@@ -57,8 +54,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayer: 'ADD_newLayer',
-      updateLayerProps: 'Update_layerProps',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers'
+      updateLayerProps: 'Update_layerProps'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -114,7 +110,6 @@ export default Vue.extend({
       })
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      console.log(shown)
       this.updateLayerProps({
         pageIndex,
         layerIndex,
@@ -176,10 +171,5 @@ export default Vue.extend({
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
-  .nu-controller::v-deep {
-    // We want to prevent the page-control div from blocking all the event of page-content,
-    // but still allow event on nu-controller, so set this property on controller to initial
-    pointer-events: initial;
-  }
 }
 </style>

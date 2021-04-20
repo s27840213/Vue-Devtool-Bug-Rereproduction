@@ -1,6 +1,10 @@
 <template lang="pug">
-  div(class="nu-controller" ref="body"
-  :style="styles()" @mousedown.stop="moveStart")
+  div(v-if="isShown || isActive"
+      class="nu-controller"
+      ref="body"
+      :style="styles()"
+      @mousedown.stop="moveStart"
+      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
     div(v-if="isActive" v-for="(controlPoint,index) in controlPoints"
       class="scaler"
       :key="index"
@@ -13,7 +17,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 
 export default Vue.extend({
@@ -41,22 +45,28 @@ export default Vue.extend({
     }
   },
   computed: {
-    isActive() {
+    ...mapGetters({
+      currSelectedLayers: 'getCurrSelectedLayers'
+    }),
+    isActive(): boolean {
       return this.config.active
     },
-    getLayerX() {
+    isShown(): boolean {
+      return this.config.shown
+    },
+    getLayerX(): number {
       return this.config.styles.x
     },
-    getLayerY() {
+    getLayerY(): number {
       return this.config.styles.y
     },
-    getLayerWidth() {
+    getLayerWidth(): number {
       return this.config.styles.width
     },
-    getLayerHeight() {
+    getLayerHeight(): number {
       return this.config.styles.height
     },
-    getLayerRotate() {
+    getLayerRotate(): number {
       return this.config.styles.rotate
     }
   },
@@ -96,12 +106,24 @@ export default Vue.extend({
         }
       })
     },
-
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props: {
+          shown
+        }
+      })
+    },
     styles() {
+      console.log(this.isActive || this.isShown ? 'initial' : 'none')
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`
+        height: `${this.config.styles.height}px`,
+        border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
+        'pointer-events': this.isActive || this.isShown ? 'initial' : 'none'
+        // 'pointer-events': this.isActive ? 'initial' : 'none'
       }
     },
 
@@ -110,6 +132,7 @@ export default Vue.extend({
       this.initialY = event.clientY
       this.translate.xOffset = this.getLayerX
       this.translate.yOffset = this.getLayerY
+      console.log(this.$refs.body)
       if (event.target === (this.$refs.body)) {
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
@@ -144,12 +167,12 @@ export default Vue.extend({
     scaling(xSign: number, ySign: number) {
       return (event: MouseEvent) => {
         event.preventDefault()
-        const width = parseInt(this.getLayerWidth, 10) + xSign * event.movementX
-        const height = parseInt(this.getLayerHeight, 10) + ySign * event.movementY
+        const width = this.getLayerWidth + xSign * event.movementX
+        const height = this.getLayerHeight + ySign * event.movementY
         if (width <= 20 || height <= 20) return
 
-        const x = xSign < 0 ? parseInt(this.getLayerX) + event.movementX : parseInt(this.getLayerX)
-        const y = ySign < 0 ? parseInt(this.getLayerY) + event.movementY : parseInt(this.getLayerY)
+        const x = xSign < 0 ? this.getLayerX + event.movementX : this.getLayerX
+        const y = ySign < 0 ? this.getLayerY + event.movementY : this.getLayerY
 
         this.translate.xOffset += xSign < 0 ? event.movementX : 0
         this.translate.yOffset += ySign < 0 ? event.movementY : 0
@@ -217,7 +240,6 @@ export default Vue.extend({
   align-items: center;
   z-index: setZindex("nu-controller");
   position: absolute;
-  border: 3px solid setColor(blue-2);
   box-sizing: border-box;
   &:active {
     border: 1.5px solid rgb(174, 46, 190);

@@ -10,6 +10,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   data() {
@@ -25,13 +26,18 @@ export default Vue.extend({
   mounted() {
     this.editorView = document.querySelector('.editor-view') as HTMLElement
   },
+  computed: {
+    ...mapGetters({
+      pages: 'getPages'
+    })
+  },
   methods: {
     ...mapMutations({
       clearSelectedLayers: 'CLEAR_currSelectedLayers'
     }),
     selectStart(e: MouseEvent) {
-      this.initialAbsPos = this.currentAbsPos = this.getMouseAbsPoint(e)
-      this.initialRelPos = this.currentRelPos = this.getMouseRelPoint(e, this.editorView)
+      this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
 
       this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
       document.documentElement.addEventListener('mousemove', this.selecting)
@@ -40,8 +46,8 @@ export default Vue.extend({
       this.isSelecting = true
     },
     selecting(e: MouseEvent) {
-      this.currentAbsPos = this.getMouseAbsPoint(e)
-      this.currentRelPos = this.getMouseRelPoint(e, this.editorView)
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
@@ -52,6 +58,7 @@ export default Vue.extend({
       document.documentElement.dispatchEvent(event)
     },
     selectEnd() {
+      console.log('select end')
       this.isSelecting = false
       this.clearSelectedLayers()
       document.documentElement.removeEventListener('mousemove', this.selecting)
@@ -67,23 +74,7 @@ export default Vue.extend({
       selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
       selectionArea.style.width = `${Math.round((maxX - minX))}px`
       selectionArea.style.height = `${Math.round((maxY - minY))}px`
-    },
-    getMouseAbsPoint(e: MouseEvent) {
-      return { x: e.clientX, y: e.clientY }
-    },
-
-    getMouseRelPoint(e: MouseEvent, target: HTMLElement) {
-      const rect = target.getBoundingClientRect()
-      console.log(e.clientX)
-      const x = e.clientX + target.scrollLeft - rect.left
-      const y = e.clientY + target.scrollTop - rect.top
-      return { x, y }
     }
-  },
-  computed: {
-    ...mapGetters({
-      pages: 'getPages'
-    })
   }
 })
 </script>

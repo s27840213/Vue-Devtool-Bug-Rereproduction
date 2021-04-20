@@ -88,6 +88,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayerNum(state: IEditorState, pageIndex: number) {
     return state.pages[pageIndex].layers.length
+  },
+  getCurrSelectedLayers(state: IEditorState) {
+    return state.currSelectedLayers
   }
 }
 
@@ -133,7 +136,6 @@ const mutations: MutationTree<IEditorState> = {
       console.warn('Warning: Could not manipulate layers in different pages at the same time')
       return
     }
-
     layerIndexs.forEach((layerIndex: number) => {
       if (!state.currSelectedLayers.layers.includes(layerIndex)) {
         state.pages[pIndex].layers[layerIndex].active = true
