@@ -10,6 +10,7 @@
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
+            @click.self="clearSelectedLayers()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
@@ -53,7 +54,9 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayer: 'ADD_newLayer',
-      updateLayerProps: 'Update_layerProps'
+      updateLayerProps: 'Update_layerProps',
+      addSelectedLayer: 'ADD_selectedLayer',
+      clearSelectedLayers: 'CLEAR_currSelectedLayers'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -100,6 +103,11 @@ export default Vue.extend({
           }
         }
         this.addNewLayer(this.pageIndex, layerInfo)
+        this.clearSelectedLayers()
+        this.addSelectedLayer({
+          pageIndex: this.pageIndex,
+          layerIndexs: [this.config.layers.length - 1]
+        })
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
@@ -108,6 +116,7 @@ export default Vue.extend({
         layer
       })
     },
+
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       this.updateLayerProps({
         pageIndex,

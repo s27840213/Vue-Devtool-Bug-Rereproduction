@@ -125,6 +125,17 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
   },
+  Update_selectedLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
+    state.currSelectedLayers.layers.forEach((layerIndex) => {
+      Object.entries(updateInfo.styles).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          (state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] as number) += v
+        } else {
+          state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] = v
+        }
+      })
+    })
+  },
   ADD_selectedLayer(state: IEditorState, { layerIndexs, pageIndex }) {
     let pIndex = state.currSelectedLayers.pageIndex
 

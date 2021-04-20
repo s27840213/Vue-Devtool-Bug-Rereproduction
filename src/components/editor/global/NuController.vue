@@ -3,8 +3,9 @@
       class="nu-controller"
       ref="body"
       :style="styles()"
-      @mousedown.stop="moveStart"
-      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
+      @mousedown.left.stop="moveStart"
+      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
+      )
     div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
       class="scaler"
       :key="index"
@@ -94,7 +95,8 @@ export default Vue.extend({
       updateLayerStyles: 'Update_layerStyles',
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers'
+      clearSelectedLayers: 'CLEAR_currSelectedLayers',
+      updateSelectedLayers: 'Update_selectedLayerStyles'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
       this.updateLayerStyles({
@@ -153,7 +155,10 @@ export default Vue.extend({
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        this.clearSelectedLayers()
+        if (!event.metaKey && !this.currSelectedLayers.layers.includes(this.layerIndex)) {
+          console.log('fuck')
+          this.clearSelectedLayers()
+        }
         this.addSelectedLayer()
       }
     },
@@ -161,9 +166,18 @@ export default Vue.extend({
       if (this.isActive) {
         event.preventDefault()
         const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.initialX, event.clientY - this.initialY)
-        const x = moveOffset.offsetX + this.initTranslate.x
-        const y = moveOffset.offsetY + this.initTranslate.y
-        this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
+        this.initialX += moveOffset.offsetX
+        this.initialY += moveOffset.offsetY
+        // const x = moveOffset.offsetX + this.initTranslate.x
+        // const y = moveOffset.offsetY + this.initTranslate.y
+        this.updateSelectedLayers({
+          pageIndex: this.pageIndex,
+          styles: {
+            x: moveOffset.offsetX,
+            y: moveOffset.offsetY
+          }
+        })
+        // this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
       }
     },
     moveEnd() {

@@ -58,7 +58,6 @@ export default Vue.extend({
       document.documentElement.dispatchEvent(event)
     },
     selectEnd() {
-      console.log('select end')
       this.isSelecting = false
       this.clearSelectedLayers()
       document.documentElement.removeEventListener('mousemove', this.selecting)
