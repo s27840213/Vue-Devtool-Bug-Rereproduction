@@ -3,7 +3,9 @@
     nu-page(v-for="(page,index) in pages"
       :key="`page-${index}`"
       :pageIndex="index"
-      :config="page" :index="index" )
+      :config="page" :index="index"
+      :isSelecting="isSelecting"
+      @mousedown.native.left="setCurrPage(index)")
     div(v-show="isSelecting" class="selection-area" ref="selectionArea")
 </template>
 
@@ -20,7 +22,8 @@ export default Vue.extend({
       initialRelPos: { x: 0, y: 0 },
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
-      editorView: null as unknown as HTMLElement
+      editorView: null as unknown as HTMLElement,
+      pageIndex: -1
     }
   },
   mounted() {
@@ -33,6 +36,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
+      addLayer: 'ADD_selectedLayer',
       clearSelectedLayers: 'CLEAR_currSelectedLayers'
     }),
     selectStart(e: MouseEvent) {
@@ -63,6 +67,29 @@ export default Vue.extend({
       document.documentElement.removeEventListener('mousemove', this.selecting)
       document.documentElement.removeEventListener('scroll', this.scrollUpdate)
       document.documentElement.removeEventListener('mouseup', this.selectEnd)
+      const selectionArea = this.$refs.selectionArea as HTMLElement
+      this.handleSelectionData(selectionArea.getBoundingClientRect())
+    },
+    handleSelectionData(selectionData: any) {
+      let layers = [...document.querySelectorAll('.nu-layer--outermost')]
+      layers = layers.filter((layer) => {
+        return (layer as HTMLElement).dataset.pindex === `${this.pageIndex}`
+      })
+      const layerIndexs: number[] = []
+      layers.forEach((layer) => {
+        const layerData = layer.getBoundingClientRect()
+        const withinVr = (((layerData.top > selectionData.top) && (layerData.top < selectionData.bottom)) ||
+          ((layerData.bottom > selectionData.top) && (layerData.bottom < selectionData.bottom)))
+        const withinHr = (((layerData.left > selectionData.left) && (layerData.left < selectionData.right)) ||
+          ((layerData.right > selectionData.left) && (layerData.right < selectionData.right)))
+        if (withinVr && withinHr) {
+          layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+        }
+      })
+      if (layerIndexs.length > 0) {
+        console.log(`Overlap num: ${layerIndexs.length}`)
+        this.addSelectedLayer(layerIndexs as number[])
+      }
     },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
       const minX = Math.min(initPoint.x, endPoint.x)
@@ -73,6 +100,15 @@ export default Vue.extend({
       selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
       selectionArea.style.width = `${Math.round((maxX - minX))}px`
       selectionArea.style.height = `${Math.round((maxY - minY))}px`
+    },
+    setCurrPage(index: number) {
+      this.pageIndex = index
+    },
+    addSelectedLayer(layerIndexs: Array<number>) {
+      this.addLayer({
+        layerIndexs: [...layerIndexs],
+        pageIndex: this.pageIndex
+      })
     }
   }
 })

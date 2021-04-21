@@ -15,6 +15,9 @@
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
+            class="nu-layer--outermost"
+            :data-index="`${index}`"
+            :data-pindex="`${pageIndex}`"
             :config="layer"
             @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)")
         div(v-if="pageIsHover"
@@ -44,6 +47,7 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
+    isSelecting: Boolean,
     pageScaleRatio: Number
   },
   computed: {
@@ -116,15 +120,16 @@ export default Vue.extend({
         layer
       })
     },
-
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: {
-          shown
-        }
-      })
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean): void {
+      if (!this.isSelecting) {
+        this.updateLayerProps({
+          pageIndex,
+          layerIndex,
+          props: {
+            shown
+          }
+        })
+      }
     },
     togglePageHighlighter(isHover: boolean) {
       this.pageIsHover = isHover

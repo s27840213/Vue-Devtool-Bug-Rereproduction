@@ -13,29 +13,29 @@ const getDefaultState = (): IEditorState => ({
       backgroundColor: '#ffffff',
       name: 'Default Page',
       layers: [
-        {
-          type: 'text',
-          pageIndex: 0,
-          active: false,
-          shown: false,
-          text: 'Tesing Font',
-          styles: {
-            width: 'auto',
-            height: 'auto',
-            x: 40,
-            y: 100,
-            scale: 0,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            font: 'Lobster',
-            weight: 'bold',
-            align: 'left',
-            lineHeight: 20,
-            color: '#000000',
-            size: 72
-          }
-        },
+        // {
+        //   type: 'text',
+        //   pageIndex: 0,
+        //   active: false,
+        //   shown: false,
+        //   text: 'Tesing Font',
+        //   styles: {
+        //     width: 'auto',
+        //     height: 'auto',
+        //     x: 40,
+        //     y: 100,
+        //     scale: 0,
+        //     scaleX: 0,
+        //     scaleY: 0,
+        //     rotate: 0,
+        //     font: 'Lobster',
+        //     weight: 'bold',
+        //     align: 'left',
+        //     lineHeight: 20,
+        //     color: '#000000',
+        //     size: 72
+        //   }
+        // },
         {
           type: 'text',
           pageIndex: 1,
@@ -72,7 +72,7 @@ const getDefaultState = (): IEditorState => ({
   pageScaleRatio: 100,
   currSelectedLayers: {
     pageIndex: -1,
-    layers: []
+    layersIndex: []
   }
 })
 const state = getDefaultState()
@@ -86,8 +86,10 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPageScaleRatio(state) {
     return state.pageScaleRatio
   },
-  getLayerNum(state: IEditorState, pageIndex: number) {
-    return state.pages[pageIndex].layers.length
+  getLayers(state: IEditorState) {
+    return (pageIndex: number): Array<IShape | IText | IImage | IGroup> => {
+      return state.pages[pageIndex].layers
+    }
   },
   getCurrSelectedLayers(state: IEditorState) {
     return state.currSelectedLayers
@@ -126,7 +128,7 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   Update_selectedLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
-    state.currSelectedLayers.layers.forEach((layerIndex) => {
+    state.currSelectedLayers.layersIndex.forEach((layerIndex) => {
       Object.entries(updateInfo.styles).forEach(([k, v]) => {
         if (typeof v === 'number') {
           (state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] as number) += v
@@ -148,9 +150,9 @@ const mutations: MutationTree<IEditorState> = {
       return
     }
     layerIndexs.forEach((layerIndex: number) => {
-      if (!state.currSelectedLayers.layers.includes(layerIndex)) {
+      if (!state.currSelectedLayers.layersIndex.includes(layerIndex)) {
         state.pages[pIndex].layers[layerIndex].active = true
-        state.currSelectedLayers.layers.push(layerIndex)
+        state.currSelectedLayers.layersIndex.push(layerIndex)
       }
     })
   },
@@ -161,13 +163,13 @@ const mutations: MutationTree<IEditorState> = {
     const pageIndex = state.currSelectedLayers.pageIndex
 
     // Set all selected layers' active property to false
-    state.currSelectedLayers.layers.forEach((layerIndex) => {
+    state.currSelectedLayers.layersIndex.forEach((layerIndex) => {
       state.pages[pageIndex].layers[layerIndex].active = false
-      state.currSelectedLayers.layers.push(layerIndex)
+      state.currSelectedLayers.layersIndex.push(layerIndex)
     })
 
     state.currSelectedLayers.pageIndex = -1
-    state.currSelectedLayers.layers = []
+    state.currSelectedLayers.layersIndex = []
   }
 }
 
