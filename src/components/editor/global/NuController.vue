@@ -1,9 +1,14 @@
 <template lang="pug">
-  div(class="nu-controller" ref="body"
-  :style="styles()" @mousedown.stop="moveStart"
-  @drop="onDrop"
-  @dragover.prevent,
-  @dragenter.prevent)
+  div(v-if="isShown || isActive"
+      class="nu-controller"
+      ref="body"
+      :style="styles()"
+      @drop="onDrop"
+      @dragover.prevent,
+      @dragenter.prevent
+      @mousedown.left.stop="moveStart"
+      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
+      )
     div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
       class="scaler"
       :key="index"
@@ -16,8 +21,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
-import CssConveter from '@/utils/cssConverter'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
@@ -49,36 +53,36 @@ export default Vue.extend({
     }
   },
   computed: {
-    scaleRatio() {
-      console.log('map' + this.$store.getters.getPageScaleRatio)
-      return this.$store.getters.getPageScaleRatio
-    },
-    getControlPoints() {
+    ...mapGetters({
+      currSelectedLayers: 'getCurrSelectedLayers',
+      scaleRatio: 'getPageScaleRatio'
+    }),
+    getControlPoints(): any {
       return this.config.controlPoints
     },
-    isActive() {
+    isActive(): boolean {
       return this.config.active
     },
-    getLayerX() {
+    isShown(): boolean {
+      return this.config.shown
+    },
+    getLayerX(): number {
       return this.config.styles.x
     },
-    getLayerY() {
+    getLayerY(): number {
       return this.config.styles.y
     },
-    getLayerWidth() {
+    getLayerWidth(): number {
       return this.config.styles.width
     },
-    getLayerHeight() {
+    getLayerHeight(): number {
       return this.config.styles.height
     },
-    getLayerRotate() {
+    getLayerRotate(): number {
       return this.config.styles.rotate
     }
   },
   methods: {
-    styles() {
-      return CssConveter.convertDefaultStyle(this.config.styles)
-    },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
@@ -89,6 +93,7 @@ export default Vue.extend({
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
       clearSelectedLayers: 'CLEAR_currSelectedLayers',
+      updateSelectedLayers: 'Update_selectedLayerStyles',
       ADD_newLayer: 'ADD_newLayer'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
@@ -121,6 +126,24 @@ export default Vue.extend({
         }
       })
     },
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props: {
+          shown
+        }
+      })
+    },
+    styles() {
+      return {
+        transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.width}px`,
+        height: `${this.config.styles.height}px`,
+        border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
+        'pointer-events': this.isActive || this.isShown ? 'initial' : 'none'
+      }
+    },
 
     moveStart(event: MouseEvent) {
       this.initialX = event.clientX
@@ -131,17 +154,27 @@ export default Vue.extend({
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        this.clearSelectedLayers()
+        if (!event.metaKey && !this.currSelectedLayers.layers.includes(this.layerIndex)) {
+          this.clearSelectedLayers()
+        }
         this.addSelectedLayer()
       }
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
         event.preventDefault()
-        const moveOffset = PropsTransformer.getActualMoveOffset(event.clientX - this.initialX, event.clientY - this.initialY)
-        const x = moveOffset.offsetX + this.initTranslate.x
-        const y = moveOffset.offsetY + this.initTranslate.y
-        this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
+        const xOffset = event.clientX - this.initialX
+        const yOffset = event.clientY - this.initialY
+        const moveOffset = PropsTransformer.getActualMoveOffset(xOffset, yOffset)
+        this.initialX += xOffset
+        this.initialY += yOffset
+        this.updateSelectedLayers({
+          pageIndex: this.pageIndex,
+          styles: {
+            x: moveOffset.offsetX,
+            y: moveOffset.offsetY
+          }
+        })
       }
     },
     moveEnd() {
@@ -174,7 +207,7 @@ export default Vue.extend({
       const vectX = event.clientX - this.center.x
       const vectY = event.clientY - this.center.y
 
-      // Get client point while no rotation
+      // Get client point as no rotation
       const clientP = {
         x: vectX * Math.cos(-angleInRad) - vectY * Math.sin(-angleInRad) + this.center.x,
         y: vectY * Math.cos(-angleInRad) + vectX * Math.sin(-angleInRad) + this.center.y
@@ -199,8 +232,8 @@ export default Vue.extend({
     scaling(event: MouseEvent) {
       event.preventDefault()
 
-      let width = parseInt(this.getLayerWidth, 10)
-      let height = parseInt(this.getLayerHeight, 10)
+      let width = this.getLayerWidth
+      let height = this.getLayerHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const dx = event.clientX - this.initialX

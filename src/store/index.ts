@@ -88,6 +88,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayerNum(state: IEditorState, pageIndex: number) {
     return state.pages[pageIndex].layers.length
+  },
+  getCurrSelectedLayers(state: IEditorState) {
+    return state.currSelectedLayers
   }
 }
 
@@ -122,6 +125,17 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
   },
+  Update_selectedLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
+    state.currSelectedLayers.layers.forEach((layerIndex) => {
+      Object.entries(updateInfo.styles).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          (state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] as number) += v
+        } else {
+          state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] = v
+        }
+      })
+    })
+  },
   ADD_selectedLayer(state: IEditorState, { layerIndexs, pageIndex }) {
     let pIndex = state.currSelectedLayers.pageIndex
 
@@ -133,7 +147,6 @@ const mutations: MutationTree<IEditorState> = {
       console.warn('Warning: Could not manipulate layers in different pages at the same time')
       return
     }
-
     layerIndexs.forEach((layerIndex: number) => {
       if (!state.currSelectedLayers.layers.includes(layerIndex)) {
         state.pages[pIndex].layers[layerIndex].active = true
