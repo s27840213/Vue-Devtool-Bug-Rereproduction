@@ -16,18 +16,20 @@ import Vue from 'vue'
 export default Vue.extend({
   methods: {
     dragStart(e: DragEvent) {
-      console.log('drag start!')
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
 
       const rect = (e.target as Element).getBoundingClientRect()
       const data = {
+        type: 'image',
+        src: '@/assets/img/svg/img-tmp.svg',
         geometry: {
           left: e.clientX - rect.x,
-          top: e.clientY - rect.y
-        },
-        src: '@/assets/img/svg/img-tmp.svg'
+          top: e.clientY - rect.y,
+          width: 150,
+          height: 150
+        }
       }
 
       dataTransfer.setData('data', JSON.stringify(data))

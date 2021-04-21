@@ -34,15 +34,17 @@ class CssConveter {
     if (y !== 0 && y) {
       tmpArr.push(`translateY(${y}px)`)
     }
-    if (scale !== 0 && scale !== undefined) {
-      tmpArr.push(`scale(${scale})`)
-    }
-    if (scaleX !== 0 && scaleX !== undefined) {
-      tmpArr.push(`scaleX(${scaleX})`)
-    }
-    if (scaleY !== 0 && scaleY !== undefined) {
-      tmpArr.push(`scaleY(${scaleY})`)
-    }
+    //  The scale feature only applied on "layer-scale" as a child-container of the layer
+
+    // if (scale !== 0 && scale !== undefined) {
+    //   tmpArr.push(`scale(${scale})`)
+    // }
+    // if (scaleX !== 0 && scaleX !== undefined) {
+    //   tmpArr.push(`scaleX(${scaleX})`)
+    // }
+    // if (scaleY !== 0 && scaleY !== undefined) {
+    //   tmpArr.push(`scaleY(${scaleY})`)
+    // }
     if (rotate !== 0 && rotate !== undefined) {
       tmpArr.push(`rotate(${rotate}deg)`)
     }

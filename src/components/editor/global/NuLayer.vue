@@ -1,8 +1,9 @@
 <template lang="pug">
   div(class="nu-layer" :style="styles()")
-    nu-clipper(v-if="config.type !== 'group'" :config="config")
-      component(:is="`nu-${config.type}`" :config="config")
-    component(v-else :is="`nu-${config.type}`" :config="config")
+    div(class="layer-scale" :style="scaleStyles()")
+      nu-clipper(v-if="config.type !== 'group'" :config="config")
+        component(:is="`nu-${config.type}`" :config="config")
+      component(v-else :is="`nu-${config.type}`" :config="config")
 </template>
 
 <script lang="ts">
@@ -23,6 +24,14 @@ export default Vue.extend({
   methods: {
     styles() {
       return CssConveter.convertDefaultStyle(this.config.styles)
+    },
+    scaleStyles() {
+      return {
+        transform: `
+        translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+        translateY(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+        scale(${this.config.styles.scale})`
+      }
     }
   }
 })
@@ -45,5 +54,8 @@ export default Vue.extend({
   &:hover {
     cursor: pointer;
   }
+}
+.layer-scale {
+  position: absolute;
 }
 </style>
