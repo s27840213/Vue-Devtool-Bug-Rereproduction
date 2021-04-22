@@ -78,11 +78,8 @@ export default Vue.extend({
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
-        const withinVr = (((layerData.top > selectionData.top) && (layerData.top < selectionData.bottom)) ||
-          ((layerData.bottom > selectionData.top) && (layerData.bottom < selectionData.bottom)))
-        const withinHr = (((layerData.left > selectionData.left) && (layerData.left < selectionData.right)) ||
-          ((layerData.right > selectionData.left) && (layerData.right < selectionData.right)))
-        if (withinVr && withinHr) {
+        if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
+          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
           layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
         }
       })
