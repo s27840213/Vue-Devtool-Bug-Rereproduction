@@ -24,6 +24,7 @@ import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   props: {
@@ -34,22 +35,11 @@ export default Vue.extend({
   data() {
     return {
       controlPoints: ControlPoints,
-      initialX: 0,
-      initialY: 0,
-      initWidth: 0,
-      initHeight: 0,
-      center: {
-        x: 0,
-        y: 0
-      },
-      initTranslate: {
-        x: 0,
-        y: 0
-      },
-      scale: {
-        xSign: 1,
-        ySign: 1
-      }
+      initialPos: { x: 0, y: 0 },
+      initTranslate: { x: 0, y: 0 },
+      initialWH: { width: 0, height: 0 },
+      center: { x: 0, y: 0 },
+      scale: { xSign: 1, ySign: 1 }
     }
   },
   computed: {
@@ -146,11 +136,8 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      this.initialX = event.clientX
-      this.initialY = event.clientY
-      this.initTranslate.x = this.getLayerX
-      this.initTranslate.y = this.getLayerY
       if (event.target === this.$refs.body) {
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
@@ -163,11 +150,11 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.isActive) {
         event.preventDefault()
-        const xOffset = event.clientX - this.initialX
-        const yOffset = event.clientY - this.initialY
-        const moveOffset = PropsTransformer.getActualMoveOffset(xOffset, yOffset)
-        this.initialX += xOffset
-        this.initialY += yOffset
+        const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+        const moveOffset = PropsTransformer.getActualMoveOffset(offsetPos.x, offsetPos.y)
+        this.initialPos.x += offsetPos.x
+        this.initialPos.y += offsetPos.y
+
         this.updateSelectedLayers({
           pageIndex: this.pageIndex,
           styles: {
@@ -185,37 +172,36 @@ export default Vue.extend({
     },
 
     scaleStart(event: MouseEvent) {
-      this.initialX = event.clientX
-      this.initialY = event.clientY
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
 
       const body = this.$el as HTMLElement
-      this.initWidth = parseInt(body.style.width, 10)
-      this.initHeight = parseInt(body.style.height, 10)
+      this.initialWH = {
+        width: parseInt(body.style.width),
+        height: parseInt(body.style.height)
+      }
 
       const rect = this.$el.getBoundingClientRect()
       this.center = {
         x: rect.left + rect.width / 2 - window.pageXOffset,
         y: rect.top + rect.height / 2 - window.pageYOffset
       }
-
       this.initTranslate = {
         x: this.getLayerX,
         y: this.getLayerY
       }
-
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const vectX = event.clientX - this.center.x
-      const vectY = event.clientY - this.center.y
+      const vect = Object.assign({}, MouseUtils.getMouseRelPoint(event, this.center))
 
       // Get client point as no rotation
       const clientP = {
-        x: vectX * Math.cos(-angleInRad) - vectY * Math.sin(-angleInRad) + this.center.x,
-        y: vectY * Math.cos(-angleInRad) + vectX * Math.sin(-angleInRad) + this.center.y
+        x: vect.x * Math.cos(-angleInRad) - vect.y * Math.sin(-angleInRad) + this.center.x,
+        y: vect.y * Math.cos(-angleInRad) + vect.x * Math.sin(-angleInRad) + this.center.y
       }
 
       this.scale.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.scale.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
 
+      // TODO: discussion cursor's styling
       let cursorIndex = this.scale.xSign + this.scale.ySign
       if (cursorIndex === 0 && this.scale.xSign === -1) {
         cursorIndex = 6
@@ -236,26 +222,29 @@ export default Vue.extend({
       let height = this.getLayerHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const dx = event.clientX - this.initialX
-      const dy = event.clientY - this.initialY
+      const diff = Object.assign({}, MouseUtils.getMouseRelPoint(event, this.initialPos))
+      const dx = diff.x
+      const dy = diff.y
       let offsetWidth = this.scale.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       let offsetHeight = this.scale.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
 
-      if ((width + offsetWidth) / this.initWidth >= (height + offsetHeight) / this.initHeight) {
-        width = offsetWidth + this.initWidth
-        height = width * this.initHeight / this.initWidth
+      const initWidth = this.initialWH.width
+      const initHeight = this.initialWH.height
+      if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
+        width = offsetWidth + initWidth
+        height = width * initHeight / initWidth
       } else {
-        height = offsetHeight + this.initHeight
-        width = height * this.initWidth / this.initHeight
+        height = offsetHeight + initHeight
+        width = height * initWidth / initHeight
       }
       if (width <= 40 || height <= 40) return
 
       const scale = width / this.config.styles.initWidth
       this.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
 
-      offsetWidth = width - this.initWidth
-      offsetHeight = height - this.initHeight
+      offsetWidth = width - initWidth
+      offsetHeight = height - initHeight
 
       const x = -offsetWidth / 2 + this.scale.xSign * (offsetWidth / 2) * Math.cos(angleInRad) -
         this.scale.ySign * (offsetHeight / 2) * Math.sin(angleInRad) + this.initTranslate.x
@@ -281,14 +270,13 @@ export default Vue.extend({
         y: rect.top + rect.height / 2 - window.pageYOffset
       }
 
-      this.initialX = event.clientX
-      this.initialY = event.clientY
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
 
       window.addEventListener('mousemove', this.rotating)
       window.addEventListener('mouseup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      const [lineAx, lineAy] = [this.initialX - this.center.x, this.initialY - this.center.y]
+      const [lineAx, lineAy] = [this.initialPos.x - this.center.x, this.initialPos.y - this.center.y]
       const [lineBx, lineBy] = [event.clientX - this.center.x, event.clientY - this.center.y]
 
       const lineA = Math.sqrt(Math.pow(lineAx, 2) + Math.pow(lineAy, 2))
@@ -300,10 +288,8 @@ export default Vue.extend({
         if (lineAy * lineBx - lineAx * lineBy > 0) {
           angle *= -1
         }
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
         angle += this.getLayerRotate % 360
-
-        this.initialX = event.clientX
-        this.initialY = event.clientY
         this.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
       }
     },
@@ -372,7 +358,7 @@ export default Vue.extend({
   align-items: center;
   z-index: setZindex("nu-controller");
   position: absolute;
-  border: 1px solid setColor(blue-2);
+  border: 3px solid setColor(blue-2);
   box-sizing: border-box;
   &:active {
     border: 1px solid rgb(174, 46, 190);

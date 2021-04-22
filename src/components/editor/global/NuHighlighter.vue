@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="config.shown" class="nu-highlighter" :style="styles()" )
+  div(v-if="config.shown" class="nu-highlighter" :style="styles()")
 </template>
 
 <script lang="ts">
