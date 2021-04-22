@@ -11,7 +11,7 @@ export interface IEditorState {
   pageScaleRatio: number,
   currSelectedLayers: {
     pageIndex: number,
-    layers: number[]
+    layersIndex: number[]
   }
 }
 

@@ -141,10 +141,11 @@ export default Vue.extend({
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        if (!event.metaKey && !this.currSelectedLayers.layers.includes(this.layerIndex)) {
+        if (!event.metaKey && !this.currSelectedLayers.layersIndex.includes(this.layerIndex)) {
           this.clearSelectedLayers()
         }
         this.addSelectedLayer()
+        console.log(el.getBoundingClientRect())
       }
     },
     moving(event: MouseEvent) {

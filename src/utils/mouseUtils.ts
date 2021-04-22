@@ -1,6 +1,4 @@
 /**
- * This typescript file is used to import/export JSON.
- * May implement futhter file export feature in the future
  */
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
