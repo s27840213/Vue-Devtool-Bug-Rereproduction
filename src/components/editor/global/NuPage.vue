@@ -90,7 +90,7 @@ export default Vue.extend({
         const top = (e.clientY - pageTop - data.geometry.top) * (100 / this.scaleRatio)
 
         const layerInfo = {
-          type: 'image',
+          type: data.type,
           pageIndex: this.config.pageIndex,
           src: require('@/assets/img/svg/img-tmp.svg'),
           active: false,
@@ -98,12 +98,14 @@ export default Vue.extend({
           styles: {
             x: left,
             y: top,
-            scale: 0,
+            scale: 1,
             scaleX: 0,
             scaleY: 0,
             rotate: 0,
             width: 150,
-            height: 150
+            height: 150,
+            initWidth: 150,
+            initHeight: 150
           }
         }
         this.addNewLayer(this.pageIndex, layerInfo)

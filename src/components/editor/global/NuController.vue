@@ -3,6 +3,9 @@
       class="nu-controller"
       ref="body"
       :style="styles()"
+      @drop="onDrop"
+      @dragover.prevent,
+      @dragenter.prevent
       @mousedown.left.stop="moveStart"
       @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
       )
@@ -20,6 +23,7 @@ import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -44,21 +48,14 @@ export default Vue.extend({
       },
       scale: {
         xSign: 1,
-        ySign: 1,
-        anchorPoint: {
-          x: 0,
-          y: 0
-        },
-        initOrigin: {
-          x: 0,
-          y: 0
-        }
+        ySign: 1
       }
     }
   },
   computed: {
     ...mapGetters({
-      currSelectedLayers: 'getCurrSelectedLayers'
+      currSelectedLayers: 'getCurrSelectedLayers',
+      scaleRatio: 'getPageScaleRatio'
     }),
     getControlPoints(): any {
       return this.config.controlPoints
@@ -96,7 +93,8 @@ export default Vue.extend({
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
       clearSelectedLayers: 'CLEAR_currSelectedLayers',
-      updateSelectedLayers: 'Update_selectedLayerStyles'
+      updateSelectedLayers: 'Update_selectedLayerStyles',
+      ADD_newLayer: 'ADD_newLayer'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
       this.updateLayerStyles({
@@ -108,13 +106,14 @@ export default Vue.extend({
         }
       })
     },
-    updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number) {
+    updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
       this.updateLayerStyles({
         pageIndex,
         layerIndex,
         styles: {
           width,
-          height
+          height,
+          scale
         }
       })
     },
@@ -170,8 +169,6 @@ export default Vue.extend({
         const moveOffset = PropsTransformer.getActualMoveOffset(xOffset, yOffset)
         this.initialX += xOffset
         this.initialY += yOffset
-        // const x = moveOffset.offsetX + this.initTranslate.x
-        // const y = moveOffset.offsetY + this.initTranslate.y
         this.updateSelectedLayers({
           pageIndex: this.pageIndex,
           styles: {
@@ -179,7 +176,6 @@ export default Vue.extend({
             y: moveOffset.offsetY
           }
         })
-        // this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
       }
     },
     moveEnd() {
@@ -203,35 +199,33 @@ export default Vue.extend({
         y: rect.top + rect.height / 2 - window.pageYOffset
       }
 
-      this.scale.xSign = (event.clientX - this.center.x > 0) ? 1 : -1
-      this.scale.ySign = (event.clientY - this.center.y > 0) ? 1 : -1
-
-      this.scale.initOrigin.x = this.center.x - parseInt(body.style.width) / 2
-      this.scale.initOrigin.y = this.center.y - parseInt(body.style.height) / 2
       this.initTranslate = {
         x: this.getLayerX,
         y: this.getLayerY
       }
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      let vectX = event.clientX - this.center.x
-      let vectY = event.clientY - this.center.y
+      const vectX = event.clientX - this.center.x
+      const vectY = event.clientY - this.center.y
 
-      // Get client point while no rotation
+      // Get client point as no rotation
       const clientP = {
         x: vectX * Math.cos(-angleInRad) - vectY * Math.sin(-angleInRad) + this.center.x,
         y: vectY * Math.cos(-angleInRad) + vectX * Math.sin(-angleInRad) + this.center.y
       }
-      const anchorP = {
-        x: clientP.x < this.center.x ? clientP.x + this.initWidth : clientP.x - this.initWidth,
-        y: clientP.y < this.center.y ? clientP.y + this.initHeight : clientP.y - this.initHeight
+
+      this.scale.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+      this.scale.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+
+      let cursorIndex = this.scale.xSign + this.scale.ySign
+      if (cursorIndex === 0 && this.scale.xSign === -1) {
+        cursorIndex = 6
+      } else {
+        cursorIndex = cursorIndex === -2 ? 0 : cursorIndex === 2 ? 4 : 2
       }
-      vectX = anchorP.x - this.center.x
-      vectY = anchorP.y - this.center.y
-      this.scale.anchorPoint = {
-        x: vectX * Math.cos(angleInRad) - vectY * Math.sin(angleInRad) + this.center.x,
-        y: vectY * Math.cos(angleInRad) + vectX * Math.sin(angleInRad) + this.center.y
-      }
+      const layer = this.$el as HTMLElement
+      layer.style.cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
+      document.body.style.cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
 
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
@@ -241,8 +235,13 @@ export default Vue.extend({
 
       let width = this.getLayerWidth
       let height = this.getLayerHeight
-      const offsetWidth = this.scale.xSign * (event.clientX - this.initialX)
-      const offsetHeight = this.scale.ySign * (event.clientY - this.initialY)
+
+      const angleInRad = this.getLayerRotate * Math.PI / 180
+      const dx = event.clientX - this.initialX
+      const dy = event.clientY - this.initialY
+      let offsetWidth = this.scale.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
+      let offsetHeight = this.scale.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
+      if (offsetWidth === 0 || offsetHeight === 0) return
 
       if ((width + offsetWidth) / this.initWidth >= (height + offsetHeight) / this.initHeight) {
         width = offsetWidth + this.initWidth
@@ -251,27 +250,26 @@ export default Vue.extend({
         height = offsetHeight + this.initHeight
         width = height * this.initWidth / this.initHeight
       }
-      if (width <= 20 || height <= 20) return
+      if (width <= 40 || height <= 40) return
 
-      const ratio = width / this.initWidth
-      const center = {
-        x: (this.center.x - this.scale.anchorPoint.x) * ratio + this.scale.anchorPoint.x,
-        y: (this.center.y - this.scale.anchorPoint.y) * ratio + this.scale.anchorPoint.y
-      }
+      const scale = width / this.config.styles.initWidth
+      this.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
 
-      // const anchorP = this.scale.anchorPoint
-      const origin = {
-        x: center.x - width / 2,
-        y: center.y - height / 2
-      }
+      offsetWidth = width - this.initWidth
+      offsetHeight = height - this.initHeight
 
-      const x = this.initTranslate.x + (origin.x - this.scale.initOrigin.x)
-      const y = this.initTranslate.y + (origin.y - this.scale.initOrigin.y)
+      const x = -offsetWidth / 2 + this.scale.xSign * (offsetWidth / 2) * Math.cos(angleInRad) -
+        this.scale.ySign * (offsetHeight / 2) * Math.sin(angleInRad) + this.initTranslate.x
+      const y = -offsetHeight / 2 + this.scale.xSign * (offsetHeight / 2) * Math.sin(angleInRad) +
+        this.scale.ySign * (offsetHeight / 2) * Math.cos(angleInRad) + this.initTranslate.y
 
-      this.updateLayerSize(this.pageIndex, this.layerIndex, width, height)
       this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
     },
     scaleEnd() {
+      const layer = this.$el as HTMLElement
+      layer.style.cursor = 'default'
+      document.body.style.cursor = 'default'
+
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     },
@@ -308,12 +306,55 @@ export default Vue.extend({
         this.initialX = event.clientX
         this.initialY = event.clientY
         this.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
-        console.log('angle:  ' + angle)
       }
     },
     rotateEnd() {
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
+    },
+    onDrop(e: DragEvent) {
+      if (e.dataTransfer != null) {
+        const data = JSON.parse(e.dataTransfer.getData('data'))
+
+        const target = e.target as HTMLElement
+        const targetPos = {
+          x: target.getBoundingClientRect().x,
+          y: target.getBoundingClientRect().y
+        }
+        const targetOffset = {
+          x: this.getLayerX,
+          y: this.getLayerY
+        }
+        const x = (e.clientX - targetPos.x + targetOffset.x - data.geometry.left) * (100 / this.scaleRatio)
+        const y = (e.clientY - targetPos.y + targetOffset.y - data.geometry.top) * (100 / this.scaleRatio)
+
+        const layerInfo = {
+          type: data.type,
+          pageIndex: this.config.pageIndex,
+          src: require('@/assets/img/svg/img-tmp.svg'),
+          active: false,
+          shown: false,
+          styles: {
+            x: x,
+            y: y,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: 150,
+            height: 150,
+            initWidth: 150,
+            initHeight: 150
+          }
+        }
+        this.addNewLayer(this.pageIndex, layerInfo)
+      }
+    },
+    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
+      this.ADD_newLayer({
+        pageIndex,
+        layer
+      })
     },
     addSelectedLayer() {
       this.addLayer({
