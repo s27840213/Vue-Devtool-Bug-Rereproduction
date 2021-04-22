@@ -9,7 +9,6 @@ export interface IStyle {
   width: number | string,
   height: number | string,
 }
-
 export interface ITextStyle extends IStyle {
   fontFamily?: string,
   fontWeight?: string,
@@ -29,11 +28,9 @@ export interface ILayer<T extends IStyle = IStyle> {
 export interface IText extends ILayer<ITextStyle> {
   text: string
 }
-
 export interface IShape extends ILayer<IStyle> {
   radius?: string,
 }
-
 export interface IImage extends ILayer<IStyle> {
   src: string
 }
