@@ -1,4 +1,5 @@
 import { IPage } from '@/interfaces/page'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 /**
  * @param {object} currcurrSelectedLayers - used to record the info of selected layers
@@ -9,10 +10,13 @@ export interface IEditorState {
   pages: Array<IPage>,
   currPanelType: number,
   pageScaleRatio: number,
-  currSelectedLayers: {
+  lastSelectedPageIndex: number,
+  currSelectedInfo: {
     pageIndex: number,
-    layersIndex: number[]
-  }
+    layersIndex: number[],
+    layers: Array<IShape | IText | IImage | IGroup>
+  },
+  clipboard: Array<IShape | IText | IImage | IGroup>
 }
 
 export enum PanelType {
@@ -41,28 +45,32 @@ export const ControlPoints = {
   positions: [
     {
       left: '-7.5px',
-      top: '-7.5px'
+      top: '-7.5px',
+      borderRadius: '50%'
     },
     {
       top: '-7.5px'
     },
     {
       right: '-7.5px',
-      top: '-7.5px'
+      top: '-7.5px',
+      borderRadius: '50%'
     },
     {
       right: '-7.5px'
     },
     {
       right: '-7.5px',
-      bottom: '-7.5px'
+      bottom: '-7.5px',
+      borderRadius: '50%'
     },
     {
       bottom: '-7.5px'
     },
     {
       left: '-7.5px',
-      bottom: '-7.5px'
+      bottom: '-7.5px',
+      borderRadius: '50%'
     },
     {
       left: '-7.5px'

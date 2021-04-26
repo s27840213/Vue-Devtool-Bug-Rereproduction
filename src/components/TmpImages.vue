@@ -28,7 +28,7 @@ export default Vue.extend({
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,
-          width: 200,
+          width: 150,
           height: 150
         }
       }

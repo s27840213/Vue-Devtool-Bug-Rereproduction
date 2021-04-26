@@ -7,8 +7,7 @@
       @dragover.prevent,
       @dragenter.prevent
       @mousedown.left.stop="moveStart"
-      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-      )
+      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
     template(v-if="isActive && !isControlling")
       div(v-for="(controlPoint, index) in controlPoints.positions"
         class="scaler"
@@ -45,7 +44,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSelectedLayers: 'getCurrSelectedLayers',
+      currSelectedInfo: 'getCurrSelectedInfo',
       scaleRatio: 'getPageScaleRatio'
     }),
     getControlPoints(): any {
@@ -83,9 +82,9 @@ export default Vue.extend({
       updateLayerStyles: 'Update_layerStyles',
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers',
+      clearSelectedInfo: 'CLEAR_currSelectedInfo',
       updateSelectedLayers: 'Update_selectedLayerStyles',
-      ADD_newLayer: 'ADD_newLayer'
+      ADD_newLayers: 'ADD_newLayers'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
       this.updateLayerStyles({
@@ -145,8 +144,8 @@ export default Vue.extend({
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         layer.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        if (!event.metaKey && !this.currSelectedLayers.layersIndex.includes(this.layerIndex)) {
-          this.clearSelectedLayers()
+        if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
+          this.clearSelectedInfo()
         }
         this.addSelectedLayer()
         console.log(layer.getBoundingClientRect())

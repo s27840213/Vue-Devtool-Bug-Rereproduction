@@ -8,7 +8,7 @@ class MouseUtils {
     return { x: e.clientX, y: e.clientY }
   }
 
-  getMouseRelPoint(e: MouseEvent, target: HTMLElement | {x: number, y: number}) {
+  getMouseRelPoint(e: MouseEvent, target: HTMLElement | { x: number, y: number }) {
     let x: number
     let y: number
     if (target instanceof HTMLElement) {
@@ -58,8 +58,11 @@ class MouseUtils {
         layer.styles = Object.assign(data.styles, layer.styles)
       }
 
-      store.commit('ADD_newLayer', { pageIndex, layer })
-      store.commit('CLEAR_currSelectedLayers')
+      store.commit('ADD_newLayers', {
+        pageIndex: pageIndex,
+        layers: [layer]
+      })
+      store.commit('CLEAR_currSelectedInfo')
       store.commit('ADD_selectedLayer', {
         pageIndex: pageIndex,
         layerIndexs: [store.state.pages[pageIndex].layers.length - 1]
@@ -67,4 +70,6 @@ class MouseUtils {
     }
   }
 }
-export default new MouseUtils()
+
+const mouseUtils = new MouseUtils()
+export default mouseUtils

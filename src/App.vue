@@ -10,6 +10,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
+
 export default Vue.extend({
   data() {
     return {
@@ -20,6 +22,11 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+  },
+  computed: {
+    ...mapGetters({
+      getLastSelectedPageIndex: 'getLastSelectedPageIndex'
+    })
   },
   methods: {
     coordinateHandler(e: MouseEvent) {

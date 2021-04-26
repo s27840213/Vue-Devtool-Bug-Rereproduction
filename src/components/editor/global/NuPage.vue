@@ -10,12 +10,12 @@
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
-            @click.self="clearSelectedLayers()"
+            @click.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
-            class="nu-layer--outermost"
+            :class="`nu-layer--p${pageIndex}`"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
             :pageIndex="pageIndex"
@@ -31,6 +31,12 @@
             :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer")
+          //- nu-controller(
+          //-   v-if="currSelected.layers.length > 1"
+          //-   :key="`mul-controller-${index}`"
+          //-   :layerIndex="index"
+          //-   :pageIndex="pageIndex"
+          //-   :config="layer")
 </template>
 
 <script lang="ts">
@@ -58,10 +64,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      ADD_newLayer: 'ADD_newLayer',
+      ADD_newLayers: 'ADD_newLayers',
       updateLayerProps: 'Update_layerProps',
       addSelectedLayer: 'ADD_selectedLayer',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers'
+      clearSelectedInfo: 'CLEAR_currSelectedInfo',
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -83,9 +90,9 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex)
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
-      this.ADD_newLayer({
-        pageIndex,
-        layer
+      this.ADD_newLayers({
+        pageIndex: pageIndex,
+        layers: [layer]
       })
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean): void {
@@ -101,6 +108,10 @@ export default Vue.extend({
     },
     togglePageHighlighter(isHover: boolean) {
       this.pageIsHover = isHover
+    },
+    pageClickHandler() {
+      this.setLastSelectedPageIndex(this.pageIndex)
+      this.clearSelectedInfo()
     }
   }
 })
