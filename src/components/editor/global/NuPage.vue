@@ -18,6 +18,7 @@
             :class="`nu-layer--p${pageIndex}`"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
+            :pageIndex="pageIndex"
             :config="layer"
             @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)")
         div(v-if="pageIsHover"
@@ -42,7 +43,7 @@
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
-// import MouseUtils from '@/utils/mouseUtils'
+import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   data() {
@@ -86,42 +87,7 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      if (e.dataTransfer != null) {
-        const data = JSON.parse(e.dataTransfer.getData('data'))
-
-        const page = e.target as HTMLElement
-        const pageLeft = page.getBoundingClientRect().x
-        const pageTop = page.getBoundingClientRect().y
-
-        const left = (e.clientX - pageLeft - data.geometry.left) * (100 / this.scaleRatio)
-        const top = (e.clientY - pageTop - data.geometry.top) * (100 / this.scaleRatio)
-
-        const layerInfo = {
-          type: data.type,
-          pageIndex: this.config.pageIndex,
-          src: require('@/assets/img/svg/img-tmp.svg'),
-          active: false,
-          shown: false,
-          styles: {
-            x: left,
-            y: top,
-            scale: 1,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            width: 150,
-            height: 150,
-            initWidth: 150,
-            initHeight: 150
-          }
-        }
-        this.addNewLayer(this.pageIndex, layerInfo)
-        this.clearSelectedInfo()
-        this.addSelectedLayer({
-          pageIndex: this.pageIndex,
-          layerIndexs: [this.config.layers.length - 1]
-        })
-      }
+      MouseUtils.onDrop(e, this.pageIndex)
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
       this.ADD_newLayers({

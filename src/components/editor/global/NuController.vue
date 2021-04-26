@@ -8,13 +8,14 @@
       @dragenter.prevent
       @mousedown.left.stop="moveStart"
       @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
-    div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
-      class="scaler"
-      :key="index"
-      :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
-      @mousedown.stop="scaleStart")
-    div(v-if="isActive" class="rotaterWrapper")
-      div(class="rotater" @mousedown.stop="rotateStart")
+    template(v-if="isActive && !isControlling")
+      div(v-for="(controlPoint, index) in controlPoints.positions"
+        class="scaler"
+        :key="index"
+        :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
+        @mousedown.stop="scaleStart")
+      div(class="rotaterWrapper")
+        div(class="rotater" @mousedown.stop="rotateStart")
 </template>
 
 <script lang="ts">
@@ -22,7 +23,6 @@ import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
@@ -34,6 +34,7 @@ export default Vue.extend({
   data() {
     return {
       controlPoints: ControlPoints,
+      isControlling: false,
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
@@ -136,15 +137,18 @@ export default Vue.extend({
 
     moveStart(event: MouseEvent) {
       if (event.target === this.$refs.body) {
+        this.isControlling = true
+        this.setCursorStyle('move')
+
+        const layer = this.$el as HTMLElement
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        const el = event.target as HTMLElement
-        el.addEventListener('mouseup', this.moveEnd)
+        layer.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
         if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
           this.clearSelectedInfo()
         }
         this.addSelectedLayer()
-        console.log(el.getBoundingClientRect())
+        console.log(layer.getBoundingClientRect())
       }
     },
     moving(event: MouseEvent) {
@@ -166,12 +170,15 @@ export default Vue.extend({
     },
     moveEnd() {
       if (this.isActive) {
+        this.isControlling = false
+        this.setCursorStyle('default')
         document.documentElement.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
     },
 
     scaleStart(event: MouseEvent) {
+      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
 
       const body = this.$el as HTMLElement
@@ -179,7 +186,6 @@ export default Vue.extend({
         width: parseInt(body.style.width),
         height: parseInt(body.style.height)
       }
-
       const rect = this.$el.getBoundingClientRect()
       this.center = {
         x: rect.left + rect.width / 2 - window.pageXOffset,
@@ -190,7 +196,7 @@ export default Vue.extend({
         y: this.getLayerY
       }
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const vect = Object.assign({}, MouseUtils.getMouseRelPoint(event, this.center))
+      const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
       // Get client point as no rotation
       const clientP = {
@@ -208,9 +214,8 @@ export default Vue.extend({
       } else {
         cursorIndex = cursorIndex === -2 ? 0 : cursorIndex === 2 ? 4 : 2
       }
-      const layer = this.$el as HTMLElement
-      layer.style.cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
-      document.body.style.cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
+      const cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
+      this.setCursorStyle(cursor)
 
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
@@ -222,9 +227,9 @@ export default Vue.extend({
       let height = this.getLayerHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const diff = Object.assign({}, MouseUtils.getMouseRelPoint(event, this.initialPos))
-      const dx = diff.x
-      const dy = diff.y
+      const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      const [dx, dy] = [diff.x, diff.y]
+
       let offsetWidth = this.scale.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       let offsetHeight = this.scale.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
@@ -245,7 +250,6 @@ export default Vue.extend({
 
       offsetWidth = width - initWidth
       offsetHeight = height - initHeight
-
       const x = -offsetWidth / 2 + this.scale.xSign * (offsetWidth / 2) * Math.cos(angleInRad) -
         this.scale.ySign * (offsetHeight / 2) * Math.sin(angleInRad) + this.initTranslate.x
       const y = -offsetHeight / 2 + this.scale.xSign * (offsetHeight / 2) * Math.sin(angleInRad) +
@@ -254,15 +258,16 @@ export default Vue.extend({
       this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
     },
     scaleEnd() {
-      const layer = this.$el as HTMLElement
-      layer.style.cursor = 'default'
-      document.body.style.cursor = 'default'
-
+      this.isControlling = false
+      this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
     },
 
     rotateStart(event: MouseEvent) {
+      this.isControlling = true
+      this.setCursorStyle('move')
+
       const body = this.$el
       const rect = body.getBoundingClientRect()
       this.center = {
@@ -294,52 +299,19 @@ export default Vue.extend({
       }
     },
     rotateEnd() {
+      this.isControlling = false
+      this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
     },
-    onDrop(e: DragEvent) {
-      if (e.dataTransfer != null) {
-        const data = JSON.parse(e.dataTransfer.getData('data'))
-
-        const target = e.target as HTMLElement
-        const targetPos = {
-          x: target.getBoundingClientRect().x,
-          y: target.getBoundingClientRect().y
-        }
-        const targetOffset = {
-          x: this.getLayerX,
-          y: this.getLayerY
-        }
-        const x = (e.clientX - targetPos.x + targetOffset.x - data.geometry.left) * (100 / this.scaleRatio)
-        const y = (e.clientY - targetPos.y + targetOffset.y - data.geometry.top) * (100 / this.scaleRatio)
-
-        const layerInfo = {
-          type: data.type,
-          pageIndex: this.config.pageIndex,
-          src: require('@/assets/img/svg/img-tmp.svg'),
-          active: false,
-          shown: false,
-          styles: {
-            x: x,
-            y: y,
-            scale: 1,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            width: 150,
-            height: 150,
-            initWidth: 150,
-            initHeight: 150
-          }
-        }
-        this.addNewLayer(this.pageIndex, layerInfo)
-      }
+    setCursorStyle(cursor: string) {
+      const layer = this.$el as HTMLElement
+      layer.style.cursor = cursor
+      document.body.style.cursor = cursor
     },
-    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
-      this.ADD_newLayers({
-        pageIndex: pageIndex,
-        layers: [layer]
-      })
+    onDrop(e: DragEvent) {
+      const targetOffset = { x: this.getLayerX, y: this.getLayerY }
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset)
     },
     addSelectedLayer() {
       this.addLayer({

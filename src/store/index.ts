@@ -207,7 +207,6 @@ const mutations: MutationTree<IEditorState> = {
 const actions: ActionTree<IEditorState, unknown> = {
 
 }
-
 export default new Vuex.Store({
   state,
   getters,

@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)"
-      @keydown.esc.stop.prevent="test()"
       @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
       @keydown.ctrl.67.exact.stop.prevent="ShortcutHandler.copy()"
       @keydown.meta.67.exact.stop.prevent="ShortcutHandler.copy()"
@@ -117,9 +116,6 @@ export default Vue.extend({
         layerIndexs: [...layerIndexs],
         pageIndex: this.pageIndex
       })
-    },
-    test() {
-      console.log('Test!')
     }
   }
 })

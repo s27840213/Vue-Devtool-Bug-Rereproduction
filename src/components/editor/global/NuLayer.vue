@@ -1,5 +1,8 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles()")
+  div(class="nu-layer" :style="styles()"
+  @drop="onDrop"
+  @dragover.prevent,
+  @dragenter.prevent)
     div(class="layer-scale" :style="scaleStyles()")
       nu-clipper(v-if="config.type !== 'group'" :config="config")
         component(:is="`nu-${config.type}`" :config="config")
@@ -10,6 +13,7 @@
 import Vue from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
+import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   props: {
@@ -19,6 +23,20 @@ export default Vue.extend({
   data() {
     return {
       LayerType
+    }
+  },
+  computed: {
+    getLayerPos(): { x: number, y: number } {
+      return {
+        x: this.config.styles.x,
+        y: this.config.styles.y
+      }
+    },
+    getLayerX(): number {
+      return this.config.styles.x
+    },
+    getLayerY(): number {
+      return this.config.styles.y
     }
   },
   methods: {
@@ -32,6 +50,10 @@ export default Vue.extend({
         translateY(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
         scale(${this.config.styles.scale})`
       }
+    },
+    onDrop(e: DragEvent) {
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+      e.stopPropagation()
     }
   }
 })

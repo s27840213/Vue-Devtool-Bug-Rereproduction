@@ -44,44 +44,36 @@ export enum LayerType {
 export const ControlPoints = {
   positions: [
     {
-      left: '0px',
-      top: '0px',
-      transform: 'translate(-50%,-50%)',
+      left: '-7.5px',
+      top: '-7.5px',
       borderRadius: '50%'
     },
     {
-      top: '0px',
-      transform: 'translate(0%,-50%)'
+      top: '-7.5px'
     },
     {
-      right: '0px',
-      top: '0px',
-      transform: 'translate(50%,-50%)',
+      right: '-7.5px',
+      top: '-7.5px',
       borderRadius: '50%'
     },
     {
-      right: '0px',
-      transform: 'translate(50%,0%)'
+      right: '-7.5px'
     },
     {
-      right: '0px',
-      bottom: '0px',
-      transform: 'translate(50%,50%)',
+      right: '-5.5px',
+      bottom: '-5.5px',
       borderRadius: '50%'
     },
     {
-      bottom: '0px',
-      transform: 'translate(0%,50%)'
+      bottom: '-7.5px'
     },
     {
-      left: '0px',
-      bottom: '0px',
-      transform: 'translate(-50%,50%)',
+      left: '-7.5px',
+      bottom: '-7.5px',
       borderRadius: '50%'
     },
     {
-      left: '0px',
-      transform: 'translate(-50%,0%)'
+      left: '-7.5px'
     }
   ],
   cursors: [
