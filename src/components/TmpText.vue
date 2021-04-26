@@ -9,7 +9,7 @@ div(class="temp__content")
 
 <script lang="ts">
 /**
- * This components is temporarily used for img section, and it will be remove in the future
+ * This components is temporarily used for text section, and it will be remove in the future
  */
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
@@ -22,14 +22,13 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      const styles = {
-        font: 'Lobster',
-        weight: 'bold',
-        align: 'center',
-        color: '#000000',
-        size: 25
+      return {
+        'font-family': 'Lobster',
+        'font-weight': 'bold',
+        'font-size': '25px',
+        'text-align': 'center',
+        color: '#000000'
       }
-      return CssConveter.convertFontStyle(styles)
     },
     dragStart(e: DragEvent, text: string) {
       const dataTransfer = e.dataTransfer as DataTransfer
