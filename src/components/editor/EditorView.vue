@@ -1,5 +1,18 @@
 <template lang="pug">
-  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
+  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)"
+      @keydown.esc.stop.prevent="test()"
+      @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
+      @keydown.ctrl.67.exact.stop.prevent="ShortcutHandler.copy()"
+      @keydown.meta.67.exact.stop.prevent="ShortcutHandler.copy()"
+      @keydown.ctrl.88.exact.stop.prevent="ShortcutHandler.cut()"
+      @keydown.meta.88.exact.stop.prevent="ShortcutHandler.cut()"
+      @keydown.ctrl.86.exact.stop.prevent="ShortcutHandler.paste()"
+      @keydown.meta.86.exact.stop.prevent="ShortcutHandler.paste()"
+      @keydown.ctrl.90.exact.stop.prevent="ShortcutHandler.undo()"
+      @keydown.meta.90.exact.stop.prevent="ShortcutHandler.undo()"
+      @keydown.ctrl.shift.90.exact.stop.prevent="ShortcutHandlun.redo()"
+      @keydown.meta.shift.90.exact.stop.prevent="ShortcutHandler.redo()"
+      tabindex="0")
     nu-page(v-for="(page,index) in pages"
       :key="`page-${index}`"
       :pageIndex="index"
@@ -13,6 +26,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
+import ShortcutHandler from '@/utils/shortcutHandler'
 
 export default Vue.extend({
   data() {
@@ -23,7 +37,8 @@ export default Vue.extend({
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
-      pageIndex: -1
+      pageIndex: -1,
+      ShortcutHandler
     }
   },
   mounted() {
@@ -37,12 +52,11 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers'
+      clearSelectedInfo: 'CLEAR_currSelectedInfo'
     }),
     selectStart(e: MouseEvent) {
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
-
       this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
       document.documentElement.addEventListener('mousemove', this.selecting)
       document.documentElement.addEventListener('scroll', this.scrollUpdate)
@@ -63,7 +77,7 @@ export default Vue.extend({
     },
     selectEnd() {
       this.isSelecting = false
-      this.clearSelectedLayers()
+      this.clearSelectedInfo()
       document.documentElement.removeEventListener('mousemove', this.selecting)
       document.documentElement.removeEventListener('scroll', this.scrollUpdate)
       document.documentElement.removeEventListener('mouseup', this.selectEnd)
@@ -71,10 +85,7 @@ export default Vue.extend({
       this.handleSelectionData(selectionArea.getBoundingClientRect())
     },
     handleSelectionData(selectionData: any) {
-      let layers = [...document.querySelectorAll('.nu-layer--outermost')]
-      layers = layers.filter((layer) => {
-        return (layer as HTMLElement).dataset.pindex === `${this.pageIndex}`
-      })
+      const layers = [...document.querySelectorAll(`.nu-layer--p${this.pageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
@@ -106,6 +117,9 @@ export default Vue.extend({
         layerIndexs: [...layerIndexs],
         pageIndex: this.pageIndex
       })
+    },
+    test() {
+      console.log('Test!')
     }
   }
 })
@@ -118,6 +132,9 @@ export default Vue.extend({
   position: relative;
   z-index: setZindex("editor-view");
   overflow: scroll;
+  &:focus {
+    outline: none;
+  }
 }
 .selection-area {
   position: absolute;

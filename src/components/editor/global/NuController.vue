@@ -7,8 +7,7 @@
       @dragover.prevent,
       @dragenter.prevent
       @mousedown.left.stop="moveStart"
-      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-      )
+      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
     div(v-if="isActive" v-for="(controlPoint, index) in controlPoints.positions"
       class="scaler"
       :key="index"
@@ -44,7 +43,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSelectedLayers: 'getCurrSelectedLayers',
+      currSelectedInfo: 'getCurrSelectedInfo',
       scaleRatio: 'getPageScaleRatio'
     }),
     getControlPoints(): any {
@@ -82,9 +81,9 @@ export default Vue.extend({
       updateLayerStyles: 'Update_layerStyles',
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
-      clearSelectedLayers: 'CLEAR_currSelectedLayers',
+      clearSelectedInfo: 'CLEAR_currSelectedInfo',
       updateSelectedLayers: 'Update_selectedLayerStyles',
-      ADD_newLayer: 'ADD_newLayer'
+      ADD_newLayers: 'ADD_newLayers'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
       this.updateLayerStyles({
@@ -141,8 +140,8 @@ export default Vue.extend({
         const el = event.target as HTMLElement
         el.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        if (!event.metaKey && !this.currSelectedLayers.layersIndex.includes(this.layerIndex)) {
-          this.clearSelectedLayers()
+        if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
+          this.clearSelectedInfo()
         }
         this.addSelectedLayer()
         console.log(el.getBoundingClientRect())
@@ -337,9 +336,9 @@ export default Vue.extend({
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
-      this.ADD_newLayer({
-        pageIndex,
-        layer
+      this.ADD_newLayers({
+        pageIndex: pageIndex,
+        layers: [layer]
       })
     },
     addSelectedLayer() {

@@ -1,4 +1,5 @@
 import { IPage } from '@/interfaces/page'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 /**
  * @param {object} currcurrSelectedLayers - used to record the info of selected layers
@@ -9,10 +10,13 @@ export interface IEditorState {
   pages: Array<IPage>,
   currPanelType: number,
   pageScaleRatio: number,
-  currSelectedLayers: {
+  lastSelectedPageIndex: number,
+  currSelectedInfo: {
     pageIndex: number,
-    layersIndex: number[]
-  }
+    layersIndex: number[],
+    layers: Array<IShape | IText | IImage | IGroup>
+  },
+  clipboard: Array<IShape | IText | IImage | IGroup>
 }
 
 export enum PanelType {
@@ -41,31 +45,43 @@ export const ControlPoints = {
   positions: [
     {
       left: '0px',
-      top: '0px'
+      top: '0px',
+      transform: 'translate(-50%,-50%)',
+      borderRadius: '50%'
     },
     {
-      top: '0px'
-    },
-    {
-      right: '0px',
-      top: '0px'
-    },
-    {
-      right: '0px'
+      top: '0px',
+      transform: 'translate(0%,-50%)'
     },
     {
       right: '0px',
-      bottom: '0px'
+      top: '0px',
+      transform: 'translate(50%,-50%)',
+      borderRadius: '50%'
     },
     {
-      bottom: '0px'
+      right: '0px',
+      transform: 'translate(50%,0%)'
+    },
+    {
+      right: '0px',
+      bottom: '0px',
+      transform: 'translate(50%,50%)',
+      borderRadius: '50%'
+    },
+    {
+      bottom: '0px',
+      transform: 'translate(0%,50%)'
     },
     {
       left: '0px',
-      bottom: '0px'
+      bottom: '0px',
+      transform: 'translate(-50%,50%)',
+      borderRadius: '50%'
     },
     {
-      left: '0px'
+      left: '0px',
+      transform: 'translate(-50%,0%)'
     }
   ],
   cursors: [
