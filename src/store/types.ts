@@ -40,32 +40,32 @@ export enum LayerType {
 export const ControlPoints = {
   positions: [
     {
-      left: '0px',
-      top: '0px'
+      left: '-7.5px',
+      top: '-7.5px'
     },
     {
-      top: '0px'
+      top: '-7.5px'
     },
     {
-      right: '0px',
-      top: '0px'
+      right: '-7.5px',
+      top: '-7.5px'
     },
     {
-      right: '0px'
+      right: '-7.5px'
     },
     {
-      right: '0px',
-      bottom: '0px'
+      right: '-5.5px',
+      bottom: '-5.5px'
     },
     {
-      bottom: '0px'
+      bottom: '-7.5px'
     },
     {
-      left: '0px',
-      bottom: '0px'
+      left: '-7.5px',
+      bottom: '-7.5px'
     },
     {
-      left: '0px'
+      left: '-7.5px'
     }
   ],
   cursors: [

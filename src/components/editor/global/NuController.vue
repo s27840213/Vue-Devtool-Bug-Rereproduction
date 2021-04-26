@@ -24,7 +24,6 @@ import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
@@ -312,47 +311,8 @@ export default Vue.extend({
       document.body.style.cursor = cursor
     },
     onDrop(e: DragEvent) {
-      if (e.dataTransfer != null) {
-        const data = JSON.parse(e.dataTransfer.getData('data'))
-        const target = e.target as HTMLElement
-        const targetPos = {
-          x: target.getBoundingClientRect().x,
-          y: target.getBoundingClientRect().y
-        }
-        const targetOffset = {
-          x: this.getLayerX,
-          y: this.getLayerY
-        }
-        const x = (e.clientX - targetPos.x + targetOffset.x - data.geometry.left) * (100 / this.scaleRatio)
-        const y = (e.clientY - targetPos.y + targetOffset.y - data.geometry.top) * (100 / this.scaleRatio)
-
-        const layerInfo = {
-          type: data.type,
-          pageIndex: this.config.pageIndex,
-          src: require('@/assets/img/svg/img-tmp.svg'),
-          active: false,
-          shown: false,
-          styles: {
-            x: x,
-            y: y,
-            scale: 1,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            width: 150,
-            height: 150,
-            initWidth: 150,
-            initHeight: 150
-          }
-        }
-        this.addNewLayer(this.pageIndex, layerInfo)
-      }
-    },
-    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
-      this.ADD_newLayer({
-        pageIndex,
-        layer
-      })
+      const targetOffset = { x: this.getLayerX, y: this.getLayerY }
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset)
     },
     addSelectedLayer() {
       this.addLayer({
