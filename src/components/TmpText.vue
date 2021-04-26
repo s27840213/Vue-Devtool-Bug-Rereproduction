@@ -54,9 +54,6 @@ export default Vue.extend({
 
       dataTransfer.setData('data', JSON.stringify(data))
     }
-  },
-  fontStyles() {
-    return CssConveter.convertFontStyle(this.config.styles)
   }
 })
 </script>
