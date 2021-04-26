@@ -41,7 +41,7 @@ const getDefaultState = (): IEditorState => ({
           pageIndex: 1,
           active: false,
           shown: false,
-          text: 'Tesing Font',
+          text: 'Tesing Font ts',
           styles: {
             width: 120,
             height: 120,

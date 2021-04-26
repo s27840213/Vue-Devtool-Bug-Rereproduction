@@ -253,7 +253,7 @@ export default Vue.extend({
       offsetHeight = height - initHeight
       const x = -offsetWidth / 2 + this.scale.xSign * (offsetWidth / 2) * Math.cos(angleInRad) -
         this.scale.ySign * (offsetHeight / 2) * Math.sin(angleInRad) + this.initTranslate.x
-      const y = -offsetHeight / 2 + this.scale.xSign * (offsetHeight / 2) * Math.sin(angleInRad) +
+      const y = -offsetHeight / 2 + this.scale.xSign * (offsetWidth / 2) * Math.sin(angleInRad) +
         this.scale.ySign * (offsetHeight / 2) * Math.cos(angleInRad) + this.initTranslate.y
 
       this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
@@ -333,6 +333,7 @@ export default Vue.extend({
   position: absolute;
   border: 3px solid setColor(blue-2);
   box-sizing: border-box;
+  background-color: rgba(0, 0, 255, 0);
   &:active {
     border: 1px solid rgb(174, 46, 190);
   }

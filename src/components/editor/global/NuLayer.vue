@@ -41,13 +41,14 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      return CssConveter.convertDefaultStyle(this.config.styles)
+      return this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles), { background: 'rgba(0, 0, 255, 0)' })
+        : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
       return {
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-        translateY(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+        translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
         scale(${this.config.styles.scale})`
       }
     },

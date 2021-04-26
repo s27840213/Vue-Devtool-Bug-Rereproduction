@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-text")
     span(class="panel-text__title text-blue-1 label-lg") Text
+    tmp-text
 </template>
 
 <script lang="ts">

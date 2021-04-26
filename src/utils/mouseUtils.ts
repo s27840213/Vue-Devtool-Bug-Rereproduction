@@ -1,6 +1,7 @@
 /**
  */
 import store from '@/store'
+import { IShape, IText, IImage, IGroup, ILayer } from '@/interfaces/layer'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -29,13 +30,12 @@ class MouseUtils {
         x: target.getBoundingClientRect().x,
         y: target.getBoundingClientRect().y
       }
-      const x = (e.clientX - targetPos.x + targetOffset.x - data.geometry.left) * (100 / store.state.pageScaleRatio)
-      const y = (e.clientY - targetPos.y + targetOffset.y - data.geometry.top) * (100 / store.state.pageScaleRatio)
+      const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
+      const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
 
-      const layer = {
-        type: 'image',
+      const layer: ILayer = {
+        type: data.type,
         pageIndex: pageIndex,
-        src: require('@/assets/img/svg/img-tmp.svg'),
         active: false,
         shown: false,
         styles: {
@@ -45,11 +45,17 @@ class MouseUtils {
           scaleX: 0,
           scaleY: 0,
           rotate: 0,
-          width: 150,
-          height: 150,
-          initWidth: 150,
-          initHeight: 150
+          width: data.styles.width,
+          height: data.styles.height,
+          initWidth: data.styles.width,
+          initHeight: data.styles.height
         }
+      }
+      if (data.type === 'image') {
+        layer.src = require(`@/assets/${data.src}`)
+      } else if (data.type === 'text') {
+        layer.text = data.text
+        layer.styles = Object.assign(data.styles, layer.styles)
       }
 
       store.commit('ADD_newLayer', { pageIndex, layer })
