@@ -9,6 +9,7 @@ import NuPage from '@/components/editor/global/NuPage.vue'
 import NuLayer from '@/components/editor/global/NuLayer.vue'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuText from '@/components/editor/global/NuText.vue'
+import NuTmp from '@/components/editor/global/NuTmp.vue'
 import NuGroup from '@/components/editor/global/NuGroup.vue'
 import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuHighlighter from '@/components/editor/global/NuHighlighter.vue'
@@ -24,6 +25,7 @@ Vue.component('nu-image', NuImage)
 Vue.component('nu-layer', NuLayer)
 Vue.component('nu-text', NuText)
 Vue.component('nu-group', NuGroup)
+Vue.component('nu-tmp', NuTmp)
 Vue.component('nu-highlighter', NuHighlighter)
 Vue.component('nu-clipper', NuClipper)
 Vue.component('nu-controller', NuController)

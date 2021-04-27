@@ -1,5 +1,19 @@
 <template lang="pug">
-  div(class="nu-page")
+  div(class="nu-page"
+      @keydown.delete.exact.stop.prevent="ShortcutUtils.del()"
+      @keydown.ctrl.67.exact.stop.prevent="ShortcutUtils.copy()"
+      @keydown.meta.67.exact.stop.prevent="ShortcutUtils.copy()"
+      @keydown.ctrl.88.exact.stop.prevent="ShortcutUtils.cut()"
+      @keydown.meta.88.exact.stop.prevent="ShortcutUtils.cut()"
+      @keydown.ctrl.86.exact.stop.prevent="ShortcutUtils.paste()"
+      @keydown.meta.86.exact.stop.prevent="ShortcutUtils.paste()"
+      @keydown.ctrl.71.exact.stop.prevent="ShortcutUtils.group()"
+      @keydown.meta.71.exact.stop.prevent="ShortcutUtils.group()"
+      @keydown.ctrl.90.exact.stop.prevent="ShortcutUtils.undo()"
+      @keydown.meta.90.exact.stop.prevent="ShortcutUtils.undo()"
+      @keydown.ctrl.shift.90.exact.stop.prevent="ShortcutUtils.redo()"
+      @keydown.meta.shift.90.exact.stop.prevent="ShortcutUtils.redo()"
+      tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
     div(class='pages-wrapper'
@@ -44,11 +58,13 @@ import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
 
 export default Vue.extend({
   data() {
     return {
-      pageIsHover: false
+      pageIsHover: false,
+      ShortcutUtils
     }
   },
   props: {
@@ -59,8 +75,12 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
-    })
+      scaleRatio: 'getPageScaleRatio',
+      currSelectedInfo: 'getCurrSelectedInfo'
+    }),
+    currSelectedNum(): number {
+      return this.currSelectedInfo.layers.length
+    }
   },
   methods: {
     ...mapMutations({
@@ -125,6 +145,9 @@ export default Vue.extend({
   flex-direction: column;
   box-sizing: border-box;
   position: relative;
+  &:focus {
+    outline: none;
+  }
 }
 
 .page-title {

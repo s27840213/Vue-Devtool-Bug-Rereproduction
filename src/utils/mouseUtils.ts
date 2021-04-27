@@ -1,6 +1,7 @@
 /**
  */
 import store from '@/store'
+import LayerFactary from '@/utils/layerFactary'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -32,25 +33,7 @@ class MouseUtils {
       const x = (e.clientX - targetPos.x + targetOffset.x - data.geometry.left) * (100 / store.state.pageScaleRatio)
       const y = (e.clientY - targetPos.y + targetOffset.y - data.geometry.top) * (100 / store.state.pageScaleRatio)
 
-      const layer = {
-        type: 'image',
-        pageIndex: pageIndex,
-        src: require('@/assets/img/svg/img-tmp.svg'),
-        active: false,
-        shown: false,
-        styles: {
-          x: x,
-          y: y,
-          scale: 1,
-          scaleX: 0,
-          scaleY: 0,
-          rotate: 0,
-          width: 150,
-          height: 150,
-          initWidth: 150,
-          initHeight: 150
-        }
-      }
+      const layer = LayerFactary.newImage(x, y, pageIndex)
 
       store.commit('ADD_newLayers', {
         pageIndex: pageIndex,
