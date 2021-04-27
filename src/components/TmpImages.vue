@@ -23,10 +23,11 @@ export default Vue.extend({
       const rect = (e.target as Element).getBoundingClientRect()
       const data = {
         type: 'image',
-        src: '@/assets/img/svg/img-tmp.svg',
-        geometry: {
-          left: e.clientX - rect.x,
-          top: e.clientY - rect.y,
+        // @/assets/img/svg/img-tmp.svg
+        src: 'img/svg/img-tmp.svg',
+        styles: {
+          x: e.clientX - rect.x,
+          y: e.clientY - rect.y,
           width: 150,
           height: 150
         }

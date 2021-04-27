@@ -60,8 +60,8 @@ export const ControlPoints = {
       right: '-7.5px'
     },
     {
-      right: '-5.5px',
-      bottom: '-5.5px',
+      right: '-7.5px',
+      bottom: '-7.5px',
       borderRadius: '50%'
     },
     {
