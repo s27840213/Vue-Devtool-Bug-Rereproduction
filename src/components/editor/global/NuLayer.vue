@@ -3,9 +3,10 @@
   @drop="onDrop"
   @dragover.prevent,
   @dragenter.prevent)
-    div(class="layer-scale" :style="scaleStyles()")
+    div(:class="{'layer-scale': true, 'layer-text': config.type === 'text'}" :style="scaleStyles()")
       nu-clipper(v-if="config.type !== 'group'" :config="config")
-        component(:is="`nu-${config.type}`" :config="config")
+        component(:is="`nu-${config.type}`" :config="config"
+        :pageIndex="pageIndex" :layerIndex="layerIndex")
       component(v-else :is="`nu-${config.type}`" :config="config")
 </template>
 
@@ -18,7 +19,8 @@ import MouseUtils from '@/utils/mouseUtils'
 export default Vue.extend({
   props: {
     config: Object,
-    pageIndex: Number
+    pageIndex: Number,
+    layerIndex: Number
   },
   data() {
     return {
@@ -80,5 +82,8 @@ export default Vue.extend({
 }
 .layer-scale {
   position: absolute;
+}
+.layer-text {
+  // margin: 10px;
 }
 </style>

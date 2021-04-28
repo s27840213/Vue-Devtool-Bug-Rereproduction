@@ -17,6 +17,7 @@
             :key="`layer-${index}`"
             :class="`nu-layer--p${pageIndex}`"
             :data-index="`${index}`"
+            :layerIndex="index"
             :data-pindex="`${pageIndex}`"
             :pageIndex="pageIndex"
             :config="layer"

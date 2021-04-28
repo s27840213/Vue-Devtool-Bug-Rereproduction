@@ -1,6 +1,6 @@
+      // @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
 <template lang="pug">
   div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)"
-      @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
       @keydown.ctrl.67.exact.stop.prevent="ShortcutHandler.copy()"
       @keydown.meta.67.exact.stop.prevent="ShortcutHandler.copy()"
       @keydown.ctrl.88.exact.stop.prevent="ShortcutHandler.cut()"

@@ -6,6 +6,7 @@
       @drop="onDrop"
       @dragover.prevent,
       @dragenter.prevent
+      @click="onClick"
       @mousedown.left.stop="moveStart"
       @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
     template(v-if="isActive && !isControlling")
@@ -39,7 +40,13 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      scale: { xSign: 1, ySign: 1 }
+      scale: { xSign: 1, ySign: 1 },
+      clickTime: 0
+    }
+  },
+  watch: {
+    config: function() {
+      console.log('this isControlling')
     }
   },
   computed: {
@@ -125,17 +132,36 @@ export default Vue.extend({
         }
       })
     },
+    triggerTextEditor(pageIndex: number, layerIndex: number) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props: {
+          textEditable: true
+        }
+      })
+    },
     styles() {
+      let pointerEvent: string
+      if (this.config.type === 'text' && this.config.textEditable) {
+        pointerEvent = this.config.textEditable ? 'none' : 'initial'
+      } else {
+        pointerEvent = this.isActive || this.isShown ? 'initial' : 'none'
+      }
+      // const pointerEvent = this.isActive || this.isShown ? 'initial' : 'none'
+
+      console.log('pointerEvent: ' + pointerEvent)
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
-        'pointer-events': this.isActive || this.isShown ? 'initial' : 'none'
+        'pointer-events': pointerEvent
       }
     },
 
     moveStart(event: MouseEvent) {
+      this.clickTime = new Date()
       if (event.target === this.$refs.body) {
         this.isControlling = true
         this.setCursorStyle('move')
@@ -313,6 +339,12 @@ export default Vue.extend({
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
       MouseUtils.onDrop(e, this.pageIndex, targetOffset)
     },
+    onClick(e: MouseEvent) {
+      if ((new Date() - this.clickTime > 100)) return
+      if (this.config.type === 'text') {
+        this.triggerTextEditor(this.pageIndex, this.layerIndex)
+      }
+    },
     addSelectedLayer() {
       this.addLayer({
         layerIndexs: [this.layerIndex],
@@ -341,6 +373,7 @@ export default Vue.extend({
   }
 }
 .scaler {
+  pointer-events: auto;
   position: absolute;
   width: 10px;
   height: 10px;

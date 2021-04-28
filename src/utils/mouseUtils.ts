@@ -55,6 +55,7 @@ class MouseUtils {
         layer.src = require(`@/assets/${data.src}`)
       } else if (data.type === 'text') {
         layer.text = data.text
+        layer.textEditable = false
         layer.styles = Object.assign(data.styles, layer.styles)
       }
 

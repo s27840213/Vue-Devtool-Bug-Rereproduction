@@ -36,23 +36,40 @@ export default Vue.extend({
       dataTransfer.effectAllowed = 'move'
 
       const rect = (e.target as Element).getBoundingClientRect()
+      const styles = {
+        x: e.clientX - rect.x,
+        y: e.clientY - rect.y,
+        font: 'Lobster',
+        weight: 'bold',
+        align: 'left',
+        color: '#000000',
+        size: 72
+      }
+
+      const textHW = this.getTextHW(text, styles)
       const data = {
         type: 'text',
         text: text,
-        styles: {
-          x: e.clientX - rect.x,
-          y: e.clientY - rect.y,
-          width: 300,
-          height: 150,
-          font: 'Lobster',
-          weight: 'bold',
-          align: 'left',
-          color: '#000000',
-          size: 72
-        }
+        textEditable: false,
+        styles: Object.assign(styles, textHW)
       }
 
       dataTransfer.setData('data', JSON.stringify(data))
+    },
+    contextStyles(styles: any) {
+      return CssConveter.convertFontStyle(styles)
+    },
+    getTextHW(text: string, styles: any) {
+      const el = document.createElement('span')
+      el.textContent = text
+      Object.assign(el.style, this.contextStyles(styles))
+      document.body.appendChild(el)
+      const textHW = {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+      }
+      document.body.removeChild(el)
+      return textHW
     }
   }
 })
