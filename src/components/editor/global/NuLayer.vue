@@ -47,6 +47,14 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
+      if (this.config.type === 'text') {
+        return {
+          transform: `
+          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
+          scale(${this.config.styles.scale})`
+        }
+      }
       return {
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)

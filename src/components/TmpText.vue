@@ -44,6 +44,7 @@ export default Vue.extend({
         align: 'left',
         color: '#000000',
         size: 72
+        // initSize: 72
       }
 
       const textHW = this.getTextHW(text, styles)

@@ -23,6 +23,8 @@ export default Vue.extend({
       const rect = (e.target as Element).getBoundingClientRect()
       const data = {
         type: 'image',
+        // should be deleted
+        text: 'MayDay',
         // @/assets/img/svg/img-tmp.svg
         src: 'img/svg/img-tmp.svg',
         styles: {

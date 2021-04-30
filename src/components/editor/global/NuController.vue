@@ -9,6 +9,10 @@
       @click="onClick"
       @mousedown.left.stop="moveStart"
       @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
+    span(class="text-content" :style="contextStyles()" ref="content"
+    @blur="onFocusOut"
+    @keydown="onKeyDown"
+    :contenteditable="this.config.textEditable") {{ textContent }}
     template(v-if="isActive && !isControlling")
       div(v-for="(controlPoint, index) in controlPoints.positions"
         class="scaler"
@@ -25,6 +29,7 @@ import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 import MouseUtils from '@/utils/mouseUtils'
+import CssConveter from '@/utils/cssConverter'
 
 export default Vue.extend({
   props: {
@@ -34,6 +39,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      textContent: this.config.text,
       controlPoints: ControlPoints,
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -41,12 +47,8 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
       scale: { xSign: 1, ySign: 1 },
-      clickTime: 0
-    }
-  },
-  watch: {
-    config: function() {
-      console.log('this isControlling')
+      clickTime: 0,
+      isGetMoved: false
     }
   },
   computed: {
@@ -80,6 +82,14 @@ export default Vue.extend({
     }
   },
   methods: {
+    contextStyles() {
+      const styles = {
+        color: 'rgba(10,10,10,0)',
+        'caret-color': '#000000',
+        'pointer-events': this.config.textEditable ? 'initial' : 'none'
+      }
+      return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
+    },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
@@ -142,42 +152,47 @@ export default Vue.extend({
       })
     },
     styles() {
-      let pointerEvent: string
-      if (this.config.type === 'text' && this.config.textEditable) {
-        pointerEvent = this.config.textEditable ? 'none' : 'initial'
-      } else {
-        pointerEvent = this.isActive || this.isShown ? 'initial' : 'none'
-      }
+      // let pointerEvent: string
+      // if (this.config.type === 'text' && this.config.textEditable) {
+      //   pointerEvent = this.config.textEditable ? 'none' : 'initial'
+      // } else {
+      //   pointerEvent = this.isActive || this.isShown ? 'initial' : 'none'
+      // }
       // const pointerEvent = this.isActive || this.isShown ? 'initial' : 'none'
-
-      console.log('pointerEvent: ' + pointerEvent)
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
-        'pointer-events': pointerEvent
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'none'
       }
     },
 
     moveStart(event: MouseEvent) {
+      console.log('-------target---:')
+      console.log(event.target)
       this.clickTime = new Date()
-      if (event.target === this.$refs.body) {
-        this.isControlling = true
-        this.setCursorStyle('move')
-
-        const layer = this.$el as HTMLElement
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        layer.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
-        if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
-          this.clearSelectedInfo()
-        }
-        this.addSelectedLayer()
-        console.log(layer.getBoundingClientRect())
+      if (this.config.type === 'text' && this.isActive) {
+        this.toggleTextEditable(this.pageIndex, this.layerIndex, true)
       }
+      // if (event.target === this.$refs.body) {
+      console.log('is body------------====')
+      this.isControlling = true
+      this.setCursorStyle('move')
+
+      const layer = this.$el as HTMLElement
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      layer.addEventListener('mouseup', this.moveEnd)
+      window.addEventListener('mousemove', this.moving)
+      if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
+        this.clearSelectedInfo()
+      }
+      this.addSelectedLayer()
+        console.log(layer.getBoundingClientRect())
+      // }
     },
     moving(event: MouseEvent) {
+      console.log('moving!!')
       if (this.isActive) {
         event.preventDefault()
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
@@ -193,14 +208,21 @@ export default Vue.extend({
           }
         })
       }
+      this.isGetMoved = true
     },
     moveEnd() {
+      // console.log('ismoved: ' + this.isGetMoved)
+      // console.log('textEditable: ' + this.config.textEditable)
+      // if (this.isGetMoved) {
+      //   this.toggleTextEditable(this.pageIndex, this.layerIndex, false)
+      // }
       if (this.isActive) {
         this.isControlling = false
         this.setCursorStyle('default')
         document.documentElement.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
+      this.isGetMoved = false
     },
 
     scaleStart(event: MouseEvent) {
@@ -340,10 +362,33 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, targetOffset)
     },
     onClick(e: MouseEvent) {
-      if ((new Date() - this.clickTime > 100)) return
-      if (this.config.type === 'text') {
-        this.triggerTextEditor(this.pageIndex, this.layerIndex)
+      // if ((new Date() - this.clickTime > 100) && this.config.type === 'text') {
+      //   this.triggerTextEditor(this.pageIndex, this.layerIndex, true)
+      // }
+    },
+    onFocusOut() {
+      this.toggleTextEditable(this.pageIndex, this.layerIndex, false)
+    },
+    onKeyDown() {
+      setTimeout(() => {
+        const props = {
+          text: this.$refs.content.innerText
+        }
+        this.updateTextProps(this.pageIndex, this.layerIndex, props)
+      }, 0)
+    },
+    toggleTextEditable(pageIndex: number, layerIndex: number, isEditable: boolean) {
+      const props = {
+        textEditable: isEditable
       }
+      this.updateTextProps(this.pageIndex, this.layerIndex, props)
+    },
+    updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean }) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props
+      })
     },
     addSelectedLayer() {
       this.addLayer({
@@ -393,5 +438,14 @@ export default Vue.extend({
   height: 10px;
   background-color: blue;
   cursor: move;
+}
+.text-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  outline: none;
+  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 </style>

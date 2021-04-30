@@ -1,10 +1,9 @@
 <template lang="pug">
   div(class="nu-text")
     span(class="text-content" :style="contextStyles()" ref="content"
-    contenteditable=true
+    @keydown="onKeyDown"
     @keyup="onKeyUp"
-    @click="onClick"
-    @blur="onFocusOut") {{ textContent }}
+    @blur="onFocusOut") {{ config.text }}
 </template>
 
 <script lang="ts">
@@ -23,30 +22,12 @@ export default Vue.extend({
     }
   },
   watch: {
-    'config.textEditable': function(newVal) {
-      console.log('watch this.config.text:' + this.config.text)
-      console.log('watch textContent:' + this.textContent)
-      if (newVal) {
-        const el = this.$refs.content
-        el.focus()
-        const ev = document.createEvent('MouseEvent')
-        var event = new MouseEvent('click', {
-          view: window,
-          clientX: 919,
-          clientY: 410,
-          bubbles: true
-        })
-        el.dispatchEvent(event)
-        // const el = this.$refs.content as HTMLElement
-        // const x = el.getBoundingClientRect().x
-        // const y = el.getBoundingClientRect().y
-        // console.log('testing---')
-        // console.log('x' + x)
-        // console.log('y' + y)
-        // document.elementFromPoint(x, y).click()
-        // this.$refs.content.click()
-      }
-    }
+    // 'config.textEditable': function(newVal) {
+    //   if (newVal) {
+    //     const el = this.$refs.content
+    //     el.focus()
+    //   }
+    // }
   },
   computed: {
     getLayerX(): number {
@@ -56,35 +37,11 @@ export default Vue.extend({
       return this.config.styles.y
     }
   },
-  mounted() {
-    const textHW = this.getTextHW()
-    const scaleX = textHW.width / this.config.styles.initWidth
-    const scaleY = textHW.height / this.config.styles.initHeight
-    this.updateLayerSizeXY(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scaleX, scaleY)
-  },
   methods: {
     ...mapMutations({
       updateLayerProps: 'Update_layerProps',
       updateLayerStyles: 'Update_layerStyles'
     }),
-    contextStyles() {
-      return CssConveter.convertFontStyle(this.config.styles)
-    },
-    onClick(e: MouseEvent) {
-      console.log(e)
-    },
-    getTextHW() {
-      const el = document.createElement('span')
-      el.textContent = this.$refs.content.textContent
-      Object.assign(el.style, this.contextStyles())
-      document.body.appendChild(el)
-      const textHW = {
-        width: el.offsetWidth,
-        height: el.offsetHeight
-      }
-      document.body.removeChild(el)
-      return textHW
-    },
     updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean }) {
       this.updateLayerProps({
         pageIndex,
@@ -103,15 +60,13 @@ export default Vue.extend({
         }
       })
     },
-    updateLayerSizeXY(pageIndex: number, layerIndex: number, width: number, height: number, scaleX: number, scaleY: number) {
+    updateLayerInitWH(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number) {
       this.updateLayerStyles({
         pageIndex,
         layerIndex,
         styles: {
-          width,
-          height,
-          scaleX,
-          scaleY
+          initWidth,
+          initHeight
         }
       })
     },
@@ -122,6 +77,47 @@ export default Vue.extend({
         styles: { x, y }
       })
     },
+    contextStyles() {
+      // const styles = Object.assign(this.config.styles, { size: this.config.styles.size * this.config.styles.scale })
+      // console.log(styles.size)
+      return CssConveter.convertFontStyle(this.config.styles)
+    },
+    onKeyDown(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault()
+        console.log('enter')
+        // document.execCommand('insertHTML', false, '<br/>')
+        const docFragment = document.createDocumentFragment()
+
+        // add a new line
+        let newEle = document.createTextNode('\n')
+        docFragment.appendChild(newEle)
+
+        // add the br, or p, or something else
+        newEle = document.createElement('br')
+        docFragment.appendChild(newEle)
+
+        // make the br replace selection
+        let range = window.getSelection().getRangeAt(0)
+        range.deleteContents()
+        range.insertNode(docFragment)
+
+        // create a new range
+        range = document.createRange()
+        range.setStartAfter(newEle)
+        range.collapse(true)
+
+        // make the cursor there
+        const sel = window.getSelection()
+        sel.removeAllRanges()
+        sel.addRange(range)
+
+        if (this.$refs.content.lastChild.tagName !== 'BR') {
+          const br = document.createElement('br')
+          this.$refs.content.appendChild(br)
+        }
+      }
+    },
     onKeyUp(e) {
       // const textHW = this.getTextHW()
       // const scaleX = textHW.width / this.config.styles.initWidth
@@ -129,23 +125,54 @@ export default Vue.extend({
       // console.log(scaleX)
       // console.log(scaleY)
       // this.updateLayerSizeXY(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scaleX, scaleY)
-      if (e.keyCode === 13) {
-        console.log('enter')
-      }
       const textWH = this.getTextHW()
       const scale = textWH / this.config.styles.initWidth
+      this.updateLayerInitWH(this.pageIndex, this.layerIndex, textWH.width, textWH.height)
       this.updateLayerSize(this.pageIndex, this.layerIndex, textWH.width, textWH.height, scale)
+      console.log(this.config.styles.initWidth)
+    },
+    onFocusOut() {
+      this.toggleTextEditable(this.pageIndex, this.layerIndex)
+    },
+    textNewLine(): number {
+      const content = this.$refs.content.innerHTML
+      const brs = content.match(/<br>/g)
+      console.log(content.split(/<br>/))
+
+      if (!brs) {
+        return 1
+      } else {
+        return brs.length + 1
+      }
+    },
+    getTextHW() {
+      // const el = document.createElement('span')
+      // const content = this.$refs.content.innerHTML
+      // const sentences = content.split(/<br>/)
+      // const maxTextLength = Math.max(...sentences.map(sentence => sentence.length))
+      // const maxSentence = sentences.filter(sentence => sentence.length === maxTextLength)
+      // el.textContnet = maxSentence
+
+      // console.log('maxSentence')
+      // console.log(maxSentence)
+      // Object.assign(el.style, this.contextStyles())
+      // document.body.appendChild(el)
+
+      const textRect = this.$refs.content.getBoundingClientRect()
+      const textHW = {
+        width: textRect.width,
+        height: textRect.height
+      }
+      // document.body.removeChild(el)
+
+      return textHW
     },
     toggleTextEditable(pageIndex: number, layerIndex: number) {
       const props = {
         text: this.$refs.content.textContent,
         textEditable: false
       }
-      console.log(props.text)
       this.updateTextProps(this.pageIndex, this.layerIndex, props)
-    },
-    onFocusOut() {
-      this.toggleTextEditable(this.pageIndex, this.layerIndex)
     }
   }
 })
@@ -153,13 +180,14 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-text {
+  position: relative;
   text-align: left;
 }
 .text-content {
   position: absolute;
   display: inline-block;
   outline: none;
-  white-space: pre-wrap;
+  white-space: nowrap;
   overflow-wrap: break-word;
 }
 </style>
