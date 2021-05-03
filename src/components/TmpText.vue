@@ -43,8 +43,8 @@ export default Vue.extend({
         weight: 'bold',
         align: 'left',
         color: '#000000',
-        size: 72
-        // initSize: 72
+        size: 72,
+        initSize: 72
       }
 
       const textHW = this.getTextHW(text, styles)
