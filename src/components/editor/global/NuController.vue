@@ -40,7 +40,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      // text content might be innerHTML for rendering reason
       controlPoints: ControlPoints,
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -53,8 +52,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const text = this.$refs.content as HTMLElement
-    text.innerHTML = this.getTextContent
+    this.$nextTick(() => {
+      const text = this.$refs.content as HTMLElement
+      text.innerHTML = this.getTextContent
+    })
   },
   computed: {
     ...mapGetters({

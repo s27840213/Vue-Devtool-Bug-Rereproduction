@@ -47,7 +47,7 @@ const getDefaultState = (): IEditorState => ({
             height: 120,
             x: 300,
             y: 200,
-            scale: 0,
+            scale: 1,
             scaleX: 0,
             scaleY: 0,
             rotate: 0,
@@ -55,7 +55,8 @@ const getDefaultState = (): IEditorState => ({
             weight: 'bold',
             align: 'left',
             color: '#000000',
-            size: 72
+            size: 72,
+            initSize: 72
           }
         }
       ]
@@ -117,6 +118,10 @@ const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     state.pages = newPages
   },
+  SET_layers(state: IEditorState, updateInfo: { pageIndex: number, newLayers: Array<IShape | IText | IImage | IGroup> }) {
+    console.log(updateInfo.pageIndex)
+    state.pages[updateInfo.pageIndex].layers = [...updateInfo.newLayers]
+  },
   SET_currPanelType(state: IEditorState, type: PanelType) {
     state.currPanelType = type
   },
@@ -130,6 +135,9 @@ const mutations: MutationTree<IEditorState> = {
     updateInfo.layers.forEach(layer => {
       state.pages[updateInfo.pageIndex].layers.push(layer)
     })
+  },
+  ADD_layerToPos(state: IEditorState, updateInfo: { pageIndex: number, layer: IShape | IText | IImage | IGroup, pos: number }) {
+    state.pages[updateInfo.pageIndex].layers.splice(updateInfo.pos, 0, updateInfo.layer)
   },
   Update_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean } }) {
     /**
@@ -179,6 +187,22 @@ const mutations: MutationTree<IEditorState> = {
     })
 
     state.lastSelectedPageIndex = updateInfo.pageIndex
+  },
+  DELETE_selectedLayer(state: IEditorState) {
+    const currSelectedInfo = state.currSelectedInfo
+    const pageIndex = currSelectedInfo.pageIndex
+
+    if (pageIndex === -1) {
+      console.warn('You didn\'t selected any layer')
+      return
+    }
+    state.pages[pageIndex].layers = state.pages[pageIndex].layers.filter((el, index) => {
+      return !currSelectedInfo.layersIndex.includes(index)
+    })
+
+    state.currSelectedInfo.pageIndex = -1
+    state.currSelectedInfo.layersIndex = []
+    state.currSelectedInfo.layers = []
   },
   UPDATE_currPageIndex(state, pageIndex) {
     state.currSelectedInfo.pageIndex = pageIndex

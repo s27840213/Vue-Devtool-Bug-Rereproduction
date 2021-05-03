@@ -1,17 +1,6 @@
       // @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
 <template lang="pug">
-  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)"
-      @keydown.ctrl.67.exact.stop.prevent="ShortcutHandler.copy()"
-      @keydown.meta.67.exact.stop.prevent="ShortcutHandler.copy()"
-      @keydown.ctrl.88.exact.stop.prevent="ShortcutHandler.cut()"
-      @keydown.meta.88.exact.stop.prevent="ShortcutHandler.cut()"
-      @keydown.ctrl.86.exact.stop.prevent="ShortcutHandler.paste()"
-      @keydown.meta.86.exact.stop.prevent="ShortcutHandler.paste()"
-      @keydown.ctrl.90.exact.stop.prevent="ShortcutHandler.undo()"
-      @keydown.meta.90.exact.stop.prevent="ShortcutHandler.undo()"
-      @keydown.ctrl.shift.90.exact.stop.prevent="ShortcutHandlun.redo()"
-      @keydown.meta.shift.90.exact.stop.prevent="ShortcutHandler.redo()"
-      tabindex="0")
+  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     nu-page(v-for="(page,index) in pages"
       :key="`page-${index}`"
       :pageIndex="index"
@@ -25,7 +14,6 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
-import ShortcutHandler from '@/utils/shortcutHandler'
 
 export default Vue.extend({
   data() {
@@ -36,8 +24,7 @@ export default Vue.extend({
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
-      pageIndex: -1,
-      ShortcutHandler
+      pageIndex: -1
     }
   },
   mounted() {
@@ -128,9 +115,6 @@ export default Vue.extend({
   position: relative;
   z-index: setZindex("editor-view");
   overflow: scroll;
-  &:focus {
-    outline: none;
-  }
 }
 .selection-area {
   position: absolute;

@@ -15,6 +15,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number
   },
+  mounted() {
+    console.log('group created')
+    console.log()
+    console.log(this.config.layers)
+  },
   methods: {
     styles() {
       return {

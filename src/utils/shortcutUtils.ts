@@ -1,4 +1,5 @@
 import store from '@/store'
+import GroupUtils from '@/utils/groupUtils'
 
 class ShortcutHandler {
   // target: HTMLElement
@@ -29,12 +30,18 @@ class ShortcutHandler {
     store.commit('ADD_selectedLayer', { layerIndexs: [...Array(pasteNum)].fill(diff).map((el, index) => el + index), pageIndex: lastSelectedPageIndex })
   }
 
-  delete() {
+  del() {
     console.log('delete')
+    store.commit('DELETE_selectedLayer')
   }
 
   cut() {
     console.log('cut')
+  }
+
+  group() {
+    console.log('group')
+    GroupUtils.appendGroup()
   }
 
   redo() {

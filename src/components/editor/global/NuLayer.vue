@@ -1,13 +1,13 @@
 <template lang="pug">
   div(class="nu-layer" :style="styles()"
-  @drop="onDrop"
-  @dragover.prevent,
-  @dragenter.prevent)
+      @drop="onDrop"
+      @dragover.prevent,
+      @dragenter.prevent)
     div(:class="{'layer-scale': true, 'layer-text': config.type === 'text'}" :style="scaleStyles()")
       nu-clipper(v-if="config.type !== 'group'" :config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
-      component(v-else :is="`nu-${config.type}`" :config="config")
+      component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
 </template>
 
 <script lang="ts">
@@ -79,7 +79,6 @@ export default Vue.extend({
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
-  background-color: white;
 
   &:focus {
     background-color: rgba(168, 218, 220, 1);

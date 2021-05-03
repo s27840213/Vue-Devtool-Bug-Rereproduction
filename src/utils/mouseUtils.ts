@@ -1,7 +1,8 @@
 /**
  */
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, ILayer } from '@/interfaces/layer'
+import LayerFactary from '@/utils/layerFactary'
+import { ILayer } from '@/interfaces/layer'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -33,6 +34,7 @@ class MouseUtils {
       const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
       const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
 
+      // const layer = LayerFactary.newImage(x, y, pageIndex)
       const layer: ILayer = {
         type: data.type,
         pageIndex: pageIndex,
