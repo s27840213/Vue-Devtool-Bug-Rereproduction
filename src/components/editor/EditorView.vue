@@ -1,3 +1,4 @@
+      // @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
 <template lang="pug">
   div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     nu-page(v-for="(page,index) in pages"

@@ -37,28 +37,29 @@ const getDefaultState = (): IEditorState => ({
         //     size: 72
         //   }
         // },
-        {
-          type: 'text',
-          pageIndex: 1,
-          active: false,
-          shown: false,
-          text: 'Tesing Font ts',
-          styles: {
-            width: 120,
-            height: 120,
-            x: 300,
-            y: 200,
-            scale: 0,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            font: 'Lobster',
-            weight: 'bold',
-            align: 'left',
-            color: '#000000',
-            size: 72
-          }
-        }
+        // {
+        //   type: 'text',
+        //   pageIndex: 1,
+        //   active: false,
+        //   shown: false,
+        //   text: 'Tesing Font ts',
+        //   styles: {
+        //     width: 120,
+        //     height: 120,
+        //     x: 300,
+        //     y: 200,
+        //     scale: 1,
+        //     scaleX: 0,
+        //     scaleY: 0,
+        //     rotate: 0,
+        //     font: 'Lobster',
+        //     weight: 'bold',
+        //     align: 'left',
+        //     color: '#000000',
+        //     size: 72,
+        //     initSize: 72
+        //   }
+        // }
       ]
     },
     {

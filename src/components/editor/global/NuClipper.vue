@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-clipper" :style="styles()")
+  div(class="nu-clipper" :style="styles()" )
     slot
 </template>
 

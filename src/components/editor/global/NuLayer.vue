@@ -3,9 +3,10 @@
       @drop="onDrop"
       @dragover.prevent,
       @dragenter.prevent)
-    div(class="layer-scale" :style="scaleStyles()")
+    div(:class="{'layer-scale': true, 'layer-text': config.type === 'text'}" :style="scaleStyles()")
       nu-clipper(v-if="config.type !== 'group'" :config="config")
-        component(:is="`nu-${config.type}`" :config="config")
+        component(:is="`nu-${config.type}`" :config="config"
+        :pageIndex="pageIndex" :layerIndex="layerIndex")
       component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
     div(class="test-index")
       span {{layerIndex}}
@@ -48,6 +49,14 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
+      if (this.config.type === 'text') {
+        return {
+          transform: `
+          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
+          scale(${this.config.styles.scale})`
+        }
+      }
       return {
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
@@ -82,5 +91,8 @@ export default Vue.extend({
 }
 .layer-scale {
   position: absolute;
+}
+.layer-text {
+  // margin: 10px;
 }
 </style>

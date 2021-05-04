@@ -1,21 +1,27 @@
 <template lang="pug">
-  div(v-if="isShown || isActive"
-      class="nu-controller"
-      ref="body"
-      :style="styles()"
-      @drop="onDrop"
-      @dragover.prevent,
-      @dragenter.prevent
-      @mousedown.left.stop="moveStart"
-      @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
-    template(v-if="isActive && !isControlling")
-      div(v-for="(controlPoint, index) in controlPoints.positions"
-        class="scaler"
-        :key="index"
-        :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
-        @mousedown.stop="scaleStart")
-      div(class="rotaterWrapper")
-        div(class="rotater" @mousedown.stop="rotateStart")
+  keep-alive
+    div(v-if="isShown || isActive"
+        class="nu-controller"
+        ref="body"
+        :style="styles()"
+        @drop="onDrop"
+        @dragover.prevent,
+        @dragenter.prevent
+        @click="onClick"
+        @mousedown.left.stop="moveStart"
+        @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
+      span(class="text-content" :style="contextStyles()" ref="content"
+      @blur="onFocusOut"
+      @keydown="onKeyDown"
+      :contenteditable="this.config.textEditable")
+      template(v-if="isActive && !isControlling")
+        div(v-for="(controlPoint, index) in controlPoints.positions"
+          class="scaler"
+          :key="index"
+          :style="Object.assign(controlPoint, cursorStyles(index, getLayerRotate))"
+          @mousedown.stop="scaleStart")
+        div(class="rotaterWrapper")
+          div(class="rotater" @mousedown.stop="rotateStart")
 </template>
 
 <script lang="ts">
@@ -25,6 +31,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
+import CssConveter from '@/utils/cssConverter'
 
 export default Vue.extend({
   props: {
@@ -40,9 +47,17 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      scale: { xSign: 1, ySign: 1 }
+      scale: { xSign: 1, ySign: 1 },
+      clickTime: new Date().toISOString(),
+      isGetMoved: false
     }
   },
+  // mounted() {
+  //   this.$nextTick(() => {
+  //     const text = this.$refs.content as HTMLElement
+  //     text.innerHTML = this.getTextContent
+  //   })
+  // },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -71,9 +86,24 @@ export default Vue.extend({
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
+    },
+    getFontSize(): number {
+      return this.config.styles.size
+    },
+    getTextContent(): string {
+      return this.config.text
     }
   },
   methods: {
+    contextStyles() {
+      const styles = {
+        color: 'rgba(10,10,10,0)',
+        'font-size': `${this.getFontSize}px`,
+        'caret-color': this.isGetMoved ? '#00000000' : '#000000',
+        'pointer-events': this.config.textEditable ? 'initial' : 'none'
+      }
+      return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
+    },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
@@ -107,6 +137,15 @@ export default Vue.extend({
         }
       })
     },
+    updateFontSize(pageIndex: number, layerIndex: number, size: number) {
+      this.updateLayerStyles({
+        pageIndex,
+        layerIndex,
+        styles: {
+          size
+        }
+      })
+    },
     updateLayerRotate(pageIndex: number, layerIndex: number, rotate: number) {
       this.updateLayerStyles({
         pageIndex,
@@ -125,19 +164,39 @@ export default Vue.extend({
         }
       })
     },
+    triggerTextEditor(pageIndex: number, layerIndex: number) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props: {
+          textEditable: true
+        }
+      })
+    },
     styles() {
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
-        'pointer-events': this.isActive || this.isShown ? 'initial' : 'none'
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'none'
       }
     },
 
     moveStart(event: MouseEvent) {
       if (event.target === this.$refs.body) {
         this.isControlling = true
+        const layer = this.$el as HTMLElement
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        layer.addEventListener('mouseup', this.moveEnd)
+        window.addEventListener('mousemove', this.moving)
+        if (this.config.type === 'text') {
+          const text = this.$refs.content as HTMLElement
+          text.innerHTML = this.getTextContent
+          this.isGetMoved = true
+          this.clickTime = new Date().toISOString()
+          this.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+        }
         this.setCursorStyle('move')
         if (this.config.type !== 'tmp') {
           /**
@@ -149,23 +208,22 @@ export default Vue.extend({
            * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
            * Thus, we need to do some condition checking to prevent this error
            */
-          const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0) ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
-          console.log(targetIndex)
-          if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
-            GroupUtils.deselect()
+          const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || GroupUtils.tmpLayers.length === 0)
+            ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          if (!this.isActive) {
+            if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
+              GroupUtils.deselect()
+            }
+            GroupUtils.select([targetIndex])
           }
-          GroupUtils.select([targetIndex])
         }
-        const layer = this.$el as HTMLElement
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        layer.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
       }
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
+        this.setCursorStyle('move')
         event.preventDefault()
-        const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+        var offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = PropsTransformer.getActualMoveOffset(offsetPos.x, offsetPos.y)
         this.initialPos.x += offsetPos.x
         this.initialPos.y += offsetPos.y
@@ -185,6 +243,9 @@ export default Vue.extend({
         document.documentElement.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
+      setTimeout(() => {
+        this.isGetMoved = false
+      }, 350)
     },
 
     scaleStart(event: MouseEvent) {
@@ -266,6 +327,12 @@ export default Vue.extend({
         this.scale.ySign * (offsetHeight / 2) * Math.cos(angleInRad) + this.initTranslate.y
 
       this.updateLayerPos(this.pageIndex, this.layerIndex, x, y)
+
+      if (this.config.type === 'text') {
+        // may need to change the initWidht/height and the scale will always set to 1
+        // only if the control points be manipulated changes the scale
+        this.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
+      }
     },
     scaleEnd() {
       this.isControlling = false
@@ -322,6 +389,100 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
       MouseUtils.onDrop(e, this.pageIndex, targetOffset)
+    },
+    onClick(e: MouseEvent) {
+      const clickDate = new Date(this.clickTime)
+      const currDate = new Date()
+      const diff = currDate.getTime() - clickDate.getTime()
+
+      this.textClickHandler(diff)
+    },
+    textClickHandler(diff: number) {
+      if (this.config.type === 'text' && diff < 100) {
+        this.isGetMoved = false
+        this.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+      }
+    },
+    onFocusOut() {
+      this.toggleTextEditable(this.pageIndex, this.layerIndex, false)
+    },
+    onKeyDown(e: KeyboardEvent) {
+      if (this.config.type === 'text') {
+        this.onTyping(e)
+      }
+    },
+    onTyping(e: KeyboardEvent) {
+      if (this.isGetMoved) {
+        e.preventDefault()
+      } else {
+        this.textNewLine(e)
+        const text = this.$refs.content as HTMLElement
+        setTimeout(() => {
+          const props = {
+            text: text.innerHTML
+          }
+          const textSize = {
+            width: text.offsetWidth,
+            height: text.offsetHeight
+          }
+          this.updateTextProps(this.pageIndex, this.layerIndex, props)
+          this.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+          this.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+        }, 0)
+      }
+    },
+    textNewLine(e: KeyboardEvent) {
+      if (e.key !== 'Enter') return
+      e.preventDefault()
+
+      const docFragment = document.createDocumentFragment()
+      const br = document.createElement('br')
+      docFragment.appendChild(br)
+
+      let range = window.getSelection()?.getRangeAt(0)
+      if (range) {
+        range.deleteContents()
+        range.insertNode(docFragment)
+      }
+
+      range = document.createRange()
+      range.setStartAfter(br)
+      range.collapse(true)
+
+      const sel = window.getSelection()
+      if (sel) {
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }
+
+      if ((this.$refs.content as HTMLElement).lastChild?.nodeName !== 'BR') {
+        const br = document.createElement('br') as HTMLBRElement
+        (this.$refs.content as HTMLElement).appendChild(br)
+      }
+    },
+    toggleTextEditable(pageIndex: number, layerIndex: number, isEditable: boolean) {
+      const props = {
+        textEditable: isEditable
+      }
+      this.updateTextProps(this.pageIndex, this.layerIndex, props)
+    },
+    updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
+      this.updateLayerProps({
+        pageIndex,
+        layerIndex,
+        props
+      })
+    },
+    updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
+      this.updateLayerStyles({
+        pageIndex,
+        layerIndex,
+        styles: {
+          initWidth,
+          initHeight,
+          initSize
+        }
+      })
     }
   }
 })
@@ -344,6 +505,7 @@ export default Vue.extend({
   }
 }
 .scaler {
+  pointer-events: auto;
   position: absolute;
   width: 10px;
   height: 10px;
@@ -363,5 +525,14 @@ export default Vue.extend({
   height: 10px;
   background-color: blue;
   cursor: move;
+}
+.text-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  outline: none;
+  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 </style>

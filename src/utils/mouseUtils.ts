@@ -3,7 +3,7 @@
 import store from '@/store'
 import LayerFactary from '@/utils/layerFactary'
 import { ILayer } from '@/interfaces/layer'
-
+import GroupUtils from '@/utils/groupUtils'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -55,8 +55,11 @@ class MouseUtils {
       }
       if (data.type === 'image') {
         layer.src = require(`@/assets/${data.src}`)
+        // should be deleted
+        layer.text = data.text
       } else if (data.type === 'text') {
         layer.text = data.text
+        layer.textEditable = false
         layer.styles = Object.assign(data.styles, layer.styles)
       }
 
@@ -64,6 +67,8 @@ class MouseUtils {
         pageIndex: pageIndex,
         layers: [layer]
       })
+      GroupUtils.deselect()
+      GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
     }
   }
 }

@@ -46,9 +46,8 @@ class GroupUtils {
   }
 
   group() {
-    console.log('Group!!!')
     if (this.tmpLayers.length < 2) {
-      console.log('You need to selecte at least 2 layers!')
+      console.log('You need to select at least 2 layers!')
       return
     }
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
@@ -73,16 +72,7 @@ class GroupUtils {
     this.deselect()
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
 
-    store.commit('Update_layerProps', {
-      pageIndex: lastSelectedPageIndex,
-      layerIndex: tmpIndex,
-      props: {
-        type: 'tmp',
-        active: true
-      }
-    })
     const tmpLayer = GeneralUtils.deepCopy(store.getters.getLayer(lastSelectedPageIndex, tmpIndex))
-    console.log(tmpLayer)
     this.set(tmpIndex, tmpLayer.styles, tmpLayer.layers)
   }
 
@@ -91,65 +81,106 @@ class GroupUtils {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
 
     if (this.tmpIndex < 0) {
-      const layers = MappingUtils.mappingLayers(layerIndexs)
-      this.tmpStyles = calcTmpProps(layers)
-      this.tmpLayers = this.mapLayersToTmp(layers, this.tmpStyles)
-      const topIndex = Math.max(...layerIndexs)
-      const newLayersNum = layers.length
-      this.tmpIndex = topIndex - newLayersNum + 1
-      const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
-        return !layerIndexs.includes(index)
-      })
-      const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
-      store.commit('SET_layers', {
-        pageIndex: lastSelectedPageIndex,
-        newLayers
-      })
-      store.commit('ADD_layersToPos', {
-        pageIndex: lastSelectedPageIndex,
-        layers: [tmp],
-        pos: this.tmpIndex
-      })
+      if (layerIndexs.length === 1) {
+        this.tmpIndex = layerIndexs[0]
+        store.commit('Update_layerProps', {
+          pageIndex: lastSelectedPageIndex,
+          layerIndex: this.tmpIndex,
+          props: {
+            active: true
+          }
+        })
+      } else {
+        const layers = MappingUtils.mappingLayers(layerIndexs)
+        this.tmpStyles = calcTmpProps(layers)
+        this.tmpLayers = this.mapLayersToTmp(layers, this.tmpStyles)
+        const topIndex = Math.max(...layerIndexs)
+        const newLayersNum = layers.length
+        this.tmpIndex = topIndex - newLayersNum + 1
+        const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
+          return !layerIndexs.includes(index)
+        })
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
+        store.commit('SET_layers', {
+          pageIndex: lastSelectedPageIndex,
+          newLayers
+        })
+        store.commit('ADD_layersToPos', {
+          pageIndex: lastSelectedPageIndex,
+          layers: [tmp],
+          pos: this.tmpIndex
+        })
+      }
     } else {
-      const layers = MappingUtils.mappingLayers(layerIndexs)
-      const prevTmpStyles = this.tmpStyles
-      this.tmpStyles = calcTmpProps([...this.mapLayersToPage(this.tmpLayers, this.tmpStyles), ...layers])
-      this.tmpLayers = this.mapLayersToTmp([...this.mapLayersToPage(this.tmpLayers, prevTmpStyles), ...layers], this.tmpStyles)
-      const topIndex = Math.max(this.tmpIndex, ...layerIndexs)
-      const newLayersNum = 1 + layerIndexs.length
-      const indexs = [this.tmpIndex, ...layerIndexs]
-      this.tmpIndex = topIndex - newLayersNum + 1
-      const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
-        return !indexs.includes(index)
-      })
-      const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
-      store.commit('SET_layers', {
-        pageIndex: lastSelectedPageIndex,
-        newLayers
-      })
-      store.commit('ADD_layersToPos', {
-        pageIndex: lastSelectedPageIndex,
-        layers: [tmp],
-        pos: this.tmpIndex
-      })
+      if (this.tmpLayers.length === 0) {
+        const indexs = [this.tmpIndex, ...layerIndexs]
+        const layers = MappingUtils.mappingLayers(indexs)
+        this.tmpStyles = calcTmpProps(layers)
+        this.tmpLayers = this.mapLayersToTmp(layers, this.tmpStyles)
+        const topIndex = Math.max(...indexs)
+        const newLayersNum = layers.length
+        this.tmpIndex = topIndex - newLayersNum + 1
+        const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
+          return !indexs.includes(index)
+        })
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
+        store.commit('SET_layers', {
+          pageIndex: lastSelectedPageIndex,
+          newLayers
+        })
+        store.commit('ADD_layersToPos', {
+          pageIndex: lastSelectedPageIndex,
+          layers: [tmp],
+          pos: this.tmpIndex
+        })
+      } else {
+        const layers = MappingUtils.mappingLayers(layerIndexs)
+        const prevTmpStyles = this.tmpStyles
+        this.tmpStyles = calcTmpProps([...this.mapLayersToPage(this.tmpLayers, this.tmpStyles), ...layers])
+        this.tmpLayers = this.mapLayersToTmp([...this.mapLayersToPage(this.tmpLayers, prevTmpStyles), ...layers], this.tmpStyles)
+        const topIndex = Math.max(this.tmpIndex, ...layerIndexs)
+        const newLayersNum = 1 + layerIndexs.length
+        const indexs = [this.tmpIndex, ...layerIndexs]
+        this.tmpIndex = topIndex - newLayersNum + 1
+        const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
+          return !indexs.includes(index)
+        })
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
+        store.commit('SET_layers', {
+          pageIndex: lastSelectedPageIndex,
+          newLayers
+        })
+        store.commit('ADD_layersToPos', {
+          pageIndex: lastSelectedPageIndex,
+          layers: [tmp],
+          pos: this.tmpIndex
+        })
+      }
     }
-
-    console.log(`select ${this.tmpIndex}`)
   }
 
   deselect() {
     if (this.tmpIndex !== -1) {
       const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-      console.log(this.tmpIndex)
-      store.commit('DELETE_layer', {
-        pageIndex: lastSelectedPageIndex,
-        layerIndex: this.tmpIndex
-      })
-      store.commit('ADD_layersToPos', {
-        pageIndex: lastSelectedPageIndex,
-        layers: [...this.mapLayersToPage(this.tmpLayers, this.tmpStyles)],
-        pos: this.tmpIndex
-      })
+      if (this.tmpLayers.length === 0) {
+        store.commit('Update_layerProps', {
+          pageIndex: lastSelectedPageIndex,
+          layerIndex: this.tmpIndex,
+          props: {
+            active: false
+          }
+        })
+      } else {
+        store.commit('DELETE_layer', {
+          pageIndex: lastSelectedPageIndex,
+          layerIndex: this.tmpIndex
+        })
+        store.commit('ADD_layersToPos', {
+          pageIndex: lastSelectedPageIndex,
+          layers: [...this.mapLayersToPage(this.tmpLayers, this.tmpStyles)],
+          pos: this.tmpIndex
+        })
+      }
       this.reset()
     }
   }
