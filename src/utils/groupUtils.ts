@@ -65,15 +65,14 @@ class GroupUtils {
   }
 
   ungroup() {
-    if (this.tmpLayers.length !== 1 || this.tmpLayers[0].type !== 'group') {
-      return
-    }
-    const tmpIndex = this.tmpIndex
-    this.deselect()
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+    if (store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex).type === 'group') {
+      const tmpIndex = this.tmpIndex
+      this.deselect()
 
-    const tmpLayer = GeneralUtils.deepCopy(store.getters.getLayer(lastSelectedPageIndex, tmpIndex))
-    this.set(tmpIndex, tmpLayer.styles, tmpLayer.layers)
+      const tmpLayer = GeneralUtils.deepCopy(store.getters.getLayer(lastSelectedPageIndex, tmpIndex))
+      this.set(tmpIndex, tmpLayer.styles, tmpLayer.layers)
+    }
   }
 
   select(layerIndexs: Array<number>) {

@@ -1,5 +1,6 @@
 import Vue, { VueConstructor } from 'vue'
 import '@/globalComponents'
+import VueRecyclerviewNew from 'vue-recyclerview'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -7,6 +8,7 @@ import { Store } from 'vuex'
 import { IEditorState } from './store/types'
 
 Vue.config.productionTip = false
+Vue.use(VueRecyclerviewNew)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)

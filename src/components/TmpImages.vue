@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="temp__content")
   img(class="temp__item"
-    v-for="i in 24",
-    :src="require('@/assets/img/svg/img-tmp.svg')",
+    v-for="photo in photos",
+    :src="photo.urls.small",
     draggable="true",
-    @dragstart="dragStart")
+    @dragstart="dragStart($event,photo)")
 </template>
 
 <script lang="ts">
@@ -12,10 +12,20 @@ div(class="temp__content")
  * This components is temporarily used for img section, and it will be remove in the future
  */
 import Vue from 'vue'
-
+import { mapGetters } from 'vuex'
 export default Vue.extend({
+  computed: {
+    ...mapGetters({
+      photos: 'getPhotos'
+    })
+  },
+  watch: {
+    photos() {
+      console.log(this.photos)
+    }
+  },
   methods: {
-    dragStart(e: DragEvent) {
+    dragStart(e: DragEvent, photo: any) {
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -24,12 +34,12 @@ export default Vue.extend({
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
-        src: 'img/svg/img-tmp.svg',
+        src: photo.urls.small,
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,
-          width: 150,
-          height: 150
+          width: photo.width / 20,
+          height: photo.height / 20
         }
       }
 

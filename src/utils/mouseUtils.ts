@@ -54,7 +54,7 @@ class MouseUtils {
         }
       }
       if (data.type === 'image') {
-        layer.src = require(`@/assets/${data.src}`)
+        layer.src = data.src
         // should be deleted
         layer.text = data.text
       } else if (data.type === 'text') {

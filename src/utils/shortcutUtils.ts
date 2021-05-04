@@ -26,7 +26,6 @@ class ShortcutHandler {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (GroupUtils.tmpIndex >= 0) {
       const tmpIndex = GroupUtils.tmpIndex
-      const tmpStyles = GroupUtils.tmpStyles
       const tmpLayers = GroupUtils.tmpLayers
       const tmpLayersNum = tmpLayers.length
       GroupUtils.deselect()

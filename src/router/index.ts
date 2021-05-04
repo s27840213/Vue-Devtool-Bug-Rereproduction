@@ -1,23 +1,24 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
-
+import store from '@/store'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'Editor',
-    component: Editor
+    component: Editor,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        await store.dispatch('getRandomPhoto', { count: 30 })
+        next()
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
-  // {
-  //   path: '/about',
-  //   name: 'About',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
-  // },
 ]
 
 const router = new VueRouter({

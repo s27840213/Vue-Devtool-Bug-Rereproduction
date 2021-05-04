@@ -11,7 +11,8 @@ export interface IEditorState {
   currPanelType: number,
   pageScaleRatio: number,
   lastSelectedPageIndex: number,
-  clipboard: Array<ITmp>
+  clipboard: Array<ITmp>,
+  photos: Array<unknown>
 }
 
 export enum PanelType {

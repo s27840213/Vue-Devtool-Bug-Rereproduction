@@ -4,6 +4,8 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import { IEditorState, PanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
+import apis from '@/apis/unsplash'
+
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
@@ -73,7 +75,8 @@ const getDefaultState = (): IEditorState => ({
   currPanelType: PanelType.template,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
-  clipboard: []
+  clipboard: [],
+  photos: []
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -106,6 +109,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getClipboard(state: IEditorState) {
     return state.clipboard
+  },
+  getPhotos(state: IEditorState) {
+    return state.photos
   }
 }
 
@@ -179,11 +185,22 @@ const mutations: MutationTree<IEditorState> = {
   },
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []
+  },
+  SET_photos(state: IEditorState, data) {
+    state.photos = [...data]
   }
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-
+  async getRandomPhoto({ state, commit }, { count }) {
+    try {
+      const { data } = await apis.getRandomPhoto(count)
+      console.log(data)
+      commit('SET_photos', data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }
 export default new Vuex.Store({
   state,
