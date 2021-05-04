@@ -113,6 +113,7 @@ class GroupUtils {
     } else {
       if (this.tmpLayers.length === 0) {
         const indexs = [this.tmpIndex, ...layerIndexs]
+        this.deselect()
         const layers = MappingUtils.mappingLayers(indexs)
         this.tmpStyles = calcTmpProps(layers)
         this.tmpLayers = this.mapLayersToTmp(layers, this.tmpStyles)
