@@ -24,6 +24,7 @@ import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
 import { ControlPoints } from '@/store/types'
 import MouseUtils from '@/utils/mouseUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
@@ -82,8 +83,7 @@ export default Vue.extend({
       updateLayerStyles: 'Update_layerStyles',
       updateLayerProps: 'Update_layerProps',
       addLayer: 'ADD_selectedLayer',
-      clearSelectedInfo: 'CLEAR_currSelectedInfo',
-      updateSelectedLayers: 'Update_selectedLayerStyles',
+      updateTmpLayerStyles: 'Update_tmpLayerStyles',
       ADD_newLayers: 'ADD_newLayers'
     }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
@@ -139,16 +139,27 @@ export default Vue.extend({
       if (event.target === this.$refs.body) {
         this.isControlling = true
         this.setCursorStyle('move')
-
+        if (this.config.type !== 'tmp') {
+          /**
+           * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
+           * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
+           * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
+           * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
+           * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
+           * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
+           * Thus, we need to do some condition checking to prevent this error
+           */
+          const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0) ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          console.log(targetIndex)
+          if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
+            GroupUtils.deselect()
+          }
+          GroupUtils.select([targetIndex])
+        }
         const layer = this.$el as HTMLElement
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         layer.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        if (!event.metaKey && !this.currSelectedInfo.layersIndex.includes(this.layerIndex)) {
-          this.clearSelectedInfo()
-        }
-        this.addSelectedLayer()
-        console.log(layer.getBoundingClientRect())
       }
     },
     moving(event: MouseEvent) {
@@ -158,14 +169,13 @@ export default Vue.extend({
         const moveOffset = PropsTransformer.getActualMoveOffset(offsetPos.x, offsetPos.y)
         this.initialPos.x += offsetPos.x
         this.initialPos.y += offsetPos.y
-
-        this.updateSelectedLayers({
-          pageIndex: this.pageIndex,
-          styles: {
+        GroupUtils.movingTmp(
+          this.pageIndex,
+          {
             x: moveOffset.offsetX,
             y: moveOffset.offsetY
           }
-        })
+        )
       }
     },
     moveEnd() {
@@ -312,12 +322,6 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
       MouseUtils.onDrop(e, this.pageIndex, targetOffset)
-    },
-    addSelectedLayer() {
-      this.addLayer({
-        layerIndexs: [this.layerIndex],
-        pageIndex: this.pageIndex
-      })
     }
   }
 })
@@ -332,7 +336,6 @@ export default Vue.extend({
   position: absolute;
   border: 3px solid setColor(blue-2);
   box-sizing: border-box;
-  background-color: rgba(0, 0, 255, 0);
   &:active {
     border: 1px solid rgb(174, 46, 190);
   }

@@ -1,6 +1,6 @@
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
-
+import GeneralUtils from '@/utils/generalUtils'
 class ShortcutHandler {
   // target: HTMLElement
   // constructor(target: HTMLElement) {
@@ -9,9 +9,11 @@ class ShortcutHandler {
 
   copy() {
     console.log('copy')
-    const selectedLayers = store.getters.getCurrSelectedLayers
-    console.log(selectedLayers)
-    store.commit('SET_clipboard', [...selectedLayers])
+    if (GroupUtils.tmpIndex >= 0) {
+      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, GroupUtils.tmpIndex)))
+    } else {
+      console.warn('You did\'t select any layer')
+    }
   }
 
   paste() {
@@ -22,12 +24,18 @@ class ShortcutHandler {
       return layer
     })
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    store.commit('ADD_newLayers', { pageIndex: lastSelectedPageIndex, layers: JSON.parse(JSON.stringify(clipboardInfo)) })
-    store.commit('CLEAR_currSelectedInfo')
-    const layersNum = store.getters.getLayersNum(lastSelectedPageIndex)
-    const pasteNum = clipboardInfo.length
-    const diff = layersNum - pasteNum
-    store.commit('ADD_selectedLayer', { layerIndexs: [...Array(pasteNum)].fill(diff).map((el, index) => el + index), pageIndex: lastSelectedPageIndex })
+    if (GroupUtils.tmpIndex >= 0) {
+      const tmpIndex = GroupUtils.tmpIndex
+      const tmpStyles = GroupUtils.tmpStyles
+      const tmpLayers = GroupUtils.tmpLayers
+      const tmpLayersNum = tmpLayers.length
+      GroupUtils.deselect()
+      store.commit('ADD_layersToPos', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
+      GroupUtils.set(tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].styles), GeneralUtils.deepCopy(clipboardInfo[0].layers))
+    } else {
+      store.commit('ADD_newLayers', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
+      GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].styles), GeneralUtils.deepCopy(clipboardInfo[0].layers))
+    }
   }
 
   del() {
@@ -41,7 +49,12 @@ class ShortcutHandler {
 
   group() {
     console.log('group')
-    GroupUtils.appendGroup()
+    GroupUtils.group()
+  }
+
+  ungroup() {
+    console.log('ungroup')
+    GroupUtils.ungroup()
   }
 
   redo() {

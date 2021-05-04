@@ -35,5 +35,8 @@ export interface IImage extends ILayer<IStyle> {
   src: string
 }
 export interface IGroup extends ILayer<IStyle> {
+  layers: Array<IShape | IText | IImage | IGroup>
+}
+export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage>
 }

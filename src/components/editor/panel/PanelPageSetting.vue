@@ -6,14 +6,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { mappingIconSet } from '@/utils/mapping'
 
 export default Vue.extend({
   components: {
     SearchBar
-  },
-  methods: {
-    mappingIconSet
   }
 })
 </script>

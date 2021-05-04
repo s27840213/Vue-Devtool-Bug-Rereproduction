@@ -2,12 +2,12 @@
   div(class="panel-group")
     btn(class="full-width" :type="'primary-lg'") Group
     action-bar(class="flex-between")
-      svg-icon(v-for="(icon,index) in mappingIconSet('align')"
+      svg-icon(v-for="(icon,index) in mappingIcons('align')"
         :key="`align-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'24px'" :iconColor="'gray-2'")
     action-bar(class="flex-between")
-      svg-icon(v-for="(icon,index) in mappingIconSet('action')"
+      svg-icon(v-for="(icon,index) in mappingIcons('action')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
@@ -15,11 +15,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mappingIconSet } from '@/utils/mapping'
+import MappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   methods: {
-    mappingIconSet
+    mappingIcons(type: string) {
+      return MappingUtils.mappingIconSet(type)
+    }
   }
 })
 </script>

@@ -13,6 +13,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   data() {
@@ -36,8 +37,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      addLayer: 'ADD_selectedLayer',
-      clearSelectedInfo: 'CLEAR_currSelectedInfo'
+      addLayer: 'ADD_selectedLayer'
     }),
     selectStart(e: MouseEvent) {
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
@@ -61,13 +61,18 @@ export default Vue.extend({
       document.documentElement.dispatchEvent(event)
     },
     selectEnd() {
-      this.isSelecting = false
-      this.clearSelectedInfo()
-      document.documentElement.removeEventListener('mousemove', this.selecting)
-      document.documentElement.removeEventListener('scroll', this.scrollUpdate)
-      document.documentElement.removeEventListener('mouseup', this.selectEnd)
-      const selectionArea = this.$refs.selectionArea as HTMLElement
-      this.handleSelectionData(selectionArea.getBoundingClientRect())
+      GroupUtils.deselect()
+      /**
+       * Use nextTick to trigger the following function after DOM updating
+       */
+      this.$nextTick(() => {
+        this.isSelecting = false
+        document.documentElement.removeEventListener('mousemove', this.selecting)
+        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+        document.documentElement.removeEventListener('mouseup', this.selectEnd)
+        const selectionArea = this.$refs.selectionArea as HTMLElement
+        this.handleSelectionData(selectionArea.getBoundingClientRect())
+      })
     },
     handleSelectionData(selectionData: any) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${this.pageIndex}`)]
@@ -81,7 +86,8 @@ export default Vue.extend({
       })
       if (layerIndexs.length > 0) {
         console.log(`Overlap num: ${layerIndexs.length}`)
-        this.addSelectedLayer(layerIndexs as number[])
+        // this.addSelectedLayer(layerIndexs as number[])
+        GroupUtils.select(layerIndexs)
       }
     },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
@@ -99,8 +105,8 @@ export default Vue.extend({
     },
     addSelectedLayer(layerIndexs: Array<number>) {
       this.addLayer({
-        layerIndexs: [...layerIndexs],
-        pageIndex: this.pageIndex
+        pageIndex: this.pageIndex,
+        layerIndexs: [...layerIndexs]
       })
     }
   }

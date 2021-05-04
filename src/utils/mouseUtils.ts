@@ -64,11 +64,6 @@ class MouseUtils {
         pageIndex: pageIndex,
         layers: [layer]
       })
-      store.commit('CLEAR_currSelectedInfo')
-      store.commit('ADD_selectedLayer', {
-        pageIndex: pageIndex,
-        layerIndexs: [store.state.pages[pageIndex].layers.length - 1]
-      })
     }
   }
 }

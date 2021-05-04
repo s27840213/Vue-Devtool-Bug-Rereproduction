@@ -3,6 +3,7 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import { IEditorState, PanelType } from './types'
 import { IPage } from '@/interfaces/page'
+import GroupUtils from '@/utils/groupUtils'
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
@@ -71,11 +72,6 @@ const getDefaultState = (): IEditorState => ({
   currPanelType: PanelType.template,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
-  currSelectedInfo: {
-    pageIndex: -1,
-    layersIndex: [],
-    layers: []
-  },
   clipboard: []
 })
 const state = getDefaultState()
@@ -88,6 +84,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageScaleRatio(state) {
     return state.pageScaleRatio
+  },
+  getLayer(state: IEditorState) {
+    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup => {
+      return state.pages[pageIndex].layers[layerIndex]
+    }
   },
   getLayers(state: IEditorState) {
     return (pageIndex: number): Array<IShape | IText | IImage | IGroup> => {
@@ -102,12 +103,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLastSelectedPageIndex(state: IEditorState) {
     return state.lastSelectedPageIndex
   },
-  getCurrSelectedInfo(state: IEditorState) {
-    return state.currSelectedInfo
-  },
-  getCurrSelectedLayers(state: IEditorState) {
-    return state.currSelectedInfo.layers
-  },
   getClipboard(state: IEditorState) {
     return state.clipboard
   }
@@ -118,7 +113,6 @@ const mutations: MutationTree<IEditorState> = {
     state.pages = newPages
   },
   SET_layers(state: IEditorState, updateInfo: { pageIndex: number, newLayers: Array<IShape | IText | IImage | IGroup> }) {
-    console.log(updateInfo.pageIndex)
     state.pages[updateInfo.pageIndex].layers = [...updateInfo.newLayers]
   },
   SET_currPanelType(state: IEditorState, type: PanelType) {
@@ -135,8 +129,11 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers.push(layer)
     })
   },
-  ADD_layerToPos(state: IEditorState, updateInfo: { pageIndex: number, layer: IShape | IText | IImage | IGroup, pos: number }) {
-    state.pages[updateInfo.pageIndex].layers.splice(updateInfo.pos, 0, updateInfo.layer)
+  ADD_layersToPos(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup>, pos: number }) {
+    state.pages[updateInfo.pageIndex].layers.splice(updateInfo.pos, 0, ...updateInfo.layers)
+  },
+  DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
+    state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
   Update_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean } }) {
     /**
@@ -156,71 +153,28 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
   },
-  Update_selectedLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
-    state.currSelectedInfo.layersIndex.forEach((layerIndex) => {
-      Object.entries(updateInfo.styles).forEach(([k, v]) => {
-        if (typeof v === 'number') {
-          (state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] as number) += v
-        } else {
-          state.pages[updateInfo.pageIndex].layers[layerIndex].styles[k] = v
-        }
-      })
-    })
-  },
-  ADD_selectedLayer(state: IEditorState, updateInfo: { layerIndexs: number[], pageIndex: number }) {
-    let pIndex = state.currSelectedInfo.pageIndex
-    // If selected array is empty
-    if (pIndex === -1) {
-      state.currSelectedInfo.pageIndex = updateInfo.pageIndex
-      pIndex = updateInfo.pageIndex
-    } else if (pIndex !== updateInfo.pageIndex) {
-      console.warn('Warning: Could not manipulate layers in different pages at the same time')
-      return
-    }
-    updateInfo.layerIndexs.forEach((layerIndex: number) => {
-      if (!state.currSelectedInfo.layersIndex.includes(layerIndex)) {
-        state.pages[pIndex].layers[layerIndex].active = true
-        state.currSelectedInfo.layersIndex.push(layerIndex)
-        state.currSelectedInfo.layers.push(state.pages[pIndex].layers[layerIndex])
+  Update_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
+    Object.entries(updateInfo.styles).forEach(([k, v]) => {
+      if (typeof v === 'number') {
+        (state.pages[updateInfo.pageIndex].layers[GroupUtils.tmpIndex].styles[k] as number) += v
+      } else {
+        state.pages[updateInfo.pageIndex].layers[GroupUtils.tmpIndex].styles[k] = v
       }
     })
-
-    state.lastSelectedPageIndex = updateInfo.pageIndex
   },
   DELETE_selectedLayer(state: IEditorState) {
-    const currSelectedInfo = state.currSelectedInfo
-    const pageIndex = currSelectedInfo.pageIndex
-
-    if (pageIndex === -1) {
-      console.warn('You didn\'t selected any layer')
+    const index = GroupUtils.tmpIndex
+    if (index < 0) {
+      console.log('You didn\'t select any layer')
       return
     }
-    state.pages[pageIndex].layers = state.pages[pageIndex].layers.filter((el, index) => {
-      return !currSelectedInfo.layersIndex.includes(index)
-    })
+    console.log(index)
+    state.pages[state.lastSelectedPageIndex].layers.splice(index, 1)
 
-    state.currSelectedInfo.pageIndex = -1
-    state.currSelectedInfo.layersIndex = []
-    state.currSelectedInfo.layers = []
+    GroupUtils.reset()
   },
-  UPDATE_currPageIndex(state, pageIndex) {
-    state.currSelectedInfo.pageIndex = pageIndex
-  },
-  CLEAR_currSelectedInfo(state: IEditorState) {
-    const pageIndex = state.currSelectedInfo.pageIndex
-
-    // Set all selected layers' active property to false
-    state.currSelectedInfo.layersIndex.forEach((layerIndex) => {
-      state.pages[pageIndex].layers[layerIndex].active = false
-      state.currSelectedInfo.layersIndex.push(layerIndex)
-    })
-
-    state.currSelectedInfo.pageIndex = -1
-    state.currSelectedInfo.layersIndex = []
-    state.currSelectedInfo.layers = []
-  },
-  SET_clipboard(state: IEditorState, layersInfo) {
-    state.clipboard = JSON.parse(JSON.stringify(layersInfo))
+  SET_clipboard(state: IEditorState, tmpLayer: IShape | IText | IImage | IGroup) {
+    state.clipboard = [JSON.parse(JSON.stringify(tmpLayer))]
   },
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []

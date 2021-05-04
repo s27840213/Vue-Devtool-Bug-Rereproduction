@@ -1,6 +1,6 @@
 // import store from '@/store'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-// import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
   newImage(x: number, y: number, pageIndex: number) {
@@ -31,7 +31,7 @@ class LayerFactary {
     }
   }
 
-  newGroup(styles: ICalculatedGroupStyle, pageIndex: number) {
+  newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
       pageIndex: pageIndex,
       type: 'group',
@@ -47,15 +47,15 @@ class LayerFactary {
         width: styles.width,
         height: styles.height
       },
-      layers: styles.layers
+      layers: layers
     }
   }
 
-  newTmp(styles: ICalculatedGroupStyle, pageIndex: number) {
+  newTmp(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
       pageIndex: pageIndex,
       type: 'tmp',
-      active: false,
+      active: true,
       shown: false,
       styles: {
         x: styles.x,
@@ -67,7 +67,7 @@ class LayerFactary {
         width: styles.width,
         height: styles.height
       },
-      layers: styles.layers
+      layers: layers
     }
   }
 

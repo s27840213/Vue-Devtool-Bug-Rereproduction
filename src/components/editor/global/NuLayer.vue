@@ -7,6 +7,8 @@
       nu-clipper(v-if="config.type !== 'group'" :config="config")
         component(:is="`nu-${config.type}`" :config="config")
       component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
+    div(class="test-index")
+      span {{layerIndex}}
 </template>
 
 <script lang="ts">
@@ -18,7 +20,8 @@ import MouseUtils from '@/utils/mouseUtils'
 export default Vue.extend({
   props: {
     config: Object,
-    pageIndex: Number
+    pageIndex: Number,
+    layerIndex: Number
   },
   data() {
     return {

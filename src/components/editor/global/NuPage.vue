@@ -1,18 +1,20 @@
 <template lang="pug">
   div(class="nu-page"
-      @keydown.delete.exact.stop.prevent="ShortcutUtils.del()"
-      @keydown.ctrl.67.exact.stop.prevent="ShortcutUtils.copy()"
-      @keydown.meta.67.exact.stop.prevent="ShortcutUtils.copy()"
-      @keydown.ctrl.88.exact.stop.prevent="ShortcutUtils.cut()"
-      @keydown.meta.88.exact.stop.prevent="ShortcutUtils.cut()"
-      @keydown.ctrl.86.exact.stop.prevent="ShortcutUtils.paste()"
-      @keydown.meta.86.exact.stop.prevent="ShortcutUtils.paste()"
-      @keydown.ctrl.71.exact.stop.prevent="ShortcutUtils.group()"
-      @keydown.meta.71.exact.stop.prevent="ShortcutUtils.group()"
-      @keydown.ctrl.90.exact.stop.prevent="ShortcutUtils.undo()"
-      @keydown.meta.90.exact.stop.prevent="ShortcutUtils.undo()"
-      @keydown.ctrl.shift.90.exact.stop.prevent="ShortcutUtils.redo()"
-      @keydown.meta.shift.90.exact.stop.prevent="ShortcutUtils.redo()"
+      @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
+      @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+      @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+      @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+      @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+      @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste()"
+      @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste()"
+      @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
+      @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
+      @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+      @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+      @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+      @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+      @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+      @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
@@ -32,6 +34,7 @@
             :class="`nu-layer--p${pageIndex}`"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
+            :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer"
             @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)")
@@ -59,6 +62,7 @@ import { mapMutations, mapGetters } from 'vuex'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   data() {
@@ -77,17 +81,12 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
-    }),
-    currSelectedNum(): number {
-      return this.currSelectedInfo.layers.length
-    }
+    })
   },
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
       updateLayerProps: 'Update_layerProps',
-      addSelectedLayer: 'ADD_selectedLayer',
-      clearSelectedInfo: 'CLEAR_currSelectedInfo',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     styles(type: string) {
@@ -131,7 +130,7 @@ export default Vue.extend({
     },
     pageClickHandler() {
       this.setLastSelectedPageIndex(this.pageIndex)
-      this.clearSelectedInfo()
+      GroupUtils.deselect()
     }
   }
 })
