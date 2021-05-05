@@ -38,7 +38,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      addLayer: 'ADD_selectedLayer'
+      addLayer: 'ADD_selectedLayer',
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     selectStart(e: MouseEvent) {
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
@@ -63,6 +64,7 @@ export default Vue.extend({
     },
     selectEnd() {
       GroupUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex)
       /**
        * Use nextTick to trigger the following function after DOM updating
        */

@@ -68,6 +68,7 @@ class MouseUtils {
         layers: [layer]
       })
       GroupUtils.deselect()
+      store.commit('SET_lastSelectedPageIndex', pageIndex)
       GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
     }
   }

@@ -195,7 +195,6 @@ const actions: ActionTree<IEditorState, unknown> = {
   async getRandomPhoto({ state, commit }, { count }) {
     try {
       const { data } = await apis.getRandomPhoto(count)
-      console.log(data)
       commit('SET_photos', data)
     } catch (error) {
       console.log(error)

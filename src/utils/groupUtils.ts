@@ -78,7 +78,7 @@ class GroupUtils {
   select(layerIndexs: Array<number>) {
     // const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-
+    console.log(lastSelectedPageIndex)
     if (this.tmpIndex < 0) {
       if (layerIndexs.length === 1) {
         this.tmpIndex = layerIndexs[0]

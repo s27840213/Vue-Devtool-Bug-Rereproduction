@@ -95,6 +95,14 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      updateLayerStyles: 'Update_layerStyles',
+      updateLayerProps: 'Update_layerProps',
+      addLayer: 'ADD_selectedLayer',
+      updateTmpLayerStyles: 'Update_tmpLayerStyles',
+      ADD_newLayers: 'ADD_newLayers',
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+    }),
     contextStyles() {
       const styles = {
         color: 'rgba(10,10,10,0)',
@@ -109,13 +117,6 @@ export default Vue.extend({
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
-    ...mapMutations({
-      updateLayerStyles: 'Update_layerStyles',
-      updateLayerProps: 'Update_layerProps',
-      addLayer: 'ADD_selectedLayer',
-      updateTmpLayerStyles: 'Update_tmpLayerStyles',
-      ADD_newLayers: 'ADD_newLayers'
-    }),
     updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
       this.updateLayerStyles({
         pageIndex,
@@ -214,6 +215,7 @@ export default Vue.extend({
             if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
               GroupUtils.deselect()
             }
+            this.setLastSelectedPageIndex(this.pageIndex)
             GroupUtils.select([targetIndex])
           }
         }
