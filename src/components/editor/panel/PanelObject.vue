@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-object")
     search-bar
+    tmp-svg
 </template>
 
 <script lang="ts">

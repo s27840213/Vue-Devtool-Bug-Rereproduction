@@ -399,7 +399,9 @@ export default Vue.extend({
       if (this.isGetMoved) {
         e.preventDefault()
       } else {
-        this.textNewLine(e)
+        this.textBackspace(e)
+        this.textEnter(e)
+
         const text = this.$refs.content as HTMLElement
         setTimeout(() => {
           const props = {
@@ -415,7 +417,11 @@ export default Vue.extend({
         }, 0)
       }
     },
-    textNewLine(e: KeyboardEvent) {
+    textBackspace(e: KeyboardEvent) {
+      if (e.key !== 'Backspace') return
+      e.stopPropagation()
+    },
+    textEnter(e: KeyboardEvent) {
       if (e.key !== 'Enter') return
       e.preventDefault()
 
