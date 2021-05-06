@@ -4,6 +4,11 @@ export interface IPage {
   width: number,
   height: number,
   backgroundColor: string,
+  backgroundImage: {
+    src: string,
+    posX: number,
+    posY: number
+  },
   name: string,
   layers: Array<IShape | IText | IImage | IGroup>
 }
