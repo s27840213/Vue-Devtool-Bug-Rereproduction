@@ -1,5 +1,5 @@
 import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 
 /**
  * @param {object} currcurrSelectedLayers - used to record the info of selected layers
@@ -11,12 +11,8 @@ export interface IEditorState {
   currPanelType: number,
   pageScaleRatio: number,
   lastSelectedPageIndex: number,
-  currSelectedInfo: {
-    pageIndex: number,
-    layersIndex: number[],
-    layers: Array<IShape | IText | IImage | IGroup>
-  },
-  clipboard: Array<IShape | IText | IImage | IGroup>
+  clipboard: Array<ITmp>,
+  photos: Array<unknown>
 }
 
 export enum PanelType {
@@ -42,38 +38,48 @@ export enum LayerType {
 }
 
 export const ControlPoints = {
-  positions: [
+  scalers: [
     {
       left: '-7.5px',
       top: '-7.5px',
-      borderRadius: '50%'
-    },
-    {
-      top: '-7.5px'
+      borderRadius: '50%',
+      cursor: 'nwse-resize'
     },
     {
       right: '-7.5px',
       top: '-7.5px',
-      borderRadius: '50%'
-    },
-    {
-      right: '-7.5px'
+      borderRadius: '50%',
+      cursor: 'nesw-resize'
     },
     {
       right: '-7.5px',
       bottom: '-7.5px',
-      borderRadius: '50%'
-    },
-    {
-      bottom: '-7.5px'
+      borderRadius: '50%',
+      cursor: 'ns-resize'
     },
     {
       left: '-7.5px',
       bottom: '-7.5px',
-      borderRadius: '50%'
+      borderRadius: '50%',
+      cursor: 'nesw-resize'
+    }
+  ],
+  resizers: [
+    {
+      top: '-7.5px',
+      cursor: 'ew-resize'
     },
     {
-      left: '-7.5px'
+      right: '-7.5px',
+      cursor: 'ew-resize'
+    },
+    {
+      bottom: '-7.5px',
+      cursor: 'nwse-resize'
+    },
+    {
+      left: '-7.5px',
+      cursor: 'nwse-resize'
     }
   ],
   cursors: [

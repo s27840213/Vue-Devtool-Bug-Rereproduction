@@ -15,12 +15,12 @@
         div(class="full-width text-left ml-10")
           span(class="body-2 text-gray-2") #222222
     action-bar(class="flex-evenly")
-      svg-icon(v-for="(icon,index) in mappingIconSet('font')"
+      svg-icon(v-for="(icon,index) in mappingIcons('font')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
     action-bar(class="flex-evenly")
-      svg-icon(v-for="(icon,index) in mappingIconSet('font-align')"
+      svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
@@ -38,7 +38,7 @@
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     action-bar(class="flex-between")
-      svg-icon(v-for="(icon,index) in mappingIconSet('action')"
+      svg-icon(v-for="(icon,index) in mappingIcons('action')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
@@ -47,14 +47,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { mappingIconSet } from '@/utils/mapping'
+import MappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   components: {
     SearchBar
   },
   methods: {
-    mappingIconSet
+    mappingIcons(type: string) {
+      return MappingUtils.mappingIconSet(type)
+    }
   }
 })
 </script>

@@ -8,6 +8,8 @@
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
       component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
+    div(class="test-index")
+      span {{layerIndex}}
 </template>
 
 <script lang="ts">
@@ -90,7 +92,14 @@ export default Vue.extend({
 .layer-scale {
   position: absolute;
 }
-.layer-text {
-  // margin: 10px;
+.test-index {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  font-size: 18px;
+  color: white;
+  font-weight: bold;
+  text-shadow: 2px 2px 5px setColor(blue-1);
+  z-index: 100;
 }
 </style>

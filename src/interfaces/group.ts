@@ -4,6 +4,5 @@ export interface ICalculatedGroupStyle {
   x: number,
   y: number,
   width: number,
-  height: number,
-  layers: Array<IShape | IText | IImage | IGroup>
+  height: number
 }

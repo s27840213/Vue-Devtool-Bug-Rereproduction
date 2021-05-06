@@ -28,18 +28,19 @@ export default Vue.extend({
   },
   computed: {
     getTextContent(): string[] {
-      const text = this.config.text
       const textArr: string[] = []
-
+      const space = /&nbsp;/g
+      const text = this.config.text.replace(space, ' ')
+      console.log(text)
       let i = 0
       let j = 0
       for (i = 0, j = 0; i < text.length - 4; i++) {
-        if (text.substring(i, i + 6) === '&nbsp;') {
-          console.log('space')
-          textArr.push(text.substring(j, i))
-          i += 7
-          j = i
-        }
+        // if (text.substring(i, i + 6) === '&nbsp;') {
+        //   console.log('space')
+        //   textArr.push(text.substring(j, i))
+        //   i += 7
+        //   j = i
+        // }
         if (text.substring(i, i + 4) === '<br>') {
           textArr.push(text.substring(j, i))
           i += 4
@@ -77,5 +78,6 @@ export default Vue.extend({
   outline: none;
   white-space: nowrap;
   overflow-wrap: break-word;
+  user-select: none;
 }
 </style>

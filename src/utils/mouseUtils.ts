@@ -3,7 +3,7 @@
 import store from '@/store'
 import LayerFactary from '@/utils/layerFactary'
 import { ILayer } from '@/interfaces/layer'
-
+import GroupUtils from '@/utils/groupUtils'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -64,18 +64,15 @@ class MouseUtils {
       if (data.type === 'shape') {
         Object.assign(data.styles, layer.styles)
         Object.assign(layer, data)
-        console.log(layer)
       }
 
       store.commit('ADD_newLayers', {
         pageIndex: pageIndex,
         layers: [layer]
       })
-      store.commit('CLEAR_currSelectedInfo')
-      store.commit('ADD_selectedLayer', {
-        pageIndex: pageIndex,
-        layerIndexs: [store.state.pages[pageIndex].layers.length - 1]
-      })
+      GroupUtils.deselect()
+      store.commit('SET_lastSelectedPageIndex', pageIndex)
+      GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
     }
   }
 }
