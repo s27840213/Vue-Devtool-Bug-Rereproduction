@@ -3,6 +3,7 @@ import Vue from 'vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
 import TmpImages from '@/components/TmpImages.vue'
 import TmpText from '@/components/TmpText.vue'
+import TmpSvg from '@/components/TmpSvg.vue'
 import ActionBar from '@/components/global/ActionBar.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Btn from '@/components/global/Btn.vue'
@@ -15,10 +16,12 @@ import NuGroup from '@/components/editor/global/NuGroup.vue'
 import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuHighlighter from '@/components/editor/global/NuHighlighter.vue'
 import NuController from '@/components/editor/global/NuController.vue'
+import NuShape from '@/components/editor/global/NuShape.vue'
 
 Vue.component('svg-icon', SvgIcon)
 Vue.component('tmp-images', TmpImages)
 Vue.component('tmp-text', TmpText)
+Vue.component('tmp-svg', TmpSvg)
 Vue.component('btn', Btn)
 Vue.component('action-bar', ActionBar)
 Vue.component('property-bar', PropertyBar)
@@ -31,3 +34,4 @@ Vue.component('nu-tmp', NuTmp)
 Vue.component('nu-highlighter', NuHighlighter)
 Vue.component('nu-clipper', NuClipper)
 Vue.component('nu-controller', NuController)
+Vue.component('nu-shape', NuShape)

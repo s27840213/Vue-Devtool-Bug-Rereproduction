@@ -9444,7 +9444,7 @@ vue-recyclerview@^0.4.1:
   resolved "https://registry.yarnpkg.com/vue-recyclerview/-/vue-recyclerview-0.4.1.tgz#16ed322e7c76b13043cb46e80541c7654fe27a28"
   integrity sha512-NuadFeWQuK5s70W+SNHksPevf26ENImg+pYjlFgWNCNjcgv0L0rJpunceI/OdGngqBV9wzI/82Gu288h0+h+bg==
 
-vue-router@^3.2.0:
+vue-router@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.5.1.tgz#edf3cf4907952d1e0583e079237220c5ff6eb6c9"
   integrity sha512-RRQNLT8Mzr8z7eL4p7BtKvRaTSGdCbTy2+Mm5HTJvLGYSSeG9gDzNasJPP/yOYKLy+/cLG/ftrqq5fvkFwBJEw==

@@ -5,3 +5,9 @@ export interface IFrameList {
 export interface IFrame {
   temp: string | null
 }
+
+export interface ICoordinate {
+  x: number
+  y: number
+}
+

@@ -29,7 +29,7 @@ export interface IText extends ILayer<ITextStyle> {
   text: string
 }
 export interface IShape extends ILayer<IStyle> {
-  radius?: string,
+  radius?: string | number,
 }
 export interface IImage extends ILayer<IStyle> {
   src: string

@@ -54,13 +54,16 @@ class MouseUtils {
           }
         }
         if (data.type === 'image') {
-          layer.src = data.src
-          // should be deleted
-          layer.text = data.text
-        } else if (data.type === 'text') {
-          layer.text = data.text
+          layer.src = require(`@/assets/${data.src}`)
+        }
+        if (data.type === 'text') {
+          Object.assign(data.styles, layer.styles)
+          Object.assign(layer, data)
           layer.textEditable = false
-          layer.styles = Object.assign(data.styles, layer.styles)
+        }
+        if (data.type === 'shape') {
+          Object.assign(data.styles, layer.styles)
+          Object.assign(layer, data)
         }
 
         store.commit('ADD_newLayers', {
