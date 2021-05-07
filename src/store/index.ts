@@ -199,7 +199,7 @@ const mutations: MutationTree<IEditorState> = {
       console.log('You didn\'t select any layer')
       return
     }
-    console.log(index)
+    console.log(index, state.lastSelectedPageIndex)
     state.pages[state.lastSelectedPageIndex].layers.splice(index, 1)
 
     GroupUtils.reset()

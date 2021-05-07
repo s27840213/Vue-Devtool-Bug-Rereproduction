@@ -30,10 +30,10 @@ class ShortcutHandler {
       const tmpLayersNum = tmpLayers.length
       GroupUtils.deselect()
       store.commit('ADD_layersToPos', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-      GroupUtils.set(tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].styles), GeneralUtils.deepCopy(clipboardInfo[0].layers))
+      GroupUtils.set(tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
     } else {
       store.commit('ADD_newLayers', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-      GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].styles), GeneralUtils.deepCopy(clipboardInfo[0].layers))
+      GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
     }
   }
 
