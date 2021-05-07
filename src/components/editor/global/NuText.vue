@@ -35,6 +35,8 @@ export default Vue.extend({
       let i = 0
       let j = 0
       for (i = 0, j = 0; i < text.length - 4; i++) {
+        // TODO: solve the problem of space rendering
+
         // if (text.substring(i, i + 6) === '&nbsp;') {
         //   console.log('space')
         //   textArr.push(text.substring(j, i))

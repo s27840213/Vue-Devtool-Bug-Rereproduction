@@ -18,32 +18,32 @@ export default Vue.extend({
     return {
       contents: [
         {
-          shape: 'rect',
+          category: 'rect',
           fill: 'default',
           color: '#000000',
           path: 'M0 0 L0 40 60 40 60 0z',
-          viewBox: '0 0 60 40'
+          viewBox: [0, 0, 60, 40]
         },
         {
-          shape: 'rect',
+          category: 'rect',
           fill: 'default',
           color: '#000000',
-          path: 'M0 0 L0 40 60 40 60 0z',
-          viewBox: '0 0 60 40'
+          path: 'M0 0 L0 80 40 80 40 0z',
+          viewBox: [0, 0, 40, 80]
         }
         // ,
         // {
-        //   shape: 'rect',
+        //   category: 'rect',
         //   radius: 10,
         //   color: 'green',
         // },
         // {
-        //   shape: 'line',
+        //   category: 'line',
         //   radius: 10,
         //   color: 'black',
         // },
         // {
-        //   shape: 'ellipse',
+        //   category: 'ellipse',
         //   radiusX: 10,
         //   radiusY: 5,
         //   color: 'red',
@@ -64,32 +64,19 @@ export default Vue.extend({
       dataTransfer.effectAllowed = 'move'
 
       const rect = (e.target as HTMLElement).getBoundingClientRect()
-      const svgSize = this.getSVGSize()
       const svgData = {
         type: 'shape',
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,
-          width: svgSize.width,
-          height: svgSize.height,
+          width: data.viewBox[2] * 3,
+          height: data.viewBox[3] * 3,
           color: '#000000'
         }
       }
 
       Object.assign(data, svgData)
       dataTransfer.setData('data', JSON.stringify(data))
-    },
-    getSVGSize() {
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-      const path = this.$refs.path as HTMLElement
-      svg.append(path)
-      document.body.appendChild(svg)
-      const size = {
-        width: svg.getBoundingClientRect().width,
-        height: svg.getBoundingClientRect().height
-      }
-      document.body.removeChild(svg)
-      return size
     }
   }
 })

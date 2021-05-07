@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-shape" :style="styles()" )
-    svg(:viewBox="config.viewBox" preserveAspectRatio="xMidYMid slice")
+    svg(:viewBox="viewBox" preserveAspectRatio="xMidYMid")
       path(:d="config.path")
 
 </template>
@@ -12,6 +12,14 @@ export default Vue.extend({
   data() {
     return {
     }
+  },
+  computed: {
+    viewBox(): string {
+      return this.config.viewBox.join(' ')
+    }
+  },
+  mounted() {
+    console.log(this.config.viewBox)
   },
   props: {
     config: Object,

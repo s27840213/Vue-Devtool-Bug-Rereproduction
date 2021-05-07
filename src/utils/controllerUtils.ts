@@ -9,6 +9,7 @@ class Controller {
     return Math.sqrt(sqareSum)
   }
 
+  // Get relative position to the center as no-rotation happens
   getRelPosToCenter(vectClient: ICoordinate, center: ICoordinate, rotation: number): ICoordinate {
     return {
       x: vectClient.x * Math.cos(-rotation) - vectClient.y * Math.sin(-rotation) + center.x,
@@ -49,6 +50,56 @@ class Controller {
     }
   }
 
+  textBackspace(e: KeyboardEvent) {
+    if (e.key !== 'Backspace') return
+    e.stopPropagation()
+  }
+
+  textEnter(e: KeyboardEvent, content: HTMLElement) {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+
+    const docFragment = document.createDocumentFragment()
+    const br = document.createElement('br')
+    docFragment.appendChild(br)
+
+    let range = window.getSelection()?.getRangeAt(0)
+    if (range) {
+      range.deleteContents()
+      range.insertNode(docFragment)
+    }
+
+    range = document.createRange()
+    range.setStartAfter(br)
+    range.collapse(true)
+
+    const sel = window.getSelection()
+    if (sel) {
+      sel.removeAllRanges()
+      sel.addRange(range)
+    }
+
+    if (content.lastChild?.nodeName !== 'BR') {
+      const br = document.createElement('br') as HTMLBRElement
+      content.appendChild(br)
+    }
+  }
+
+  updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
+    store.commit('Update_layerProps', {
+      pageIndex,
+      layerIndex,
+      props
+    })
+  }
+
+  toggleTextEditable(pageIndex: number, layerIndex: number, isEditable: boolean) {
+    const props = {
+      textEditable: isEditable
+    }
+    this.updateTextProps(pageIndex, layerIndex, props)
+  }
+
   updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
     store.commit('Update_layerStyles', {
       pageIndex,
@@ -72,6 +123,18 @@ class Controller {
     })
   }
 
+  updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
+    store.commit('Update_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        initWidth,
+        initHeight,
+        initSize
+      }
+    })
+  }
+
   updateFontSize(pageIndex: number, layerIndex: number, size: number) {
     store.commit('Update_layerStyles', {
       pageIndex,
@@ -88,6 +151,20 @@ class Controller {
       layerIndex,
       styles: {
         rotate
+      }
+    })
+  }
+
+  // TODO: change the viewBox so as the path to accomplish the shape's size changing
+  updateShapeProps(pageIndex: number, layerIndex: number, viewBox: number[], path: string) {
+    console.log(viewBox)
+    console.log(path)
+    store.commit('Update_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        viewBox,
+        path
       }
     })
   }

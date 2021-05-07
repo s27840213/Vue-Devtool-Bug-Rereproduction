@@ -163,7 +163,7 @@ export default Vue.extend({
           text.innerHTML = this.getTextContent
           this.isGetMoved = true
           this.clickTime = new Date().toISOString()
-          this.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+          ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
         }
         this.setCursorStyle('move')
         if (this.config.type !== 'tmp') {
@@ -361,9 +361,29 @@ export default Vue.extend({
         angle: angleInRad
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
+
+      if (this.config.type === 'shape') {
+        this.shapeHandler(width, height, initWidth, initHeight)
+      }
       // const scale = width / this.config.styles.initWidth
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, 1)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+    },
+    shapeHandler(width: number, height: number, initWidth: number, initHeight: number) {
+      const scaleX = width / initWidth
+      const scaleY = height / initHeight
+
+      if (this.config.category === 'rect') {
+        const viewBox = [0, 0, 0, 0]
+        viewBox[2] = width
+        viewBox[3] = height
+        const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
+        ControlUtils.updateShapeProps(this.pageIndex, this.layerIndex, viewBox, path)
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, 1)
+      }
+      if (this.config.category === 'circle') {
+        // TODO
+      }
     },
     resizeEnd(event: MouseEvent) {
       this.isControlling = false
@@ -434,11 +454,11 @@ export default Vue.extend({
     textClickHandler(diff: number) {
       if (this.config.type === 'text' && diff < 100) {
         this.isGetMoved = false
-        this.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+        ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
       }
     },
     onFocusOut() {
-      this.toggleTextEditable(this.pageIndex, this.layerIndex, false)
+      ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, false)
     },
     onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text') {
@@ -449,8 +469,8 @@ export default Vue.extend({
       if (this.isGetMoved) {
         e.preventDefault()
       } else {
-        this.textBackspace(e)
-        this.textEnter(e)
+        ControlUtils.textBackspace(e)
+        ControlUtils.textEnter(e, this.$refs.content as HTMLElement)
 
         const text = this.$refs.content as HTMLElement
         setTimeout(() => {
@@ -461,68 +481,11 @@ export default Vue.extend({
             width: text.offsetWidth,
             height: text.offsetHeight
           }
-          this.updateTextProps(this.pageIndex, this.layerIndex, props)
-          this.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
-    },
-    textBackspace(e: KeyboardEvent) {
-      if (e.key !== 'Backspace') return
-      e.stopPropagation()
-    },
-    textEnter(e: KeyboardEvent) {
-      if (e.key !== 'Enter') return
-      e.preventDefault()
-
-      const docFragment = document.createDocumentFragment()
-      const br = document.createElement('br')
-      docFragment.appendChild(br)
-
-      let range = window.getSelection()?.getRangeAt(0)
-      if (range) {
-        range.deleteContents()
-        range.insertNode(docFragment)
-      }
-
-      range = document.createRange()
-      range.setStartAfter(br)
-      range.collapse(true)
-
-      const sel = window.getSelection()
-      if (sel) {
-        sel.removeAllRanges()
-        sel.addRange(range)
-      }
-
-      if ((this.$refs.content as HTMLElement).lastChild?.nodeName !== 'BR') {
-        const br = document.createElement('br') as HTMLBRElement
-        (this.$refs.content as HTMLElement).appendChild(br)
-      }
-    },
-    toggleTextEditable(pageIndex: number, layerIndex: number, isEditable: boolean) {
-      const props = {
-        textEditable: isEditable
-      }
-      this.updateTextProps(this.pageIndex, this.layerIndex, props)
-    },
-    updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props
-      })
-    },
-    updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
-      this.updateLayerStyles({
-        pageIndex,
-        layerIndex,
-        styles: {
-          initWidth,
-          initHeight,
-          initSize
-        }
-      })
     }
   }
 })
@@ -550,7 +513,8 @@ export default Vue.extend({
   width: 10px;
   height: 10px;
   background-color: setColor(white);
-  border: 2px solid setColor(blue-2);
+  border: 1.5px solid setColor(blue-2);
+  border-radius: 30%;
 }
 .rotaterWrapper {
   position: absolute;

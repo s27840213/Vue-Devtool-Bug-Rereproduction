@@ -37,59 +37,71 @@ export enum LayerType {
   'nu-group'
 }
 
-export const ControlPoints = {
-  scalers: [
-    {
-      left: '-7.5px',
-      top: '-7.5px',
-      borderRadius: '50%',
-      cursor: 'nwse-resize'
-    },
-    {
-      right: '-7.5px',
-      top: '-7.5px',
-      borderRadius: '50%',
-      cursor: 'nesw-resize'
-    },
-    {
-      right: '-7.5px',
-      bottom: '-7.5px',
-      borderRadius: '50%',
-      cursor: 'ns-resize'
-    },
-    {
-      left: '-7.5px',
-      bottom: '-7.5px',
-      borderRadius: '50%',
-      cursor: 'nesw-resize'
-    }
-  ],
-  resizers: [
-    {
-      top: '-7.5px',
-      cursor: 'ew-resize'
-    },
-    {
-      right: '-7.5px',
-      cursor: 'ew-resize'
-    },
-    {
-      bottom: '-7.5px',
-      cursor: 'nwse-resize'
-    },
-    {
-      left: '-7.5px',
-      cursor: 'nwse-resize'
-    }
-  ],
-  cursors: [
-    'nwse-resize',
-    'ns-resize',
-    'nesw-resize',
-    'ew-resize',
-    'nwse-resize',
-    'ns-resize',
-    'nesw-resize',
-    'ew-resize'
-  ]
+const _ControlPoints = (resizerShort: number, resizerLong: number) => {
+  return {
+    scalers: [
+      {
+        left: '-7.5px',
+        top: '-7.5px',
+        borderRadius: '50%',
+        cursor: 'nwse-resize'
+      },
+      {
+        right: '-7.5px',
+        top: '-7.5px',
+        borderRadius: '50%',
+        cursor: 'nesw-resize'
+      },
+      {
+        right: '-7.5px',
+        bottom: '-7.5px',
+        borderRadius: '50%',
+        cursor: 'ns-resize'
+      },
+      {
+        left: '-7.5px',
+        bottom: '-7.5px',
+        borderRadius: '50%',
+        cursor: 'nesw-resize'
+      }
+    ],
+    resizers: [
+      {
+        width: `${resizerLong}px`,
+        height: `${resizerShort}px`,
+        top: `${-resizerShort - 1.5}px`,
+        cursor: 'ew-resize'
+      },
+      {
+        height: `${resizerLong}px`,
+        width: `${resizerShort}px`,
+        right: `${-resizerShort - 1.5}px`,
+        cursor: 'ew-resize'
+      },
+      {
+        width: `${resizerLong}px`,
+        height: `${resizerShort}px`,
+        bottom: `${-resizerShort - 1.5}px`,
+        cursor: 'nwse-resize'
+      },
+      {
+        height: `${resizerLong}px`,
+        width: `${resizerShort}px`,
+        left: `${-resizerShort - 1.5}px`,
+        cursor: 'nwse-resize'
+      }
+    ],
+    cursors: [
+      'nwse-resize',
+      'ns-resize',
+      'nesw-resize',
+      'ew-resize',
+      'nwse-resize',
+      'ns-resize',
+      'nesw-resize',
+      'ew-resize'
+    ]
+  }
 }
+
+export const ControlPoints = _ControlPoints(4, 25)
