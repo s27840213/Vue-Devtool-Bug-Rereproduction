@@ -3,7 +3,9 @@
       @drop="onDrop"
       @dragover.prevent,
       @dragenter.prevent)
-    div(:class="{'layer-scale': true, 'layer-text': config.type === 'text'}" :style="scaleStyles()")
+    div(class='layer-scale'
+        :class="{'layer-text': config.type === 'text'}"
+        :style="scaleStyles()")
       nu-clipper(v-if="config.type !== 'group'" :config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
@@ -57,6 +59,7 @@ export default Vue.extend({
           scale(${this.config.styles.scale})`
         }
       }
+      console.log(this.config.type, this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
       return {
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)

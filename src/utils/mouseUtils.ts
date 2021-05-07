@@ -1,9 +1,9 @@
 /**
  */
 import store from '@/store'
-import LayerFactary from '@/utils/layerFactary'
 import { ILayer } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
+import { PanelType } from '@/store/types'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -33,46 +33,52 @@ class MouseUtils {
       }
       const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
       const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
-
-      // const layer = LayerFactary.newImage(x, y, pageIndex)
-      const layer: ILayer = {
-        type: data.type,
-        pageIndex: pageIndex,
-        active: false,
-        shown: false,
-        styles: {
-          x: x,
-          y: y,
-          scale: 1,
-          scaleX: 0,
-          scaleY: 0,
-          rotate: 0,
-          width: data.styles.width,
-          height: data.styles.height,
-          initWidth: data.styles.width,
-          initHeight: data.styles.height
+      if (store.getters.getCurrPanelType !== PanelType.bg) {
+        // const layer = LayerFactary.newImage(x, y, pageIndex)
+        const layer: ILayer = {
+          type: data.type,
+          pageIndex: pageIndex,
+          active: false,
+          shown: false,
+          styles: {
+            x: x,
+            y: y,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: data.styles.width,
+            height: data.styles.height,
+            initWidth: data.styles.width,
+            initHeight: data.styles.height
+          }
         }
-      }
-      if (data.type === 'image') {
-        layer.src = require(`@/assets/${data.src}`)
-      }
-      if (data.type === 'text') {
-        Object.assign(data.styles, layer.styles)
-        Object.assign(layer, data)
-        layer.textEditable = false
-      }
-      if (data.type === 'shape') {
-        Object.assign(data.styles, layer.styles)
-        Object.assign(layer, data)
-      }
+        if (data.type === 'image') {
+          layer.src = require(`@/assets/${data.src}`)
+        }
+        if (data.type === 'text') {
+          Object.assign(data.styles, layer.styles)
+          Object.assign(layer, data)
+          layer.textEditable = false
+        }
+        if (data.type === 'shape') {
+          Object.assign(data.styles, layer.styles)
+          Object.assign(layer, data)
+        }
 
-      store.commit('ADD_newLayers', {
-        pageIndex: pageIndex,
-        layers: [layer]
-      })
-      GroupUtils.deselect()
-      store.commit('SET_lastSelectedPageIndex', pageIndex)
-      GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
+        store.commit('ADD_newLayers', {
+          pageIndex: pageIndex,
+          layers: [layer]
+        })
+        GroupUtils.deselect()
+        store.commit('SET_lastSelectedPageIndex', pageIndex)
+        GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
+      } else {
+        store.commit('SET_backgroundImageSrc', {
+          pageIndex: pageIndex,
+          imageSrc: data.src
+        })
+      }
     }
   }
 }

@@ -93,7 +93,10 @@ export default Vue.extend({
       return type === 'content' ? {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
-        backgroundColor: this.config.backgroundColor
+        backgroundColor: this.config.backgroundColor,
+        backgroundImage: `url(${this.config.backgroundImage.src})`,
+        backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
+          : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
       } : {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`
@@ -171,6 +174,8 @@ export default Vue.extend({
   position: absolute;
   // border: 5px solid green;
   box-sizing: border-box;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .page-highlighter {
   position: absolute;

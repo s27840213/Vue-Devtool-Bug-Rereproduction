@@ -14,6 +14,11 @@ const getDefaultState = (): IEditorState => ({
       width: 600,
       height: 800,
       backgroundColor: '#ffffff',
+      backgroundImage: {
+        src: 'none',
+        posX: -1,
+        posY: -1
+      },
       name: 'Default Page',
       layers: [
         // {
@@ -68,6 +73,11 @@ const getDefaultState = (): IEditorState => ({
       width: 600,
       height: 800,
       backgroundColor: '#ffffff',
+      backgroundImage: {
+        src: 'none',
+        posX: -1,
+        posY: -1
+      },
       name: 'Default Page',
       layers: []
     }
@@ -130,6 +140,20 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_lastSelectedPageIndex(state: IEditorState, index: number) {
     state.lastSelectedPageIndex = index
+  },
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, imageSrc: string }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.imageSrc
+  },
+  SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
+    state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
+  },
+  REMOVE_backgroundImage(state: IEditorState) {
+    Object.assign(state.pages[state.lastSelectedPageIndex].backgroundImage, {
+      src: 'none',
+      posX: -1,
+      posY: -1
+    })
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {

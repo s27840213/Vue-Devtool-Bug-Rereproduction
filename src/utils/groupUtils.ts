@@ -146,6 +146,7 @@ class GroupUtils {
           return !indexs.includes(index)
         })
         const tmp = LayerFactary.newTmp(lastSelectedPageIndex, this.tmpStyles, this.tmpLayers)
+        console.log(tmp)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers

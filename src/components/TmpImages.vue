@@ -2,7 +2,7 @@
 div(class="temp__content")
   img(class="temp__item"
     v-for="photo in photos",
-    :src="photo.urls.small",
+    :src="photo.urls.regular",
     draggable="true",
     @dragstart="dragStart($event,photo)")
 </template>
@@ -34,7 +34,7 @@ export default Vue.extend({
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
-        src: photo.urls.small,
+        src: photo.urls.regular,
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,

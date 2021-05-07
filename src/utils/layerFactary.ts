@@ -40,12 +40,14 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        scale: 0,
-        scaleX: 0,
-        scaleY: 0,
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         rotate: 0,
         width: styles.width,
-        height: styles.height
+        height: styles.height,
+        initWidth: 150,
+        initHeight: 150
       },
       layers: layers
     }
@@ -60,12 +62,14 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        scale: 0,
-        scaleX: 0,
-        scaleY: 0,
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         rotate: 0,
         width: styles.width,
-        height: styles.height
+        height: styles.height,
+        initWidth: styles.width,
+        initHeight: styles.height
       },
       layers: layers
     }
