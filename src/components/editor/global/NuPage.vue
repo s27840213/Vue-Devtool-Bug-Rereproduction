@@ -19,7 +19,13 @@
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
     div(class='pages-wrapper'
-        :style="wrapperStyles()")
+        :style="wrapperStyles()"
+        @mousemove="coordinateHandler($event)")
+      div(class="coordinate" ref="coordinate")
+        div(class="coordinate__val coordinate__width")
+          span {{coordinateWidth* (100/scaleRatio)}}px
+        div(class="coordinate__val coordinate__height")
+          span {{coordinateHeight*(100/scaleRatio)}}px
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="page-content"
             :style="styles('content')"
@@ -28,7 +34,8 @@
             @dragenter.prevent
             @click.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
-            @mouseout="togglePageHighlighter(false)")
+            @mouseout="togglePageHighlighter(false)"
+            )
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
             :class="`nu-layer--p${pageIndex}`"
@@ -48,12 +55,6 @@
             :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer")
-          //- nu-controller(
-          //-   v-if="currSelected.layers.length > 1"
-          //-   :key="`mul-controller-${index}`"
-          //-   :layerIndex="index"
-          //-   :pageIndex="pageIndex"
-          //-   :config="layer")
 </template>
 
 <script lang="ts">
@@ -68,7 +69,11 @@ export default Vue.extend({
   data() {
     return {
       pageIsHover: false,
-      ShortcutUtils
+      ShortcutUtils,
+      // for test used
+      coordinate: null as unknown as HTMLElement,
+      coordinateWidth: 0,
+      coordinateHeight: 0
     }
   },
   props: {
@@ -76,6 +81,9 @@ export default Vue.extend({
     pageIndex: Number,
     isSelecting: Boolean,
     pageScaleRatio: Number
+  },
+  mounted() {
+    this.coordinate = this.$refs.coordinate as HTMLElement
   },
   computed: {
     ...mapGetters({
@@ -134,6 +142,13 @@ export default Vue.extend({
     pageClickHandler() {
       this.setLastSelectedPageIndex(this.pageIndex)
       GroupUtils.deselect()
+    },
+    coordinateHandler(e: MouseEvent) {
+      var rect = this.coordinate.getBoundingClientRect()
+      this.coordinateWidth = e.clientX - rect.left
+      this.coordinateHeight = e.clientY - rect.top
+      this.coordinate.style.width = `${this.coordinateWidth}px`
+      this.coordinate.style.height = `${this.coordinateHeight}px`
     }
   }
 })
@@ -141,12 +156,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-page {
-  @include flexCenter;
-  min-height: 100%;
-  min-width: 100%;
-  flex-direction: column;
-  box-sizing: border-box;
   position: relative;
+  margin: 15px auto;
   &:focus {
     outline: none;
   }
@@ -190,5 +201,35 @@ export default Vue.extend({
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
+}
+
+.coordinate {
+  border-right: 1px solid blue;
+  border-bottom: 1px solid blue;
+  opacity: 0.5;
+  box-sizing: border-box;
+  z-index: 10000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  font-size: 12px;
+  &__val {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 5px blue;
+  }
+
+  &__width {
+    bottom: 5px;
+    left: 50%;
+    transform: translate(0, -50%);
+  }
+  &__height {
+    top: 50%;
+    right: 5px;
+    transform: translate(-50%, 0);
+  }
 }
 </style>

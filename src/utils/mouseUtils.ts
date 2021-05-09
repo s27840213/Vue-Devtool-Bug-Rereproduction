@@ -54,7 +54,7 @@ class MouseUtils {
           }
         }
         if (data.type === 'image') {
-          layer.src = require(`@/assets/${data.src}`)
+          layer.src = data.src
         }
         if (data.type === 'text') {
           Object.assign(data.styles, layer.styles)

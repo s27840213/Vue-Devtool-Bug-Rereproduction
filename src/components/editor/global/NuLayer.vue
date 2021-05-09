@@ -12,6 +12,9 @@
       component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
     div(class="test-index")
       span {{layerIndex}}
+    div(class="test-angle")
+      span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
+      span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
 </template>
 
 <script lang="ts">
@@ -19,6 +22,7 @@ import Vue from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
+import MathUtils from '@/utils/mathUtils'
 
 export default Vue.extend({
   props: {
@@ -43,6 +47,9 @@ export default Vue.extend({
     },
     getLayerY(): number {
       return this.config.styles.y
+    },
+    getCos(): number {
+      return MathUtils.cos(this.config.styles.rotate)
     }
   },
   methods: {
@@ -59,7 +66,6 @@ export default Vue.extend({
           scale(${this.config.styles.scale})`
         }
       }
-      console.log(this.config.type, this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
       return {
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
@@ -104,5 +110,18 @@ export default Vue.extend({
   font-weight: bold;
   text-shadow: 2px 2px 5px setColor(blue-1);
   z-index: 100;
+}
+
+.test-angle {
+  width: 100%;
+  position: absolute;
+  bottom: -80px;
+  font-size: 18px;
+  color: white;
+  font-weight: bold;
+  text-shadow: 2px 2px 5px setColor(blue-1);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
 }
 </style>

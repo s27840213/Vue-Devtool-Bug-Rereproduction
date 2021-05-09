@@ -1,13 +1,14 @@
-      // @keydown.delete.exact.stop.prevent="ShortcutHandler.copy()"
 <template lang="pug">
   div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
-    nu-page(v-for="(page,index) in pages"
-      :key="`page-${index}`"
-      :pageIndex="index"
-      :config="page" :index="index"
-      :isSelecting="isSelecting"
-      @mousedown.native.left="setCurrPage(index)")
-    div(v-show="isSelecting" class="selection-area" ref="selectionArea")
+    div(class="editor-canvas")
+      div(class="page-container")
+        nu-page(v-for="(page,index) in pages"
+          :key="`page-${index}`"
+          :pageIndex="index"
+          :config="page" :index="index"
+          :isSelecting="isSelecting"
+          @mousedown.native.left="setCurrPage(index)")
+        div(v-show="isSelecting" class="selection-area" ref="selectionArea")
 </template>
 
 <script lang="ts">
@@ -119,11 +120,28 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .editor-view {
   width: 100%;
-  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  overflow: scroll;
   position: relative;
   z-index: setZindex("editor-view");
-  overflow: scroll;
 }
+.editor-canvas {
+  display: flex;
+  position: absolute;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.page-container {
+  display: flex;
+  width: 100%;
+  position: relative;
+  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .selection-area {
   position: absolute;
   top: 0;

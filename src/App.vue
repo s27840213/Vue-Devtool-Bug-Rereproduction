@@ -66,13 +66,14 @@ export default Vue.extend({
   }
 
   &__width {
-    top: 50%;
-    right: 5px;
+    bottom: 5px;
+    left: 50%;
+
     transform: translate(0, -50%);
   }
   &__height {
-    bottom: 5px;
-    left: 50%;
+    top: 50%;
+    right: 5px;
     transform: translate(-50%, 0);
   }
 }
