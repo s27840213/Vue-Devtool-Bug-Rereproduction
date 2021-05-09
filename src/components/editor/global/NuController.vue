@@ -21,10 +21,12 @@
           :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
           @mousedown.stop="scaleStart")
         div(v-for="(resizer, index) in controlPoints.resizers"
-        class="controller-point"
-        :key="index * 2 + 1"
-        :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))"
-        @mousedown.stop="resizeStart")
+            @mousedown.stop="resizeStart")
+          div(class="resize-bar"
+              :key="index * 2 + 1"
+              :style="resizerBarStyles(resizer)")
+          div(class="controller-point"
+              :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
         div(class="rotaterWrapper")
           div(class="rotater" @mousedown.stop="rotateStart")
 </template>
@@ -108,6 +110,16 @@ export default Vue.extend({
       updateTmpLayerStyles: 'Update_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
+    resizerBarStyles(resizer: any) {
+      const resizerStyle = Object.assign({}, resizer)
+      const ControllerStyles = this.styles()
+      const HW = {
+        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        width: resizerStyle.width < resizerStyle.height ? `${parseInt(ControllerStyles.width) - 20}px` : resizerStyle.width,
+        height: resizerStyle.width > resizerStyle.height ? `${parseInt(ControllerStyles.height) - 20}px` : resizerStyle.height
+      }
+      return Object.assign(resizerStyle, HW)
+    },
     contextStyles() {
       const styles = {
         color: 'rgba(10,10,10,0)',
@@ -240,16 +252,7 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
 
-      // TODO: discussion cursor's styling
-      let cursorIndex = this.control.xSign + this.control.ySign
-      if (cursorIndex === 0 && this.control.xSign === -1) {
-        cursorIndex = 6
-      } else {
-        cursorIndex = cursorIndex === -2 ? 0 : cursorIndex === 2 ? 4 : 2
-      }
-      const cursor = this.cursorStyles(cursorIndex, this.getLayerRotate).cursor
-      this.setCursorStyle(cursor)
-
+      this.currCursorStyling(event)
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
     },
@@ -329,6 +332,8 @@ export default Vue.extend({
       this.initialPos = { x: event.clientX, y: event.clientY }
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
+
+      this.currCursorStyling(event)
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
@@ -365,7 +370,6 @@ export default Vue.extend({
       if (this.config.type === 'shape') {
         this.shapeHandler(width, height, initWidth, initHeight)
       }
-      // const scale = width / this.config.styles.initWidth
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, 1)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
@@ -387,6 +391,7 @@ export default Vue.extend({
     },
     resizeEnd(event: MouseEvent) {
       this.isControlling = false
+      this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
     },
@@ -439,6 +444,10 @@ export default Vue.extend({
       const layer = this.$el as HTMLElement
       layer.style.cursor = cursor
       document.body.style.cursor = cursor
+    },
+    currCursorStyling(e: MouseEvent) {
+      const el = e.target as HTMLElement
+      this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
@@ -507,6 +516,12 @@ export default Vue.extend({
     cursor: pointer;
   }
 }
+
+.resize-bar {
+  position: absolute;
+  color: '#00000000';
+}
+
 .controller-point {
   pointer-events: auto;
   position: absolute;

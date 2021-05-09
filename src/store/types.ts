@@ -70,24 +70,28 @@ const _ControlPoints = (resizerShort: number, resizerLong: number) => {
         width: `${resizerLong}px`,
         height: `${resizerShort}px`,
         top: `${-resizerShort - 1.5}px`,
+        transform: 'translate(-50%, 0)',
         cursor: 'ew-resize'
       },
       {
         height: `${resizerLong}px`,
         width: `${resizerShort}px`,
         right: `${-resizerShort - 1.5}px`,
+        transform: 'translate(0, -50%)',
         cursor: 'ew-resize'
       },
       {
         width: `${resizerLong}px`,
         height: `${resizerShort}px`,
         bottom: `${-resizerShort - 1.5}px`,
+        transform: 'translate(-50%, 0)',
         cursor: 'nwse-resize'
       },
       {
         height: `${resizerLong}px`,
         width: `${resizerShort}px`,
         left: `${-resizerShort - 1.5}px`,
+        transform: 'translate(0, -50%)',
         cursor: 'nwse-resize'
       }
     ],
