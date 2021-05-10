@@ -233,6 +233,11 @@ class GroupUtils {
     return layers
   }
 
+  /**
+   * @param layers - all selected layers in tmp layer
+   * @param styles - the styles of tmp layer
+   * @returns calculated layers in tmp layer
+   */
   mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IStyle | ITextStyle): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
@@ -240,11 +245,25 @@ class GroupUtils {
       layer.styles.x += styles.x
       layer.styles.y += styles.y
 
+      // calculate scale offset
+      layer.styles.width = layer.styles.width as number * styles.scale
+      layer.styles.height = layer.styles.height as number * styles.scale
+      layer.styles.scale *= styles.scale
+
+      // calculate the center shift of scaled image
+      if (layer.styles.scale !== 1) {
+        const c = MathUtils.getCenter(styles)
+        const [xc, yc] = [c.x, c.y]
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [xOffset, yOffset] = [x1 - xc, y1 - yc]
+        // const [dcx, dcy] = [styles.x - styles.initX, stl]
+        // const [dx, dy] = []
+      }
+
       // calculate rotation offset
       const centerOffset = MathUtils.getRotatedPoint(styles.rotate, MathUtils.getCenter(styles), MathUtils.getCenter(layer.styles))
       layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
       layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
-      // layer.styles.scale *= styles.scale
       layer.styles.rotate = (layer.styles.rotate + styles.rotate) % 360
       layer.shown = false
     })

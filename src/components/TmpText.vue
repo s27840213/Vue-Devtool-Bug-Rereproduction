@@ -51,7 +51,6 @@ export default Vue.extend({
       const data = {
         type: 'text',
         text: text,
-        textEditable: false,
         styles: Object.assign(styles, textHW)
       }
 
