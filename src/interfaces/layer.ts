@@ -6,16 +6,30 @@ export interface IStyle {
   scaleX: number,
   scaleY: number,
   rotate: number,
-  width: number | string,
-  height: number | string,
+  width: number,
+  height: number,
+  initWidth: number,
+  initHeight: number
 }
+
 export interface ITextStyle extends IStyle {
-  fontFamily?: string,
-  fontWeight?: string,
-  textAlign?: string,
-  lineHeight?: number,
-  color?: string,
-  fontSize?: number
+  font: string,
+  weight: string,
+  align: string,
+  lineHeight: number,
+  color: string,
+  size: number,
+  initSize: number
+}
+
+export interface ITmpStyle extends IStyle {
+  initX: number,
+  initY: number,
+}
+
+export interface IGroupStyle extends IStyle {
+  initX: number,
+  initY: number,
 }
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
@@ -26,7 +40,8 @@ export interface ILayer<T extends IStyle = IStyle> {
   styles: T
 }
 export interface IText extends ILayer<ITextStyle> {
-  text: string
+  text: string,
+  textEditable: boolean
 }
 export interface IShape extends ILayer<IStyle> {
   radius?: string | number,
@@ -34,9 +49,9 @@ export interface IShape extends ILayer<IStyle> {
 export interface IImage extends ILayer<IStyle> {
   src: string
 }
-export interface IGroup extends ILayer<IStyle> {
+export interface IGroup extends ILayer<IGroupStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
-export interface ITmp extends ILayer<IStyle> {
+export interface ITmp extends ILayer<ITmpStyle> {
   layers: Array<IShape | IText | IImage>
 }

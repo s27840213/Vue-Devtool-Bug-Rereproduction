@@ -4,6 +4,7 @@ import store from '@/store'
 import { ILayer } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
 import { PanelType } from '@/store/types'
+import LayerFactary from '@/utils/layerFactary'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -34,8 +35,7 @@ class MouseUtils {
       const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
       const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
       if (store.getters.getCurrPanelType !== PanelType.bg) {
-        // const layer = LayerFactary.newImage(x, y, pageIndex)
-        const layer: ILayer = {
+        const layerConfig: ILayer = {
           type: data.type,
           pageIndex: pageIndex,
           active: false,
@@ -43,6 +43,8 @@ class MouseUtils {
           styles: {
             x: x,
             y: y,
+            initX: x,
+            initY: y,
             scale: 1,
             scaleX: 0,
             scaleY: 0,
@@ -53,17 +55,16 @@ class MouseUtils {
             initHeight: data.styles.height
           }
         }
+
+        let layer
         if (data.type === 'image') {
-          layer.src = data.src
-        }
-        if (data.type === 'text') {
-          Object.assign(data.styles, layer.styles)
-          Object.assign(layer, data)
-          layer.textEditable = false
-        }
-        if (data.type === 'shape') {
-          Object.assign(data.styles, layer.styles)
-          Object.assign(layer, data)
+          layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src }))
+        } else if (data.type === 'text') {
+          Object.assign(layerConfig.styles, data.styles)
+          layer = LayerFactary.newText(pageIndex, Object.assign(layerConfig, { text: data.text }))
+        } else if (data.type === 'shape') {
+          Object.assign(layerConfig.styles, data.styles)
+          layer = LayerFactary.newShape(pageIndex, Object.assign(layerConfig))
         }
 
         store.commit('ADD_newLayers', {

@@ -219,7 +219,9 @@ export default Vue.extend({
           this.pageIndex,
           {
             x: moveOffset.offsetX,
-            y: moveOffset.offsetY
+            y: moveOffset.offsetY,
+            initX: moveOffset.offsetX,
+            initY: moveOffset.offsetY
           }
         )
       }

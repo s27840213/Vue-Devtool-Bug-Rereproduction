@@ -6,15 +6,16 @@
     div(class='layer-scale'
         :class="{'layer-text': config.type === 'text'}"
         :style="scaleStyles()")
-      nu-clipper(v-if="config.type !== 'group'" :config="config")
+      nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
-      component(v-else :is="`nu-${config.type}`" :config="config" :pageIndex="pageIndex")
     div(class="test-index")
       span {{layerIndex}}
     div(class="test-angle")
-      span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
-      span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
+      span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
+      span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
+      //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
+      //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
 </template>
 
 <script lang="ts">
@@ -58,6 +59,9 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
+      // if (this.config.type === 'group' || this.config.type === 'tmp') {
+      //   console.log(this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
+      // }
       if (this.config.type === 'text') {
         return {
           transform: `

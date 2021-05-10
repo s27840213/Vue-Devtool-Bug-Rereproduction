@@ -3,35 +3,67 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
-  newImage(x: number, y: number, pageIndex: number) {
-    return {
+  newImage(pageIndex: number, config: any): IImage {
+    const basicConfig = {
       type: 'image',
       pageIndex: pageIndex,
-      src: require('@/assets/img/svg/img-tmp.svg'),
+      src: '',
       active: false,
       shown: false,
       styles: {
-        x: x,
-        y: y,
+        x: 0,
+        y: 0,
+        initX: 0,
+        initY: 0,
         scale: 1,
         scaleX: 0,
         scaleY: 0,
         rotate: 0,
-        width: 150,
-        height: 150,
-        initWidth: 150,
-        initHeight: 150
+        width: 0,
+        height: 0,
+        initWidth: 0,
+        initHeight: 0
       }
     }
+    Object.assign(basicConfig.styles, config.styles)
+    return Object.assign(basicConfig, config)
   }
 
-  newText() {
-    return {
-
+  newText(pageIndex: number, config: any): IImage {
+    const basicConfig = {
+      type: 'text',
+      text: '',
+      textEditable: false,
+      pageIndex: pageIndex,
+      active: false,
+      shown: false,
+      styles: {
+        x: 0,
+        y: 0,
+        initX: 0,
+        initY: 0,
+        scale: 1,
+        scaleX: 0,
+        scaleY: 0,
+        rotate: 0,
+        width: 0,
+        height: 0,
+        initWidth: 0,
+        initHeight: 0,
+        font: 'Lobster',
+        weight: 'bold',
+        align: 'left',
+        lineHeight: 20,
+        color: '#000000',
+        size: 72,
+        initSize: 72
+      }
     }
+    Object.assign(basicConfig.styles, config.styles)
+    return Object.assign(basicConfig, config)
   }
 
-  newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
+  newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     return {
       pageIndex: pageIndex,
       type: 'group',
@@ -40,14 +72,16 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
+        initX: styles.x,
+        initY: styles.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
         width: styles.width,
         height: styles.height,
-        initWidth: 150,
-        initHeight: 150
+        initWidth: styles.width,
+        initHeight: styles.height
       },
       layers: layers
     }
@@ -62,6 +96,8 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
+        initX: styles.x,
+        initY: styles.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -75,10 +111,28 @@ class LayerFactary {
     }
   }
 
-  newShape() {
-    return {
-
+  newShape(pageIndex: number, config: any): IImage {
+    const basicConfig = {
+      type: 'shape',
+      pageIndex: pageIndex,
+      active: false,
+      shown: false,
+      styles: {
+        x: 0,
+        y: 0,
+        initX: 0,
+        initY: 0,
+        scale: 1,
+        scaleX: 0,
+        scaleY: 0,
+        rotate: 0,
+        width: 0,
+        height: 0,
+        initWidth: 0,
+        initHeight: 0
+      }
     }
+    return Object.assign(basicConfig, config)
   }
 }
 

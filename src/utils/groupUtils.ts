@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, IGroupStyle, ITmpStyle } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -233,9 +233,28 @@ class GroupUtils {
     return layers
   }
 
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IStyle | ITextStyle): Array<IShape | IText | IImage | IGroup> {
+  /**
+   * @param layers - all selected layers in tmp layer
+   * @param styles - the styles of tmp layer
+   * @returns calculated layers in tmp layer
+   */
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IGroupStyle | ITmpStyle): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      // calculate scale offset
+      layer.styles.width = layer.styles.width as number * styles.scale
+      layer.styles.height = layer.styles.height as number * styles.scale
+      layer.styles.scale *= styles.scale
+
+      // calculate the center shift of scaled image
+      if (layer.styles.scale !== 1) {
+        const ratio = styles.width / styles.initWidth
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        layer.styles.x = shiftX
+        layer.styles.y = shiftY
+      }
+
       // map to original coordinate system
       layer.styles.x += styles.x
       layer.styles.y += styles.y
@@ -244,7 +263,6 @@ class GroupUtils {
       const centerOffset = MathUtils.getRotatedPoint(styles.rotate, MathUtils.getCenter(styles), MathUtils.getCenter(layer.styles))
       layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
       layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
-      // layer.styles.scale *= styles.scale
       layer.styles.rotate = (layer.styles.rotate + styles.rotate) % 360
       layer.shown = false
     })

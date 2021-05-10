@@ -9,11 +9,17 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number
+  },
+  computed: {
+    ...mapGetters({
+      getLayer: 'getLayer'
+    })
   },
   methods: {
     styles() {
@@ -27,7 +33,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.nu-group {
-  position: relative;
+.nu-tmp {
+  position: absolute;
 }
 </style>
