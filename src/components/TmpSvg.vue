@@ -3,7 +3,8 @@ div(class="temp__content")
   div(class="temp__item" v-for="svg in contents",
       draggable="true",
       @dragstart="dragStart($event, svg)")
-    svg(class="temp__svg" :viewBox="svg.viewBox" preserveAspectRatio="xMidYMid")
+    svg(class="temp__svg" :viewBox="svg.viewBox" preserveAspectRatio="xMidYMid"
+        :style="styles(svg)")
       path(:d="svg.path" ref="path")
 </template>
 
@@ -19,17 +20,27 @@ export default Vue.extend({
       contents: [
         {
           category: 'rect',
-          fill: 'default',
-          color: '#000000',
-          path: 'M0 0 L0 40 60 40 60 0z',
-          viewBox: [0, 0, 60, 40]
+          color: '#2EB8E6',
+          path: 'M0 0 L0 120 180 120 180 0z',
+          viewBox: [0, 0, 180, 120]
         },
         {
           category: 'rect',
-          fill: 'default',
-          color: '#000000',
-          path: 'M0 0 L0 80 40 80 40 0z',
-          viewBox: [0, 0, 40, 80]
+          color: 'pink',
+          path: 'M0 0 L0 240 120 240 120 0z',
+          viewBox: [0, 0, 120, 240]
+        },
+        {
+          category: 'circle',
+          color: 'gray',
+          path: 'M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z',
+          viewBox: [0, 0, 250, 250]
+        },
+        {
+          category: 'arbitrary',
+          color: 'red',
+          path: 'M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z',
+          viewBox: [0, 0, 100, 100]
         }
         // ,
         // {
@@ -51,12 +62,11 @@ export default Vue.extend({
       ]
     }
   },
-  mounted() {
-    console.log('mounted!')
-  },
   methods: {
-    styles() {
-      return {}
+    styles(svg: any) {
+      return {
+        fill: svg.color
+      }
     },
     dragStart(e: DragEvent, data: any) {
       const dataTransfer = e.dataTransfer as DataTransfer
@@ -69,9 +79,9 @@ export default Vue.extend({
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,
-          width: data.viewBox[2] * 3,
-          height: data.viewBox[3] * 3,
-          color: '#000000'
+          width: data.viewBox[2],
+          height: data.viewBox[3],
+          color: data.color
         }
       }
 

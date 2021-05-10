@@ -55,8 +55,8 @@ class Controller {
     e.stopPropagation()
   }
 
-  textEnter(e: KeyboardEvent, content: HTMLElement) {
-    if (e.key !== 'Enter') return
+  textEnter(e: KeyboardEvent, content: HTMLElement, isCompositioning: boolean) {
+    if (e.key !== 'Enter' || isCompositioning) return
     e.preventDefault()
 
     const docFragment = document.createDocumentFragment()

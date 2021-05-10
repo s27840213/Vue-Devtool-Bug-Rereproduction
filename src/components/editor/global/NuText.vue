@@ -21,38 +21,27 @@ export default Vue.extend({
     this.content = this.getTextContent
   },
   watch: {
-    'config.text': function(newVal) {
+    'config.text': function() {
       this.content = this.getTextContent
-      console.log(this.content)
     }
   },
   computed: {
     getTextContent(): string[] {
-      const textArr: string[] = []
       const space = /&nbsp;/g
-      const text = this.config.text.replace(space, ' ')
-      console.log(text)
-      let i = 0
-      let j = 0
-      for (i = 0, j = 0; i < text.length - 4; i++) {
-        // TODO: solve the problem of space rendering
-
-        // if (text.substring(i, i + 6) === '&nbsp;') {
-        //   console.log('space')
-        //   textArr.push(text.substring(j, i))
-        //   i += 7
-        //   j = i
-        // }
-        if (text.substring(i, i + 4) === '<br>') {
-          textArr.push(text.substring(j, i))
-          i += 4
-          j = i
+      let text = this.config.text as string
+      text = this.config.text.replace(space, ' ')
+      let textArr = text.split('<br>')
+      textArr = textArr.map((text) => {
+        if (text === '') {
+          text = ' '
         }
-      }
-      if (text.substring(text.length - 4, text.length) === '<br>') {
-        textArr.push(text.substring(j, text.length - 4))
-      } else {
-        textArr.push(text.substring(j, text.length))
+        return text
+      })
+      for (let i = textArr.length - 1; i > 0; i--) {
+        if (textArr[i] !== ' ') {
+          textArr = textArr.slice(0, i + 1)
+          break
+        }
       }
       return textArr
     }
@@ -61,6 +50,7 @@ export default Vue.extend({
     contextStyles() {
       const _styles = Object.assign({}, this.config.styles)
       const styles = Object.assign(_styles, { size: this.config.styles.initSize })
+      console.log(CssConveter.convertFontStyle(styles))
       return CssConveter.convertFontStyle(styles)
     }
   }
@@ -78,7 +68,8 @@ export default Vue.extend({
   position: relative;
   display: inline-block;
   outline: none;
-  white-space: nowrap;
+  // white-space: nowrap
+  white-space: pre;
   overflow-wrap: break-word;
   user-select: none;
 }

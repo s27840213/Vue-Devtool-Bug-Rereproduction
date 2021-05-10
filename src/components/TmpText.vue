@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="temp__content")
   div(class="temp__item"
-    v-for="text in contents",
-    :style="styles()"
-    draggable="true",
-    @dragstart="dragStart($event, text)") {{ text }}
+      v-for="content in contents",
+      :style="contextStyles(content.styles)"
+      draggable="true"
+      @dragstart="dragStart($event, content)") {{ content.text }}
 </template>
 
 <script lang="ts">
@@ -17,7 +17,74 @@ import CssConveter from '@/utils/cssConverter'
 export default Vue.extend({
   data() {
     return {
-      contents: ['Happy', 'New Year', 'Mary', 'Christmas', 'Hello', 'World']
+      contents: [
+        {
+          text: 'Happy',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'initia',
+            size: 25
+          }
+        },
+        {
+          text: 'New Year',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'initia',
+            size: 25
+          }
+        },
+        {
+          text: 'Mary',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'initia',
+            size: 25
+          }
+        },
+        {
+          text: 'Christmas',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'initia',
+            size: 25
+          }
+        },
+        {
+          text: '虎虎生風',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'vertical-lr',
+            size: 25
+          }
+        },
+        {
+          text: '平安喜樂',
+          styles: {
+            font: 'Lobster',
+            weight: 'bold',
+            align: 'text-align',
+            color: '#000000',
+            writingMode: 'vertical-lr',
+            size: 25
+          }
+        }
+      ]
     }
   },
   methods: {
@@ -27,30 +94,28 @@ export default Vue.extend({
         'font-weight': 'bold',
         'font-size': '25px',
         'text-align': 'center',
+        'writing-mode': 'initial',
         color: '#000000'
       }
     },
-    dragStart(e: DragEvent, text: string) {
+    dragStart(e: DragEvent, content: any) {
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
 
       const rect = (e.target as Element).getBoundingClientRect()
-      const styles = {
+      const styles = Object.assign({}, content.styles)
+      Object.assign(styles, {
         x: e.clientX - rect.x,
         y: e.clientY - rect.y,
-        font: 'Lobster',
-        weight: 'bold',
-        align: 'left',
-        color: '#000000',
         size: 72,
         initSize: 72
-      }
+      })
 
-      const textHW = this.getTextHW(text, styles)
+      const textHW = this.getTextHW(content.text, styles)
       const data = {
         type: 'text',
-        text: text,
+        text: content.text,
         textEditable: false,
         styles: Object.assign(styles, textHW)
       }
@@ -93,6 +158,9 @@ export default Vue.extend({
     }
   }
   &__item {
+    display:flex;
+    justify-content:center;
+    align-items:center;
     border: 1px solid blue;
     width: auto;
   }

@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="nu-shape" :style="styles()" )
+  div(class="nu-shape")
     svg(:viewBox="viewBox" preserveAspectRatio="xMidYMid")
-      path(:d="config.path")
+      path(:d="config.path" :style="patternStyles()")
 
 </template>
 
@@ -18,16 +18,15 @@ export default Vue.extend({
       return this.config.viewBox.join(' ')
     }
   },
-  mounted() {
-    console.log(this.config.viewBox)
-  },
   props: {
     config: Object,
     pageIndex: Number
   },
   methods: {
-    styles() {
+    patternStyles() {
+      console.log(this.config.styles.color)
       return {
+        fill: this.config.styles.color
         // width: `${this.config.styles.initWidth}px`,
         // height: `${this.config.styles.initHeight}px`
       }

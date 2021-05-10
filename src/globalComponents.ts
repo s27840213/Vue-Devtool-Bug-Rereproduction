@@ -17,6 +17,7 @@ import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuHighlighter from '@/components/editor/global/NuHighlighter.vue'
 import NuController from '@/components/editor/global/NuController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
+import NuImgController from '@/components/editor/global/NuImgController.vue'
 
 Vue.component('svg-icon', SvgIcon)
 Vue.component('tmp-images', TmpImages)
@@ -35,3 +36,4 @@ Vue.component('nu-highlighter', NuHighlighter)
 Vue.component('nu-clipper', NuClipper)
 Vue.component('nu-controller', NuController)
 Vue.component('nu-shape', NuShape)
+Vue.component('nu-img-controller', NuImgController)
