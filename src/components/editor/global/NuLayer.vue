@@ -59,9 +59,9 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
-      if (this.config.type === 'group' || this.config.type === 'tmp') {
-        console.log(this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
-      }
+      // if (this.config.type === 'group' || this.config.type === 'tmp') {
+      //   console.log(this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
+      // }
       if (this.config.type === 'text') {
         return {
           transform: `
