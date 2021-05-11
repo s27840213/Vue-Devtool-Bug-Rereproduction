@@ -22,27 +22,31 @@ export default Vue.extend({
           category: 'rect',
           color: '#2EB8E6',
           path: 'M0 0 L0 120 180 120 180 0z',
-          viewBox: [0, 0, 180, 120]
+          viewBox: [0, 0, 180, 120],
+          clipper: false
         },
         {
           category: 'rect',
           color: 'pink',
           path: 'M0 0 L0 240 120 240 120 0z',
-          viewBox: [0, 0, 120, 240]
+          viewBox: [0, 0, 120, 240],
+          clipper: true
         },
         {
           category: 'circle',
           color: 'gray',
           path: 'M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z',
-          viewBox: [0, 0, 250, 250]
+          viewBox: [0, 0, 250, 250],
+          clipper: true
         },
         {
           category: 'arbitrary',
           color: 'red',
           path: 'M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z',
-          viewBox: [0, 0, 100, 100]
+          viewBox: [0, 0, 100, 100],
+          clipper: true
+          // svg: `<script>alert('xxx')<\/script><style type='text/css'>.st0{fill:#008BDB;}<\/style><circle class='st0' cx='400' cy='400' r='265'/>`
         }
-        // ,
         // {
         //   category: 'rect',
         //   radius: 10,

@@ -19,8 +19,8 @@ export default Vue.extend({
     styles() {
       return {
         width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
-        // 'clip-path': "path('M250 0a250 250 0 1 0 0 500a250 250 0 1 0 0-500z')"
+        height: `${this.config.styles.initHeight}px`,
+        'clip-path': "path('M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z')"
       }
     }
   }

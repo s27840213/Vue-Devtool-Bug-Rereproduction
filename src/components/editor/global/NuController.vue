@@ -465,7 +465,7 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
-      MouseUtils.onDrop(e, this.pageIndex, targetOffset)
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.clipper)
     },
     onClick(e: MouseEvent) {
       const clickDate = new Date(this.clickTime)

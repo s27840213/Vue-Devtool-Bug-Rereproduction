@@ -62,15 +62,9 @@ export default Vue.extend({
       // if (this.config.type === 'group' || this.config.type === 'tmp') {
       //   console.log(this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
       // }
-      if (this.config.type === 'text') {
-        return {
-          transform: `
-          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-          scale(${this.config.styles.scale})`
-        }
-      }
       return {
+        width: this.config.styles.initWidth,
+        height: this.config.styles.initHeight,
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
         translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
@@ -78,7 +72,7 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos, this.config.clipper)
       e.stopPropagation()
     }
   }
