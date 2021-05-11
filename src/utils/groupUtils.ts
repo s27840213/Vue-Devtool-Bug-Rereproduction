@@ -14,13 +14,37 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
   layers = JSON.parse(JSON.stringify(layers))
 
   layers.forEach((layer: IShape | IText | IImage | IGroup) => {
-    minX = Math.min(minX, layer.styles.x)
-    minY = Math.min(minY, layer.styles.y)
+    if (layer.styles.rotate === 0) {
+      minX = Math.min(minX, layer.styles.x)
+      minY = Math.min(minY, layer.styles.y)
+    } else {
+      const layerBouding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
+        x: layer.styles.x,
+        y: layer.styles.y,
+        width: layer.styles.width,
+        height: layer.styles.height
+      })
+      console.log(layerBouding)
+      minX = Math.min(minX, layerBouding.x)
+      minY = Math.min(minY, layerBouding.y)
+    }
   })
 
   layers.forEach((layer: IShape | IText | IImage | IGroup) => {
-    maxWidth = Math.max(maxWidth, (layer.styles.x + (layer.styles.width as number) - minX))
-    maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
+    if (layer.styles.rotate === 0) {
+      maxWidth = Math.max(maxWidth, layer.styles.x + (layer.styles.width as number) - minX)
+      maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
+    } else {
+      const layerBouding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
+        x: layer.styles.x,
+        y: layer.styles.y,
+        width: layer.styles.width,
+        height: layer.styles.height
+      })
+      console.log(layerBouding)
+      maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
+      maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
+    }
   })
 
   return {

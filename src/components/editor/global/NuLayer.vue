@@ -9,13 +9,13 @@
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
-    div(class="test-index")
-      span {{layerIndex}}
-    div(class="test-angle")
-      span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
-      span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
-      //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
-      //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
+    //- div(class="test-index")
+    //-   span {{layerIndex}}
+    //- div(class="test-angle")
+    //-   span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
+    //-   span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
+    //-   //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
+    //-   //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
 </template>
 
 <script lang="ts">

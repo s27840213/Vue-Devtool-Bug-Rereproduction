@@ -11,10 +11,10 @@
         @mousedown.left.stop="moveStart"
         @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
       span(class="text-content" :style="contextStyles()" ref="content"
-      @blur="onFocusOut"
-      @keydown="onKeyDown"
-      @compositionstart="compositionStart"
-      :contenteditable="this.config.textEditable")
+        @blur="onFocusOut"
+        @keydown="onKeyDown"
+        @compositionstart="compositionStart"
+        :contenteditable="this.config.textEditable")
       template(v-if="isActive && !isControlling")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
@@ -42,6 +42,7 @@ import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controllerUtils'
 import { AxiosStatic } from 'axios'
+import MathUtils from '@/utils/mathUtils'
 
 export default Vue.extend({
   props: {
@@ -71,7 +72,7 @@ export default Vue.extend({
   // },
   computed: {
     ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo',
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio'
     }),
     getControlPoints(): any {
@@ -165,7 +166,8 @@ export default Vue.extend({
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        border: this.isShown || this.isActive ? '3px solid #7190CC' : 'none',
+        border: this.isShown || this.isActive ? (this.config.type === 'tmp'
+          ? '3px dashed #7190CC' : '3px solid #7190CC') : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'none'
       }
     },
@@ -200,9 +202,11 @@ export default Vue.extend({
           if (!this.isActive) {
             if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
               GroupUtils.deselect()
+              this.setLastSelectedPageIndex(this.pageIndex)
             }
-            this.setLastSelectedPageIndex(this.pageIndex)
-            GroupUtils.select([targetIndex])
+            if (this.pageIndex === this.lastSelectedPageIndex) {
+              GroupUtils.select([targetIndex])
+            }
           }
         }
       }
@@ -521,7 +525,6 @@ export default Vue.extend({
   align-items: center;
   z-index: setZindex("nu-controller");
   position: absolute;
-  border: 3px solid setColor(blue-2);
   box-sizing: border-box;
   &:active {
     border: 1px solid rgb(174, 46, 190);
@@ -533,7 +536,7 @@ export default Vue.extend({
 
 .resize-bar {
   position: absolute;
-  color: '#00000000';
+  color: "#00000000";
 }
 
 .controller-point {
