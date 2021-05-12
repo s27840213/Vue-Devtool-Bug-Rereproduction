@@ -35,6 +35,36 @@ class MathUtils {
       y: origin.y + tempX * this.sin(angle) + tempY * this.cos(angle)
     }
   }
+
+  getBounding(angle: number, origin: { x: number, y: number }, initStyles: { x: number, y: number, width: number, height: number }) {
+    const points = [
+      [initStyles.x, initStyles.y],
+      [initStyles.x + initStyles.width, initStyles.y],
+      [initStyles.x, initStyles.y + initStyles.height],
+      [initStyles.x + initStyles.width, initStyles.y + initStyles.height]
+    ]
+    let minX = Number.MAX_SAFE_INTEGER
+    let minY = Number.MAX_SAFE_INTEGER
+    let maxX = Number.MIN_SAFE_INTEGER
+    let maxY = Number.MIN_SAFE_INTEGER
+
+    points.forEach((point: number[]) => {
+      const tmp = this.getRotatedPoint(angle, origin, { x: point[0], y: point[1] })
+      minX = Math.min(minX, tmp.x)
+      minY = Math.min(minY, tmp.y)
+      maxX = Math.max(maxX, tmp.x)
+      maxY = Math.max(maxY, tmp.y)
+    })
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      xShift: minX - initStyles.x,
+      yShift: minY - initStyles.y
+    }
+  }
 }
 
 const mathUtils = new MathUtils()
