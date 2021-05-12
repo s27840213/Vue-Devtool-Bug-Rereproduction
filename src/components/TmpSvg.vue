@@ -47,6 +47,7 @@ export default Vue.extend({
           clipper: true
           // svg: `<script>alert('xxx')<\/script><style type='text/css'>.st0{fill:#008BDB;}<\/style><circle class='st0' cx='400' cy='400' r='265'/>`
         }
+        // path('M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z')
         // {
         //   category: 'rect',
         //   radius: 10,

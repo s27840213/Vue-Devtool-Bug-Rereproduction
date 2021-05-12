@@ -302,7 +302,11 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
-      const scale = width / this.config.styles.initWidth
+      const ratio = {
+        width: width / this.config.styles.initWidth,
+        height: height / this.config.styles.initHeight
+      }
+      const scale = Math.max(ratio.width, ratio.height)
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
 
@@ -465,7 +469,7 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
-      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.clipper)
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path)
     },
     onClick(e: MouseEvent) {
       const clickDate = new Date(this.clickTime)

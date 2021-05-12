@@ -8,6 +8,7 @@ class LayerFactary {
       type: 'image',
       pageIndex: pageIndex,
       src: '',
+      clipPath: '',
       active: false,
       shown: false,
       styles: {

@@ -24,7 +24,7 @@ class MouseUtils {
     return { x, y }
   }
 
-  onDrop(e: DragEvent, pageIndex: number, targetOffset: { x: number, y: number } = { x: 0, y: 0 }, isClipper = false) {
+  onDrop(e: DragEvent, pageIndex: number, targetOffset: { x: number, y: number } = { x: 0, y: 0 }, clipPath = '') {
     if (e.dataTransfer === null) return
 
     const data = JSON.parse(e.dataTransfer.getData('data'))
@@ -34,7 +34,7 @@ class MouseUtils {
       y: target.getBoundingClientRect().y
     }
 
-    if (isClipper && data.type === 'image') {
+    if (clipPath && data.type === 'image') {
       const imgHW = {
         width: data.styles.width,
         heihgt: data.styles.height
@@ -43,8 +43,6 @@ class MouseUtils {
         width: target.getBoundingClientRect().width,
         height: target.getBoundingClientRect().height
       }
-      console.log('img-w', clipperHW.width)
-      console.log('img-h', clipperHW.height)
       const ratio = {
         width: clipperHW.width / imgHW.width,
         height: clipperHW.height / imgHW.heihgt
@@ -55,12 +53,11 @@ class MouseUtils {
       } else {
         scaleRatio = ratio.width
       }
-      console.log(scaleRatio)
       const clippedStyles = {
-        width: imgHW.width * scaleRatio,
-        height: imgHW.heihgt * scaleRatio,
-        initWidth: clipperHW.width,
-        initHeight: clipperHW.height
+        initWidth: imgHW.width * scaleRatio,
+        initHeight: imgHW.heihgt * scaleRatio,
+        width: clipperHW.width,
+        height: clipperHW.height
       }
       Object.assign(data.styles, clippedStyles)
     }
@@ -84,13 +81,16 @@ class MouseUtils {
           rotate: 0,
           width: data.styles.width,
           height: data.styles.height,
-          initWidth: data.styles.width,
-          initHeight: data.styles.height
+          initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
+          initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height
         }
       }
 
       let layer
       if (data.type === 'image') {
+        if (clipPath) {
+          layerConfig.clipPath = `path('${clipPath}')`
+        }
         layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src }))
       } else if (data.type === 'text') {
         const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
@@ -125,7 +125,7 @@ class MouseUtils {
 
       // //   const svg = document.createElement('div')
       // //   svg.innerHTML = `<?xml version="1.0" encoding="utf-8"?><!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  --><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="圖層_1" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve"><link xmlns="" type="text/css" id="dark-mode" rel="stylesheet" href=""/><style xmlns="" type="text/css" id="dark-mode-custom-style"/>
-      // //   <script>alert(this)</script>
+      // //   <script>alert('xxx')</script>
       // //   <style type="text/css">
       // //     .st0{fill:#008BDB;}
       // //   </style>
