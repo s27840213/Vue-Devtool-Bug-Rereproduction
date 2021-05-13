@@ -4,7 +4,7 @@
         class="nu-controller"
         ref="body"
         :style="styles()"
-        @drop="onDrop"
+        @drop="!config.clipper ? onDrop($event) : onDropClipper($event, config.clipPath, config.styles)"
         @dragover.prevent,
         @dragenter.prevent
         @click="onClick"
@@ -43,6 +43,7 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controllerUtils'
 import { AxiosStatic } from 'axios'
 import MathUtils from '@/utils/mathUtils'
+import { IStyle } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -64,12 +65,6 @@ export default Vue.extend({
       isCompositoning: false
     }
   },
-  // mounted() {
-  //   this.$nextTick(() => {
-  //     const text = this.$refs.content as HTMLElement
-  //     text.innerHTML = this.getTextContent
-  //   })
-  // },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
@@ -473,7 +468,11 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const targetOffset = { x: this.getLayerX, y: this.getLayerY }
-      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path)
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path, this.config.styles)
+    },
+    onDropClipper(e: DragEvent, clipPath: string, styles: IStyle) {
+      const targetOffset = { x: this.getLayerX, y: this.getLayerY }
+      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path, this.config.styles)
     },
     onClick(e: MouseEvent) {
       const clickDate = new Date(this.clickTime)

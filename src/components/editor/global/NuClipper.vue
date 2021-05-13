@@ -24,6 +24,7 @@ export default Vue.extend({
     styles() {
       const HW = { width: 0, height: 0 }
       if (this.config.type === 'image' && this.isClipped) {
+        // Divided by the scale for prevents scaling changes the clipper's size
         HW.width = this.config.styles.width / this.config.styles.scale
         HW.height = this.config.styles.height / this.config.styles.scale
       } else {

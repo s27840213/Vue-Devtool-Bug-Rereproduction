@@ -64,7 +64,7 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos, this.config.path)
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
     }
   }
