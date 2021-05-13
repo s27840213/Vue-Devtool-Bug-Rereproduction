@@ -3,8 +3,9 @@
     div(v-if="isShown || isActive"
         class="nu-controller"
         ref="body"
+        :layer-index="`${layerIndex}`"
         :style="styles()"
-        @drop="!config.clipper ? onDrop($event) : onDropClipper($event, config.clipPath, config.styles)"
+        @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
         @dragover.prevent,
         @dragenter.prevent
         @click="onClick"
@@ -44,6 +45,7 @@ import ControlUtils from '@/utils/controllerUtils'
 import { AxiosStatic } from 'axios'
 import MathUtils from '@/utils/mathUtils'
 import { IStyle } from '@/interfaces/layer'
+import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
   props: {
@@ -70,6 +72,12 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio'
     }),
+    getLayerPos(): ICoordinate {
+      return {
+        x: this.config.styles.x,
+        y: this.config.styles.y
+      }
+    },
     getControlPoints(): any {
       return this.config.controlPoints
     },
@@ -79,12 +87,7 @@ export default Vue.extend({
     isShown(): boolean {
       return this.config.shown
     },
-    getLayerX(): number {
-      return this.config.styles.x
-    },
-    getLayerY(): number {
-      return this.config.styles.y
-    },
+
     getLayerWidth(): number {
       return this.config.styles.width
     },
@@ -247,10 +250,7 @@ export default Vue.extend({
       }
       const rect = this.$el.getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
-      this.initTranslate = {
-        x: this.getLayerX,
-        y: this.getLayerY
-      }
+      this.initTranslate = this.getLayerPos
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
@@ -329,10 +329,7 @@ export default Vue.extend({
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
-      this.initTranslate = {
-        x: this.getLayerX,
-        y: this.getLayerY
-      }
+      this.initTranslate = this.getLayerPos
       const vect = MouseUtils.getMouseRelPoint(event, center)
       const angeleInRad = this.getLayerRotate * Math.PI / 180
       const clientP = ControlUtils.getRelPosToCenter(vect, center, angeleInRad)
@@ -467,12 +464,10 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      const targetOffset = { x: this.getLayerX, y: this.getLayerY }
-      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path, this.config.styles)
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
-    onDropClipper(e: DragEvent, clipPath: string, styles: IStyle) {
-      const targetOffset = { x: this.getLayerX, y: this.getLayerY }
-      MouseUtils.onDrop(e, this.pageIndex, targetOffset, this.config.path, this.config.styles)
+    onDropClipper(e: DragEvent) {
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
     },
     onClick(e: MouseEvent) {
       const clickDate = new Date(this.clickTime)

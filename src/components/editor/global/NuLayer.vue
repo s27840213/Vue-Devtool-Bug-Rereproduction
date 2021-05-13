@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-layer" :style="styles()"
-      @drop="onDrop"
+      @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent,
       @dragenter.prevent)
     div(class='layer-scale'
@@ -64,7 +64,15 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos, this.config.path, this.config.styles)
+      console.log('bubble-------', e.target)
+      if (e.target === this.$refs.body) {
+        console.log('bubble')
+      }
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+      e.stopPropagation()
+    },
+    onDropClipper(e: DragEvent) {
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
     }
   }

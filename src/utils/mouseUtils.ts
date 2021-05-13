@@ -25,19 +25,21 @@ class MouseUtils {
     return { x, y }
   }
 
-  onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0}, clipPath = '', clipperStyles: IStyle | null = null) {
+  onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0},
+    clipPath = '', clipperStyles: IStyle | null = null) {
     let layer = this.onDropHandler(e, pageIndex, targetOffset)
 
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
+      this.refreshLayers(pageIndex, layer)
     }
-    store.commit('ADD_newLayers', {
-      pageIndex: pageIndex,
-      layers: [layer]
-    })
-    GroupUtils.deselect()
-    store.commit('SET_lastSelectedPageIndex', pageIndex)
-    GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
+  }
+
+  onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0}) {
+    const layer = this.onDropHandler(e, pageIndex, targetOffset)
+    if (layer) {
+      this.refreshLayers(pageIndex, layer)
+    }
   }
 
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): ILayer | undefined {
@@ -102,6 +104,16 @@ class MouseUtils {
     return layer
   }
 
+  refreshLayers(pageIndex: number, layer: ILayer) {
+    store.commit('ADD_newLayers', {
+      pageIndex: pageIndex,
+      layers: [layer]
+    })
+    GroupUtils.deselect()
+    store.commit('SET_lastSelectedPageIndex', pageIndex)
+    GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
+  }
+
   backgroundHandler(pageIndex: number, src: string) {
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
@@ -109,30 +121,45 @@ class MouseUtils {
     })
   }
 
-  clipperHandler(layer: ILayer, clipPath: string, ClipperStyles: IStyle): ILayer {
+  clipperHandler(layer: ILayer, clipPath: string, clipperStyles: IStyle): ILayer {
     const imgHW = {
       width: layer.styles.width,
-      heihgt: layer.styles.height
+      height: layer.styles.height
     }
     const ratio = {
-      width: ClipperStyles.initWidth / imgHW.width,
-      height: ClipperStyles.initHeight / imgHW.heihgt
+      width: clipperStyles.initWidth / imgHW.width,
+      height: clipperStyles.initHeight / imgHW.height
     }
+
     // Used to determine the img's initial width/height
     let scaleRatio: number
-    if (imgHW.width > imgHW.heihgt) {
+    const scaleImg = (scaleRatio: number) => {
+      imgHW.width *= scaleRatio
+      imgHW.height *= scaleRatio
+    }
+    if (imgHW.width > imgHW.height) {
       scaleRatio = ratio.height
+      scaleImg(scaleRatio)
     } else {
       scaleRatio = ratio.width
+      scaleImg(scaleRatio)
     }
-    const clippedStyles = {
-      initWidth: imgHW.width * scaleRatio,
-      initHeight: imgHW.heihgt * scaleRatio,
-      width: ClipperStyles.width,
-      height: ClipperStyles.height,
-      scale: ClipperStyles.scale
+    if (imgHW.width < clipperStyles.initWidth || imgHW.height < clipperStyles.initHeight) {
+      const scaleRatio = imgHW.height < clipperStyles.initHeight ? clipperStyles.initHeight / imgHW.height
+       : clipperStyles.initWidth / imgHW.width
+      scaleImg(scaleRatio)
     }
-    Object.assign(layer.styles, clippedStyles)
+
+    const newStyles = {
+      initWidth: imgHW.width,
+      initHeight: imgHW.height,
+      width: clipperStyles.width,
+      height: clipperStyles.height,
+      scale: clipperStyles.scale,
+      x: clipperStyles.x,
+      y: clipperStyles.y
+    }
+    Object.assign(layer.styles, newStyles)
     layer.clipPath = `path('${clipPath}')`
     return layer
   }
