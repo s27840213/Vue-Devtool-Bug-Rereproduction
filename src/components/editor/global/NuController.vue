@@ -71,7 +71,6 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio'
     }),
-<<<<<<< HEAD
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -81,8 +80,6 @@ export default Vue.extend({
     getControlPoints(): any {
       return this.config.controlPoints
     },
-=======
->>>>>>> acb2536cb80c4f2f415af294c5e923bc8585b36f
     isActive(): boolean {
       return this.config.active
     },
