@@ -1,5 +1,7 @@
 <template lang="pug">
   div(class="nu-page"
+      :class="`nu-page-${pageIndex}`"
+      ref="page"
       @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
       @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
       @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
@@ -52,7 +54,8 @@
             :key="`controller-${index}`"
             :layerIndex="index"
             :pageIndex="pageIndex"
-            :config="layer")
+            :config="layer"
+            @setFocus="setFocus()")
 </template>
 
 <script lang="ts">
@@ -141,6 +144,12 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.pageIndex)
       GroupUtils.deselect()
     },
+    setFocus() {
+      this.$nextTick(() => {
+        const currPage = this.$refs.page as HTMLElement
+        currPage.focus()
+      })
+    },
     coordinateHandler(e: MouseEvent) {
       var rect = this.coordinate.getBoundingClientRect()
       this.coordinateWidth = e.clientX - rect.left
@@ -158,7 +167,7 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   &:focus {
-    outline: none;
+    // outline: none;
   }
 }
 

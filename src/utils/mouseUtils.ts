@@ -3,7 +3,7 @@
 import store from '@/store'
 import { ILayer } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
-import { PanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import ZindexUtils from '@/utils/zindexUtils'
 class MouseUtils {
@@ -65,7 +65,7 @@ class MouseUtils {
 
     const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
-    if (store.getters.getCurrPanelType !== PanelType.bg) {
+    if (store.getters.getCurrSidebarPanelType !== SidebarPanelType.bg) {
       const layerConfig: ILayer = {
         type: data.type,
         pageIndex: pageIndex,
@@ -153,6 +153,13 @@ class MouseUtils {
       ZindexUtils.reassignZindex(pageIndex)
       GroupUtils.deselect()
       store.commit('SET_lastSelectedPageIndex', pageIndex)
+
+      /**
+       * @param {HTMLElement} targetPage - when we drop something to page, we lose focus of the page, so we can't use any shortcut unless we click the page again
+       * Thus, we need to get the target page to make it focused
+       */
+      const targetPage = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
+      targetPage.focus()
       GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
     } else {
       store.commit('SET_backgroundImageSrc', {

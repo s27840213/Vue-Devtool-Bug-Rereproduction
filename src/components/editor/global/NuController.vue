@@ -20,16 +20,16 @@
             class="controller-point"
             :key="index * 2"
             :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
-            @mousedown.stop="scaleStart")
+            @mousedown.left.stop="scaleStart")
         div(v-for="(resizer, index) in controlPoints.resizers"
-            @mousedown.stop="resizeStart")
+            @mousedown.left.stop="resizeStart")
           div(class="resize-bar"
               :key="index * 2 + 1"
               :style="resizerBarStyles(resizer)")
           div(class="controller-point"
               :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
         div(class="rotaterWrapper")
-          div(class="rotater" @mousedown.stop="rotateStart")
+          div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
 
 <script lang="ts">
@@ -104,7 +104,6 @@ export default Vue.extend({
   },
   watch: {
     scaleRatio() {
-      console.log('hi')
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     }
   },
@@ -326,6 +325,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      this.$emit('setFocus')
     },
     resizeStart(event: MouseEvent) {
       this.isControlling = true
@@ -414,6 +414,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
+      this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
       this.isControlling = true
@@ -459,6 +460,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
+      this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8

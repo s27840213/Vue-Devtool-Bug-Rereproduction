@@ -25,7 +25,6 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
         width: layer.styles.width,
         height: layer.styles.height
       })
-      console.log(layerBouding)
       minX = Math.min(minX, layerBouding.x)
       minY = Math.min(minY, layerBouding.y)
     }
@@ -42,7 +41,6 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
         width: layer.styles.width,
         height: layer.styles.height
       })
-      console.log(layerBouding)
       maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
@@ -266,6 +264,7 @@ class GroupUtils {
       })
       ZindexUtils.reassignZindex(lastSelectedPageIndex)
     }
+    store.commit('SET_currFunctionPanelType', 0)
   }
 
   reset() {

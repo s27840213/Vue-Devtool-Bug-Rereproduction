@@ -1,7 +1,6 @@
 <template lang="pug">
-  div(v-if="currSidebarPanel !== 0"
-      class="panel p-20")
-    component(:is="panelComponents[currSidebarPanel]")
+  div(class="panel p-20")
+    component(:is="panelComponents[currPanel]")
     img(class="btn-pack" :src="require('@/assets/img/svg/pack-up.svg')")
 </template>
 
@@ -20,7 +19,7 @@ import PanelColorPicker from '@/components/editor/panel/PanelColorPicker.vue'
 import PanelPageSetting from '@/components/editor/panel/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
 import { mapGetters } from 'vuex'
-import { FunctionPanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
 
 export default Vue.extend({
@@ -40,9 +39,15 @@ export default Vue.extend({
   },
   data() {
     return {
-      FunctionPanelType,
+      SidebarPanelType,
       panelComponents: [
-        'none',
+        'panel-template',
+        'panel-photo',
+        'panel-object',
+        'panel-background',
+        'panel-text',
+        'panel-file',
+        'panel-brand',
         'panel-group',
         'panel-text-setting',
         'panel-color-picker',
@@ -53,7 +58,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSidebarPanel: 'getCurrFunctionPanelType'
+      currPanel: 'getCurrSidebarPanelType'
     })
   }
 })
