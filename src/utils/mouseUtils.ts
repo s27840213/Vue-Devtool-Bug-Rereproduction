@@ -26,7 +26,7 @@ class MouseUtils {
     return { x, y }
   }
 
-  onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0},
+  onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 },
     clipPath = '', clipperStyles: IStyle | null = null) {
     let layer = this.onDropHandler(e, pageIndex, targetOffset)
 
@@ -36,7 +36,7 @@ class MouseUtils {
     }
   }
 
-  onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0}) {
+  onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       this.refreshLayers(pageIndex, layer)
@@ -149,7 +149,7 @@ class MouseUtils {
     }
     if (imgHW.width < clipperStyles.initWidth || imgHW.height < clipperStyles.initHeight) {
       const scaleRatio = imgHW.height < clipperStyles.initHeight ? clipperStyles.initHeight / imgHW.height
-       : clipperStyles.initWidth / imgHW.width
+        : clipperStyles.initWidth / imgHW.width
       scaleImg(scaleRatio)
     }
 
@@ -167,7 +167,6 @@ class MouseUtils {
     return layer
   }
 }
-
 
 const mouseUtils = new MouseUtils()
 export default mouseUtils
