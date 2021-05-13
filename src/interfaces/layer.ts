@@ -48,7 +48,8 @@ export interface IShape extends ILayer<IStyle> {
   radius?: string | number,
 }
 export interface IImage extends ILayer<IStyle> {
-  src: string
+  src: string,
+  clipPath?: string
 }
 export interface IGroup extends ILayer<IGroupStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

@@ -60,36 +60,13 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
-      // if (this.config.type === 'group' || this.config.type === 'tmp') {
-      //   console.log(this.config.styles.width, this.config.styles.height, this.config.styles.initWidth, this.config.styles.initHeight)
-      // }
-      if (this.config.type === 'text') {
-        return {
-          transform: `
-          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-          scale(${this.config.styles.scale})`,
-          'transform-style': 'preserve-3d'
-        }
-      }
-      if (this.config.type === 'group') {
-        return {
-          transform: `
-          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-          scale(${this.config.styles.scale})`
-        }
-      }
       return {
-        transform: `
-        translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-        translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-        scale(${this.config.styles.scale})`,
-        'transform-style': 'preserve-3d'
+        transform: `scale(${this.config.styles.scale})`,
+        'transform-style': this.config.type === 'group' ? 'flat' : 'preserve-3d'
       }
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos, this.config.path)
       e.stopPropagation()
     }
   }
@@ -101,7 +78,9 @@ export default Vue.extend({
   position: absolute;
   top: 0;
   left: 0;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;

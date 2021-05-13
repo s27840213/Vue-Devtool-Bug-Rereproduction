@@ -24,11 +24,8 @@ export default Vue.extend({
   },
   methods: {
     patternStyles() {
-      console.log(this.config.styles.color)
       return {
         fill: this.config.styles.color
-        // width: `${this.config.styles.initWidth}px`,
-        // height: `${this.config.styles.initHeight}px`
       }
     }
   }

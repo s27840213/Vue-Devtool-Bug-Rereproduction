@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-clipper" :style="styles()" )
+  div(class="nu-clipper" :style="styles()" ref="body")
     slot
 </template>
 
@@ -15,12 +15,25 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number
   },
+  computed: {
+    isClipped(): boolean {
+      return !(this.config.styles.initWidth === this.config.styles.width && this.config.styles.initHeight === this.config.styles.height)
+    }
+  },
   methods: {
     styles() {
+      const HW = { width: 0, height: 0 }
+      if (this.config.type === 'image' && this.isClipped) {
+        HW.width = this.config.styles.width / this.config.styles.scale
+        HW.height = this.config.styles.height / this.config.styles.scale
+      } else {
+        HW.width = this.config.styles.initWidth
+        HW.height = this.config.styles.initHeight
+      }
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
-        // 'clip-path': "path('M250 0a250 250 0 1 0 0 500a250 250 0 1 0 0-500z')"
+        width: `${HW.width}px`,
+        height: `${HW.height}px`,
+        'clip-path': this.config.clipPath
       }
     }
   }
