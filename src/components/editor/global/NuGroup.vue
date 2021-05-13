@@ -35,5 +35,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-tmp {
   position: absolute;
+  transform-style: flat;
 }
 </style>

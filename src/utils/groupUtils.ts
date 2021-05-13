@@ -5,6 +5,7 @@ import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import MathUtils from '@/utils/mathUtils'
+import ZindexUtils from './zindexUtils'
 
 function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -95,12 +96,13 @@ class GroupUtils {
       return
     }
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    store.commit('Update_layerProps', {
+    store.commit('UPDATE_layerProps', {
       pageIndex: lastSelectedPageIndex,
       layerIndex: this.tmpIndex,
       props: {
         type: 'group',
-        active: false
+        active: false,
+        shown: true
       }
     })
     const tmpIndex = this.tmpIndex
@@ -110,13 +112,46 @@ class GroupUtils {
 
   ungroup() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    if (store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex).type === 'group') {
+    const targetLayer = store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex)
+    if (targetLayer.type === 'group') {
+      targetLayer.layers.forEach((layer: IGroup) => {
+        layer.styles.zindex = targetLayer.styles.zindex
+      })
+      const tmpLayer = targetLayer
+      store.commit('UPDATE_layerProps', {
+        pageIndex: lastSelectedPageIndex,
+        layerIndex: this.tmpIndex,
+        props: {
+          type: 'tmp',
+          active: true
+        }
+      })
+      store.commit('UPDATE_layerStyles', {
+        pageIndex: lastSelectedPageIndex,
+        layerIndex: this.tmpIndex,
+        styles: {
+          zindex: -1
+        }
+      })
       const tmpIndex = this.tmpIndex
-      this.deselect()
-
-      const tmpLayer = GeneralUtils.deepCopy(store.getters.getLayer(lastSelectedPageIndex, tmpIndex))
+      this.reset()
       this.set(tmpIndex, tmpLayer.layers)
     }
+    // const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+    // if (store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex).type === 'group') {
+    //   const tmpLayer = store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex)
+    //   store.commit('UPDATE_layerProps', {
+    //     pageIndex: lastSelectedPageIndex,
+    //     layerIndex: this.tmpIndex,
+    //     props: {
+    //       type: 'tmp',
+    //       active: true
+    //     }
+    //   })
+    //   const tmpIndex = this.tmpIndex
+    //   this.reset()
+    //   this.set(tmpIndex, tmpLayer.layers)
+    // }
   }
 
   select(layerIndexs: Array<number>) {
@@ -125,7 +160,7 @@ class GroupUtils {
     if (this.tmpIndex < 0) {
       if (layerIndexs.length === 1) {
         this.tmpIndex = layerIndexs[0]
-        store.commit('Update_layerProps', {
+        store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: this.tmpIndex,
           props: {
@@ -203,10 +238,10 @@ class GroupUtils {
   }
 
   deselect() {
+    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (this.tmpIndex !== -1) {
-      const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
       if (this.tmpLayers.length === 0) {
-        store.commit('Update_layerProps', {
+        store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: this.tmpIndex,
           props: {
@@ -226,6 +261,10 @@ class GroupUtils {
         })
       }
       this.reset()
+      store.commit('UPDATE_layerOrders', {
+        pageIndex: lastSelectedPageIndex
+      })
+      ZindexUtils.reassignZindex(lastSelectedPageIndex)
     }
   }
 
@@ -240,14 +279,14 @@ class GroupUtils {
   }
 
   movingTmp(pageIndex: number, styles: any) {
-    store.commit('Update_tmpLayerStyles', {
+    store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles
     })
   }
 
   mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup> {
-    layers = JSON.parse(JSON.stringify(layers))
+    layers = JSON.parse(JSON.stringify(layers.sort((a, b) => a.styles.zindex - b.styles.zindex)))
 
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.x -= styles.x

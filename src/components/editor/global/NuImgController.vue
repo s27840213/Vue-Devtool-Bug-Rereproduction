@@ -20,7 +20,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { ControlPoints } from '@/store/types'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controllerUtils'
 
@@ -35,7 +34,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      controlPoints: ControlPoints,
+      controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
@@ -84,9 +83,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'Update_layerStyles',
-      updateLayerProps: 'Update_layerProps',
-      updateTmpLayerStyles: 'Update_tmpLayerStyles',
+      updateLayerStyles: 'UPDATE_layerStyles',
+      updateLayerProps: 'UPDATE_layerProps',
+      updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     resizerBarStyles(resizer: any) {
@@ -293,7 +292,7 @@ export default Vue.extend({
 
 .resize-bar {
   position: absolute;
-  color: '#00000000';
+  color: "#00000000";
 }
 
 .controller-point {
@@ -305,5 +304,4 @@ export default Vue.extend({
   border: 1.5px solid setColor(blue-2);
   border-radius: 30%;
 }
-
 </style>

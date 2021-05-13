@@ -24,6 +24,90 @@ class Controller {
     }
   }
 
+  getControlPoints = (resizerShort: number, resizerLong: number) => {
+    const scaleRatio = store.getters.getPageScaleRatio
+    return {
+      scalers: [
+        {
+          width: `${10 * (100 / scaleRatio)}px`,
+          height: `${10 * (100 / scaleRatio)}px`,
+          left: '0',
+          top: '0',
+          transform: 'translate3d(-50%,-50%,0)',
+          borderRadius: '50%',
+          cursor: 'nwse-resize'
+        },
+        {
+          width: `${10 * (100 / scaleRatio)}px`,
+          height: `${10 * (100 / scaleRatio)}px`,
+          transform: 'translate3d(50%,-50%,0)',
+          right: '0',
+          top: '0',
+          borderRadius: '50%',
+          cursor: 'nesw-resize'
+        },
+        {
+          width: `${10 * (100 / scaleRatio)}px`,
+          height: `${10 * (100 / scaleRatio)}px`,
+          transform: 'translate3d(50%,50%,0)',
+          right: '0',
+          bottom: '0',
+          borderRadius: '50%',
+          cursor: 'ns-resize'
+        },
+        {
+          width: `${10 * (100 / scaleRatio)}px`,
+          height: `${10 * (100 / scaleRatio)}px`,
+          transform: 'translate3d(-50%,50%,0)',
+          left: '0',
+          bottom: '0',
+          borderRadius: '50%',
+          cursor: 'nesw-resize'
+        }
+      ],
+      resizers: [
+        {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          top: `${-resizerShort - 1.5}px`,
+          transform: 'translate(-50%, 0)',
+          cursor: 'ew-resize'
+        },
+        {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          right: `${-resizerShort - 1.5}px`,
+          transform: 'translate(0, -50%)',
+          cursor: 'ew-resize'
+        },
+        {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          bottom: `${-resizerShort - 1.5}px`,
+          transform: 'translate(-50%, 0)',
+          cursor: 'nwse-resize'
+        },
+        {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          left: `${-resizerShort - 1.5}px`,
+          transform: 'translate(0, -50%)',
+          cursor: 'nwse-resize'
+        }
+      ],
+      cursors: [
+        'nwse-resize',
+        'ns-resize',
+        'nesw-resize',
+        'ew-resize',
+        'nwse-resize',
+        'ns-resize',
+        'nesw-resize',
+        'ew-resize'
+      ]
+    }
+  }
+
   dirHandler(clientP: ICoordinate, rect: DOMRect): boolean {
     const center: ICoordinate = this.getRectCenter(rect)
     const H = {
@@ -40,7 +124,7 @@ class Controller {
     return xmin < ymin
   }
 
-  getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number},
+  getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number },
     sizeOffset: { width: number, height: number }): ICoordinate {
     return {
       x: -sizeOffset.width / 2 + initData.xSign * (sizeOffset.width / 2) * Math.cos(initData.angle) -
@@ -86,7 +170,7 @@ class Controller {
   }
 
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
-    store.commit('Update_layerProps', {
+    store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
       props
@@ -101,7 +185,7 @@ class Controller {
   }
 
   updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
-    store.commit('Update_layerStyles', {
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
@@ -112,7 +196,7 @@ class Controller {
   }
 
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
-    store.commit('Update_layerStyles', {
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
@@ -124,7 +208,7 @@ class Controller {
   }
 
   updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
-    store.commit('Update_layerStyles', {
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
@@ -136,7 +220,7 @@ class Controller {
   }
 
   updateFontSize(pageIndex: number, layerIndex: number, size: number) {
-    store.commit('Update_layerStyles', {
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
@@ -146,7 +230,7 @@ class Controller {
   }
 
   updateLayerRotate(pageIndex: number, layerIndex: number, rotate: number) {
-    store.commit('Update_layerStyles', {
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
@@ -159,7 +243,7 @@ class Controller {
   updateShapeProps(pageIndex: number, layerIndex: number, viewBox: number[], path: string) {
     console.log(viewBox)
     console.log(path)
-    store.commit('Update_layerProps', {
+    store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
       props: {

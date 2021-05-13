@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { IEditorState, PanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
@@ -90,13 +90,13 @@ const getDefaultState = (): IEditorState => ({
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
-  getPages(state) {
+  getPages(state): Array<IPage> {
     return state.pages
   },
-  getCurrPanelType(state) {
+  getCurrPanelType(state): number {
     return state.currPanelType
   },
-  getPageScaleRatio(state) {
+  getPageScaleRatio(state): number {
     return state.pageScaleRatio
   },
   getLayer(state: IEditorState) {
@@ -114,10 +114,10 @@ const getters: GetterTree<IEditorState, unknown> = {
       return state.pages[pageIndex].layers.length
     }
   },
-  getLastSelectedPageIndex(state: IEditorState) {
+  getLastSelectedPageIndex(state: IEditorState): number {
     return state.lastSelectedPageIndex
   },
-  getClipboard(state: IEditorState) {
+  getClipboard(state: IEditorState): Array<ITmp> {
     return state.clipboard
   },
   getPhotos(state: IEditorState) {
@@ -166,7 +166,7 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
-  Update_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
@@ -174,7 +174,7 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
     })
   },
-  Update_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
+  UPDATE_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
     /**
      * TODO: type check -> To check the properties is in the certain interface or not
      * ex: weight properties is not allowed in Img Layer
@@ -184,7 +184,10 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
   },
-  Update_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
+  UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
+    state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
+  },
+  UPDATE_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       if (typeof v === 'number') {
         (state.pages[updateInfo.pageIndex].layers[GroupUtils.tmpIndex].styles[k] as number) += v
@@ -199,7 +202,6 @@ const mutations: MutationTree<IEditorState> = {
       console.log('You didn\'t select any layer')
       return
     }
-    console.log(index, state.lastSelectedPageIndex)
     state.pages[state.lastSelectedPageIndex].layers.splice(index, 1)
 
     GroupUtils.reset()

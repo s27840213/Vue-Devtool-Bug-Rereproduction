@@ -9,13 +9,14 @@
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
-    //- div(class="test-index")
-    //-   span {{layerIndex}}
-    //- div(class="test-angle")
-    //-   span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
-    //-   span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
-    //-   //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
-    //-   //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
+    div(class="test-index")
+      span {{layerIndex}}
+    div(class="test-angle")
+      span {{`(z): ${config.styles.zindex}`}}
+      //- span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
+      //- span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
+      //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
+      //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
 </template>
 
 <script lang="ts">
@@ -67,6 +68,15 @@ export default Vue.extend({
           transform: `
           translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
           translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
+          scale(${this.config.styles.scale})`,
+          'transform-style': 'preserve-3d'
+        }
+      }
+      if (this.config.type === 'group') {
+        return {
+          transform: `
+          translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+          translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
           scale(${this.config.styles.scale})`
         }
       }
@@ -74,7 +84,8 @@ export default Vue.extend({
         transform: `
         translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
         translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-        scale(${this.config.styles.scale})`
+        scale(${this.config.styles.scale})`,
+        'transform-style': 'preserve-3d'
       }
     },
     onDrop(e: DragEvent) {
@@ -94,7 +105,7 @@ export default Vue.extend({
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
-
+  transform-style: preserve-3d;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }

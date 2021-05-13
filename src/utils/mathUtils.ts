@@ -60,9 +60,7 @@ class MathUtils {
       x: minX,
       y: minY,
       width: maxX - minX,
-      height: maxY - minY,
-      xShift: minX - initStyles.x,
-      yShift: minY - initStyles.y
+      height: maxY - minY
     }
   }
 }
