@@ -9,7 +9,8 @@ export interface IStyle {
   width: number,
   height: number,
   initWidth: number,
-  initHeight: number
+  initHeight: number,
+  zindex: number
 }
 
 export interface ITextStyle extends IStyle {

@@ -6,6 +6,7 @@ import GroupUtils from '@/utils/groupUtils'
 import { PanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
+import ZindexUtils from '@/utils/zindexUtils'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -75,7 +76,8 @@ class MouseUtils {
         width: data.styles.width,
         height: data.styles.height,
         initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
-        initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height
+        initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
+        zindex: -1
       }
     }
 
@@ -109,6 +111,7 @@ class MouseUtils {
       pageIndex: pageIndex,
       layers: [layer]
     })
+    ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
     store.commit('SET_lastSelectedPageIndex', pageIndex)
     GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])

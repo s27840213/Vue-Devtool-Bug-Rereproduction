@@ -4,7 +4,8 @@
     nu-layer(v-for="(layer,index) in config.layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
-      :config="layer")
+      :config="layer"
+      :style="{'outline': '2px solid #7190CC'}")
 </template>
 
 <script lang="ts">
@@ -35,5 +36,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-tmp {
   position: absolute;
+  transform-style: preserve-3d;
 }
 </style>

@@ -34,8 +34,7 @@
             @dragenter.prevent
             @click.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
-            @mouseout="togglePageHighlighter(false)"
-            )
+            @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
             :class="`nu-layer--p${pageIndex}`"
@@ -43,8 +42,7 @@
             :data-pindex="`${pageIndex}`"
             :layerIndex="index"
             :pageIndex="pageIndex"
-            :config="layer"
-            @mouseover.native.stop="toggleHighlighter(pageIndex,index,true)")
+            :config="layer")
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
@@ -94,7 +92,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      updateLayerProps: 'Update_layerProps',
+      updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     styles(type: string) {
@@ -158,6 +156,7 @@ export default Vue.extend({
 .nu-page {
   position: relative;
   margin: 15px auto;
+  transform-style: preserve-3d;
   &:focus {
     outline: none;
   }
@@ -179,6 +178,7 @@ export default Vue.extend({
   // border: 1px solid blue;
   box-sizing: border-box;
   transform-origin: 0 0;
+  transform-style: preserve-3d;
 }
 .page-content {
   overflow: hidden;
@@ -187,10 +187,11 @@ export default Vue.extend({
   box-sizing: border-box;
   background-size: cover;
   background-repeat: no-repeat;
+  transform-style: preserve-3d;
 }
 .page-highlighter {
   position: absolute;
-  border: 2px solid setColor(blue-2, 0.5);
+  outline: 2px solid setColor(blue-2, 0.5);
   box-sizing: border-box;
   z-index: 5;
   pointer-events: none;

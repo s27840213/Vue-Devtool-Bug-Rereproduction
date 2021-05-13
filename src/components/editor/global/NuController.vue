@@ -1,7 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(v-if="isShown || isActive"
-        class="nu-controller"
+    div(class="nu-controller"
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles()"
@@ -10,7 +9,8 @@
         @dragenter.prevent
         @click="onClick"
         @mousedown.left.stop="moveStart"
-        @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)")
+        @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
+        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)")
       span(class="text-content" :style="contextStyles()" ref="content"
         @blur="onFocusOut"
         @keydown="onKeyDown"
@@ -37,7 +37,6 @@
 import Vue from 'vue'
 import PropsTransformer from '@/utils/propsTransformer'
 import { mapGetters, mapMutations } from 'vuex'
-import { ControlPoints } from '@/store/types'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
@@ -55,7 +54,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      controlPoints: ControlPoints,
+      controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
@@ -72,6 +71,7 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio'
     }),
+<<<<<<< HEAD
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -81,6 +81,8 @@ export default Vue.extend({
     getControlPoints(): any {
       return this.config.controlPoints
     },
+=======
+>>>>>>> acb2536cb80c4f2f415af294c5e923bc8585b36f
     isActive(): boolean {
       return this.config.active
     },
@@ -104,11 +106,17 @@ export default Vue.extend({
       return this.config.text
     }
   },
+  watch: {
+    scaleRatio() {
+      console.log('hi')
+      this.controlPoints = ControlUtils.getControlPoints(4, 25)
+    }
+  },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'Update_layerStyles',
-      updateLayerProps: 'Update_layerProps',
-      updateTmpLayerStyles: 'Update_tmpLayerStyles',
+      updateLayerStyles: 'UPDATE_layerStyles',
+      updateLayerProps: 'UPDATE_layerProps',
+      updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     resizerBarStyles(resizer: any) {
@@ -160,13 +168,14 @@ export default Vue.extend({
       })
     },
     styles() {
+      const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        border: this.isShown || this.isActive ? (this.config.type === 'tmp'
-          ? '3px dashed #7190CC' : '3px solid #7190CC') : 'none',
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'none'
+        outline: this.isShown || this.isActive ? (this.config.type === 'tmp'
+          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${3 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
     },
 
@@ -473,7 +482,6 @@ export default Vue.extend({
       const clickDate = new Date(this.clickTime)
       const currDate = new Date()
       const diff = currDate.getTime() - clickDate.getTime()
-
       this.textClickHandler(diff)
     },
     textClickHandler(diff: number) {
@@ -521,12 +529,9 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: setZindex("nu-controller");
+  // z-index: setZindex("nu-controller");
   position: absolute;
   box-sizing: border-box;
-  &:active {
-    border: 1px solid rgb(174, 46, 190);
-  }
   &:hover {
     cursor: pointer;
   }
@@ -540,11 +545,9 @@ export default Vue.extend({
 .controller-point {
   pointer-events: auto;
   position: absolute;
-  width: 10px;
-  height: 10px;
   background-color: setColor(white);
   border: 1.5px solid setColor(blue-2);
-  border-radius: 30%;
+  transform-style: preserve-3d;
 }
 .rotaterWrapper {
   position: absolute;
