@@ -66,6 +66,15 @@ export default Vue.extend({
       isCompositoning: false
     }
   },
+  mounted() {
+    const body = this.$refs.body as HTMLElement
+    /**
+     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+     */
+    body.addEventListener('contextmenu', (e: MouseEvent) => {
+      e.preventDefault()
+    }, false)
+  },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
@@ -164,7 +173,8 @@ export default Vue.extend({
       })
     },
     styles() {
-      const zindex = (this.layerIndex + 1) * 100
+      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
@@ -176,11 +186,12 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      event.preventDefault()
+      event.stopPropagation()
       if (event.target === this.$refs.body) {
         this.isControlling = true
-        const layer = this.$el as HTMLElement
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        layer.addEventListener('mouseup', this.moveEnd)
+        window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
         if (this.config.type === 'text') {
           const text = this.$refs.content as HTMLElement
@@ -200,11 +211,13 @@ export default Vue.extend({
            * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
            * Thus, we need to do some condition checking to prevent this error
            */
-          const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || GroupUtils.tmpLayers.length === 0)
-            ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
+          //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          let targetIndex = this.layerIndex
           if (!this.isActive) {
-            if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
+            if ((!event.metaKey && !event.ctrlKey) && GroupUtils.tmpIndex >= 0) {
               GroupUtils.deselect()
+              targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
             }
             if (this.pageIndex === this.lastSelectedPageIndex) {
@@ -231,6 +244,7 @@ export default Vue.extend({
             initY: moveOffset.offsetY
           }
         )
+        this.$emit('moving', this.config)
       }
     },
     moveEnd() {
@@ -478,6 +492,7 @@ export default Vue.extend({
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
     },
     onClick(e: MouseEvent) {
+      e.preventDefault()
       const clickDate = new Date(this.clickTime)
       const currDate = new Date()
       const diff = currDate.getTime() - clickDate.getTime()

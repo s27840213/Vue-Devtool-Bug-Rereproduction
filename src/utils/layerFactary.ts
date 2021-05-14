@@ -23,7 +23,8 @@ class LayerFactary {
         width: 0,
         height: 0,
         initWidth: 0,
-        initHeight: 0
+        initHeight: 0,
+        zindex: -1
       }
     }
     Object.assign(basicConfig.styles, config.styles)

@@ -135,21 +135,6 @@ class GroupUtils {
       this.reset()
       this.set(tmpIndex, tmpLayer.layers)
     }
-    // const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    // if (store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex).type === 'group') {
-    //   const tmpLayer = store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex)
-    //   store.commit('UPDATE_layerProps', {
-    //     pageIndex: lastSelectedPageIndex,
-    //     layerIndex: this.tmpIndex,
-    //     props: {
-    //       type: 'tmp',
-    //       active: true
-    //     }
-    //   })
-    //   const tmpIndex = this.tmpIndex
-    //   this.reset()
-    //   this.set(tmpIndex, tmpLayer.layers)
-    // }
   }
 
   select(layerIndexs: Array<number>) {
@@ -165,6 +150,7 @@ class GroupUtils {
             active: true
           }
         })
+        this.tmpLayers = [...MappingUtils.mappingLayers(layerIndexs)]
       } else {
         const layers = MappingUtils.mappingLayers(layerIndexs)
         const tmpStyles = calcTmpProps(layers)
@@ -187,7 +173,7 @@ class GroupUtils {
         })
       }
     } else {
-      if (this.tmpLayers.length === 0) {
+      if (this.tmpLayers.length === 1) {
         const indexs = [this.tmpIndex, ...layerIndexs]
         this.deselect()
         const layers = MappingUtils.mappingLayers(indexs)
@@ -238,7 +224,7 @@ class GroupUtils {
   deselect() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (this.tmpIndex !== -1) {
-      if (this.tmpLayers.length === 0) {
+      if (this.tmpLayers.length === 1) {
         store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: this.tmpIndex,

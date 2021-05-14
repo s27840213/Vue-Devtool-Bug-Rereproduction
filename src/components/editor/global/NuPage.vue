@@ -28,6 +28,13 @@
           span {{coordinateWidth* (100/scaleRatio)}}px
         div(class="coordinate__val coordinate__height")
           span {{coordinateHeight*(100/scaleRatio)}}px
+      div(class="snap-area")
+        div(v-for="line in snaplines.v"
+          class="snap-area__line snap-area__line--vr"
+          :style="snapLineStyles('v', line.pos)")
+        div(v-for="line in snaplines.h"
+          class="snap-area__line snap-area__line--hr"
+          :style="snapLineStyles('h', line.pos)")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="page-content"
             :style="styles('content')"
@@ -48,23 +55,26 @@
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
-        div(class="page-control" :style="styles('control')")
+        div(class="page-control"
+            :style="styles('control')")
           nu-controller(v-for="(layer,index) in config.layers"
             data-identifier="controller"
             :key="`controller-${index}`"
             :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer"
-            @setFocus="setFocus()")
+            @setFocus="setFocus()"
+            @moving="calcSnap")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
+import SnapUtils from '@/utils/snapUtils'
 
 export default Vue.extend({
   data() {
@@ -74,7 +84,12 @@ export default Vue.extend({
       // for test used
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0
+      coordinateHeight: 0,
+      snapUtils: new SnapUtils(this.pageIndex),
+      snaplines: {
+        v: [],
+        h: []
+      }
     }
   },
   props: {
@@ -117,10 +132,15 @@ export default Vue.extend({
         height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
     },
+    snapLineStyles(dir: string, pos: number) {
+      console.log(pos)
+      return dir === 'v' ? { height: `${this.config.height}px`, transform: `translate3d(${pos}px,0,3000px)` }
+        : { width: `${this.config.width}px`, transform: `translate3d(0,${pos}px,3000px)` }
+    },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex)
     },
-    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup) {
+    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
       this.ADD_newLayers({
         pageIndex: pageIndex,
         layers: [layer]
@@ -137,14 +157,14 @@ export default Vue.extend({
         })
       }
     },
-    togglePageHighlighter(isHover: boolean) {
+    togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
-    pageClickHandler() {
+    pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
       GroupUtils.deselect()
     },
-    setFocus() {
+    setFocus(): void {
       this.$nextTick(() => {
         const currPage = this.$refs.page as HTMLElement
         currPage.focus()
@@ -156,6 +176,17 @@ export default Vue.extend({
       this.coordinateHeight = e.clientY - rect.top
       this.coordinate.style.width = `${this.coordinateWidth}px`
       this.coordinate.style.height = `${this.coordinateHeight}px`
+    },
+    getSnaplines(): { v: number[], h: number[] } {
+      return this.snapUtils.getSnaplinePos()
+    },
+    calcSnap(layer: any) {
+      const snapLines = this.snapUtils.getSnaplinePos()
+      const layerSnapInfo = this.snapUtils.getObjectSnappingEdges(layer)
+      const targetSnapLines = this.snapUtils.getGuides(snapLines, layerSnapInfo)
+      console.log(targetSnapLines.v, targetSnapLines.h)
+      this.snaplines.v = targetSnapLines.v
+      this.snaplines.h = targetSnapLines.h
     }
   }
 })
@@ -213,12 +244,34 @@ export default Vue.extend({
   pointer-events: none;
 }
 
+.snap-area {
+  @include size(100%, 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: setZindex(coordinate);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  &__line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: setZindex(coordinate);
+    background-color: blue;
+    &--vr {
+      width: 1px;
+    }
+    &--hr {
+      height: 1px;
+    }
+  }
+}
 .coordinate {
   border-right: 1px solid blue;
   border-bottom: 1px solid blue;
   opacity: 0.5;
   box-sizing: border-box;
-  z-index: 10000;
+  z-index: setZindex("coordinate");
   position: absolute;
   top: 0;
   left: 0;
