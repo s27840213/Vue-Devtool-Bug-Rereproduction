@@ -64,7 +64,8 @@
             :pageIndex="pageIndex"
             :config="layer"
             @setFocus="setFocus()"
-            @moving="calcSnap")
+            @moving="calcSnap"
+            @clearSnap="clearSnap")
 </template>
 
 <script lang="ts">
@@ -183,10 +184,49 @@ export default Vue.extend({
     calcSnap(layer: any) {
       const snapLines = this.snapUtils.getSnaplinePos()
       const layerSnapInfo = this.snapUtils.getObjectSnappingEdges(layer)
-      const targetSnapLines = this.snapUtils.getGuides(snapLines, layerSnapInfo)
+      const targetSnapLines = this.snapUtils.getPossibleSnaplines(snapLines, layerSnapInfo)
       console.log(targetSnapLines.v, targetSnapLines.h)
       this.snaplines.v = targetSnapLines.v
       this.snaplines.h = targetSnapLines.h
+
+      const snaplines = [...this.snaplines.v, this.snaplines.h]
+      snaplines.forEach((snapline: any) => {
+        console.log(snapline)
+        switch (snapline.snapTo) {
+          case 'start': {
+            if (snapline.orientation === 'V') {
+              // GroupUtils.movingTmp(
+              //   this.pageIndex,
+              //   {
+              //     x: snapline.pos
+              //   })
+            } else if (snapline.orientation === 'H') {
+
+            }
+            break
+          }
+          case 'center': {
+            if (snapline.orientation === 'V') {
+
+            } else if (snapline.orientation === 'H') {
+
+            }
+            break
+          }
+          case 'end': {
+            if (snapline.orientation === 'V') {
+
+            } else if (snapline.orientation === 'H') {
+
+            }
+            break
+          }
+        }
+      })
+    },
+    clearSnap() {
+      this.snaplines.v = []
+      this.snaplines.h = []
     }
   }
 })

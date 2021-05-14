@@ -67,8 +67,6 @@ class MouseUtils {
       styles: {
         x: x,
         y: y,
-        initX: x,
-        initY: y,
         scale: 1,
         scaleX: 0,
         scaleY: 0,

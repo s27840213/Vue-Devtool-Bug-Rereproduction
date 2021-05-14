@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, IGroupStyle, ITmpStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IStyle, ITextStyle } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -286,7 +286,7 @@ class GroupUtils {
    * @param styles - the styles of tmp layer
    * @returns calculated layers in tmp layer
    */
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IGroupStyle | ITmpStyle): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IStyle): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset

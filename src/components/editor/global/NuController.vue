@@ -239,9 +239,7 @@ export default Vue.extend({
           this.pageIndex,
           {
             x: moveOffset.offsetX,
-            y: moveOffset.offsetY,
-            initX: moveOffset.offsetX,
-            initY: moveOffset.offsetY
+            y: moveOffset.offsetY
           }
         )
         this.$emit('moving', this.config)
@@ -257,6 +255,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.isGetMoved = false
       }, 350)
+      this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
       this.isControlling = true

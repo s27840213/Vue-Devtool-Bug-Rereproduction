@@ -58,96 +58,97 @@ class SnapUtils {
         {
           guide: Math.round(box.x),
           offset: Math.round(absPos.x - box.x),
-          snap: 'start'
+          snapTo: 'start'
         },
         {
           guide: Math.round(box.x + box.width / 2),
           offset: Math.round(absPos.x - box.x - box.width / 2),
-          snap: 'center'
+          snapTo: 'center'
         },
         {
           guide: Math.round(box.x + box.width),
           offset: Math.round(absPos.x - box.x - box.width),
-          snap: 'end'
+          snapTo: 'end'
         }
       ],
       h: [
         {
           guide: Math.round(box.y),
           offset: Math.round(absPos.y - box.y),
-          snap: 'start'
+          snapTo: 'start'
         },
         {
           guide: Math.round(box.y + box.height / 2),
           offset: Math.round(absPos.y - box.y - box.height / 2),
-          snap: 'center'
+          snapTo: 'center'
         },
         {
           guide: Math.round(box.y + box.height),
           offset: Math.round(absPos.y - box.y - box.height),
-          snap: 'end'
+          snapTo: 'end'
         }
       ]
     }
   }
 
   // find all snapping possibilities
-  getGuides(lineGuideStops: any, itemBounds: any): any {
+  getPossibleSnaplines(snaplines: any, layerSnappingInfos: any): any {
     const resultV: any = []
     const resultH: any = []
-    lineGuideStops.v.forEach((lineGuide: any) => {
-      itemBounds.v.forEach((itemBound: any) => {
-        const diff = Math.abs(lineGuide - itemBound.guide)
+    snaplines.v.forEach((lineGuide: any) => {
+      layerSnappingInfos.v.forEach((layerSnappingInfo: any) => {
+        const diff = Math.abs(lineGuide - layerSnappingInfo.guide)
         // if the distance between guild line and object snap point is close we can consider this for snapping
         if (diff < GUIDELINE_OFFSET) {
           resultV.push({
             lineGuide: lineGuide,
             diff: diff,
-            snap: itemBound.snap,
-            offset: itemBound.offset
+            snapTo: layerSnappingInfo.snapTo,
+            offset: layerSnappingInfo.offset
           })
         }
       })
     })
 
-    lineGuideStops.h.forEach((lineGuide: any) => {
-      itemBounds.h.forEach((itemBound: any) => {
-        const diff = Math.abs(lineGuide - itemBound.guide)
+    snaplines.h.forEach((lineGuide: any) => {
+      layerSnappingInfos.h.forEach((layerSnappingInfo: any) => {
+        const diff = Math.abs(lineGuide - layerSnappingInfo.guide)
         if (diff < GUIDELINE_OFFSET) {
           resultH.push({
             lineGuide: lineGuide,
             diff: diff,
-            snap: itemBound.snap,
-            offset: itemBound.offset
+            snapTo: layerSnappingInfo.snapTo,
+            offset: layerSnappingInfo.offset
           })
         }
       })
     })
 
-    const snaplines = []
+    const possibleSnaplinesV = []
+    const possibleSnaplinesH = []
 
     // find closest snap
     const minV = resultV.sort((a: any, b: any) => a.diff - b.diff)[0]
     const minH = resultH.sort((a: any, b: any) => a.diff - b.diff)[0]
     if (minV) {
-      snaplines.push({
+      possibleSnaplinesV.push({
         pos: minV.lineGuide,
         offset: minV.offset,
         orientation: 'V',
-        snap: minV.snap
+        snapTo: minV.snapTo
       })
     }
     if (minH) {
-      snaplines.push({
+      possibleSnaplinesH.push({
         pos: minH.lineGuide,
         offset: minH.offset,
         orientation: 'H',
-        snap: minH.snap
+        snapTo: minH.snapTo
       })
     }
     return {
-      v: snaplines.filter((snapline: any) => snapline.orientation === 'V'),
-      h: snaplines.filter((snapline: any) => snapline.orientation === 'H')
+      v: possibleSnaplinesV,
+      h: possibleSnaplinesH
     }
   }
 }
