@@ -85,6 +85,7 @@ const getDefaultState = (): IEditorState => ({
   currPanelType: PanelType.template,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
+  lastSelectedLayerIndex: 0,
   clipboard: [],
   photos: []
 })
@@ -117,6 +118,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLastSelectedPageIndex(state: IEditorState): number {
     return state.lastSelectedPageIndex
   },
+  getLastSelectedLayerIndex(state: IEditorState): number {
+    return state.lastSelectedLayerIndex
+  },
   getClipboard(state: IEditorState): Array<ITmp> {
     return state.clipboard
   },
@@ -140,6 +144,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_lastSelectedPageIndex(state: IEditorState, index: number) {
     state.lastSelectedPageIndex = index
+  },
+  SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
+    state.lastSelectedLayerIndex = index
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, imageSrc: string }) {
     state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.imageSrc

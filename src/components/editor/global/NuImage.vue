@@ -14,9 +14,11 @@ export default Vue.extend({
   },
   methods: {
     styles() {
+      const styles = this.config.styles
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
+        width: `${styles.imgWidth}px`,
+        height: `${styles.imgHeight}px`
       }
     }
   }

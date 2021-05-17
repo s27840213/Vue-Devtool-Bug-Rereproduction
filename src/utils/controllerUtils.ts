@@ -195,6 +195,39 @@ class Controller {
     })
   }
 
+  updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        imgX,
+        imgY
+      }
+    })
+  }
+
+  updateImgSize(pageIndex: number, layerIndex: number, imgWidth: number, imgHeight: number) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        imgWidth,
+        imgHeight
+      }
+    })
+  }
+
+  updateImgControl(pageIndex: number, layerIndex: number, imgControl: boolean) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        imgControl
+      }
+    })
+  }
+
+
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,

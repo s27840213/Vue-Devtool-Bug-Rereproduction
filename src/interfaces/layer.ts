@@ -49,7 +49,12 @@ export interface IShape extends ILayer<IStyle> {
 }
 export interface IImage extends ILayer<IStyle> {
   src: string,
-  clipPath?: string
+  clipPath?: string,
+  imgX: number,
+  imgY: number,
+  imgWidth: number,
+  imgHeight: number,
+  imgControll: boolean
 }
 export interface IGroup extends ILayer<IGroupStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

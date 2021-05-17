@@ -50,7 +50,6 @@ export default Vue.extend({
     contextStyles() {
       const _styles = Object.assign({}, this.config.styles)
       const styles = Object.assign(_styles, { size: this.config.styles.initSize })
-      console.log(CssConveter.convertFontStyle(styles))
       return CssConveter.convertFontStyle(styles)
     }
   }

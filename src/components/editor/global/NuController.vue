@@ -10,7 +10,8 @@
         @click="onClick"
         @mousedown.left.stop="moveStart"
         @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)")
+        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
+        @dblclick="onDblClick")
       span(class="text-content" :style="contextStyles()" ref="content"
         @blur="onFocusOut"
         @keydown="onKeyDown"
@@ -114,7 +115,8 @@ export default Vue.extend({
       updateLayerStyles: 'UPDATE_layerStyles',
       updateLayerProps: 'UPDATE_layerProps',
       updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     resizerBarStyles(resizer: any) {
       const resizerStyle = Object.assign({}, resizer)
@@ -207,6 +209,7 @@ export default Vue.extend({
             if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
               GroupUtils.deselect()
               this.setLastSelectedPageIndex(this.pageIndex)
+              this.setLastSelectedLayerIndex(this.layerIndex)
             }
             if (this.pageIndex === this.lastSelectedPageIndex) {
               GroupUtils.select([targetIndex])
@@ -516,6 +519,9 @@ export default Vue.extend({
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
+    },
+    onDblClick(e: MouseEvent) {
+      ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     }
   }
 })

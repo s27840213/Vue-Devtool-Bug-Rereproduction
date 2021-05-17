@@ -47,13 +47,21 @@
           class="page-highlighter"
           :style="styles()")
         div(class="page-control" :style="styles('control')")
-          nu-controller(v-for="(layer,index) in config.layers"
-            data-identifier="controller"
-            :key="`controller-${index}`"
-            :layerIndex="index"
-            :pageIndex="pageIndex"
-            :config="layer")
+          template(v-for="(layer, index) in config.layers")
+            component(:is="layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+              data-identifier="controller"
+              :key="`controller-${index}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer")
 </template>
+
+    // nu-controller(v-for="(layer,index) in config.layers"
+    //         data-identifier="controller"
+    //         :key="`controller-${index}`"
+    //         :layerIndex="index"
+    //         :pageIndex="pageIndex"
+    //         :config="layer")
 
 <script lang="ts">
 import Vue from 'vue'
@@ -62,6 +70,7 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
+import ControllerUtils from '@/utils/controllerUtils'
 
 export default Vue.extend({
   data() {
@@ -86,14 +95,15 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      getLastSelectedLayer: 'getLastSelectedLayerIndex'
     })
   },
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
       updateLayerProps: 'UPDATE_layerProps',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -138,7 +148,9 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler() {
+      console.log('pageClicked')
       this.setLastSelectedPageIndex(this.pageIndex)
+      ControllerUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
       GroupUtils.deselect()
     },
     coordinateHandler(e: MouseEvent) {

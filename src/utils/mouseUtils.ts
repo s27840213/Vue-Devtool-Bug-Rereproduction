@@ -83,7 +83,14 @@ class MouseUtils {
 
     let layer
     if (data.type === 'image') {
-      layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src }))
+      const imgStyles = {
+        imgX: 0,
+        imgY: 0,
+        imgWidth: layerConfig.styles.initWidth,
+        imgHeight: layerConfig.styles.initHeight
+      }
+      Object.assign(layerConfig.styles, imgStyles)
+      layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src, imgControl: false }))
     } else if (data.type === 'text') {
       const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
       Object.assign(layerConfig.styles, data.styles)
@@ -103,6 +110,7 @@ class MouseUtils {
       layerConfig.styles.y = tmpPos.y
       layer = LayerFactary.newShape(pageIndex, Object.assign(layerConfig, shapeConfig))
     }
+    console.log('layer produced', layer)
     return layer
   }
 
@@ -125,37 +133,42 @@ class MouseUtils {
   }
 
   clipperHandler(layer: ILayer, clipPath: string, clipperStyles: IStyle): ILayer {
-    const imgHW = {
+    const img = {
       width: layer.styles.width,
       height: layer.styles.height
     }
     const ratio = {
-      width: clipperStyles.initWidth / imgHW.width,
-      height: clipperStyles.initHeight / imgHW.height
+      width: clipperStyles.initWidth / img.width,
+      height: clipperStyles.initHeight / img.height
     }
 
-    // Used to determine the img's initial width/height
+    // Here's to determine the img's initial width/height
     let scaleRatio: number
     const scaleImg = (scaleRatio: number) => {
-      imgHW.width *= scaleRatio
-      imgHW.height *= scaleRatio
+      img.width *= scaleRatio
+      img.height *= scaleRatio
     }
-    if (imgHW.width > imgHW.height) {
+    if (img.width > img.height) {
       scaleRatio = ratio.height
       scaleImg(scaleRatio)
     } else {
       scaleRatio = ratio.width
       scaleImg(scaleRatio)
     }
-    if (imgHW.width < clipperStyles.initWidth || imgHW.height < clipperStyles.initHeight) {
-      const scaleRatio = imgHW.height < clipperStyles.initHeight ? clipperStyles.initHeight / imgHW.height
-        : clipperStyles.initWidth / imgHW.width
-      scaleImg(scaleRatio)
+
+    if (img.width < clipperStyles.initWidth || img.height < clipperStyles.initHeight) {
+      const scaleRatio = img.height < clipperStyles.initHeight ? clipperStyles.initHeight / img.height
+        : clipperStyles.initWidth / img.width
+        scaleImg(scaleRatio)
     }
 
     const newStyles = {
-      initWidth: imgHW.width,
-      initHeight: imgHW.height,
+      imgWidth: img.width,
+      imgHeight: img.height,
+      imgX: -img.width / 2 + clipperStyles.initWidth / 2,
+      imgY: -img.height / 2 + clipperStyles.initHeight / 2,
+      initWidth: img.width,
+      initHeight: img.height,
       width: clipperStyles.width,
       height: clipperStyles.height,
       scale: clipperStyles.scale,
