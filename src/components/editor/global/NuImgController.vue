@@ -83,8 +83,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'UPDATE_layerStyles',
-      updateLayerProps: 'UPDATE_layerProps',
       updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),

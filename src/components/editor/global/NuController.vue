@@ -1,6 +1,7 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller"
+    div(v-show="!isControlling"
+        class="nu-controller"
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles()"
@@ -16,7 +17,7 @@
         @keydown="onKeyDown"
         @compositionstart="compositionStart"
         :contenteditable="this.config.textEditable")
-      template(v-if="isActive && !isControlling")
+      template(v-if="isActive")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index * 2"
@@ -35,22 +36,22 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import PropsTransformer from '@/utils/propsTransformer'
+import MathUtils from '@/utils/mathUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controllerUtils'
-import { AxiosStatic } from 'axios'
-import MathUtils from '@/utils/mathUtils'
-import { IStyle } from '@/interfaces/layer'
 import { ICoordinate } from '@/interfaces/frame'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
-    pageIndex: Number
+    pageIndex: Number,
+    snaplines: Object,
+    snapUtils: Object
   },
   data() {
     return {
@@ -63,7 +64,8 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false },
       clickTime: new Date().toISOString(),
       isGetMoved: false,
-      isCompositoning: false
+      isCompositoning: false,
+      isSnapping: false
     }
   },
   mounted() {
@@ -232,9 +234,8 @@ export default Vue.extend({
         this.setCursorStyle('move')
         event.preventDefault()
         var offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-        const moveOffset = PropsTransformer.getActualMoveOffset(offsetPos.x, offsetPos.y)
-        this.initialPos.x += offsetPos.x
-        this.initialPos.y += offsetPos.y
+        const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+
         GroupUtils.movingTmp(
           this.pageIndex,
           {
@@ -242,7 +243,9 @@ export default Vue.extend({
             y: moveOffset.offsetY
           }
         )
-        this.$emit('moving', this.config)
+        const offsetSnap = this.calcSnap(this.config, this.layerIndex)
+        this.initialPos.x += (offsetPos.x + offsetSnap.x)
+        this.initialPos.y += (offsetPos.y + offsetSnap.y)
       }
     },
     moveEnd() {
@@ -532,6 +535,34 @@ export default Vue.extend({
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
+    },
+    calcSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number) {
+      const snaplinePos = this.snapUtils.getSnaplinePos()
+      const layerSnapInfo = this.snapUtils.getLayerSnappingEdges(layer)
+      const targetSnapLines = this.snapUtils.getClosestSnaplines(snaplinePos, layerSnapInfo)
+      this.snaplines.v = targetSnapLines.v
+      this.snaplines.h = targetSnapLines.h
+
+      const snaplines = [...this.snaplines.v, ...this.snaplines.h]
+      const snapResult = { x: layer.styles.x, y: layer.styles.y }
+      const offset = {
+        x: 0,
+        y: 0
+      }
+      if (snaplines.length === 0) {
+        return offset
+      }
+      snaplines.forEach((snapline: any) => {
+        if (snapline.orientation === 'V') {
+          snapResult.x = snapline.pos + snapline.offset
+          offset.x = snapResult.x - layer.styles.x
+        } else {
+          snapResult.y = snapline.pos + snapline.offset
+          offset.y = snapResult.y - layer.styles.y
+        }
+      })
+      ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+      return offset
     }
   }
 })

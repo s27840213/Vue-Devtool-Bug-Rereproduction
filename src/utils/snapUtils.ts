@@ -3,19 +3,26 @@ import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import MathUtils from '@/utils/mathUtils'
-
-const GUIDELINE_OFFSET = 5
-
+import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
 class SnapUtils {
   pageIndex: number
+  GUIDELINE_OFFSET: number
   constructor(pageIndex: number) {
     this.pageIndex = pageIndex
+    this.GUIDELINE_OFFSET = 10
   }
 
-  getSnaplinePos(): { v: Array<number>, h: Array<number> } {
+  getSnaplinePos(): ISnaplinePos {
     const page = store.getters.getPages[this.pageIndex] as IPage
+    /**
+     * Push page edge and center snapline first
+     */
     const v: number[] = [0, page.width / 2, page.width]
     const h: number[] = [0, page.height / 2, page.height]
+
+    /**
+     * Then push all bounding edges and center line of layers
+     */
     const layers = store.getters.getLayers(this.pageIndex)
     layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (!layer.active) {
@@ -36,17 +43,17 @@ class SnapUtils {
     }
   }
 
-  // what points of the object will trigger to snapping?
-  // it can be just center of the object
-  // but we will enable all edges and center
-  getObjectSnappingEdges(layer: IShape | IText | IImage | IGroup | ITmp): any {
-    const box = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
+  /**
+   * Get the edges and center that will trigger snapping
+   */
+  getLayerSnappingEdges(layer: IShape | IText | IImage | IGroup | ITmp): ISnaplineInfo {
+    const layerBounding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
       x: layer.styles.x,
       y: layer.styles.y,
       width: layer.styles.width,
       height: layer.styles.height
     })
-    const absPos = {
+    const layerStyles = {
       x: layer.styles.x,
       y: layer.styles.y,
       width: layer.styles.width,
@@ -56,35 +63,35 @@ class SnapUtils {
     return {
       v: [
         {
-          guide: Math.round(box.x),
-          offset: Math.round(absPos.x - box.x),
+          pos: layerBounding.x,
+          offset: layerStyles.x - layerBounding.x,
           snapTo: 'start'
         },
         {
-          guide: Math.round(box.x + box.width / 2),
-          offset: Math.round(absPos.x - box.x - box.width / 2),
+          pos: layerBounding.x + layerBounding.width / 2,
+          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2,
           snapTo: 'center'
         },
         {
-          guide: Math.round(box.x + box.width),
-          offset: Math.round(absPos.x - box.x - box.width),
+          pos: layerBounding.x + layerBounding.width,
+          offset: layerStyles.x - layerBounding.x - layerBounding.width,
           snapTo: 'end'
         }
       ],
       h: [
         {
-          guide: Math.round(box.y),
-          offset: Math.round(absPos.y - box.y),
+          pos: layerBounding.y,
+          offset: layerStyles.y - layerBounding.y,
           snapTo: 'start'
         },
         {
-          guide: Math.round(box.y + box.height / 2),
-          offset: Math.round(absPos.y - box.y - box.height / 2),
+          pos: layerBounding.y + layerBounding.height / 2,
+          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2,
           snapTo: 'center'
         },
         {
-          guide: Math.round(box.y + box.height),
-          offset: Math.round(absPos.y - box.y - box.height),
+          pos: layerBounding.y + layerBounding.height,
+          offset: layerStyles.y - layerBounding.y - layerBounding.height,
           snapTo: 'end'
         }
       ]
@@ -92,16 +99,16 @@ class SnapUtils {
   }
 
   // find all snapping possibilities
-  getPossibleSnaplines(snaplines: any, layerSnappingInfos: any): any {
-    const resultV: any = []
-    const resultH: any = []
-    snaplines.v.forEach((lineGuide: any) => {
-      layerSnappingInfos.v.forEach((layerSnappingInfo: any) => {
-        const diff = Math.abs(lineGuide - layerSnappingInfo.guide)
-        // if the distance between guild line and object snap point is close we can consider this for snapping
-        if (diff < GUIDELINE_OFFSET) {
+  getClosestSnaplines(snaplinesPos: ISnaplinePos, layerSnappingInfos: ISnaplineInfo): ISnaplineInfo {
+    const resultV: Array<IConsideredEdges> = []
+    const resultH: Array<IConsideredEdges> = []
+    snaplinesPos.v.forEach((pos: number) => {
+      layerSnappingInfos.v.forEach((layerSnappingInfo: ISnapline) => {
+        // if the distance between snapline and layer snap edge is close, we can consider this edge for snapping
+        const diff = Math.abs(pos - layerSnappingInfo.pos)
+        if (diff < this.GUIDELINE_OFFSET) {
           resultV.push({
-            lineGuide: lineGuide,
+            pos: pos,
             diff: diff,
             snapTo: layerSnappingInfo.snapTo,
             offset: layerSnappingInfo.offset
@@ -110,12 +117,12 @@ class SnapUtils {
       })
     })
 
-    snaplines.h.forEach((lineGuide: any) => {
-      layerSnappingInfos.h.forEach((layerSnappingInfo: any) => {
-        const diff = Math.abs(lineGuide - layerSnappingInfo.guide)
-        if (diff < GUIDELINE_OFFSET) {
+    snaplinesPos.h.forEach((pos: number) => {
+      layerSnappingInfos.h.forEach((layerSnappingInfo: ISnapline) => {
+        const diff = Math.abs(pos - layerSnappingInfo.pos)
+        if (diff < this.GUIDELINE_OFFSET) {
           resultH.push({
-            lineGuide: lineGuide,
+            pos: pos,
             diff: diff,
             snapTo: layerSnappingInfo.snapTo,
             offset: layerSnappingInfo.offset
@@ -124,31 +131,31 @@ class SnapUtils {
       })
     })
 
-    const possibleSnaplinesV = []
-    const possibleSnaplinesH = []
+    const closestSnaplineV: Array<ISnapline> = []
+    const closestSnaplineH: Array<ISnapline> = []
 
     // find closest snap
-    const minV = resultV.sort((a: any, b: any) => a.diff - b.diff)[0]
-    const minH = resultH.sort((a: any, b: any) => a.diff - b.diff)[0]
+    const minV = resultV.sort((a: IConsideredEdges, b: IConsideredEdges) => a.diff - b.diff)[0]
+    const minH = resultH.sort((a: IConsideredEdges, b: IConsideredEdges) => a.diff - b.diff)[0]
     if (minV) {
-      possibleSnaplinesV.push({
-        pos: minV.lineGuide,
-        offset: minV.offset,
+      closestSnaplineV.push({
+        pos: minV.pos,
         orientation: 'V',
+        offset: minV.offset,
         snapTo: minV.snapTo
       })
     }
     if (minH) {
-      possibleSnaplinesH.push({
-        pos: minH.lineGuide,
-        offset: minH.offset,
+      closestSnaplineH.push({
+        pos: minH.pos,
         orientation: 'H',
+        offset: minH.offset,
         snapTo: minH.snapTo
       })
     }
     return {
-      v: possibleSnaplinesV,
-      h: possibleSnaplinesH
+      v: closestSnaplineV,
+      h: closestSnaplineH
     }
   }
 }

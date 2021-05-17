@@ -63,8 +63,9 @@
             :layerIndex="index"
             :pageIndex="pageIndex"
             :config="layer"
+            :snaplines="snaplines"
+            :snapUtils="snapUtils"
             @setFocus="setFocus()"
-            @moving="calcSnap"
             @clearSnap="clearSnap")
 </template>
 
@@ -76,6 +77,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
+import ControlUtils from '@/utils/controllerUtils'
 
 export default Vue.extend({
   data() {
@@ -134,7 +136,6 @@ export default Vue.extend({
       }
     },
     snapLineStyles(dir: string, pos: number) {
-      console.log(pos)
       return dir === 'v' ? { height: `${this.config.height}px`, transform: `translate3d(${pos}px,0,3000px)` }
         : { width: `${this.config.width}px`, transform: `translate3d(0,${pos}px,3000px)` }
     },
@@ -180,49 +181,6 @@ export default Vue.extend({
     },
     getSnaplines(): { v: number[], h: number[] } {
       return this.snapUtils.getSnaplinePos()
-    },
-    calcSnap(layer: any) {
-      const snapLines = this.snapUtils.getSnaplinePos()
-      const layerSnapInfo = this.snapUtils.getObjectSnappingEdges(layer)
-      const targetSnapLines = this.snapUtils.getPossibleSnaplines(snapLines, layerSnapInfo)
-      console.log(targetSnapLines.v, targetSnapLines.h)
-      this.snaplines.v = targetSnapLines.v
-      this.snaplines.h = targetSnapLines.h
-
-      const snaplines = [...this.snaplines.v, this.snaplines.h]
-      snaplines.forEach((snapline: any) => {
-        console.log(snapline)
-        switch (snapline.snapTo) {
-          case 'start': {
-            if (snapline.orientation === 'V') {
-              // GroupUtils.movingTmp(
-              //   this.pageIndex,
-              //   {
-              //     x: snapline.pos
-              //   })
-            } else if (snapline.orientation === 'H') {
-
-            }
-            break
-          }
-          case 'center': {
-            if (snapline.orientation === 'V') {
-
-            } else if (snapline.orientation === 'H') {
-
-            }
-            break
-          }
-          case 'end': {
-            if (snapline.orientation === 'V') {
-
-            } else if (snapline.orientation === 'H') {
-
-            }
-            break
-          }
-        }
-      })
     },
     clearSnap() {
       this.snaplines.v = []

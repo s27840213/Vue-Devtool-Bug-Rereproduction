@@ -56,6 +56,15 @@ class MathUtils {
       height: maxY - minY
     }
   }
+
+  getActualMoveOffset(x: number, y: number) {
+    const scaleRatio = store.getters.getPageScaleRatio
+    // console.log(x, y, x * (100 / scaleRatio), y * (100 / scaleRatio), scaleRatio)
+    return {
+      offsetX: x * (100 / scaleRatio),
+      offsetY: y * (100 / scaleRatio)
+    }
+  }
 }
 
 const mathUtils = new MathUtils()
