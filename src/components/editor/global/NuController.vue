@@ -235,6 +235,11 @@ export default Vue.extend({
             initY: moveOffset.offsetY
           }
         )
+        const imgControllerPos = {
+          x: this.config.styles.imgController.x + offsetPos.x,
+          y: this.config.styles.imgController.y + offsetPos.y
+        }
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
       }
     },
     moveEnd() {

@@ -21,6 +21,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controllerUtils'
 import GroupUtils from '@/utils/groupUtils'
 import PropsTransformer from '@/utils/propsTransformer'
+import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
   props: {
@@ -34,11 +35,10 @@ export default Vue.extend({
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
+      initImgControllerPos: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
-      clickTime: new Date().toISOString(),
-      isGetMoved: false
     }
   },
   computed: {
@@ -72,6 +72,9 @@ export default Vue.extend({
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
+    },
+    getImgController(): ICoordinate {
+      return this.config.styles.imgController
     }
   },
   methods: {
@@ -84,12 +87,17 @@ export default Vue.extend({
     }),
     styles() {
       const zindex = (this.layerIndex + 1) * 100
-      const pos = {
-        x: this.getImgX + this.config.styles.x,
-        y: this.getImgY + this.config.styles.y
-      }
+      const angleInRad = this.getLayerRotate * Math.PI / 180
+      // const pos = {
+      //   x: Math.cos(angleInRad) * this.getImgX - Math.sin(angleInRad) * this.getImgY + this.config.styles.x,
+      //   y: Math.sin(angleInRad) * this.getImgX + Math.cos(angleInRad) * this.getImgY + this.config.styles.y
+      // }
+      // const pos = {
+      //   x: Math.cos(angleInRad) * this.controllerTranslate.x - Math.sin(angleInRad) * this.controllerTranslate.y + this.config.styles.x,
+      //   y: Math.sin(angleInRad) * this.controllerTranslate.x + Math.cos(angleInRad) * this.controllerTranslate.y + this.config.styles.y
+      // }
       return {
-        transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate3d(${this.getImgController.x}px, ${this.getImgController.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth}px`,
         height: `${this.config.styles.imgHeight}px`,
         outline: this.isShown || this.isActive ? `${3 * (100 / this.scaleRatio)}px solid red` : 'none',
@@ -110,14 +118,13 @@ export default Vue.extend({
     moveStart(event: MouseEvent) {
         this.isControlling = true
         Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
-        const layer = this.$el as HTMLElement
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        this.initImgControllerPos = this.getImgController
         document.documentElement.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
         this.setCursorStyle('move')
         this.setLastSelectedPageIndex(this.pageIndex)
         this.setLastSelectedLayerIndex(this.layerIndex)
-        console.log('angle', this.getLayerRotate)
         // if (this.config.type !== 'tmp') {
         //   /**
         //    * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
@@ -146,15 +153,23 @@ export default Vue.extend({
       this.setCursorStyle('move')
       event.preventDefault()
 
-      const angleInRad = this.getLayerRotate * Math.PI / 180
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
       offsetPos.x /= this.getLayerScale
       offsetPos.y /= this.getLayerScale
-      // const imgX = this.initImgPos.imgX + offsetPos.x / this.getLayerScale
-      // const imgY = this.initImgPos.imgY + offsetPos.y / this.getLayerScale
-      const imgX = offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX
-      const imgY = -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX, imgY)
+
+      const img = this.imgPosMapper(offsetPos)
+      const imgController = {
+        x: offsetPos.x + this.initImgControllerPos.x,
+        y: offsetPos.y + this.initImgControllerPos.y
+      }
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y, imgController)
+    },
+    imgPosMapper(offsetPos: ICoordinate): ICoordinate {
+      const angleInRad = this.getLayerRotate * Math.PI / 180
+      return {
+        x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX,
+        y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
+      }
     },
     moveEnd(event: MouseEvent) {
       this.setCursorStyle('default')
@@ -164,6 +179,7 @@ export default Vue.extend({
     scaleStart(event: MouseEvent) {
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.initImgControllerPos = this.getImgController
 
       const body = this.$refs.body as HTMLElement
       this.initialWH = {
@@ -182,7 +198,6 @@ export default Vue.extend({
 
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
-
       this.currCursorStyling(event)
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
@@ -218,14 +233,16 @@ export default Vue.extend({
       const initData = {
         xSign: this.control.xSign,
         ySign: this.control.ySign,
-        x: this.initImgPos.imgX,
-        y: this.initImgPos.imgY,
+        x: this.initImgControllerPos.x,
+        y: this.initImgControllerPos.y,
         angle: angleInRad
       }
-      const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-
+      const img = {
+        x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
+        y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+      }
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y, ControlUtils.getTranslateCompensation(initData, offsetSize))
     },
     scaleEnd() {
       this.isControlling = false

@@ -1,3 +1,5 @@
+import { ICoordinate } from "./frame";
+
 export interface IStyle {
   [key: string]: number | string | undefined,
   x: number,
@@ -54,7 +56,8 @@ export interface IImage extends ILayer<IStyle> {
   imgY: number,
   imgWidth: number,
   imgHeight: number,
-  imgControll: boolean
+  imgControl: boolean,
+  imgContorller: ICoordinate
 }
 export interface IGroup extends ILayer<IGroupStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

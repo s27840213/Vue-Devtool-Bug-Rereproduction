@@ -87,7 +87,8 @@ class MouseUtils {
         imgX: 0,
         imgY: 0,
         imgWidth: layerConfig.styles.initWidth,
-        imgHeight: layerConfig.styles.initHeight
+        imgHeight: layerConfig.styles.initHeight,
+        imgController: { x: layerConfig.styles.x, y: layerConfig.styles.y }
       }
       Object.assign(layerConfig.styles, imgStyles)
       layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src, imgControl: false }))

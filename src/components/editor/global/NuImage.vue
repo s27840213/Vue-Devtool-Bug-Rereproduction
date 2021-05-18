@@ -26,4 +26,9 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.nu-image {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
 </style>

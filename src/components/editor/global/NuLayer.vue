@@ -66,10 +66,6 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      console.log('bubble-------', e.target)
-      if (e.target === this.$refs.body) {
-        console.log('bubble')
-      }
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
     },

@@ -195,13 +195,14 @@ class Controller {
     })
   }
 
-  updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {
+  updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number, imgController: ICoordinate) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
         imgX,
-        imgY
+        imgY,
+        imgController
       }
     })
   }

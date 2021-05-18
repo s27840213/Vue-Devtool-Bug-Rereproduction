@@ -28,7 +28,8 @@ class LayerFactary {
         imgX: 0,
         imgY: 0,
         imgWidth: config.styles.initWidth,
-        imgHeight: config.styles.initHeight
+        imgHeight: config.styles.initHeight,
+        imgController: { x: 0, y: 0 }
       }
     }
     Object.assign(basicConfig.styles, config.styles)
