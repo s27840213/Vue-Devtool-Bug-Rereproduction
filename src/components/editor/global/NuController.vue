@@ -89,6 +89,9 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
+    getLayerType(): string {
+      return this.config.type
+    },
     getControlPoints(): any {
       return this.config.controlPoints
     },
@@ -98,7 +101,6 @@ export default Vue.extend({
     isShown(): boolean {
       return this.config.shown
     },
-
     getLayerWidth(): number {
       return this.config.styles.width
     },
@@ -237,7 +239,7 @@ export default Vue.extend({
         this.isControlling = true
         this.setCursorStyle('move')
         event.preventDefault()
-        var offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+        let offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
 
         GroupUtils.movingTmp(
@@ -247,14 +249,17 @@ export default Vue.extend({
             y: moveOffset.offsetY
           }
         )
-        const imgControllerPos = {
-          x: this.config.styles.imgController.x + offsetPos.x,
-          y: this.config.styles.imgController.y + offsetPos.y
-        }
-        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
         const offsetSnap = this.calcSnap(this.config, this.layerIndex)
-        this.initialPos.x += (offsetPos.x + offsetSnap.x)
-        this.initialPos.y += (offsetPos.y + offsetSnap.y)
+        const totalOffset = {
+          x: offsetPos.x + offsetSnap.x,
+          y: offsetPos.y + offsetSnap.y
+        }
+        this.initialPos.x += totalOffset.x
+        this.initialPos.y += totalOffset.y
+
+        if (this.getLayerType === 'image') {
+          this.imgHandler(totalOffset)
+        }
       }
     },
     moveEnd() {
@@ -429,6 +434,13 @@ export default Vue.extend({
         // TODO
       }
     },
+    imgHandler(offset: ICoordinate) {
+      const imgControllerPos = {
+          x: this.config.styles.imgController.x + offset.x,
+          y: this.config.styles.imgController.y + offset.y
+        }
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
+    },
     resizeEnd(event: MouseEvent) {
       this.isControlling = false
       this.setCursorStyle('default')
@@ -464,6 +476,12 @@ export default Vue.extend({
       const lineA = ControlUtils.getLength(vectA)
       const lineB = ControlUtils.getLength(vectB)
       const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
+
+      // const imgControllerPos = {
+      //     x: this.config.styles.imgController.x + offsetPos.x,
+      //     y: this.config.styles.imgController.y + offsetPos.y
+      //   }
+      // ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
 
       let angle = Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI
       if (angle) {
@@ -546,7 +564,6 @@ export default Vue.extend({
       }
     },
     onDblClick(e: MouseEvent) {
-      console.log('zz')
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     calcSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number) {

@@ -89,15 +89,15 @@ export default Vue.extend({
       // const pos = {
       //   x: Math.cos(angleInRad) * this.getImgX - Math.sin(angleInRad) * this.getImgY + this.config.styles.x,
       //   y: Math.sin(angleInRad) * this.getImgX + Math.cos(angleInRad) * this.getImgY + this.config.styles.y
-      // }
+      // // }
       // const pos = {
-      //   x: Math.cos(angleInRad) * this.controllerTranslate.x - Math.sin(angleInRad) * this.controllerTranslate.y + this.config.styles.x,
-      //   y: Math.sin(angleInRad) * this.controllerTranslate.x + Math.cos(angleInRad) * this.controllerTranslate.y + this.config.styles.y
+      //   x: this.config.styles.x + this.getImgX,
+      //   y: this.config.styles.y + this.getImgY
       // }
       return {
         transform: `translate3d(${this.getImgController.x}px, ${this.getImgController.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth}px`,
-        height: `${this.config.styles.imgHeight}px`,
+        width: `${this.config.styles.imgWidth * this.config.styles.scale}px`,
+        height: `${this.config.styles.imgHeight * this.config.styles.scale}px`,
         outline: this.isShown || this.isActive ? `${3 * (100 / this.scaleRatio)}px solid red` : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
