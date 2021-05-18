@@ -27,17 +27,7 @@ const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'size', 'color', 'writingMode']
 
 class CssConveter {
-  convertTransformStyle(x: number, y: number, zindex: number, scale: number, scaleX: number, scaleY: number, rotate: number): { transform?: string } {
-    const tmpArr = []
-    if (x !== 0 && x) {
-      tmpArr.push(`translateX(${x}px)`)
-    }
-    if (y !== 0 && y) {
-      tmpArr.push(`translateY(${y}px)`)
-    }
-    if (zindex !== -1 && zindex) {
-      tmpArr.push(`translateZ(${zindex}px)`)
-    }
+  convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {
     //  The scale feature only applied on "layer-scale" as a child-container of the layer
 
     // if (scale !== 0 && scale !== undefined) {
@@ -49,13 +39,9 @@ class CssConveter {
     // if (scaleY !== 0 && scaleY !== undefined) {
     //   tmpArr.push(`scaleY(${scaleY})`)
     // }
-    if (rotate !== 0 && rotate !== undefined) {
-      tmpArr.push(`rotate(${rotate}deg)`)
+    return {
+      transform: `translate3d(${x}px, ${y}px, ${zindex}px ) rotate(${rotate}deg)`
     }
-
-    return tmpArr.length > 0 ? {
-      transform: tmpArr.join(' ')
-    } : {}
   }
 
   convertFontStyle(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
@@ -73,7 +59,7 @@ class CssConveter {
     Object.assign(result,
       { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width}px` : 'initial' },
       { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height}px` : 'initial' },
-      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.scale, sourceStyles.scaleX, sourceStyles.scaleY, sourceStyles.rotate))
+      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate))
     return result
   }
 
@@ -81,7 +67,7 @@ class CssConveter {
     const result: { [key: string]: string } = {}
     // create a deep copy to prevent from changing the original state.
     const tmp = JSON.parse(JSON.stringify(sourceStyles))
-    Object.assign(result, this.convertTransformStyle(tmp.x, tmp.y, tmp.zindex, tmp.scale, tmp.scaleX, tmp.scaleY, tmp.rotate))
+    Object.assign(result, this.convertTransformStyle(tmp.x, tmp.y, tmp.zindex, tmp.rotate))
     // remove transform properties from tmp to prevent from duplicate key value pair
     transformProps.forEach(prop => {
       delete tmp[prop]
