@@ -14,9 +14,11 @@ export default Vue.extend({
   },
   methods: {
     styles() {
+      const styles = this.config.styles
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
+        width: `${styles.imgWidth}px`,
+        height: `${styles.imgHeight}px`
       }
     }
   }
@@ -24,4 +26,9 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.nu-image {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
 </style>

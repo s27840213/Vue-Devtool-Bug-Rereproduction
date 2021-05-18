@@ -11,6 +11,7 @@ class LayerFactary {
       clipPath: '',
       active: false,
       shown: false,
+      imgControl: false,
       styles: {
         x: 0,
         y: 0,
@@ -22,6 +23,11 @@ class LayerFactary {
         height: 0,
         initWidth: 0,
         initHeight: 0,
+        imgX: 0,
+        imgY: 0,
+        imgWidth: config.styles.initWidth,
+        imgHeight: config.styles.initHeight,
+        imgController: { x: 0, y: 0 },
         zindex: -1
       }
     }

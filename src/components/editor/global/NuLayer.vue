@@ -60,16 +60,18 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
+      // return {
+      //   transform: `
+      //   translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+      //   translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
+      //   scale(${this.config.styles.scale})`
+      // }
       return {
         transform: `scale(${this.config.styles.scale})`,
         'transform-style': this.config.type === 'group' ? 'flat' : 'preserve-3d'
       }
     },
     onDrop(e: DragEvent) {
-      console.log('bubble-------', e.target)
-      if (e.target === this.$refs.body) {
-        console.log('bubble')
-      }
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
     },
@@ -86,9 +88,6 @@ export default Vue.extend({
   position: absolute;
   top: 0;
   left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
@@ -102,6 +101,7 @@ export default Vue.extend({
 }
 .layer-scale {
   position: absolute;
+  transform-origin: top left;
 }
 .test-index {
   position: absolute;

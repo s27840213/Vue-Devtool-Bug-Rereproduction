@@ -57,17 +57,38 @@
           :style="styles()")
         div(class="page-control"
             :style="styles('control')")
-          nu-controller(v-for="(layer,index) in config.layers"
-            data-identifier="controller"
-            :key="`controller-${index}`"
-            :layerIndex="index"
-            :pageIndex="pageIndex"
-            :config="layer"
-            :snapUtils="snapUtils"
-            @setFocus="setFocus()"
-            @getClosestSnaplines="getClosestSnaplines"
-            @clearSnap="clearSnap")
+        div(class="page-control" :style="styles('control')")
+          template(v-for="(layer, index) in config.layers")
+            component(:is="layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+              data-identifier="controller"
+              :key="`controller-${index}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer"
+              :snapUtils="snapUtils"
+              @setFocus="setFocus()"
+              @getClosestSnaplines="getClosestSnaplines"
+              @clearSnap="clearSnap")
 </template>
+        // div(class="page-control"
+        //     :style="styles('control')")
+        //   nu-controller(v-for="(layer,index) in config.layers"
+        //     data-identifier="controller"
+        //     :key="`controller-${index}`"
+        //     :layerIndex="index"
+        //     :pageIndex="pageIndex"
+        //     :config="layer"
+        //     :snaplines="snaplines"
+        //     :snapUtils="snapUtils"
+        //     @setFocus="setFocus()"
+        //     @clearSnap="clearSnap")
+
+    // nu-controller(v-for="(layer,index) in config.layers"
+    //         data-identifier="controller"
+    //         :key="`controller-${index}`"
+    //         :layerIndex="index"
+    //         :pageIndex="pageIndex"
+    //         :config="layer")
 
 <script lang="ts">
 import Vue from 'vue'
@@ -77,6 +98,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
+import ControlUtils from '@/utils/controllerUtils'
 import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
@@ -107,7 +129,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      getLastSelectedLayer: 'getLastSelectedLayerIndex'
     })
   },
   methods: {
@@ -164,6 +187,7 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
+      ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
       GroupUtils.deselect()
     },
     setFocus(): void {

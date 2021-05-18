@@ -10,7 +10,8 @@
         @click="onClick"
         @mousedown.left.stop="moveStart"
         @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)")
+        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
+        @dblclick="onDblClick")
       span(class="text-content" :style="contextStyles()" ref="content"
         @blur="onFocusOut"
         @keydown="onKeyDown"
@@ -87,6 +88,9 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
+    getLayerType(): string {
+      return this.config.type
+    },
     getControlPoints(): any {
       return this.config.controlPoints
     },
@@ -96,7 +100,6 @@ export default Vue.extend({
     isShown(): boolean {
       return this.config.shown
     },
-
     getLayerWidth(): number {
       return this.config.styles.width
     },
@@ -123,7 +126,8 @@ export default Vue.extend({
       updateLayerStyles: 'UPDATE_layerStyles',
       updateLayerProps: 'UPDATE_layerProps',
       updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     resizerBarStyles(resizer: any) {
       const resizerStyle = Object.assign({}, resizer)
@@ -190,10 +194,10 @@ export default Vue.extend({
       event.preventDefault()
       event.stopPropagation()
       if (event.target === this.$refs.body) {
-        this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
+
         if (this.config.type === 'text') {
           const text = this.$refs.content as HTMLElement
           text.innerHTML = this.getTextContent
@@ -220,6 +224,7 @@ export default Vue.extend({
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
+              this.setLastSelectedLayerIndex(this.layerIndex)
             }
             if (this.pageIndex === this.lastSelectedPageIndex) {
               GroupUtils.select([targetIndex])
@@ -230,9 +235,10 @@ export default Vue.extend({
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
+        this.isControlling = true
         this.setCursorStyle('move')
         event.preventDefault()
-        var offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+        const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
 
         GroupUtils.movingTmp(
@@ -244,8 +250,16 @@ export default Vue.extend({
         )
         const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
         this.$emit('getClosestSnaplines')
-        this.initialPos.x += (offsetPos.x + (offsetSnap.x * this.scaleRatio / 100))
-        this.initialPos.y += (offsetPos.y + (offsetSnap.y * this.scaleRatio / 100))
+        const totalOffset = {
+          x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+          y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+        }
+        this.initialPos.x += totalOffset.x
+        this.initialPos.y += totalOffset.y
+
+        if (this.getLayerType === 'image') {
+          this.imgHandler(totalOffset)
+        }
       }
     },
     moveEnd() {
@@ -423,6 +437,13 @@ export default Vue.extend({
         // TODO
       }
     },
+    imgHandler(offset: ICoordinate) {
+      const imgControllerPos = {
+        x: this.config.styles.imgController.x + offset.x,
+        y: this.config.styles.imgController.y + offset.y
+      }
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
+    },
     resizeEnd(event: MouseEvent) {
       this.isControlling = false
       this.setCursorStyle('default')
@@ -458,6 +479,12 @@ export default Vue.extend({
       const lineA = ControlUtils.getLength(vectA)
       const lineB = ControlUtils.getLength(vectB)
       const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
+
+      // const imgControllerPos = {
+      //     x: this.config.styles.imgController.x + offsetPos.x,
+      //     y: this.config.styles.imgController.y + offsetPos.y
+      //   }
+      // ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
 
       let angle = Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI
       if (angle) {
@@ -538,6 +565,9 @@ export default Vue.extend({
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
+    },
+    onDblClick(e: MouseEvent) {
+      ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     }
   }
 })

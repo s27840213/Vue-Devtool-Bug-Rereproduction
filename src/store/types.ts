@@ -12,6 +12,7 @@ export interface IEditorState {
   currFunctionPanelType: number,
   pageScaleRatio: number,
   lastSelectedPageIndex: number,
+  lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
   photos: Array<unknown>
 }
@@ -42,5 +43,3 @@ export enum LayerType {
   'nu-text',
   'nu-group'
 }
-
-// export const ControlPoints = _ControlPoints(4, 25)
