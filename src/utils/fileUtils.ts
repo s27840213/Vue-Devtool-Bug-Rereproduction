@@ -3,6 +3,7 @@
  * May implement futhter file export feature in the future
  */
 import store from '@/store'
+import GroupUtils from '@/utils/groupUtils'
 class FileUtils {
   import() {
     // Because inputNode won't be appended to DOM, so we don't need to release it
@@ -15,6 +16,7 @@ class FileUtils {
   }
 
   export() {
+    GroupUtils.deselect()
     const dataStr = 'data:text/jsoncharset=utf-8,' + encodeURIComponent(JSON.stringify(store.getters.getPages))
     const downloadAnchorNode = document.createElement('a')
     const exportName = 'file'

@@ -8,7 +8,8 @@ import store from '@/store'
  */
 export interface IEditorState {
   pages: Array<IPage>,
-  currPanelType: number,
+  currSidebarPanelType: number,
+  currFunctionPanelType: number,
   pageScaleRatio: number,
   lastSelectedPageIndex: number,
   lastSelectedLayerIndex: number,
@@ -16,13 +17,18 @@ export interface IEditorState {
   photos: Array<unknown>
 }
 
-export enum PanelType {
+export enum SidebarPanelType {
   template,
   photo,
   object,
   bg,
   text,
   file,
+  brand
+}
+
+export enum FunctionPanelType {
+  none,
   group,
   textSetting,
   colorPicker,

@@ -25,15 +25,15 @@ export interface ITextStyle extends IStyle {
   initSize: number
 }
 
-export interface ITmpStyle extends IStyle {
-  initX: number,
-  initY: number,
-}
+// export interface ITmpStyle extends IStyle {
+//   initX: number,
+//   initY: number,
+// }
 
-export interface IGroupStyle extends IStyle {
-  initX: number,
-  initY: number,
-}
+// export interface IGroupStyle extends IStyle {
+//   initX: number,
+//   initY: number,
+// }
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
   type: string,
@@ -59,9 +59,9 @@ export interface IImage extends ILayer<IStyle> {
   imgControl: boolean,
   imgContorller: ICoordinate
 }
-export interface IGroup extends ILayer<IGroupStyle> {
+export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
-export interface ITmp extends ILayer<ITmpStyle> {
+export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage>
 }

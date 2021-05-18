@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, IGroupStyle, ITmpStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IStyle, ITextStyle } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -25,7 +25,6 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
         width: layer.styles.width,
         height: layer.styles.height
       })
-      console.log(layerBouding)
       minX = Math.min(minX, layerBouding.x)
       minY = Math.min(minY, layerBouding.y)
     }
@@ -42,7 +41,6 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
         width: layer.styles.width,
         height: layer.styles.height
       })
-      console.log(layerBouding)
       maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
@@ -137,21 +135,6 @@ class GroupUtils {
       this.reset()
       this.set(tmpIndex, tmpLayer.layers)
     }
-    // const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    // if (store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex).type === 'group') {
-    //   const tmpLayer = store.getters.getLayer(lastSelectedPageIndex, this.tmpIndex)
-    //   store.commit('UPDATE_layerProps', {
-    //     pageIndex: lastSelectedPageIndex,
-    //     layerIndex: this.tmpIndex,
-    //     props: {
-    //       type: 'tmp',
-    //       active: true
-    //     }
-    //   })
-    //   const tmpIndex = this.tmpIndex
-    //   this.reset()
-    //   this.set(tmpIndex, tmpLayer.layers)
-    // }
   }
 
   select(layerIndexs: Array<number>) {
@@ -167,6 +150,7 @@ class GroupUtils {
             active: true
           }
         })
+        this.tmpLayers = [...MappingUtils.mappingLayers(layerIndexs)]
       } else {
         const layers = MappingUtils.mappingLayers(layerIndexs)
         const tmpStyles = calcTmpProps(layers)
@@ -189,7 +173,7 @@ class GroupUtils {
         })
       }
     } else {
-      if (this.tmpLayers.length === 0) {
+      if (this.tmpLayers.length === 1) {
         const indexs = [this.tmpIndex, ...layerIndexs]
         this.deselect()
         const layers = MappingUtils.mappingLayers(indexs)
@@ -240,7 +224,7 @@ class GroupUtils {
   deselect() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (this.tmpIndex !== -1) {
-      if (this.tmpLayers.length === 0) {
+      if (this.tmpLayers.length === 1) {
         store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: this.tmpIndex,
@@ -266,6 +250,7 @@ class GroupUtils {
       })
       ZindexUtils.reassignZindex(lastSelectedPageIndex)
     }
+    store.commit('SET_currFunctionPanelType', 0)
   }
 
   reset() {
@@ -301,7 +286,7 @@ class GroupUtils {
    * @param styles - the styles of tmp layer
    * @returns calculated layers in tmp layer
    */
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IGroupStyle | ITmpStyle): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IStyle): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset

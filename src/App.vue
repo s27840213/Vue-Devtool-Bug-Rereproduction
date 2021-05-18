@@ -55,7 +55,7 @@ export default Vue.extend({
   border-bottom: 1px solid red;
   opacity: 0.5;
   box-sizing: border-box;
-  z-index: 1000;
+  z-index: setZindex(coordinate);
   position: absolute;
   top: 0;
   left: 0;

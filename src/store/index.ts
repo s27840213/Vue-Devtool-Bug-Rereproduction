@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
-import { IEditorState, PanelType } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
 import apis from '@/apis/unsplash'
@@ -82,7 +82,8 @@ const getDefaultState = (): IEditorState => ({
       layers: []
     }
   ],
-  currPanelType: PanelType.template,
+  currSidebarPanelType: SidebarPanelType.template,
+  currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
   lastSelectedLayerIndex: 0,
@@ -94,8 +95,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPages(state): Array<IPage> {
     return state.pages
   },
-  getCurrPanelType(state): number {
-    return state.currPanelType
+  getCurrSidebarPanelType(state): number {
+    return state.currSidebarPanelType
+  },
+  getCurrFunctionPanelType(state): number {
+    return state.currFunctionPanelType
   },
   getPageScaleRatio(state): number {
     return state.pageScaleRatio
@@ -136,8 +140,11 @@ const mutations: MutationTree<IEditorState> = {
   SET_layers(state: IEditorState, updateInfo: { pageIndex: number, newLayers: Array<IShape | IText | IImage | IGroup> }) {
     state.pages[updateInfo.pageIndex].layers = [...updateInfo.newLayers]
   },
-  SET_currPanelType(state: IEditorState, type: PanelType) {
-    state.currPanelType = type
+  SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
+    state.currSidebarPanelType = type
+  },
+  SET_currFunctionPanelType(state: IEditorState, type: SidebarPanelType) {
+    state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio

@@ -19,35 +19,36 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { PanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
   },
   data() {
     return {
-      PanelType,
+      SidebarPanelType,
       navItem: [
         { icon: 'template', text: 'Templates' },
         { icon: 'photo', text: 'Photos' },
         { icon: 'shape', text: 'Objects' },
         { icon: 'bg', text: 'Background' },
         { icon: 'text', text: 'Text' },
-        { icon: 'folder', text: 'MyFile' }
+        { icon: 'folder', text: 'MyFile' },
+        { icon: 'brand', text: 'Brandkit' }
       ]
     }
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrPanelType'
+      currPanel: 'getCurrSidebarPanelType'
     })
   },
   methods: {
     ...mapMutations({
-      SET_currPanelType: 'SET_currPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     switchNav(index: number): void {
-      this.SET_currPanelType(index)
+      this.setCurrSidebarPanel(index)
     }
   }
 })
@@ -76,8 +77,15 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  overflow: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 .nav-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(7, 1fr);
   width: 100%;
 }
 .nav-item {

@@ -4,40 +4,43 @@
     section
       editor-header
       div(class="content")
-        function-panel
+        sidebar-panel
         div(class="content__main")
           div(class="content__blank bg-white")
             div(class="test-nav")
-              div(v-for="nav in testNav" @click="setPanelType(PanelType[nav])") {{nav}}
+              div(v-for="nav in testNav" @click="setPanelType(FunctionPanelType[nav])") {{nav}}
           div(class="content__editor")
             editor-view
             size-editor
+        function-panel
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
+import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import Frames from '@/components/editor/Frames.vue'
 import SizeEditor from '@/components/editor/SizeEditor.vue'
 import { mapMutations } from 'vuex'
-import { PanelType } from '@/store/types'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   name: 'Editor',
   components: {
     Sidebar,
     EditorHeader,
-    FunctionPanel,
+    SidebarPanel,
     EditorView,
     Frames,
-    SizeEditor
+    SizeEditor,
+    FunctionPanel
   },
   data() {
     return {
-      PanelType,
+      FunctionPanelType,
       testNav: [
         'group',
         'textSetting',
@@ -48,10 +51,10 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      SET_currPanelType: 'SET_currPanelType'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
     }),
     setPanelType(type: number) {
-      this.SET_currPanelType(type)
+      this.setCurrFunctionPanel(type)
     }
   }
 })
@@ -74,7 +77,7 @@ export default Vue.extend({
 .content {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   &__main {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);

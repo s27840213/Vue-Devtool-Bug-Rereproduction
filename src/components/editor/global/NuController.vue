@@ -1,6 +1,7 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller"
+    div(v-show="!isControlling"
+        class="nu-controller"
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles()"
@@ -17,41 +18,41 @@
         @keydown="onKeyDown"
         @compositionstart="compositionStart"
         :contenteditable="this.config.textEditable")
-      template(v-if="isActive && !isControlling")
+      template(v-if="isActive")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index * 2"
             :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
-            @mousedown.stop="scaleStart")
+            @mousedown.left.stop="scaleStart")
         div(v-for="(resizer, index) in controlPoints.resizers"
-            @mousedown.stop="resizeStart")
+            @mousedown.left.stop="resizeStart")
           div(class="resize-bar"
               :key="index * 2 + 1"
               :style="resizerBarStyles(resizer)")
           div(class="controller-point"
               :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
         div(class="rotaterWrapper")
-          div(class="rotater" @mousedown.stop="rotateStart")
+          div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import PropsTransformer from '@/utils/propsTransformer'
+import MathUtils from '@/utils/mathUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controllerUtils'
-import { AxiosStatic } from 'axios'
-import MathUtils from '@/utils/mathUtils'
-import { IStyle } from '@/interfaces/layer'
 import { ICoordinate } from '@/interfaces/frame'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
-    pageIndex: Number
+    pageIndex: Number,
+    snaplines: Object,
+    snapUtils: Object
   },
   data() {
     return {
@@ -64,8 +65,18 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false },
       clickTime: new Date().toISOString(),
       isGetMoved: false,
-      isCompositoning: false
+      isCompositoning: false,
+      isSnapping: false
     }
+  },
+  mounted() {
+    const body = this.$refs.body as HTMLElement
+    /**
+     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+     */
+    body.addEventListener('contextmenu', (e: MouseEvent) => {
+      e.preventDefault()
+    }, false)
   },
   computed: {
     ...mapGetters({
@@ -106,7 +117,6 @@ export default Vue.extend({
   },
   watch: {
     scaleRatio() {
-      console.log('hi')
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     }
   },
@@ -167,7 +177,8 @@ export default Vue.extend({
       })
     },
     styles() {
-      const zindex = (this.layerIndex + 1) * 100
+      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
@@ -179,12 +190,13 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      event.preventDefault()
+      event.stopPropagation()
       if (event.target === this.$refs.body) {
-        this.isControlling = true
-        const layer = this.$el as HTMLElement
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        layer.addEventListener('mouseup', this.moveEnd)
+        window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
+
         if (this.config.type === 'text') {
           const text = this.$refs.content as HTMLElement
           text.innerHTML = this.getTextContent
@@ -203,11 +215,13 @@ export default Vue.extend({
            * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
            * Thus, we need to do some condition checking to prevent this error
            */
-          const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || GroupUtils.tmpLayers.length === 0)
-            ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
+          //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+          let targetIndex = this.layerIndex
           if (!this.isActive) {
-            if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
+            if ((!event.metaKey && !event.ctrlKey) && GroupUtils.tmpIndex >= 0) {
               GroupUtils.deselect()
+              targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
             }
@@ -220,19 +234,17 @@ export default Vue.extend({
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
+        this.isControlling = true
         this.setCursorStyle('move')
         event.preventDefault()
         var offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-        const moveOffset = PropsTransformer.getActualMoveOffset(offsetPos.x, offsetPos.y)
-        this.initialPos.x += offsetPos.x
-        this.initialPos.y += offsetPos.y
+        const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+
         GroupUtils.movingTmp(
           this.pageIndex,
           {
             x: moveOffset.offsetX,
-            y: moveOffset.offsetY,
-            initX: moveOffset.offsetX,
-            initY: moveOffset.offsetY
+            y: moveOffset.offsetY
           }
         )
         const imgControllerPos = {
@@ -240,6 +252,9 @@ export default Vue.extend({
           y: this.config.styles.imgController.y + offsetPos.y
         }
         ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
+        const offsetSnap = this.calcSnap(this.config, this.layerIndex)
+        this.initialPos.x += (offsetPos.x + offsetSnap.x)
+        this.initialPos.y += (offsetPos.y + offsetSnap.y)
       }
     },
     moveEnd() {
@@ -252,6 +267,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.isGetMoved = false
       }, 350)
+      this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
       this.isControlling = true
@@ -332,6 +348,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      this.$emit('setFocus')
     },
     resizeStart(event: MouseEvent) {
       this.isControlling = true
@@ -417,6 +434,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
+      this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
       this.isControlling = true
@@ -462,6 +480,7 @@ export default Vue.extend({
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
+      this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
@@ -484,6 +503,7 @@ export default Vue.extend({
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
     },
     onClick(e: MouseEvent) {
+      e.preventDefault()
       const clickDate = new Date(this.clickTime)
       const currDate = new Date()
       const diff = currDate.getTime() - clickDate.getTime()
@@ -526,7 +546,36 @@ export default Vue.extend({
       }
     },
     onDblClick(e: MouseEvent) {
+      console.log('zz')
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
+    },
+    calcSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number) {
+      const snaplinePos = this.snapUtils.getSnaplinePos()
+      const layerSnapInfo = this.snapUtils.getLayerSnappingEdges(layer)
+      const targetSnapLines = this.snapUtils.getClosestSnaplines(snaplinePos, layerSnapInfo)
+      this.snaplines.v = targetSnapLines.v
+      this.snaplines.h = targetSnapLines.h
+
+      const snaplines = [...this.snaplines.v, ...this.snaplines.h]
+      const snapResult = { x: layer.styles.x, y: layer.styles.y }
+      const offset = {
+        x: 0,
+        y: 0
+      }
+      if (snaplines.length === 0) {
+        return offset
+      }
+      snaplines.forEach((snapline: any) => {
+        if (snapline.orientation === 'V') {
+          snapResult.x = snapline.pos + snapline.offset
+          offset.x = snapResult.x - layer.styles.x
+        } else {
+          snapResult.y = snapline.pos + snapline.offset
+          offset.y = snapResult.y - layer.styles.y
+        }
+      })
+      ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+      return offset
     }
   }
 })

@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, ITmpStyle, IGroupStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IStyle, ITextStyle } from '@/interfaces/layer'
 
 import store from '@/store'
 
@@ -11,13 +11,6 @@ class MathUtils {
   sin(angle: number) {
     const angleInRad = angle * Math.PI / 180
     return Math.sin(angleInRad)
-  }
-
-  getInitCenter(styles: ITmpStyle | IGroupStyle) {
-    return {
-      x: styles.initX + ((styles.initWidth as number) / 2),
-      y: styles.initY + ((styles.initHeight as number) / 2)
-    }
   }
 
   getCenter(styles: IStyle | ITextStyle) {
@@ -61,6 +54,15 @@ class MathUtils {
       y: minY,
       width: maxX - minX,
       height: maxY - minY
+    }
+  }
+
+  getActualMoveOffset(x: number, y: number) {
+    const scaleRatio = store.getters.getPageScaleRatio
+    // console.log(x, y, x * (100 / scaleRatio), y * (100 / scaleRatio), scaleRatio)
+    return {
+      offsetX: x * (100 / scaleRatio),
+      offsetY: y * (100 / scaleRatio)
     }
   }
 }

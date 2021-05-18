@@ -15,8 +15,6 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        initX: 0,
-        initY: 0,
         scale: 1,
         scaleX: 0,
         scaleY: 0,
@@ -29,7 +27,8 @@ class LayerFactary {
         imgY: 0,
         imgWidth: config.styles.initWidth,
         imgHeight: config.styles.initHeight,
-        imgController: { x: 0, y: 0 }
+        imgController: { x: 0, y: 0 },
+        zindex: -1
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -47,8 +46,6 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        initX: 0,
-        initY: 0,
         scale: 1,
         scaleX: 0,
         scaleY: 0,
@@ -80,8 +77,6 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        initX: styles.x,
-        initY: styles.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -105,8 +100,6 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        initX: styles.x,
-        initY: styles.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -130,8 +123,6 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        initX: 0,
-        initY: 0,
         scale: 1,
         scaleX: 0,
         scaleY: 0,

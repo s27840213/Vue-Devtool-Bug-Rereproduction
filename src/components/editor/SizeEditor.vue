@@ -1,18 +1,25 @@
 <template lang="pug">
   div(class="size-editor")
-    svg-icon(class="pointer"
-      :iconName="'minus-square'" :iconColor="'gray-2'" iconWidth="22px"
-      @click.native="minus()")
-    div(class="size-editor__percentage")
+    input(type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
+      @input="setScaleRatio(Math.round(ratioInPercent*100))")
+    div(class="size-editor__percentage lead-2")
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
-      :iconName="'plus-square'" :iconColor="'gray-2'" iconWidth="22px")
+      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 export default Vue.extend({
+  data() {
+    return {
+      ratioInPercent: 0
+    }
+  },
+  created() {
+    this.ratioInPercent = this.pageScaleRatio / 100
+  },
   computed: {
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio'
@@ -21,15 +28,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setScaleRatio: 'SET_pageScaleRatio'
-    }),
-    plus() {
-      this.setScaleRatio(this.pageScaleRatio + 10)
-    },
-    minus() {
-      if (this.pageScaleRatio > 10) {
-        this.setScaleRatio(this.pageScaleRatio - 10)
-      }
-    }
+    })
   }
 })
 </script>
@@ -38,18 +37,22 @@ export default Vue.extend({
 .size-editor {
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: auto 60px auto;
+  grid-template-columns: auto auto auto;
   background-color: setColor(white);
   align-items: center;
   box-shadow: 0px 0px 5px setColor(gray-2, 0.3);
   padding: 7px 14px;
   border-radius: 7px;
-  column-gap: 10px;
+  column-gap: 5px;
+  input[type="range"] {
+    background: setColor(gray-6);
+    &:focus {
+      outline: none;
+    }
+  }
   &__percentage {
-    border: 1px solid setColor(gray-2, 0.3);
-    font-size: 12px;
-    padding: 5px;
-    border-radius: 3px;
+    // border: 1px solid setColor(gray-2, 0.3);
+    width: 2.5rem;
   }
 }
 </style>

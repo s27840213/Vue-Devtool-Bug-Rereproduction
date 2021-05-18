@@ -3,7 +3,7 @@
 import store from '@/store'
 import { ILayer, IStyle } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
-import { PanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
 import ZindexUtils from '@/utils/zindexUtils'
@@ -52,7 +52,7 @@ class MouseUtils {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y
     }
-    if (store.getters.getCurrPanelType === PanelType.bg) {
+    if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
       this.backgroundHandler(pageIndex, data.src)
       return
     }
@@ -67,8 +67,6 @@ class MouseUtils {
       styles: {
         x: x,
         y: y,
-        initX: x,
-        initY: y,
         scale: 1,
         scaleX: 0,
         scaleY: 0,
@@ -123,6 +121,8 @@ class MouseUtils {
     ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
     store.commit('SET_lastSelectedPageIndex', pageIndex)
+    const targetPage = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
+    targetPage.focus()
     GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
   }
 
