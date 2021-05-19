@@ -435,11 +435,7 @@ export default Vue.extend({
       }
     },
     imgHandler(offset: ICoordinate) {
-      const imgControllerPos = {
-          x: this.config.styles.imgController.x + offset.x,
-          y: this.config.styles.imgController.y + offset.y
-        }
-        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     resizeEnd(event: MouseEvent) {
       this.isControlling = false

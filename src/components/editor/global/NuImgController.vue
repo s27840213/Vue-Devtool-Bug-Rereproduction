@@ -19,8 +19,6 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controllerUtils'
-import GroupUtils from '@/utils/groupUtils'
-import PropsTransformer from '@/utils/propsTransformer'
 import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
@@ -38,7 +36,7 @@ export default Vue.extend({
       initImgControllerPos: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
+      control: { xSign: 1, ySign: 1, isHorizon: false }
     }
   },
   computed: {
@@ -85,22 +83,45 @@ export default Vue.extend({
     }),
     styles() {
       const zindex = (this.layerIndex + 1) * 100
-      const angleInRad = this.getLayerRotate * Math.PI / 180
-      // const pos = {
-      //   x: Math.cos(angleInRad) * this.getImgX - Math.sin(angleInRad) * this.getImgY + this.config.styles.x,
-      //   y: Math.sin(angleInRad) * this.getImgX + Math.cos(angleInRad) * this.getImgY + this.config.styles.y
-      // // }
-      // const pos = {
-      //   x: this.config.styles.x + this.getImgX,
-      //   y: this.config.styles.y + this.getImgY
-      // }
+      const pos = this.imgControllerPosHandler()
       return {
-        transform: `translate3d(${this.getImgController.x}px, ${this.getImgController.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.config.styles.scale}px`,
         height: `${this.config.styles.imgHeight * this.config.styles.scale}px`,
-        outline: this.isShown || this.isActive ? `${3 * (100 / this.scaleRatio)}px solid red` : 'none',
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
+        outline: `${3 * (100 / this.scaleRatio)}px solid red`,
+       'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
+    },
+    imgControllerPosHandler(): ICoordinate {
+      const angleInRad = this.getLayerRotate * Math.PI / 180
+      const rectCenter = {
+        x: this.config.styles.x + this.config.styles.width / 2,
+        y: this.config.styles.y + this.config.styles.height / 2
+      }
+      const layerVect = {
+        x: this.config.styles.x - rectCenter.x,
+        y: this.config.styles.y - rectCenter.y
+      }
+      /**
+       * Anchor denotes the top-left fix point of the elements
+       */
+      const scale = this.config.styles.scale
+      const layerAnchor = ControlUtils.getRelPosToCenter(layerVect, rectCenter, -angleInRad)
+      const imgAnchor = {
+        x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + layerAnchor.x,
+        y: Math.sin(angleInRad) * this.getImgX * scale + Math.cos(angleInRad) * this.getImgY * scale + layerAnchor.y
+      }
+      const [w, h] = [this.config.styles.imgWidth * scale, this.config.styles.imgHeight * scale]
+      const center = {
+        x: imgAnchor.x + (w * Math.cos(angleInRad) - h * Math.sin(angleInRad)) / 2,
+        y: imgAnchor.y + (w * Math.sin(angleInRad) + h * Math.cos(angleInRad)) / 2
+      }
+      const vect = {
+        x: imgAnchor.x - center.x,
+        y: imgAnchor.y - center.y
+      }
+      const imgControllerPos = ControlUtils.getRelPosToCenter(vect, center, angleInRad)
+      return imgControllerPos
     },
     controllerStyles() {
       const zindex = 0
@@ -156,11 +177,7 @@ export default Vue.extend({
       offsetPos.y /= this.getLayerScale
 
       const img = this.imgPosMapper(offsetPos)
-      const imgController = {
-        x: offsetPos.x + this.initImgControllerPos.x,
-        y: offsetPos.y + this.initImgControllerPos.y
-      }
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y, imgController)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -240,7 +257,7 @@ export default Vue.extend({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y, ControlUtils.getTranslateCompensation(initData, offsetSize))
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
     },
     scaleEnd() {
       this.isControlling = false
