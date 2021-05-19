@@ -27,7 +27,6 @@ class LayerFactary {
         imgY: 0,
         imgWidth: config.styles.initWidth,
         imgHeight: config.styles.initHeight,
-        imgController: { x: 0, y: 0 },
         zindex: -1
       }
     }

@@ -18,7 +18,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
-import ControlUtils from '@/utils/controllerUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
@@ -106,7 +106,7 @@ export default Vue.extend({
        * Anchor denotes the top-left fix point of the elements
        */
       const scale = this.config.styles.scale
-      const layerAnchor = ControlUtils.getRelPosToCenter(layerVect, rectCenter, -angleInRad)
+      const layerAnchor = ControlUtils.getNoRotationPos(layerVect, rectCenter, -angleInRad)
       const imgAnchor = {
         x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + layerAnchor.x,
         y: Math.sin(angleInRad) * this.getImgX * scale + Math.cos(angleInRad) * this.getImgY * scale + layerAnchor.y
@@ -120,7 +120,7 @@ export default Vue.extend({
         x: imgAnchor.x - center.x,
         y: imgAnchor.y - center.y
       }
-      const imgControllerPos = ControlUtils.getRelPosToCenter(vect, center, angleInRad)
+      const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
       return imgControllerPos
     },
     controllerStyles() {
@@ -209,7 +209,7 @@ export default Vue.extend({
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
       // Get client point as no rotation
-      const clientP = ControlUtils.getRelPosToCenter(vect, this.center, angleInRad)
+      const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
@@ -224,7 +224,7 @@ export default Vue.extend({
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const [dx, dy] = [diff.x, diff.y]
+      const [dx, dy] = [diff.x / this.config.styles.scale, diff.y / this.config.styles.scale]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -244,13 +244,6 @@ export default Vue.extend({
       const offsetSize = {
         width: width - initWidth,
         height: height - initHeight
-      }
-      const initData = {
-        xSign: this.control.xSign,
-        ySign: this.control.ySign,
-        x: this.initImgControllerPos.x,
-        y: this.initImgControllerPos.y,
-        angle: angleInRad
       }
       const img = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,

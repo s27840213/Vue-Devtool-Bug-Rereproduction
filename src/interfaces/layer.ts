@@ -56,8 +56,7 @@ export interface IImage extends ILayer<IStyle> {
   imgY: number,
   imgWidth: number,
   imgHeight: number,
-  imgControl: boolean,
-  imgContorller: ICoordinate
+  imgControl: boolean
 }
 export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

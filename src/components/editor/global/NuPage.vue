@@ -68,25 +68,6 @@
               @setFocus="setFocus()"
               @clearSnap="clearSnap")
 </template>
-        // div(class="page-control"
-        //     :style="styles('control')")
-        //   nu-controller(v-for="(layer,index) in config.layers"
-        //     data-identifier="controller"
-        //     :key="`controller-${index}`"
-        //     :layerIndex="index"
-        //     :pageIndex="pageIndex"
-        //     :config="layer"
-        //     :snaplines="snaplines"
-        //     :snapUtils="snapUtils"
-        //     @setFocus="setFocus()"
-        //     @clearSnap="clearSnap")
-
-    // nu-controller(v-for="(layer,index) in config.layers"
-    //         data-identifier="controller"
-    //         :key="`controller-${index}`"
-    //         :layerIndex="index"
-    //         :pageIndex="pageIndex"
-    //         :config="layer")
 
 <script lang="ts">
 import Vue from 'vue'
@@ -96,7 +77,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
-import ControlUtils from '@/utils/controllerUtils'
+import ControlUtils from '@/utils/controlUtils'
 
 export default Vue.extend({
   data() {

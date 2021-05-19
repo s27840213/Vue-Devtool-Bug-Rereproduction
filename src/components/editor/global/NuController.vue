@@ -42,7 +42,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
-import ControlUtils from '@/utils/controllerUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 
@@ -290,7 +290,7 @@ export default Vue.extend({
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
       // Get client point as no rotation
-      const clientP = ControlUtils.getRelPosToCenter(vect, this.center, angleInRad)
+      const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
@@ -368,7 +368,7 @@ export default Vue.extend({
       this.initTranslate = this.getLayerPos
       const vect = MouseUtils.getMouseRelPoint(event, center)
       const angeleInRad = this.getLayerRotate * Math.PI / 180
-      const clientP = ControlUtils.getRelPosToCenter(vect, center, angeleInRad)
+      const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
 
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1

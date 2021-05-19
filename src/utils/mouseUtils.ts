@@ -85,8 +85,7 @@ class MouseUtils {
         imgX: 0,
         imgY: 0,
         imgWidth: layerConfig.styles.initWidth,
-        imgHeight: layerConfig.styles.initHeight,
-        imgController: { x: layerConfig.styles.x, y: layerConfig.styles.y }
+        imgHeight: layerConfig.styles.initHeight
       }
       Object.assign(layerConfig.styles, imgStyles)
       layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src, imgControl: false }))
@@ -109,7 +108,6 @@ class MouseUtils {
       layerConfig.styles.y = tmpPos.y
       layer = LayerFactary.newShape(pageIndex, Object.assign(layerConfig, shapeConfig))
     }
-    console.log('layer produced', layer)
     return layer
   }
 

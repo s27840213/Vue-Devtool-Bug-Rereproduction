@@ -9,8 +9,8 @@ class Controller {
     return Math.sqrt(sqareSum)
   }
 
-  // Get relative position to the center as no-rotation happens
-  getRelPosToCenter(vectClient: ICoordinate, center: ICoordinate, rotation: number): ICoordinate {
+  // Get position as no-rotation happens
+  getNoRotationPos(vectClient: ICoordinate, center: ICoordinate, rotation: number): ICoordinate {
     return {
       x: vectClient.x * Math.cos(-rotation) - vectClient.y * Math.sin(-rotation) + center.x,
       y: vectClient.y * Math.cos(-rotation) + vectClient.x * Math.sin(-rotation) + center.y
