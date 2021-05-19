@@ -3,13 +3,23 @@ import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import MathUtils from '@/utils/mathUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
 class SnapUtils {
   pageIndex: number
   GUIDELINE_OFFSET: number
+  closestSnaplines: {
+    v: Array<ISnapline>,
+    h: Array<ISnapline>
+  }
+
   constructor(pageIndex: number) {
     this.pageIndex = pageIndex
     this.GUIDELINE_OFFSET = 10
+    this.closestSnaplines = {
+      v: [],
+      h: []
+    }
   }
 
   getSnaplinePos(): ISnaplinePos {
@@ -17,8 +27,8 @@ class SnapUtils {
     /**
      * Push page edge and center snapline first
      */
-    const v: number[] = [0, page.width / 2, page.width]
-    const h: number[] = [0, page.height / 2, page.height]
+    const v = [0, page.width / 2, page.width]
+    const h = [0, page.height / 2, page.height]
 
     /**
      * Then push all bounding edges and center line of layers
@@ -153,10 +163,83 @@ class SnapUtils {
         snapTo: minH.snapTo
       })
     }
+    this.closestSnaplines.v = [...closestSnaplineV]
+    this.closestSnaplines.h = [...closestSnaplineH]
     return {
-      v: closestSnaplineV,
-      h: closestSnaplineH
+      v: this.closestSnaplines.v,
+      h: this.closestSnaplines.h
     }
+  }
+
+  calcMoveSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number } {
+    const snaplinePos = this.getSnaplinePos()
+    const layerSnapInfo = this.getLayerSnappingEdges(layer)
+    const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
+
+    const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
+    const snapResult = { x: layer.styles.x, y: layer.styles.y }
+    /**
+     * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
+     * It's used to prevent the layer from always snapping to the snapline if the mouse move offset is too small
+     * It will force the mouse move offset being higher to prevent the problem
+     */
+    const offset = {
+      x: 0,
+      y: 0
+    }
+    if (snaplines.length === 0) {
+      return offset
+    }
+    snaplines.forEach((snapline: ISnapline) => {
+      if (snapline.orientation === 'V') {
+        snapResult.x = snapline.pos + snapline.offset
+        offset.x = snapResult.x - layer.styles.x
+      } else {
+        snapResult.y = snapline.pos + snapline.offset
+        offset.y = snapResult.y - layer.styles.y
+      }
+    })
+    ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+    return offset
+  }
+
+  calcScaleSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number, width: number, height: number } {
+    const snaplinePos = this.getSnaplinePos()
+    const layerSnapInfo = this.getLayerSnappingEdges(layer)
+    const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
+
+    const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
+    const snapResult = { x: layer.styles.x, y: layer.styles.y }
+    /**
+     * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
+     * It's used to prevent the layer from always snapping to the snapline if the mouse move offset is too small
+     * It will force the mouse move offset being higher to prevent the problem
+     */
+    const offset = {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0
+    }
+    if (snaplines.length === 0) {
+      return offset
+    }
+    snaplines.forEach((snapline: ISnapline) => {
+      if (snapline.orientation === 'V') {
+        snapResult.x = snapline.pos + snapline.offset
+        offset.x = snapResult.x - layer.styles.x
+      } else {
+        snapResult.y = snapline.pos + snapline.offset
+        offset.y = snapResult.y - layer.styles.y
+      }
+    })
+    ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+    return offset
+  }
+
+  clear(): void {
+    this.closestSnaplines.v = []
+    this.closestSnaplines.h = []
   }
 }
 

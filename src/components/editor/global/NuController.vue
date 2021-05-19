@@ -1,7 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(v-show="!isControlling"
-        class="nu-controller"
+    div(class="nu-controller"
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles()"
@@ -18,7 +17,7 @@
         @keydown="onKeyDown"
         @compositionstart="compositionStart"
         :contenteditable="this.config.textEditable")
-      template(v-if="isActive")
+      template(v-if="isActive && !isControlling")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index * 2"
@@ -45,13 +44,13 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    snaplines: Object,
     snapUtils: Object
   },
   data() {
@@ -185,8 +184,8 @@ export default Vue.extend({
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline: this.isShown || this.isActive ? (this.config.type === 'tmp'
-          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${3 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
+        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
+          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${2 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
     },
@@ -239,7 +238,7 @@ export default Vue.extend({
         this.isControlling = true
         this.setCursorStyle('move')
         event.preventDefault()
-        let offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+        const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
 
         GroupUtils.movingTmp(
@@ -249,10 +248,11 @@ export default Vue.extend({
             y: moveOffset.offsetY
           }
         )
-        const offsetSnap = this.calcSnap(this.config, this.layerIndex)
+        const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+        this.$emit('getClosestSnaplines')
         const totalOffset = {
-          x: offsetPos.x + offsetSnap.x,
-          y: offsetPos.y + offsetSnap.y
+          x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+          y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
@@ -305,8 +305,9 @@ export default Vue.extend({
       let height = this.getLayerHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const [dx, dy] = [diff.x, diff.y]
+      const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -347,6 +348,8 @@ export default Vue.extend({
       if (this.config.type === 'text') {
         ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
       }
+      // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
       this.isControlling = false
@@ -561,34 +564,6 @@ export default Vue.extend({
     },
     onDblClick(e: MouseEvent) {
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
-    },
-    calcSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number) {
-      const snaplinePos = this.snapUtils.getSnaplinePos()
-      const layerSnapInfo = this.snapUtils.getLayerSnappingEdges(layer)
-      const targetSnapLines = this.snapUtils.getClosestSnaplines(snaplinePos, layerSnapInfo)
-      this.snaplines.v = targetSnapLines.v
-      this.snaplines.h = targetSnapLines.h
-
-      const snaplines = [...this.snaplines.v, ...this.snaplines.h]
-      const snapResult = { x: layer.styles.x, y: layer.styles.y }
-      const offset = {
-        x: 0,
-        y: 0
-      }
-      if (snaplines.length === 0) {
-        return offset
-      }
-      snaplines.forEach((snapline: any) => {
-        if (snapline.orientation === 'V') {
-          snapResult.x = snapline.pos + snapline.offset
-          offset.x = snapResult.x - layer.styles.x
-        } else {
-          snapResult.y = snapline.pos + snapline.offset
-          offset.y = snapResult.y - layer.styles.y
-        }
-      })
-      ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
-      return offset
     }
   }
 })

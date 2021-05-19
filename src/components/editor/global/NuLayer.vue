@@ -9,10 +9,10 @@
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
-    div(class="test-index")
-      span {{layerIndex}}
-    div(class="test-angle")
-      span {{`(z): ${config.styles.zindex}`}}
+    //- div(class="test-index")
+    //-   span {{layerIndex}}
+    //- div(class="test-angle")
+    //-   span {{`(z): ${config.styles.zindex}`}}
       //- span {{`(x,y): (${config.styles.x},${config.styles.y})`}}
       //- span {{`(initX,initY): (${config.styles.initX},${config.styles.initY})`}}
       //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
@@ -60,6 +60,11 @@ export default Vue.extend({
         : CssConveter.convertDefaultStyle(this.config.styles)
     },
     scaleStyles() {
+      // return {
+      //   transform: `
+      //   translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
+      //   translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
+      // }
       return {
         transform: `scale(${this.config.styles.scale})`,
         'transform-style': this.config.type === 'group' ? 'flat' : 'preserve-3d'
@@ -98,6 +103,7 @@ export default Vue.extend({
 }
 .layer-scale {
   position: absolute;
+  // transform-origin: top left;
 }
 .test-index {
   position: absolute;

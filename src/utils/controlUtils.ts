@@ -227,7 +227,6 @@ class Controller {
     })
   }
 
-
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,

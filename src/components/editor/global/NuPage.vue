@@ -28,14 +28,14 @@
           span {{coordinateWidth* (100/scaleRatio)}}px
         div(class="coordinate__val coordinate__height")
           span {{coordinateHeight*(100/scaleRatio)}}px
-      div(class="snap-area")
-        div(v-for="line in snaplines.v"
-          class="snap-area__line snap-area__line--vr"
-          :style="snapLineStyles('v', line.pos)")
-        div(v-for="line in snaplines.h"
-          class="snap-area__line snap-area__line--hr"
-          :style="snapLineStyles('h', line.pos)")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
+        div(class="snap-area")
+          div(v-for="line in closestSnaplines.v"
+            class="snap-area__line snap-area__line--vr"
+            :style="snapLineStyles('v', line.pos)")
+          div(v-for="line in closestSnaplines.h"
+            class="snap-area__line snap-area__line--hr"
+            :style="snapLineStyles('h', line.pos)")
         div(class="page-content"
             :style="styles('content')"
             @drop="onDrop"
@@ -55,6 +55,8 @@
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
+        div(class="page-control"
+            :style="styles('control')")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
@@ -63,9 +65,9 @@
               :layerIndex="index"
               :pageIndex="pageIndex"
               :config="layer"
-              :snaplines="snaplines"
               :snapUtils="snapUtils"
               @setFocus="setFocus()"
+              @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
 </template>
 
@@ -78,6 +80,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
 import ControlUtils from '@/utils/controlUtils'
+import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
   data() {
@@ -89,9 +92,9 @@ export default Vue.extend({
       coordinateWidth: 0,
       coordinateHeight: 0,
       snapUtils: new SnapUtils(this.pageIndex),
-      snaplines: {
-        v: [],
-        h: []
+      closestSnaplines: {
+        v: [] as Array<ISnapline>,
+        h: [] as Array<ISnapline>
       }
     }
   },
@@ -115,7 +118,7 @@ export default Vue.extend({
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
       updateLayerProps: 'UPDATE_layerProps',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -181,12 +184,15 @@ export default Vue.extend({
       this.coordinate.style.width = `${this.coordinateWidth}px`
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
-    getSnaplines(): { v: number[], h: number[] } {
-      return this.snapUtils.getSnaplinePos()
+    getClosestSnaplines() {
+      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v]
+      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h]
     },
-    clearSnap() {
-      this.snaplines.v = []
-      this.snaplines.h = []
+    clearSnap(): void {
+      console.log('clear snap')
+      this.snapUtils.clear()
+      this.closestSnaplines.v = []
+      this.closestSnaplines.h = []
     }
   }
 })
@@ -249,7 +255,6 @@ export default Vue.extend({
   position: absolute;
   top: 0;
   left: 0;
-  z-index: setZindex(coordinate);
   pointer-events: none;
   transform-style: preserve-3d;
   &__line {
