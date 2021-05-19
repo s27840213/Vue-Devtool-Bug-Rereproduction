@@ -19,7 +19,6 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
-import GroupUtils from '@/utils/groupUtils'
 import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
@@ -90,7 +89,7 @@ export default Vue.extend({
         width: `${this.config.styles.imgWidth * this.config.styles.scale}px`,
         height: `${this.config.styles.imgHeight * this.config.styles.scale}px`,
         outline: `${3 * (100 / this.scaleRatio)}px solid red`,
-       'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -137,37 +136,16 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent) {
       this.isControlling = true
-      Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
+      Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
+
       document.documentElement.addEventListener('mouseup', this.moveEnd)
       window.addEventListener('mousemove', this.moving)
+
       this.setCursorStyle('move')
       this.setLastSelectedPageIndex(this.pageIndex)
       this.setLastSelectedLayerIndex(this.layerIndex)
-      // if (this.config.type !== 'tmp') {
-      //   /**
-      //    * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
-      //    * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
-      //    * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
-      //    * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
-      //    * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
-      //    * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
-      //    * Thus, we need to do some condition checking to prevent this error
-      //    */
-      //   const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || GroupUtils.tmpLayers.length === 0)
-      //     ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
-      //   if (!this.isActive) {
-      //     if (!event.metaKey && GroupUtils.tmpIndex >= 0) {
-      //       GroupUtils.deselect()
-      //       this.setLastSelectedPageIndex(this.pageIndex)
-      //       this.setLastSelectedLayerIndex(this.layerIndex)
-      //     }
-      //     if (this.pageIndex === this.lastSelectedPageIndex) {
-      //       GroupUtils.select([targetIndex])
-      //     }
-      //   }
-      // }
     },
     moving(event: MouseEvent) {
       this.setCursorStyle('move')
@@ -196,8 +174,6 @@ export default Vue.extend({
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
-
-      const body = this.$refs.body as HTMLElement
       this.initialWH = {
         width: this.getImgWidth,
         height: this.getImgHeight

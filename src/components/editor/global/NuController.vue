@@ -278,7 +278,6 @@ export default Vue.extend({
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
 
-      const body = this.$el as HTMLElement
       this.initialWH = {
         width: this.getLayerWidth,
         height: this.getLayerHeight
@@ -422,9 +421,6 @@ export default Vue.extend({
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     shapeHandler(width: number, height: number, initWidth: number, initHeight: number) {
-      const scaleX = width / initWidth
-      const scaleY = height / initHeight
-
       if (this.config.category === 'rect') {
         const viewBox = [0, 0, 0, 0]
         viewBox[2] = width
@@ -438,9 +434,9 @@ export default Vue.extend({
       }
     },
     imgHandler(offset: ICoordinate) {
-        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
-    resizeEnd(event: MouseEvent) {
+    resizeEnd() {
       this.isControlling = false
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
@@ -562,7 +558,7 @@ export default Vue.extend({
         }, 0)
       }
     },
-    onDblClick(e: MouseEvent) {
+    onDblClick() {
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     }
   }
