@@ -37,8 +37,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .photo-setting {
-  @include size(100%, 100%);
-  text-align: center;
+  text-align: left;
   &__title {
   }
   > div:nth-child(n + 1) {

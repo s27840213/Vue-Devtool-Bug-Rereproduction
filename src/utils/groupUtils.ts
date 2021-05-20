@@ -61,10 +61,6 @@ function getTmpStyles(tmpIndex: number) {
 class GroupUtils {
   /**
    * @param {Array<IShape | IText | IImage | IGroup>} tmpLayers - all selected layers
-   *    In the current way, if we only select one layer, we won't push the layer into tmpLayers to create Nu-tmp component.
-   *    The reason is that if we push the layer into tmpLayers and render Nu-tmp, we can't trigger the function binding on other components like Nu-image, Nu-tmp, Nu-group
-   *    Thus, we just update the tmpIndex and then tmpLayers remains empty, and select the layer with that index instead of creating an Nu-tmp and select it.
-   *    I think this approach is not good enough. Probably I will refactor this structure in the future.
    *
 
    * @param {number} tmpIndex - selected index of layer,
@@ -76,8 +72,6 @@ class GroupUtils {
   /**
    * Condition:
    *    1. tmpIndex < 0 -> there isn't any selected layer
-   *    2. tmpIndex >= 0  && tmpLayers.length === 0 -> only select one layer
-   *    3. tmpIndex >=0 && tmpLayers.length > 0 -> select more than one layer
    */
 
   tmpLayers: Array<IShape | IText | IImage | IGroup>

@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(v-if="currSidebarPanel !== 0"
-      class="panel p-20")
-    component(:is="panelComponents[currSidebarPanel]")
-    img(class="btn-pack" :src="require('@/assets/img/svg/pack-up.svg')")
+  div(class="function-panel p-20")
+    panel-group
+    panel-text-setting
+    panel-photo-setting
 </template>
 
 <script lang="ts">
@@ -60,21 +60,15 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.panel {
+.function-panel {
   position: relative;
-  @include size(320px, 100%);
+  @include size(330px, 100%);
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
-}
-
-.btn-pack {
-  width: 25px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate3d(100%, -70%, 0);
-  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.05));
-  cursor: pointer;
+  overflow-y: scroll;
+  > div {
+    margin-bottom: 25px;
+  }
 }
 </style>

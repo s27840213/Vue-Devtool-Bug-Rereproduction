@@ -22,7 +22,6 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
-import Frames from '@/components/editor/Frames.vue'
 import SizeEditor from '@/components/editor/SizeEditor.vue'
 import { mapMutations } from 'vuex'
 import { FunctionPanelType } from '@/store/types'
@@ -34,7 +33,6 @@ export default Vue.extend({
     EditorHeader,
     SidebarPanel,
     EditorView,
-    Frames,
     SizeEditor,
     FunctionPanel
   },

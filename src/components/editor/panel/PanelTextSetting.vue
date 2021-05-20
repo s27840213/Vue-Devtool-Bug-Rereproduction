@@ -63,8 +63,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-setting {
-  @include size(100%, 100%);
-  text-align: center;
+  text-align: left;
   &__title {
     margin-bottom: 30px;
   }
