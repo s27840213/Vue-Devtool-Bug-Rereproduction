@@ -1,37 +1,24 @@
 <template lang="pug">
-  div(v-if="currSidebarPanel !== 0"
-      class="panel p-20")
-    component(:is="panelComponents[currSidebarPanel]")
-    img(class="btn-pack" :src="require('@/assets/img/svg/pack-up.svg')")
+  div(v-show="GroupUtils.tmpLayers.length!==0"
+      class="function-panel p-20")
+    panel-group
+    panel-text-setting(v-if="GroupUtils.type.has('text')")
+    panel-photo-setting(v-if="GroupUtils.type.has('image') && GroupUtils.type.size===1")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import PanelTemplate from '@/components/editor/panel/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panel/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panel/PanelObject.vue'
-import PanelBackground from '@/components/editor/panel/PanelBackground.vue'
-import PanelText from '@/components/editor/panel/PanelText.vue'
-import PanelFile from '@/components/editor/panel/PanelFile.vue'
-import PanelBrand from '@/components/editor/panel/PanelBrand.vue'
 import PanelGroup from '@/components/editor/panel/PanelGroup.vue'
 import PanelTextSetting from '@/components/editor/panel/PanelTextSetting.vue'
 import PanelColorPicker from '@/components/editor/panel/PanelColorPicker.vue'
 import PanelPageSetting from '@/components/editor/panel/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
 import { mapGetters } from 'vuex'
-import { FunctionPanelType } from '@/store/types'
+import GroupUtils from '@/utils/groupUtils'
 // import { CartType } from '@/store/types'
 
 export default Vue.extend({
   components: {
-    PanelTemplate,
-    PanelPhoto,
-    PanelObject,
-    PanelBackground,
-    PanelText,
-    PanelFile,
-    PanelBrand,
     PanelGroup,
     PanelTextSetting,
     PanelColorPicker,
@@ -40,7 +27,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      FunctionPanelType,
+      GroupUtils,
       panelComponents: [
         'none',
         'panel-group',
@@ -60,21 +47,15 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.panel {
+.function-panel {
   position: relative;
-  @include size(320px, 100%);
+  @include size(330px, 100%);
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
-}
-
-.btn-pack {
-  width: 25px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate3d(100%, -70%, 0);
-  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.05));
-  cursor: pointer;
+  overflow-y: scroll;
+  > div {
+    margin-bottom: 25px;
+  }
 }
 </style>

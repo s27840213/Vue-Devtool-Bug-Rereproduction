@@ -115,3 +115,11 @@ $spacer: 5;
 .align-baseline {
   vertical-align: baseline;
 }
+
+.border-box {
+  box-sizing: border-box;
+}
+
+.content-box {
+  box-sizing: content-box;
+}

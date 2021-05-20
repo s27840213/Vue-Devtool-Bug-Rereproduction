@@ -195,7 +195,6 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      event.stopPropagation()
       if (event.target === this.$refs.body || event.target === this.$refs.content) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
@@ -518,7 +517,6 @@ export default Vue.extend({
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
     },
     onClick(e: MouseEvent) {
-      e.preventDefault()
       const clickDate = new Date(this.clickTime)
       const currDate = new Date()
       const diff = currDate.getTime() - clickDate.getTime()

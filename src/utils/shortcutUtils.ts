@@ -64,7 +64,6 @@ class ShortcutHandler {
   }
 
   group() {
-    console.log('group')
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     GroupUtils.group()
     ZindexUtils.reassignZindex(lastSelectedPageIndex)

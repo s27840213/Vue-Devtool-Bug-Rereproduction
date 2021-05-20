@@ -11,11 +11,11 @@
       span(class="body-2 text-gray-2") 100
       svg-icon(class="pointer"
         :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    action-bar(class="flex-evenly")
-      svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        :key="`gp-action-icon-${index}`"
-        class="pointer"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
+    //- action-bar(class="flex-evenly")
+    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
+    //-     :key="`gp-action-icon-${index}`"
+    //-     class="pointer"
+    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
@@ -37,8 +37,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .photo-setting {
-  @include size(100%, 100%);
-  text-align: center;
+  text-align: left;
   &__title {
   }
   > div:nth-child(n + 1) {

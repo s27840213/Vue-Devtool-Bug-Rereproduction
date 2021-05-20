@@ -16,6 +16,5 @@ export default Vue.extend({
 .action-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 </style>

@@ -1,7 +1,12 @@
 <template lang="pug">
-  div(class="panel p-20")
-    component(:is="panelComponents[currPanel]")
-    img(class="btn-pack" :src="require('@/assets/img/svg/pack-up.svg')")
+  div(class="panel")
+    component(v-if="isActive"
+      class="p-20 border-box"
+      :style="panelStyles()"
+      :is="panelComponents[currPanel]")
+    img(class="btn-pack"
+      :src="require('@/assets/img/svg/pack-up.svg')"
+      @click="togglePanel()")
 </template>
 
 <script lang="ts">
@@ -53,13 +58,24 @@ export default Vue.extend({
         'panel-color-picker',
         'panel-page-setting',
         'panel-photo-setting'
-      ]
+      ],
+      isActive: true
     }
   },
   computed: {
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType'
     })
+  },
+  methods: {
+    togglePanel() {
+      this.isActive = !this.isActive
+    },
+    panelStyles() {
+      return {
+        width: '300px'
+      }
+    }
   }
 })
 </script>
@@ -67,7 +83,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel {
   position: relative;
-  @include size(320px, 100%);
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
