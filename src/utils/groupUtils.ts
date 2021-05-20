@@ -54,6 +54,24 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
   } as ICalculatedGroupStyle
 }
 
+function calcType(layers: Array<IShape | IText | IImage | IGroup>): Set<string> {
+  const typeSet = new Set<string>()
+  if (layers.length === 0) {
+    return typeSet
+  }
+  if (layers.length === 1) {
+    typeSet.add(layers[0].type)
+    return typeSet
+  } else {
+    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      if (!typeSet.has(layer.type)) {
+        typeSet.add(layer.type)
+      }
+    })
+    return typeSet
+  }
+}
+
 function getTmpStyles(tmpIndex: number) {
   const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
   return store.getters.getLayer(lastSelectedPageIndex, tmpIndex).styles
@@ -62,11 +80,13 @@ class GroupUtils {
   /**
    * @param {Array<IShape | IText | IImage | IGroup>} tmpLayers - all selected layers
    *
-
    * @param {number} tmpIndex - selected index of layer,
    *    It isn't an array of index becauce we just have two options now:
    *        1. select tmp layer which contain all selected layers(tmpLayers)
    *        2. only select one layer(image, text, group, shape layer)
+   * @param {string} type - selected layer type
+   * - if there are several type-different layer, the value will be mix
+   * - if tmpLayers is empty, the value will be 'none'
    */
 
   /**
@@ -77,9 +97,11 @@ class GroupUtils {
   tmpLayers: Array<IShape | IText | IImage | IGroup>
   // tmpStyles: ICalculatedGroupStyle
   tmpIndex: number
+  type: Set<string>
   constructor() {
     this.tmpLayers = []
     this.tmpIndex = -1
+    this.type = new Set<string>()
   }
 
   group() {
@@ -94,7 +116,7 @@ class GroupUtils {
       props: {
         type: 'group',
         active: false,
-        shown: true
+        shown: false
       }
     })
     const tmpIndex = this.tmpIndex
@@ -213,6 +235,8 @@ class GroupUtils {
         })
       }
     }
+    this.type = calcType(this.tmpLayers)
+    console.log(this.type)
   }
 
   deselect() {
@@ -250,11 +274,13 @@ class GroupUtils {
   reset() {
     this.tmpIndex = -1
     this.tmpLayers = []
+    this.type.clear()
   }
 
   set(tmpIndex: number, tmpLayers: Array<IShape | IText | IImage | IGroup>) {
     this.tmpIndex = tmpIndex
     this.tmpLayers = tmpLayers
+    this.type = calcType(tmpLayers)
   }
 
   movingTmp(pageIndex: number, styles: any) {

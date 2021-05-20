@@ -191,8 +191,8 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      event.preventDefault()
-      event.stopPropagation()
+      // event.preventDefault()
+      // event.stopPropagation()
       if (event.target === this.$refs.body) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)

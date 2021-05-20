@@ -189,7 +189,6 @@ export default Vue.extend({
       this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h]
     },
     clearSnap(): void {
-      console.log('clear snap')
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []

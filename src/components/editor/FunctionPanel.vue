@@ -1,37 +1,24 @@
 <template lang="pug">
-  div(class="function-panel p-20")
+  div(v-show="GroupUtils.tmpLayers.length!==0"
+      class="function-panel p-20")
     panel-group
-    panel-text-setting
-    panel-photo-setting
+    panel-text-setting(v-if="GroupUtils.type.has('text')")
+    panel-photo-setting(v-if="GroupUtils.type.has('image') && GroupUtils.type.size===1")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import PanelTemplate from '@/components/editor/panel/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panel/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panel/PanelObject.vue'
-import PanelBackground from '@/components/editor/panel/PanelBackground.vue'
-import PanelText from '@/components/editor/panel/PanelText.vue'
-import PanelFile from '@/components/editor/panel/PanelFile.vue'
-import PanelBrand from '@/components/editor/panel/PanelBrand.vue'
 import PanelGroup from '@/components/editor/panel/PanelGroup.vue'
 import PanelTextSetting from '@/components/editor/panel/PanelTextSetting.vue'
 import PanelColorPicker from '@/components/editor/panel/PanelColorPicker.vue'
 import PanelPageSetting from '@/components/editor/panel/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
 import { mapGetters } from 'vuex'
-import { FunctionPanelType } from '@/store/types'
+import GroupUtils from '@/utils/groupUtils'
 // import { CartType } from '@/store/types'
 
 export default Vue.extend({
   components: {
-    PanelTemplate,
-    PanelPhoto,
-    PanelObject,
-    PanelBackground,
-    PanelText,
-    PanelFile,
-    PanelBrand,
     PanelGroup,
     PanelTextSetting,
     PanelColorPicker,
@@ -40,7 +27,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      FunctionPanelType,
+      GroupUtils,
       panelComponents: [
         'none',
         'panel-group',
