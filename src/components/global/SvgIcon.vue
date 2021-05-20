@@ -21,7 +21,6 @@ import ControlUtils from '@/utils/controlUtils'
  * icon資料夾的圖檔都是單色可切換顏色的圖片，若是普通的 svg icon 就把它放在img/svg資料夾內，以此來做區分
  */
 
-
 export default Vue.extend({
   name: 'SvgIcon',
   props: {
@@ -57,7 +56,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'UPDATE_layerStyles',
+      updateLayerStyles: 'UPDATE_layerStyles'
     }),
     iconStyles() {
       return {
@@ -80,28 +79,28 @@ export default Vue.extend({
     },
     textAlign() {
       const alignStyle = this.iconName.substring(11, this.iconName.length)
-      this.updateTextStyles(this.pageIndex, this.layerIndex, {align: alignStyle})
+      this.updateTextStyles(this.pageIndex, this.layerIndex, { align: alignStyle })
     },
     textBold() {
       let weight = 'normal'
       if (this.getLayer().styles.weight === 'normal') {
         weight = 'bold'
       }
-      this.updateTextStyles(this.pageIndex, this.layerIndex, {weight: weight})
+      this.updateTextStyles(this.pageIndex, this.layerIndex, { weight: weight })
     },
     textUnderline() {
       let decoration = 'none'
       if (this.getLayer().styles.decoration === 'none') {
         decoration = 'underline'
       }
-      this.updateTextStyles(this.pageIndex, this.layerIndex, {decoration: decoration})
+      this.updateTextStyles(this.pageIndex, this.layerIndex, { decoration: decoration })
     },
     textItalic() {
       let style = 'normal'
       if (this.getLayer().styles.style === 'normal') {
         style = 'italic'
       }
-      this.updateTextStyles(this.pageIndex, this.layerIndex, {style: style})
+      this.updateTextStyles(this.pageIndex, this.layerIndex, { style: style })
     },
     textVertical() {
       let writingMode = 'initial'
@@ -116,9 +115,9 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, layer.styles.size as number)
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
-      this.updateTextStyles(this.lastSelectedPageIndex, this.lastSelectedLayerIndex, {writingMode: writingMode})
+      this.updateTextStyles(this.lastSelectedPageIndex, this.lastSelectedLayerIndex, { writingMode: writingMode })
     },
-    updateTextStyles(pageIndex: number, layerIndex: number, styles: {[key: string]: string}) {
+    updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string }) {
       this.updateLayerStyles({
         pageIndex,
         layerIndex,

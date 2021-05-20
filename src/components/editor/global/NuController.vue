@@ -150,7 +150,7 @@ export default Vue.extend({
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.isGetMoved ? '#00000000' : '#000000',
         'pointer-events': this.config.textEditable ? 'initial' : 'none',
-        // 'writing-mode': this.config.styles.writingMode
+        'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
     },
