@@ -1,7 +1,7 @@
 import store from '@/store'
 import ShortcutUtils from '@/utils/shortcutUtils'
 
-const iconAlign = ['left-align', 'distribute-horizontally', 'right-align', 'top-align', 'center-vertically', 'distribute-vertically', 'distribute-horizontally']
+const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'distribute-vertically', 'distribute-horizontally']
 const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
 const iconOrder = ['layers-front', 'layers-forward', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
@@ -24,9 +24,31 @@ class MappingUtils {
         return []
     }
   }
+  // const iconAlign = ['left-align', 'distribute-horizontally', 'right-align', 'top-align', 'center-vertically', 'distribute-vertically', 'distribute-horizontally']
 
   mappingIconAction(icon: string) {
     switch (icon) {
+      case 'left-align': {
+        break
+      }
+      case 'center-horizontally': {
+        break
+      }
+      case 'right-align': {
+        break
+      }
+      case 'top-align': {
+        break
+      }
+      case 'center-vertically': {
+        break
+      }
+      case 'distribute-vertically': {
+        break
+      }
+      case 'distribute-horizontally': {
+        break
+      }
       case 'trash': {
         ShortcutUtils.del()
         break

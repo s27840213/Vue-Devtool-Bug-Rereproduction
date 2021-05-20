@@ -21,52 +21,6 @@ const getDefaultState = (): IEditorState => ({
       },
       name: 'Default Page',
       layers: [
-        // {
-        //   type: 'text',
-        //   pageIndex: 0,
-        //   active: false,
-        //   shown: false,
-        //   text: 'Tesing Font',
-        //   styles: {
-        //     width: 'auto',
-        //     height: 'auto',
-        //     x: 40,
-        //     y: 100,
-        //     scale: 0,
-        //     scaleX: 0,
-        //     scaleY: 0,
-        //     rotate: 0,
-        //     font: 'Lobster',
-        //     weight: 'bold',
-        //     align: 'left',
-        //     lineHeight: 20,
-        //     color: '#000000',
-        //     size: 72
-        //   }
-        // },
-        // {
-        //   type: 'text',
-        //   pageIndex: 1,
-        //   active: false,
-        //   shown: false,
-        //   text: 'Tesing Font ts',
-        //   styles: {
-        //     width: 120,
-        //     height: 120,
-        //     x: 300,
-        //     y: 200,
-        //     scale: 1,
-        //     scaleX: 0,
-        //     scaleY: 0,
-        //     rotate: 0,
-        //     font: 'Lobster',
-        //     weight: 'bold',
-        //     align: 'left',
-        //     color: '#000000',
-        //     size: 72,
-        //     initSize: 72
-        //   }
-        // }
       ]
     },
     {
@@ -88,7 +42,12 @@ const getDefaultState = (): IEditorState => ({
   lastSelectedPageIndex: 0,
   lastSelectedLayerIndex: 0,
   clipboard: [],
-  photos: []
+  photos: [],
+  currSelectedInfo: {
+    index: -1,
+    layers: [],
+    types: new Set<string>()
+  }
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -130,6 +89,18 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPhotos(state: IEditorState) {
     return state.photos
+  },
+  getCurrSelectedInfo(state: IEditorState) {
+    return state.currSelectedInfo
+  },
+  getCurrSelectedIndex(state: IEditorState) {
+    return state.currSelectedInfo.index
+  },
+  getCurrSelectedLayers(state: IEditorState) {
+    return state.currSelectedInfo.layers
+  },
+  getCurrSelectedTypes(state: IEditorState) {
+    return state.currSelectedInfo.types
   }
 }
 
@@ -204,14 +175,14 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       if (typeof v === 'number') {
-        (state.pages[updateInfo.pageIndex].layers[GroupUtils.tmpIndex].styles[k] as number) += v
+        (state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] as number) += v
       } else {
-        state.pages[updateInfo.pageIndex].layers[GroupUtils.tmpIndex].styles[k] = v
+        state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] = v
       }
     })
   },
   DELETE_selectedLayer(state: IEditorState) {
-    const index = GroupUtils.tmpIndex
+    const index = state.currSelectedInfo.index
     if (index < 0) {
       console.log('You didn\'t select any layer')
       return
@@ -228,11 +199,14 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_photos(state: IEditorState, data) {
     state.photos = [...data]
+  },
+  SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
+    Object.assign(state.currSelectedInfo, data)
   }
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-  async getRandomPhoto({ state, commit }, { count }) {
+  async getRandomPhoto({ commit }, { count }) {
     try {
       const { data } = await apis.getRandomPhoto(count)
       commit('SET_photos', data)

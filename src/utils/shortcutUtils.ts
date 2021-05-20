@@ -11,8 +11,8 @@ class ShortcutHandler {
 
   copy() {
     console.log('copy')
-    if (GroupUtils.tmpIndex >= 0) {
-      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, GroupUtils.tmpIndex)))
+    if (store.getters.getCurrSelectedIndex >= 0) {
+      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
       console.warn('You did\'t select any layer')
     }
@@ -28,9 +28,9 @@ class ShortcutHandler {
     })
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
-    if (GroupUtils.tmpIndex >= 0) {
-      const tmpIndex = GroupUtils.tmpIndex
-      const tmpLayers = GroupUtils.tmpLayers
+    if (store.getters.getCurrSelectedIndex >= 0) {
+      const tmpIndex = store.getters.getCurrSelectedIndex
+      const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
       if (isTmp) {
