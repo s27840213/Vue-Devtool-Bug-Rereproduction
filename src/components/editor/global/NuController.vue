@@ -1,39 +1,42 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller"
-        ref="body"
-        :layer-index="`${layerIndex}`"
-        :style="styles()"
-        @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
-        @dragover.prevent,
-        @dragenter.prevent
-        @click="onClick"
-        @mousedown.left.stop="moveStart"
-        @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-        @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
-        @dblclick="onDblClick")
-      span(class="text-content" :style="contextStyles()" ref="content"
-        @blur="onFocusOut"
-        @keydown="onKeyDown"
-        @compositionstart="compositionStart"
-        :contenteditable="this.config.textEditable")
-      template(v-if="isActive && !isControlling")
-        div(v-for="(scaler, index)  in controlPoints.scalers"
-            class="controller-point"
-            :key="index * 2"
-            :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
-            @mousedown.left.stop="scaleStart")
-        div(v-for="(resizer, index) in controlPoints.resizers"
-            @mousedown.left.stop="resizeStart")
-          div(class="resize-bar"
-              :key="index * 2 + 1"
-              :style="resizerBarStyles(resizer)")
-          div(class="controller-point"
-              :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
-        div(class="rotaterWrapper")
-          div(class="rotater" @mousedown.left.stop="rotateStart")
+    div
+      div(class="nu-controller"
+          ref="body"
+          :layer-index="`${layerIndex}`"
+          :style="styles()"
+          @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
+          @dragover.prevent,
+          @dragenter.prevent
+          @click="onClick"
+          @mousedown.left.stop="moveStart"
+          @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
+          @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
+          @dblclick="onDblClick")
+        span(class="text-content" :style="contextStyles()" ref="content"
+          @blur="onFocusOut"
+          @keydown="onKeyDown"
+          @compositionstart="compositionStart"
+          :contenteditable="config.textEditable")
+      div(v-if="isActive && !isControlling"
+          class="control-point-wrapper"
+          :style="Object.assign(styles(), {'pointer-events': 'none'})")
+          div(v-for="(scaler, index)  in controlPoints.scalers"
+              class="controller-point"
+              :key="index * 2"
+              :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
+              @mousedown.left.stop="scaleStart")
+          div(v-for="(resizer, index) in controlPoints.resizers"
+              @mousedown.left.stop="resizeStart")
+            div(class="resize-bar"
+                :key="index * 2 + 1"
+                :style="resizerBarStyles(resizer)")
+            div(class="controller-point"
+                :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
+          div(class="rotaterWrapper")
+            div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
-
+// @dblclick="onDblClick"
 <script lang="ts">
 import Vue from 'vue'
 import MathUtils from '@/utils/mathUtils'
@@ -76,6 +79,7 @@ export default Vue.extend({
     body.addEventListener('contextmenu', (e: MouseEvent) => {
       e.preventDefault()
     }, false)
+    this.setLastSelectedLayerIndex(this.layerIndex)
   },
   computed: {
     ...mapGetters({
@@ -123,7 +127,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'UPDATE_layerStyles',
       updateLayerProps: 'UPDATE_layerProps',
       updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
@@ -140,12 +143,14 @@ export default Vue.extend({
       return Object.assign(resizerStyle, HW)
     },
     contextStyles() {
+      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
       const styles = {
+        transform: `translate3d(0px, 0px, ${zindex}px)`,
         color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.isGetMoved ? '#00000000' : '#000000',
         'pointer-events': this.config.textEditable ? 'initial' : 'none',
-        'writing-mode': this.config.styles.writingMode
+        // 'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
     },
@@ -179,7 +184,6 @@ export default Vue.extend({
     },
     styles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
-
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
@@ -191,9 +195,8 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      event.preventDefault()
       event.stopPropagation()
-      if (event.target === this.$refs.body) {
+      if (event.target === this.$refs.body || event.target === this.$refs.content) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
@@ -205,7 +208,6 @@ export default Vue.extend({
           this.clickTime = new Date().toISOString()
           ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
         }
-        this.setCursorStyle('move')
         if (this.config.type !== 'tmp') {
           /**
            * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
@@ -235,9 +237,9 @@ export default Vue.extend({
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
+        event.preventDefault()
         this.isControlling = true
         this.setCursorStyle('move')
-        event.preventDefault()
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
 
@@ -282,7 +284,7 @@ export default Vue.extend({
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
-      const rect = this.$el.getBoundingClientRect()
+      const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -414,8 +416,14 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
-      if (this.config.type === 'shape') {
+      if (this.getLayerType === 'shape') {
         this.shapeHandler(width, height, initWidth, initHeight)
+      }
+      if (this.getLayerType === 'text') {
+        const textRect = (this.$refs.content as HTMLElement).getBoundingClientRect()
+        if (this.getLayerWidth < textRect.width) {
+          console.log('smaller than content')
+        }
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, 1)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -447,7 +455,7 @@ export default Vue.extend({
       this.isControlling = true
       this.setCursorStyle('move')
 
-      const body = this.$el
+      const body = this.$refs.body as HTMLElement
       const rect = body.getBoundingClientRect()
       this.center = {
         x: rect.left + rect.width / 2 - window.pageXOffset,
@@ -471,12 +479,6 @@ export default Vue.extend({
       const lineA = ControlUtils.getLength(vectA)
       const lineB = ControlUtils.getLength(vectB)
       const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
-
-      // const imgControllerPos = {
-      //     x: this.config.styles.imgController.x + offsetPos.x,
-      //     y: this.config.styles.imgController.y + offsetPos.y
-      //   }
-      // ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY, imgControllerPos)
 
       let angle = Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI
       if (angle) {
@@ -523,7 +525,7 @@ export default Vue.extend({
       this.textClickHandler(diff)
     },
     textClickHandler(diff: number) {
-      if (this.config.type === 'text' && diff < 100) {
+      if (this.config.type === 'text' && diff < 1000) {
         this.isGetMoved = false
         ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
       }
@@ -559,6 +561,7 @@ export default Vue.extend({
       }
     },
     onDblClick() {
+      if (this.getLayerType !== 'image') return
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     }
   }
@@ -580,6 +583,8 @@ export default Vue.extend({
 
 .resize-bar {
   position: absolute;
+  pointer-events: auto;
+  border: 2.5px solid #00000000;
   color: "#00000000";
 }
 
@@ -589,6 +594,18 @@ export default Vue.extend({
   background-color: setColor(white);
   border: 1.5px solid setColor(blue-2);
   transform-style: preserve-3d;
+}
+.control-point-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // z-index: setZindex("nu-controller");
+  position: absolute;
+  box-sizing: border-box;
+  &:hover {
+    cursor: pointer;
+  }
+  pointer-events: 'none';
 }
 .rotaterWrapper {
   position: absolute;
@@ -602,12 +619,11 @@ export default Vue.extend({
   width: 10px;
   height: 10px;
   background-color: blue;
+  pointer-events: auto;
   cursor: move;
 }
 .text-content {
-  position: absolute;
-  top: 0;
-  left: 0;
+  text-align: left;
   display: inline-block;
   outline: none;
   white-space: nowrap;

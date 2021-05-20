@@ -60,7 +60,10 @@ class LayerFactary {
         lineHeight: 20,
         color: '#000000',
         size: 72,
-        initSize: 72
+        initSize: 72,
+        writingMode: 'initial',
+        decoration: 'none',
+        style: 'normal'
       }
     }
     Object.assign(basicConfig.styles, config.styles)

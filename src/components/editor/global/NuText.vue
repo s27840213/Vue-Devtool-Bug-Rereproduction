@@ -18,6 +18,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.content = this.getTextContent
   },
   watch: {
