@@ -22,7 +22,9 @@ export interface ITextStyle extends IStyle {
   lineHeight: number,
   color: string,
   size: number,
-  initSize: number
+  initSize: number,
+  writingMode: string,
+  decoration: string
 }
 
 // export interface ITmpStyle extends IStyle {

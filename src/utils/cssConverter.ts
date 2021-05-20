@@ -20,11 +20,13 @@ const styleMap = {
   lineHeight: 'line-height',
   size: 'font-size',
   color: 'color',
-  writingMode: 'writing-mode'
+  writingMode: 'writing-mode',
+  decoration: 'text-decoration',
+  style: 'font-style'
 } as IStyleMap
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
-const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'size', 'color', 'writingMode']
+const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'size', 'color', 'writingMode', 'decoration', 'style']
 
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {

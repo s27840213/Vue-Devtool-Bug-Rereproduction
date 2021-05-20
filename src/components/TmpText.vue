@@ -25,7 +25,9 @@ export default Vue.extend({
             weight: 'bold',
             align: 'text-align',
             color: '#000000',
-            writingMode: 'initia',
+            writingMode: 'initial',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         },
@@ -36,7 +38,9 @@ export default Vue.extend({
             weight: 'bold',
             align: 'text-align',
             color: '#000000',
-            writingMode: 'initia',
+            writingMode: 'initial',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         },
@@ -47,7 +51,9 @@ export default Vue.extend({
             weight: 'bold',
             align: 'text-align',
             color: '#000000',
-            writingMode: 'initia',
+            writingMode: 'initial',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         },
@@ -58,7 +64,9 @@ export default Vue.extend({
             weight: 'bold',
             align: 'text-align',
             color: '#000000',
-            writingMode: 'initia',
+            writingMode: 'initial',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         },
@@ -70,6 +78,8 @@ export default Vue.extend({
             align: 'text-align',
             color: '#000000',
             writingMode: 'vertical-lr',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         },
@@ -81,6 +91,8 @@ export default Vue.extend({
             align: 'text-align',
             color: '#000000',
             writingMode: 'vertical-lr',
+            decoration: 'none',
+            style: 'normal',
             size: 25
           }
         }
@@ -95,6 +107,7 @@ export default Vue.extend({
         'font-size': '25px',
         'text-align': 'center',
         'writing-mode': 'initial',
+        'text-decoration': 'none',
         color: '#000000'
       }
     },
