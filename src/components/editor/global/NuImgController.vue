@@ -150,27 +150,25 @@ export default Vue.extend({
       this.setCursorStyle('move')
       event.preventDefault()
 
-      const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x /= this.getLayerScale
-      offsetPos.y /= this.getLayerScale
-
       const baseOffset = {
-        x: -this.getImgWidth / 2 + this.config.styles.width / 2,
-        y: -this.getImgHeight / 2 + this.config.styles.height / 2
+        x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
+        y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
       const translateLimit = {
         width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
         height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
       }
 
+      const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      offsetPos.x /= this.getLayerScale
+      offsetPos.y /= this.getLayerScale
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseOffset.x > 0 ? 0 : this.config.styles.width - this.getImgWidth
+        imgPos.x = imgPos.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseOffset.y > 0 ? 0 : this.config.styles.height - this.getImgHeight
+        imgPos.y = imgPos.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
       }
-
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
@@ -241,8 +239,46 @@ export default Vue.extend({
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
+
+      const baseOffset = {
+        x: -width / 2 + (this.config.styles.width / this.getLayerScale) / 2,
+        y: -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
+      }
+      const translateLimit = {
+        width: (width - this.config.styles.width / this.getLayerScale) / 2,
+        height: (height - this.config.styles.height / this.getLayerScale) / 2
+      }
+
+      // const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      // offsetPos.x /= this.getLayerScale
+      // offsetPos.y /= this.getLayerScale
+      // const imgPos = this.imgPosMapper(offsetPos)
+      // let reachLimit = false
+      if (Math.abs(img.x - baseOffset.x) > translateLimit.width) {
+        const respectRatio = width / height
+        width = translateLimit.width + this.config.styles.width / this.getLayerScale
+        height = width / respectRatio
+        offsetSize.width = width - initWidth
+        offsetSize.height = height - initHeight
+
+        img.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
+        img.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+      }
+      if (Math.abs(img.y - baseOffset.y) > translateLimit.height) {
+        const respectRatio = width / height
+        height = translateLimit.height + this.config.styles.height / this.getLayerScale
+        width = height * respectRatio
+        offsetSize.width = width - initWidth
+        offsetSize.height = height - initHeight
+
+        img.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
+        img.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+        // reachLimit = true
+      }
+      // if (!reachLimit) {
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
+      // }
     },
     scaleEnd() {
       this.isControlling = false
