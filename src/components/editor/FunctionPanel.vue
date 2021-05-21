@@ -1,7 +1,6 @@
 <template lang="pug">
-  div(v-show="currSelectedInfo.layers.length!==0"
-      class="function-panel p-20")
-    panel-group
+  div(class="function-panel p-20")
+    panel-group(v-show="currSelectedInfo.layers.length!==0")
     panel-text-setting(v-if="currSelectedInfo.types.has('text')")
     panel-photo-setting(v-if="currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1")
 </template>

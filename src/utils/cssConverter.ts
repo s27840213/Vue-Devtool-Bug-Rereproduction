@@ -20,6 +20,7 @@ const styleMap = {
   lineHeight: 'line-height',
   size: 'font-size',
   color: 'color',
+  opacity: 'opacity',
   writingMode: 'writing-mode',
   decoration: 'text-decoration',
   style: 'font-style'
@@ -61,6 +62,7 @@ class CssConveter {
     Object.assign(result,
       { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width}px` : 'initial' },
       { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height}px` : 'initial' },
+      { opacity: `${sourceStyles.opacity / 100}` },
       this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate))
     return result
   }

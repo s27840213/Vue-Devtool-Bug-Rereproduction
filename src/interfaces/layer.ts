@@ -12,7 +12,8 @@ export interface IStyle {
   height: number,
   initWidth: number,
   initHeight: number,
-  zindex: number
+  zindex: number,
+  opacity: number
 }
 
 export interface ITextStyle extends IStyle {

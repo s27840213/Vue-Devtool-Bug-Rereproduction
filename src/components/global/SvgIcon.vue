@@ -78,6 +78,7 @@ export default Vue.extend({
       }
     },
     textAlign() {
+      console.log('hi')
       const alignStyle = this.iconName.substring(11, this.iconName.length)
       this.updateTextStyles(this.pageIndex, this.layerIndex, { align: alignStyle })
     },

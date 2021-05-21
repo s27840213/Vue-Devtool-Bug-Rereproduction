@@ -127,7 +127,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updateLayerProps: 'UPDATE_layerProps',
-      updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
@@ -602,7 +601,7 @@ export default Vue.extend({
   &:hover {
     cursor: pointer;
   }
-  pointer-events: 'none';
+  pointer-events: "none";
 }
 .rotaterWrapper {
   position: absolute;

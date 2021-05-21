@@ -51,6 +51,11 @@ const getDefaultState = (): IEditorState => ({
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
+  getPage(state: IEditorState) {
+    return (pageIndex: number): IPage => {
+      return state.pages[pageIndex]
+    }
+  },
   getPages(state): Array<IPage> {
     return state.pages
   },
@@ -90,7 +95,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPhotos(state: IEditorState) {
     return state.photos
   },
-  getCurrSelectedInfo(state: IEditorState) {
+  getCurrSelectedInfo(state: IEditorState): {
+    index: number,
+    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
+    types: Set<string>
+  } {
     return state.currSelectedInfo
   },
   getCurrSelectedIndex(state: IEditorState) {
@@ -160,11 +169,6 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   UPDATE_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
-    /**
-     * TODO: type check -> To check the properties is in the certain interface or not
-     * ex: weight properties is not allowed in Img Layer
-     * keywords: user-type-guard in TypeScript or using type predicates
-     */
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
     })
@@ -180,6 +184,10 @@ const mutations: MutationTree<IEditorState> = {
         state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] = v
       }
     })
+  },
+  UPDATE_layersInTmp(state: IEditorState, updateInfo: { layers: Array<IShape | IText | IImage | IGroup> }) {
+    state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index].layers = updateInfo.layers
+    console.log(state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index])
   },
   DELETE_selectedLayer(state: IEditorState) {
     const index = state.currSelectedInfo.index
