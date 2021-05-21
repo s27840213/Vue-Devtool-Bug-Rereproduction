@@ -4,5 +4,7 @@ export interface ICalculatedGroupStyle {
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
+  initWidth: number,
+  initHeight: number
 }

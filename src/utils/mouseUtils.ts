@@ -75,7 +75,8 @@ class MouseUtils {
         height: data.styles.height,
         initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
         initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
-        zindex: -1
+        zindex: -1,
+        opacity: 100
       }
     }
 

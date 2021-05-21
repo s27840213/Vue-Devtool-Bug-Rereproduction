@@ -46,8 +46,6 @@ import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
-import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
   props: {
@@ -84,7 +82,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      currSelectedInfo: 'getCurrSelectedInfo'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -128,7 +127,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updateLayerProps: 'UPDATE_layerProps',
-      updateTmpLayerStyles: 'UPDATE_tmpLayerStyles',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
@@ -221,7 +219,7 @@ export default Vue.extend({
         //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
         let targetIndex = this.layerIndex
         if (!this.isActive) {
-          if ((!event.metaKey && !event.ctrlKey) && GroupUtils.tmpIndex >= 0) {
+          if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
             GroupUtils.deselect()
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedPageIndex(this.pageIndex)
@@ -516,7 +514,7 @@ export default Vue.extend({
     onDropClipper(e: DragEvent) {
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
     },
-    onClick(e: MouseEvent) {
+    onClick() {
       const clickDate = new Date(this.clickTime)
       const currDate = new Date()
       const diff = currDate.getTime() - clickDate.getTime()
@@ -603,7 +601,7 @@ export default Vue.extend({
   &:hover {
     cursor: pointer;
   }
-  pointer-events: 'none';
+  pointer-events: "none";
 }
 .rotaterWrapper {
   position: absolute;

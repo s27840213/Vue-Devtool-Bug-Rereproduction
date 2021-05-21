@@ -11,8 +11,8 @@ class ShortcutHandler {
 
   copy() {
     console.log('copy')
-    if (GroupUtils.tmpIndex >= 0) {
-      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, GroupUtils.tmpIndex)))
+    if (store.getters.getCurrSelectedIndex >= 0) {
+      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
       console.warn('You did\'t select any layer')
     }
@@ -28,17 +28,18 @@ class ShortcutHandler {
     })
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
-    if (GroupUtils.tmpIndex >= 0) {
-      const tmpIndex = GroupUtils.tmpIndex
-      const tmpLayers = GroupUtils.tmpLayers
+    if (store.getters.getCurrSelectedIndex >= 0) {
+      const tmpIndex = store.getters.getCurrSelectedIndex
+      const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
+      ZindexUtils.reassignZindex(lastSelectedPageIndex)
       if (isTmp) {
         store.commit('ADD_layersToPos', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
         GroupUtils.set(tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
         store.commit('ADD_layersToPos', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(tmpIndex + tmpLayersNum, [])
+        GroupUtils.set(tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
     } else {
       if (isTmp) {
@@ -46,10 +47,9 @@ class ShortcutHandler {
         GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
         store.commit('ADD_newLayers', { pageIndex: lastSelectedPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, [])
+        GroupUtils.set(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
     }
-    ZindexUtils.reassignZindex(lastSelectedPageIndex)
   }
 
   del() {

@@ -8,7 +8,7 @@
       btn(class="full-width" :type="'primary-mid'") Adjust
       btn(class="full-width" :type="'primary-mid'") BG Remover
     property-bar
-      span(class="body-2 text-gray-2") 100
+      input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
       svg-icon(class="pointer"
         :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     //- action-bar(class="flex-evenly")
@@ -22,12 +22,38 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
     SearchBar
   },
+  computed: {
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSelectedIndex: 'getCurrSelectedIndex',
+      getLayer: 'getLayer'
+    }),
+    opacity: {
+      get() {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            opacity: value
+          }
+        })
+      }
+    }
+  },
   methods: {
+    ...mapMutations({
+      updateLayerStyles: 'UPDATE_layerStyles'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     }

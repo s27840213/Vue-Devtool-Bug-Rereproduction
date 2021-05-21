@@ -1,9 +1,8 @@
 <template lang="pug">
-  div(v-show="GroupUtils.tmpLayers.length!==0"
-      class="function-panel p-20")
-    panel-group
-    panel-text-setting(v-if="GroupUtils.type.has('text')")
-    panel-photo-setting(v-if="GroupUtils.type.has('image') && GroupUtils.type.size===1")
+  div(class="function-panel p-20")
+    panel-group(v-show="currSelectedInfo.layers.length!==0")
+    panel-text-setting(v-if="currSelectedInfo.types.has('text')")
+    panel-photo-setting(v-if="currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1")
 </template>
 
 <script lang="ts">
@@ -40,7 +39,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSidebarPanel: 'getCurrFunctionPanelType'
+      currSidebarPanel: 'getCurrFunctionPanelType',
+      currSelectedInfo: 'getCurrSelectedInfo'
     })
   }
 })

@@ -20,6 +20,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -28,12 +29,17 @@ export default Vue.extend({
       GroupUtils
     }
   },
+  computed: {
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo'
+    })
+  },
   methods: {
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
     },
     isGroup(): boolean {
-      return GroupUtils.type.has('group') && GroupUtils.tmpLayers.length === 1
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
     iconAction(icon: string) {
       console.log(icon)

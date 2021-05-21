@@ -27,7 +27,8 @@ class LayerFactary {
         imgY: 0,
         imgWidth: config.styles.initWidth,
         imgHeight: config.styles.initHeight,
-        zindex: -1
+        zindex: -1,
+        opacity: 100
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -54,6 +55,7 @@ class LayerFactary {
         initWidth: 0,
         initHeight: 0,
         zindex: -1,
+        opacity: 100,
         font: 'Lobster',
         weight: 'bold',
         align: 'left',
@@ -87,7 +89,8 @@ class LayerFactary {
         height: styles.height,
         initWidth: styles.width,
         initHeight: styles.height,
-        zindex: -1
+        zindex: -1,
+        opacity: 100
       },
       layers: layers
     }
@@ -110,7 +113,8 @@ class LayerFactary {
         height: styles.height,
         initWidth: styles.width,
         initHeight: styles.height,
-        zindex: -1
+        zindex: 0,
+        opacity: 100
       },
       layers: layers
     }
@@ -133,7 +137,8 @@ class LayerFactary {
         height: 0,
         initWidth: 0,
         initHeight: 0,
-        zindex: -1
+        zindex: -1,
+        opacity: 100
       }
     }
     return Object.assign(basicConfig, config)
