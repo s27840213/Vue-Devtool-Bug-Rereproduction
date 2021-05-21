@@ -17,6 +17,7 @@ export default Vue.extend({
   },
   computed: {
     isClipped(): boolean {
+      // return this.config.path !== ''
       return !(this.config.styles.initWidth === this.config.styles.width && this.config.styles.initHeight === this.config.styles.height)
     }
   },
@@ -24,7 +25,9 @@ export default Vue.extend({
     styles() {
       const HW = { width: 0, height: 0 }
       if (this.config.type === 'image' && this.isClipped) {
-        // Divided by the scale for prevents scaling changes the clipper's size
+        /**
+         * Divided by the scale for synchronizing the scale applied at layer-scale
+         */
         HW.width = this.config.styles.width / this.config.styles.scale
         HW.height = this.config.styles.height / this.config.styles.scale
       } else {
@@ -34,7 +37,8 @@ export default Vue.extend({
       return {
         width: `${HW.width}px`,
         height: `${HW.height}px`,
-        'clip-path': this.config.clipPath
+        'clip-path': this.config.clipPath,
+        'background-color': '#00000001'
       }
     }
   }

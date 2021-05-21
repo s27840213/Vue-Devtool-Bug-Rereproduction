@@ -44,14 +44,22 @@
             @click.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
-          nu-layer(v-for="(layer,index) in config.layers"
-            :key="`layer-${index}`"
-            :class="`nu-layer--p${pageIndex}`"
-            :data-index="`${index}`"
-            :data-pindex="`${pageIndex}`"
-            :layerIndex="index"
-            :pageIndex="pageIndex"
-            :config="layer")
+          template(v-for="(layer,index) in config.layers")
+            //- div(v-if="layer.imgControl && layer.clipPath !== ''" class="layer-img")
+            //-   nu-layer(:key="`layer-${index}`"
+            //-     :class="`nu-layer--p${pageIndex}`"
+            //-     :data-index="`${index}`"
+            //-     :data-pindex="`${pageIndex}`"
+            //-     :layerIndex="index"
+            //-     :pageIndex="pageIndex"
+            //-     :config="imgLayerConfig(layer)")
+            nu-layer(:key="`layer-${index}`"
+              :class="`nu-layer--p${pageIndex}`"
+              :data-index="`${index}`"
+              :data-pindex="`${pageIndex}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer")
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
@@ -74,7 +82,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -120,6 +128,11 @@ export default Vue.extend({
       updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
+    // imgLayerConfig(config: ILayer) {
+    //   const imgLayerConfig = JSON.parse(JSON.stringify(config))
+    //   imgLayerConfig.clipPath = ''
+    //   return imgLayerConfig
+    // },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,
@@ -298,5 +311,11 @@ export default Vue.extend({
     right: 5px;
     transform: translate(-50%, 0);
   }
+}
+
+.layer-img {
+  background: red;
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

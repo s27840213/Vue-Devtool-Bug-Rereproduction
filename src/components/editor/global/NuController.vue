@@ -195,44 +195,44 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      if (event.target === this.$refs.body || event.target === this.$refs.content) {
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
+      // if (event.target === this.$refs.body || event.target === this.$refs.content) {
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      window.addEventListener('mouseup', this.moveEnd)
+      window.addEventListener('mousemove', this.moving)
 
-        if (this.config.type === 'text') {
-          const text = this.$refs.content as HTMLElement
-          text.innerHTML = this.getTextContent
-          this.isGetMoved = true
-          this.clickTime = new Date().toISOString()
-          ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
-        }
-        if (this.config.type !== 'tmp') {
-          /**
-           * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
-           * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
-           * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
-           * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
-           * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
-           * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
-           * Thus, we need to do some condition checking to prevent this error
-           */
-          // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
-          //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
-          let targetIndex = this.layerIndex
-          if (!this.isActive) {
-            if ((!event.metaKey && !event.ctrlKey) && GroupUtils.tmpIndex >= 0) {
-              GroupUtils.deselect()
-              targetIndex = this.config.styles.zindex - 1
-              this.setLastSelectedPageIndex(this.pageIndex)
-              this.setLastSelectedLayerIndex(this.layerIndex)
-            }
-            if (this.pageIndex === this.lastSelectedPageIndex) {
-              GroupUtils.select([targetIndex])
-            }
+      if (this.config.type === 'text') {
+        const text = this.$refs.content as HTMLElement
+        text.innerHTML = this.getTextContent
+        this.isGetMoved = true
+        this.clickTime = new Date().toISOString()
+        ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+      }
+      if (this.config.type !== 'tmp') {
+        /**
+         * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
+         * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
+         * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
+         * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
+         * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
+         * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
+         * Thus, we need to do some condition checking to prevent this error
+         */
+        // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
+        //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+        let targetIndex = this.layerIndex
+        if (!this.isActive) {
+          if ((!event.metaKey && !event.ctrlKey) && GroupUtils.tmpIndex >= 0) {
+            GroupUtils.deselect()
+            targetIndex = this.config.styles.zindex - 1
+            this.setLastSelectedPageIndex(this.pageIndex)
+            this.setLastSelectedLayerIndex(this.layerIndex)
+          }
+          if (this.pageIndex === this.lastSelectedPageIndex) {
+            GroupUtils.select([targetIndex])
           }
         }
       }
+      // }
     },
     moving(event: MouseEvent) {
       if (this.isActive) {

@@ -9,6 +9,8 @@
           :isSelecting="isSelecting"
           @mousedown.native.left="setCurrPage(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea")
+    div(v-if="(typeof getLastLayer) !== 'undefined' && isImgControl"
+        class="editor-background")
 </template>
 
 <script lang="ts">
@@ -16,6 +18,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
+import { ILayer } from '@/interfaces/layer'
 
 export default Vue.extend({
   data() {
@@ -34,8 +37,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      pages: 'getPages'
-    })
+      pages: 'getPages',
+      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getLastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      getLayer: 'getLayer'
+    }),
+    getLastLayer(): ILayer {
+      return this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)
+    },
+    isImgControl(): boolean {
+      return this.getLastLayer.imgControl as boolean
+    }
   },
   methods: {
     ...mapMutations({
@@ -131,6 +143,15 @@ export default Vue.extend({
   position: absolute;
   min-width: 100%;
   min-height: 100%;
+}
+
+.editor-background {
+  display: flex;
+  position: fixed;
+  min-width: 100%;
+  min-height: 100%;
+  background: rgba(53,71,90,.2);
+  pointer-events: none;
 }
 
 .page-container {

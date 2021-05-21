@@ -45,7 +45,7 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
-      _getLayer: 'getLayer'
+      getLayer: 'getLayer'
     }),
     pageIndex(): number {
       return this.lastSelectedPageIndex
@@ -83,28 +83,28 @@ export default Vue.extend({
     },
     textBold() {
       let weight = 'normal'
-      if (this.getLayer().styles.weight === 'normal') {
+      if (this.getLayer(this.lastSelectedPageIndex, this.lastSelectedLayerIndex).styles.weight === 'normal') {
         weight = 'bold'
       }
       this.updateTextStyles(this.pageIndex, this.layerIndex, { weight: weight })
     },
     textUnderline() {
       let decoration = 'none'
-      if (this.getLayer().styles.decoration === 'none') {
+      if (this.getLayer(this.lastSelectedPageIndex, this.lastSelectedLayerIndex).styles.decoration === 'none') {
         decoration = 'underline'
       }
       this.updateTextStyles(this.pageIndex, this.layerIndex, { decoration: decoration })
     },
     textItalic() {
       let style = 'normal'
-      if (this.getLayer().styles.style === 'normal') {
+      if (this.getLayer(this.lastSelectedPageIndex, this.lastSelectedLayerIndex).styles.style === 'normal') {
         style = 'italic'
       }
       this.updateTextStyles(this.pageIndex, this.layerIndex, { style: style })
     },
     textVertical() {
       let writingMode = 'initial'
-      const layer = this.getLayer()
+      const layer = this.getLayer(this.lastSelectedPageIndex, this.lastSelectedLayerIndex)
       if (layer.styles.writingMode === 'initial') {
         writingMode = 'vertical-lr'
       }
@@ -123,9 +123,6 @@ export default Vue.extend({
         layerIndex,
         styles
       })
-    },
-    getLayer(): ILayer {
-      return this._getLayer(this.lastSelectedPageIndex, this.lastSelectedLayerIndex)
     }
   }
 })
