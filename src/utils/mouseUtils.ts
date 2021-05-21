@@ -141,7 +141,9 @@ class MouseUtils {
       height: clipperStyles.initHeight / img.height
     }
 
-    // Here's to determine the img's initial width/height
+    /**
+     * Here's to determine the img's initial width/height
+     */
     let scaleRatio: number
     const scaleImg = (scaleRatio: number) => {
       img.width *= scaleRatio
@@ -162,15 +164,16 @@ class MouseUtils {
     }
 
     const newStyles = {
-      imgWidth: img.width,
-      imgHeight: img.height,
-      imgX: -img.width / 2 + clipperStyles.initWidth / 2,
-      imgY: -img.height / 2 + clipperStyles.initHeight / 2,
-      initWidth: img.width,
-      initHeight: img.height,
       width: clipperStyles.width,
       height: clipperStyles.height,
+      initWidth: img.width,
+      initHeight: img.height,
+      imgWidth: img.width,
+      imgHeight: img.height,
       scale: clipperStyles.scale,
+      rotate: clipperStyles.rotate,
+      imgX: -img.width / 2 + clipperStyles.initWidth / 2,
+      imgY: -img.height / 2 + clipperStyles.initHeight / 2,
       x: clipperStyles.x,
       y: clipperStyles.y
     }

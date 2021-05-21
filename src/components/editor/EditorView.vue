@@ -1,24 +1,34 @@
 <template lang="pug">
   div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     div(class="editor-canvas")
-      div(class="page-container")
+      div(class="page-container" ref="container")
         nu-page(v-for="(page,index) in pages"
+          :ref="`page-${index}`"
           :key="`page-${index}`"
           :pageIndex="index"
           :config="page" :index="index"
           :isSelecting="isSelecting"
           @mousedown.native.left="setCurrPage(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea")
-    div(v-if="(typeof getLastLayer) !== 'undefined' && isImgControl"
-        class="editor-background")
-</template>
+    //- template(v-if="(typeof getLastLayer) !== 'undefined' && isImgControl")
+    //-   div(class="editor-background")
+      //- nu-layer(:data-index="`${getLastSelectedLayerIndex}`"
+      //-         :data-pindex="`${getLastSelectedPageIndex}`"
+      //-         :layerIndex="getLastSelectedLayerIndex"
+      //-         :pageIndex="getLastSelectedPageIndex"
+      //-         :config="getLastLayer")
 
+</template>
+  //  nu-clipper(:config="getLastLayer")
+  //         nu-image(:config="getLastLayer"
+  //         :pageIndex="getLastSelectedPageIndex" :layerIndex="getLastSelectedLayerIndex")
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { ILayer } from '@/interfaces/layer'
+import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
   data() {
@@ -41,13 +51,31 @@ export default Vue.extend({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       getLastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       getLayer: 'getLayer'
-    }),
-    getLastLayer(): ILayer {
-      return this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)
-    },
-    isImgControl(): boolean {
-      return this.getLastLayer.imgControl as boolean
-    }
+    })
+    // getLastLayer(): ILayer {
+    //   const page = this.$refs[`page-${this.getLastSelectedPageIndex}`] as [Vue]
+    //   let layer = this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)
+    //   if (layer) {
+    //     layer = JSON.parse(JSON.stringify(this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)))
+    //   }
+    //   let pagePos = { x: 0, y: 0 }
+    //   if (page) {
+    //     const container = this.$refs.container as HTMLElement
+    //     pagePos = {
+    //       x: page[0].$el.getBoundingClientRect().x,
+    //       y: page[0].$el.getBoundingClientRect().y
+    //     }
+    //     console.log(window.scrollY)
+    //     console.log(container.scrollTop)
+    //     // layer.styles.x += (pagePos.x - container.getBoundingClientRect().x)
+    //     // layer.styles.y += (pagePos.y - container.getBoundingClientRect().y)
+    //   }
+    //   return layer
+    // },
+    // isImgControl(): boolean {
+    //   console.log(this.getLastLayer.imgControl as boolean)
+    //   return this.getLastLayer.imgControl as boolean
+    // }
   },
   methods: {
     ...mapMutations({

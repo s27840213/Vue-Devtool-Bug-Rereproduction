@@ -129,12 +129,11 @@ export default Vue.extend({
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline: this.isShown || this.isActive ? (this.config.type === 'tmp'
-          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${3 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
+        outline: `${3 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
     moveStart(event: MouseEvent) {
+      console.log(this.config.styles)
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -155,8 +154,24 @@ export default Vue.extend({
       offsetPos.x /= this.getLayerScale
       offsetPos.y /= this.getLayerScale
 
-      const img = this.imgPosMapper(offsetPos)
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
+      const baseOffset = {
+        x: -this.getImgWidth / 2 + this.config.styles.width / 2,
+        y: -this.getImgHeight / 2 + this.config.styles.height / 2
+      }
+      const translateLimit = {
+        width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
+        height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
+      }
+
+      const imgPos = this.imgPosMapper(offsetPos)
+      if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width) {
+        imgPos.x = imgPos.x - baseOffset.x > 0 ? 0 : this.config.styles.width - this.getImgWidth
+      }
+      if (Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
+        imgPos.y = imgPos.y - baseOffset.y > 0 ? 0 : this.config.styles.height - this.getImgHeight
+      }
+
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180

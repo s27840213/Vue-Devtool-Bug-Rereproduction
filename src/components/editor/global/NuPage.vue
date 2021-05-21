@@ -44,16 +44,8 @@
             @click.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
-          template(v-for="(layer,index) in config.layers")
-            //- div(v-if="layer.imgControl && layer.clipPath !== ''" class="layer-img")
-            //-   nu-layer(:key="`layer-${index}`"
-            //-     :class="`nu-layer--p${pageIndex}`"
-            //-     :data-index="`${index}`"
-            //-     :data-pindex="`${pageIndex}`"
-            //-     :layerIndex="index"
-            //-     :pageIndex="pageIndex"
-            //-     :config="imgLayerConfig(layer)")
-            nu-layer(:key="`layer-${index}`"
+            nu-layer(v-for="(layer,index) in config.layers"
+              :key="`layer-${index}`"
               :class="`nu-layer--p${pageIndex}`"
               :data-index="`${index}`"
               :data-pindex="`${pageIndex}`"
@@ -128,11 +120,6 @@ export default Vue.extend({
       updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
-    // imgLayerConfig(config: ILayer) {
-    //   const imgLayerConfig = JSON.parse(JSON.stringify(config))
-    //   imgLayerConfig.clipPath = ''
-    //   return imgLayerConfig
-    // },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,
