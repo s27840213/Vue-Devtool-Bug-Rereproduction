@@ -74,7 +74,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -298,5 +298,11 @@ export default Vue.extend({
     right: 5px;
     transform: translate(-50%, 0);
   }
+}
+
+.layer-img {
+  background: red;
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

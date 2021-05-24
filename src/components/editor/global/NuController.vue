@@ -62,7 +62,7 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
+      control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       clickTime: new Date().toISOString(),
       isGetMoved: false,
       isCompositoning: false,
@@ -194,44 +194,44 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      if (event.target === this.$refs.body || event.target === this.$refs.content) {
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
+      // if (event.target === this.$refs.body || event.target === this.$refs.content) {
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      window.addEventListener('mouseup', this.moveEnd)
+      window.addEventListener('mousemove', this.moving)
 
-        if (this.config.type === 'text') {
-          const text = this.$refs.content as HTMLElement
-          text.innerHTML = this.getTextContent
-          this.isGetMoved = true
-          this.clickTime = new Date().toISOString()
-          ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
-        }
-        if (this.config.type !== 'tmp') {
-          /**
-           * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
-           * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
-           * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
-           * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
-           * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
-           * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
-           * Thus, we need to do some condition checking to prevent this error
-           */
-          // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
-          //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
-          let targetIndex = this.layerIndex
-          if (!this.isActive) {
-            if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
-              GroupUtils.deselect()
-              targetIndex = this.config.styles.zindex - 1
-              this.setLastSelectedPageIndex(this.pageIndex)
-              this.setLastSelectedLayerIndex(this.layerIndex)
-            }
-            if (this.pageIndex === this.lastSelectedPageIndex) {
-              GroupUtils.select([targetIndex])
-            }
+      if (this.config.type === 'text') {
+        const text = this.$refs.content as HTMLElement
+        text.innerHTML = this.getTextContent
+        this.isGetMoved = true
+        this.clickTime = new Date().toISOString()
+        ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+      }
+      if (this.config.type !== 'tmp') {
+        /**
+         * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
+         * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
+         * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
+         * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
+         * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
+         * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
+         * Thus, we need to do some condition checking to prevent this error
+         */
+        // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
+        //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
+        let targetIndex = this.layerIndex
+        if (!this.isActive) {
+          if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
+            GroupUtils.deselect()
+            targetIndex = this.config.styles.zindex - 1
+            this.setLastSelectedPageIndex(this.pageIndex)
+            this.setLastSelectedLayerIndex(this.layerIndex)
+          }
+          if (this.pageIndex === this.lastSelectedPageIndex) {
+            GroupUtils.select([targetIndex])
           }
         }
       }
+      // }
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
@@ -261,6 +261,9 @@ export default Vue.extend({
           this.imgHandler(totalOffset)
         }
       }
+    },
+    imgHandler(offset: ICoordinate) {
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd() {
       if (this.isActive) {
@@ -340,7 +343,15 @@ export default Vue.extend({
         width: width / this.config.styles.initWidth,
         height: height / this.config.styles.initHeight
       }
-      const scale = Math.max(ratio.width, ratio.height)
+      /**
+       * TO times the initSize is for synchronizing the img-resizer.
+       * after resizing the img's clip-path, the initWidth and initHeight will be reset
+       * However the scaling factor of the layer needs to be reserved, which is the initSize used for.
+       */
+      const scale = Math.max(ratio.width, ratio.height) * this.config.styles.initSize
+      if (typeof this.config.styles.initSize === 'undefined') {
+        this.config.styles.initSize = 1
+      }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
 
@@ -367,6 +378,8 @@ export default Vue.extend({
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
+      this.control.imgX = this.config.styles.imgX
+      this.control.imgY = this.config.styles.imgY
       this.initTranslate = this.getLayerPos
       const vect = MouseUtils.getMouseRelPoint(event, center)
       const angeleInRad = this.getLayerRotate * Math.PI / 180
@@ -414,8 +427,17 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
+      if (this.getLayerType === 'image') {
+        let offsetX
+        let offsetY
+        if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
+          offsetX = offsetWidth
+          offsetY = offsetHeight
+        }
+        this.imgResizeHandler(width, height, offsetX, offsetY)
+      }
       if (this.getLayerType === 'shape') {
-        this.shapeHandler(width, height, initWidth, initHeight)
+        this.shapeResizeHandler(width, height)
       }
       if (this.getLayerType === 'text') {
         const textRect = (this.$refs.content as HTMLElement).getBoundingClientRect()
@@ -423,10 +445,10 @@ export default Vue.extend({
           console.log('smaller than content')
         }
       }
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, 1)
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
-    shapeHandler(width: number, height: number, initWidth: number, initHeight: number) {
+    shapeResizeHandler(width: number, height: number) {
       if (this.config.category === 'rect') {
         const viewBox = [0, 0, 0, 0]
         viewBox[2] = width
@@ -439,8 +461,19 @@ export default Vue.extend({
         // TODO
       }
     },
-    imgHandler(offset: ICoordinate) {
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
+    imgResizeHandler(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
+      ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
+      width /= this.config.styles.scale
+      height /= this.config.styles.scale
+      const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
+      if (typeof offsetX !== 'undefined' && typeof offsetY !== 'undefined') {
+        const imgX = this.control.imgX
+        const imgY = this.control.imgY
+        offsetX /= this.config.styles.scale
+        offsetY /= this.config.styles.scale
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, offsetX + imgX, offsetY + imgY)
+      }
+      ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
     resizeEnd() {
       this.isControlling = false

@@ -6,9 +6,8 @@
     div(class='layer-scale'
         :class="{'layer-text': config.type === 'text'}"
         :style="scaleStyles()")
-      div(v-if="config.imgControl"
-          style="opacity: 0.35")
-        nu-image(:config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
+      nu-image(v-if="config.imgControl" style="opacity: 0.35"
+              :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
@@ -21,7 +20,7 @@
       //- span {{`Rotated Deg: ${Math.floor(config.styles.rotate*100)/100}`}}
       //- span {{`Pos: (${Math.round(config.styles.x)},${Math.round(config.styles.y)})`}}
 </template>
-// v-if="config.type === 'image' && config.path !== ''"
+
 <script lang="ts">
 import Vue from 'vue'
 import { LayerType } from '@/store/types'
@@ -39,10 +38,6 @@ export default Vue.extend({
     return {
       LayerType
     }
-  },
-  mounted() {
-    console.log('mounted!')
-    console.log(this.config)
   },
   computed: {
     getLayerPos(): { x: number, y: number } {
@@ -63,8 +58,13 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      return this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles), { background: 'rgba(0, 0, 255, 0)' })
-        : CssConveter.convertDefaultStyle(this.config.styles)
+      const zindex = (this.layerIndex + 1) * 99
+      const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
+        { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
+      if (this.config.imgControl) {
+        styles.transform = `translate3d(${this.config.styles.x}px , ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg)`
+      }
+      return styles
     },
     scaleStyles() {
       // return {
