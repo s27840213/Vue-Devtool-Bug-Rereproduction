@@ -26,13 +26,14 @@
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
-          div(v-for="(resizer, index) in controlPoints.resizers"
-              @mousedown.left.stop="resizeStart")
-            div(class="resize-bar"
-                :key="index * 2 + 1"
-                :style="resizerBarStyles(resizer)")
-            div(class="controller-point"
-                :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
+          template(v-if="config.type !=='tmp'")
+            div(v-for="(resizer, index) in controlPoints.resizers"
+                @mousedown.left.stop="resizeStart")
+              div(class="resize-bar"
+                  :key="index * 2 + 1"
+                  :style="resizerBarStyles(resizer)")
+              div(class="controller-point"
+                  :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(class="rotaterWrapper")
             div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
