@@ -5,6 +5,7 @@ import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
 import apis from '@/apis/unsplash'
+import orderMutation from '@/store/mutations/order'
 
 Vue.use(Vuex)
 
@@ -47,7 +48,8 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     layers: [],
     types: new Set<string>()
-  }
+  },
+  isOrderDropdownsOpened: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -110,6 +112,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
+  },
+  getIsOrderDropdownsOpened(state: IEditorState) {
+    return state.isOrderDropdownsOpened
   }
 }
 
@@ -187,7 +192,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_layersInTmp(state: IEditorState, updateInfo: { layers: Array<IShape | IText | IImage | IGroup> }) {
     state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index].layers = updateInfo.layers
-    console.log(state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index])
+  },
+  UPDATE_tmpLayersZindex(state: IEditorState) {
+    (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup, index: number) => {
+      layer.styles.zindex = state.currSelectedInfo.index + 1
+    })
   },
   DELETE_selectedLayer(state: IEditorState) {
     const index = state.currSelectedInfo.index
@@ -210,7 +219,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
-  }
+  },
+  SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {
+    state.isOrderDropdownsOpened = isOpened
+  },
+  ...orderMutation
 }
 
 const actions: ActionTree<IEditorState, unknown> = {

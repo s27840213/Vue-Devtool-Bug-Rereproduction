@@ -1,9 +1,10 @@
 
 import store from '@/store'
 import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp, IStyle, ITextStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IStyle, ITextStyle, ILayer } from '@/interfaces/layer'
 import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
 import GroupUtils from '@/utils/groupUtils'
+import mathUtils from './mathUtils'
 
 function updateLayerStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: number }) {
   store.commit('UPDATE_layerStyles', {
@@ -21,10 +22,11 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
-      const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
-      const layerWidth = currSelectedInfo.layers[0].styles.width
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
       updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        x: 0
+        x: 0 + offset
       })
     } else {
       const tmpStyles = getTmpStyles()
@@ -61,10 +63,12 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
       const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
-      const layerWidth = currSelectedInfo.layers[0].styles.width
       updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        x: pageWidth - layerWidth
+        x: pageWidth - bouding.width + offset
       })
     } else {
       const tmpStyles = getTmpStyles()
@@ -81,10 +85,11 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
-      const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
-      const layerHeight = currSelectedInfo.layers[0].styles.height
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
       updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        y: 0
+        y: 0 + offset
       })
     } else {
       const tmpStyles = getTmpStyles()
@@ -123,11 +128,12 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
       const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
-      const layerHeight = currSelectedInfo.layers[0].styles.height
-      console.log(pageHeight, layerHeight)
       updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        y: pageHeight - layerHeight
+        y: pageHeight - bouding.height + offset
       })
     } else {
       const tmpStyles = getTmpStyles()

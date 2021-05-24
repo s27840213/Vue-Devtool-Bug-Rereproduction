@@ -19,7 +19,8 @@ export interface IEditorState {
     index: number,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
     types: Set<string>
-  }
+  },
+  isOrderDropdownsOpened: boolean
 }
 
 export enum SidebarPanelType {

@@ -1,9 +1,9 @@
 <template lang="pug">
-  div(@click="onClick")
-    svg(class="svg-icon" :class="`text-${iconColor}`"
-        ref="icon"
-        :style="iconStyles()")
-      use(:xlink:href="`#${iconName}`")
+  svg(class="svg-icon" :class="`text-${iconColor}`"
+      ref="icon"
+      :style="iconStyles()"
+      @click="onClick")
+    use(:xlink:href="`#${iconName}`")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -78,7 +78,6 @@ export default Vue.extend({
       }
     },
     textAlign() {
-      console.log('hi')
       const alignStyle = this.iconName.substring(11, this.iconName.length)
       this.updateTextStyles(this.pageIndex, this.layerIndex, { align: alignStyle })
     },
@@ -136,5 +135,8 @@ export default Vue.extend({
 .svg-icon {
   width: 100%;
   transition: background-color 0.2s;
+  &:focus {
+    outline: none;
+  }
 }
 </style>

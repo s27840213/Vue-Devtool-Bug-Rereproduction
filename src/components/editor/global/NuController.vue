@@ -181,7 +181,8 @@ export default Vue.extend({
       })
     },
     styles() {
-      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+      // const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+      const zindex = (this.layerIndex + 1) * 50
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,

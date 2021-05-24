@@ -11,6 +11,7 @@
       svg-icon(v-for="(icon,index) in mappingIcons('action')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
+        :class="{'layers-alt': icon==='layers-alt'}"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction(icon)")
 </template>
@@ -20,7 +21,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -35,6 +36,9 @@ export default Vue.extend({
     })
   },
   methods: {
+    ...mapMutations({
+      setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened'
+    }),
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
     },
@@ -42,7 +46,6 @@ export default Vue.extend({
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
     iconAction(icon: string) {
-      console.log(icon)
       MappingUtils.mappingIconAction(icon)
     }
   }

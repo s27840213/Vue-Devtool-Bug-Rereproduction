@@ -65,5 +65,5 @@ export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
 export interface ITmp extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage>
+  layers: Array<IShape | IText | IImage | IGroup>
 }

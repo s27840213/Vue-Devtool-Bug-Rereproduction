@@ -6,13 +6,22 @@
       div(class="coordinate__val coordinate__height")
         span {{coordinateHeight}}px
     router-view
+    div(class="dropdowns-area")
+      dropdowns(v-if="isOrderDropdownsOpened"
+        :type="'order'"
+        @blur.native="setIsOrderDropdownsOpened(false)"
+        tabindex="0")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import Dropdowns from '@/components/Dropdowns.vue'
 
 export default Vue.extend({
+  components: {
+    Dropdowns
+  },
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
@@ -25,15 +34,24 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      getLastSelectedPageIndex: 'getLastSelectedPageIndex'
+      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      isOrderDropdownsOpened: 'getIsOrderDropdownsOpened'
     })
   },
   methods: {
+    ...mapMutations({
+      _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened'
+    }),
     coordinateHandler(e: MouseEvent) {
       this.coordinateWidth = e.clientX
       this.coordinateHeight = e.clientY
       this.coordinate.style.width = `${this.coordinateWidth}px`
       this.coordinate.style.height = `${this.coordinateHeight}px`
+    },
+    setIsOrderDropdownsOpened(isOpened: boolean) {
+      this.$nextTick(() => {
+        this._setIsOrderDropdownsOpened(isOpened)
+      })
     }
   }
 })
@@ -41,6 +59,7 @@ export default Vue.extend({
 <style lang="scss">
 #app {
   @include size(100%, 100%);
+  position: relative;
   max-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -76,5 +95,11 @@ export default Vue.extend({
     right: 5px;
     transform: translate(-50%, 0);
   }
+}
+.dropdowns-area {
+  @include size(100%, 100%);
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 </style>

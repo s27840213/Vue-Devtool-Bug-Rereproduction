@@ -5,6 +5,7 @@ import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
 import MathUtils from '@/utils/mathUtils'
 import ZindexUtils from './zindexUtils'
+import generalUtils from './generalUtils'
 
 function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -18,12 +19,7 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
       minX = Math.min(minX, layer.styles.x)
       minY = Math.min(minY, layer.styles.y)
     } else {
-      const layerBouding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
-        x: layer.styles.x,
-        y: layer.styles.y,
-        width: layer.styles.width,
-        height: layer.styles.height
-      })
+      const layerBouding = MathUtils.getBounding(layer)
       minX = Math.min(minX, layerBouding.x)
       minY = Math.min(minY, layerBouding.y)
     }
@@ -34,12 +30,7 @@ function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalcula
       maxWidth = Math.max(maxWidth, layer.styles.x + (layer.styles.width as number) - minX)
       maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
     } else {
-      const layerBouding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
-        x: layer.styles.x,
-        y: layer.styles.y,
-        width: layer.styles.width,
-        height: layer.styles.height
-      })
+      const layerBouding = MathUtils.getBounding(layer)
       maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
@@ -153,11 +144,7 @@ class GroupUtils {
         const topIndex = Math.max(...layerIndexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        store.commit('SET_currSelectedInfo', {
-          index: currSelectedIndex,
-          layers: tmpLayers,
-          types: calcType(tmpLayers)
-        })
+        this.set(currSelectedIndex, tmpLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
@@ -182,11 +169,7 @@ class GroupUtils {
         const topIndex = Math.max(...indexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        store.commit('SET_currSelectedInfo', {
-          index: currSelectedIndex,
-          layers: tmpLayers,
-          types: calcType(tmpLayers)
-        })
+        this.set(currSelectedIndex, tmpLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -209,11 +192,7 @@ class GroupUtils {
         const newLayersNum = 1 + layerIndexs.length
         const indexs = [store.getters.getCurrSelectedIndex, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
-        store.commit('SET_currSelectedInfo', {
-          index: currSelectedIndex,
-          layers: tmpLayers,
-          types: calcType(tmpLayers)
-        })
+        this.set(currSelectedIndex, tmpLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -288,7 +267,7 @@ class GroupUtils {
   }
 
   mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup> {
-    layers = JSON.parse(JSON.stringify(layers.sort((a, b) => a.styles.zindex - b.styles.zindex)))
+    layers = generalUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
 
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.x -= styles.x
@@ -336,9 +315,9 @@ class GroupUtils {
   }
 
   recalcTmpStyle(layers: Array<IShape | IText | IImage | IGroup>) {
-    console.log(layers)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const prevTmpStyles = getTmpStyles()
+    prevTmpStyles.rotate = 0
     const tmpStyles = calcTmpProps(this.mapLayersToPage(layers, prevTmpStyles))
     const tmpLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, prevTmpStyles), tmpStyles)
     console.log(tmpLayers)

@@ -6,9 +6,9 @@
       div(class="content")
         sidebar-panel
         div(class="content__main")
-          div(class="content__blank bg-white")
-            div(class="test-nav")
-              div(v-for="nav in testNav" @click="setPanelType(FunctionPanelType[nav])") {{nav}}
+          //- div(class="content__blank bg-white")
+          //-   div(class="test-nav")
+          //-     div(v-for="nav in testNav" @click="setPanelType(FunctionPanelType[nav])") {{nav}}
           div(class="content__editor")
             editor-view
             size-editor
@@ -78,15 +78,15 @@ export default Vue.extend({
   grid-template-columns: auto 1fr auto;
   &__main {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: 1fr;
   }
-  &__blank {
-    @include size(100%, 50px);
-    @include flexCenter;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
-    z-index: setZindex("default-1");
-  }
+  // &__blank {
+  //   @include size(100%, 50px);
+  //   @include flexCenter;
+  //   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
+  //   z-index: setZindex("default-1");
+  // }
   &__editor {
     position: relative;
     height: 100%;
