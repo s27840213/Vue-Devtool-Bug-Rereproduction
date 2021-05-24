@@ -433,6 +433,9 @@ export default Vue.extend({
           offsetX = offsetWidth
           offsetY = offsetHeight
         }
+        if (this.imgResizeLimiter(width, height, offsetX, offsetY)) {
+          return
+        }
         this.imgResizeHandler(width, height, offsetX, offsetY)
       }
       if (this.getLayerType === 'shape') {
@@ -459,6 +462,31 @@ export default Vue.extend({
       if (this.config.category === 'circle') {
         // TODO
       }
+    },
+    imgResizeLimiter(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined): boolean {
+      const [imgWidth, imgHeight, scale] = [this.config.styles.imgWidth, this.config.styles.imgHeight, this.config.styles.scale]
+      const imgPos = {
+        x: this.config.styles.imgX,
+        y: this.config.styles.imgY
+      }
+      const baseOffset = {
+        x: -imgWidth / 2 + (width / scale) / 2,
+        y: -imgHeight / 2 + (height / scale) / 2
+      }
+      const translateLimit = {
+        width: (imgWidth - width / scale) / 2,
+        height: (imgHeight - height / scale) / 2
+      }
+      if (typeof offsetX === 'undefined' || typeof offsetY === 'undefined') {
+        if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width || Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
+          return true
+        }
+      } else {
+        if (imgPos.x + offsetX > 0 || imgPos.y + offsetY > 0) {
+          return true
+        }
+      }
+      return false
     },
     imgResizeHandler(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
