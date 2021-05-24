@@ -62,7 +62,7 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
+      control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       clickTime: new Date().toISOString(),
       isGetMoved: false,
       isCompositoning: false,
@@ -261,6 +261,9 @@ export default Vue.extend({
         }
       }
     },
+    imgHandler(offset: ICoordinate) {
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
+    },
     moveEnd() {
       if (this.isActive) {
         this.isControlling = false
@@ -339,7 +342,15 @@ export default Vue.extend({
         width: width / this.config.styles.initWidth,
         height: height / this.config.styles.initHeight
       }
-      const scale = Math.max(ratio.width, ratio.height)
+      /**
+       * TO times the initSize is for synchronizing the img-resizer.
+       * after resizing the img's clip-path, the initWidth and initHeight will be reset
+       * However the scaling factor of the layer needs to be reserved, which is the initSize used for.
+       */
+      const scale = Math.max(ratio.width, ratio.height) * this.config.styles.initSize
+      if (typeof this.config.styles.initSize === 'undefined') {
+        this.config.styles.initSize = 1
+      }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
 
@@ -366,6 +377,8 @@ export default Vue.extend({
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
+      this.control.imgX = this.config.styles.imgX
+      this.control.imgY = this.config.styles.imgY
       this.initTranslate = this.getLayerPos
       const vect = MouseUtils.getMouseRelPoint(event, center)
       const angeleInRad = this.getLayerRotate * Math.PI / 180
@@ -413,8 +426,17 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
+      if (this.getLayerType === 'image') {
+        let offsetX
+        let offsetY
+        if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
+          offsetX = offsetWidth
+          offsetY = offsetHeight
+        }
+        this.imgResizeHandler(width, height, offsetX, offsetY)
+      }
       if (this.getLayerType === 'shape') {
-        this.shapeHandler(width, height, initWidth, initHeight)
+        this.shapeResizeHandler(width, height)
       }
       if (this.getLayerType === 'text') {
         const textRect = (this.$refs.content as HTMLElement).getBoundingClientRect()
@@ -422,10 +444,10 @@ export default Vue.extend({
           console.log('smaller than content')
         }
       }
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, 1)
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
-    shapeHandler(width: number, height: number, initWidth: number, initHeight: number) {
+    shapeResizeHandler(width: number, height: number) {
       if (this.config.category === 'rect') {
         const viewBox = [0, 0, 0, 0]
         viewBox[2] = width
@@ -438,8 +460,19 @@ export default Vue.extend({
         // TODO
       }
     },
-    imgHandler(offset: ICoordinate) {
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
+    imgResizeHandler(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
+      ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
+      width /= this.config.styles.scale
+      height /= this.config.styles.scale
+      const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
+      if (typeof offsetX !== 'undefined' && typeof offsetY !== 'undefined') {
+        const imgX = this.control.imgX
+        const imgY = this.control.imgY
+        offsetX /= this.config.styles.scale
+        offsetY /= this.config.styles.scale
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, offsetX + imgX, offsetY + imgY)
+      }
+      ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
     resizeEnd() {
       this.isControlling = false

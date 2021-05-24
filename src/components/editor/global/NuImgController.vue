@@ -133,7 +133,6 @@ export default Vue.extend({
       }
     },
     moveStart(event: MouseEvent) {
-      console.log(this.config.styles)
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -216,24 +215,40 @@ export default Vue.extend({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const [dx, dy] = [diff.x / this.config.styles.scale, diff.y / this.config.styles.scale]
 
-      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
-      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
+      let offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
+      let offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
 
       const initWidth = this.initialWH.width
       const initHeight = this.initialWH.height
+      const tmpHW = {
+        width: width,
+        height: height
+      }
+
+      // if (Math.abs(offsetWidth) >= 3 || Math.abs(offsetHeight) >= 3) {
+      //   offsetWidth /= 2
+      //   offsetHeight /= 2
+      // }
+
       if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
         width = offsetWidth + initWidth
         height = width * initHeight / initWidth
+        offsetHeight = height - initHeight
       } else {
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
+        offsetWidth = width - initWidth
       }
       if (width <= 40 || height <= 40) return
 
       const offsetSize = {
         width: width - initWidth,
         height: height - initHeight
+      }
+      if (Math.abs(offsetSize.width) >= 3 || Math.abs(offsetSize.height) >= 3) {
+        offsetSize.width /= 2
+        offsetSize.height /= 2
       }
       const img = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
@@ -255,30 +270,25 @@ export default Vue.extend({
       // const imgPos = this.imgPosMapper(offsetPos)
       // let reachLimit = false
       if (Math.abs(img.x - baseOffset.x) > translateLimit.width) {
-        const respectRatio = width / height
-        width = translateLimit.width + this.config.styles.width / this.getLayerScale
-        height = width / respectRatio
-        offsetSize.width = width - initWidth
-        offsetSize.height = height - initHeight
-
-        img.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
-        img.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+        return
+        // img.x = img.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
+        // img.y = this.getImgY
+        // width = tmpHW.width
+        // height = tmpHW.height
       }
       if (Math.abs(img.y - baseOffset.y) > translateLimit.height) {
-        const respectRatio = width / height
-        height = translateLimit.height + this.config.styles.height / this.getLayerScale
-        width = height * respectRatio
-        offsetSize.width = width - initWidth
-        offsetSize.height = height - initHeight
-
-        img.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
-        img.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
-        // reachLimit = true
+        return
+        // const tmpY = img.y
+        // img.y = img.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
+        // const diffRatio = (tmpY - img.y) / (tmpY - this.initImgPos.imgY)
+        // img.x = this.getImgX
+        // width = initWidth + offsetWidth * diffRatio
+        // height = initHeight + offsetHeight * diffRatio
       }
       // if (!reachLimit) {
+      //   }
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
-      // }
     },
     scaleEnd() {
       this.isControlling = false

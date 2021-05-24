@@ -19,14 +19,23 @@ export default Vue.extend({
   data() {
     return {
       contents: [
-        // {
-        //   category: 'rect',
-        //   color: '#2EB8E6',
-        //   path: 'M0 0 L0 120 180 120 180 0z',
-        //   viewBox: [0, 0, 180, 120],
-        //   clipper: false
-        // },
-        // {
+        {
+          category: 'rect',
+          color: '#2EB8E6',
+          svg: `<?xml version="1.0" encoding="utf-8"?>
+                <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+                <style type="text/css">
+                  .st3{fill:#2EB8E6;}
+                </style>
+                <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                  viewBox="0 0 180 120" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                <path class="st3" class="st0" d="M0 0 L0 120 180 120 180 0z"/>
+                </svg>
+                `,
+          path: 'M0 0 L0 120 180 120 180 0z',
+          viewBox: [0, 0, 180, 120],
+          clipper: true
+        },
         //   category: 'rect',
         //   color: 'pink',
         //   path: 'M0 0 L0 240 120 240 120 0z',

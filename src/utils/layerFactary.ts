@@ -4,11 +4,12 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
   newImage(pageIndex: number, config: any): IImage {
+    const [width, height] = [config.styles.width, config.styles.height]
     const basicConfig = {
       type: 'image',
       pageIndex: pageIndex,
       src: '',
-      clipPath: '',
+      clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
       imgControl: false,

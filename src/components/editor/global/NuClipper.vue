@@ -5,6 +5,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   data() {
@@ -16,15 +17,15 @@ export default Vue.extend({
     pageIndex: Number
   },
   computed: {
-    isClipped(): boolean {
-      // return this.config.path !== ''
-      return !(this.config.styles.initWidth === this.config.styles.width && this.config.styles.initHeight === this.config.styles.height)
-    }
+    // isClipped(): boolean {
+    //   return this.config.path !== ''
+    //   // return !(this.config.styles.initWidth === this.config.styles.width && this.config.styles.initHeight === this.config.styles.height)
+    // }
   },
   methods: {
     styles() {
       const HW = { width: 0, height: 0 }
-      if (this.config.type === 'image' && this.isClipped) {
+      if (this.config.type === 'image') {
         /**
          * Divided by the scale for synchronizing the scale applied at layer-scale
          */

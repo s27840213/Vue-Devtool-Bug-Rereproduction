@@ -271,10 +271,18 @@ class Controller {
     })
   }
 
+  updateImgClipPath(pageIndex: number, layerIndex: number, clipPath: string) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        clipPath
+      }
+    })
+  }
+
   // TODO: change the viewBox so as the path to accomplish the shape's size changing
   updateShapeProps(pageIndex: number, layerIndex: number, viewBox: number[], path: string) {
-    console.log(viewBox)
-    console.log(path)
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
