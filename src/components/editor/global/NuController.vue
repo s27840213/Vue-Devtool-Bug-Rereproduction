@@ -466,8 +466,8 @@ export default Vue.extend({
     imgResizeLimiter(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined): boolean {
       const [imgWidth, imgHeight, scale] = [this.config.styles.imgWidth, this.config.styles.imgHeight, this.config.styles.scale]
       const imgPos = {
-        x: this.config.styles.imgX,
-        y: this.config.styles.imgY
+        x: this.control.imgX,
+        y: this.control.imgY
       }
       const baseOffset = {
         x: -imgWidth / 2 + (width / scale) / 2,
@@ -477,14 +477,14 @@ export default Vue.extend({
         width: (imgWidth - width / scale) / 2,
         height: (imgHeight - height / scale) / 2
       }
-      if (typeof offsetX === 'undefined' || typeof offsetY === 'undefined') {
-        if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width || Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
-          return true
-        }
-      } else {
-        if (imgPos.x + offsetX > 0 || imgPos.y + offsetY > 0) {
-          return true
-        }
+      if (typeof offsetX !== 'undefined' && typeof offsetY !== 'undefined') {
+        offsetX /= this.config.styles.scale
+        offsetY /= this.config.styles.scale
+        imgPos.x += offsetX
+        imgPos.y += offsetY
+      }
+      if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width || Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
+        return true
       }
       return false
     },

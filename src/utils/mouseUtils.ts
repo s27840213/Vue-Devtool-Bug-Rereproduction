@@ -32,6 +32,9 @@ class MouseUtils {
 
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
+      store.commit('DELETE_layer', {
+        pageIndex, layerIndex
+      })
       this.refreshLayers(pageIndex, layer)
     }
   }

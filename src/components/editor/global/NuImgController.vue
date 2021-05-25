@@ -164,7 +164,6 @@ export default Vue.extend({
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
-        // console.log(imgPos.x - baseOffset.x)
       }
       if (Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
