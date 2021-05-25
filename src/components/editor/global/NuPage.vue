@@ -46,7 +46,7 @@
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
-            :class="`nu-layer--p${pageIndex}`"
+            :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
             :layerIndex="index"
@@ -203,7 +203,7 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   &:focus {
-    // outline: none;
+    outline: none;
   }
 }
 

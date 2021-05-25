@@ -20,7 +20,8 @@ export interface IEditorState {
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
     types: Set<string>
   },
-  isOrderDropdownsOpened: boolean
+  isOrderDropdownsOpened: boolean,
+  isLayerDropdownsOpened: boolean
 }
 
 export enum SidebarPanelType {

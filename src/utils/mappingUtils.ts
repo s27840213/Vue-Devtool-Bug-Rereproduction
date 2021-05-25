@@ -9,7 +9,6 @@ const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
 const iconOrder = ['layers-front', 'layers-forward', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
 const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify']
-
 class MappingUtils {
   mappingIconSet(set: string): string[] {
     switch (set) {
@@ -86,6 +85,20 @@ class MappingUtils {
       case 'copy': {
         ShortcutUtils.copy()
         ShortcutUtils.paste()
+        break
+      }
+      case 'unlock': {
+        const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+        const currSelectedIndex = store.getters.getCurrSelectedIndex
+        console.log('lcok')
+        console.log(store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked)
+        store.commit('UPDATE_layerProps', {
+          pageIndex: lastSelectedPageIndex,
+          layerIndex: currSelectedIndex,
+          props: {
+            locked: !store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked
+          }
+        })
         break
       }
       case 'trash': {

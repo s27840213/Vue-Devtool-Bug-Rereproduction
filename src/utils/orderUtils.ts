@@ -1,17 +1,5 @@
 
 import store from '@/store'
-
-function updateLayerStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: number }) {
-  store.commit('UPDATE_layerStyles', {
-    pageIndex,
-    layerIndex,
-    styles
-  })
-}
-
-function getTmpStyles() {
-  return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex).styles
-}
 class OrderUtils {
   bringToFront() {
     store.commit('UPDATE_layerOrder', {

@@ -43,6 +43,7 @@ export interface ILayer<T extends IStyle = IStyle> {
   pageIndex: number,
   active: boolean,
   shown: boolean,
+  locked: boolean,
   styles: T
 }
 export interface IText extends ILayer<ITextStyle> {

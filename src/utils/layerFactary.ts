@@ -44,6 +44,7 @@ class LayerFactary {
       pageIndex: pageIndex,
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: 0,
         y: 0,
@@ -79,6 +80,7 @@ class LayerFactary {
       type: 'group',
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -103,6 +105,7 @@ class LayerFactary {
       type: 'tmp',
       active: true,
       shown: false,
+      locked: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -127,6 +130,7 @@ class LayerFactary {
       pageIndex: pageIndex,
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: 0,
         y: 0,

@@ -178,7 +178,7 @@ export default Vue.extend({
   position: fixed;
   min-width: 100%;
   min-height: 100%;
-  background: rgba(53,71,90,.2);
+  background: rgba(53, 71, 90, 0.2);
   pointer-events: none;
 }
 

@@ -64,6 +64,7 @@ class MouseUtils {
       pageIndex: pageIndex,
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: x,
         y: y,

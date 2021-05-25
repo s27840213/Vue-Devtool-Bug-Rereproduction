@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, ITmp } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -64,8 +64,8 @@ function calcType(layers: Array<IShape | IText | IImage | IGroup>): Set<string> 
   }
 }
 
-function getTmpStyles() {
-  return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex).styles
+function getTmpLayer() {
+  return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)
 }
 class GroupUtils {
   group() {
@@ -130,25 +130,25 @@ class GroupUtils {
             active: true
           }
         })
-        const tmpLayers = [...MappingUtils.mappingLayers(layerIndexs)]
+        const currSelectedLayers = [...MappingUtils.mappingLayers(layerIndexs)]
         store.commit('SET_currSelectedInfo', {
           index: layerIndexs[0],
-          layers: tmpLayers,
-          types: calcType(tmpLayers)
+          layers: currSelectedLayers,
+          types: calcType(currSelectedLayers)
         })
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(layerIndexs)
         const tmpStyles = calcTmpProps(layers)
-        const tmpLayers = this.mapLayersToTmp(layers, tmpStyles)
+        const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(currSelectedIndex, tmpLayers)
+        this.set(currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, tmpLayers)
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -165,15 +165,15 @@ class GroupUtils {
         this.deselect()
         const layers = MappingUtils.mappingLayers(indexs)
         const tmpStyles = calcTmpProps(layers)
-        const tmpLayers = this.mapLayersToTmp(layers, tmpStyles)
+        const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...indexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(currSelectedIndex, tmpLayers)
+        this.set(currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, tmpLayers)
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -185,18 +185,18 @@ class GroupUtils {
         })
       } else {
         const layers = MappingUtils.mappingLayers(layerIndexs)
-        const prevTmpStyles = getTmpStyles()
-        const tmpStyles = calcTmpProps([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, getTmpStyles()), ...layers])
-        const tmpLayers = this.mapLayersToTmp([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, prevTmpStyles), ...layers], tmpStyles)
+        const tmpLayer = getTmpLayer()
+        const tmpStyles = calcTmpProps([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, getTmpLayer()), ...layers])
+        const currSelectedLayers = this.mapLayersToTmp([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer), ...layers], tmpStyles)
         const topIndex = Math.max(store.getters.getCurrSelectedIndex, ...layerIndexs)
         const newLayersNum = 1 + layerIndexs.length
         const indexs = [store.getters.getCurrSelectedIndex, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(currSelectedIndex, tmpLayers)
+        this.set(currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, tmpLayers)
+        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -214,7 +214,6 @@ class GroupUtils {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (store.getters.getCurrSelectedIndex !== -1) {
       if (store.getters.getCurrSelectedLayers.length === 1) {
-        console.log('1')
         store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: store.getters.getCurrSelectedIndex,
@@ -223,8 +222,7 @@ class GroupUtils {
           }
         })
       } else {
-        console.log(store.getters.getCurrSelectedLayers.length)
-        const tmpStyles = getTmpStyles()
+        const tmpStyles = getTmpLayer()
         store.commit('DELETE_layer', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: store.getters.getCurrSelectedIndex
@@ -282,17 +280,17 @@ class GroupUtils {
    * @param styles - the styles of tmp layer
    * @returns calculated layers in tmp layer
    */
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, styles: IStyle): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset
-      layer.styles.width = layer.styles.width as number * styles.scale
-      layer.styles.height = layer.styles.height as number * styles.scale
-      layer.styles.scale *= styles.scale
+      layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+      layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
+      layer.styles.scale *= tmpLayer.styles.scale
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
-        const ratio = styles.width / styles.initWidth
+        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -300,15 +298,16 @@ class GroupUtils {
       }
 
       // map to original coordinate system
-      layer.styles.x += styles.x
-      layer.styles.y += styles.y
+      layer.styles.x += tmpLayer.styles.x
+      layer.styles.y += tmpLayer.styles.y
 
       // calculate rotation offset
-      const centerOffset = MathUtils.getRotatedPoint(styles.rotate, MathUtils.getCenter(styles), MathUtils.getCenter(layer.styles))
+      const centerOffset = MathUtils.getRotatedPoint(tmpLayer.styles.rotate, MathUtils.getCenter(tmpLayer.styles), MathUtils.getCenter(layer.styles))
       layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
       layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
-      layer.styles.rotate = (layer.styles.rotate + styles.rotate) % 360
+      layer.styles.rotate = (layer.styles.rotate + tmpLayer.styles.rotate) % 360
       layer.shown = false
+      layer.locked = tmpLayer.locked
     })
 
     return layers
@@ -316,16 +315,16 @@ class GroupUtils {
 
   recalcTmpStyle(layers: Array<IShape | IText | IImage | IGroup>) {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const prevTmpStyles = getTmpStyles()
-    prevTmpStyles.rotate = 0
-    const tmpStyles = calcTmpProps(this.mapLayersToPage(layers, prevTmpStyles))
-    const tmpLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, prevTmpStyles), tmpStyles)
-    console.log(tmpLayers)
+    const tmpLayer = getTmpLayer()
+    tmpLayer.rotate = 0
+    const tmpStyles = calcTmpProps(this.mapLayersToPage(layers, tmpLayer))
+    const currSelectedLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, tmpLayer), tmpStyles)
+    console.log(currSelectedLayers)
 
     store.commit('SET_currSelectedInfo', {
       index: currSelectedInfo.index,
-      layers: tmpLayers,
-      types: calcType(tmpLayers)
+      layers: currSelectedLayers,
+      types: calcType(currSelectedLayers)
     })
 
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
@@ -335,9 +334,9 @@ class GroupUtils {
       styles: tmpStyles
     })
     store.commit('UPDATE_layersInTmp', {
-      layers: tmpLayers
+      layers: currSelectedLayers
     })
-    this.set(currSelectedInfo.index, tmpLayers)
+    this.set(currSelectedInfo.index, currSelectedLayers)
   }
 }
 

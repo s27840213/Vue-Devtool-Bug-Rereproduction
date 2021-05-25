@@ -7,9 +7,13 @@
         span {{coordinateHeight}}px
     router-view
     div(class="dropdowns-area")
-      dropdowns(v-if="isOrderDropdownsOpened"
+      dropdowns(v-show="isOrderDropdownsOpened"
         :type="'order'"
         @blur.native="setIsOrderDropdownsOpened(false)"
+        tabindex="0")
+      dropdowns-layer(v-show="isLayerDropdownsOpened"
+        @blur.native="setIsLayerDropdownsOpened(false)"
+        @click.native="setIsLayerDropdownsOpened(false)"
         tabindex="0")
 </template>
 
@@ -17,10 +21,12 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Dropdowns from '@/components/Dropdowns.vue'
+import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 
 export default Vue.extend({
   components: {
-    Dropdowns
+    Dropdowns,
+    DropdownsLayer
   },
   data() {
     return {
@@ -35,12 +41,14 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isOrderDropdownsOpened: 'getIsOrderDropdownsOpened'
+      isOrderDropdownsOpened: 'getIsOrderDropdownsOpened',
+      isLayerDropdownsOpened: 'getIsLayerDropdownsOpened'
     })
   },
   methods: {
     ...mapMutations({
-      _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened'
+      _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened',
+      _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
     coordinateHandler(e: MouseEvent) {
       this.coordinateWidth = e.clientX
@@ -51,6 +59,11 @@ export default Vue.extend({
     setIsOrderDropdownsOpened(isOpened: boolean) {
       this.$nextTick(() => {
         this._setIsOrderDropdownsOpened(isOpened)
+      })
+    },
+    setIsLayerDropdownsOpened(isOpened: boolean) {
+      this.$nextTick(() => {
+        this._setIsLayerDropdownsOpened(isOpened)
       })
     }
   }
@@ -101,5 +114,6 @@ export default Vue.extend({
   position: absolute;
   left: 0;
   top: 0;
+  overflow: hidden;
 }
 </style>

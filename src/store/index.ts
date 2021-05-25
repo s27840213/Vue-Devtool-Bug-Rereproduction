@@ -49,7 +49,8 @@ const getDefaultState = (): IEditorState => ({
     layers: [],
     types: new Set<string>()
   },
-  isOrderDropdownsOpened: false
+  isOrderDropdownsOpened: false,
+  isLayerDropdownsOpened: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -115,6 +116,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsOrderDropdownsOpened(state: IEditorState) {
     return state.isOrderDropdownsOpened
+  },
+  getIsLayerDropdownsOpened(state: IEditorState) {
+    return state.isLayerDropdownsOpened
   }
 }
 
@@ -222,6 +226,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {
     state.isOrderDropdownsOpened = isOpened
+  },
+  SET_isLayerDropdownsOpened(state: IEditorState, isOpened: boolean) {
+    state.isLayerDropdownsOpened = isOpened
   },
   ...orderMutation
 }

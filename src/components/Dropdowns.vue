@@ -44,6 +44,13 @@ export default Vue.extend({
             'Bring to Back'
           ]
         }
+        case 'layer': {
+          return [
+            'Copy',
+            'Paste',
+            'Delete'
+          ]
+        }
         default: {
           return []
         }
@@ -82,7 +89,9 @@ export default Vue.extend({
   }
   &__item {
     display: flex;
+    align-items: center;
     padding: 5px;
+    padding: 5px 10px;
     &:active {
       background-color: setColor(blue-3);
     }
