@@ -9,7 +9,7 @@
           @dragover.prevent,
           @dragenter.prevent
           @click.left="onClick"
-          @click.right="onRightClick"
+          @click.right.stop="onRightClick"
           @mousedown.left.stop="moveStart"
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
@@ -133,7 +133,7 @@ export default Vue.extend({
       updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
     resizerBarStyles(resizer: any) {
       const resizerStyle = Object.assign({}, resizer)
@@ -589,7 +589,10 @@ export default Vue.extend({
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     onRightClick(event: MouseEvent) {
-      this._setIsLayerDropdownsOpened(true)
+      this.setIsLayerDropdownsOpened(true)
+      if (this.currSelectedInfo.index < 0) {
+        GroupUtils.select([this.layerIndex])
+      }
       this.$nextTick(() => {
         const el = document.querySelector('.dropdowns--layer') as HTMLElement
         const mousePos = MouseUtils.getMouseAbsPoint(event)

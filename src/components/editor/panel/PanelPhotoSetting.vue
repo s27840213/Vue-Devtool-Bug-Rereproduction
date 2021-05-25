@@ -40,13 +40,15 @@ export default Vue.extend({
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
       },
       set(value) {
-        this.$store.commit('UPDATE_layerStyles', {
-          pageIndex: this.lastSelectedPageIndex,
-          layerIndex: this.currSelectedIndex,
-          styles: {
-            opacity: value
-          }
-        })
+        if (this.currSelectedInfo.layers.length === 1) {
+          this.$store.commit('UPDATE_layerStyles', {
+            pageIndex: this.lastSelectedPageIndex,
+            layerIndex: this.currSelectedIndex,
+            styles: {
+              opacity: value
+            }
+          })
+        }
       }
     }
   },

@@ -4,8 +4,9 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
 import MathUtils from '@/utils/mathUtils'
-import ZindexUtils from './zindexUtils'
-import generalUtils from './generalUtils'
+import ZindexUtils from '@/utils/zindexUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
 
 function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -131,11 +132,7 @@ class GroupUtils {
           }
         })
         const currSelectedLayers = [...MappingUtils.mappingLayers(layerIndexs)]
-        store.commit('SET_currSelectedInfo', {
-          index: layerIndexs[0],
-          layers: currSelectedLayers,
-          types: calcType(currSelectedLayers)
-        })
+        this.set(layerIndexs[0], currSelectedLayers)
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(layerIndexs)
@@ -153,11 +150,7 @@ class GroupUtils {
           pageIndex: lastSelectedPageIndex,
           newLayers
         })
-        store.commit('ADD_layersToPos', {
-          pageIndex: lastSelectedPageIndex,
-          layers: [tmp],
-          pos: currSelectedIndex
-        })
+        LayerUtils.addLayersToPos(lastSelectedPageIndex, [tmp], currSelectedIndex)
       }
     } else { // when we already have selected layers
       if (store.getters.getCurrSelectedLayers.length === 1) {
@@ -178,11 +171,7 @@ class GroupUtils {
           pageIndex: lastSelectedPageIndex,
           newLayers
         })
-        store.commit('ADD_layersToPos', {
-          pageIndex: lastSelectedPageIndex,
-          layers: [tmp],
-          pos: currSelectedIndex
-        })
+        LayerUtils.addLayersToPos(lastSelectedPageIndex, [tmp], currSelectedIndex)
       } else {
         const layers = MappingUtils.mappingLayers(layerIndexs)
         const tmpLayer = getTmpLayer()
@@ -201,11 +190,7 @@ class GroupUtils {
           pageIndex: lastSelectedPageIndex,
           newLayers
         })
-        store.commit('ADD_layersToPos', {
-          pageIndex: lastSelectedPageIndex,
-          layers: [tmp],
-          pos: currSelectedIndex
-        })
+        LayerUtils.addLayersToPos(lastSelectedPageIndex, [tmp], currSelectedIndex)
       }
     }
   }
@@ -223,20 +208,10 @@ class GroupUtils {
         })
       } else {
         const tmpStyles = getTmpLayer()
-        store.commit('DELETE_layer', {
-          pageIndex: lastSelectedPageIndex,
-          layerIndex: store.getters.getCurrSelectedIndex
-        })
-        store.commit('ADD_layersToPos', {
-          pageIndex: lastSelectedPageIndex,
-          layers: [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpStyles)],
-          pos: store.getters.getCurrSelectedIndex
-        })
+        LayerUtils.deleteSelectedLayer()
+        LayerUtils.addLayersToPos(lastSelectedPageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpStyles)], store.getters.getCurrSelectedIndex)
       }
       this.reset()
-      store.commit('UPDATE_layerOrders', {
-        pageIndex: lastSelectedPageIndex
-      })
       ZindexUtils.reassignZindex(lastSelectedPageIndex)
     }
   }
@@ -265,7 +240,7 @@ class GroupUtils {
   }
 
   mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup> {
-    layers = generalUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
+    layers = GeneralUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
 
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.x -= styles.x
@@ -321,11 +296,7 @@ class GroupUtils {
     const currSelectedLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, tmpLayer), tmpStyles)
     console.log(currSelectedLayers)
 
-    store.commit('SET_currSelectedInfo', {
-      index: currSelectedInfo.index,
-      layers: currSelectedLayers,
-      types: calcType(currSelectedLayers)
-    })
+    this.set(currSelectedInfo.index, currSelectedLayers)
 
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     store.commit('UPDATE_layerStyles', {

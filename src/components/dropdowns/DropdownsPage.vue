@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="dropdowns dropdowns--layer bg-gray-6")
+  div(class="dropdowns dropdowns--page bg-gray-6")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`dropdowns__shortcut-${index}`"
         class="dropdowns__item"
@@ -12,29 +12,14 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     hr(class="dropdowns__hr")
-    div(v-if="layerNum > 1")
-      div(v-for="(data,index) in orderMenu()"
-          :key="`dropdowns__order-${index}`"
-          class="dropdowns__item"
-          @click="data.action")
-        svg-icon(
-          class="pointer"
-          :iconName="data.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{data.text}}
-        div(class="shortcut")
-          span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="dropdowns__hr")
-    div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
-        class="dropdowns__item"
-        @click="setBackgroundImage")
+    div(class="dropdowns__item"
+        @click="detachBackgroundImage")
       svg-icon(
         class="pointer"
         :iconName="'copy'"
         :iconWidth="'16px'"
         :iconColor="'gray-1'")
-      span(class="ml-10 body-2") Set Image as Background
+      span(class="ml-10 body-2") Detach Image from Background
 </template>
 
 <script lang="ts">
@@ -43,17 +28,46 @@ import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { IImage } from '@/interfaces/layer'
+import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   data() {
     return {
+      baseBgImgConfig: {
+        type: 'image',
+        src: 'none',
+        clipPath: '',
+        active: false,
+        shown: false,
+        imgControl: false,
+        styles: {
+          x: 0,
+          y: 0,
+          scale: 1,
+          scaleX: 0,
+          scaleY: 0,
+          rotate: 0,
+          width: 0,
+          height: 0,
+          initWidth: 0,
+          initHeight: 0,
+          imgX: 0,
+          imgY: 0,
+          imgWidth: 0,
+          imgHeight: 0,
+          zindex: -1,
+          opacity: 100
+        }
+      }
     }
   },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      _layerNum: 'getLayersNum'
+      _layerNum: 'getLayersNum',
+      detachedBackgroundImage: 'getBackgroundImage'
     }),
     layerNum(): number {
       return this._layerNum(this.lastSelectedPageIndex)
@@ -71,23 +85,23 @@ export default Vue.extend({
     },
     shortcutMenu() {
       return [
-        {
-          icon: 'copy',
-          text: 'Copy',
-          shortcutText: 'Cmd+C',
-          action: ShortcutUtils.copy
-        },
-        {
-          icon: 'copy',
-          text: 'Paste',
-          shortcutText: 'Cmd+V',
-          action: ShortcutUtils.paste
-        },
+        // {
+        //   icon: 'copy',
+        //   text: 'Copy',
+        //   shortcutText: 'Cmd+C',
+        //   action: ShortcutUtils.copy
+        // },
+        // {
+        //   icon: 'copy',
+        //   text: 'Paste',
+        //   shortcutText: 'Cmd+V',
+        //   action: ShortcutUtils.paste
+        // },
         {
           icon: 'trash',
           text: 'Delete',
           shortcutText: 'DEL',
-          action: ShortcutUtils.del
+          action: this.deleteBackgroundImage
         }
       ]
     },
@@ -120,12 +134,19 @@ export default Vue.extend({
         }
       ]
     },
-    setBackgroundImage() {
+    deleteBackgroundImage() {
       this._setBackgroundImage({
         pageIndex: this.lastSelectedPageIndex,
-        config: (this.currSelectedInfo.layers[0] as IImage)
+        config: this.baseBgImgConfig
       })
-      ShortcutUtils.del()
+    },
+    detachBackgroundImage() {
+      const detachedBackgroundImage = this.detachedBackgroundImage(this.lastSelectedPageIndex)
+      layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
+      this._setBackgroundImage({
+        pageIndex: this.lastSelectedPageIndex,
+        config: this.baseBgImgConfig
+      })
     }
   }
 })
@@ -152,6 +173,7 @@ export default Vue.extend({
     align-items: center;
     padding: 5px;
     padding: 5px 10px;
+    cursor: pointer;
     &:active {
       background-color: setColor(blue-3);
     }

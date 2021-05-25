@@ -7,6 +7,7 @@ import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
 import ZindexUtils from '@/utils/zindexUtils'
+import LayerUtils from '@/utils/layerUtils'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -32,14 +33,14 @@ class MouseUtils {
 
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
-      this.refreshLayers(pageIndex, layer)
+      LayerUtils.addLayers(pageIndex, layer)
     }
   }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
-      this.refreshLayers(pageIndex, layer)
+      LayerUtils.addLayers(pageIndex, layer)
     }
   }
 
@@ -51,10 +52,6 @@ class MouseUtils {
     const targetPos = {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y
-    }
-    if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
-      this.backgroundHandler(pageIndex, data.src)
-      return
     }
 
     const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
@@ -90,7 +87,13 @@ class MouseUtils {
         imgHeight: layerConfig.styles.initHeight
       }
       Object.assign(layerConfig.styles, imgStyles)
-      layer = LayerFactary.newImage(pageIndex, Object.assign(layerConfig, { src: data.src, imgControl: false }))
+      Object.assign(layerConfig, { src: data.src, imgControl: false })
+      if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
+        this.backgroundHandler(pageIndex, layerConfig)
+        return
+      } else {
+        layer = LayerFactary.newImage(pageIndex, layerConfig)
+      }
     } else if (data.type === 'text') {
       const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
       Object.assign(layerConfig.styles, data.styles)
@@ -113,23 +116,10 @@ class MouseUtils {
     return layer
   }
 
-  refreshLayers(pageIndex: number, layer: ILayer) {
-    store.commit('ADD_newLayers', {
+  backgroundHandler(pageIndex: number, config: ILayer) {
+    store.commit('SET_backgroundImage', {
       pageIndex: pageIndex,
-      layers: [layer]
-    })
-    ZindexUtils.reassignZindex(pageIndex)
-    GroupUtils.deselect()
-    store.commit('SET_lastSelectedPageIndex', pageIndex)
-    const targetPage = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
-    targetPage.focus()
-    GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
-  }
-
-  backgroundHandler(pageIndex: number, src: string) {
-    store.commit('SET_backgroundImageSrc', {
-      pageIndex: pageIndex,
-      imageSrc: src
+      config: config
     })
   }
 

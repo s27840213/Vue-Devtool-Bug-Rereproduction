@@ -6,6 +6,7 @@ export interface IPage {
   backgroundColor: string,
   backgroundImage: {
     src: string,
+    config: IImage,
     posX: number,
     posY: number
   },

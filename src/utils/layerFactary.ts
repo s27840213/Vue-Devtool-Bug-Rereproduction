@@ -7,8 +7,7 @@ class LayerFactary {
     const [width, height] = [config.styles.width, config.styles.height]
     const basicConfig = {
       type: 'image',
-      pageIndex: pageIndex,
-      src: '',
+      src: 'none',
       clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
@@ -41,7 +40,6 @@ class LayerFactary {
       type: 'text',
       text: '',
       textEditable: false,
-      pageIndex: pageIndex,
       active: false,
       shown: false,
       locked: false,
@@ -76,7 +74,6 @@ class LayerFactary {
 
   newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     return {
-      pageIndex: pageIndex,
       type: 'group',
       active: false,
       shown: false,
@@ -101,7 +98,6 @@ class LayerFactary {
 
   newTmp(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
-      pageIndex: pageIndex,
       type: 'tmp',
       active: true,
       shown: false,
@@ -127,7 +123,6 @@ class LayerFactary {
   newShape(pageIndex: number, config: any): IImage {
     const basicConfig = {
       type: 'shape',
-      pageIndex: pageIndex,
       active: false,
       shown: false,
       locked: false,

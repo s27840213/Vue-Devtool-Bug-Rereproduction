@@ -38,10 +38,12 @@
             :style="snapLineStyles('h', line.pos)")
         div(class="page-content"
             :style="styles('content')"
+            ref="page-content"
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
-            @click.self="pageClickHandler()"
+            @click.right.stop="onRightClick"
+            @click.left.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
@@ -106,6 +108,13 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    const pageContent = this.$refs['page-content'] as HTMLElement
+    /**
+     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+     */
+    pageContent.addEventListener('contextmenu', (e: MouseEvent) => {
+      e.preventDefault()
+    }, false)
   },
   computed: {
     ...mapGetters({
@@ -118,7 +127,8 @@ export default Vue.extend({
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
       updateLayerProps: 'UPDATE_layerProps',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -192,6 +202,15 @@ export default Vue.extend({
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
+    },
+    onRightClick(event: MouseEvent) {
+      this.setIsPageDropdownsOpened(true)
+      this.$nextTick(() => {
+        const el = document.querySelector('.dropdowns--page') as HTMLElement
+        const mousePos = MouseUtils.getMouseAbsPoint(event)
+        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+        el.focus()
+      })
     }
   }
 })

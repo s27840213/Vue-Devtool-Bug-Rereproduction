@@ -15,6 +15,10 @@
         @blur.native="setIsLayerDropdownsOpened(false)"
         @click.native="setIsLayerDropdownsOpened(false)"
         tabindex="0")
+      dropdowns-page(v-show="isPageDropdownsOpened"
+        @blur.native="setIsPageDropdownsOpened(false)"
+        @click.native="setIsPageDropdownsOpened(false)"
+        tabindex="0")
 </template>
 
 <script lang="ts">
@@ -22,11 +26,13 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Dropdowns from '@/components/Dropdowns.vue'
 import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
+import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 
 export default Vue.extend({
   components: {
     Dropdowns,
-    DropdownsLayer
+    DropdownsLayer,
+    DropdownsPage
   },
   data() {
     return {
@@ -42,13 +48,15 @@ export default Vue.extend({
     ...mapGetters({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       isOrderDropdownsOpened: 'getIsOrderDropdownsOpened',
-      isLayerDropdownsOpened: 'getIsLayerDropdownsOpened'
+      isLayerDropdownsOpened: 'getIsLayerDropdownsOpened',
+      isPageDropdownsOpened: 'getIsPageDropdownsOpened'
     })
   },
   methods: {
     ...mapMutations({
       _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened',
-      _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
+      _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
+      _setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
     }),
     coordinateHandler(e: MouseEvent) {
       this.coordinateWidth = e.clientX
@@ -64,6 +72,11 @@ export default Vue.extend({
     setIsLayerDropdownsOpened(isOpened: boolean) {
       this.$nextTick(() => {
         this._setIsLayerDropdownsOpened(isOpened)
+      })
+    },
+    setIsPageDropdownsOpened(isOpened: boolean) {
+      this.$nextTick(() => {
+        this._setIsPageDropdownsOpened(isOpened)
       })
     }
   }

@@ -28,6 +28,13 @@ export interface ITextStyle extends IStyle {
   decoration: string
 }
 
+export interface IImageStyle extends IStyle {
+  imgX: number,
+  imgY: number,
+  imgWidth: number,
+  imgHeight: number
+}
+
 // export interface ITmpStyle extends IStyle {
 //   initX: number,
 //   initY: number,
@@ -40,7 +47,6 @@ export interface ITextStyle extends IStyle {
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
   type: string,
-  pageIndex: number,
   active: boolean,
   shown: boolean,
   locked: boolean,
@@ -53,13 +59,9 @@ export interface IText extends ILayer<ITextStyle> {
 export interface IShape extends ILayer<IStyle> {
   radius?: string | number,
 }
-export interface IImage extends ILayer<IStyle> {
+export interface IImage extends ILayer<IImageStyle> {
   src: string,
   clipPath?: string,
-  imgX: number,
-  imgY: number,
-  imgWidth: number,
-  imgHeight: number,
   imgControl: boolean
 }
 export interface IGroup extends ILayer<IStyle> {

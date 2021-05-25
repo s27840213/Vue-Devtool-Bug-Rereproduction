@@ -1,7 +1,8 @@
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import ZindexUtils from './zindexUtils'
+import ZindexUtils from '@/utils/zindexUtils'
+import LayerUtils from '@/utils/layerUtils'
 
 class ShortcutHandler {
   // target: HTMLElement
@@ -10,7 +11,6 @@ class ShortcutHandler {
   // }
 
   copy() {
-    console.log('copy')
     if (store.getters.getCurrSelectedIndex >= 0) {
       store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
@@ -19,7 +19,6 @@ class ShortcutHandler {
   }
 
   paste() {
-    console.log('paste')
     const clipboardInfo = store.getters.getClipboard.map((layer: any) => {
       layer.styles.x += 10
       layer.styles.y += 10
@@ -53,10 +52,8 @@ class ShortcutHandler {
   }
 
   del() {
-    console.log('delete')
-    store.commit('DELETE_selectedLayer')
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    ZindexUtils.reassignZindex(lastSelectedPageIndex)
+    LayerUtils.deleteSelectedLayer()
+    GroupUtils.reset()
   }
 
   cut() {
@@ -70,7 +67,6 @@ class ShortcutHandler {
   }
 
   ungroup() {
-    console.log('ungroup')
     GroupUtils.ungroup()
   }
 

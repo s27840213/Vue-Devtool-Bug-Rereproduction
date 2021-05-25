@@ -17,6 +17,34 @@ const getDefaultState = (): IEditorState => ({
       backgroundColor: '#ffffff',
       backgroundImage: {
         src: 'none',
+        config: {
+          type: 'image',
+          pageIndex: -1,
+          src: '',
+          clipPath: '',
+          active: false,
+          shown: false,
+          locked: false,
+          imgControl: false,
+          styles: {
+            x: 0,
+            y: 0,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: 0,
+            height: 0,
+            initWidth: 0,
+            initHeight: 0,
+            imgX: 0,
+            imgY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            zindex: -1,
+            opacity: 100
+          }
+        },
         posX: -1,
         posY: -1
       },
@@ -30,6 +58,34 @@ const getDefaultState = (): IEditorState => ({
       backgroundColor: '#ffffff',
       backgroundImage: {
         src: 'none',
+        config: {
+          type: 'image',
+          pageIndex: -1,
+          src: '',
+          clipPath: '',
+          active: false,
+          shown: false,
+          locked: false,
+          imgControl: false,
+          styles: {
+            x: 0,
+            y: 0,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: 0,
+            height: 0,
+            initWidth: 0,
+            initHeight: 0,
+            imgX: 0,
+            imgY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            zindex: -1,
+            opacity: 100
+          }
+        },
         posX: -1,
         posY: -1
       },
@@ -50,7 +106,8 @@ const getDefaultState = (): IEditorState => ({
     types: new Set<string>()
   },
   isOrderDropdownsOpened: false,
-  isLayerDropdownsOpened: false
+  isLayerDropdownsOpened: false,
+  isPageDropdownsOpened: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -86,6 +143,11 @@ const getters: GetterTree<IEditorState, unknown> = {
       return state.pages[pageIndex].layers.length
     }
   },
+  getBackgroundImage(state: IEditorState) {
+    return (pageIndex: number) => {
+      return state.pages[pageIndex].backgroundImage
+    }
+  },
   getLastSelectedPageIndex(state: IEditorState): number {
     return state.lastSelectedPageIndex
   },
@@ -119,6 +181,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsLayerDropdownsOpened(state: IEditorState) {
     return state.isLayerDropdownsOpened
+  },
+  getIsPageDropdownsOpened(state: IEditorState) {
+    return state.isPageDropdownsOpened
   }
 }
 
@@ -144,8 +209,15 @@ const mutations: MutationTree<IEditorState> = {
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
   },
+  SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.config.src
+    state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
+  },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, imageSrc: string }) {
     state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.imageSrc
+  },
+  SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
   },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
@@ -209,8 +281,6 @@ const mutations: MutationTree<IEditorState> = {
       return
     }
     state.pages[state.lastSelectedPageIndex].layers.splice(index, 1)
-
-    GroupUtils.reset()
   },
   SET_clipboard(state: IEditorState, tmpLayer: IShape | IText | IImage | IGroup) {
     state.clipboard = [JSON.parse(JSON.stringify(tmpLayer))]
@@ -229,6 +299,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isLayerDropdownsOpened(state: IEditorState, isOpened: boolean) {
     state.isLayerDropdownsOpened = isOpened
+  },
+  SET_isPageDropdownsOpened(state: IEditorState, isOpened: boolean) {
+    state.isPageDropdownsOpened = isOpened
   },
   ...orderMutation
 }
