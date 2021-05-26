@@ -1,4 +1,3 @@
-import generalUtils from '@/utils/generalUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { IEditorState } from '../types'
 

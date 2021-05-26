@@ -1,6 +1,5 @@
 // import store from '@/store'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -28,9 +27,6 @@ class LayerUtils {
   }
 
   deleteSelectedLayer() {
-    (document as any).fonts.ready.then((font: any) => {
-      console.log(font)
-    })
     store.commit('DELETE_selectedLayer')
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     ZindexUtils.reassignZindex(lastSelectedPageIndex)
@@ -42,16 +38,37 @@ class LayerUtils {
     })
   }
 
-  /**
-   * Not finish yet
-   */
-  // updateLayersStyles() {
+  // store.commit('UPDATE_layerProps', {
+  //   pageIndex: lastSelectedPageIndex,
+  //   layerIndex: store.getters.getCurrSelectedIndex,
+  //   props: {
+  //     type: 'tmp',
+  //     active: true
+  //   }
+  // })
+  // store.commit('UPDATE_layerStyles', {
+  //   pageIndex: lastSelectedPageIndex,
+  //   layerIndex: store.getters.getCurrSelectedIndex,
+  //   styles: {
+  //     zindex: -1
+  //   }
+  // })
 
-  // }
+  updateLayersStyles(pageIndex: number, layerIndex: number, styles: { [index: string]: number | string | boolean }) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles
+    })
+  }
 
-  // updateLayerProps() {
-
-  // }
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean }) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props
+    })
+  }
 }
 
 const layerUtils = new LayerUtils()

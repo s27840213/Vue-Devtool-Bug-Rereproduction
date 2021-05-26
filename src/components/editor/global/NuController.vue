@@ -47,6 +47,8 @@ import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
+import { IControlPoints, IResizer } from '@/interfaces/controller'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -95,7 +97,7 @@ export default Vue.extend({
     getLayerType(): string {
       return this.config.type
     },
-    getControlPoints(): any {
+    getControlPoints(): IControlPoints {
       return this.config.controlPoints
     },
     isActive(): boolean {
@@ -130,12 +132,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
-    resizerBarStyles(resizer: any) {
+    resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles()
       const HW = {
@@ -158,12 +159,8 @@ export default Vue.extend({
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: {
-          shown
-        }
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
       })
     },
     compositionStart() {
@@ -177,12 +174,8 @@ export default Vue.extend({
       el.removeEventListener('compositionend', this.compositionEnd)
     },
     triggerTextEditor(pageIndex: number, layerIndex: number) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: {
-          textEditable: true
-        }
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        textEditable: true
       })
     },
     styles() {

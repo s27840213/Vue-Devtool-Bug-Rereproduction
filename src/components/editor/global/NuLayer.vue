@@ -67,11 +67,6 @@ export default Vue.extend({
       return styles
     },
     scaleStyles() {
-      // return {
-      //   transform: `
-      //   translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-      //   translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-      // }
       return {
         transform: `scale(${this.config.styles.scale})`,
         'transform-style': this.config.type === 'group' ? 'flat' : 'preserve-3d'

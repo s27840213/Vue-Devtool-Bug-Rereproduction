@@ -12,7 +12,7 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     hr(class="dropdowns__hr")
-    div(v-if="detachedBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
+    div(v-if="_detachedBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
         class="dropdowns__item"
         @click="detachBackgroundImage")
       svg-icon(
@@ -28,8 +28,6 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import { IImage } from '@/interfaces/layer'
-import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
@@ -68,7 +66,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       _layerNum: 'getLayersNum',
-      detachedBackgroundImage: 'getBackgroundImage'
+      _detachedBackgroundImage: 'getBackgroundImage'
     }),
     layerNum(): number {
       return this._layerNum(this.lastSelectedPageIndex)
@@ -142,7 +140,7 @@ export default Vue.extend({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = this.detachedBackgroundImage(this.lastSelectedPageIndex)
+      const detachedBackgroundImage = this._detachedBackgroundImage(this.lastSelectedPageIndex)
       layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
       this._setBackgroundImage({
         pageIndex: this.lastSelectedPageIndex,

@@ -3,7 +3,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
-  newImage(pageIndex: number, config: any): IImage {
+  newImage(config: IImage): IImage {
     const [width, height] = [config.styles.width, config.styles.height]
     const basicConfig = {
       type: 'image',
@@ -35,7 +35,7 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newText(pageIndex: number, config: any): IImage {
+  newText(config: IText): IText {
     const basicConfig = {
       type: 'text',
       text: '',
@@ -72,7 +72,7 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
+  newGroup(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     return {
       type: 'group',
       active: false,
@@ -96,7 +96,7 @@ class LayerFactary {
     }
   }
 
-  newTmp(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
+  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
       type: 'tmp',
       active: true,
@@ -120,7 +120,7 @@ class LayerFactary {
     }
   }
 
-  newShape(pageIndex: number, config: any): IImage {
+  newShape(config: IShape): IShape {
     const basicConfig = {
       type: 'shape',
       active: false,

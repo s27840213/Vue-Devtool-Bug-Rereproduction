@@ -7,7 +7,7 @@
         span {{coordinateHeight}}px
     router-view
     div(class="dropdowns-area")
-      dropdowns(v-show="isOrderDropdownsOpened"
+      dropdowns-order(v-show="isOrderDropdownsOpened"
         :type="'order'"
         @blur.native="setIsOrderDropdownsOpened(false)"
         tabindex="0")
@@ -24,13 +24,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import Dropdowns from '@/components/Dropdowns.vue'
+import DropdownsOrder from '@/components//dropdowns/DropdownsOrder.vue'
 import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 
 export default Vue.extend({
   components: {
-    Dropdowns,
+    DropdownsOrder,
     DropdownsLayer,
     DropdownsPage
   },

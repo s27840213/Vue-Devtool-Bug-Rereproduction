@@ -1,12 +1,10 @@
 /**
  */
 import store from '@/store'
-import { ILayer, IStyle } from '@/interfaces/layer'
-import GroupUtils from '@/utils/groupUtils'
+import { IImage, ILayer, IStyle, IText } from '@/interfaces/layer'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
-import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -92,14 +90,14 @@ class MouseUtils {
         this.backgroundHandler(pageIndex, layerConfig)
         return
       } else {
-        layer = LayerFactary.newImage(pageIndex, layerConfig)
+        layer = LayerFactary.newImage(layerConfig as IImage)
       }
     } else if (data.type === 'text') {
       const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
       Object.assign(layerConfig.styles, data.styles)
       layerConfig.styles.x = tmpPos.x
       layerConfig.styles.y = tmpPos.y
-      layer = LayerFactary.newText(pageIndex, Object.assign(layerConfig, { text: data.text }))
+      layer = LayerFactary.newText(Object.assign(layerConfig, { text: data.text }) as IText)
     } else if (data.type === 'shape') {
       const shapeConfig = {
         viewBox: data.viewBox,
@@ -111,7 +109,7 @@ class MouseUtils {
       Object.assign(layerConfig.styles, data.styles)
       layerConfig.styles.x = tmpPos.x
       layerConfig.styles.y = tmpPos.y
-      layer = LayerFactary.newShape(pageIndex, Object.assign(layerConfig, shapeConfig))
+      layer = LayerFactary.newShape(Object.assign(layerConfig, shapeConfig))
     }
     return layer
   }

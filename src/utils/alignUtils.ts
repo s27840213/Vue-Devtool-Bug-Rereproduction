@@ -1,8 +1,6 @@
 
 import store from '@/store'
-import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp, IStyle, ITextStyle, ILayer } from '@/interfaces/layer'
-import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
 import mathUtils from './mathUtils'
 

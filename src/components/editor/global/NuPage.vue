@@ -76,7 +76,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -126,7 +126,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
     }),
@@ -161,17 +160,6 @@ export default Vue.extend({
         pageIndex: pageIndex,
         layers: [layer]
       })
-    },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean): void {
-      if (!this.isSelecting) {
-        this.updateLayerProps({
-          pageIndex,
-          layerIndex,
-          props: {
-            shown
-          }
-        })
-      }
     },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover

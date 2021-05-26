@@ -1,6 +1,5 @@
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
-import store from '@/store'
 /**
  * @param {object} currcurrSelectedLayers - used to record the info of selected layers
  *    @param {number} pageIndex - used to record where page the selected layers is

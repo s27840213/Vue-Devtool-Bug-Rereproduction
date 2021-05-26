@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -75,44 +75,32 @@ class GroupUtils {
       return
     }
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    store.commit('UPDATE_layerProps', {
-      pageIndex: lastSelectedPageIndex,
-      layerIndex: store.getters.getCurrSelectedIndex,
-      props: {
-        type: 'group',
-        active: false,
-        shown: false
-      }
-    })
     const currSelectedIndex = store.getters.getCurrSelectedIndex
+    LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
+      type: 'group',
+      active: false,
+      shown: false
+    })
     this.reset()
     this.select([currSelectedIndex])
   }
 
   ungroup() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+    const currSelectedIndex = store.getters.getLastSelectedPageIndex
     const targetLayer = store.getters.getLayer(lastSelectedPageIndex, store.getters.getCurrSelectedIndex)
     if (targetLayer.type === 'group') {
       targetLayer.layers.forEach((layer: IGroup) => {
         layer.styles.zindex = targetLayer.styles.zindex
       })
       const tmpLayer = targetLayer
-      store.commit('UPDATE_layerProps', {
-        pageIndex: lastSelectedPageIndex,
-        layerIndex: store.getters.getCurrSelectedIndex,
-        props: {
-          type: 'tmp',
-          active: true
-        }
+      LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
+        type: 'tmp',
+        active: true
       })
-      store.commit('UPDATE_layerStyles', {
-        pageIndex: lastSelectedPageIndex,
-        layerIndex: store.getters.getCurrSelectedIndex,
-        styles: {
-          zindex: -1
-        }
+      LayerUtils.updateLayersStyles(lastSelectedPageIndex, currSelectedIndex, {
+        zindex: -1
       })
-      const currSelectedIndex = store.getters.getCurrSelectedIndex
       this.reset()
       this.set(currSelectedIndex, tmpLayer.layers)
     }
@@ -124,12 +112,8 @@ class GroupUtils {
     if (store.getters.getCurrSelectedIndex < 0) {
       // When we only select one layer
       if (layerIndexs.length === 1) {
-        store.commit('UPDATE_layerProps', {
-          pageIndex: lastSelectedPageIndex,
-          layerIndex: layerIndexs[0],
-          props: {
-            active: true
-          }
+        LayerUtils.updateLayerProps(lastSelectedPageIndex, layerIndexs[0], {
+          active: true
         })
         const currSelectedLayers = [...MappingUtils.mappingLayers(layerIndexs)]
         this.set(layerIndexs[0], currSelectedLayers)
@@ -145,7 +129,7 @@ class GroupUtils {
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
+        const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -166,7 +150,7 @@ class GroupUtils {
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
+        const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -185,7 +169,7 @@ class GroupUtils {
         const newLayers = store.getters.getLayers(lastSelectedPageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
-        const tmp = LayerFactary.newTmp(lastSelectedPageIndex, tmpStyles, currSelectedLayers)
+        const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
         store.commit('SET_layers', {
           pageIndex: lastSelectedPageIndex,
           newLayers
@@ -197,14 +181,11 @@ class GroupUtils {
 
   deselect() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+    const currSelectedIndex = store.getters.getCurrSelectedIndex
     if (store.getters.getCurrSelectedIndex !== -1) {
       if (store.getters.getCurrSelectedLayers.length === 1) {
-        store.commit('UPDATE_layerProps', {
-          pageIndex: lastSelectedPageIndex,
-          layerIndex: store.getters.getCurrSelectedIndex,
-          props: {
-            active: false
-          }
+        LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
+          active: false
         })
       } else {
         const tmpStyles = getTmpLayer()
@@ -232,7 +213,7 @@ class GroupUtils {
     })
   }
 
-  movingTmp(pageIndex: number, styles: any) {
+  movingTmp(pageIndex: number, styles: { [index: string]: number }) {
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles
@@ -299,11 +280,7 @@ class GroupUtils {
     this.set(currSelectedInfo.index, currSelectedLayers)
 
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    store.commit('UPDATE_layerStyles', {
-      pageIndex: lastSelectedPageIndex,
-      layerIndex: currSelectedInfo.index,
-      styles: tmpStyles
-    })
+    LayerUtils.updateLayersStyles(lastSelectedPageIndex, currSelectedInfo.index, tmpStyles)
     store.commit('UPDATE_layersInTmp', {
       layers: currSelectedLayers
     })

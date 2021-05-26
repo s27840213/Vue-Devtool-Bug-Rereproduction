@@ -15,7 +15,6 @@ import PanelBackgroundSetting from '@/components/editor/panel/PanelBackgroundSet
 import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
 import { mapGetters } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
-// import { CartType } from '@/store/types'
 
 export default Vue.extend({
   components: {

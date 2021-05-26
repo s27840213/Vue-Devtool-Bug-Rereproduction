@@ -3,7 +3,6 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
-import GroupUtils from '@/utils/groupUtils'
 import apis from '@/apis/unsplash'
 import orderMutation from '@/store/mutations/order'
 
@@ -19,7 +18,7 @@ const getDefaultState = (): IEditorState => ({
         src: 'none',
         config: {
           type: 'image',
-          src: '',
+          src: 'none',
           clipPath: '',
           active: false,
           shown: false,
@@ -273,7 +272,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index].layers = updateInfo.layers
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
-    (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup, index: number) => {
+    (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
   },

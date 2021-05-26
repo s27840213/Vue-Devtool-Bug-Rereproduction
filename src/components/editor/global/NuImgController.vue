@@ -177,7 +177,7 @@ export default Vue.extend({
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
-    moveEnd(event: MouseEvent) {
+    moveEnd() {
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -221,11 +221,6 @@ export default Vue.extend({
 
       const initWidth = this.initialWH.width
       const initHeight = this.initialWH.height
-      const tmpHW = {
-        width: width,
-        height: height
-      }
-
       // if (Math.abs(offsetWidth) >= 3 || Math.abs(offsetHeight) >= 3) {
       //   offsetWidth /= 2
       //   offsetHeight /= 2

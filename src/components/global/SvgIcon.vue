@@ -7,7 +7,6 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { ILayer } from '@/interfaces/layer'
 import { mapGetters, mapMutations } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 
@@ -64,7 +63,7 @@ export default Vue.extend({
         height: this.iconWidth
       }
     },
-    onClick(e: MouseEvent) {
+    onClick() {
       if (this.iconName.substring(0, 10) === 'text-align') {
         this.textAlign()
       } else if (this.iconName === 'bold') {

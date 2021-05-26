@@ -3,6 +3,7 @@ import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
+import { ILayer } from '@/interfaces/layer'
 
 class ShortcutHandler {
   // target: HTMLElement
@@ -19,7 +20,7 @@ class ShortcutHandler {
   }
 
   paste() {
-    const clipboardInfo = store.getters.getClipboard.map((layer: any) => {
+    const clipboardInfo = store.getters.getClipboard.map((layer: ILayer) => {
       layer.styles.x += 10
       layer.styles.y += 10
       layer.shown = false
