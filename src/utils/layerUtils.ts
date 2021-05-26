@@ -28,6 +28,9 @@ class LayerUtils {
   }
 
   deleteSelectedLayer() {
+    (document as any).fonts.ready.then((font: any) => {
+      console.log(font)
+    })
     store.commit('DELETE_selectedLayer')
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     ZindexUtils.reassignZindex(lastSelectedPageIndex)

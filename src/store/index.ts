@@ -19,7 +19,6 @@ const getDefaultState = (): IEditorState => ({
         src: 'none',
         config: {
           type: 'image',
-          pageIndex: -1,
           src: '',
           clipPath: '',
           active: false,
@@ -208,6 +207,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
+  },
+  SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
+    console.log(updateInfo.color, state.pages[updateInfo.pageIndex].backgroundColor)
+    state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.config.src

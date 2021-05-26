@@ -12,7 +12,8 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     hr(class="dropdowns__hr")
-    div(class="dropdowns__item"
+    div(v-if="detachedBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
+        class="dropdowns__item"
         @click="detachBackgroundImage")
       svg-icon(
         class="pointer"
@@ -85,18 +86,18 @@ export default Vue.extend({
     },
     shortcutMenu() {
       return [
-        // {
-        //   icon: 'copy',
-        //   text: 'Copy',
-        //   shortcutText: 'Cmd+C',
-        //   action: ShortcutUtils.copy
-        // },
-        // {
-        //   icon: 'copy',
-        //   text: 'Paste',
-        //   shortcutText: 'Cmd+V',
-        //   action: ShortcutUtils.paste
-        // },
+        {
+          icon: 'copy',
+          text: 'Copy',
+          shortcutText: 'Cmd+C',
+          action: ShortcutUtils.copy
+        },
+        {
+          icon: 'copy',
+          text: 'Paste',
+          shortcutText: 'Cmd+V',
+          action: ShortcutUtils.paste
+        },
         {
           icon: 'trash',
           text: 'Delete',

@@ -48,6 +48,8 @@ export default Vue.extend({
               opacity: value
             }
           })
+        } else {
+
         }
       }
     }
