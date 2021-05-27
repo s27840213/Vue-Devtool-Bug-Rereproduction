@@ -40,6 +40,7 @@ class LayerFactary {
     const basicConfig = {
       type: 'text',
       text: '',
+      widthLimit: '',
       textEditable: false,
       pageIndex: pageIndex,
       active: false,

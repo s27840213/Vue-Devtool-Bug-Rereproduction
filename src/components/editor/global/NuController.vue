@@ -70,6 +70,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -143,8 +144,9 @@ export default Vue.extend({
     contextStyles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
       const styles = {
+        // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0)',
+        color: 'rgba(10,10,10,0.5)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.isGetMoved ? '#00000000' : '#000000',
         'pointer-events': this.config.textEditable ? 'initial' : 'none',
@@ -193,7 +195,6 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      // if (event.target === this.$refs.body || event.target === this.$refs.content) {
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       window.addEventListener('mouseup', this.moveEnd)
       window.addEventListener('mousemove', this.moving)
@@ -230,7 +231,6 @@ export default Vue.extend({
           }
         }
       }
-      // }
     },
     moving(event: MouseEvent) {
       if (this.isActive) {
@@ -347,16 +347,15 @@ export default Vue.extend({
        * after resizing the img's clip-path, the initWidth and initHeight will be reset
        * However the scaling factor of the layer needs to be reserved, which is the initSize used for.
        */
-      const scale = Math.max(ratio.width, ratio.height) * this.config.styles.initSize
-      if (typeof this.config.styles.initSize === 'undefined') {
-        this.config.styles.initSize = 1
+      let scale = Math.max(ratio.width, ratio.height)
+      if (this.getLayerType === 'image') {
+        scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
       }
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
-      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-
       if (this.config.type === 'text') {
         ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
       }
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
@@ -603,19 +602,65 @@ export default Vue.extend({
         ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
 
         const text = this.$refs.content as HTMLElement
+        /**
+         * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+         * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+         * hence plus 5 to the offsetWidth for preventing this bug.
+         */
+
         setTimeout(() => {
           const props = {
             text: text.innerHTML
           }
+          // text.style.whiteSpace = e.key === ' ' ? 'pre' : 'pre-wrap'
+
+          const dummyTextSize = this.getTextHW(text.innerHTML, this.config.styles)
+          text.style.whiteSpace = 'pre'
           const textSize = {
             width: text.offsetWidth,
             height: text.offsetHeight
+            // height: e.key === ' ' && this.getLayerHeight > text.offsetHeight ? this.getLayerHeight : text.offsetHeight
           }
+          console.log(textSize)
+          const page = this.$parent.$el as HTMLElement
+          let layerX = this.getLayerPos.x
+          const layerY = this.getLayerPos.y
+          // TODO: take the rotate angle into pos-compensation consideration
+          if (this.config.widthLimit === '') {
+            layerX = -(textSize.width - this.getLayerWidth) / 2 + this.getLayerPos.x
+            if (layerX <= 0) {
+              /**
+               * can't automatically change the span-size after we set the whiteSpace back to 'pre-wrap'
+               * we need to manually change it in here.
+               */
+              text.style.width = `${this.getLayerWidth}px`
+              textSize.width = this.getLayerWidth
+              textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+              console.log(dummyTextSize.width / textSize.width)
+              layerX = 0
+            }
+          }
+          text.style.whiteSpace = 'pre-wrap'
+
           ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+          ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
+    },
+    getTextHW(text: string, styles: any): { width: number, height: number } {
+      const el = document.createElement('span')
+      document.body.appendChild(el)
+      el.style.whiteSpace = 'pre'
+      el.textContent = text
+      Object.assign(el.style, CssConveter.convertFontStyle(styles))
+      const textHW = {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+      }
+      document.body.removeChild(el)
+      return textHW
     },
     onDblClick() {
       if (this.getLayerType !== 'image') return
@@ -683,7 +728,39 @@ export default Vue.extend({
   text-align: left;
   display: inline-block;
   outline: none;
-  white-space: nowrap;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
 }
 </style>
+
+    // onTyping(e: KeyboardEvent) {
+    //   if (this.isGetMoved) {
+    //     e.preventDefault()
+    //   } else {
+    //     ControlUtils.textBackspace(e)
+    //     ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+
+    //     const text = this.$refs.content as HTMLElement
+    //     /**
+    //      * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+    //      * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+    //      * hence plus 5 to the offsetWidth for preventing this bug.
+    //      */
+    //     text.style.whiteSpace = 'pre'
+    //     setTimeout(() => {
+    //       const props = {
+    //         text: text.innerHTML
+    //       }
+    //       const textSize = {
+    //         width: text.offsetWidth + 5,
+    //         height: text.offsetHeight
+    //       }
+    //       const page = this.$parent.$el as HTMLElement
+
+    //       text.style.whiteSpace = 'pre-wrap'
+    //       ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+    //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+    //     }, 0)
+    //   }
+    // },

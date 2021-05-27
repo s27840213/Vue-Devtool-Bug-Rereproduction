@@ -1,11 +1,12 @@
 <template lang="pug">
-  div(class="nu-text")
+  div(class="nu-text" ref="body")
     span(class="text-content" v-for="text in content" :style="contextStyles()" ref="content") {{ text }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
+import ControlUtils from '@/utils/controlUtils'
 export default Vue.extend({
   props: {
     config: Object,
@@ -18,12 +19,20 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     this.content = this.getTextContent
   },
   watch: {
     'config.text': function() {
       this.content = this.getTextContent
+      setTimeout(() => {
+        const content = this.$refs.body as HTMLElement
+        console.log(content.offsetHeight)
+        if (content.offsetHeight > this.config.styles.height) {
+          console.log('is the ffff')
+          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
+          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
+        }
+      }, 0)
     }
   },
   computed: {
@@ -51,6 +60,8 @@ export default Vue.extend({
     contextStyles() {
       const _styles = Object.assign({}, this.config.styles)
       const styles = Object.assign(_styles, { size: this.config.styles.initSize })
+      delete styles.width
+      delete styles.height
       return CssConveter.convertFontStyle(styles)
     }
   }
@@ -62,14 +73,14 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   position: relative;
-  text-align: left;
 }
 .text-content {
+  text-align: left;
   position: relative;
   display: inline-block;
   outline: none;
   // white-space: nowrap
-  white-space: pre;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   user-select: none;
 }
