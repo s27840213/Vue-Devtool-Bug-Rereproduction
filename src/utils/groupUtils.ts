@@ -87,13 +87,14 @@ class GroupUtils {
 
   ungroup() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    const currSelectedIndex = store.getters.getLastSelectedPageIndex
+    const currSelectedIndex = store.getters.getCurrSelectedIndex
     const targetLayer = store.getters.getLayer(lastSelectedPageIndex, store.getters.getCurrSelectedIndex)
     if (targetLayer.type === 'group') {
+      console.log(currSelectedIndex)
       targetLayer.layers.forEach((layer: IGroup) => {
         layer.styles.zindex = targetLayer.styles.zindex
       })
-      const tmpLayer = targetLayer
+      const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
         type: 'tmp',
         active: true
@@ -180,9 +181,9 @@ class GroupUtils {
   }
 
   deselect() {
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const currSelectedIndex = store.getters.getCurrSelectedIndex
-    if (store.getters.getCurrSelectedIndex !== -1) {
+    if (currSelectedIndex !== -1) {
+      const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
       if (store.getters.getCurrSelectedLayers.length === 1) {
         LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
           active: false
@@ -191,6 +192,7 @@ class GroupUtils {
         const tmpStyles = getTmpLayer()
         LayerUtils.deleteSelectedLayer()
         LayerUtils.addLayersToPos(lastSelectedPageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpStyles)], store.getters.getCurrSelectedIndex)
+        LayerUtils.updateLayersOrder(lastSelectedPageIndex)
       }
       this.reset()
       ZindexUtils.reassignZindex(lastSelectedPageIndex)

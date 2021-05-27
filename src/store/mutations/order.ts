@@ -23,6 +23,7 @@ export default {
       }
       case 'forward': {
         if (layerIndex === layerNum - 1) {
+          zindexUtils.reassignZindex(lastSelectedPageIndex)
           break
         }
         const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)

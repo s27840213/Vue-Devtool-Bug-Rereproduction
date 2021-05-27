@@ -28,8 +28,6 @@ class LayerUtils {
 
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    ZindexUtils.reassignZindex(lastSelectedPageIndex)
   }
 
   updateLayersOrder(pageIndex: number) {

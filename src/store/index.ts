@@ -275,6 +275,9 @@ const mutations: MutationTree<IEditorState> = {
     (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
+    Object.assign(state.currSelectedInfo, {
+      layers: (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    })
   },
   DELETE_selectedLayer(state: IEditorState) {
     const index = state.currSelectedInfo.index
