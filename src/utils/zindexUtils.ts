@@ -4,7 +4,6 @@ import LayerUtils from '@/utils/layerUtils'
 
 class ZindexUtils {
   reassignZindex(pageIndex: number) {
-    console.log('I was called!')
     const layers = store.getters.getLayers(pageIndex)
     layers.forEach((layer: ILayer | IImage | ITmp | IGroup | IShape, index: number) => {
       LayerUtils.updateLayersStyles(pageIndex, index, {

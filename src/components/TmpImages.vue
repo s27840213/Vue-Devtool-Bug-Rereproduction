@@ -19,11 +19,6 @@ export default Vue.extend({
       photos: 'getPhotos'
     })
   },
-  watch: {
-    photos() {
-      console.log(this.photos)
-    }
-  },
   methods: {
     dragStart(e: DragEvent, photo: any) {
       const dataTransfer = e.dataTransfer as DataTransfer

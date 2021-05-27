@@ -90,8 +90,6 @@ class MappingUtils {
       case 'unlock': {
         const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
         const currSelectedIndex = store.getters.getCurrSelectedIndex
-        console.log('lcok')
-        console.log(store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked)
         store.commit('UPDATE_layerProps', {
           pageIndex: lastSelectedPageIndex,
           layerIndex: currSelectedIndex,

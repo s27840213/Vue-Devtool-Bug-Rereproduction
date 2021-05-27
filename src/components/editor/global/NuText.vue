@@ -18,11 +18,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     this.content = this.getTextContent
   },
   watch: {
-    'config.text': function() {
+    'config.text': function () {
       this.content = this.getTextContent
     }
   },

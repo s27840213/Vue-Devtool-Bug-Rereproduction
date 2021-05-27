@@ -83,7 +83,6 @@ export default Vue.extend({
     },
     toggleTab(tab: string) {
       this.activeTab = tab
-      console.log(tab)
     },
     setBgColor(color: number) {
       this._setBgColor({
