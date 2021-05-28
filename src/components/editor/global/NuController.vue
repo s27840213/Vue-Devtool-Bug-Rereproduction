@@ -360,6 +360,9 @@ export default Vue.extend({
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
+      if (this.getLayerType === 'text') {
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+      }
       this.isControlling = false
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
@@ -436,15 +439,14 @@ export default Vue.extend({
           return
         }
         this.imgResizeHandler(width, height, offsetX, offsetY)
-      }
-      if (this.getLayerType === 'shape') {
+      } else if (this.getLayerType === 'shape') {
         this.shapeResizeHandler(width, height)
-      }
-      if (this.getLayerType === 'text') {
-        const textRect = (this.$refs.content as HTMLElement).getBoundingClientRect()
-        if (this.getLayerWidth < textRect.width) {
-          console.log('smaller than content')
-        }
+      } else if (this.getLayerType === 'text') {
+        const content = this.$refs.content as HTMLElement
+        content.style.width = `${width}px`
+        height = content.offsetHeight
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -600,8 +602,13 @@ export default Vue.extend({
       } else {
         ControlUtils.textBackspace(e)
         ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+        if (this.isNoCharactor(e)) return
 
         const text = this.$refs.content as HTMLElement
+        text.style.width = 'auto'
+        text.style.height = 'auto'
+
+        const textTmp = text.innerHTML
         /**
          * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
          * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
@@ -609,39 +616,63 @@ export default Vue.extend({
          */
 
         setTimeout(() => {
+          /**
+           * This line of code prevents the bug while deleting at begin of the text.
+           */
+          if (e.key === 'Backspace' && textTmp === text.innerHTML) return
+          text.style.whiteSpace = 'pre'
+          const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
+          const page = this.$parent.$el as HTMLElement
+
           const props = {
             text: text.innerHTML
           }
-          // text.style.whiteSpace = e.key === ' ' ? 'pre' : 'pre-wrap'
-
-          const dummyTextSize = this.getTextHW(text.innerHTML, this.config.styles)
-          text.style.whiteSpace = 'pre'
           const textSize = {
-            width: text.offsetWidth,
-            height: text.offsetHeight
-            // height: e.key === ' ' && this.getLayerHeight > text.offsetHeight ? this.getLayerHeight : text.offsetHeight
+            width: Math.ceil(text.getBoundingClientRect().width + 5),
+            // width: e.key === ' ' ? Math.ceil(text.getBoundingClientRect().width + 5) : dummyTextSize.width + 1,
+            height: text.getBoundingClientRect().height
           }
-          console.log(textSize)
-          const page = this.$parent.$el as HTMLElement
           let layerX = this.getLayerPos.x
           const layerY = this.getLayerPos.y
           // TODO: take the rotate angle into pos-compensation consideration
           if (this.config.widthLimit === '') {
-            layerX = -(textSize.width - this.getLayerWidth) / 2 + this.getLayerPos.x
+            const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
+            layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
+            console.log('layerX', layerX)
             if (layerX <= 0) {
-              /**
-               * can't automatically change the span-size after we set the whiteSpace back to 'pre-wrap'
-               * we need to manually change it in here.
-               */
+              layerX = 0
               text.style.width = `${this.getLayerWidth}px`
               textSize.width = this.getLayerWidth
-              textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
-              console.log(dummyTextSize.width / textSize.width)
-              layerX = 0
+              if (e.key !== ' ') {
+                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
+              }
+              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+            } else if (layerX + currTextWidth >= page.offsetWidth) {
+              layerX = page.offsetWidth - this.getLayerWidth
+              text.style.width = `${this.getLayerWidth}px`
+              textSize.width = this.getLayerWidth
+              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+              if (e.key !== ' ') {
+                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
+              }
+              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+            } else {
+              if (e.key !== ' ') {
+                text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
+                const HW = this.getTextHW(text.innerHTML, this.config.styles)
+                textSize.width = HW.width
+                textSize.height = HW.height
+              }
             }
+          } else {
+            text.style.width = `${this.config.widthLimit}px`
+            textSize.width = this.config.widthLimit
+            textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
           }
+          console.log('widthLimit', this.config.widthLimit)
+          // text.style.width = `${textSize.width}px`
           text.style.whiteSpace = 'pre-wrap'
-
           ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
           ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
@@ -649,18 +680,35 @@ export default Vue.extend({
         }, 0)
       }
     },
+    // TODO: this function got bug**
     getTextHW(text: string, styles: any): { width: number, height: number } {
+      const div = document.createElement('div')
       const el = document.createElement('span')
-      document.body.appendChild(el)
-      el.style.whiteSpace = 'pre'
-      el.textContent = text
+      const content = this.$refs.content as HTMLElement
+
+      // el.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
+      // div.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
+      el.style.width = `${content.getBoundingClientRect().width}px`
+      div.style.width = `${content.getBoundingClientRect().width}px`
+      el.innerHTML = text
+      div.appendChild(el)
+      document.body.appendChild(div)
+      el.style.whiteSpace = 'pre-wrap'
+      el.style.overflowWrap = 'break-word'
+      div.style.whiteSpace = 'pre-wrap'
       Object.assign(el.style, CssConveter.convertFontStyle(styles))
       const textHW = {
-        width: el.offsetWidth,
-        height: el.offsetHeight
+        width: Math.ceil(el.getBoundingClientRect().width),
+        height: Math.ceil(el.getBoundingClientRect().height)
       }
-      document.body.removeChild(el)
+      // console.log('layer')
+      // console.log(this.getLayerWidth)
+      // console.log(content.getBoundingClientRect().width)
+      // document.body.removeChild(div)
       return textHW
+    },
+    isNoCharactor(e: KeyboardEvent): boolean {
+      return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Shift'
     },
     onDblClick() {
       if (this.getLayerType !== 'image') return
@@ -676,6 +724,7 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   // z-index: setZindex("nu-controller");
+  white-space: pre-wrap;
   position: absolute;
   box-sizing: border-box;
   &:hover {
@@ -759,6 +808,76 @@ export default Vue.extend({
 
     //       text.style.whiteSpace = 'pre-wrap'
     //       ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+    //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+    //     }, 0)
+    //   }
+    // },
+
+    //     onTyping(e: KeyboardEvent) {
+    //   if (this.isGetMoved) {
+    //     e.preventDefault()
+    //   } else {
+    //     ControlUtils.textBackspace(e)
+    //     ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+
+    //     const text = this.$refs.content as HTMLElement
+    //     /**
+    //      * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+    //      * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+    //      * hence plus 5 to the offsetWidth for preventing this bug.
+    //      */
+
+    //     setTimeout(() => {
+    //       const props = {
+    //         text: text.innerHTML
+    //       }
+    //       const dummyTextSize = this.getTextHW(text.innerHTML, this.config.styles)
+    //       console.log(dummyTextSize)
+    //       console.log(e.key)
+    //       text.style.whiteSpace = 'pre'
+    //       const textSize = {
+    //         width: e.key !== ' ' ? text.offsetWidth : text.offsetWidth + 5,
+    //         height: text.offsetHeight
+    //       }
+    //       // console.log(textSize)
+    //       const page = this.$parent.$el as HTMLElement
+    //       let layerX = this.getLayerPos.x
+    //       const layerY = this.getLayerPos.y
+    //       // TODO: take the rotate angle into pos-compensation consideration
+    //       if (this.config.widthLimit === '') {
+    //         layerX = -(textSize.width - this.getLayerWidth) / 2 + this.getLayerPos.x
+    //         // text.style.width = `${textSize.width}px`
+    //         if (layerX <= 0) {
+    //           /**
+    //            * can't automatically change the span-size after we set the whiteSpace back to 'pre-wrap'
+    //            * we need to manually change it in here.
+    //            */
+    //           text.style.width = `${this.getLayerWidth}px`
+    //           textSize.width = this.getLayerWidth
+    //           if (e.key !== ' ') {
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //           // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+    //           layerX = 0
+    //         } else if (layerX + textSize.width >= page.offsetWidth) {
+    //           text.style.width = `${this.getLayerWidth}px`
+    //           textSize.width = this.getLayerWidth
+    //           // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+    //           if (e.key !== ' ') {
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //           layerX = page.offsetWidth - this.getLayerWidth
+    //         } else {
+    //           if (e.key !== ' ') {
+    //             text.style.width = `${textSize.width}px`
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //         }
+    //       }
+    //       text.style.whiteSpace = 'pre-wrap'
+    //       ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
     //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
     //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
     //     }, 0)

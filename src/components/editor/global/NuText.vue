@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="nu-text" ref="body")
-    span(class="text-content" v-for="text in content" :style="contextStyles()" ref="content") {{ text }}
+    div(class="nu-text" ref="content")
+      span(class="text-content" v-for="text in content" :style="contextStyles()") {{ text }}
 </template>
 
 <script lang="ts">
@@ -25,10 +26,9 @@ export default Vue.extend({
     'config.text': function() {
       this.content = this.getTextContent
       setTimeout(() => {
-        const content = this.$refs.body as HTMLElement
-        console.log(content.offsetHeight)
+        const content = this.$refs.content as HTMLElement
         if (content.offsetHeight > this.config.styles.height) {
-          console.log('is the ffff')
+          console.log('text layer height compensation')
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
         }
@@ -47,7 +47,7 @@ export default Vue.extend({
         }
         return text
       })
-      for (let i = textArr.length - 1; i > 0; i--) {
+      for (let i = textArr.length - 1; i >= 0; i--) {
         if (textArr[i] !== ' ') {
           textArr = textArr.slice(0, i + 1)
           break

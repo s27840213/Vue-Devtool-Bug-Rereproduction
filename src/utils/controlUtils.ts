@@ -162,6 +162,8 @@ class Controller {
       sel.removeAllRanges()
       sel.addRange(range)
     }
+    console.log('sel')
+    console.log(range)
 
     if (content.lastChild?.nodeName !== 'BR') {
       const br = document.createElement('br') as HTMLBRElement
