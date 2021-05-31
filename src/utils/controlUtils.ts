@@ -32,8 +32,7 @@ class Controller {
           left: '0',
           top: '0',
           transform: 'translate3d(-50%,-50%,0)',
-          borderRadius: '50%',
-          cursor: 'nwse-resize'
+          borderRadius: '50%'
         },
         {
           width: `${10 * (100 / scaleRatio)}px`,
@@ -41,8 +40,7 @@ class Controller {
           transform: 'translate3d(50%,-50%,0)',
           right: '0',
           top: '0',
-          borderRadius: '50%',
-          cursor: 'nesw-resize'
+          borderRadius: '50%'
         },
         {
           width: `${10 * (100 / scaleRatio)}px`,
@@ -50,8 +48,7 @@ class Controller {
           transform: 'translate3d(50%,50%,0)',
           right: '0',
           bottom: '0',
-          borderRadius: '50%',
-          cursor: 'ns-resize'
+          borderRadius: '50%'
         },
         {
           width: `${10 * (100 / scaleRatio)}px`,
@@ -59,49 +56,44 @@ class Controller {
           transform: 'translate3d(-50%,50%,0)',
           left: '0',
           bottom: '0',
-          borderRadius: '50%',
-          cursor: 'nesw-resize'
+          borderRadius: '50%'
         }
       ],
       resizers: [
         {
-          width: `${resizerLong}px`,
-          height: `${resizerShort}px`,
-          top: `${-resizerShort - 1.5}px`,
-          transform: 'translate(-50%, 0)',
-          cursor: 'ew-resize'
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          left: `${-resizerShort - 1.5}px`,
+          transform: 'translate(0, -50%)'
         },
         {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: `${-resizerShort - 1.5}px`,
-          transform: 'translate(0, -50%)',
-          cursor: 'ew-resize'
+          transform: 'translate(0, -50%)'
         },
         {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: `${-resizerShort - 1.5}px`,
-          transform: 'translate(-50%, 0)',
-          cursor: 'nwse-resize'
+          transform: 'translate(-50%, 0)'
         },
         {
-          height: `${resizerLong}px`,
-          width: `${resizerShort}px`,
-          left: `${-resizerShort - 1.5}px`,
-          transform: 'translate(0, -50%)',
-          cursor: 'nwse-resize'
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          top: `${-resizerShort - 1.5}px`,
+          transform: 'translate(-50%, 0)'
         }
       ],
       cursors: [
         'nwse-resize',
-        'ns-resize',
+        'ew-resize',
         'nesw-resize',
         'ew-resize',
         'nwse-resize',
         'ns-resize',
         'nesw-resize',
-        'ew-resize'
+        'ns-resize'
       ]
     }
   }
@@ -160,6 +152,8 @@ class Controller {
       sel.removeAllRanges()
       sel.addRange(range)
     }
+    console.log('sel')
+    console.log(range)
 
     if (content.lastChild?.nodeName !== 'BR') {
       const br = document.createElement('br') as HTMLBRElement

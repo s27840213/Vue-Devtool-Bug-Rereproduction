@@ -12,6 +12,7 @@ class LayerFactary {
       active: false,
       shown: false,
       imgControl: false,
+      isClipped: false,
       styles: {
         x: 0,
         y: 0,
@@ -39,6 +40,7 @@ class LayerFactary {
     const basicConfig = {
       type: 'text',
       text: '',
+      widthLimit: '',
       textEditable: false,
       active: false,
       shown: false,
@@ -126,6 +128,7 @@ class LayerFactary {
       type: 'shape',
       active: false,
       shown: false,
+      path: '',
       locked: false,
       styles: {
         x: 0,

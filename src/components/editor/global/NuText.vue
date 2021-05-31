@@ -1,11 +1,13 @@
 <template lang="pug">
-  div(class="nu-text")
-    span(class="text-content" v-for="text in content" :style="contextStyles()" ref="content") {{ text }}
+  div(class="nu-text" ref="body")
+    div(class="nu-text" ref="content")
+      span(class="text-content" v-for="text in content" :style="contextStyles()") {{ text }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
+import ControlUtils from '@/utils/controlUtils'
 export default Vue.extend({
   props: {
     config: Object,
@@ -21,8 +23,16 @@ export default Vue.extend({
     this.content = this.getTextContent
   },
   watch: {
-    'config.text': function () {
+    'config.text': function() {
       this.content = this.getTextContent
+      setTimeout(() => {
+        const content = this.$refs.content as HTMLElement
+        if (content.offsetHeight > this.config.styles.height) {
+          console.log('text layer height compensation')
+          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
+          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
+        }
+      }, 0)
     }
   },
   computed: {
@@ -37,7 +47,7 @@ export default Vue.extend({
         }
         return text
       })
-      for (let i = textArr.length - 1; i > 0; i--) {
+      for (let i = textArr.length - 1; i >= 0; i--) {
         if (textArr[i] !== ' ') {
           textArr = textArr.slice(0, i + 1)
           break
@@ -50,6 +60,8 @@ export default Vue.extend({
     contextStyles() {
       const _styles = Object.assign({}, this.config.styles)
       const styles = Object.assign(_styles, { size: this.config.styles.initSize })
+      delete styles.width
+      delete styles.height
       return CssConveter.convertFontStyle(styles)
     }
   }
@@ -61,14 +73,14 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   position: relative;
-  text-align: left;
 }
 .text-content {
+  text-align: left;
   position: relative;
   display: inline-block;
   outline: none;
   // white-space: nowrap
-  white-space: pre;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   user-select: none;
 }

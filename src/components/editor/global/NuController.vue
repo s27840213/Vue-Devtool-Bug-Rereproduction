@@ -5,7 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles()"
-          @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
+          @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
           @click.left="onClick"
@@ -27,14 +27,13 @@
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
-          template(v-if="config.type !=='tmp'")
-            div(v-for="(resizer, index) in controlPoints.resizers"
-                @mousedown.left.stop="resizeStart")
-              div(class="resize-bar"
-                  :key="index * 2 + 1"
-                  :style="resizerBarStyles(resizer)")
-              div(class="controller-point"
-                  :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
+          div(v-for="(resizer, index) in resizer(controlPoints)"
+              @mousedown.left.stop="resizeStart")
+            div(class="resize-bar"
+                :key="index * 2 + 1"
+                :style="resizerBarStyles(resizer)")
+            div(class="controller-point"
+                :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(class="rotaterWrapper")
             div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
@@ -81,6 +80,7 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
+    this.textInit()
   },
   computed: {
     ...mapGetters({
@@ -146,9 +146,22 @@ export default Vue.extend({
       }
       return Object.assign(resizerStyle, HW)
     },
+    resizer(controlPoints: any) {
+      let resizer = controlPoints.resizers
+      if (this.getLayerType === 'text') {
+        resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
+          : controlPoints.resizers.slice(0, 2)
+      } else if (this.getLayerType === 'image') {
+        resizer = this.config.isClipped ? [] : resizer
+      } else if (this.getLayerType === 'shape' && this.config.category !== 'rect') {
+        resizer = []
+      }
+      return resizer
+    },
     contextStyles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
       const styles = {
+        // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
         color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
@@ -157,6 +170,10 @@ export default Vue.extend({
         'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
+    },
+    textInit() {
+      const text = this.$refs.content as HTMLElement
+      text.innerHTML = this.getTextContent
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -335,20 +352,22 @@ export default Vue.extend({
        * after resizing the img's clip-path, the initWidth and initHeight will be reset
        * However the scaling factor of the layer needs to be reserved, which is the initSize used for.
        */
-      const scale = Math.max(ratio.width, ratio.height) * this.config.styles.initSize
-      if (typeof this.config.styles.initSize === 'undefined') {
-        this.config.styles.initSize = 1
+      let scale = Math.max(ratio.width, ratio.height)
+      if (this.getLayerType === 'image') {
+        scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
       }
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
-      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-
       if (this.config.type === 'text') {
         ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
       }
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
+      if (this.getLayerType === 'text') {
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+      }
       this.isControlling = false
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
@@ -421,16 +440,18 @@ export default Vue.extend({
           offsetX = offsetWidth
           offsetY = offsetHeight
         }
-        this.imgResizeHandler(width, height, offsetX, offsetY)
-      }
-      if (this.getLayerType === 'shape') {
-        this.shapeResizeHandler(width, height)
-      }
-      if (this.getLayerType === 'text') {
-        const textRect = (this.$refs.content as HTMLElement).getBoundingClientRect()
-        if (this.getLayerWidth < textRect.width) {
-          console.log('smaller than content')
+        if (this.imgResizeLimiter(width, height, offsetX, offsetY)) {
+          return
         }
+        this.imgResizeHandler(width, height, offsetX, offsetY)
+      } else if (this.getLayerType === 'shape') {
+        this.shapeResizeHandler(width, height)
+      } else if (this.getLayerType === 'text') {
+        const content = this.$refs.content as HTMLElement
+        content.style.width = `${width}px`
+        height = content.offsetHeight
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -447,6 +468,31 @@ export default Vue.extend({
       if (this.config.category === 'circle') {
         // TODO
       }
+    },
+    imgResizeLimiter(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined): boolean {
+      const [imgWidth, imgHeight, scale] = [this.config.styles.imgWidth, this.config.styles.imgHeight, this.config.styles.scale]
+      const imgPos = {
+        x: this.control.imgX,
+        y: this.control.imgY
+      }
+      const baseOffset = {
+        x: -imgWidth / 2 + (width / scale) / 2,
+        y: -imgHeight / 2 + (height / scale) / 2
+      }
+      const translateLimit = {
+        width: (imgWidth - width / scale) / 2,
+        height: (imgHeight - height / scale) / 2
+      }
+      if (typeof offsetX !== 'undefined' && typeof offsetY !== 'undefined') {
+        offsetX /= this.config.styles.scale
+        offsetY /= this.config.styles.scale
+        imgPos.x += offsetX
+        imgPos.y += offsetY
+      }
+      if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width || Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
+        return true
+      }
+      return false
     },
     imgResizeHandler(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
@@ -533,7 +579,7 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick() {
       const clickDate = new Date(this.clickTime)
@@ -561,21 +607,113 @@ export default Vue.extend({
       } else {
         ControlUtils.textBackspace(e)
         ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+        if (this.isNoCharactor(e)) return
 
         const text = this.$refs.content as HTMLElement
+        text.style.width = 'auto'
+        text.style.height = 'auto'
+
+        const textTmp = text.innerHTML
+        /**
+         * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+         * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+         * hence plus 5 to the offsetWidth for preventing this bug.
+         */
+
         setTimeout(() => {
+          /**
+           * This line of code prevents the bug while deleting at begin of the text.
+           */
+          if (e.key === 'Backspace' && textTmp === text.innerHTML) return
+          text.style.whiteSpace = 'pre'
+          const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
+          const page = this.$parent.$el as HTMLElement
+
           const props = {
             text: text.innerHTML
           }
           const textSize = {
-            width: text.offsetWidth,
-            height: text.offsetHeight
+            width: Math.ceil(text.getBoundingClientRect().width + 5),
+            // width: e.key === ' ' ? Math.ceil(text.getBoundingClientRect().width + 5) : dummyTextSize.width + 1,
+            height: text.getBoundingClientRect().height
           }
+          let layerX = this.getLayerPos.x
+          const layerY = this.getLayerPos.y
+          // TODO: take the rotate angle into pos-compensation consideration
+          if (this.config.widthLimit === '') {
+            const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
+            layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
+            console.log('layerX', layerX)
+            if (layerX <= 0) {
+              layerX = 0
+              text.style.width = `${this.getLayerWidth}px`
+              textSize.width = this.getLayerWidth
+              if (e.key !== ' ') {
+                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
+              }
+              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+            } else if (layerX + currTextWidth >= page.offsetWidth) {
+              layerX = page.offsetWidth - this.getLayerWidth
+              text.style.width = `${this.getLayerWidth}px`
+              textSize.width = this.getLayerWidth
+              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+              if (e.key !== ' ') {
+                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
+              }
+              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+            } else {
+              if (e.key !== ' ') {
+                text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
+                const HW = this.getTextHW(text.innerHTML, this.config.styles)
+                textSize.width = HW.width
+                textSize.height = HW.height
+              }
+            }
+          } else {
+            text.style.width = `${this.config.widthLimit}px`
+            textSize.width = this.config.widthLimit
+            textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
+          }
+          console.log('widthLimit', this.config.widthLimit)
+          // text.style.width = `${textSize.width}px`
+          text.style.whiteSpace = 'pre-wrap'
           ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+          ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         }, 0)
       }
+    },
+    // TODO: this function got bug**
+    getTextHW(text: string, styles: any): { width: number, height: number } {
+      const div = document.createElement('div')
+      const el = document.createElement('span')
+      const content = this.$refs.content as HTMLElement
+
+      // el.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
+      // div.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
+      el.style.width = `${content.getBoundingClientRect().width}px`
+      div.style.width = `${content.getBoundingClientRect().width}px`
+      el.innerHTML = text
+      div.appendChild(el)
+      document.body.appendChild(div)
+      el.style.whiteSpace = 'pre-wrap'
+      el.style.overflowWrap = 'break-word'
+      div.style.whiteSpace = 'pre-wrap'
+      Object.assign(el.style, CssConveter.convertFontStyle(styles))
+      const textHW = {
+        width: Math.ceil(el.getBoundingClientRect().width),
+        height: Math.ceil(el.getBoundingClientRect().height)
+      }
+      // console.log('layer')
+      // console.log(this.getLayerWidth)
+      // console.log(content.getBoundingClientRect().width)
+      // document.body.removeChild(div)
+      return textHW
+    },
+    isNoCharactor(e: KeyboardEvent): boolean {
+      return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Shift'
     },
     onDblClick() {
       if (this.getLayerType !== 'image') return
@@ -603,6 +741,7 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   // z-index: setZindex("nu-controller");
+  white-space: pre-wrap;
   position: absolute;
   box-sizing: border-box;
   &:hover {
@@ -655,7 +794,109 @@ export default Vue.extend({
   text-align: left;
   display: inline-block;
   outline: none;
-  white-space: nowrap;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
 }
 </style>
+
+    // onTyping(e: KeyboardEvent) {
+    //   if (this.isGetMoved) {
+    //     e.preventDefault()
+    //   } else {
+    //     ControlUtils.textBackspace(e)
+    //     ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+
+    //     const text = this.$refs.content as HTMLElement
+    //     /**
+    //      * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+    //      * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+    //      * hence plus 5 to the offsetWidth for preventing this bug.
+    //      */
+    //     text.style.whiteSpace = 'pre'
+    //     setTimeout(() => {
+    //       const props = {
+    //         text: text.innerHTML
+    //       }
+    //       const textSize = {
+    //         width: text.offsetWidth + 5,
+    //         height: text.offsetHeight
+    //       }
+    //       const page = this.$parent.$el as HTMLElement
+
+    //       text.style.whiteSpace = 'pre-wrap'
+    //       ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+    //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+    //     }, 0)
+    //   }
+    // },
+
+    //     onTyping(e: KeyboardEvent) {
+    //   if (this.isGetMoved) {
+    //     e.preventDefault()
+    //   } else {
+    //     ControlUtils.textBackspace(e)
+    //     ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+
+    //     const text = this.$refs.content as HTMLElement
+    //     /**
+    //      * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+    //      * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
+    //      * hence plus 5 to the offsetWidth for preventing this bug.
+    //      */
+
+    //     setTimeout(() => {
+    //       const props = {
+    //         text: text.innerHTML
+    //       }
+    //       const dummyTextSize = this.getTextHW(text.innerHTML, this.config.styles)
+    //       console.log(dummyTextSize)
+    //       console.log(e.key)
+    //       text.style.whiteSpace = 'pre'
+    //       const textSize = {
+    //         width: e.key !== ' ' ? text.offsetWidth : text.offsetWidth + 5,
+    //         height: text.offsetHeight
+    //       }
+    //       // console.log(textSize)
+    //       const page = this.$parent.$el as HTMLElement
+    //       let layerX = this.getLayerPos.x
+    //       const layerY = this.getLayerPos.y
+    //       // TODO: take the rotate angle into pos-compensation consideration
+    //       if (this.config.widthLimit === '') {
+    //         layerX = -(textSize.width - this.getLayerWidth) / 2 + this.getLayerPos.x
+    //         // text.style.width = `${textSize.width}px`
+    //         if (layerX <= 0) {
+    //           /**
+    //            * can't automatically change the span-size after we set the whiteSpace back to 'pre-wrap'
+    //            * we need to manually change it in here.
+    //            */
+    //           text.style.width = `${this.getLayerWidth}px`
+    //           textSize.width = this.getLayerWidth
+    //           if (e.key !== ' ') {
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //           // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+    //           layerX = 0
+    //         } else if (layerX + textSize.width >= page.offsetWidth) {
+    //           text.style.width = `${this.getLayerWidth}px`
+    //           textSize.width = this.getLayerWidth
+    //           // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
+    //           if (e.key !== ' ') {
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //           layerX = page.offsetWidth - this.getLayerWidth
+    //         } else {
+    //           if (e.key !== ' ') {
+    //             text.style.width = `${textSize.width}px`
+    //             textSize.height = dummyTextSize.height
+    //           }
+    //         }
+    //       }
+    //       text.style.whiteSpace = 'pre-wrap'
+    //       ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
+    //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+    //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+    //     }, 0)
+    //   }
+    // },

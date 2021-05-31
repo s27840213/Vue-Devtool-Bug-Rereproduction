@@ -58,7 +58,7 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      const zindex = (this.layerIndex + 1) * 99
+      const zindex = this.config.imgControl ? 10000 : (this.layerIndex + 1) * 99
       const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
         { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
       if (this.config.imgControl) {

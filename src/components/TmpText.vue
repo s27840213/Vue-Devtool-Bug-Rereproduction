@@ -130,6 +130,7 @@ export default Vue.extend({
         type: 'text',
         text: content.text,
         textEditable: false,
+        widthLimit: '',
         styles: Object.assign(styles, textHW)
       }
 
@@ -144,7 +145,7 @@ export default Vue.extend({
       Object.assign(el.style, this.contextStyles(styles))
       document.body.appendChild(el)
       const textHW = {
-        width: el.offsetWidth,
+        width: el.offsetWidth + 5,
         height: el.offsetHeight
       }
       document.body.removeChild(el)

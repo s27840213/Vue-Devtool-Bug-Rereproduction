@@ -215,8 +215,8 @@ export default Vue.extend({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const [dx, dy] = [diff.x / this.config.styles.scale, diff.y / this.config.styles.scale]
 
-      let offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
-      let offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
+      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
+      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
 
       const initWidth = this.initialWH.width
@@ -229,11 +229,11 @@ export default Vue.extend({
       if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
         width = offsetWidth + initWidth
         height = width * initHeight / initWidth
-        offsetHeight = height - initHeight
+        // offsetHeight = height - initHeight
       } else {
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
-        offsetWidth = width - initWidth
+        // offsetWidth = width - initWidth
       }
       if (width <= 40 || height <= 40) return
 
@@ -241,10 +241,10 @@ export default Vue.extend({
         width: width - initWidth,
         height: height - initHeight
       }
-      if (Math.abs(offsetSize.width) >= 3 || Math.abs(offsetSize.height) >= 3) {
-        offsetSize.width /= 2
-        offsetSize.height /= 2
-      }
+      // if (Math.abs(offsetSize.width) >= 3 || Math.abs(offsetSize.height) >= 3) {
+      //   offsetSize.width /= 2
+      //   offsetSize.height /= 2
+      // }
       const img = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY

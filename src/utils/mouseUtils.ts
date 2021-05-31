@@ -28,9 +28,11 @@ class MouseUtils {
   onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 },
     clipPath = '', clipperStyles: IStyle | null = null) {
     let layer = this.onDropHandler(e, pageIndex, targetOffset)
-
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
+      store.commit('DELETE_layer', {
+        pageIndex, layerIndex
+      })
       LayerUtils.addLayers(pageIndex, layer)
     }
   }
@@ -122,6 +124,13 @@ class MouseUtils {
   }
 
   clipperHandler(layer: ILayer, clipPath: string, clipperStyles: IStyle): ILayer {
+    /**
+     * If the drop-in target is a clipped-Image, setting the initial size as the layer size.
+     */
+    if (typeof clipperStyles.imgX !== 'undefined') {
+      clipperStyles.initWidth = clipperStyles.width / clipperStyles.scale
+      clipperStyles.initHeight = clipperStyles.height / clipperStyles.scale
+    }
     const img = {
       width: layer.styles.width,
       height: layer.styles.height
@@ -152,7 +161,6 @@ class MouseUtils {
         : clipperStyles.initWidth / img.width
       scaleImg(scaleRatio)
     }
-
     const newStyles = {
       width: clipperStyles.width,
       height: clipperStyles.height,
@@ -168,7 +176,8 @@ class MouseUtils {
       y: clipperStyles.y
     }
     Object.assign(layer.styles, newStyles)
-    layer.clipPath = `path('${clipPath}')`
+    layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
+    layer.isClipped = true
     return layer
   }
 }
