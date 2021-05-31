@@ -1,12 +1,12 @@
 <template lang="pug">
   div(class="function-panel p-20")
-    panel-group(v-show="!isFontsPanelOpened && selectedLayerNum!==0")
-    panel-text-setting(v-show="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
+    panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+    panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
       @openFontsPanel="openFontsPanel()")
-    panel-photo-setting(v-show="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1")
-    //- panel-background-setting(v-show="selectedLayerNum===0")
-    panel-page-setting(v-show="!isFontsPanelOpened && selectedLayerNum===0")
-    panel-fonts(v-show="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+    panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1")
+    //- panel-background-setting(v-if="selectedLayerNum===0")
+    panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
+    panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 
 <script lang="ts">
