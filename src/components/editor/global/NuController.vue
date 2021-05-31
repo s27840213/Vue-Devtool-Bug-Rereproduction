@@ -5,7 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles()"
-          @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
+          @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
           @click="onClick"
@@ -26,7 +26,7 @@
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
-          div(v-for="(resizer, index) in controlPoints.resizers"
+          div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart")
             div(class="resize-bar"
                 :key="index * 2 + 1"
@@ -70,7 +70,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -141,6 +140,16 @@ export default Vue.extend({
       }
       return Object.assign(resizerStyle, HW)
     },
+    resizer(controlPoints: any) {
+      let resizer = controlPoints.resizers
+      if (this.config.type === 'text') {
+        resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
+          : controlPoints.resizers.slice(0, 2)
+      } else if (this.config.type === 'image') {
+        resizer = this.config.isClipped ? [] : resizer
+      }
+      return resizer
+    },
     contextStyles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
       const styles = {
@@ -195,6 +204,7 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      console.log(this.config)
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       window.addEventListener('mouseup', this.moveEnd)
       window.addEventListener('mousemove', this.moving)
@@ -574,7 +584,7 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick() {
       const clickDate = new Date(this.clickTime)

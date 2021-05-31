@@ -168,7 +168,7 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
-      ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
+      // ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
       GroupUtils.deselect()
     },
     setFocus(): void {

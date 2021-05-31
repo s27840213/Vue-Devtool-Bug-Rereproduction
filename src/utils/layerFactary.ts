@@ -13,6 +13,7 @@ class LayerFactary {
       active: false,
       shown: false,
       imgControl: false,
+      isClipped: false,
       styles: {
         x: 0,
         y: 0,
@@ -128,6 +129,7 @@ class LayerFactary {
       pageIndex: pageIndex,
       active: false,
       shown: false,
+      path: '',
       styles: {
         x: 0,
         y: 0,
