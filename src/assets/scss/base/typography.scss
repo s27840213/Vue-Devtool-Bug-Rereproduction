@@ -1,72 +1,52 @@
-.h {
-	&-1{
-		font-size: 72px;
-		line-height: 98px;
-	}
-	&-2{
-		font-size: 48px;
-		line-height: 64px;
-		font-weight: 800;
-	}
-	&-3{
-		font-size: 40px;
-		line-height: 54px;
-		font-weight: 800;
-	}
-	&-4{
-		font-size: 28px;
-		line-height: 40px;
-		font-weight: 800;
-	}
-	&-5{
-		font-size: 24px;
-		line-height: 32px;
-		font-weight: 600;
-	}
-	&-6{
-		font-size: 20px;
-		line-height: 30px;
-		font-weight: 400;
-	}
+@mixin heading-1{
+	font-size: 72px;
+	line-height: 98px;
+}
+@mixin heading-2{
+	font-size: 48px;
+	line-height: 64px;
+	font-weight: 800;
+}
+@mixin heading-3{
+	font-size: 40px;
+	line-height: 54px;
+	font-weight: 800;
+}
+@mixin heading-4{
+	font-size: 28px;
+	line-height: 40px;
+	font-weight: 800;
+}
+@mixin heading-5{
+	font-size: 24px;
+	line-height: 32px;
+	font-weight: 600;
+}
+@mixin heading-6{
+	font-size: 20px;
+	line-height: 30px;
+	font-weight: 400;
 }
 
-.subtitle{
-	&-1 {
-		font-size: 18px;
-		line-height: 28px;
-		font-weight: 700;
-	}
-	&-2 {
-		font-size: 14px;
-		line-height: 18px;
-		font-weight: 600;
-	}
+@mixin subtitle-1 {
+	font-size: 18px;
+	line-height: 28px;
+	font-weight: 700;
 }
-
-.body {
-	&-1 {
-		font-size: 16px;
-		line-height: 26px;
-		font-weight: 400;
-	}
-	&-2 {
-		font-size: 14px;
-		line-height: 22px;
-		font-weight: 400;
-	}
+@mixin subtitle-2 {
+	font-size: 14px;
+	line-height: 18px;
+	font-weight: 600;
 }
-
-.lead {
-	&-1 {
-		font-size: 16px;
-		line-height: 32px;
-		font-weight: 400;
-	}
-	&-2{
-		font-size: 14px;
-		line-height: 24px;
-		font-weight: 400;
-	}
+@mixin body-1 {
+	font-size: 16px;
+	line-height: 26px;
+	font-weight: 400;
+}
+@mixin body-2 {
+	font-size: 14px;
+	line-height: 22px;
+	font-weight: 400;
 }
 @mixin label-sm(){
 	font-size: 12px;
@@ -86,6 +66,60 @@
 	font-weight: 700;
 }
 
+
+.h {
+	&-1{
+		@include heading-1
+	}
+	&-2{
+		@include heading-2
+	}
+	&-3{
+		@include heading-3
+	}
+	&-4{
+		@include heading-4
+	}
+	&-5{
+		@include heading-5
+	}
+	&-6{
+		@include heading-6
+	}
+}
+
+
+.subtitle{
+	&-1 {
+		@include subtitle-1()
+	}
+	&-2 {
+		@include subtitle-2()
+	}
+}
+
+
+.body {
+	&-1 {
+		@include body-1()
+	}
+	&-2 {
+		@include body-2()
+	}
+}
+
+.lead {
+	&-1 {
+		font-size: 16px;
+		line-height: 32px;
+		font-weight: 400;
+	}
+	&-2{
+		font-size: 14px;
+		line-height: 24px;
+		font-weight: 400;
+	}
+}
 
 .label {
 	&-sm {

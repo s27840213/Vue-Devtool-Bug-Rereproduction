@@ -19,16 +19,12 @@
       //-         :config="getLastLayer")
 
 </template>
-  //  nu-clipper(:config="getLastLayer")
-  //         nu-image(:config="getLastLayer"
-  //         :pageIndex="getLastSelectedPageIndex" :layerIndex="getLastSelectedLayerIndex")
+
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { ILayer } from '@/interfaces/layer'
-import { ICoordinate } from '@/interfaces/frame'
 
 export default Vue.extend({
   data() {
@@ -118,7 +114,7 @@ export default Vue.extend({
         this.handleSelectionData(selectionArea.getBoundingClientRect())
       })
     },
-    handleSelectionData(selectionData: any) {
+    handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${this.pageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
@@ -178,7 +174,7 @@ export default Vue.extend({
   position: fixed;
   min-width: 100%;
   min-height: 100%;
-  background: rgba(53,71,90,.2);
+  background: rgba(53, 71, 90, 0.2);
   pointer-events: none;
 }
 

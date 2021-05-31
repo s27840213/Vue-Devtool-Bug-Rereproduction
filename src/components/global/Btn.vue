@@ -42,8 +42,5 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .btn {
-  &__icon {
-    margin-right: 10px;
-  }
 }
 </style>

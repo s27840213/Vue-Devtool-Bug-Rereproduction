@@ -38,15 +38,17 @@
             :style="snapLineStyles('h', line.pos)")
         div(class="page-content"
             :style="styles('content')"
+            ref="page-content"
             @drop="onDrop"
             @dragover.prevent,
             @dragenter.prevent
-            @click.self="pageClickHandler()"
+            @click.right.stop="onRightClick"
+            @click.left.self="pageClickHandler()"
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
             :key="`layer-${index}`"
-            :class="`nu-layer--p${pageIndex}`"
+            :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
             :layerIndex="index"
@@ -74,7 +76,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -106,6 +108,13 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    const pageContent = this.$refs['page-content'] as HTMLElement
+    /**
+     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+     */
+    pageContent.addEventListener('contextmenu', (e: MouseEvent) => {
+      e.preventDefault()
+    }, false)
   },
   computed: {
     ...mapGetters({
@@ -117,8 +126,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      updateLayerProps: 'UPDATE_layerProps',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -152,23 +161,12 @@ export default Vue.extend({
         layers: [layer]
       })
     },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean): void {
-      if (!this.isSelecting) {
-        this.updateLayerProps({
-          pageIndex,
-          layerIndex,
-          props: {
-            shown
-          }
-        })
-      }
-    },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
-      // ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
+      ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
       GroupUtils.deselect()
     },
     setFocus(): void {
@@ -192,6 +190,15 @@ export default Vue.extend({
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
+    },
+    onRightClick(event: MouseEvent) {
+      this.setIsPageDropdownsOpened(true)
+      this.$nextTick(() => {
+        const el = document.querySelector('.dropdowns--page') as HTMLElement
+        const mousePos = MouseUtils.getMouseAbsPoint(event)
+        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+        el.focus()
+      })
     }
   }
 })
@@ -203,7 +210,7 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   &:focus {
-    // outline: none;
+    outline: none;
   }
 }
 

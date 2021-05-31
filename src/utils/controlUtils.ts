@@ -1,6 +1,4 @@
 import store from '@/store'
-import MouseUtils from '@/utils/mouseUtils'
-import GroupUtils from '@/utils/groupUtils'
 import { ICoordinate } from '@/interfaces/frame'
 
 class Controller {

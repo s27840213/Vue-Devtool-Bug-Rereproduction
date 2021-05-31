@@ -1,39 +1,56 @@
 
 import store from '@/store'
-import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp, IStyle, ITextStyle } from '@/interfaces/layer'
-import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
+import mathUtils from './mathUtils'
+import { IBounding } from '@/interfaces/math'
+import LayerUtils from '@/utils/layerUtils'
 
-function updateLayerStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: number }) {
-  store.commit('UPDATE_layerStyles', {
-    pageIndex,
-    layerIndex,
-    styles
-  })
-}
-
-function getTmpStyles() {
-  return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex).styles
-}
 class AlignUtils {
   leftAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
-      const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
-      const layerWidth = currSelectedInfo.layers[0].styles.width
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        x: 0
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        x: 0 + offset
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'left'))
+        const layerBounding = mathUtils.getBounding(layer)
+        const offset: { [index: string]: number } = {
+          x: layer.styles.x - layerBounding.x,
+          y: layer.styles.y - layerBounding.y,
+          width: layer.styles.width,
+          height: layerBounding.height
+        }
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'left'))
       })
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
+      // if (rotateDeg !== 0) {
+      //   LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+      //   const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
+      //   GroupUtils.reselect()
+      //   const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
+      //   const centerOffset = {
+      //     x: center1.x - center2.x,
+      //     y: center1.y - center2.y
+      //   }
+      //   LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      //     x: tmpStyles.x + centerOffset.x,
+      //     y: tmpStyles.y + centerOffset.y,
+      //     rotate: rotateDeg
+      //   })
+      // }
     }
   }
 
@@ -43,17 +60,21 @@ class AlignUtils {
     if (currSelectedInfo.layers.length === 1) {
       const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
       const layerWidth = currSelectedInfo.layers[0].styles.width
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
         x: (pageWidth / 2) - (layerWidth / 2)
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'centerHr'))
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, {}, 'centerHr'))
       })
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
     }
   }
 
@@ -61,19 +82,32 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
       const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
-      const layerWidth = currSelectedInfo.layers[0].styles.width
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        x: pageWidth - layerWidth
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        x: pageWidth - bouding.width + offset
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'right'))
+        const layerBounding = mathUtils.getBounding(layer)
+        const offset: { [index: string]: number } = {
+          x: layer.styles.x - layerBounding.x,
+          y: layer.styles.y - layerBounding.y,
+          width: layerBounding.width,
+          height: layerBounding.height
+        }
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'right'))
       })
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
     }
   }
 
@@ -81,20 +115,32 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
-      const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
-      const layerHeight = currSelectedInfo.layers[0].styles.height
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        y: 0
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        y: 0 + offset
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'top'))
+        const layerBounding = mathUtils.getBounding(layer)
+        const offset: { [index: string]: number } = {
+          x: layer.styles.x - layerBounding.x,
+          y: layer.styles.y - layerBounding.y,
+          width: layer.styles.width - layerBounding.width,
+          height: layer.styles.height - layerBounding.height
+        }
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'top'))
       })
 
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
     }
   }
 
@@ -105,17 +151,21 @@ class AlignUtils {
       const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
       const layerHeight = currSelectedInfo.layers[0].styles.height
       console.log(pageHeight, layerHeight)
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
         y: (pageHeight / 2) - (layerHeight / 2)
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'centerVr'))
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, {}, 'centerVr'))
       })
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
     }
   }
 
@@ -123,53 +173,65 @@ class AlignUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     if (currSelectedInfo.layers.length === 1) {
+      const layer = currSelectedInfo.layers[0] as ILayer
+      const bouding = mathUtils.getBounding(layer)
+      const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
       const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
-      const layerHeight = currSelectedInfo.layers[0].styles.height
-      console.log(pageHeight, layerHeight)
-      updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
-        y: pageHeight - layerHeight
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        y: pageHeight - bouding.height + offset
       })
     } else {
-      const tmpStyles = getTmpStyles()
+      let tmpStyles = LayerUtils.getTmpLayer().styles
+      const rotateDeg = tmpStyles.rotate
+      if (rotateDeg !== 0) {
+        GroupUtils.reselect()
+        tmpStyles = LayerUtils.getTmpLayer().styles
+      }
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-
       currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, 'bottom'))
+        const layerBounding = mathUtils.getBounding(layer)
+        const offset: { [index: string]: number } = {
+          x: layer.styles.x - layerBounding.x,
+          y: layer.styles.y - layerBounding.y,
+          width: layerBounding.width,
+          height: layerBounding.height
+        }
+        Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'bottom'))
       })
-      GroupUtils.recalcTmpStyle(currSelectedInfo.layers)
+      GroupUtils.reselect()
     }
   }
 
-  getAlignPos(tmpStyles: IStyle, layerStyle: IStyle, type: string): { [key: string]: number } {
+  getAlignPos(tmpStyles: IStyle, layerStyles: IStyle, offset: { [index: string]: number }, type: string): { [key: string]: number } {
     switch (type) {
       case 'left': {
         return {
-          x: 0
+          x: 0 + offset.x
         }
       }
       case 'centerHr': {
         return {
-          x: (tmpStyles.width / 2) - (layerStyle.width / 2)
+          x: (tmpStyles.initWidth / 2) - (layerStyles.width / 2)
         }
       }
       case 'right': {
         return {
-          x: tmpStyles.width - layerStyle.width
+          x: tmpStyles.initWidth - offset.width + offset.x
         }
       }
       case 'top': {
         return {
-          y: 0
+          y: 0 + offset.y
         }
       }
       case 'centerVr': {
         return {
-          y: (tmpStyles.height / 2) - (layerStyle.height / 2)
+          y: (tmpStyles.initHeight / 2) - (layerStyles.height / 2)
         }
       }
       case 'bottom': {
         return {
-          y: tmpStyles.height - layerStyle.height
+          y: tmpStyles.initHeight - offset.height + offset.y
         }
       }
       default: {

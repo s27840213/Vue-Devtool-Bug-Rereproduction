@@ -67,14 +67,13 @@ export default Vue.extend({
       return styles
     },
     scaleStyles() {
-      // return {
-      //   transform: `
-      //   translateX(${(this.config.styles.width - this.config.styles.initWidth) / 2}px)
-      //   translateY(${(this.config.styles.height - this.config.styles.initHeight) / 2}px)
-      // }
+      /**
+       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
+       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
+       */
       return {
         transform: `scale(${this.config.styles.scale})`,
-        'transform-style': this.config.type === 'group' ? 'flat' : 'preserve-3d'
+        'transform-style': this.config.type === 'group' ? 'flat' : (this.config.type === 'tmp' && this.config.styles.zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
     onDrop(e: DragEvent) {

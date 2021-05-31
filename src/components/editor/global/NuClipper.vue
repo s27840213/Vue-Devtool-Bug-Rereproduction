@@ -5,7 +5,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   data() {

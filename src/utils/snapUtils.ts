@@ -36,12 +36,7 @@ class SnapUtils {
     const layers = store.getters.getLayers(this.pageIndex)
     layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (!layer.active) {
-        const rect = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
-          x: layer.styles.x,
-          y: layer.styles.y,
-          width: layer.styles.width,
-          height: layer.styles.height
-        })
+        const rect = MathUtils.getBounding(layer)
 
         v.push(...[rect.x, rect.x + rect.width / 2, rect.x + rect.width])
         h.push(...[rect.y, rect.y + rect.height / 2, rect.y + rect.height])
@@ -57,12 +52,7 @@ class SnapUtils {
    * Get the edges and center that will trigger snapping
    */
   getLayerSnappingEdges(layer: IShape | IText | IImage | IGroup | ITmp): ISnaplineInfo {
-    const layerBounding = MathUtils.getBounding(layer.styles.rotate, MathUtils.getCenter(layer.styles), {
-      x: layer.styles.x,
-      y: layer.styles.y,
-      width: layer.styles.width,
-      height: layer.styles.height
-    })
+    const layerBounding = MathUtils.getBounding(layer)
     const layerStyles = {
       x: layer.styles.x,
       y: layer.styles.y,

@@ -2,9 +2,17 @@ button {
 	outline: none;
 	border: none;
 	cursor: pointer;
+	background-color: transparent;
 }
 
 input {
 	outline: none;
 	border: none;
+	width: 100%;
+}
+
+select {
+	outline: none;
+	border: none;
+	width: 100%;
 }

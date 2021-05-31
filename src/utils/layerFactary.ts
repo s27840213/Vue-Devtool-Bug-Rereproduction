@@ -3,12 +3,11 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
-  newImage(pageIndex: number, config: any): IImage {
+  newImage(config: IImage): IImage {
     const [width, height] = [config.styles.width, config.styles.height]
     const basicConfig = {
       type: 'image',
-      pageIndex: pageIndex,
-      src: '',
+      src: 'none',
       clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
@@ -37,15 +36,15 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newText(pageIndex: number, config: any): IImage {
+  newText(config: any): IText {
     const basicConfig = {
       type: 'text',
       text: '',
       widthLimit: '',
       textEditable: false,
-      pageIndex: pageIndex,
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: 0,
         y: 0,
@@ -60,7 +59,7 @@ class LayerFactary {
         zindex: -1,
         opacity: 100,
         font: 'Lobster',
-        weight: 'bold',
+        weight: 'normal',
         align: 'left',
         lineHeight: 20,
         color: '#000000',
@@ -72,15 +71,16 @@ class LayerFactary {
       }
     }
     Object.assign(basicConfig.styles, config.styles)
+    // delete config.styles
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
+  newGroup(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     return {
-      pageIndex: pageIndex,
       type: 'group',
       active: false,
       shown: false,
+      locked: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -99,12 +99,12 @@ class LayerFactary {
     }
   }
 
-  newTmp(pageIndex: number, styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
+  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
-      pageIndex: pageIndex,
       type: 'tmp',
       active: true,
       shown: false,
+      locked: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -123,13 +123,13 @@ class LayerFactary {
     }
   }
 
-  newShape(pageIndex: number, config: any): IImage {
+  newShape(config: IShape): IShape {
     const basicConfig = {
       type: 'shape',
-      pageIndex: pageIndex,
       active: false,
       shown: false,
       path: '',
+      locked: false,
       styles: {
         x: 0,
         y: 0,

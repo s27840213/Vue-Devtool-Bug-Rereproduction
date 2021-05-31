@@ -8,7 +8,8 @@
           @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
-          @click="onClick"
+          @click.left="onClick"
+          @click.right.stop="onRightClick"
           @mousedown.left.stop="moveStart"
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
@@ -18,7 +19,7 @@
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
           :contenteditable="config.textEditable")
-      div(v-if="isActive && !isControlling"
+      div(v-if="isActive && !isControlling && !isLocked"
           class="control-point-wrapper"
           :style="Object.assign(styles(), {'pointer-events': 'none'})")
           div(v-for="(scaler, index)  in controlPoints.scalers"
@@ -36,7 +37,6 @@
           div(class="rotaterWrapper")
             div(class="rotater" @mousedown.left.stop="rotateStart")
 </template>
-// @dblclick="onDblClick"
 <script lang="ts">
 import Vue from 'vue'
 import MathUtils from '@/utils/mathUtils'
@@ -46,6 +46,8 @@ import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
+import { IControlPoints, IResizer } from '@/interfaces/controller'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -78,6 +80,7 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
+    this.textInit()
   },
   computed: {
     ...mapGetters({
@@ -94,7 +97,7 @@ export default Vue.extend({
     getLayerType(): string {
       return this.config.type
     },
-    getControlPoints(): any {
+    getControlPoints(): IControlPoints {
       return this.config.controlPoints
     },
     isActive(): boolean {
@@ -102,6 +105,9 @@ export default Vue.extend({
     },
     isShown(): boolean {
       return this.config.shown
+    },
+    isLocked(): boolean {
+      return this.config.locked
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -126,11 +132,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerProps: 'UPDATE_layerProps',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
-      setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
+      setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
-    resizerBarStyles(resizer: any) {
+    resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles()
       const HW = {
@@ -142,11 +148,13 @@ export default Vue.extend({
     },
     resizer(controlPoints: any) {
       let resizer = controlPoints.resizers
-      if (this.config.type === 'text') {
+      if (this.getLayerType === 'text') {
         resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
           : controlPoints.resizers.slice(0, 2)
-      } else if (this.config.type === 'image') {
+      } else if (this.getLayerType === 'image') {
         resizer = this.config.isClipped ? [] : resizer
+      } else if (this.getLayerType === 'shape' && this.config.category !== 'rect') {
+        resizer = []
       }
       return resizer
     },
@@ -155,7 +163,7 @@ export default Vue.extend({
       const styles = {
         // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0.5)',
+        color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.isGetMoved ? '#00000000' : '#000000',
         'pointer-events': this.config.textEditable ? 'initial' : 'none',
@@ -163,13 +171,13 @@ export default Vue.extend({
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
     },
+    textInit() {
+      const text = this.$refs.content as HTMLElement
+      text.innerHTML = this.getTextContent
+    },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: {
-          shown
-        }
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
       })
     },
     compositionStart() {
@@ -183,16 +191,13 @@ export default Vue.extend({
       el.removeEventListener('compositionend', this.compositionEnd)
     },
     triggerTextEditor(pageIndex: number, layerIndex: number) {
-      this.updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: {
-          textEditable: true
-        }
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        textEditable: true
       })
     },
     styles() {
-      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+      // const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
+      const zindex = (this.layerIndex + 1) * 50
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
@@ -204,10 +209,11 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      console.log(this.config)
-      this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      window.addEventListener('mouseup', this.moveEnd)
-      window.addEventListener('mousemove', this.moving)
+      if (!this.config.locked) {
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        window.addEventListener('mouseup', this.moveEnd)
+        window.addEventListener('mousemove', this.moving)
+      }
 
       if (this.config.type === 'text') {
         const text = this.$refs.content as HTMLElement
@@ -217,17 +223,6 @@ export default Vue.extend({
         ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
       }
       if (this.config.type !== 'tmp') {
-        /**
-         * @param {number} targetIndex - target index is used to determine the selected target layer after all layers in tmp being pushed into page
-         * the reason why we need this variable is when we ungroup a tmp layer and push all selected layers into page
-         * the original layerIndex may represent the different layer, and this condition will happen when the tmp index is smaller than the layer you click
-         * for example, assume there are three layers in the page 0, and then we select layer 0 and layer 1 to generate a tmp layer(it will become layer 0)
-         * and the original layer 2 will become layer 1. Once we click on the this layer 1(layerIndex = 1), the layer 0(tmp layer) will be ungroup(deselect), push all layers into page
-         * and the original layer 1 will become layer 2, so if we directly use layerIndex 1 to select the layer we will get the wrong target
-         * Thus, we need to do some condition checking to prevent this error
-         */
-        // const targetIndex = (GroupUtils.tmpIndex > this.layerIndex || GroupUtils.tmpIndex < 0 || event.metaKey || GroupUtils.tmpLayers.length === 0)
-        //   ? this.layerIndex : this.layerIndex + GroupUtils.tmpLayers.length - 1
         let targetIndex = this.layerIndex
         if (!this.isActive) {
           if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
@@ -549,7 +544,7 @@ export default Vue.extend({
       const lineB = ControlUtils.getLength(vectB)
       const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
 
-      let angle = Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI
+      let angle = Math.round(Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI)
       if (angle) {
         if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
           angle *= -1
@@ -723,6 +718,18 @@ export default Vue.extend({
     onDblClick() {
       if (this.getLayerType !== 'image') return
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
+    },
+    onRightClick(event: MouseEvent) {
+      this.setIsLayerDropdownsOpened(true)
+      if (this.currSelectedInfo.index < 0) {
+        GroupUtils.select([this.layerIndex])
+      }
+      this.$nextTick(() => {
+        const el = document.querySelector('.dropdowns--layer') as HTMLElement
+        const mousePos = MouseUtils.getMouseAbsPoint(event)
+        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+        el.focus()
+      })
     }
   }
 })
