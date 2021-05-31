@@ -24,6 +24,14 @@ class FileUtils {
     downloadAnchorNode.setAttribute('download', exportName + '.json')
     downloadAnchorNode.click()
   }
+
+  importFont(callback: (this: HTMLInputElement, ev: Event) => any) {
+    const inputNode = document.createElement('input')
+    inputNode.setAttribute('type', 'file')
+    inputNode.setAttribute('accept', '.ttf,.ttc,.otf')
+    inputNode.click()
+    inputNode.addEventListener('change', callback, false)
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

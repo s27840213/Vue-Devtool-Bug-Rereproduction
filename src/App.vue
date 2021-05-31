@@ -19,11 +19,11 @@
         @blur.native="setIsPageDropdownsOpened(false)"
         @click.native="setIsPageDropdownsOpened(false)"
         tabindex="0")
-      chrome-picker(v-show="isPageDropdownsOpened"
-        @blur.native="setIsPageDropdownsOpened(false)"
-        @click.native="setIsPageDropdownsOpened(false)"
-        tabindex="0"
-        v-model="colors")
+      //- chrome-picker(v-show="isPageDropdownsOpened"
+      //-   @blur.native="setIsPageDropdownsOpened(false)"
+      //-   @click.native="setIsPageDropdownsOpened(false)"
+      //-   tabindex="0"
+      //-   v-model="colors")
 </template>
 
 <script lang="ts">
@@ -120,6 +120,7 @@ export default Vue.extend({
   top: 0;
   left: 0;
   pointer-events: none;
+  z-index: setZindex(coordinate);
   &__val {
     position: absolute;
     color: red;

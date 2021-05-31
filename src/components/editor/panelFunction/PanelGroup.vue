@@ -1,6 +1,9 @@
 <template lang="pug">
   div(class="panel-group")
-    btn(class="full-width" :type="'primary-lg'" @click.native=" isGroup()? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup()?'Ungroup':'Group'}}
+    btn(v-show="currSelectedInfo.layers.length>1"
+      class="full-width"
+      :type="'primary-lg'"
+      @click.native=" isGroup()? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup()?'Ungroup':'Group'}}
     action-bar(class="flex-between")
       svg-icon(v-for="(icon,index) in mappingIcons('align')"
         :key="`align-icon-${index}`"

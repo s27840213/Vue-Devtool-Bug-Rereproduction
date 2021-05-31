@@ -202,6 +202,31 @@ class AlignUtils {
     }
   }
 
+  distribueHr(): void {
+    console.log('empty')
+  }
+
+  distribueVr(): void {
+    let tmpStyles = LayerUtils.getTmpLayer().styles
+    const rotateDeg = tmpStyles.rotate
+    if (rotateDeg !== 0) {
+      GroupUtils.reselect()
+      tmpStyles = LayerUtils.getTmpLayer().styles
+    }
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
+      const layerBounding = mathUtils.getBounding(layer)
+      const offset: { [index: string]: number } = {
+        x: layer.styles.x - layerBounding.x,
+        y: layer.styles.y - layerBounding.y,
+        width: layerBounding.width,
+        height: layerBounding.height
+      }
+      Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'bottom'))
+    })
+    GroupUtils.reselect()
+  }
+
   getAlignPos(tmpStyles: IStyle, layerStyles: IStyle, offset: { [index: string]: number }, type: string): { [key: string]: number } {
     switch (type) {
       case 'left': {
