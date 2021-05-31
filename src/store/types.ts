@@ -22,6 +22,7 @@ export interface IEditorState {
   isOrderDropdownsOpened: boolean,
   isLayerDropdownsOpened: boolean
   isPageDropdownsOpened: boolean,
+  isColorPickerOpened: boolean
 }
 
 export enum SidebarPanelType {

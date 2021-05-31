@@ -2,18 +2,18 @@
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar
-      span(class="body-2 text-gray-2") Pass Through
-      svg-icon(class="pointer"
-        :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+      select(v-model="layerFont")
+        option(v-for="font in fontPreset" :selected="layerFont === font") {{font}}
     div(class="text-setting__row2")
       property-bar
         span(class="body-2 text-gray-2") 40
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color-picker")
-        div(class="color-slip" class="bg-gray-1")
+        div(class="color-slip"
+          :style="{'background-color': textColor}")
         div(class="full-width text-left ml-10")
-          span(class="body-2 text-gray-2") #222222
+          input(class="body-2 text-gray-2" v-model="textColor")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         :key="`gp-action-icon-${index}`"
@@ -43,10 +43,56 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   components: {
     SearchBar
+  },
+  data() {
+    return {
+      fontPreset: [
+        'sans-serif',
+        'Manrop',
+        'Lobster'
+      ]
+    }
+  },
+  computed: {
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSelectedIndex: 'getCurrSelectedIndex',
+      getLayer: 'getLayer'
+    }),
+    layerFont: {
+      get() {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            font: value
+          }
+        })
+      }
+    },
+    textColor: {
+      get() {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.color
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            color: value
+          }
+        })
+      }
+    }
   },
   methods: {
     mappingIcons(type: string) {

@@ -6,7 +6,7 @@
       div(class="coordinate__val coordinate__height")
         span {{coordinateHeight}}px
     router-view
-    div(class="dropdowns-area")
+    div(class="popup-area")
       dropdowns-order(v-show="isOrderDropdownsOpened"
         :type="'order'"
         @blur.native="setIsOrderDropdownsOpened(false)"
@@ -19,6 +19,11 @@
         @blur.native="setIsPageDropdownsOpened(false)"
         @click.native="setIsPageDropdownsOpened(false)"
         tabindex="0")
+      chrome-picker(v-show="isPageDropdownsOpened"
+        @blur.native="setIsPageDropdownsOpened(false)"
+        @click.native="setIsPageDropdownsOpened(false)"
+        tabindex="0"
+        v-model="colors")
 </template>
 
 <script lang="ts">
@@ -27,18 +32,24 @@ import { mapGetters, mapMutations } from 'vuex'
 import DropdownsOrder from '@/components//dropdowns/DropdownsOrder.vue'
 import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
+import { Chrome } from 'vue-color'
 
 export default Vue.extend({
   components: {
     DropdownsOrder,
     DropdownsLayer,
-    DropdownsPage
+    DropdownsPage,
+    'chrome-picker': Chrome
   },
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0
+      coordinateHeight: 0,
+      colors: {
+        hex: '#194d33',
+        a: 1
+      }
     }
   },
   mounted() {
@@ -78,6 +89,11 @@ export default Vue.extend({
       this.$nextTick(() => {
         this._setIsPageDropdownsOpened(isOpened)
       })
+    },
+    setIsColorPickerOpened(isOpened: boolean) {
+      this.$nextTick(() => {
+        this._setIsPageDropdownsOpened(isOpened)
+      })
     }
   }
 })
@@ -100,7 +116,6 @@ export default Vue.extend({
   border-bottom: 1px solid red;
   opacity: 0.5;
   box-sizing: border-box;
-  z-index: setZindex(coordinate);
   position: absolute;
   top: 0;
   left: 0;
@@ -122,11 +137,16 @@ export default Vue.extend({
     transform: translate(-50%, 0);
   }
 }
-.dropdowns-area {
+.popup-area {
   @include size(100%, 100%);
   position: absolute;
   left: 0;
   top: 0;
   overflow: hidden;
+  z-index: setZindex(dropdowns);
+  pointer-events: none;
+  > div {
+    pointer-events: initial;
+  }
 }
 </style>

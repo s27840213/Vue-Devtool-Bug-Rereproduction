@@ -1098,6 +1098,13 @@
   dependencies:
     source-map "^0.6.1"
 
+"@types/vue-color@^2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@types/vue-color/-/vue-color-2.4.3.tgz#a5bf386d4606ed158cba5d5a20e0f10f01860f01"
+  integrity sha512-BCtwKNPi+XUklM9TdQL0Oo86XL9B+DxXpWnNeuMXt0iWdzjmOfyAsCAcxBTxC7mLcWup3T76oP+dsuRwtuh/gQ==
+  dependencies:
+    vue "^2.0.0"
+
 "@types/webpack-dev-server@^3.11.0":
   version "3.11.3"
   resolved "https://registry.yarnpkg.com/@types/webpack-dev-server/-/webpack-dev-server-3.11.3.tgz#237e26d87651cf95490dcd356f568c8c84016177"
@@ -9495,7 +9502,7 @@ vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue@^2.6.11:
+vue@^2.0.0, vue@^2.6.11:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.12.tgz#f5ebd4fa6bd2869403e29a896aed4904456c9123"
   integrity sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg==
