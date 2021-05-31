@@ -35,7 +35,7 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newText(config: IText): IText {
+  newText(config: any): IText {
     const basicConfig = {
       type: 'text',
       text: '',
@@ -57,7 +57,7 @@ class LayerFactary {
         zindex: -1,
         opacity: 100,
         font: 'Lobster',
-        weight: 'bold',
+        weight: 'normal',
         align: 'left',
         lineHeight: 20,
         color: '#000000',
@@ -69,6 +69,7 @@ class LayerFactary {
       }
     }
     Object.assign(basicConfig.styles, config.styles)
+    // delete config.styles
     return Object.assign(basicConfig, config)
   }
 

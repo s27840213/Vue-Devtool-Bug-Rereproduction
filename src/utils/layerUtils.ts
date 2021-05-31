@@ -1,5 +1,5 @@
 // import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -30,29 +30,21 @@ class LayerUtils {
     store.commit('DELETE_selectedLayer')
   }
 
+  getLayer(pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | ITmp {
+    return store.getters.getLayer(pageIndex, layerIndex)
+  }
+
+  getTmpLayer(): ITmp {
+    return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)
+  }
+
   updateLayersOrder(pageIndex: number) {
     store.commit('UPDATE_layerOrders', {
       pageIndex: pageIndex
     })
   }
 
-  // store.commit('UPDATE_layerProps', {
-  //   pageIndex: lastSelectedPageIndex,
-  //   layerIndex: store.getters.getCurrSelectedIndex,
-  //   props: {
-  //     type: 'tmp',
-  //     active: true
-  //   }
-  // })
-  // store.commit('UPDATE_layerStyles', {
-  //   pageIndex: lastSelectedPageIndex,
-  //   layerIndex: store.getters.getCurrSelectedIndex,
-  //   styles: {
-  //     zindex: -1
-  //   }
-  // })
-
-  updateLayersStyles(pageIndex: number, layerIndex: number, styles: { [index: string]: number | string | boolean }) {
+  updateLayerStyles(pageIndex: number, layerIndex: number, styles: { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,

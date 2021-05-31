@@ -11,18 +11,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import PanelTemplate from '@/components/editor/panel/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panel/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panel/PanelObject.vue'
-import PanelBackground from '@/components/editor/panel/PanelBackground.vue'
-import PanelText from '@/components/editor/panel/PanelText.vue'
-import PanelFile from '@/components/editor/panel/PanelFile.vue'
-import PanelBrand from '@/components/editor/panel/PanelBrand.vue'
-import PanelGroup from '@/components/editor/panel/PanelGroup.vue'
-import PanelTextSetting from '@/components/editor/panel/PanelTextSetting.vue'
-import PanelColorPicker from '@/components/editor/panel/PanelColorPicker.vue'
-import PanelPageSetting from '@/components/editor/panel/PanelPageSetting.vue'
-import PanelPhotoSetting from '@/components/editor/panel/PanelPhotoSetting.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
 import { mapGetters } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
@@ -35,12 +30,7 @@ export default Vue.extend({
     PanelBackground,
     PanelText,
     PanelFile,
-    PanelBrand,
-    PanelGroup,
-    PanelTextSetting,
-    PanelColorPicker,
-    PanelPageSetting,
-    PanelPhotoSetting
+    PanelBrand
   },
   data() {
     return {
@@ -85,7 +75,7 @@ export default Vue.extend({
   position: relative;
   box-sizing: border-box;
   z-index: setZindex("function-panel");
-  box-shadow: 1px 0 4px setColor(blue-1, 0.1);
+  box-shadow: 2px 0 4px setColor(blue-1, 0.2);
 }
 
 .btn-pack {
@@ -94,7 +84,7 @@ export default Vue.extend({
   top: 50%;
   right: 0;
   transform: translate3d(100%, -70%, 0);
-  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.05));
+  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.1));
   cursor: pointer;
 }
 </style>

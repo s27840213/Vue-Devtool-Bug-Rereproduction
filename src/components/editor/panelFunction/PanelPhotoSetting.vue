@@ -68,8 +68,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .photo-setting {
   text-align: left;
-  &__title {
-  }
   > div:nth-child(n + 1) {
     margin-top: 15px;
   }

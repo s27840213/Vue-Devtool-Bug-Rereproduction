@@ -498,7 +498,7 @@ export default Vue.extend({
       const lineB = ControlUtils.getLength(vectB)
       const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
 
-      let angle = Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI
+      let angle = Math.round(Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI)
       if (angle) {
         if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
           angle *= -1

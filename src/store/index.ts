@@ -11,8 +11,8 @@ Vue.use(Vuex)
 const getDefaultState = (): IEditorState => ({
   pages: [
     {
-      width: 600,
-      height: 800,
+      width: 1080,
+      height: 1080,
       backgroundColor: '#ffffff',
       backgroundImage: {
         src: 'none',
@@ -49,46 +49,6 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [
       ]
-    },
-    {
-      width: 600,
-      height: 800,
-      backgroundColor: '#ffffff',
-      backgroundImage: {
-        src: 'none',
-        config: {
-          type: 'image',
-          pageIndex: -1,
-          src: '',
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          imgControl: false,
-          styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
-            width: 0,
-            height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
-            zindex: -1,
-            opacity: 100
-          }
-        },
-        posX: -1,
-        posY: -1
-      },
-      name: 'Default Page',
-      layers: []
     }
   ],
   currSidebarPanelType: SidebarPanelType.template,
@@ -188,6 +148,15 @@ const getters: GetterTree<IEditorState, unknown> = {
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     state.pages = newPages
+  },
+  UPDATE_pageProps(state: IEditorState, updateInfo: { pageIndex: number, props: { [key: string]: string | number } }) {
+    /**
+     * This Mutation is used to update the layer's properties excluding styles
+     */
+    console.log(updateInfo)
+    Object.entries(updateInfo.props).forEach(([k, v]) => {
+      state.pages[updateInfo.pageIndex][k] = v
+    })
   },
   SET_layers(state: IEditorState, updateInfo: { pageIndex: number, newLayers: Array<IShape | IText | IImage | IGroup> }) {
     state.pages[updateInfo.pageIndex].layers = [...updateInfo.newLayers]

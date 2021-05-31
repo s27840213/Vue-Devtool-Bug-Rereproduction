@@ -4,6 +4,7 @@
 $buttons: (
 	primary: setColor(blue-1),
 	secondary: setColor(blue-2),
+	tertiary: setColor(blue-3),
 	white: setColor(white),
 	inactive: setColor(gray-4),
 	icon: none
@@ -12,6 +13,7 @@ $buttons: (
 $textColor: (
 	primary: setColor(white),
 	secondary: setColor(blue-1),
+	tertiary: setColor(white),
 	whites: setColor(blue-1),
 	inactive: setColor(gray-2),
 	icon: none
@@ -57,3 +59,28 @@ $textColor: (
 		}
 	}
 };
+
+
+.btn-text {
+	&-heading {
+		@include heading-3;
+		background-color: setColor(blue-3);
+		color: setColor(white);
+	}
+
+	&-subheading {
+		@include subtitle-1;
+		background-color: setColor(blue-3);
+		color: setColor(white);
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
+
+	&-body {
+		@include label-mid();
+		background-color: setColor(blue-3);
+		color: setColor(white);
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+}

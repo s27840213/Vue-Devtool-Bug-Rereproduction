@@ -3,6 +3,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import AlignUtils from '@/utils/alignUtils'
 import OrderUtils from './orderUtils'
 import Vue from 'vue'
+import groupUtils from './groupUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align', 'distribute-vertically', 'distribute-horizontally']
 const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
@@ -67,6 +68,7 @@ class MappingUtils {
         return OrderUtils.bringToBack
       }
       case 'distribute-vertically': {
+        return groupUtils.reselect()
         break
       }
       case 'distribute-horizontally': {

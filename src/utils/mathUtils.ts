@@ -1,5 +1,5 @@
 import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, ITmp } from '@/interfaces/layer'
-
+import { IBounding } from '@/interfaces/math'
 import store from '@/store'
 
 class MathUtils {
@@ -29,7 +29,7 @@ class MathUtils {
     }
   }
 
-  getBounding(layer: IShape | IText | IImage | IGroup | ITmp) {
+  getBounding(layer: IShape | IText | IImage | IGroup | ITmp): IBounding {
     const angle = layer.styles.rotate
     const origin = this.getCenter(layer.styles)
     const initStyles = { x: layer.styles.x, y: layer.styles.y, width: layer.styles.width, height: layer.styles.height }

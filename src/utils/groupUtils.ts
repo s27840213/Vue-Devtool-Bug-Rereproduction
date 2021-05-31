@@ -99,7 +99,7 @@ class GroupUtils {
         type: 'tmp',
         active: true
       })
-      LayerUtils.updateLayersStyles(lastSelectedPageIndex, currSelectedIndex, {
+      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedIndex, {
         zindex: -1
       })
       this.reset()
@@ -189,14 +189,26 @@ class GroupUtils {
           active: false
         })
       } else {
-        const tmpStyles = getTmpLayer()
+        const tmpLayer = getTmpLayer()
         LayerUtils.deleteSelectedLayer()
-        LayerUtils.addLayersToPos(lastSelectedPageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpStyles)], store.getters.getCurrSelectedIndex)
+        LayerUtils.addLayersToPos(lastSelectedPageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
         LayerUtils.updateLayersOrder(lastSelectedPageIndex)
       }
       this.reset()
       ZindexUtils.reassignZindex(lastSelectedPageIndex)
     }
+  }
+
+  reselect() {
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const currSelectedIndex = currSelectedInfo.index
+    const currSelectedLayersNum = currSelectedInfo.layers.length
+    let selectedIndexs = new Array(currSelectedLayersNum).fill(currSelectedIndex)
+    selectedIndexs = selectedIndexs.map((selectedIndex: number, index: number) => {
+      return selectedIndex + index
+    })
+    this.deselect()
+    this.select([...selectedIndexs])
   }
 
   reset() {
@@ -271,18 +283,16 @@ class GroupUtils {
     return layers
   }
 
+  // When doing alignment, we need to change the bouding of tmp layers
   recalcTmpStyle(layers: Array<IShape | IText | IImage | IGroup>) {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const tmpLayer = getTmpLayer()
-    tmpLayer.rotate = 0
     const tmpStyles = calcTmpProps(this.mapLayersToPage(layers, tmpLayer))
     const currSelectedLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, tmpLayer), tmpStyles)
-    console.log(currSelectedLayers)
-
-    this.set(currSelectedInfo.index, currSelectedLayers)
+    const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
 
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    LayerUtils.updateLayersStyles(lastSelectedPageIndex, currSelectedInfo.index, tmpStyles)
+    LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, tmp.styles)
     store.commit('UPDATE_layersInTmp', {
       layers: currSelectedLayers
     })

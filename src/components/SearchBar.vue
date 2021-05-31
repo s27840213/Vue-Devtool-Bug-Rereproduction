@@ -2,7 +2,7 @@
   div(class="search-bar bg-gray-6")
     input(class="search-bar__input"
       type="text"
-      placeholder="Search from our template")
+      :placeholder="placeholder")
     svg-icon(:iconName="'search'" :iconColor="'gray-3'" :iconWidth="'15px'")
 </template>
 
@@ -11,6 +11,12 @@ import Vue from 'vue'
 
 export default Vue.extend({
   components: {
+  },
+  props: {
+    placeholder: {
+      type: String,
+      default: 'Search from our template'
+    }
   }
 })
 </script>
