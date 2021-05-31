@@ -201,11 +201,8 @@ class GroupUtils {
 
   reselect() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const currSelectedIndex = currSelectedInfo.index
-    const currSelectedLayersNum = currSelectedInfo.layers.length
-    let selectedIndexs = new Array(currSelectedLayersNum).fill(currSelectedIndex)
-    selectedIndexs = selectedIndexs.map((selectedIndex: number, index: number) => {
-      return selectedIndex + index
+    const selectedIndexs = currSelectedInfo.layers.map((layer: IShape | IText | IImage | IGroup, index: number) => {
+      return layer.styles.zindex - 1
     })
     this.deselect()
     this.select([...selectedIndexs])
