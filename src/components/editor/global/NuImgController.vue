@@ -149,7 +149,7 @@ export default Vue.extend({
       this.setCursorStyle('move')
       event.preventDefault()
 
-      const baseOffset = {
+      const baseLine = {
         x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
@@ -162,11 +162,11 @@ export default Vue.extend({
       offsetPos.x /= this.getLayerScale
       offsetPos.y /= this.getLayerScale
       const imgPos = this.imgPosMapper(offsetPos)
-      if (Math.abs(imgPos.x - baseOffset.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
+      if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
       }
-      if (Math.abs(imgPos.y - baseOffset.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
+      if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
       }
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
     },
@@ -250,7 +250,7 @@ export default Vue.extend({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
 
-      const baseOffset = {
+      const baseLine = {
         x: -width / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
@@ -264,14 +264,14 @@ export default Vue.extend({
       // offsetPos.y /= this.getLayerScale
       // const imgPos = this.imgPosMapper(offsetPos)
       // let reachLimit = false
-      if (Math.abs(img.x - baseOffset.x) > translateLimit.width) {
+      if (Math.abs(img.x - baseLine.x) > translateLimit.width) {
         return
         // img.x = img.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
         // img.y = this.getImgY
         // width = tmpHW.width
         // height = tmpHW.height
       }
-      if (Math.abs(img.y - baseOffset.y) > translateLimit.height) {
+      if (Math.abs(img.y - baseLine.y) > translateLimit.height) {
         return
         // const tmpY = img.y
         // img.y = img.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight

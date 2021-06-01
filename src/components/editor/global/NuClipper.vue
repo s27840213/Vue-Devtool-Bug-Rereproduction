@@ -34,8 +34,6 @@ export default Vue.extend({
         HW.width = this.config.styles.initWidth
         HW.height = this.config.styles.initHeight
       }
-      console.log('this.config.clipPath')
-      console.log(this.config)
       return {
         width: `${HW.width}px`,
         height: `${HW.height}px`,
