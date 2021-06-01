@@ -71,7 +71,6 @@ class LayerFactary {
       }
     }
     Object.assign(basicConfig.styles, config.styles)
-    // delete config.styles
     return Object.assign(basicConfig, config)
   }
 

@@ -3,9 +3,9 @@
     div(class="panel-text__title mb-15")
       span(class="text-blue-1 label-lg") Text
     div(class="panel-text__buttons")
-      btn(class="full-width mb-10" :type="'text-heading'" @click="addText('heading')") Heading
-      btn(class="full-width mb-10" :type="'text-subheading'" @click="addText('subheading')") Subheading
-      btn(class="full-width" :type="'text-body'" @click="addText('body')") Body
+      btn(class="full-width mb-10" :type="'text-heading'" @click.native="addText('heading')") Heading
+      btn(class="full-width mb-10" :type="'text-subheading'" @click.native="addText('subheading')") Subheading
+      btn(class="full-width" :type="'text-body'" @click.native="addText('body')") Body
     tmp-text
 </template>
 
@@ -75,8 +75,8 @@ export default Vue.extend({
   },
   methods: {
     addText(type: string) {
-      const newTextLayer = LayerFactary.newText(this.generateFormat(type))
-      LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+      // const newTextLayer = LayerFactary.newText(this.generateFormat(type))
+      // LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
     },
     generateFormat(type: string) {
       const pageStyles = this.getPage(this.lastSelectedPageIndex)

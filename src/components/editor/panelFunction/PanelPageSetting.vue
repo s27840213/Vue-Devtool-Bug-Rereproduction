@@ -30,6 +30,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -82,6 +83,7 @@ export default Vue.extend({
             width: value
           }
         })
+        StepsUtils.record()
       }
     },
     pageHeight: {
@@ -95,6 +97,7 @@ export default Vue.extend({
             height: value
           }
         })
+        StepsUtils.record()
       }
     }
   },
@@ -110,6 +113,7 @@ export default Vue.extend({
           height: format.height
         }
       })
+      StepsUtils.record()
     }
   }
 })

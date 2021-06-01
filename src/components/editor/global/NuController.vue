@@ -45,6 +45,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
@@ -209,6 +210,7 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      this.isControlling = true
       if (!this.config.locked) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
@@ -240,7 +242,6 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.isActive) {
         event.preventDefault()
-        this.isControlling = true
         this.setCursorStyle('move')
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
@@ -273,8 +274,9 @@ export default Vue.extend({
       if (this.isActive) {
         this.isControlling = false
         this.setCursorStyle('default')
-        document.documentElement.removeEventListener('mouseup', this.moveEnd)
+        window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
+        StepsUtils.record()
       }
       setTimeout(() => {
         this.isGetMoved = false
@@ -282,8 +284,8 @@ export default Vue.extend({
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
-      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.isControlling = true
 
       this.initialWH = {
         width: this.getLayerWidth,
@@ -369,6 +371,8 @@ export default Vue.extend({
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
       }
       this.isControlling = false
+      StepsUtils.record()
+
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -510,14 +514,16 @@ export default Vue.extend({
     },
     resizeEnd() {
       this.isControlling = false
+      console.log('resize')
+      StepsUtils.record()
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
-      this.isControlling = true
       this.setCursorStyle('move')
+      this.isControlling = true
 
       const body = this.$refs.body as HTMLElement
       const rect = body.getBoundingClientRect()
@@ -556,6 +562,7 @@ export default Vue.extend({
     },
     rotateEnd() {
       this.isControlling = false
+      StepsUtils.record()
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
