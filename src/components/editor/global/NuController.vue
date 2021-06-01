@@ -65,7 +65,7 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
-      offsetHW: { width: 0, height: 0 },
+      imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       clickTime: new Date().toISOString(),
@@ -502,12 +502,12 @@ export default Vue.extend({
         offsetY = offsetHeight
       }
       if (this.resizeExceedLimit(this.initialWH.width, this.initialWH.height, offsetWidth, offsetHeight)) {
-        if (this.offsetHW.width === 0 && this.offsetHW.height === 0) {
+        if (this.imgBuffer.width === 0 && this.imgBuffer.height === 0) {
           this.imgScaling(width + offsetWidth, height + offsetHeight, 0, 0)
-          this.offsetHW.width = offsetWidth
-          this.offsetHW.height = offsetHeight
+          this.imgBuffer.width = offsetWidth
+          this.imgBuffer.height = offsetHeight
         }
-        this.imgScaling(width, height, offsetWidth - this.offsetHW.width, offsetHeight - this.offsetHW.height)
+        this.imgScaling(width, height, offsetWidth - this.imgBuffer.width, offsetHeight - this.imgBuffer.height)
       } else {
         this.imgClipping(width, height, offsetX, offsetY)
       }
@@ -543,9 +543,31 @@ export default Vue.extend({
         imgHeight = layerWidth * ratio
       }
       const imgPos = {
-        x: !this.control.isHorizon ? this.control.imgX - (imgWidth - this.imgInitWH.width) / 2 : this.control.imgX,
-        y: this.control.isHorizon ? this.control.imgY - (imgHeight - this.imgInitWH.height) / 2 : this.control.imgY
+        x: this.control.imgX,
+        y: this.control.imgY
       }
+      if (this.control.isHorizon) {
+        imgPos.y -= (imgHeight - this.imgInitWH.height) / 2
+        imgPos.x = this.config.styles.imgX
+      } else {
+        imgPos.x -= (imgWidth - this.imgInitWH.width) / 2
+        imgPos.y = this.config.styles.imgY
+      }
+      if (this.imgBuffer.x === 0 && this.imgBuffer.y === 0) {
+        this.imgBuffer.x = -(imgWidth - this.imgInitWH.width) / 2
+        this.imgBuffer.y = -(imgHeight - this.imgInitWH.height) / 2
+      }
+      // if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
+      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x - this.imgBuffer.x, imgPos.y - this.imgBuffer.y)
+      // } else {
+      //   // ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x - this.imgBuffer.x, imgPos.y - this.imgBuffer.y)
+      // }
+      // if (this.control.isHorizon) {
+      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, imgPos.y)
+      // } else {
+      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, this.config.styles.imgY)
+      // }
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth, imgHeight)
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
@@ -572,8 +594,10 @@ export default Vue.extend({
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
     },
     resizeEnd() {
-      this.offsetHW.width = 0
-      this.offsetHW.height = 0
+      this.imgBuffer.width = 0
+      this.imgBuffer.height = 0
+      this.imgBuffer.x = 0
+      this.imgBuffer.y = 0
       this.isControlling = false
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
