@@ -78,6 +78,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPages(state): Array<IPage> {
     return state.pages
   },
+  getPageSize(state: IEditorState) {
+    return {
+      width: state.pages[0].width,
+      height: state.pages[0].height
+    }
+  },
   getCurrSidebarPanelType(state): number {
     return state.currSidebarPanelType
   },

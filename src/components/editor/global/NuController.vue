@@ -1,10 +1,10 @@
 <template lang="pug">
   keep-alive
-    div
-      div(class="nu-controller"
+    div(class="nu-controller")
+      div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
-          :style="styles()"
+          :style="styles('')"
           @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
@@ -19,11 +19,15 @@
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
           :contenteditable="config.textEditable")
+        div(v-if="isActive && isLocked"
+            class="nu-controller__lock-icon")
+          svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
+            @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
-          class="control-point-wrapper"
-          :style="Object.assign(styles(), {'pointer-events': 'none'})")
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
           div(v-for="(scaler, index)  in controlPoints.scalers"
-              class="controller-point"
+              class="control-point"
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
@@ -32,10 +36,11 @@
             div(class="resize-bar"
                 :key="index * 2 + 1"
                 :style="resizerBarStyles(resizer)")
-            div(class="controller-point"
+            div(class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(class="rotaterWrapper")
             div(class="rotater" @mousedown.left.stop="rotateStart")
+              svg-icon(:iconName="'rotate'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -49,6 +54,8 @@ import StepsUtils from '@/utils/stepsUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import MappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   props: {
@@ -59,6 +66,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      MappingUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -139,7 +147,7 @@ export default Vue.extend({
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
-      const ControllerStyles = this.styles()
+      const ControllerStyles = this.styles('')
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height ? `${parseInt(ControllerStyles.width) - 20}px` : resizerStyle.width,
@@ -196,22 +204,22 @@ export default Vue.extend({
         textEditable: true
       })
     },
-    styles() {
-      // const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
-      const zindex = (this.layerIndex + 1) * 50
+    styles(type: string) {
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${2 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
+          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
     },
 
     moveStart(event: MouseEvent) {
-      this.isControlling = true
       if (!this.config.locked) {
+        this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
@@ -227,7 +235,7 @@ export default Vue.extend({
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
-          if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
+          if (!GeneralUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) && this.currSelectedInfo.index >= 0) {
             GroupUtils.deselect()
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedPageIndex(this.pageIndex)
@@ -723,7 +731,7 @@ export default Vue.extend({
       return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Shift'
     },
     onDblClick() {
-      if (this.getLayerType !== 'image') return
+      if (this.getLayerType !== 'image' || this.isLocked) return
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     onRightClick(event: MouseEvent) {
@@ -744,15 +752,38 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  // z-index: setZindex("nu-controller");
-  white-space: pre-wrap;
-  position: absolute;
-  box-sizing: border-box;
-  &:hover {
-    cursor: pointer;
+  &__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: pre-wrap;
+    position: absolute;
+    box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  &__ctrl-points {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
+    pointer-events: "none";
+  }
+
+  &__lock-icon {
+    @include size(30px, 30px);
+    @include flexCenter;
+    position: absolute;
+    right: -15px;
+    bottom: -15px;
+    border: 1px solid setColor(red);
+    border-radius: 50%;
+    background-color: setColor(white);
   }
 }
 
@@ -763,37 +794,24 @@ export default Vue.extend({
   color: "#00000000";
 }
 
-.controller-point {
+.control-point {
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
   border: 1.5px solid setColor(blue-2);
   transform-style: preserve-3d;
 }
-.control-point-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  // z-index: setZindex("nu-controller");
-  position: absolute;
-  box-sizing: border-box;
-  &:hover {
-    cursor: pointer;
-  }
-  pointer-events: "none";
-}
+
 .rotaterWrapper {
   position: absolute;
   top: 100%;
   padding: 20px;
 }
 .rotater {
+  @include size(20px, 20px);
   position: relative;
   left: 0;
   top: 0;
-  width: 10px;
-  height: 10px;
-  background-color: blue;
   pointer-events: auto;
   cursor: move;
 }
