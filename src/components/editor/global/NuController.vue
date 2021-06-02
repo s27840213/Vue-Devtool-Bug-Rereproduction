@@ -720,11 +720,15 @@ export default Vue.extend({
       } else {
         console.log(e.key.length)
         ControlUtils.textStopPropagation(e)
-        ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning)
+        ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
         if (e.metaKey && e.key === 'z') {
+          console.log('undo')
           StepsUtils.undo()
-          // const text = this.$refs.content as HTMLElement
-          // text.innerHTML = this.getTextContent
+          setTimeout(() => {
+            const text = this.$refs.text as HTMLElement
+            text.innerHTML = this.getTextContent
+            text.style.width = `${this.getLayerWidth}px`
+          }, 0)
           return
         }
         if (this.isNoCharactor(e)) return
@@ -750,8 +754,8 @@ export default Vue.extend({
             text: text.innerHTML
           }
           const textSize = {
-            width: Math.ceil(text.getBoundingClientRect().width) + 5,
-            height: 0
+            width: Math.ceil(text.getBoundingClientRect().width),
+            height: text.getBoundingClientRect().height
           }
           let layerX = this.getLayerPos.x
           const layerY = this.getLayerPos.y

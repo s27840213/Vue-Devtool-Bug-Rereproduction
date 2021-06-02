@@ -131,7 +131,7 @@ class Controller {
     }
   }
 
-  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean) {
+  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
     if (e.key !== 'Enter' || isCompositioning) return
     e.preventDefault()
 
@@ -158,7 +158,12 @@ class Controller {
       const br = document.createElement('br') as HTMLBRElement
       text.appendChild(br)
     }
-    this.updateTextProps(store.state.lastSelectedPageIndex, store.state.lastSelectedLayerIndex, { text: text.innerHTML })
+    const pageIndex = store.state.lastSelectedPageIndex
+    const layerIndex = store.state.lastSelectedLayerIndex
+    console.log(text.offsetHeight)
+    this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
+    this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
+    this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
   }
 
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
