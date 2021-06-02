@@ -374,6 +374,9 @@ export default Vue.extend({
         scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
       }
       if (this.config.type === 'text') {
+        const text = this.$refs.text as HTMLElement
+        text.style.width = `${width}px`
+        text.style.height = `${height}px`
         ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
@@ -715,7 +718,8 @@ export default Vue.extend({
       if (this.isGetMoved) {
         e.preventDefault()
       } else {
-        ControlUtils.textBackspace(e)
+        console.log(e.key.length)
+        ControlUtils.textStopPropagation(e)
         ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning)
         if (e.metaKey && e.key === 'z') {
           StepsUtils.undo()
@@ -724,7 +728,6 @@ export default Vue.extend({
           return
         }
         if (this.isNoCharactor(e)) return
-
         const text = this.$refs.text as HTMLElement
         text.style.width = 'auto'
         text.style.height = 'auto'
@@ -786,23 +789,14 @@ export default Vue.extend({
         }, 0)
       }
     },
-    // TODO: this function got bug**
     getTextHW(innerText: string, styles: any): { width: number, height: number } {
-      // const div = document.createElement('div')
       const el = document.createElement('span')
       const text = this.$refs.text as HTMLElement
-
-      // el.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
-      // div.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
       el.style.width = `${text.getBoundingClientRect().width}px`
-      // div.style.width = `${content.getBoundingClientRect().width}px`
       el.innerHTML = innerText
-      // div.appendChild(el)
-      // document.body.appendChild(div)
       document.body.appendChild(el)
       el.style.whiteSpace = 'pre-wrap'
       el.style.overflowWrap = 'break-word'
-      // div.style.whiteSpace = 'pre-wrap'
       Object.assign(el.style, CssConveter.convertFontStyle(styles))
       const textHW = {
         width: Math.ceil(el.getBoundingClientRect().width),
@@ -812,7 +806,10 @@ export default Vue.extend({
       return textHW
     },
     isNoCharactor(e: KeyboardEvent): boolean {
-      return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Shift'
+      if (e.key === 'Backspace') {
+        return false
+      }
+      return e.key.length !== 1
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return

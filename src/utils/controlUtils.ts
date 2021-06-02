@@ -1,6 +1,5 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
-import stepsUtils from './stepsUtils'
 
 class Controller {
   getLength(vect: ICoordinate): number {
@@ -125,12 +124,14 @@ class Controller {
     }
   }
 
-  textBackspace(e: KeyboardEvent) {
-    if (e.key !== 'Backspace') return
-    e.stopPropagation()
+  textStopPropagation(e: KeyboardEvent) {
+    if (e.key === 'Backspace' || e.key === ' ') {
+      console.log('andthe')
+      e.stopPropagation()
+    }
   }
 
-  textEnter(e: KeyboardEvent, content: HTMLElement, isCompositioning: boolean) {
+  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean) {
     if (e.key !== 'Enter' || isCompositioning) return
     e.preventDefault()
 
@@ -153,13 +154,11 @@ class Controller {
       sel.removeAllRanges()
       sel.addRange(range)
     }
-    console.log('sel')
-    console.log(range)
-
-    if (content.lastChild?.nodeName !== 'BR') {
+    if (text.lastChild?.nodeName !== 'BR') {
       const br = document.createElement('br') as HTMLBRElement
-      content.appendChild(br)
+      text.appendChild(br)
     }
+    this.updateTextProps(store.state.lastSelectedPageIndex, store.state.lastSelectedLayerIndex, { text: text.innerHTML })
   }
 
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
