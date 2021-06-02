@@ -6,6 +6,8 @@ import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
+import StepsUtils from '@/utils/stepsUtils'
+
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
     return { x: e.clientX, y: e.clientY }
@@ -34,6 +36,7 @@ class MouseUtils {
         pageIndex, layerIndex
       })
       LayerUtils.addLayers(pageIndex, layer)
+      StepsUtils.record()
     }
   }
 
@@ -41,6 +44,7 @@ class MouseUtils {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       LayerUtils.addLayers(pageIndex, layer)
+      StepsUtils.record()
     }
   }
 

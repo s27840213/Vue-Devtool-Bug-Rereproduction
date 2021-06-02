@@ -25,6 +25,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {
@@ -39,6 +40,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    StepsUtils.record()
     this.editorView = document.querySelector('.editor-view') as HTMLElement
   },
   computed: {

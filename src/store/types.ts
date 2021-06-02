@@ -41,7 +41,9 @@ export enum FunctionPanelType {
   textSetting,
   colorPicker,
   pageSetting,
-  photoSetting
+  photoSetting,
+  fonts,
+  backgroundSetting
 }
 
 export enum LayerType {

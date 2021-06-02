@@ -3,6 +3,7 @@ import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import { ILayer } from '@/interfaces/layer'
 
 class ShortcutHandler {
@@ -71,12 +72,14 @@ class ShortcutHandler {
     GroupUtils.ungroup()
   }
 
-  redo() {
-    console.log('redo')
-  }
-
   undo() {
     console.log('undo')
+    StepsUtils.undo()
+  }
+
+  redo() {
+    console.log('redo')
+    StepsUtils.redo()
   }
 }
 

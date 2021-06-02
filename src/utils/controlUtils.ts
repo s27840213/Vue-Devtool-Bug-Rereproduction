@@ -1,5 +1,6 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
+import stepsUtils from './stepsUtils'
 
 class Controller {
   getLength(vect: ICoordinate): number {

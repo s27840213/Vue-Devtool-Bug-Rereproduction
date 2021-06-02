@@ -1,10 +1,10 @@
 <template lang="pug">
   keep-alive
-    div
-      div(class="nu-controller"
+    div(class="nu-controller")
+      div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
-          :style="styles()"
+          :style="styles('')"
           @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
@@ -14,16 +14,20 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        span(class="text-content" :style="contextStyles()" ref="content"
+        span(class="text-content" :style="contextStyles()" ref="text"
           @blur="onFocusOut"
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
           :contenteditable="config.textEditable")
+        div(v-if="isActive && isLocked"
+            class="nu-controller__lock-icon")
+          svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
+            @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
-          class="control-point-wrapper"
-          :style="Object.assign(styles(), {'pointer-events': 'none'})")
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
           div(v-for="(scaler, index)  in controlPoints.scalers"
-              class="controller-point"
+              class="control-point"
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
@@ -32,10 +36,11 @@
             div(class="resize-bar"
                 :key="index * 2 + 1"
                 :style="resizerBarStyles(resizer)")
-            div(class="controller-point"
+            div(class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(class="rotaterWrapper")
             div(class="rotater" @mousedown.left.stop="rotateStart")
+              svg-icon(:iconName="'rotate'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -45,10 +50,12 @@ import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
-import { config } from 'vue/types/umd'
+import GeneralUtils from '@/utils/generalUtils'
+import MappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   props: {
@@ -59,6 +66,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      MappingUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -144,7 +152,7 @@ export default Vue.extend({
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
-      const ControllerStyles = this.styles()
+      const ControllerStyles = this.styles('')
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height ? `${parseInt(ControllerStyles.width) - 20}px` : resizerStyle.width,
@@ -179,7 +187,7 @@ export default Vue.extend({
     },
     textInit() {
       if (this.getLayerType !== 'text') return
-      const text = this.$refs.content as HTMLElement
+      const text = this.$refs.text as HTMLElement
       text.innerHTML = this.getTextContent
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
@@ -189,12 +197,12 @@ export default Vue.extend({
     },
     compositionStart() {
       this.isCompositoning = true
-      const el = this.$refs.content as HTMLElement
+      const el = this.$refs.text as HTMLElement
       el.addEventListener('compositionend', this.compositionEnd)
     },
     compositionEnd() {
       this.isCompositoning = false
-      const el = this.$refs.content as HTMLElement
+      const el = this.$refs.text as HTMLElement
       el.removeEventListener('compositionend', this.compositionEnd)
     },
     triggerTextEditor(pageIndex: number, layerIndex: number) {
@@ -202,28 +210,29 @@ export default Vue.extend({
         textEditable: true
       })
     },
-    styles() {
-      // const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100
-      const zindex = (this.layerIndex + 1) * 50
+    styles(type: string) {
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed #7190CC` : `${2 * (100 / this.scaleRatio)}px solid #7190CC`) : 'none',
+          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
       }
     },
 
     moveStart(event: MouseEvent) {
       if (!this.config.locked) {
+        this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
       }
 
       if (this.config.type === 'text') {
-        const text = this.$refs.content as HTMLElement
+        const text = this.$refs.text as HTMLElement
         text.innerHTML = this.getTextContent
         this.isGetMoved = true
         this.clickTime = new Date().toISOString()
@@ -232,7 +241,7 @@ export default Vue.extend({
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
-          if ((!event.metaKey && !event.ctrlKey) && this.currSelectedInfo.index >= 0) {
+          if (!GeneralUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) && this.currSelectedInfo.index >= 0) {
             GroupUtils.deselect()
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedPageIndex(this.pageIndex)
@@ -247,7 +256,6 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       if (this.isActive) {
         event.preventDefault()
-        this.isControlling = true
         this.setCursorStyle('move')
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
@@ -280,8 +288,10 @@ export default Vue.extend({
       if (this.isActive) {
         this.isControlling = false
         this.setCursorStyle('default')
-        document.documentElement.removeEventListener('mouseup', this.moveEnd)
+        window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
+        console.log('move')
+        StepsUtils.record()
       }
       setTimeout(() => {
         this.isGetMoved = false
@@ -289,8 +299,8 @@ export default Vue.extend({
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
-      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.isControlling = true
 
       this.initialWH = {
         width: this.getLayerWidth,
@@ -376,6 +386,8 @@ export default Vue.extend({
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
       }
       this.isControlling = false
+      StepsUtils.record()
+
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -449,7 +461,7 @@ export default Vue.extend({
       } else if (this.getLayerType === 'shape') {
         this.shapeResizeHandler(width, height)
       } else if (this.getLayerType === 'text') {
-        this.textResizeHandler(width, height)
+        [width, height] = this.textResizeHandler(width, height)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -586,12 +598,18 @@ export default Vue.extend({
       }
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
-    textResizeHandler(width: number, height: number) {
-      const content = this.$refs.content as HTMLElement
-      content.style.width = `${width}px`
-      height = content.offsetHeight
-      ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-      ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
+    textResizeHandler(width: number, height: number): [number, number] {
+      const text = this.$refs.text as HTMLElement
+      if (this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
+        text.style.width = `${width}px`
+        // setTimeout(() => {
+        height = text.getBoundingClientRect().height
+        // console.log(height)
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
+        // }, 0)
+      }
+      return [width, height]
     },
     resizeEnd() {
       this.imgBuffer.width = 0
@@ -599,14 +617,16 @@ export default Vue.extend({
       this.imgBuffer.x = 0
       this.imgBuffer.y = 0
       this.isControlling = false
+      console.log('resize')
+      StepsUtils.record()
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
-      this.isControlling = true
       this.setCursorStyle('move')
+      this.isControlling = true
 
       const body = this.$refs.body as HTMLElement
       const rect = body.getBoundingClientRect()
@@ -645,6 +665,7 @@ export default Vue.extend({
     },
     rotateEnd() {
       this.isControlling = false
+      StepsUtils.record()
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
@@ -695,10 +716,16 @@ export default Vue.extend({
         e.preventDefault()
       } else {
         ControlUtils.textBackspace(e)
-        ControlUtils.textEnter(e, this.$refs.content as HTMLElement, this.isCompositoning)
+        ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning)
+        if (e.metaKey && e.key === 'z') {
+          StepsUtils.undo()
+          // const text = this.$refs.content as HTMLElement
+          // text.innerHTML = this.getTextContent
+          return
+        }
         if (this.isNoCharactor(e)) return
 
-        const text = this.$refs.content as HTMLElement
+        const text = this.$refs.text as HTMLElement
         text.style.width = 'auto'
         text.style.height = 'auto'
 
@@ -716,92 +743,79 @@ export default Vue.extend({
           if (e.key === 'Backspace' && textTmp === text.innerHTML) return
           text.style.whiteSpace = 'pre'
           const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
-          const page = this.$parent.$el as HTMLElement
-
           const props = {
             text: text.innerHTML
           }
           const textSize = {
-            width: Math.ceil(text.getBoundingClientRect().width + 5),
-            // width: e.key === ' ' ? Math.ceil(text.getBoundingClientRect().width + 5) : dummyTextSize.width + 1,
-            height: text.getBoundingClientRect().height
+            width: Math.ceil(text.getBoundingClientRect().width) + 5,
+            height: 0
           }
           let layerX = this.getLayerPos.x
           const layerY = this.getLayerPos.y
           // TODO: take the rotate angle into pos-compensation consideration
           if (this.config.widthLimit === '') {
-            const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
+            const page = this.$parent.$el as HTMLElement
+            const currTextWidth = isTextOneLine ? text.getBoundingClientRect().width : this.getLayerWidth
+            // const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
             layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
-            console.log('layerX', layerX)
             if (layerX <= 0) {
               layerX = 0
               text.style.width = `${this.getLayerWidth}px`
               textSize.width = this.getLayerWidth
-              if (e.key !== ' ') {
-                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
-              }
-              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
               ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
             } else if (layerX + currTextWidth >= page.offsetWidth) {
               layerX = page.offsetWidth - this.getLayerWidth
               text.style.width = `${this.getLayerWidth}px`
               textSize.width = this.getLayerWidth
-              // textSize.height = (Math.floor(dummyTextSize.width / textSize.width) + 1) * dummyTextSize.height
-              if (e.key !== ' ') {
-                textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
-              }
               ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
             } else {
-              if (e.key !== ' ') {
-                text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
-                const HW = this.getTextHW(text.innerHTML, this.config.styles)
-                textSize.width = HW.width
-                textSize.height = HW.height
-              }
+              text.style.width = `${text.getBoundingClientRect().width}px`
+              const HW = this.getTextHW(text.innerHTML, this.config.styles)
+              textSize.width = HW.width
             }
           } else {
             text.style.width = `${this.config.widthLimit}px`
             textSize.width = this.config.widthLimit
-            textSize.height = this.getTextHW(text.innerHTML, this.config.styles).height
           }
-          console.log('widthLimit', this.config.widthLimit)
-          // text.style.width = `${textSize.width}px`
           text.style.whiteSpace = 'pre-wrap'
           ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
           ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+          StepsUtils.record()
         }, 0)
       }
     },
     // TODO: this function got bug**
-    getTextHW(text: string, styles: any): { width: number, height: number } {
-      const div = document.createElement('div')
+    getTextHW(innerText: string, styles: any): { width: number, height: number } {
+      // const div = document.createElement('div')
       const el = document.createElement('span')
-      const content = this.$refs.content as HTMLElement
+      const text = this.$refs.text as HTMLElement
 
       // el.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
       // div.style.width = this.isTextOnEdge ? `${this.getLayerWidth}px` : `${content.getBoundingClientRect().width}px`
-      el.style.width = `${content.getBoundingClientRect().width}px`
-      div.style.width = `${content.getBoundingClientRect().width}px`
-      el.innerHTML = text
-      div.appendChild(el)
-      document.body.appendChild(div)
+      el.style.width = `${text.getBoundingClientRect().width}px`
+      // div.style.width = `${content.getBoundingClientRect().width}px`
+      el.innerHTML = innerText
+      // div.appendChild(el)
+      // document.body.appendChild(div)
+      document.body.appendChild(el)
       el.style.whiteSpace = 'pre-wrap'
       el.style.overflowWrap = 'break-word'
-      div.style.whiteSpace = 'pre-wrap'
+      // div.style.whiteSpace = 'pre-wrap'
       Object.assign(el.style, CssConveter.convertFontStyle(styles))
       const textHW = {
         width: Math.ceil(el.getBoundingClientRect().width),
         height: Math.ceil(el.getBoundingClientRect().height)
       }
+      document.body.removeChild(el)
       return textHW
     },
     isNoCharactor(e: KeyboardEvent): boolean {
       return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Shift'
     },
     onDblClick() {
-      if (this.getLayerType !== 'image') return
+      if (this.getLayerType !== 'image' || this.isLocked) return
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     onRightClick(event: MouseEvent) {
@@ -822,15 +836,38 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  // z-index: setZindex("nu-controller");
-  white-space: pre-wrap;
-  position: absolute;
-  box-sizing: border-box;
-  &:hover {
-    cursor: pointer;
+  &__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: pre-wrap;
+    position: absolute;
+    box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  &__ctrl-points {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
+    pointer-events: "none";
+  }
+
+  &__lock-icon {
+    @include size(30px, 30px);
+    @include flexCenter;
+    position: absolute;
+    right: -15px;
+    bottom: -15px;
+    border: 1px solid setColor(red);
+    border-radius: 50%;
+    background-color: setColor(white);
   }
 }
 
@@ -841,37 +878,24 @@ export default Vue.extend({
   color: "#00000000";
 }
 
-.controller-point {
+.control-point {
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
   border: 1.5px solid setColor(blue-2);
   transform-style: preserve-3d;
 }
-.control-point-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  // z-index: setZindex("nu-controller");
-  position: absolute;
-  box-sizing: border-box;
-  &:hover {
-    cursor: pointer;
-  }
-  pointer-events: "none";
-}
+
 .rotaterWrapper {
   position: absolute;
   top: 100%;
   padding: 20px;
 }
 .rotater {
+  @include size(20px, 20px);
   position: relative;
   left: 0;
   top: 0;
-  width: 10px;
-  height: 10px;
-  background-color: blue;
   pointer-events: auto;
   cursor: move;
 }

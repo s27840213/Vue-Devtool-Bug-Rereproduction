@@ -3,7 +3,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 class LayerFactary {
-  newImage(config: IImage): IImage {
+  newImage(config: any): IImage {
     const [width, height] = [config.styles.width, config.styles.height]
     const basicConfig = {
       type: 'image',
@@ -33,6 +33,7 @@ class LayerFactary {
       }
     }
     Object.assign(basicConfig.styles, config.styles)
+    delete config.styles
     return Object.assign(basicConfig, config)
   }
 
@@ -71,7 +72,6 @@ class LayerFactary {
       }
     }
     Object.assign(basicConfig.styles, config.styles)
-    // delete config.styles
     return Object.assign(basicConfig, config)
   }
 

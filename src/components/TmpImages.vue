@@ -4,19 +4,24 @@ div(class="temp__content")
     v-for="photo in photos",
     :src="photo.urls.regular",
     draggable="true",
-    @dragstart="dragStart($event,photo)")
+    @dragstart="dragStart($event,photo)"
+    @click="addImage(photo)")
 </template>
 
 <script lang="ts">
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
+import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 export default Vue.extend({
   computed: {
     ...mapGetters({
-      photos: 'getPhotos'
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      photos: 'getPhotos',
+      pageSize: 'getPageSize'
     })
   },
   methods: {
@@ -37,8 +42,23 @@ export default Vue.extend({
           height: photo.height / 20
         }
       }
-
       dataTransfer.setData('data', JSON.stringify(data))
+    },
+    addImage(photo: any) {
+      const config = {
+        src: photo.urls.regular,
+        styles: {
+          x: this.pageSize.width / 2 - (photo.width / 20) / 2,
+          y: this.pageSize.height / 2 - (photo.height / 20) / 2,
+          width: photo.width / 20,
+          height: photo.height / 20,
+          initWidth: photo.width / 20,
+          initHeight: photo.height / 20,
+          imgWidth: photo.width / 20,
+          imgHeight: photo.height / 20
+        }
+      }
+      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
     }
   }
 })

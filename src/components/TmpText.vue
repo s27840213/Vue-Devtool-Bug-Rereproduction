@@ -145,8 +145,8 @@ export default Vue.extend({
       Object.assign(el.style, this.contextStyles(styles))
       document.body.appendChild(el)
       const textHW = {
-        width: el.offsetWidth + 5,
-        height: el.offsetHeight
+        width: Math.ceil(el.getBoundingClientRect().width),
+        height: Math.ceil(el.getBoundingClientRect().height)
       }
       document.body.removeChild(el)
       return textHW

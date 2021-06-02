@@ -1,19 +1,28 @@
 <template lang="pug">
   div(class="panel-group")
-    btn(class="full-width" :type="'primary-lg'" @click.native=" isGroup()? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup()?'Ungroup':'Group'}}
+    btn(v-if="!isLocked" class="full-width"
+      :type="'primary-lg'"
+      @click.native=" isGroup()? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup()?'Ungroup':'Group'}}
     action-bar(class="flex-between")
       svg-icon(v-for="(icon,index) in mappingIcons('align')"
         :key="`align-icon-${index}`"
-        class="pointer"
-        :iconName="icon" :iconWidth="'24px'" :iconColor="'gray-2'"
+        :class="{'pointer': !isLocked}"
+        :iconName="icon" :iconWidth="'24px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction(icon)")
     action-bar(class="flex-between")
-      svg-icon(v-for="(icon,index) in mappingIcons('action')"
-        :key="`gp-action-icon-${index}`"
-        class="pointer"
-        :class="{'layers-alt': icon==='layers-alt'}"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="iconAction(icon)")
+      svg-icon(class="'layers-alt'"
+        :class="{'pointer': !isLocked}"
+        iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+        @click.native="iconAction('layers-alt')")
+      svg-icon(:class="{'pointer': !isLocked}"
+        iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+        @click.native="iconAction('copy')")
+      svg-icon(class="pointer"
+        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click.native="iconAction('unlock')")
+      svg-icon(:class="{'pointer': !isLocked}"
+        iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+        @click.native="iconAction('trash')")
 </template>
 
 <script lang="ts">
@@ -22,6 +31,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { mapGetters, mapMutations } from 'vuex'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   data() {
@@ -33,7 +43,10 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
-    })
+    }),
+    isLocked() {
+      return LayerUtils.getTmpLayer().locked
+    }
   },
   methods: {
     ...mapMutations({

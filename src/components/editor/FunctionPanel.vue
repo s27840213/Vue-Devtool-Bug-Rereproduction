@@ -1,10 +1,12 @@
 <template lang="pug">
   div(class="function-panel p-20")
-    panel-group(v-show="currSelectedInfo.layers.length!==0")
-    panel-text-setting(v-if="currSelectedInfo.types.has('text')")
-    panel-photo-setting(v-if="currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1")
-    //- panel-background-setting(v-if="currSelectedInfo.layers.length===0")
-    panel-page-setting(v-if="currSelectedInfo.layers.length===0")
+    panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+    panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked"
+      @openFontsPanel="openFontsPanel()")
+    panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")
+    //- panel-background-setting(v-if="selectedLayerNum===0")
+    panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
+    panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 
 <script lang="ts">
@@ -15,8 +17,10 @@ import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import { mapGetters } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -25,27 +29,41 @@ export default Vue.extend({
     PanelColorPicker,
     PanelBackgroundSetting,
     PanelPhotoSetting,
-    PanelPageSetting
+    PanelPageSetting,
+    PanelFonts
   },
   data() {
     return {
       GroupUtils,
-      panelComponents: [
-        'none',
-        'panel-group',
-        'panel-text-setting',
-        'panel-color-picker',
-        'panel-page-setting',
-        'panel-photo-setting',
-        'panel-page-setting'
-      ]
+      isFontsPanelOpened: false
     }
   },
   computed: {
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo'
-    })
+    }),
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isLocked(): boolean {
+      return LayerUtils.getTmpLayer().locked
+    }
+  },
+  watch: {
+    selectedLayerNum(newVal, oldVal) {
+      if ((newVal === 0) && this.isFontsPanelOpened) {
+        this.closeFontsPanel()
+      }
+    }
+  },
+  methods: {
+    openFontsPanel() {
+      this.isFontsPanelOpened = true
+    },
+    closeFontsPanel() {
+      this.isFontsPanelOpened = false
+    }
   }
 })
 </script>

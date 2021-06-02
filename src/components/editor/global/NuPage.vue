@@ -82,6 +82,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
 import ControlUtils from '@/utils/controlUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
@@ -120,7 +121,8 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLastSelectedLayer: 'getLastSelectedLayerIndex'
+      getLastSelectedLayer: 'getLastSelectedLayerIndex',
+      pages: 'getPages'
     })
   },
   methods: {

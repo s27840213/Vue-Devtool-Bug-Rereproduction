@@ -4,12 +4,16 @@
       div(class="subtitle-2 text-gray-2") New Design
       div(class="subtitle-2 text-gray-2") File
       div(class="subtitle-2 text-gray-2") Resize
-      svg-icon(:iconName="'undo'"
+      svg-icon(class="pointer"
+        :iconName="'undo'"
         :iconWidth="'20px'"
-        :iconColor="'gray-2'")
-      svg-icon(:iconName="'redo'"
+        :iconColor="'gray-2'"
+        @click.native="ShortcutUtils.undo()")
+      svg-icon(class="pointer"
+        :iconName="'redo'"
         :iconWidth="'20px'"
-        :iconColor="'gray-2'")
+        :iconColor="'gray-2'"
+        @click.native="ShortcutUtils.redo()")
     div
       svg-icon(:iconName="'share-alt'"
         :iconWidth="'20px'"
@@ -34,10 +38,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import FileUtils from '@/utils/fileUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
 
 export default Vue.extend({
-  computed: {
-
+  data() {
+    return {
+      ShortcutUtils
+    }
   },
   methods: {
     exportJsonFile() {

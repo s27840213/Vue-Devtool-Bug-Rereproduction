@@ -1,9 +1,10 @@
 <template lang="pug">
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
-    property-bar
-      select(v-model="layerFont")
-        option(v-for="font in fontPreset" :selected="layerFont === font") {{font}}
+    property-bar(class="pointer" @click.native="openFontsPanel")
+      span(class="body-2 text-gray-2") {{layerFont}}
+      svg-icon(class="pointer"
+        :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
         span(class="body-2 text-gray-2") 40
@@ -97,6 +98,9 @@ export default Vue.extend({
   methods: {
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
+    },
+    openFontsPanel() {
+      this.$emit('openFontsPanel')
     }
   }
 })
