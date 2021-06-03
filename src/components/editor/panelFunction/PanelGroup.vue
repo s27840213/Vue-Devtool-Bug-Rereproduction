@@ -10,7 +10,7 @@
         :iconName="icon" :iconWidth="'24px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction(icon)")
     action-bar(class="flex-between")
-      svg-icon(class="'layers-alt'"
+      svg-icon(class="layers-alt"
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('layers-alt')")

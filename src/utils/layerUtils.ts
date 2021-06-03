@@ -1,5 +1,5 @@
 // import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -28,6 +28,7 @@ class LayerUtils {
 
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
+    store.commit('SET_lastSelectedLayerIndex', -1)
   }
 
   getLayer(pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | ITmp {

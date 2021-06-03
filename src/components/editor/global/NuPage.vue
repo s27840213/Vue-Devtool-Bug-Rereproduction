@@ -82,7 +82,6 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
 import ControlUtils from '@/utils/controlUtils'
-import StepsUtils from '@/utils/stepsUtils'
 import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
@@ -121,7 +120,7 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLastSelectedLayer: 'getLastSelectedLayerIndex',
+      lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       pages: 'getPages'
     })
   },
@@ -168,7 +167,9 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
-      ControlUtils.updateImgControl(this.pageIndex, this.getLastSelectedLayer, false)
+      if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
+        ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
+      }
       GroupUtils.deselect()
     },
     setFocus(): void {

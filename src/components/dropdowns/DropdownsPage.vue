@@ -88,19 +88,25 @@ export default Vue.extend({
           icon: 'copy',
           text: 'Copy',
           shortcutText: 'Cmd+C',
-          action: ShortcutUtils.copy
+          action: () => {
+            ShortcutUtils.copy()
+          }
         },
         {
           icon: 'copy',
           text: 'Paste',
           shortcutText: 'Cmd+V',
-          action: ShortcutUtils.paste
+          action: () => {
+            ShortcutUtils.paste()
+          }
         },
         {
           icon: 'trash',
           text: 'Delete',
           shortcutText: 'DEL',
-          action: this.deleteBackgroundImage
+          action: () => {
+            this.deleteBackgroundImage()
+          }
         }
       ]
     },
