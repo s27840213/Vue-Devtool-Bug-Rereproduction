@@ -1,11 +1,19 @@
 <template lang="pug">
+
 div(class="temp__content")
-  img(class="temp__item"
-    v-for="photo in photos",
-    :src="photo.urls.regular",
-    draggable="true",
-    @dragstart="dragStart($event,photo)"
-    @click="addImage(photo)")
+  div(v-for="(row, index) in rows"
+    :key="`rows${index}`",
+    :style="{ marginBottom: `${margin}px` }")
+    img(v-for="(photo, i) in row"
+      :key="photo.id",
+      :src="photo.urls.regular",
+      :width="photo.preview.width",
+      :height="photo.preview.height",
+      :style="i && { marginLeft: `${margin}px` }",
+      draggable="true",
+      class="temp__img"
+      @dragstart="dragStart($event,photo)"
+      @click="addImage(photo)")
 </template>
 
 <script lang="ts">
@@ -16,13 +24,28 @@ import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import GalleryUtils from '@/utils/galleryUtils'
+
 export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       photos: 'getPhotos',
       pageSize: 'getPageSize'
-    })
+    }),
+    rows (): any[] {
+      // @TODO lazyload, generate for lastest coming data
+      const { galleryUtils, photos } = this
+      return galleryUtils.generate(photos)
+    },
+    margin (): number {
+      return this.galleryUtils.margin
+    }
+  },
+  data () {
+    return {
+      galleryUtils: new GalleryUtils(260, 100, 5)
+    }
   },
   methods: {
     dragStart(e: DragEvent, photo: any) {
@@ -68,20 +91,16 @@ export default Vue.extend({
 .temp {
   &__content {
     height: 100%;
-    display: grid;
-    grid-auto-rows: auto;
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 20px;
-    column-gap: 20px;
-    padding-top: 20px;
+    line-height: 0;
+    text-align: left;
     box-sizing: border-box;
     overflow-y: scroll;
     &::-webkit-scrollbar {
       display: none;
     }
   }
-  &__item {
-    width: 100%;
+  &__img {
+    background-color: #f1f1f1;
   }
 }
 </style>
