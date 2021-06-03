@@ -110,7 +110,7 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setLastSelectedPageIndex(this.pageIndex)
       /**
-       * Use nextTick to trigger the following function after DOM updating
+       * Use nextTick to trigger the following function after DOM updatingP
        */
       this.$nextTick(() => {
         this.isSelecting = false

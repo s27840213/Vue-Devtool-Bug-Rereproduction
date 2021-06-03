@@ -8,7 +8,7 @@
       btn(class="full-width" :type="'primary-mid'") Adjust
       btn(class="full-width" :type="'primary-mid'") BG Remover
     property-bar
-      input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
+      input(class="body-2 text-gray-2" type="number" max="100" min="0" step="1" v-model="opacity")
       svg-icon(class="pointer"
         :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     //- action-bar(class="flex-evenly")

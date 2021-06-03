@@ -7,7 +7,7 @@
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
-        input(class="body-2 text-gray-2" v-model="fontSize")
+        input(class="body-2 text-gray-2" type="number" v-model="fontSize")
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color-picker")
@@ -27,15 +27,15 @@
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
     div(class="text-setting__row5")
       property-bar
-        input(class="body-2 text-gray-2" v-model="lineHeight")
+        input(class="body-2 text-gray-2" type="number" v-model="lineHeight")
         svg-icon(class="pointer"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
       property-bar
-        input(class="body-2 text-gray-2" v-model="fontSpacing")
+        input(class="body-2 text-gray-2" type="number" v-model="fontSpacing")
         svg-icon(class="pointer"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
       property-bar
-        input(class="body-2 text-gray-2" v-model="opacity")
+        input(class="body-2 text-gray-2" type="number" v-model="opacity")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
