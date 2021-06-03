@@ -605,22 +605,15 @@ export default Vue.extend({
       const text = this.$refs.text as HTMLElement
       if (this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
         text.style.width = `${width}px`
-        // setTimeout(() => {
         height = text.getBoundingClientRect().height
-        // console.log(height)
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
         ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
-        // }, 0)
       }
       return [width, height]
     },
     resizeEnd() {
-      this.imgBuffer.width = 0
-      this.imgBuffer.height = 0
-      this.imgBuffer.x = 0
-      this.imgBuffer.y = 0
+      this.imgBuffer = { width: 0, height: 0, x: 0, y: 0 }
       this.isControlling = false
-      console.log('resize')
       StepsUtils.record()
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
@@ -718,11 +711,9 @@ export default Vue.extend({
       if (this.isGetMoved) {
         e.preventDefault()
       } else {
-        console.log(e.key.length)
         ControlUtils.textStopPropagation(e)
         ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
         if (e.metaKey && e.key === 'z') {
-          console.log('undo')
           StepsUtils.undo()
           setTimeout(() => {
             const text = this.$refs.text as HTMLElement
@@ -745,7 +736,7 @@ export default Vue.extend({
 
         setTimeout(() => {
           /**
-           * This line of code prevents the bug while deleting at begin of the text.
+           * This line of code prevents the bug while deleting at beginning of the text.
            */
           if (e.key === 'Backspace' && textTmp === text.innerHTML) return
           text.style.whiteSpace = 'pre'

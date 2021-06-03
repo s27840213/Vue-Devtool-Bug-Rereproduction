@@ -72,7 +72,7 @@ export default Vue.extend({
       }
     `
       document.head.appendChild(style)
-      console.log(fontName)
+      // console.log(fontName)
       this.fontPreset.push(fontName)
     }
   }

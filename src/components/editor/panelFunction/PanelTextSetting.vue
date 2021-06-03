@@ -7,9 +7,14 @@
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
-        span(class="body-2 text-gray-2") 40
-        svg-icon(class="pointer"
-          :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+        span(class="body-2 text-gray-2") {{fontSize}}
+        div(class="text-setting__font-sizer")
+          svg-icon(class="pointer" @click.native="fontSizeStepping(1)"
+            :iconName="'caret-up'" :iconColor="'gray-2'" :iconWidth="'14px'")
+          svg-icon(class="pointer" @click.native="fontSizeStepping(-1)"
+            :iconName="'chevron-down'" :iconColor="'gray-2'" :iconWidth="'14px'")
+        //- svg-icon(class="pointer"
+        //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color-picker")
         div(class="color-slip"
           :style="{'background-color': textColor}")
@@ -19,12 +24,12 @@
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @click.native="onPropertyClick(icon)")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @click.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
       property-bar
         span(class="body-2 text-gray-2") 40
@@ -45,6 +50,7 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
+import TextUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -89,7 +95,21 @@ export default Vue.extend({
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            color: value
+            size: value
+          }
+        })
+      }
+    },
+    fontSize: {
+      get() {
+        return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            font: value
           }
         })
       }
@@ -101,6 +121,12 @@ export default Vue.extend({
     },
     openFontsPanel() {
       this.$emit('openFontsPanel')
+    },
+    onPropertyClick(iconName: string) {
+      TextUtils.onPropertyClick(iconName)
+    },
+    fontSizeStepping(step: number) {
+      TextUtils.fontSizeStepping(step)
     }
   }
 })
@@ -138,6 +164,10 @@ export default Vue.extend({
     justify-content: space-between;
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
+  }
+  &__font-sizer {
+    display: flex;
+    flex-direction: column;
   }
 }
 .color-slip {

@@ -126,7 +126,6 @@ class Controller {
 
   textStopPropagation(e: KeyboardEvent) {
     if (e.key === 'Backspace' || e.key === ' ') {
-      console.log('andthe')
       e.stopPropagation()
     }
   }
@@ -159,8 +158,7 @@ class Controller {
       text.appendChild(br)
     }
     const pageIndex = store.state.lastSelectedPageIndex
-    const layerIndex = store.state.lastSelectedLayerIndex
-    console.log(text.offsetHeight)
+    const layerIndex = store.getters.getCurrSelectedIndex
     this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
     this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
     this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })

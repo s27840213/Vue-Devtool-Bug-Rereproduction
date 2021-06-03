@@ -8,6 +8,8 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
+import TextUtils from '@/utils/textUtils'
+
 export default Vue.extend({
   props: {
     config: Object,
@@ -32,7 +34,19 @@ export default Vue.extend({
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
         }
       }, 0)
+    },
+    'config.styles.font': function() {
+      console.log('change font')
+      this.content = this.getTextContent
+      setTimeout(() => {
+        const content = this.$refs.content as HTMLElement
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
+      }, 0)
     }
+    // 'config.styles.size': function() {
+
+    // }
   },
   computed: {
     getTextContent(): string[] {
