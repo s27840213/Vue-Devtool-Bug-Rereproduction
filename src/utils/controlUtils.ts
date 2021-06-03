@@ -124,12 +124,14 @@ class Controller {
     }
   }
 
-  textBackspace(e: KeyboardEvent) {
-    if (e.key !== 'Backspace') return
-    e.stopPropagation()
+  textStopPropagation(e: KeyboardEvent) {
+    if (e.key === 'Backspace' || e.key === ' ') {
+      console.log('andthe')
+      e.stopPropagation()
+    }
   }
 
-  textEnter(e: KeyboardEvent, content: HTMLElement, isCompositioning: boolean) {
+  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
     if (e.key !== 'Enter' || isCompositioning) return
     e.preventDefault()
 
@@ -152,11 +154,16 @@ class Controller {
       sel.removeAllRanges()
       sel.addRange(range)
     }
-
-    if (content.lastChild?.nodeName !== 'BR') {
+    if (text.lastChild?.nodeName !== 'BR') {
       const br = document.createElement('br') as HTMLBRElement
-      content.appendChild(br)
+      text.appendChild(br)
     }
+    const pageIndex = store.state.lastSelectedPageIndex
+    const layerIndex = store.state.lastSelectedLayerIndex
+    console.log(text.offsetHeight)
+    this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
+    this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
+    this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
   }
 
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {

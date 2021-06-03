@@ -27,8 +27,7 @@ export default Vue.extend({
       this.content = this.getTextContent
       setTimeout(() => {
         const content = this.$refs.content as HTMLElement
-        if (content.offsetHeight > this.config.styles.height) {
-          console.log('text layer height compensation')
+        if (content.offsetHeight >= this.config.styles.height) {
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
         }
