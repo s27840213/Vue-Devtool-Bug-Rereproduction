@@ -41,6 +41,7 @@
 import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
+import FocusUtils from '@/utils/focusUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { IImage } from '@/interfaces/layer'
 
@@ -75,19 +76,28 @@ export default Vue.extend({
           icon: 'copy',
           text: 'Copy',
           shortcutText: 'Cmd+C',
-          action: ShortcutUtils.copy
+          action: () => {
+            ShortcutUtils.copy()
+            FocusUtils.focusLastSelectedPage()
+          }
         },
         {
           icon: 'copy',
           text: 'Paste',
           shortcutText: 'Cmd+V',
-          action: ShortcutUtils.paste
+          action: () => {
+            ShortcutUtils.paste()
+            FocusUtils.focusLastSelectedPage()
+          }
         },
         {
           icon: 'trash',
           text: 'Delete',
           shortcutText: 'DEL',
-          action: ShortcutUtils.del
+          action: () => {
+            ShortcutUtils.del()
+            FocusUtils.focusLastSelectedPage()
+          }
         }
       ]
     },

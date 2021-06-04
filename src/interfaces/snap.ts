@@ -5,8 +5,7 @@ export interface ISnaplinePos {
 export interface ISnapline {
   pos: number,
   orientation?: string,
-  offset: number,
-  snapTo: string
+  offset: number
 }
 
 export interface ISnaplineInfo {
@@ -17,6 +16,5 @@ export interface ISnaplineInfo {
 export interface IConsideredEdges {
   pos: number,
   diff: number,
-  offset: number,
-  snapTo: string
+  offset: number
 }

@@ -2,12 +2,12 @@
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2") {{layerFont}}
+      span(class="body-2 text-gray-2") {{textFont}}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
-        span(class="body-2 text-gray-2") {{fontSize}}
+        input(class="body-2 text-gray-2" type="number" v-model="fontSize")
         div(class="text-setting__font-sizer")
           svg-icon(class="pointer" @click.native="fontSizeStepping(1)"
             :iconName="'caret-up'" :iconColor="'gray-2'" :iconWidth="'14px'")
@@ -32,15 +32,15 @@
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @click.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
       property-bar
-        span(class="body-2 text-gray-2") 40
+        input(class="body-2 text-gray-2" type="number" v-model="lineHeight")
         svg-icon(class="pointer"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
       property-bar
-        span(class="body-2 text-gray-2") 10%
+        input(class="body-2 text-gray-2" type="number" v-model="fontSpacing")
         svg-icon(class="pointer"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
       property-bar
-        span(class="body-2 text-gray-2") 100
+        input(class="body-2 text-gray-2" type="number" v-model="opacity")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
@@ -72,7 +72,7 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    layerFont: {
+    textFont: {
       get() {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
       },
@@ -82,6 +82,20 @@ export default Vue.extend({
           layerIndex: this.currSelectedIndex,
           styles: {
             font: value
+          }
+        })
+      }
+    },
+    fontSize: {
+      get() {
+        return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            size: value
           }
         })
       }
@@ -100,19 +114,48 @@ export default Vue.extend({
         })
       }
     },
-    fontSize: {
+    lineHeight: {
       get() {
-        return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+        console.log(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles)
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            lineHeight: value
+          }
+        })
       }
-      // set(value) {
-      //   this.$store.commit('UPDATE_layerStyles', {
-      //     pageIndex: this.lastSelectedPageIndex,
-      //     layerIndex: this.currSelectedIndex,
-      //     styles: {
-      //       font: value
-      //     }
-      //   })
-      // }
+    },
+    fontSpacing: {
+      get() {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            fontSpacing: value
+          }
+        })
+      }
+    },
+    opacity: {
+      get() {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+      },
+      set(value) {
+        this.$store.commit('UPDATE_layerStyles', {
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          styles: {
+            opacity: value
+          }
+        })
+      }
     }
   },
   methods: {

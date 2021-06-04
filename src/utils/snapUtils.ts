@@ -3,8 +3,8 @@ import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import MathUtils from '@/utils/mathUtils'
-import ControlUtils from '@/utils/controlUtils'
 import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import LayerUtils from '@/utils/layerUtils'
 class SnapUtils {
   pageIndex: number
   GUIDELINE_OFFSET: number
@@ -51,7 +51,7 @@ class SnapUtils {
   /**
    * Get the edges and center that will trigger snapping
    */
-  getLayerSnappingEdges(layer: IShape | IText | IImage | IGroup | ITmp): ISnaplineInfo {
+  getLayerSnappingPos(layer: IShape | IText | IImage | IGroup | ITmp, type: string): ISnaplineInfo {
     const layerBounding = MathUtils.getBounding(layer)
     const layerStyles = {
       x: layer.styles.x,
@@ -60,39 +60,62 @@ class SnapUtils {
       height: layer.styles.height
     }
 
-    return {
+    return type === 'move' ? {
       v: [
         {
           pos: layerBounding.x,
-          offset: layerStyles.x - layerBounding.x,
-          snapTo: 'start'
+          offset: layerStyles.x - layerBounding.x
         },
         {
           pos: layerBounding.x + layerBounding.width / 2,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2,
-          snapTo: 'center'
+          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2
         },
         {
           pos: layerBounding.x + layerBounding.width,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width,
-          snapTo: 'end'
+          offset: layerStyles.x - layerBounding.x - layerBounding.width
         }
       ],
       h: [
         {
           pos: layerBounding.y,
-          offset: layerStyles.y - layerBounding.y,
-          snapTo: 'start'
+          offset: layerStyles.y - layerBounding.y
         },
         {
           pos: layerBounding.y + layerBounding.height / 2,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2,
-          snapTo: 'center'
+          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2
         },
         {
           pos: layerBounding.y + layerBounding.height,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height,
-          snapTo: 'end'
+          offset: layerStyles.y - layerBounding.y - layerBounding.height
+        }
+      ]
+    } : {
+      v: [
+        {
+          pos: layerBounding.x,
+          offset: layerStyles.x - layerBounding.x
+        },
+        {
+          pos: layerBounding.x + layerBounding.width / 2,
+          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2
+        },
+        {
+          pos: layerBounding.x + layerBounding.width,
+          offset: layerStyles.x - layerBounding.x - layerBounding.width
+        }
+      ],
+      h: [
+        {
+          pos: layerBounding.y,
+          offset: layerStyles.y - layerBounding.y
+        },
+        {
+          pos: layerBounding.y + layerBounding.height / 2,
+          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2
+        },
+        {
+          pos: layerBounding.y + layerBounding.height,
+          offset: layerStyles.y - layerBounding.y - layerBounding.height
         }
       ]
     }
@@ -110,7 +133,6 @@ class SnapUtils {
           resultV.push({
             pos: pos,
             diff: diff,
-            snapTo: layerSnappingInfo.snapTo,
             offset: layerSnappingInfo.offset
           })
         }
@@ -124,7 +146,6 @@ class SnapUtils {
           resultH.push({
             pos: pos,
             diff: diff,
-            snapTo: layerSnappingInfo.snapTo,
             offset: layerSnappingInfo.offset
           })
         }
@@ -141,16 +162,14 @@ class SnapUtils {
       closestSnaplineV.push({
         pos: minV.pos,
         orientation: 'V',
-        offset: minV.offset,
-        snapTo: minV.snapTo
+        offset: minV.offset
       })
     }
     if (minH) {
       closestSnaplineH.push({
         pos: minH.pos,
         orientation: 'H',
-        offset: minH.offset,
-        snapTo: minH.snapTo
+        offset: minH.offset
       })
     }
     this.closestSnaplines.v = [...closestSnaplineV]
@@ -163,7 +182,7 @@ class SnapUtils {
 
   calcMoveSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number } {
     const snaplinePos = this.getSnaplinePos()
-    const layerSnapInfo = this.getLayerSnappingEdges(layer)
+    const layerSnapInfo = this.getLayerSnappingPos(layer, 'move')
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
@@ -189,17 +208,18 @@ class SnapUtils {
         offset.y = snapResult.y - layer.styles.y
       }
     })
-    ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+    LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { x: snapResult.x, y: snapResult.y })
     return offset
   }
 
   calcScaleSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number, width: number, height: number } {
     const snaplinePos = this.getSnaplinePos()
-    const layerSnapInfo = this.getLayerSnappingEdges(layer)
+    const layerSnapInfo = this.getLayerSnappingPos(layer, 'scale')
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
-    const snapResult = { x: layer.styles.x, y: layer.styles.y }
+    const snapResult = { width: layer.styles.width, height: layer.styles.height }
+    // const aspectRatio = layer.styles.width / layer.styles.height
     /**
      * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
      * It's used to prevent the layer from always snapping to the snapline if the mouse move offset is too small
@@ -216,14 +236,14 @@ class SnapUtils {
     }
     snaplines.forEach((snapline: ISnapline) => {
       if (snapline.orientation === 'V') {
-        snapResult.x = snapline.pos + snapline.offset
-        offset.x = snapResult.x - layer.styles.x
+        snapResult.width = layer.styles.width + (layer.styles.x - snapline.pos) + snapline.offset
+        offset.width = snapResult.width - layer.styles.width
       } else {
-        snapResult.y = snapline.pos + snapline.offset
-        offset.y = snapResult.y - layer.styles.y
+        snapResult.height = layer.styles.height + (layer.styles.y - snapline.pos) + snapline.offset
+        offset.height = snapResult.height - layer.styles.height
       }
     })
-    ControlUtils.updateLayerPos(this.pageIndex, layerIndex, snapResult.x, snapResult.y)
+    LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { width: snapResult.width, height: snapResult.height })
     return offset
   }
 

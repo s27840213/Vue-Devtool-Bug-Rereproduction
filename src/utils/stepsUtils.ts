@@ -33,7 +33,6 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedPageIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
     }
-    // console.log(this.steps, this.steps.length, this.currStep)
   }
 
   undo() {
@@ -44,7 +43,6 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     GroupUtils.set(this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
-    console.log(this.steps, this.steps.length, this.currStep)
   }
 
   redo() {
@@ -55,7 +53,6 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     GroupUtils.set(this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
-    console.log(this.steps, this.steps.length, this.currStep)
   }
 
   reset() {

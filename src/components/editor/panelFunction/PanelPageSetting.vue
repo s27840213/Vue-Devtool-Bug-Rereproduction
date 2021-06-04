@@ -4,13 +4,14 @@
       span(class="text-blue-1 label-lg") Page Setting
     div(class="page-setting__size")
       property-bar
-        input(class="body-2 text-gray-2" min="0" v-model="pageWidth")
+        input(class="body-2 text-gray-2"  type="number" min="0" v-model="pageWidth")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
       svg-icon(class="pointer"
-          :iconName="'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'")
+          :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+          @click.native="toggleLock()")
       property-bar
-        input(class="body-2 text-gray-2" min="0" v-model="pageHeight")
+        input(class="body-2 text-gray-2"  type="number" min="0" v-model="pageHeight")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     div
@@ -64,7 +65,8 @@ export default Vue.extend({
           width: 1080,
           height: 1080
         }
-      ]
+      ],
+      isLocked: true
     }
   },
   computed: {
@@ -74,31 +76,56 @@ export default Vue.extend({
     }),
     pageWidth: {
       get(): number {
-        return this.getPage(this.lastSelectedPageIndex).width
+        return Math.round(this.getPage(this.lastSelectedPageIndex).width)
       },
-      set(value): void {
-        this.$store.commit('UPDATE_pageProps', {
-          pageIndex: this.lastSelectedPageIndex,
-          props: {
-            width: value
-          }
-        })
-        StepsUtils.record()
+      set(value: number): void {
+        if (this.isLocked) {
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: this.lastSelectedPageIndex,
+            props: {
+              width: value,
+              height: value / this.aspectRatio
+            }
+          })
+          StepsUtils.record()
+        } else {
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: this.lastSelectedPageIndex,
+            props: {
+              width: value
+            }
+          })
+          StepsUtils.record()
+        }
       }
     },
     pageHeight: {
       get(): number {
-        return this.getPage(this.lastSelectedPageIndex).height
+        return Math.round(this.getPage(this.lastSelectedPageIndex).height)
       },
-      set(value): void {
-        this.$store.commit('UPDATE_pageProps', {
-          pageIndex: this.lastSelectedPageIndex,
-          props: {
-            height: value
-          }
-        })
-        StepsUtils.record()
+      set(value: number): void {
+        if (this.isLocked) {
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: this.lastSelectedPageIndex,
+            props: {
+              height: value,
+              width: value * this.aspectRatio
+            }
+          })
+          StepsUtils.record()
+        } else {
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: this.lastSelectedPageIndex,
+            props: {
+              height: value
+            }
+          })
+          StepsUtils.record()
+        }
       }
+    },
+    aspectRatio(): number {
+      return this.getPage(this.lastSelectedPageIndex).width / this.getPage(this.lastSelectedPageIndex).height
     }
   },
   methods: {
@@ -114,6 +141,9 @@ export default Vue.extend({
         }
       })
       StepsUtils.record()
+    },
+    toggleLock() {
+      this.isLocked = !this.isLocked
     }
   }
 })

@@ -26,6 +26,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import ControlUtils from '@/utils/controlUtils'
 
 export default Vue.extend({
   data() {
@@ -47,7 +48,8 @@ export default Vue.extend({
     ...mapGetters({
       pages: 'getPages',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getLastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
     })
     // getLastLayer(): ILayer {
@@ -81,6 +83,9 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
     }),
     selectStart(e: MouseEvent) {
+      if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
+        ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
+      }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
       this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
@@ -105,7 +110,7 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setLastSelectedPageIndex(this.pageIndex)
       /**
-       * Use nextTick to trigger the following function after DOM updating
+       * Use nextTick to trigger the following function after DOM updatingP
        */
       this.$nextTick(() => {
         this.isSelecting = false

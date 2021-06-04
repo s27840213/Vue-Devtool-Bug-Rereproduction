@@ -385,7 +385,7 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
@@ -399,6 +399,7 @@ export default Vue.extend({
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
       this.$emit('setFocus')
+      this.$emit('clearSnap')
     },
     resizeStart(event: MouseEvent) {
       this.isControlling = true
@@ -817,16 +818,18 @@ export default Vue.extend({
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     onRightClick(event: MouseEvent) {
-      this.setIsLayerDropdownsOpened(true)
-      if (this.currSelectedInfo.index < 0) {
-        GroupUtils.select([this.layerIndex])
+      if (!this.isLocked) {
+        this.setIsLayerDropdownsOpened(true)
+        if (this.currSelectedInfo.index < 0) {
+          GroupUtils.select([this.layerIndex])
+        }
+        this.$nextTick(() => {
+          const el = document.querySelector('.dropdowns--layer') as HTMLElement
+          const mousePos = MouseUtils.getMouseAbsPoint(event)
+          el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+          el.focus()
+        })
       }
-      this.$nextTick(() => {
-        const el = document.querySelector('.dropdowns--layer') as HTMLElement
-        const mousePos = MouseUtils.getMouseAbsPoint(event)
-        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-        el.focus()
-      })
     }
   }
 })

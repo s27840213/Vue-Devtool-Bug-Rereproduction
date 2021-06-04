@@ -55,7 +55,7 @@ const getDefaultState = (): IEditorState => ({
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
-  lastSelectedLayerIndex: 0,
+  lastSelectedLayerIndex: -1,
   clipboard: [],
   photos: [],
   currSelectedInfo: {
@@ -163,7 +163,6 @@ const mutations: MutationTree<IEditorState> = {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
-    console.log(updateInfo)
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       state.pages[updateInfo.pageIndex][k] = v
     })
@@ -187,7 +186,6 @@ const mutations: MutationTree<IEditorState> = {
     state.lastSelectedLayerIndex = index
   },
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
-    console.log(updateInfo.color, state.pages[updateInfo.pageIndex].backgroundColor)
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
@@ -247,8 +245,13 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  UPDATE_layersInTmp(state: IEditorState, updateInfo: { layers: Array<IShape | IText | IImage | IGroup> }) {
-    state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index].layers = updateInfo.layers
+  UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
+    Object.entries(updateInfo.styles).forEach(([k, v]) => {
+      (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+        layer.styles[k] = v
+      })
+    })
+    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
     (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {

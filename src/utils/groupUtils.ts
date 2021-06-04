@@ -90,7 +90,6 @@ class GroupUtils {
     const currSelectedIndex = store.getters.getCurrSelectedIndex
     const targetLayer = store.getters.getLayer(lastSelectedPageIndex, store.getters.getCurrSelectedIndex)
     if (targetLayer.type === 'group') {
-      console.log(currSelectedIndex)
       targetLayer.layers.forEach((layer: IGroup) => {
         layer.styles.zindex = targetLayer.styles.zindex
       })
@@ -278,22 +277,6 @@ class GroupUtils {
     })
 
     return layers
-  }
-
-  // When doing alignment, we need to change the bouding of tmp layers
-  recalcTmpStyle(layers: Array<IShape | IText | IImage | IGroup>) {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const tmpLayer = getTmpLayer()
-    const tmpStyles = calcTmpProps(this.mapLayersToPage(layers, tmpLayer))
-    const currSelectedLayers = this.mapLayersToTmp(this.mapLayersToPage(layers, tmpLayer), tmpStyles)
-    const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
-
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, tmp.styles)
-    store.commit('UPDATE_layersInTmp', {
-      layers: currSelectedLayers
-    })
-    this.set(currSelectedInfo.index, currSelectedLayers)
   }
 }
 

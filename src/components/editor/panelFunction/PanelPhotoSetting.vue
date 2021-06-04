@@ -8,7 +8,7 @@
       btn(class="full-width" :type="'primary-mid'") Adjust
       btn(class="full-width" :type="'primary-mid'") BG Remover
     property-bar
-      input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
+      input(class="body-2 text-gray-2" type="number" max="100" min="0" step="1" v-model="opacity")
       svg-icon(class="pointer"
         :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     //- action-bar(class="flex-evenly")
@@ -23,6 +23,7 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations } from 'vuex'
+import { ITmp, IText, IImage, IGroup } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -36,8 +37,11 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     opacity: {
-      get() {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+      get(): string | number {
+        return this.currSelectedInfo.layers.length === 1 ? this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+          : [...new Set(this.currSelectedInfo.layers.map((layer: ITmp | IText | IImage | IGroup) => {
+            return layer.styles.opacity
+          }))].length === 1 ? this.currSelectedInfo.layers[0].styles.opacity : 'mix'
       },
       set(value) {
         if (this.currSelectedInfo.layers.length === 1) {
@@ -49,7 +53,11 @@ export default Vue.extend({
             }
           })
         } else {
-
+          this.$store.commit('UPDATE_selectedLayersStyles', {
+            styles: {
+              opacity: value
+            }
+          })
         }
       }
     }
