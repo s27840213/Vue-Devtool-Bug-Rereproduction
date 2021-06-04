@@ -186,15 +186,11 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
-      // if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
-      //   ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
-      // }
       for (let i = 0; i < this.pages[this.pageIndex].layers.length; i++) {
         if (this.getLayer(this.pageIndex, i).type === 'image') {
           ControlUtils.updateImgControl(this.pageIndex, i, false)
         }
       }
-      console.log(this.pages)
       GroupUtils.deselect()
     },
     setFocus(): void {

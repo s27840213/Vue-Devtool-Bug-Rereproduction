@@ -15,10 +15,9 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         span(class="text-content" :style="contextStyles()" ref="text"
-          @blur="onFocusOut"
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
-          :contenteditable="config.textEditable")
+          :contenteditable="contentEditable")
         div(v-if="isActive && isLocked"
             class="nu-controller__lock-icon")
           svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
@@ -76,10 +75,11 @@ export default Vue.extend({
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
-      clickTime: new Date().toISOString(),
       isGetMoved: false,
       isCompositoning: false,
-      isSnapping: false
+      isSnapping: false,
+      contentEditable: false,
+      isMoving: false
     }
   },
   mounted() {
@@ -185,8 +185,8 @@ export default Vue.extend({
         transform: `translate3d(0px, 0px, ${zindex}px)`,
         color: 'rgba(10,10,10,0.5)',
         'font-size': `${this.getFontSize}px`,
-        'caret-color': this.isGetMoved ? '#00000000' : '#000000',
-        'pointer-events': this.config.textEditable ? 'initial' : 'none',
+        'caret-color': this.contentEditable && !this.isMoving ? '#000000' : '#00000000',
+        // 'pointer-events': this.config.textEditable ? 'initial' : 'none',
         'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
@@ -211,11 +211,11 @@ export default Vue.extend({
       const el = this.$refs.text as HTMLElement
       el.removeEventListener('compositionend', this.compositionEnd)
     },
-    triggerTextEditor(pageIndex: number, layerIndex: number) {
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-        textEditable: true
-      })
-    },
+    // triggerTextEditor(pageIndex: number, layerIndex: number) {
+    //   LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+    //     textEditable: true
+    //   })
+    // },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
@@ -230,6 +230,7 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      if (this.isActive && this.contentEditable) return
       if (!this.config.locked) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
@@ -239,10 +240,11 @@ export default Vue.extend({
 
       if (this.config.type === 'text') {
         const text = this.$refs.text as HTMLElement
+        this.initTranslate = this.getLayerPos
         text.innerHTML = this.getTextContent
-        this.isGetMoved = true
-        this.clickTime = new Date().toISOString()
-        ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+        this.isMoving = true
+        this.isGetMoved = false
+        this.contentEditable = true
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -280,10 +282,6 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
-
-        if (this.getLayerType === 'image') {
-          // this.imgHandler(totalOffset)
-        }
       }
     },
     imgHandler(offset: ICoordinate) {
@@ -291,15 +289,26 @@ export default Vue.extend({
     },
     moveEnd() {
       if (this.isActive) {
+        this.isMoving = false
+        const posDiff = {
+          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
+          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+        if (this.getLayerType === 'text' && (posDiff.x > 10 || posDiff.y > 10)) {
+          this.isGetMoved = true
+          this.contentEditable = false
+        } else {
+          this.contentEditable = true
+        }
         this.isControlling = false
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
       }
-      setTimeout(() => {
-        this.isGetMoved = false
-      }, 350)
+      // setTimeout(() => {
+      //   this.isGetMoved = false
+      // }, 350)
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -693,19 +702,14 @@ export default Vue.extend({
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick() {
-      const clickDate = new Date(this.clickTime)
-      const currDate = new Date()
-      const diff = currDate.getTime() - clickDate.getTime()
-      this.textClickHandler(diff)
+      this.textClickHandler()
+      console.log('iseditable', this.contentEditable)
     },
-    textClickHandler(diff: number) {
-      if (this.config.type === 'text' && diff < 1000) {
-        this.isGetMoved = false
-        ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, true)
+    textClickHandler() {
+      console.log('isgetMoved click', this.isGetMoved)
+      if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
+        this.contentEditable = true
       }
-    },
-    onFocusOut() {
-      ControlUtils.toggleTextEditable(this.pageIndex, this.layerIndex, false)
     },
     onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text') {
@@ -713,83 +717,80 @@ export default Vue.extend({
       }
     },
     onTyping(e: KeyboardEvent) {
-      if (this.isGetMoved) {
-        e.preventDefault()
-      } else {
-        ControlUtils.textStopPropagation(e)
-        ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
-        if (e.metaKey && e.key === 'z') {
-          StepsUtils.undo()
-          setTimeout(() => {
-            const text = this.$refs.text as HTMLElement
-            text.innerHTML = this.getTextContent
-            text.style.width = `${this.getLayerWidth}px`
-          }, 0)
-          return
-        }
-        if (this.isNoCharactor(e)) return
-        const text = this.$refs.text as HTMLElement
-        text.style.width = 'auto'
-        text.style.height = 'auto'
-
-        const textTmp = text.innerHTML
-        /**
-         * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
-         * However, after set the whiteSpace back to 'pre-wrap', in real situation the text content sometimes still leads to problems (bug)
-         * hence plus 5 to the offsetWidth for preventing this bug.
-         */
-
+      console.log(this.contentEditable)
+      // if (this.isGetMoved) {
+      //   e.preventDefault()
+      // } else {
+      ControlUtils.textStopPropagation(e)
+      ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
+      if (e.metaKey && e.key === 'z') {
+        StepsUtils.undo()
         setTimeout(() => {
-          /**
-           * This line of code prevents the bug while deleting at beginning of the text.
-           */
-          if (e.key === 'Backspace' && textTmp === text.innerHTML) return
-          text.style.whiteSpace = 'pre'
-          const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
-          const props = {
-            text: text.innerHTML
-          }
-          const textSize = {
-            width: Math.ceil(text.getBoundingClientRect().width),
-            height: text.getBoundingClientRect().height
-          }
-          let layerX = this.getLayerPos.x
-          const layerY = this.getLayerPos.y
-          // TODO: take the rotate angle into pos-compensation consideration
-          if (this.config.widthLimit === '') {
-            const page = this.$parent.$el as HTMLElement
-            const currTextWidth = isTextOneLine ? text.getBoundingClientRect().width : this.getLayerWidth
-            // const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
-            layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
-            if (layerX <= 0) {
-              layerX = 0
-              text.style.width = `${this.getLayerWidth}px`
-              textSize.width = this.getLayerWidth
-              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-            } else if (layerX + currTextWidth >= page.offsetWidth) {
-              layerX = page.offsetWidth - this.getLayerWidth
-              text.style.width = `${this.getLayerWidth}px`
-              textSize.width = this.getLayerWidth
-              ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-            } else {
-              console.log(text.getBoundingClientRect().width)
-              text.style.width = `${text.getBoundingClientRect().width}px`
-              const HW = this.getTextHW(text.innerHTML, this.config.styles)
-              textSize.width = HW.width
-            }
-          } else {
-            text.style.width = `${this.config.widthLimit}px`
-            textSize.width = this.config.widthLimit
-          }
-
-          text.style.whiteSpace = 'pre-wrap'
-          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
-          ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
-          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
-          StepsUtils.record()
+          const text = this.$refs.text as HTMLElement
+          text.innerHTML = this.getTextContent
+          text.style.width = `${this.getLayerWidth}px`
         }, 0)
+        return
       }
+      if (this.isNoCharactor(e)) return
+      const text = this.$refs.text as HTMLElement
+      text.style.width = 'auto'
+      text.style.height = 'auto'
+
+      const textTmp = text.innerHTML
+      /**
+       * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+       */
+      text.style.whiteSpace = 'pre'
+      setTimeout(() => {
+        /**
+         * This line of code prevents the bug while deleting at beginning of the text.
+         */
+        if (e.key === 'Backspace' && textTmp === text.innerHTML) return
+        const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
+        const props = {
+          text: text.innerHTML
+        }
+        const textSize = {
+          width: Math.ceil(text.getBoundingClientRect().width),
+          height: text.getBoundingClientRect().height
+        }
+        let layerX = this.getLayerPos.x
+        const layerY = this.getLayerPos.y
+        // TODO: take the rotate angle into pos-compensation consideration
+        if (this.config.widthLimit === '') {
+          const page = this.$parent.$el as HTMLElement
+          const currTextWidth = isTextOneLine ? text.getBoundingClientRect().width : this.getLayerWidth
+          // const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
+          layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
+          if (layerX <= 0) {
+            layerX = 0
+            text.style.width = `${this.getLayerWidth}px`
+            textSize.width = this.getLayerWidth
+            ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+          } else if (layerX + currTextWidth >= page.offsetWidth) {
+            layerX = page.offsetWidth - this.getLayerWidth
+            text.style.width = `${this.getLayerWidth}px`
+            textSize.width = this.getLayerWidth
+            ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+          } else {
+            text.style.width = `${text.getBoundingClientRect().width}px`
+            const HW = this.getTextHW(text.innerHTML, this.config.styles)
+            textSize.width = HW.width
+          }
+        } else {
+          text.style.width = `${this.config.widthLimit}px`
+          textSize.width = this.config.widthLimit
+        }
+
+        text.style.whiteSpace = 'pre-wrap'
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+        StepsUtils.record()
+      }, 0)
+      // }
     },
     getTextHW(innerText: string, styles: any): { width: number, height: number } {
       const el = document.createElement('span')
