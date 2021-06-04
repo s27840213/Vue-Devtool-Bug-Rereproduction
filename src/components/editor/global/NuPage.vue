@@ -57,8 +57,6 @@
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
-        div(class="page-control"
-            :style="styles('control')")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
@@ -71,12 +69,25 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
+        div(v-if="(typeof getCurrLayer) !== 'undefined' && getCurrLayer.imgControl"
+            class="dim-background"
+            :style="styles('control')"
+            ref="page-content")
+          nu-layer(:layerIndex="currSelectedIndex"
+            :pageIndex="pageIndex"
+            :config="getCurrLayer")
+          div(class="page-control dim-background" :style="styles('control')")
+              nu-img-controller(:layerIndex="currSelectedIndex"
+                                :pageIndex="pageIndex"
+                                :config="getCurrLayer"
+                                 @click.left.self="pageClickHandler()")
+
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ILayer } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -121,8 +132,16 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
-      pages: 'getPages'
-    })
+      pages: 'getPages',
+      currSelectedIndex: 'getCurrSelectedIndex',
+      getLayer: 'getLayer'
+    }),
+    getCurrLayer(): ILayer {
+      return this.getLayer(this.pageIndex, this.currSelectedIndex)
+    }
+    // isImgControl(): boolean {
+    //   return this.getLastLayer.imgControl as boolean
+    // }
   },
   methods: {
     ...mapMutations({
@@ -167,9 +186,15 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       this.setLastSelectedPageIndex(this.pageIndex)
-      if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
-        ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
+      // if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
+      //   ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
+      // }
+      for (let i = 0; i < this.pages[this.pageIndex].layers.length; i++) {
+        if (this.getLayer(this.pageIndex, i).type === 'image') {
+          ControlUtils.updateImgControl(this.pageIndex, i, false)
+        }
       }
+      console.log(this.pages)
       GroupUtils.deselect()
     },
     setFocus(): void {
@@ -313,6 +338,15 @@ export default Vue.extend({
 .layer-img {
   background: red;
   opacity: 0.5;
+  pointer-events: none;
+}
+
+.dim-background {
+  display: flex;
+  position: fixed;
+  min-width: 100%;
+  min-height: 100%;
+  background: rgba(53, 71, 90, 0.25);
   pointer-events: none;
 }
 </style>

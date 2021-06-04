@@ -88,7 +88,9 @@ class TextUtils {
   getTextHW(text: string) {
     const el = document.createElement('span')
     el.style.whiteSpace = 'pre-wrap'
-    el.style.width = `${this.getCurrLayer.styles.width}px`
+    el.style.display = 'inline-block'
+    el.style.overflowWrap = 'break-word'
+    el.style.width = `${this.getCurrLayer.widthLimit}px`
     el.innerHTML = text
     Object.assign(el.style, CssConveter.convertFontStyle(this.getCurrLayer.styles))
     document.body.appendChild(el)
@@ -96,6 +98,7 @@ class TextUtils {
       width: Math.ceil(el.getBoundingClientRect().width),
       height: Math.ceil(el.getBoundingClientRect().height)
     }
+    console.log(textHW)
     document.body.removeChild(el)
     return textHW
   }

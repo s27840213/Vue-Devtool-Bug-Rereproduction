@@ -6,7 +6,7 @@
     div(class='layer-scale'
         :class="{'layer-text': config.type === 'text'}"
         :style="scaleStyles()")
-      nu-image(v-if="config.imgControl" style="opacity: 0.35"
+      nu-image(v-if="config.imgControl" style="opacity: 0.45"
               :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
