@@ -103,16 +103,16 @@ export default Vue.extend({
     fontSize: {
       get() {
         return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
-      },
-      set(value) {
-        this.$store.commit('UPDATE_layerStyles', {
-          pageIndex: this.lastSelectedPageIndex,
-          layerIndex: this.currSelectedIndex,
-          styles: {
-            font: value
-          }
-        })
       }
+      // set(value) {
+      //   this.$store.commit('UPDATE_layerStyles', {
+      //     pageIndex: this.lastSelectedPageIndex,
+      //     layerIndex: this.currSelectedIndex,
+      //     styles: {
+      //       font: value
+      //     }
+      //   })
+      // }
     }
   },
   methods: {

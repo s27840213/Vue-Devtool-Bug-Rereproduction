@@ -142,6 +142,12 @@ export default Vue.extend({
   watch: {
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
+    },
+    'config.styles.size': function() {
+      this.$nextTick(() => {
+        const text = this.$refs.text as HTMLElement
+        text.style.width = `${this.getLayerWidth}px`
+      })
     }
   },
   methods: {
@@ -259,7 +265,6 @@ export default Vue.extend({
         this.setCursorStyle('move')
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-
         GroupUtils.movingTmp(
           this.pageIndex,
           {
@@ -290,7 +295,6 @@ export default Vue.extend({
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
-        console.log('move')
         StepsUtils.record()
       }
       setTimeout(() => {
@@ -767,6 +771,7 @@ export default Vue.extend({
               textSize.width = this.getLayerWidth
               ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
             } else {
+              console.log(text.getBoundingClientRect().width)
               text.style.width = `${text.getBoundingClientRect().width}px`
               const HW = this.getTextHW(text.innerHTML, this.config.styles)
               textSize.width = HW.width
@@ -775,6 +780,7 @@ export default Vue.extend({
             text.style.width = `${this.config.widthLimit}px`
             textSize.width = this.config.widthLimit
           }
+
           text.style.whiteSpace = 'pre-wrap'
           ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
           ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" ref="body")
     div(class="nu-text" ref="content")
-      span(class="text-content" v-for="text in content" :style="contextStyles()") {{ text }}
+      span(class="text-content" v-for="text in textContent" :style="contextStyles()") {{ text }}
 </template>
 
 <script lang="ts">
@@ -18,17 +18,17 @@ export default Vue.extend({
   },
   data() {
     return {
-      content: ['']
+      textContent: ['']
     }
   },
   mounted() {
-    this.content = this.getTextContent
+    this.textContent = this.getTextContent
   },
   watch: {
     'config.text': function() {
-      this.content = this.getTextContent
+      this.textContent = this.getTextContent
       setTimeout(() => {
-        const content = this.$refs.content as HTMLElement
+        const content = this.getContentBody
         if (content.offsetHeight >= this.config.styles.height) {
           ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
@@ -36,16 +36,17 @@ export default Vue.extend({
       }, 0)
     },
     'config.styles.font': function() {
-      console.log('change font')
-      this.content = this.getTextContent
       setTimeout(() => {
-        const content = this.$refs.content as HTMLElement
+        const content = this.getContentBody
         ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
       }, 0)
     }
     // 'config.styles.size': function() {
-
+    //   const textHW = TextUtils.getTextHW(this.config.text)
+    //   console.log(textHW)
+    //   ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.config.styles.size)
+    //   ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
     // }
   },
   computed: {
@@ -67,6 +68,9 @@ export default Vue.extend({
         }
       }
       return textArr
+    },
+    getContentBody(): HTMLElement {
+      return this.$refs.content as HTMLElement
     }
   },
   methods: {
