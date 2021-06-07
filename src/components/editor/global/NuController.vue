@@ -185,7 +185,7 @@ export default Vue.extend({
       const styles = {
         // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0.5)',
+        color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.contentEditable && !this.isMoving ? '#000000' : '#00000000',
         // 'pointer-events': this.config.textEditable ? 'initial' : 'none',
@@ -779,7 +779,8 @@ export default Vue.extend({
             textSize.width = this.getLayerWidth
             ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
           } else {
-            text.style.width = `${text.getBoundingClientRect().width}px`
+            // text.style.width = `${text.getBoundingClientRect().width}px`
+            text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
             const HW = this.getTextHW(text.innerHTML, this.config.styles)
             textSize.width = HW.width
           }
@@ -795,7 +796,6 @@ export default Vue.extend({
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
         StepsUtils.record()
       }, 0)
-      // }
     },
     getTextHW(innerText: string, styles: any): { width: number, height: number } {
       const el = document.createElement('span')
