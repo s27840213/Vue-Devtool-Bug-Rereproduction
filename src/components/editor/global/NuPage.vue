@@ -76,12 +76,11 @@
           nu-layer(:layerIndex="currSelectedIndex"
             :pageIndex="pageIndex"
             :config="getCurrLayer")
-          div(class="page-control dim-background" :style="styles('control')")
+          div(class="page-control dim-background" :style="Object.assign(styles('control'), { 'pointer-events': 'none' })")
               nu-img-controller(:layerIndex="currSelectedIndex"
                                 :pageIndex="pageIndex"
                                 :config="getCurrLayer"
                                  @click.left.self="pageClickHandler()")
-
 </template>
 
 <script lang="ts">
@@ -139,9 +138,6 @@ export default Vue.extend({
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     }
-    // isImgControl(): boolean {
-    //   return this.getLastLayer.imgControl as boolean
-    // }
   },
   methods: {
     ...mapMutations({
@@ -342,7 +338,8 @@ export default Vue.extend({
   position: fixed;
   min-width: 100%;
   min-height: 100%;
-  background: rgba(53, 71, 90, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  // background: rgba(53, 71, 90, 0.25);
   pointer-events: none;
 }
 </style>

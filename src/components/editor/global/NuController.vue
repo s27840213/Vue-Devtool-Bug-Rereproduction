@@ -17,7 +17,7 @@
         span(class="text-content" :style="contextStyles()" ref="text"
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
-          :contenteditable="contentEditable")
+          :contenteditable="config.type === 'tmp' ? false : contentEditable")
         div(v-if="isActive && isLocked"
             class="nu-controller__lock-icon")
           svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
@@ -175,6 +175,8 @@ export default Vue.extend({
         resizer = this.config.isClipped ? [] : resizer
       } else if (this.getLayerType === 'shape' && this.config.category !== 'rect') {
         resizer = []
+      } else if (this.getLayerType === 'tmp') {
+        resizer = []
       }
       return resizer
     },
@@ -230,7 +232,7 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      if (this.isActive && this.contentEditable) return
+      if (this.getLayerType === 'text' && this.isActive && this.contentEditable) return
       if (!this.config.locked) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
@@ -238,14 +240,6 @@ export default Vue.extend({
         window.addEventListener('mousemove', this.moving)
       }
 
-      if (this.config.type === 'text') {
-        const text = this.$refs.text as HTMLElement
-        this.initTranslate = this.getLayerPos
-        text.innerHTML = this.getTextContent
-        this.isMoving = true
-        this.isGetMoved = false
-        this.contentEditable = true
-      }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
@@ -255,10 +249,27 @@ export default Vue.extend({
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
+          console.log(this.isActive)
           if (this.pageIndex === this.lastSelectedPageIndex) {
+            // if (this.getLayerType === 'text' && this.isActive === false) {
+            //   GroupUtils.select([targetIndex])
+            //   window.removeEventListener('mouseup', this.moveEnd)
+            //   window.removeEventListener('mousemove', this.moving)
+            //   return
+            // }
             GroupUtils.select([targetIndex])
           }
+          console.log(this.isActive)
         }
+      }
+
+      if (this.config.type === 'text') {
+        const text = this.$refs.text as HTMLElement
+        this.initTranslate = this.getLayerPos
+        text.innerHTML = this.getTextContent
+        this.isMoving = true
+        this.isGetMoved = false
+        this.contentEditable = true
       }
     },
     moving(event: MouseEvent) {
@@ -306,9 +317,6 @@ export default Vue.extend({
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
       }
-      // setTimeout(() => {
-      //   this.isGetMoved = false
-      // }, 350)
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -703,10 +711,8 @@ export default Vue.extend({
     },
     onClick() {
       this.textClickHandler()
-      console.log('iseditable', this.contentEditable)
     },
     textClickHandler() {
-      console.log('isgetMoved click', this.isGetMoved)
       if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
         this.contentEditable = true
       }
@@ -717,7 +723,6 @@ export default Vue.extend({
       }
     },
     onTyping(e: KeyboardEvent) {
-      console.log(this.contentEditable)
       // if (this.isGetMoved) {
       //   e.preventDefault()
       // } else {

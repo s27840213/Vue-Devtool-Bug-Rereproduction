@@ -120,29 +120,29 @@ export default Vue.extend({
     },
     lineHeight: {
       get() {
-        console.log(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles)
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
+        const value = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
+        return value === -1 ? -1 : value * 1000
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            lineHeight: value
+            lineHeight: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
       }
     },
     fontSpacing: {
       get() {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing * 1000
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            fontSpacing: value
+            fontSpacing: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
       }

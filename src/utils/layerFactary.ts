@@ -42,7 +42,6 @@ class LayerFactary {
       type: 'text',
       text: '',
       widthLimit: '',
-      textEditable: false,
       active: false,
       shown: false,
       locked: false,
@@ -55,24 +54,25 @@ class LayerFactary {
         rotate: 0,
         width: 0,
         height: 0,
-        initWidth: 0,
-        initHeight: 0,
+        initWidth: config.styles.width ? config.styles.width : 0,
+        initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
         opacity: 100,
-        font: 'Lobster',
+        font: 'normal',
         weight: 'normal',
         align: 'left',
-        lineHeight: 10,
-        fontSpacing: 10,
+        lineHeight: -1,
+        fontSpacing: 0,
         color: '#000000',
         size: 72,
-        initSize: 72,
+        initSize: config.styles.size ? config.styles.size : 72,
         writingMode: 'initial',
         decoration: 'none',
         style: 'normal'
       }
     }
     Object.assign(basicConfig.styles, config.styles)
+    delete config.styles
     return Object.assign(basicConfig, config)
   }
 

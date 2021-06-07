@@ -78,27 +78,24 @@ class TextUtils {
       this.updateTextStyles(this.pageIndex, this.layerIndex, { size })
     }
 
-    // setTimeout(() => {
-    const textHW = this.getTextHW(this.getCurrLayer.text)
+    const textHW = this.getTextHW(this.getCurrLayer.text, this.getCurrLayer.styles)
     ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
-    // }, 0)
   }
 
-  getTextHW(text: string) {
+  getTextHW(text: string, styles: any) {
     const el = document.createElement('span')
     el.style.whiteSpace = 'pre-wrap'
     el.style.display = 'inline-block'
     el.style.overflowWrap = 'break-word'
-    el.style.width = `${this.getCurrLayer.widthLimit}px`
+    el.style.width = this.getCurrLayer ? `${this.getCurrLayer.widthLimit}px` : 'auto'
     el.innerHTML = text
-    Object.assign(el.style, CssConveter.convertFontStyle(this.getCurrLayer.styles))
+    Object.assign(el.style, CssConveter.convertFontStyle(styles))
     document.body.appendChild(el)
     const textHW = {
       width: Math.ceil(el.getBoundingClientRect().width),
       height: Math.ceil(el.getBoundingClientRect().height)
     }
-    console.log(textHW)
     document.body.removeChild(el)
     return textHW
   }
