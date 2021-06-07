@@ -77,7 +77,10 @@ class TextUtils {
       }
       this.updateTextStyles(this.pageIndex, this.layerIndex, { size })
     }
+    this.updateLayerSize()
+  }
 
+  updateLayerSize() {
     const textHW = this.getTextHW(this.getCurrLayer.text, this.getCurrLayer.styles)
     ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)

@@ -131,6 +131,7 @@ export default Vue.extend({
             lineHeight: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
+        TextUtils.updateLayerSize()
       }
     },
     fontSpacing: {
@@ -145,6 +146,7 @@ export default Vue.extend({
             fontSpacing: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
+        TextUtils.updateLayerSize()
       }
     },
     opacity: {
