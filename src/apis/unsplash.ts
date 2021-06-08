@@ -21,6 +21,6 @@ export default {
       method: 'GET',
       params: searchParams
     })
-    return data.results
+    return data
   }
 }
