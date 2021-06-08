@@ -11,6 +11,8 @@
       @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste()"
       @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
       @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
+      @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+      @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
       @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
       @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
       @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"

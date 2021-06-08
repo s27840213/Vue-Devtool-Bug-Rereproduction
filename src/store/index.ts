@@ -3,7 +3,8 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
-import apis from '@/apis/unsplash'
+import unsplashApis from '@/apis/unsplash'
+import userApis from '@/apis/user'
 import orderMutation from '@/store/mutations/order'
 
 Vue.use(Vuex)
@@ -299,8 +300,24 @@ const mutations: MutationTree<IEditorState> = {
 const actions: ActionTree<IEditorState, unknown> = {
   async getRandomPhoto({ commit }, { count }) {
     try {
-      const { data } = await apis.getRandomPhoto(count)
+      const { data } = await unsplashApis.getRandomPhoto(count)
       commit('SET_photos', data)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getAssets({ commit }, { token }) {
+    try {
+      const { data } = await userApis.getAssets(token)
+      console.log(data)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async login({ commit }, { token, account, password }) {
+    try {
+      const { data } = await userApis.login(token, account, password)
+      console.log(data)
     } catch (error) {
       console.log(error)
     }
