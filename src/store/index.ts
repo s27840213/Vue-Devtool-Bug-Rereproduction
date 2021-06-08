@@ -6,6 +6,8 @@ import { IPage } from '@/interfaces/page'
 import apis from '@/apis/unsplash'
 import orderMutation from '@/store/mutations/order'
 
+import photos from './photos'
+
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
@@ -306,9 +308,11 @@ const actions: ActionTree<IEditorState, unknown> = {
     }
   }
 }
+
 export default new Vuex.Store({
   state,
   getters,
   mutations,
-  actions
+  actions,
+  modules: { photos }
 })

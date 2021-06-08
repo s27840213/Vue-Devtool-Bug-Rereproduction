@@ -1,7 +1,9 @@
 <template lang="pug">
-  div(class="search-bar bg-gray-6")
+  form(class="search-bar bg-gray-6"
+    @submit="onSearch")
     input(class="search-bar__input"
       type="text"
+      v-model="keyword"
       :placeholder="placeholder")
     svg-icon(:iconName="'search'" :iconColor="'gray-3'" :iconWidth="'15px'")
 </template>
@@ -16,6 +18,17 @@ export default Vue.extend({
     placeholder: {
       type: String,
       default: 'Search from our template'
+    }
+  },
+  data () {
+    return {
+      keyword: ''
+    }
+  },
+  methods: {
+    onSearch (event: Event) {
+      event.preventDefault()
+      this.$emit('search', this.keyword)
     }
   }
 })

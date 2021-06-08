@@ -21,16 +21,14 @@ export default Vue.extend({
     }
   },
   mounted () {
-    if ('IntersectionObserver' in window) {
-      this.intersectionObserver = new IntersectionObserver(
-        ([evt]) => evt.isIntersecting && this.handleCallback(),
-        {
-          root: this.$refs.container as Element,
-          rootMargin: this.rootMargin
-        }
-      )
-      this.intersectionObserver.observe(this.$refs.sentinel as Element)
-    }
+    this.intersectionObserver = new IntersectionObserver(
+      ([evt]) => evt.isIntersecting && this.handleCallback(),
+      {
+        root: this.$refs.container as Element,
+        rootMargin: this.rootMargin
+      }
+    )
+    this.intersectionObserver.observe(this.$refs.sentinel as Element)
   },
   methods: {
     handleCallback: throttle(function (this: any) {

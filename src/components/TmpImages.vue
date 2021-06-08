@@ -1,19 +1,17 @@
 <template lang="pug">
-
-div(class="temp__content")
+infinite-scroll(class="temp__content"
+  @callback="$emit('loadMore')")
   div(v-for="(row, index) in rows"
     :key="`rows${index}`",
     :style="{ marginBottom: `${margin}px` }")
-    img(v-for="(photo, i) in row"
-      :key="photo.id",
-      :src="photo.urls.regular",
-      :width="photo.preview.width",
-      :height="photo.preview.height",
-      :style="i && { marginLeft: `${margin}px` }",
-      draggable="true",
-      class="temp__img"
-      @dragstart="dragStart($event,photo)"
-      @click="addImage(photo)")
+    lazy-load(v-for="(photo, i) in row"
+      :key="photo.id")
+      img(:src="photo.urls.thumb",
+        :style="imageStyle(photo.preview, i > 0)",
+        draggable="true",
+        class="temp__img"
+        @dragstart="dragStart($event,photo)"
+        @click="addImage(photo)")
 </template>
 
 <script lang="ts">
@@ -25,26 +23,39 @@ import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
+import InfiniteScroll from '@/components/InfiniteScroll.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 
 export default Vue.extend({
+  props: {
+    photos: {
+      type: Array,
+      default: () => []
+    }
+  },
+  components: {
+    InfiniteScroll,
+    LazyLoad
+  },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      photos: 'getPhotos',
       pageSize: 'getPageSize'
     }),
-    rows (): any[] {
-      // @TODO lazyload, generate for lastest coming data
-      const { galleryUtils, photos } = this
-      return galleryUtils.generate(photos)
-    },
     margin (): number {
       return this.galleryUtils.margin
     }
   },
   data () {
     return {
+      rows: [],
       galleryUtils: new GalleryUtils(260, 100, 5)
+    }
+  },
+  watch: {
+    photos (val) {
+      const rows = this.galleryUtils.generate(val) as any
+      this.rows = this.rows.concat(rows)
     }
   },
   methods: {
@@ -82,6 +93,13 @@ export default Vue.extend({
         }
       }
       layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
+    },
+    imageStyle(attr: any, addMarginLeft: boolean) {
+      return {
+        width: `${attr.width}px`,
+        height: `${attr.height}px`,
+        marginLeft: (addMarginLeft ? `${this.margin}px` : '0px')
+      }
     }
   }
 })
@@ -100,6 +118,7 @@ export default Vue.extend({
     }
   }
   &__img {
+    display: inline-block;
     background-color: #f1f1f1;
   }
 }

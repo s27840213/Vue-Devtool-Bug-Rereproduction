@@ -12,7 +12,7 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        await store.dispatch('getRandomPhoto', { count: 30 })
+        // await store.dispatch('photos/getPhotosByUnsplash')
         next()
       } catch (error) {
         console.log(error)
