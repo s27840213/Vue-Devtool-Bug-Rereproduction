@@ -19,8 +19,8 @@ function normalized (photos: Api.IPexelsPhoto[]): Api.IUnsplashPhoto[] {
     id: `${photo.id}`,
     urls: {
       full: photo.src.original,
-      raw: photo.src.medium,
-      regular: photo.src.portrait,
+      raw: photo.src.original,
+      regular: photo.src.medium,
       small: photo.src.small,
       thumb: photo.src.small
     }
