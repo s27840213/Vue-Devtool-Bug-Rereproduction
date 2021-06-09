@@ -1,17 +1,17 @@
 <template lang="pug">
   div(class="color-picker")
-    span(class="color-picker__title text-blue-1 label-lg") Document Colors
+    //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     div(class="color-picker__colors")
-      div(v-for="(color, index) in getDocumentColors"
+      div(v-for="(color, index) in getColors"
         class="color-picker__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    span(class="color-picker__title text-blue-1 label-lg") Color Picker
+    span(class="color-picker__title text-blue-1 label-lg") Color Palette
     div(class="color-picker__colors")
-      div(v-for="color in colorPresets"
-        class="color-picker__color"
-        :style="colorStyles(color)"
-        @click="setColor(color)")
+      div(v-for="(color, index) in colorPresets"
+        class="color-picker__color palette"
+        :style="paletteColorStyle(color, index)"
+        @click="setColor(color, index)")
 </template>
 
 <script lang="ts">
@@ -29,7 +29,7 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    getDocumentColors(): [string] {
+    getColors(): [string] {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
     }
   },
@@ -47,8 +47,17 @@ export default Vue.extend({
         '#56CCF2',
         '#FFFFFF'
       ],
-      currSelectedColorIndex: 0
+      currSelectedColorIndex: 0,
+      paletteRecord: [{ key: 0, value: -1 }]
     }
+  },
+  watch: {
+    currSelectedIndex: function() {
+      this.initilizeRecord()
+    }
+  },
+  mounted() {
+    this.initilizeRecord()
   },
   methods: {
     ...mapMutations({
@@ -57,16 +66,33 @@ export default Vue.extend({
     colorStyles(color: string, index: number) {
       return {
         backgroundColor: color,
-        border: index === this.currSelectedColorIndex ? '1.5px solid black' : '',
-        boxShadow: index === this.currSelectedColorIndex ? 'inset 0 0 0 2px #fff' : ''
+        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
+        // boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #7d2ae8, inset 0 0 0 2px #fff' : ''
+      }
+    },
+    paletteColorStyle(color: string, index: number) {
+      const currSelectedInPalette = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)?.value
+      if (currSelectedInPalette === index) {
+        return {
+          backgroundColor: color,
+          boxShadow: '0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff'
+        }
+      } else {
+        return {
+          backgroundColor: color
+        }
       }
     },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
     },
-    setColor(newColor: string) {
+    setColor(newColor: string, index: number) {
       const colors = Object.assign([], this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color)
       colors[this.currSelectedColorIndex] = newColor
+      const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
+      if (record) {
+        record.value = index
+      }
       this.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, colors)
     },
     updateLayerProps(pageIndex: number, layerIndex: number, color: [string]) {
@@ -75,6 +101,13 @@ export default Vue.extend({
         layerIndex,
         props: { color: color }
       })
+    },
+    initilizeRecord() {
+      this.paletteRecord = []
+      for (let i = 0; i < this.getColors.length; i++) {
+        const record = { key: i, value: -1 }
+        this.paletteRecord.push(record)
+      }
     }
   }
 })
@@ -107,6 +140,15 @@ export default Vue.extend({
     margin: 5px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
+    &:hover {
+      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff
+    }
+    transition: box-shadow .2s ease-in-out;
+  }
+}
+.palette {
+  &:hover {
+    box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
 }
 </style>

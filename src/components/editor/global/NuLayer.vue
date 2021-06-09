@@ -58,7 +58,7 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      const zindex = this.config.imgControl ? 10000 : (this.layerIndex + 1) * 99
+      const zindex = (this.layerIndex + 1) * 99
       const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
         { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
       if (this.config.imgControl) {
@@ -72,7 +72,7 @@ export default Vue.extend({
        * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
        */
       return {
-        transform: `scale(${this.config.styles.scale})`,
+        transform: `scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
         'transform-style': this.config.type === 'group' ? 'flat' : (this.config.type === 'tmp' && this.config.styles.zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },

@@ -113,7 +113,7 @@ export default Vue.extend({
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            size: value
+            color: value
           }
         })
       }

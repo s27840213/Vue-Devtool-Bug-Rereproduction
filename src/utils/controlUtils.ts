@@ -191,19 +191,26 @@ class Controller {
   //   this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
   // }
 
+  shapeCategorySorter(resizer: any, category: number) {
+    switch (category) {
+      // category: 0 => 線條，可以修改顏色，線條粗細，線條樣式，端點樣式
+      case 0:
+        return []
+      // category: 1 => 形狀，可以修改顏色，以及等比例/非等比例縮放
+      case 1:
+        return resizer
+      // category: 2 => 複雜內容，可以修改顏色，以及等比例縮放
+      case 2:
+        return []
+    }
+  }
+
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
       props
     })
-  }
-
-  toggleTextEditable(pageIndex: number, layerIndex: number, isEditable: boolean) {
-    const props = {
-      textEditable: isEditable
-    }
-    this.updateTextProps(pageIndex, layerIndex, props)
   }
 
   updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
@@ -273,6 +280,17 @@ class Controller {
     })
   }
 
+  updateLayerScale(pageIndex: number, layerIndex: number, scaleX: number, scaleY: number) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        scaleX,
+        scaleY
+      }
+    })
+  }
+
   updateFontSize(pageIndex: number, layerIndex: number, size: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
@@ -299,18 +317,6 @@ class Controller {
       layerIndex,
       props: {
         clipPath
-      }
-    })
-  }
-
-  // TODO: change the viewBox so as the path to accomplish the shape's size changing
-  updateShapeProps(pageIndex: number, layerIndex: number, viewBox: number[], path: string) {
-    store.commit('UPDATE_layerProps', {
-      pageIndex,
-      layerIndex,
-      props: {
-        viewBox,
-        path
       }
     })
   }

@@ -31,7 +31,7 @@ export default Vue.extend({
           size: [180, 120]
         },
         {
-          category: 2,
+          category: 1,
           color: ['#808080'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->

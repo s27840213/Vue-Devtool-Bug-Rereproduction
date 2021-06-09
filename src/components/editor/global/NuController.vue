@@ -75,6 +75,7 @@ export default Vue.extend({
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
+      scale: { scaleX: 1, scaleY: 1 },
       isGetMoved: false,
       isCompositoning: false,
       isSnapping: false,
@@ -194,8 +195,8 @@ export default Vue.extend({
           : controlPoints.resizers.slice(0, 2)
       } else if (this.getLayerType === 'image') {
         resizer = this.config.isClipped ? [] : resizer
-      } else if (this.getLayerType === 'shape' && this.config.category !== 'rect') {
-        resizer = []
+      } else if (this.getLayerType === 'shape') {
+        resizer = ControlUtils.shapeCategorySorter(resizer, this.config.category)
       } else if (this.getLayerType === 'tmp') {
         resizer = []
       }
@@ -253,7 +254,6 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      console.log(this.config)
       if (this.getLayerType === 'text' && this.isActive && this.contentEditable) return
       if (!this.config.locked) {
         this.isControlling = true
@@ -325,7 +325,7 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if (this.getLayerType === 'text' && (posDiff.x > 10 || posDiff.y > 10)) {
+        if (this.getLayerType === 'text' && (posDiff.x > 3 || posDiff.y > 3)) {
           this.isGetMoved = true
           this.contentEditable = false
         } else {
@@ -336,7 +336,6 @@ export default Vue.extend({
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
-        console.log('xsdfdsf')
       }
       this.$emit('clearSnap')
     },
@@ -403,8 +402,8 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       const ratio = {
-        width: width / this.config.styles.initWidth,
-        height: height / this.config.styles.initHeight
+        width: width / (this.config.styles.initWidth * this.config.styles.scaleX),
+        height: height / (this.config.styles.initHeight * this.config.styles.scaleY)
       }
       /**
        * TO times the initSize is for synchronizing the img-resizer.
@@ -467,8 +466,14 @@ export default Vue.extend({
       this.initialPos = { x: event.clientX, y: event.clientY }
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
-
       this.currCursorStyling(event)
+
+      if (this.getLayerType === 'shape' && this.config.category === 1) {
+        this.scale = {
+          scaleX: this.config.styles.scaleX,
+          scaleY: this.config.styles.scaleY
+        }
+      }
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
@@ -506,26 +511,17 @@ export default Vue.extend({
       if (this.getLayerType === 'image') {
         this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
       } else if (this.getLayerType === 'shape') {
-        this.shapeResizeHandler(width, height)
+        let scaleX = this.scale.scaleX
+        let scaleY = this.scale.scaleY
+        scaleX = width / initWidth === 1 ? scaleX : width / initWidth * scaleX
+        scaleY = height / initHeight === 1 ? scaleY : height / initHeight * scaleY
+        ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
       } else if (this.getLayerType === 'text') {
         [width, height] = this.textResizeHandler(width, height)
         scale = 1
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-    },
-    shapeResizeHandler(width: number, height: number) {
-      if (this.config.category === 'rect') {
-        const viewBox = [0, 0, 0, 0]
-        viewBox[2] = width
-        viewBox[3] = height
-        const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-        ControlUtils.updateShapeProps(this.pageIndex, this.layerIndex, viewBox, path)
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, 1)
-      }
-      if (this.config.category === 'circle') {
-        // TODO
-      }
     },
     resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
       const imgPos = {
