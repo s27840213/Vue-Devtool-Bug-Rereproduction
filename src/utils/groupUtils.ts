@@ -179,6 +179,11 @@ class GroupUtils {
     }
   }
 
+  selectAll() {
+    this.deselect()
+    this.select([...Array(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex)).keys()])
+  }
+
   deselect() {
     const currSelectedIndex = store.getters.getCurrSelectedIndex
     if (currSelectedIndex !== -1) {

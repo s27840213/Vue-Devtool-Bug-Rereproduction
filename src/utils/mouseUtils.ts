@@ -1,7 +1,7 @@
 /**
  */
 import store from '@/store'
-import { IImage, ILayer, IStyle, IText } from '@/interfaces/layer'
+import { IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
@@ -31,12 +31,15 @@ class MouseUtils {
     clipPath = '', clipperStyles: IStyle | null = null) {
     let layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer && clipperStyles && layer.type === 'image') {
-      layer = this.clipperHandler(layer, clipPath, clipperStyles)
-      store.commit('DELETE_layer', {
-        pageIndex, layerIndex
-      })
-      LayerUtils.addLayers(pageIndex, layer)
-      StepsUtils.record()
+      layer = this.clipperHandler(layer, clipPath, clipperStyles) as IImage
+      if (layer) {
+        store.commit('DELETE_layer', {
+          pageIndex, layerIndex
+        })
+        console.log(layer)
+        LayerUtils.addLayers(pageIndex, layer)
+        StepsUtils.record()
+      }
     }
   }
 
@@ -48,7 +51,7 @@ class MouseUtils {
     }
   }
 
-  onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): ILayer | undefined {
+  onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
     if (e.dataTransfer === null) return
 
     const data = JSON.parse(e.dataTransfer.getData('data'))
@@ -105,17 +108,12 @@ class MouseUtils {
       layerConfig.styles.y = tmpPos.y
       layer = LayerFactary.newText(Object.assign(layerConfig, { text: data.text }) as IText)
     } else if (data.type === 'shape') {
-      const shapeConfig = {
-        viewBox: data.viewBox,
-        path: data.path,
-        category: data.category,
-        clipper: data.clipper
-      }
       const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
       Object.assign(layerConfig.styles, data.styles)
       layerConfig.styles.x = tmpPos.x
       layerConfig.styles.y = tmpPos.y
-      layer = LayerFactary.newShape(Object.assign(layerConfig, shapeConfig))
+      delete data.styles
+      layer = LayerFactary.newShape(Object.assign(layerConfig, data))
     }
     return layer
   }

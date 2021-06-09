@@ -1,7 +1,6 @@
 <template lang="pug">
   div(class="nu-shape")
-    svg(:viewBox="viewBox" preserveAspectRatio="xMidYMid")
-      path(:d="config.path" :style="patternStyles()")
+    div(ref="svg")
 
 </template>
 
@@ -13,20 +12,35 @@ export default Vue.extend({
     return {
     }
   },
-  computed: {
-    viewBox(): string {
-      return this.config.viewBox.join(' ')
+  mounted() {
+    const svg = this.$refs.svg as HTMLElement
+    svg.innerHTML = this.svgFormatter(this.config.svg, this.config.color)
+  },
+  watch: {
+    'config.color': {
+      handler: function(newVal) {
+        const svg = this.$refs.svg as HTMLElement
+        svg.innerHTML = this.svgFormatter(this.config.svg, newVal)
+      },
+      deep: true
     }
+  },
+  computed: {
+    // viewBox(): string {
+    //   return this.config.viewBox.join(' ')
+    // }
   },
   props: {
     config: Object,
     pageIndex: Number
   },
   methods: {
-    patternStyles() {
-      return {
-        fill: this.config.styles.color
+    svgFormatter(svg: string, color: [string]): string {
+      for (let i = 0; i < color.length; i++) {
+        const reg = new RegExp('\\${color\\[' + i + '\\]}', 'g')
+        svg = svg.replace(reg, color[i])
       }
+      return svg
     }
   }
 })

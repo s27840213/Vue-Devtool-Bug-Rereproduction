@@ -1,12 +1,10 @@
+
 <template lang="pug">
 div(class="temp__content")
   div(class="temp__item" v-for="svg in contents",
       ref="body"
       draggable="true",
       @dragstart="dragStart($event, svg)")
-    //- svg(class="temp__svg" :viewBox="svg.viewBox" preserveAspectRatio="xMidYMid"
-    //-     :style="styles(svg)")
-    //-   path(:d="svg.path" ref="path")
 </template>
 
 <script lang="ts">
@@ -20,76 +18,93 @@ export default Vue.extend({
     return {
       contents: [
         {
-          category: 'rect',
-          color: '#2EB8E6',
+          category: 1,
+          color: ['#2EB8E6'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-                <style type="text/css">
-                  .st3{fill:#2EB8E6;}
-                </style>
                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                   viewBox="0 0 180 120" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <path class="st3" class="st0" d="M0 0 L0 120 180 120 180 0z"/>
+                <path fill="\${color[0]}" d="M0 0 L0 120 180 120 180 0z"/>
                 </svg>
                 `,
           path: 'M0 0 L0 120 180 120 180 0z',
-          viewBox: [0, 0, 180, 120],
-          clipper: true
+          size: [180, 120]
         },
-        //   category: 'rect',
-        //   color: 'pink',
-        //   path: 'M0 0 L0 240 120 240 120 0z',
-        //   viewBox: [0, 0, 120, 240],
-        //   clipper: true
-        // },
         {
-          category: 'circle',
-          color: 'gray',
+          category: 2,
+          color: ['#808080'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-                <style type="text/css">
-                  .st0{fill:gray;}
-                </style>
                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <circle class="st0" class="st0" cx="400" cy="400" r="265"/>
+                  viewBox="0 0 250 250" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                <path fill="\${color[0]}" d="M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z"/>
                 </svg>
                 `,
           path: 'M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z',
-          viewBox: [0, 0, 250, 250],
-          clipper: true
+          size: [250, 250]
         },
         {
-          category: 'arbitrary',
-          color: 'red',
+          category: 2,
+          color: ['#EB5757'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                   viewBox="0 0 100 100" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <style type="text/css">
-                  .st1{fill:red;}
-                </style>
-                <path class="st1" d="M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z"/>
+                <path fill="\${color[0]}" d="M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z"/>
                 </svg>`,
           path: 'M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z',
-          viewBox: [0, 0, 100, 100],
-          clipper: true
-
+          size: [100, 100]
         },
         {
+          category: 2,
+          color: ['#EDC5B1'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                   viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <style type="text/css">
-                  .st2{fill:#EDC5B1;}
-                </style>
-                <circle class="st2" cx="400" cy="400" r="265"/>
+                <circle fill="\${color[0]}" cx="400" cy="400" r="265"/>
                 </svg>
                 `,
           path: '',
-          viewBox: [0, 0, 800, 800],
-          clipper: false
+          size: [200, 200]
+        },
+        {
+          category: 0,
+          color: ['#008BDB'],
+          svg: `<svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                <circle fill="\${color[0]}" cx="400" cy="400" r="265"/>
+                </svg>
+                `,
+          path: '',
+          size: [100, 120]
+        },
+        {
+          category: 0,
+          color: ['#EB5757', '#FFFF00'],
+          svg: `<?xml version="1.0" encoding="utf-8"?>
+                 <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 180 120" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                 <path fill="\${color[0]}" d="M0 0 L0 60 120 60 120 0z"/>
+                 <path fill="\${color[1]}" d="M0 65 L0 90 150 90 150 65z"/>
+                 <path fill="\${color[0]}" d="M0 95 L0 120 180 120 180 95z"/>
+                 </svg>`,
+          path: '',
+          size: [180, 120]
+        },
+        {
+          category: 2,
+          color: ['#fe0000', '#000095', '#fff'],
+          svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600"><g fill-rule="evenodd">
+                <path d="M0 0h900v600H0z" fill="\${color[0]}"/>
+                <path d="M0 0h450v300H0z" fill="\${color[1]}"/>
+                </g>
+                <path d="M225 37.5l-56.25 209.928L322.428 93.75 112.5 150l209.928 56.25L168.75 52.572 225 262.5l56.25-209.928L127.572 206.25 337.5 150 127.572 93.75 281.25 247.428 225 37.5" fill="\${color[2]}" paint-order="markers fill stroke"/>
+                <circle cy="150" cx="225" r="60" fill="\${color[2]}" stroke="#000095" stroke-width="7.5"/>
+                </svg>`,
+          path: '',
+          size: [180, 120]
         }
       ]
     }
@@ -98,7 +113,7 @@ export default Vue.extend({
     const body = this.$refs.body as [HTMLElement]
     for (let i = 0; i < body.length; i++) {
       const div = document.createElement('div')
-      div.innerHTML = this.contents[i].svg
+      div.innerHTML = this.svgFormatter(this.contents[i].svg, this.contents[i].color as [string])
       body[i].appendChild(div)
     }
   },
@@ -119,14 +134,21 @@ export default Vue.extend({
         styles: {
           x: e.clientX - rect.x,
           y: e.clientY - rect.y,
-          width: data.viewBox[2],
-          height: data.viewBox[3],
+          width: data.size[0],
+          height: data.size[1],
           color: data.color
         }
       }
 
       Object.assign(data, svgData)
       dataTransfer.setData('data', JSON.stringify(data))
+    },
+    svgFormatter(svg: string, color: [string]): string {
+      for (let i = 0; i < color.length; i++) {
+        const reg = new RegExp('\\${color\\[' + i + '\\]}', 'g')
+        svg = svg.replace(reg, color[i])
+      }
+      return svg
     }
   }
 })

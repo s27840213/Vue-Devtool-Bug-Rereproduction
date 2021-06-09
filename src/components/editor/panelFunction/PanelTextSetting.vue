@@ -8,10 +8,10 @@
     div(class="text-setting__row2")
       property-bar
         input(class="body-2 text-gray-2" type="number" v-model="fontSize")
-        div(class="text-setting__font-sizer")
-          svg-icon(class="pointer" @click.native="fontSizeStepping(1)"
-            :iconName="'caret-up'" :iconColor="'gray-2'" :iconWidth="'14px'")
-          svg-icon(class="pointer" @click.native="fontSizeStepping(-1)"
+        div(class="text-setting__font-stepper")
+          svg-icon(class="pointer" @click.native="fontSizeStepping(2)"
+            :iconName="'chevron-up'" :iconColor="'gray-2'" :iconWidth="'9px'")
+          svg-icon(class="pointer" @click.native="fontSizeStepping(-2)"
             :iconName="'chevron-down'" :iconColor="'gray-2'" :iconWidth="'14px'")
         //- svg-icon(class="pointer"
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
@@ -98,6 +98,10 @@ export default Vue.extend({
             size: value
           }
         })
+        if (typeof value === 'string') {
+          const step = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size - parseInt(value)
+          TextUtils.fontSizeStepping(step)
+        }
       }
     },
     textColor: {
@@ -116,31 +120,33 @@ export default Vue.extend({
     },
     lineHeight: {
       get() {
-        console.log(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles)
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
+        const value = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
+        return value === -1 ? -1 : value * 1000
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            lineHeight: value
+            lineHeight: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
+        TextUtils.updateLayerSize()
       }
     },
     fontSpacing: {
       get() {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing * 1000
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
           pageIndex: this.lastSelectedPageIndex,
           layerIndex: this.currSelectedIndex,
           styles: {
-            fontSpacing: value
+            fontSpacing: typeof value === 'string' ? parseInt(value) / 1000 : value
           }
         })
+        TextUtils.updateLayerSize()
       }
     },
     opacity: {
@@ -208,7 +214,7 @@ export default Vue.extend({
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
   }
-  &__font-sizer {
+  &__font-stepper {
     display: flex;
     flex-direction: column;
   }

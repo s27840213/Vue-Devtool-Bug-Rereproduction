@@ -77,20 +77,23 @@ class TextUtils {
       }
       this.updateTextStyles(this.pageIndex, this.layerIndex, { size })
     }
-
-    // setTimeout(() => {
-    const textHW = this.getTextHW(this.getCurrLayer.text)
-    ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
-    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
-    // }, 0)
+    this.updateLayerSize()
   }
 
-  getTextHW(text: string) {
+  updateLayerSize() {
+    const textHW = this.getTextHW(this.getCurrLayer.text, this.getCurrLayer.styles)
+    ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
+    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
+  }
+
+  getTextHW(text: string, styles: any, width = `${this.getCurrLayer.widthLimit as number}px`) {
     const el = document.createElement('span')
     el.style.whiteSpace = 'pre-wrap'
-    el.style.width = `${this.getCurrLayer.styles.width}px`
+    el.style.display = 'inline-block'
+    el.style.overflowWrap = 'break-word'
+    el.style.width = width
     el.innerHTML = text
-    Object.assign(el.style, CssConveter.convertFontStyle(this.getCurrLayer.styles))
+    Object.assign(el.style, CssConveter.convertFontStyle(styles))
     document.body.appendChild(el)
     const textHW = {
       width: Math.ceil(el.getBoundingClientRect().width),
