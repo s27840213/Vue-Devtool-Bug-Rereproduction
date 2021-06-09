@@ -1,12 +1,13 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
-import apis from '@/apis/unsplash'
-import { IPhoto } from '@/interfaces/api'
+import unsplash from '@/apis/unsplash'
+import pexels from '@/apis/pexels'
+import { IUnsplashPhoto } from '@/interfaces/api'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_TOTAL_PAGES = 'SET_TOTAL_PAGES' as const
 
 interface IPhotoState {
-  list: IPhoto[],
+  list: IUnsplashPhoto[],
   query: string,
   page: number,
   totalPages: number,
@@ -22,16 +23,12 @@ const getDefaultState = (): IPhotoState => ({
 })
 
 const actions: ActionTree<IPhotoState, unknown> = {
-  async getPhotosByUnsplash ({ commit }, params = {}) {
+  async getPhotosFromUnsplash ({ commit }, params = {}) {
     commit(SET_STATE, { pending: true, list: [] })
     try {
-      const {
-        results,
-        total_pages: totalPages
-      } = await apis.getPhotos(params)
+      const { results } = await (params.query ? unsplash.getPhotos(params) : unsplash.getPopularPhoto(params))
       commit(SET_STATE, {
         list: results,
-        totalPages,
         page: 1,
         pending: false,
         ...params
@@ -40,16 +37,49 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
-  async getMorePhotos ({ commit, getters, state }) {
+  async getMorePhotosFromUnsplash ({ commit, getters, state }) {
     const { list } = state
-    const { getNextParams } = getters
+    const { getNextParams: params } = getters
     commit(SET_STATE, { pending: true })
     try {
-      const { results } = await apis.getPhotos(getNextParams)
+      const {
+        results
+      } = await (params.query ? unsplash.getPhotos(params) : unsplash.getPopularPhoto(params))
       commit(SET_STATE, {
         list: list.concat(results),
         pending: false,
-        ...getNextParams
+        ...params
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getPhotosFromPexels ({ commit }, params = {}) {
+    commit(SET_STATE, { pending: true, list: [] })
+    try {
+      const { results } = await (params.query ? pexels.getPhotos(params) : pexels.getCuratedPhoto(params))
+      commit(SET_STATE, {
+        list: results,
+        page: 1,
+        pending: false,
+        ...params
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async getMorePhotosFromPexels ({ commit, getters, state }) {
+    const { list } = state
+    const { getNextParams: params } = getters
+    commit(SET_STATE, { pending: true })
+    try {
+      const {
+        results
+      } = await (params.query ? pexels.getPhotos(params) : pexels.getCuratedPhoto(params))
+      commit(SET_STATE, {
+        list: list.concat(results),
+        pending: false,
+        ...params
       })
     } catch (error) {
       console.log(error)
@@ -79,7 +109,7 @@ const getters: GetterTree<IPhotoState, any> = {
   },
   getCurrentPagePhotos (state) {
     const { page, list } = state
-    return list.slice((page - 1) * 10)
+    return list.slice((page - 1) * 15)
   },
   getNextParams (state) {
     const { query, page } = state
