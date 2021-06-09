@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   data() {
@@ -14,22 +13,16 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     const svg = this.$refs.svg as HTMLElement
     svg.innerHTML = this.svgFormatter(this.config.svg, this.config.color)
-    console.log(svg.innerHTML)
   },
   watch: {
     'config.color': {
       handler: function(newVal) {
         const svg = this.$refs.svg as HTMLElement
         svg.innerHTML = this.svgFormatter(this.config.svg, newVal)
-        // console.log(svg.innerHTML)
       },
       deep: true
-    },
-    'config.path': function() {
-      console.log('path change')
     }
   },
   computed: {

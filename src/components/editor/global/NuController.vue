@@ -206,7 +206,7 @@ export default Vue.extend({
       const styles = {
         // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0.5)',
+        color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.contentEditable && !this.isControlling ? '#000000' : '#00000000',
         // 'pointer-events': this.config.textEditable ? 'initial' : 'none',
