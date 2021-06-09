@@ -164,6 +164,33 @@ class Controller {
     this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
   }
 
+  // textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
+  //   if (e.key !== 'Enter' || isCompositioning) return
+  //   e.preventDefault()
+
+  //   const span = document.createElement('span')
+
+  //   const range = window.getSelection()?.anchorNode?.parentElement
+  //   if (range) {
+  //     range.after(span)
+  //   }
+
+  //   // const sel = window.getSelection()
+  //   // if (sel) {
+  //   //   sel.removeAllRanges()
+  //   //   sel.addRange(range)
+  //   // }
+  //   // if (text.lastChild?.nodeName !== 'BR') {
+  //   //   const br = document.createElement('br') as HTMLBRElement
+  //   //   text.appendChild(br)
+  //   // }
+  //   const pageIndex = store.state.lastSelectedPageIndex
+  //   const layerIndex = store.getters.getCurrSelectedIndex
+  //   this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
+  //   this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
+  //   this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
+  // }
+
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,

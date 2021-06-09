@@ -124,12 +124,16 @@ class LayerFactary {
     }
   }
 
-  newShape(config: IShape): IShape {
+  newShape(config: any): IShape {
     const basicConfig = {
       type: 'shape',
       active: false,
       shown: false,
       path: '',
+      color: [''],
+      svg: '',
+      size: [0, 0],
+      category: 0,
       locked: false,
       styles: {
         x: 0,

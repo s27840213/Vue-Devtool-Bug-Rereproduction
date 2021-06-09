@@ -86,12 +86,12 @@ class TextUtils {
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
-  getTextHW(text: string, styles: any) {
+  getTextHW(text: string, styles: any, width = `${this.getCurrLayer.widthLimit as number}px`) {
     const el = document.createElement('span')
     el.style.whiteSpace = 'pre-wrap'
     el.style.display = 'inline-block'
     el.style.overflowWrap = 'break-word'
-    el.style.width = this.getCurrLayer ? `${this.getCurrLayer.widthLimit}px` : 'auto'
+    el.style.width = width
     el.innerHTML = text
     Object.assign(el.style, CssConveter.convertFontStyle(styles))
     document.body.appendChild(el)

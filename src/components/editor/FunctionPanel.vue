@@ -4,6 +4,7 @@
     panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked"
       @openFontsPanel="openFontsPanel()")
     panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")
+    panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked")
     //- panel-background-setting(v-if="selectedLayerNum===0")
     panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
     panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -18,6 +19,7 @@ import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackg
 import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import { mapGetters } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -30,7 +32,8 @@ export default Vue.extend({
     PanelBackgroundSetting,
     PanelPhotoSetting,
     PanelPageSetting,
-    PanelFonts
+    PanelFonts,
+    PanelShapeSetting
   },
   data() {
     return {

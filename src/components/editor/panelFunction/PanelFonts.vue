@@ -24,6 +24,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import FileUtils from '@/utils/fileUtils'
+import TextUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -59,6 +60,7 @@ export default Vue.extend({
     },
     setFont(font: string) {
       LayerUtils.updateLayerStyles(this.lastSelectedPageIndex, this.currSelectedIndex, { font: font })
+      TextUtils.updateLayerSize()
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]
