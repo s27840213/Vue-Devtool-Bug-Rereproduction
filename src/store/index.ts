@@ -299,14 +299,14 @@ const mutations: MutationTree<IEditorState> = {
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-  async getRandomPhoto({ commit }, { count }) {
-    try {
-      const { data } = await apis.getRandomPhoto(count)
-      commit('SET_photos', data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  // async getRandomPhoto({ commit }, { count }) {
+  //   try {
+  //     const { data } = await apis.getRandomPhoto(count)
+  //     commit('SET_photos', data)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 }
 
 export default new Vuex.Store({

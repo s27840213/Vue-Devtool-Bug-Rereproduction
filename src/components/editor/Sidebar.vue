@@ -34,7 +34,8 @@ export default Vue.extend({
         { icon: 'bg', text: 'Background' },
         { icon: 'text', text: 'Text' },
         { icon: 'folder', text: 'MyFile' },
-        { icon: 'brand', text: 'Brandkit' }
+        { icon: 'brand', text: 'Brandkit' },
+        { icon: 'photo', text: 'Pexels' }
       ]
     }
   },
