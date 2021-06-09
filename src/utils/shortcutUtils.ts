@@ -62,6 +62,10 @@ class ShortcutHandler {
     console.log('cut')
   }
 
+  selectAll() {
+    GroupUtils.selectAll()
+  }
+
   group() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     GroupUtils.group()
