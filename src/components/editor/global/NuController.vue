@@ -5,7 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @drop="config.clipper || config.isClipped ? onDropClipper($event) : onDrop($event)"
+          @drop="config.path !== '' || config.isClipped ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
           @click.left="onClick"
@@ -78,8 +78,7 @@ export default Vue.extend({
       isGetMoved: false,
       isCompositoning: false,
       isSnapping: false,
-      contentEditable: false,
-      isMoving: false
+      contentEditable: false
     }
   },
   mounted() {
@@ -99,6 +98,12 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
+    changedSize(): any {
+      return {
+        width: this.getLayerWidth,
+        height: this.getLayerHeight
+      }
+    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -143,11 +148,27 @@ export default Vue.extend({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    'config.styles.size': function () {
-      this.$nextTick(() => {
-        const text = this.$refs.text as HTMLElement
-        text.style.width = `${this.getLayerWidth}px`
-      })
+    // 'config.styles.size': function() {
+    //   if (this.getLayerType !== 'text') return
+    //   this.$nextTick(() => {
+    //     const text = this.$refs.text as HTMLElement
+    //     text.style.width = `${this.getLayerWidth}px`
+    //   })
+    // }
+    changedSize: {
+      handler: function () {
+        if (this.getLayerType !== 'text') return
+        // console.log('size change')
+        this.$nextTick(() => {
+          const text = this.$refs.text as HTMLElement
+          if (text) {
+            // console.log(this.config.styles)
+            // console.log(this.getLayerHeight)
+            text.style.width = `${this.getLayerWidth}px`
+          }
+        })
+      },
+      deep: true
     }
   },
   methods: {
@@ -187,7 +208,7 @@ export default Vue.extend({
         transform: `translate3d(0px, 0px, ${zindex}px)`,
         color: 'rgba(10,10,10,0)',
         'font-size': `${this.getFontSize}px`,
-        'caret-color': this.contentEditable && !this.isMoving ? '#000000' : '#00000000',
+        'caret-color': this.contentEditable && !this.isControlling ? '#000000' : '#00000000',
         // 'pointer-events': this.config.textEditable ? 'initial' : 'none',
         'writing-mode': this.config.styles.writingMode
       }
@@ -232,6 +253,7 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
+      console.log(this.config)
       if (this.getLayerType === 'text' && this.isActive && this.contentEditable) return
       if (!this.config.locked) {
         this.isControlling = true
@@ -250,7 +272,7 @@ export default Vue.extend({
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
           if (this.pageIndex === this.lastSelectedPageIndex) {
-            // if (this.getLayerType === 'text' && this.isActive === false) {
+            // if (this.getLayerType === 'text' && !this.isActive) {
             //   GroupUtils.select([targetIndex])
             //   window.removeEventListener('mouseup', this.moveEnd)
             //   window.removeEventListener('mousemove', this.moving)
@@ -265,7 +287,6 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         this.initTranslate = this.getLayerPos
         text.innerHTML = this.getTextContent
-        this.isMoving = true
         this.isGetMoved = false
         this.contentEditable = true
       }
@@ -298,7 +319,6 @@ export default Vue.extend({
     },
     moveEnd() {
       if (this.isActive) {
-        this.isMoving = false
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
@@ -314,6 +334,7 @@ export default Vue.extend({
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
+        console.log('xsdfdsf')
       }
       this.$emit('clearSnap')
     },
@@ -479,14 +500,16 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
+      let scale = this.getLayerScale
       if (this.getLayerType === 'image') {
         this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
       } else if (this.getLayerType === 'shape') {
         this.shapeResizeHandler(width, height)
       } else if (this.getLayerType === 'text') {
         [width, height] = this.textResizeHandler(width, height)
+        scale = 1
       }
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.config.styles.scale)
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     shapeResizeHandler(width: number, height: number) {
@@ -623,11 +646,12 @@ export default Vue.extend({
     },
     textResizeHandler(width: number, height: number): [number, number] {
       const text = this.$refs.text as HTMLElement
-      if (this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
+      if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
+        text.style.height = 'auto'
         text.style.width = `${width}px`
-        height = text.getBoundingClientRect().height
+        height = Math.ceil(text.getBoundingClientRect().height)
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize)
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize / this.getLayerScale)
       }
       return [width, height]
     },
@@ -705,6 +729,7 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
+      console.log('xxx')
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick() {
@@ -721,9 +746,6 @@ export default Vue.extend({
       }
     },
     onTyping(e: KeyboardEvent) {
-      // if (this.isGetMoved) {
-      //   e.preventDefault()
-      // } else {
       ControlUtils.textStopPropagation(e)
       ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
       if (e.metaKey && e.key === 'z') {

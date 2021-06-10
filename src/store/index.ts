@@ -7,6 +7,8 @@ import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
 import orderMutation from '@/store/mutations/order'
 
+import photos from './photos'
+
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
@@ -298,14 +300,14 @@ const mutations: MutationTree<IEditorState> = {
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-  async getRandomPhoto({ commit }, { count }) {
-    try {
-      const { data } = await unsplashApis.getRandomPhoto(count)
-      commit('SET_photos', data)
-    } catch (error) {
-      console.log(error)
-    }
-  },
+  // async getRandomPhoto({ commit }, { count }) {
+  //   try {
+  //     const { data } = await unsplashApis.getRandomPhoto(count)
+  //     commit('SET_photos', data)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // },
   async getAssets({ commit }, { token }) {
     try {
       const { data } = await userApis.getAssets(token)
@@ -323,9 +325,11 @@ const actions: ActionTree<IEditorState, unknown> = {
     }
   }
 }
+
 export default new Vuex.Store({
   state,
   getters,
   mutations,
-  actions
+  actions,
+  modules: { photos }
 })

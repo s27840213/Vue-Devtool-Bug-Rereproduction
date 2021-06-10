@@ -18,6 +18,7 @@ import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vu
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
+import PanelPexels from '@/components/editor/panelSidebar/PanelPexels.vue'
 import { mapGetters } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
@@ -30,7 +31,8 @@ export default Vue.extend({
     PanelBackground,
     PanelText,
     PanelFile,
-    PanelBrand
+    PanelBrand,
+    PanelPexels // for testing purposes
   },
   data() {
     return {
@@ -43,6 +45,7 @@ export default Vue.extend({
         'panel-text',
         'panel-file',
         'panel-brand',
+        'panel-pexels',
         'panel-group',
         'panel-text-setting',
         'panel-color-picker',

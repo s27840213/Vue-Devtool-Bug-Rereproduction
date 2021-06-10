@@ -69,8 +69,6 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      currSelectedIndex: 'getCurrSelectedIndex',
       getPage: 'getPage'
     })
   },
@@ -84,17 +82,17 @@ export default Vue.extend({
       switch (type) {
         case 'heading': {
           const format = GeneralUtils.deepCopy(this.headingFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
           return format
         }
         case 'subheading': {
           const format = GeneralUtils.deepCopy(this.subheadingFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
           return format
         }
         case 'body': {
           const format = GeneralUtils.deepCopy(this.bodyFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
           return format
         }
       }

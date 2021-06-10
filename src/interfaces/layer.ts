@@ -57,7 +57,11 @@ export interface IText extends ILayer<ITextStyle> {
   textEditable: boolean
 }
 export interface IShape extends ILayer<IStyle> {
-  radius?: string | number,
+  category: number,
+  path: string,
+  color: [string],
+  svg: string,
+  size: [number]
 }
 export interface IImage extends ILayer<IImageStyle> {
   src: string,
