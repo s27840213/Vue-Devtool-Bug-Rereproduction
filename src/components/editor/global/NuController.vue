@@ -143,7 +143,7 @@ export default Vue.extend({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    'config.styles.size': function() {
+    'config.styles.size': function () {
       this.$nextTick(() => {
         const text = this.$refs.text as HTMLElement
         text.style.width = `${this.getLayerWidth}px`
@@ -249,7 +249,6 @@ export default Vue.extend({
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
-          console.log(this.isActive)
           if (this.pageIndex === this.lastSelectedPageIndex) {
             // if (this.getLayerType === 'text' && this.isActive === false) {
             //   GroupUtils.select([targetIndex])
@@ -259,7 +258,6 @@ export default Vue.extend({
             // }
             GroupUtils.select([targetIndex])
           }
-          console.log(this.isActive)
         }
       }
 
@@ -549,7 +547,7 @@ export default Vue.extend({
         this.imgClipping(width, height, offsetX, offsetY)
       }
     },
-    imgScaling(layerWidth:number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
+    imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, layerWidth, layerHeight, this.getLayerScale)
       let imgWidth = this.imgInitWH.width
       let imgHeight = this.imgInitWH.height
