@@ -18,9 +18,10 @@
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
           :contenteditable="config.type === 'tmp' ? false : contentEditable")
-        div(v-if="isActive && isLocked"
-            class="nu-controller__lock-icon")
-          svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
+        div(v-if="isActive && isLocked && (scaleRatio >20)"
+            class="nu-controller__lock-icon"
+            :style="`transform: scale(${100/scaleRatio})`")
+          svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
@@ -253,7 +254,6 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      console.log(this.config)
       if (this.getLayerType === 'text' && this.isActive && this.contentEditable) return
       if (!this.config.locked) {
         this.isControlling = true
@@ -334,7 +334,6 @@ export default Vue.extend({
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
-        console.log('xsdfdsf')
       }
       this.$emit('clearSnap')
     },
@@ -729,7 +728,6 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
-      console.log('xxx')
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick() {

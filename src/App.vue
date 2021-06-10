@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(id="app" @mousemove="coordinateHandler($event)")
-    div(class="coordinate" ref="coordinate")
-      div(class="coordinate__val coordinate__width")
-        span {{coordinateWidth}}px
-      div(class="coordinate__val coordinate__height")
-        span {{coordinateHeight}}px
+  div(id="app")
+    //- div(class="coordinate" ref="coordinate")
+    //-   div(class="coordinate__val coordinate__width")
+    //-     span {{coordinateWidth}}px
+    //-   div(class="coordinate__val coordinate__height")
+    //-     span {{coordinateHeight}}px
     router-view
     div(class="popup-area")
       dropdowns-order(v-show="isOrderDropdownsOpened"

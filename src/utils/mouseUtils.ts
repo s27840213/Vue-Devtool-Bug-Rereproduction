@@ -36,7 +36,6 @@ class MouseUtils {
         store.commit('DELETE_layer', {
           pageIndex, layerIndex
         })
-        console.log(layer)
         LayerUtils.addLayers(pageIndex, layer)
         StepsUtils.record()
       }

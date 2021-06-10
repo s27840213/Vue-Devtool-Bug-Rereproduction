@@ -9,7 +9,7 @@ infinite-scroll(class="temp__content"
       img(:src="photo.urls.thumb",
         :style="imageStyle(photo.preview, i > 0)",
         draggable="true",
-        class="temp__img"
+        class="temp__img pointer"
         @dragstart="dragStart($event,photo)"
         @click="addImage(photo)")
 </template>
@@ -42,18 +42,18 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       pageSize: 'getPageSize'
     }),
-    margin (): number {
+    margin(): number {
       return this.galleryUtils.margin
     }
   },
-  data () {
+  data() {
     return {
       rows: [],
       galleryUtils: new GalleryUtils(260, 100, 5)
     }
   },
   watch: {
-    photos (val) {
+    photos(val) {
       const rows = this.galleryUtils.generate(val) as any
       this.rows = this.rows.concat(rows)
     }
@@ -79,17 +79,22 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(data))
     },
     addImage(photo: any) {
+      const resizeRatio = 0.8
+      const isWider = photo.width > photo.height
+      const aspectRatio = photo.width / photo.height
+      const photoWidth = isWider ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * aspectRatio
+      const photoHeight = isWider ? (this.pageSize.width * resizeRatio) / aspectRatio : this.pageSize.height * resizeRatio
       const config = {
         src: photo.urls.regular,
         styles: {
-          x: this.pageSize.width / 2 - (photo.width / 20) / 2,
-          y: this.pageSize.height / 2 - (photo.height / 20) / 2,
-          width: photo.width / 20,
-          height: photo.height / 20,
-          initWidth: photo.width / 20,
-          initHeight: photo.height / 20,
-          imgWidth: photo.width / 20,
-          imgHeight: photo.height / 20
+          x: this.pageSize.width / 2 - photoWidth / 2,
+          y: this.pageSize.height / 2 - photoHeight / 2,
+          width: photoWidth,
+          height: photoHeight,
+          initWidth: photoWidth,
+          initHeight: photoHeight,
+          imgWidth: photoWidth,
+          imgHeight: photoHeight
         }
       }
       layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))

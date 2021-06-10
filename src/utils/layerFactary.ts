@@ -11,6 +11,7 @@ class LayerFactary {
       clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
+      locked: false,
       imgControl: false,
       isClipped: false,
       styles: {
@@ -150,6 +151,8 @@ class LayerFactary {
         opacity: 100
       }
     }
+    Object.assign(basicConfig.styles, config.styles)
+    delete config.styles
     return Object.assign(basicConfig, config)
   }
 }
