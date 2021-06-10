@@ -130,66 +130,82 @@ class Controller {
     }
   }
 
-  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
-    if (e.key !== 'Enter' || isCompositioning) return
-    e.preventDefault()
-
-    const docFragment = document.createDocumentFragment()
-    const br = document.createElement('br')
-    docFragment.appendChild(br)
-
-    let range = window.getSelection()?.getRangeAt(0)
-    if (range) {
-      range.deleteContents()
-      range.insertNode(docFragment)
-    }
-
-    range = document.createRange()
-    range.setStartAfter(br)
-    range.collapse(true)
-
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(range)
-    }
-    if (text.lastChild?.nodeName !== 'BR') {
-      const br = document.createElement('br') as HTMLBRElement
-      text.appendChild(br)
-    }
-    const pageIndex = store.state.lastSelectedPageIndex
-    const layerIndex = store.getters.getCurrSelectedIndex
-    this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
-    this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
-    this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
-  }
-
   // textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
   //   if (e.key !== 'Enter' || isCompositioning) return
   //   e.preventDefault()
 
-  //   const span = document.createElement('span')
+  //   const docFragment = document.createDocumentFragment()
+  //   const br = document.createElement('br')
+  //   docFragment.appendChild(br)
 
-  //   const range = window.getSelection()?.anchorNode?.parentElement
+  //   let range = window.getSelection()?.getRangeAt(0)
   //   if (range) {
-  //     range.after(span)
+  //     range.deleteContents()
+  //     range.insertNode(docFragment)
   //   }
 
-  //   // const sel = window.getSelection()
-  //   // if (sel) {
-  //   //   sel.removeAllRanges()
-  //   //   sel.addRange(range)
-  //   // }
-  //   // if (text.lastChild?.nodeName !== 'BR') {
-  //   //   const br = document.createElement('br') as HTMLBRElement
-  //   //   text.appendChild(br)
-  //   // }
+  //   range = document.createRange()
+  //   range.setStartAfter(br)
+  //   range.collapse(true)
+
+  //   const sel = window.getSelection()
+  //   if (sel) {
+  //     sel.removeAllRanges()
+  //     sel.addRange(range)
+  //   }
+  //   if (text.lastChild?.nodeName !== 'BR') {
+  //     const br = document.createElement('br') as HTMLBRElement
+  //     text.appendChild(br)
+  //   }
   //   const pageIndex = store.state.lastSelectedPageIndex
   //   const layerIndex = store.getters.getCurrSelectedIndex
   //   this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
   //   this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
   //   this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
   // }
+
+  textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
+    if (e.key !== 'Enter' || isCompositioning) return
+    e.preventDefault()
+
+    const p = document.createElement('p')
+    const span = document.createElement('span')
+
+    // const range = window.getSelection()?.anchorNode?.parentElement
+    // if (range) {
+    //   range.after(span)
+    // }
+
+    const sel = window.getSelection() as Selection
+    const anchorNode = sel.anchorNode as any
+    const range = document.createRange()
+    // range.setStart(anchorNode, selObj.anchorOffset);
+    // range.setEnd(anchorNode, anchorNode.length);
+
+    // selObj.addRange(range);
+    // selObj.removeAllRanges()
+    const str = anchorNode.nodeValue
+    const substr = anchorNode.nodeValue?.substring(sel.anchorOffset, anchorNode.length)
+    anchorNode.nodeValue = str.substring(0, sel.anchorOffset)
+    span.textContent = substr
+    p.appendChild(span)
+    text.after(p)
+
+    // const sel = window.getSelection()
+    // if (sel) {
+    //   sel.removeAllRanges()
+    //   sel.addRange(range)
+    // }
+    // if (text.lastChild?.nodeName !== 'BR') {
+    //   const br = document.createElement('br') as HTMLBRElement
+    //   text.appendChild(br)
+    // }
+    const pageIndex = store.state.lastSelectedPageIndex
+    const layerIndex = store.getters.getCurrSelectedIndex
+    this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
+    this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
+    this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
+  }
 
   shapeCategorySorter(resizer: any, category: number) {
     switch (category) {

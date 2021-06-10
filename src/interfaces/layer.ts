@@ -19,12 +19,9 @@ export interface IStyle {
 export interface ITextStyle extends IStyle {
   font: string,
   weight: string,
-  align: string,
-  lineHeight: number,
   color: string,
   size: number,
   initSize: number,
-  writingMode: string,
   decoration: string
 }
 
@@ -52,10 +49,20 @@ export interface ILayer<T extends IStyle = IStyle> {
   locked: boolean,
   styles: T
 }
+
 export interface IText extends ILayer<ITextStyle> {
-  text: string,
-  textEditable: boolean
+  text: string
+  contents: Array<Array<ISpan>>,
+  writingMode: string,
+  align: string,
+  lineHeight: number,
 }
+
+export interface ISpan {
+  text: string,
+  styles: ITextStyle
+}
+
 export interface IShape extends ILayer<IStyle> {
   category: number,
   path: string,

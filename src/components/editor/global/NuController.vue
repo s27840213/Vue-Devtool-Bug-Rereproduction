@@ -14,7 +14,7 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        span(class="text-content" :style="contextStyles()" ref="text"
+        p(class="text-content" :style="contextStyles()" ref="text"
           @keydown="onKeyDown"
           @compositionstart="compositionStart"
           :contenteditable="config.type === 'tmp' ? false : contentEditable")
@@ -205,12 +205,10 @@ export default Vue.extend({
     contextStyles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
       const styles = {
-        // width: `${this.config.styles.width}px`,
         transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0)',
+        color: 'rgba(10,10,10,0.5)',
         'font-size': `${this.getFontSize}px`,
         'caret-color': this.contentEditable && !this.isControlling ? '#000000' : '#00000000',
-        // 'pointer-events': this.config.textEditable ? 'initial' : 'none',
         'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
@@ -926,7 +924,7 @@ export default Vue.extend({
 }
 .text-content {
   text-align: left;
-  display: inline-block;
+  // display: inline-block;
   outline: none;
   white-space: pre-wrap;
   overflow-wrap: break-word;
