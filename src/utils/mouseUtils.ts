@@ -36,7 +36,6 @@ class MouseUtils {
         store.commit('DELETE_layer', {
           pageIndex, layerIndex
         })
-        console.log(layer)
         LayerUtils.addLayers(pageIndex, layer)
         StepsUtils.record()
       }
@@ -106,7 +105,8 @@ class MouseUtils {
       Object.assign(layerConfig.styles, data.styles)
       layerConfig.styles.x = tmpPos.x
       layerConfig.styles.y = tmpPos.y
-      layer = LayerFactary.newText(Object.assign(layerConfig, { text: data.text }) as IText)
+      layerConfig.paragraphs = data.paragraphs
+      layer = LayerFactary.newText(layerConfig)
     } else if (data.type === 'shape') {
       const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
       Object.assign(layerConfig.styles, data.styles)

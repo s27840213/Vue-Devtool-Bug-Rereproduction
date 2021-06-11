@@ -1,5 +1,3 @@
-import { ICoordinate } from "./frame";
-
 export interface IStyle {
   [key: string]: number | string | undefined,
   x: number,
@@ -16,15 +14,6 @@ export interface IStyle {
   opacity: number
 }
 
-export interface ITextStyle extends IStyle {
-  font: string,
-  weight: string,
-  color: string,
-  size: number,
-  initSize: number,
-  decoration: string
-}
-
 export interface IImageStyle extends IStyle {
   imgX: number,
   imgY: number,
@@ -32,15 +21,6 @@ export interface IImageStyle extends IStyle {
   imgHeight: number
 }
 
-// export interface ITmpStyle extends IStyle {
-//   initX: number,
-//   initY: number,
-// }
-
-// export interface IGroupStyle extends IStyle {
-//   initX: number,
-//   initY: number,
-// }
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
   type: string,
@@ -51,16 +31,41 @@ export interface ILayer<T extends IStyle = IStyle> {
 }
 
 export interface IText extends ILayer<ITextStyle> {
-  text: string
-  contents: Array<Array<ISpan>>,
-  writingMode: string,
-  align: string,
-  lineHeight: number,
+  paragraphs: Array<IParagraph>,
+  widthLimit: ''
+}
+
+export interface IParagraph {
+  spans: Array<ISpan>,
+  styles: IParagraphStyle
 }
 
 export interface ISpan {
   text: string,
-  styles: ITextStyle
+  styles: ISpanStyle
+}
+
+export interface ITextStyle extends IStyle {
+  writingMode: string
+}
+
+export interface IParagraphStyle {
+  [key: string]: number | string | undefined,
+  lineHeight: number,
+  fontSpacing: number,
+  align: string
+}
+
+export interface ISpanStyle {
+  [key: string]: number | string | undefined,
+  font: string,
+  weight: string,
+  color: string,
+  size: number,
+  initSize: number,
+  decoration: string,
+  style: string,
+  opacity: number
 }
 
 export interface IShape extends ILayer<IStyle> {

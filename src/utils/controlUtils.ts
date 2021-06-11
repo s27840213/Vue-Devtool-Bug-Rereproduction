@@ -229,6 +229,12 @@ class Controller {
     })
   }
 
+  updateTextContent(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string) {
+    store.commit('UPDATE_textContent', {
+      pageIndex, layerIndex, pIndex, sIndex, text
+    })
+  }
+
   updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,

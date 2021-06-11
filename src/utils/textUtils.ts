@@ -81,25 +81,51 @@ class TextUtils {
   }
 
   updateLayerSize() {
-    const textHW = this.getTextHW(this.getCurrLayer.text, this.getCurrLayer.styles)
-    ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
+    const textHW = this.getTextHW(this.getCurrLayer)
+    // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
-  getTextHW(text: string, styles: any, width = `${this.getCurrLayer.widthLimit as number}px`) {
-    const el = document.createElement('span')
-    el.style.whiteSpace = 'pre-wrap'
-    el.style.display = 'inline-block'
-    el.style.overflowWrap = 'break-word'
-    el.style.width = width
-    el.innerHTML = text
-    Object.assign(el.style, CssConveter.convertFontStyle(styles))
-    document.body.appendChild(el)
+  // getTextHW(text: string, styles: any, width = `${this.getCurrLayer.widthLimit as number}px`) {
+  //   const el = document.createElement('span')
+  //   el.style.whiteSpace = 'pre-wrap'
+  //   el.style.display = 'inline-block'
+  //   el.style.overflowWrap = 'break-word'
+  //   el.style.width = width
+  //   el.innerHTML = text
+  //   Object.assign(el.style, CssConveter.convertFontStyle(styles))
+  //   document.body.appendChild(el)
+  //   const textHW = {
+  //     width: Math.ceil(el.getBoundingClientRect().width),
+  //     height: Math.ceil(el.getBoundingClientRect().height)
+  //   }
+  //   document.body.removeChild(el)
+  //   return textHW
+  // }
+  getTextHW(content: IText) {
+    const body = document.createElement('div')
+    content.paragraphs.forEach(pData => {
+      const p = document.createElement('p')
+      pData.spans.forEach(spanData => {
+        const span = document.createElement('span')
+        span.textContent = spanData.text
+        Object.assign(span.style, CssConveter.convertFontStyle(spanData.styles))
+        span.style.whiteSpace = 'pre'
+        p.appendChild(span)
+      })
+      Object.assign(p.style, CssConveter.convertFontStyle(pData.styles))
+      p.style.display = 'table'
+      p.style.margin = '0.5em'
+      body.appendChild(p)
+    })
+    body.style.border = '1px solid blue'
+    body.style.width = 'fit-content'
+    document.body.appendChild(body)
     const textHW = {
-      width: Math.ceil(el.getBoundingClientRect().width),
-      height: Math.ceil(el.getBoundingClientRect().height)
+      width: Math.ceil(body.getBoundingClientRect().width),
+      height: Math.ceil(body.getBoundingClientRect().height)
     }
-    document.body.removeChild(el)
+    document.body.removeChild(body)
     return textHW
   }
 

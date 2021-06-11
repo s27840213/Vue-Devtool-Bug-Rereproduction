@@ -40,7 +40,6 @@ class LayerFactary {
   newText(config: any): IText {
     const basicConfig = {
       type: 'text',
-      text: '',
       widthLimit: '',
       active: false,
       shown: false,
@@ -57,21 +56,36 @@ class LayerFactary {
         initWidth: config.styles.width ? config.styles.width : 0,
         initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
-        opacity: 100,
-        font: 'normal',
-        weight: 'normal',
-        align: 'left',
-        lineHeight: -1,
-        fontSpacing: 0,
-        color: '#000000',
-        size: 72,
-        initSize: config.styles.size ? config.styles.size : 72,
-        writingMode: 'initial',
-        decoration: 'none',
-        style: 'normal'
-      }
+        writingMode: 'initial'
+      },
+      paragraphs: [
+        {
+          styles: {
+            align: 'left',
+            lineHeight: -1,
+            fontSpacing: 0
+          },
+          spans: [
+            {
+              text: '',
+              styles: {
+                opacity: 1,
+                font: 'normal',
+                weight: 'normal',
+                color: '#000000',
+                size: 72,
+                initSize: config.styles.size ? config.styles.size : 72,
+                decoration: 'none',
+                style: 'normal'
+              }
+            }
+          ]
+        }
+      ]
     }
     Object.assign(basicConfig.styles, config.styles)
+    // console.log('config')
+    // console.log(config)
     delete config.styles
     return Object.assign(basicConfig, config)
   }

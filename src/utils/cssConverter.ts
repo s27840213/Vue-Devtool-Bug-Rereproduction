@@ -1,7 +1,7 @@
 /**
  * This file is used to convert properties of layers into CSS-readable properties
  */
-import { IStyle, ITextStyle } from '@/interfaces/layer'
+import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 
 interface IStyleMap {
   [key: string]: string
@@ -48,7 +48,7 @@ class CssConveter {
     }
   }
 
-  convertFontStyle(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
+  convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'fontSpacing' || prop === 'lineHeight') {
