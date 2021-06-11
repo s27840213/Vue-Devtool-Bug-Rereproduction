@@ -19,6 +19,10 @@
         @blur.native="setIsPageDropdownsOpened(false)"
         @click.native="setIsPageDropdownsOpened(false)"
         tabindex="0")
+      photo-info(v-show="currSelectedPhotoInfo.userName"
+        :info="currSelectedPhotoInfo"
+        @blur.native="setCurrSelectedPhotoInfo()"
+        tabindex="0")
       //- chrome-picker(v-show="isPageDropdownsOpened"
       //-   @blur.native="setIsPageDropdownsOpened(false)"
       //-   @click.native="setIsPageDropdownsOpened(false)"
@@ -33,13 +37,15 @@ import DropdownsOrder from '@/components//dropdowns/DropdownsOrder.vue'
 import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 import { Chrome } from 'vue-color'
+import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 
 export default Vue.extend({
   components: {
     DropdownsOrder,
     DropdownsLayer,
     DropdownsPage,
-    'chrome-picker': Chrome
+    'chrome-picker': Chrome,
+    PhotoInfo
   },
   data() {
     return {
@@ -60,14 +66,16 @@ export default Vue.extend({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       isOrderDropdownsOpened: 'getIsOrderDropdownsOpened',
       isLayerDropdownsOpened: 'getIsLayerDropdownsOpened',
-      isPageDropdownsOpened: 'getIsPageDropdownsOpened'
+      isPageDropdownsOpened: 'getIsPageDropdownsOpened',
+      currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo'
     })
   },
   methods: {
     ...mapMutations({
       _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened',
       _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      _setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
+      _setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened',
+      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
     }),
     coordinateHandler(e: MouseEvent) {
       this.coordinateWidth = e.clientX
@@ -93,6 +101,11 @@ export default Vue.extend({
     setIsColorPickerOpened(isOpened: boolean) {
       this.$nextTick(() => {
         this._setIsPageDropdownsOpened(isOpened)
+      })
+    },
+    setCurrSelectedPhotoInfo() {
+      this.$nextTick(() => {
+        this._setCurrSelectedPhotoInfo({})
       })
     }
   }

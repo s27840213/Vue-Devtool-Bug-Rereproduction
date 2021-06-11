@@ -69,7 +69,8 @@ const getDefaultState = (): IEditorState => ({
   isOrderDropdownsOpened: false,
   isLayerDropdownsOpened: false,
   isPageDropdownsOpened: false,
-  isColorPickerOpened: false
+  isColorPickerOpened: false,
+  currSelectedPhotoInfo: {}
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -155,6 +156,10 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIColorPickerOpened(state: IEditorState) {
     return state.isPageDropdownsOpened
+  },
+  getCurrSelectedPhotoInfo(state: IEditorState) {
+    console.log(state.currSelectedPhotoInfo)
+    return state.currSelectedPhotoInfo
   }
 }
 
@@ -337,6 +342,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
+  },
+  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendorName: string, vendorLink: string }) {
+    state.currSelectedPhotoInfo = data
   }
 }
 

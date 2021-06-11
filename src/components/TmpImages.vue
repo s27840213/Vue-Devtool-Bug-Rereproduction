@@ -4,27 +4,20 @@ infinite-scroll(class="temp__content"
   div(v-for="(row, index) in rows"
     :key="`rows${index}`",
     :style="{ marginBottom: `${margin}px` }")
-    lazy-load(v-for="(photo, i) in row"
+    gallery-photo(v-for="(photo, i) in row"
+      :style="imageStyle(photo.preview, i > 0)",
+      :photo="photo"
       :key="photo.id")
-      img(:src="photo.urls.thumb",
-        :style="imageStyle(photo.preview, i > 0)",
-        draggable="true",
-        class="temp__img pointer"
-        @dragstart="dragStart($event,photo)"
-        @click="addImage(photo)")
 </template>
 
 <script lang="ts">
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
-import layerFactary from '@/utils/layerFactary'
-import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import InfiniteScroll from '@/components/InfiniteScroll.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
 
 export default Vue.extend({
   props: {
@@ -35,13 +28,9 @@ export default Vue.extend({
   },
   components: {
     InfiniteScroll,
-    LazyLoad
+    GalleryPhoto
   },
   computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      pageSize: 'getPageSize'
-    }),
     margin(): number {
       return this.galleryUtils.margin
     }
@@ -59,46 +48,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    dragStart(e: DragEvent, photo: any) {
-      const dataTransfer = e.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-
-      const rect = (e.target as Element).getBoundingClientRect()
-      const data = {
-        type: 'image',
-        // @/assets/img/svg/img-tmp.svg
-        src: photo.urls.regular,
-        styles: {
-          x: e.clientX - rect.x,
-          y: e.clientY - rect.y,
-          width: photo.width / 20,
-          height: photo.height / 20
-        }
-      }
-      dataTransfer.setData('data', JSON.stringify(data))
-    },
-    addImage(photo: any) {
-      const resizeRatio = 0.8
-      const isWider = photo.width > photo.height
-      const aspectRatio = photo.width / photo.height
-      const photoWidth = isWider ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * aspectRatio
-      const photoHeight = isWider ? (this.pageSize.width * resizeRatio) / aspectRatio : this.pageSize.height * resizeRatio
-      const config = {
-        src: photo.urls.regular,
-        styles: {
-          x: this.pageSize.width / 2 - photoWidth / 2,
-          y: this.pageSize.height / 2 - photoHeight / 2,
-          width: photoWidth,
-          height: photoHeight,
-          initWidth: photoWidth,
-          initHeight: photoHeight,
-          imgWidth: photoWidth,
-          imgHeight: photoHeight
-        }
-      }
-      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
-    },
     imageStyle(attr: any, addMarginLeft: boolean) {
       return {
         width: `${attr.width}px`,
@@ -121,10 +70,6 @@ export default Vue.extend({
     &::-webkit-scrollbar {
       display: none;
     }
-  }
-  &__img {
-    display: inline-block;
-    background-color: #f1f1f1;
   }
 }
 </style>
