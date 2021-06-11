@@ -49,7 +49,7 @@ export default Vue.extend({
   data() {
     return {
       rows: [],
-      galleryUtils: new GalleryUtils(260, 100, 5)
+      galleryUtils: new GalleryUtils(260, 80, 5)
     }
   },
   watch: {

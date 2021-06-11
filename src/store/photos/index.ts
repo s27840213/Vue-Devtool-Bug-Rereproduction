@@ -109,7 +109,7 @@ const getters: GetterTree<IPhotoState, any> = {
   },
   getCurrentPagePhotos (state) {
     const { page, list } = state
-    return list.slice((page - 1) * 15)
+    return list.slice((page - 1) * 25)
   },
   getNextParams (state) {
     const { query, page } = state
