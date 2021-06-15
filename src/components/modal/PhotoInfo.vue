@@ -9,6 +9,9 @@
       span(class="photo-info__link pointer"
         :data-link="vendor.link"
         @click="handleLink") {{ vendor.name }}
+    div(v-if="info.tags && info.tags.length"
+      class="photo-info__tags")
+      span tag: {{ info.tags.join(',') }}
     div(class="photo-info__action")
       svg-icon(:iconName="'folder'",
         :iconColor="'gray-2'",
@@ -83,8 +86,11 @@ export default Vue.extend({
     }
     &__desc {
       display: block;
-      margin-bottom: 20px;
+      margin-bottom: 5px;
       word-break: break-all;
+    }
+    &__tags {
+      margin-bottom: 20px;
     }
   }
 </style>

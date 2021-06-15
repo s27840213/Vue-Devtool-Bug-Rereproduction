@@ -78,12 +78,13 @@ export default Vue.extend({
       layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
     },
     onClick(evt: MouseEvent) {
-      const { user } = this.photo
+      const { user = {}, tags = [] } = this.photo
       this._setCurrSelectedPhotoInfo({
         userName: user.name,
-        userLink: user.links.html,
+        userLink: user.links && user.links.html,
         vendorName: 'Unsplash',
-        vendorLink: 'http://unsplash.com/'
+        vendorLink: 'http://unsplash.com/',
+        tags: tags.map((tag: any) => tag.title)
       })
       this.$nextTick(() => {
         const el = document.querySelector('.photo-info') as HTMLElement

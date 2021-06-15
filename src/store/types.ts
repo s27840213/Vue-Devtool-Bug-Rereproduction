@@ -27,7 +27,8 @@ export interface IEditorState {
     userName: string,
     userLink: string,
     vendorName: string,
-    vendorLink: string
+    vendorLink: string,
+    tags: string[]
   }
 }
 

@@ -158,7 +158,6 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.isPageDropdownsOpened
   },
   getCurrSelectedPhotoInfo(state: IEditorState) {
-    console.log(state.currSelectedPhotoInfo)
     return state.currSelectedPhotoInfo
   }
 }
@@ -343,7 +342,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
   },
-  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendorName: string, vendorLink: string }) {
+  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendorName: string, vendorLink: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data
   }
 }
