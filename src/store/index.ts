@@ -7,7 +7,7 @@ import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 
-import photos from './photos'
+import photos from '@/store/photos'
 
 Vue.use(Vuex)
 

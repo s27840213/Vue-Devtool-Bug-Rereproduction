@@ -1,7 +1,5 @@
 <template lang="pug">
-  div(ref="container")
-    slot
-    div(ref="sentinel")
+  div(ref="sentinel")
 </template>
 
 <script lang="ts">
@@ -10,6 +8,10 @@ import { throttle } from 'lodash'
 
 export default Vue.extend({
   props: {
+    target: {
+      type: String,
+      default: 'body'
+    },
     rootMargin: {
       type: String,
       default: '0px 0px 100px'
@@ -24,7 +26,7 @@ export default Vue.extend({
     this.intersectionObserver = new IntersectionObserver(
       ([evt]) => evt.isIntersecting && this.handleCallback(),
       {
-        root: this.$refs.container as Element,
+        root: document.querySelector(this.target),
         rootMargin: this.rootMargin
       }
     )

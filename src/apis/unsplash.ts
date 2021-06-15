@@ -17,7 +17,7 @@ export default {
   getPopularPhoto: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       order_by: 'popular',
       lang: 'zh-TW'
     }
@@ -31,7 +31,7 @@ export default {
   getPhotos: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       query: params.query || 'random',
       order_by: params.orderBy || 'relevant',
       lang: 'zh-TW'

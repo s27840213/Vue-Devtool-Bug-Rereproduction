@@ -7,10 +7,11 @@ import store from './store'
 import vueColor from 'vue-color'
 import { Store } from 'vuex'
 import { IEditorState } from './store/types'
+import { RecycleScroller } from 'vue-virtual-scroller'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
-
+Vue.component('RecycleScroller', RecycleScroller)
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 requireAll(req)
