@@ -26,8 +26,7 @@ export interface IEditorState {
   currSelectedPhotoInfo: Record<string, never> | {
     userName: string,
     userLink: string,
-    vendorName: string,
-    vendorLink: string,
+    vendor: string,
     tags: string[]
   }
 }

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="gallery-photo")
     svg-icon(class="pointer gallery-photo__more"
-      @click.native="onClick"
+      @click.native="showPhotoInfo"
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
@@ -77,14 +77,13 @@ export default Vue.extend({
       }
       layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
     },
-    onClick(evt: MouseEvent) {
-      const { user = {}, tags = [] } = this.photo
+    showPhotoInfo(evt: Event) {
+      const { user, tags, vendor } = this.photo
       this._setCurrSelectedPhotoInfo({
         userName: user.name,
-        userLink: user.links && user.links.html,
-        vendorName: 'Unsplash',
-        vendorLink: 'http://unsplash.com/',
-        tags: tags.map((tag: any) => tag.title)
+        userLink: user.link,
+        vendor,
+        tags
       })
       this.$nextTick(() => {
         const el = document.querySelector('.photo-info') as HTMLElement

@@ -1,13 +1,13 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
-import { IUnsplashPhoto } from '@/interfaces/api'
+import { IPhoto } from '@/interfaces/api'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_TOTAL_PAGES = 'SET_TOTAL_PAGES' as const
 
 interface IPhotoState {
-  list: IUnsplashPhoto[],
+  list: IPhoto[],
   query: string,
   page: number,
   totalPages: number,

@@ -12,18 +12,24 @@ const options = {
 
 const axios = Axios.create(options)
 
-function normalized (photos: Api.IPexelsPhoto[]): Api.IUnsplashPhoto[] {
+function normalized (photos: Api.IPexelsPhoto[]): Api.IPhoto[] {
   return photos.map(photo => ({
     width: photo.width,
     height: photo.height,
     id: `${photo.id}`,
+    user: {
+      name: photo.photographer,
+      link: photo.photographer_url
+    },
     urls: {
       full: photo.src.original,
       raw: photo.src.original,
       regular: photo.src.medium,
       small: photo.src.small,
       thumb: photo.src.small
-    }
+    },
+    tags: [],
+    vendor: 'Pexels'
   }))
 }
 

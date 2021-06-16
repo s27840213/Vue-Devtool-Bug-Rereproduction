@@ -18,6 +18,12 @@ export interface IUnsplashPhoto {
     small: string
     thumb: string
   }
+  user: {
+    name: string
+    links: {
+      html: string
+    }
+  }
 }
 
 export interface IPexelsPhoto {
@@ -25,12 +31,33 @@ export interface IPexelsPhoto {
   height: number
   id: number
   avg_color: string
+  photographer: string
+  photographer_url: string
   src: {
     medium: string
     original: string
     portrait: string
     small: string
   }
+}
+
+export interface IPhoto {
+  width: number
+  height: number
+  id: string
+  tags?: IPhotoTag[]
+  urls: {
+    full: string
+    raw: string
+    regular: string
+    small: string
+    thumb: string
+  }
+  user: {
+    name: string
+    link: string
+  }
+  vendor?: string
 }
 
 export interface IPexelsSearchResponse {

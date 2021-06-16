@@ -2,13 +2,17 @@
   div(class="photo-info")
     strong(class="photo-info__desc")
       span Photo by
-      span(class="photo-info__link pointer"
-        :data-link="user.link"
-        @click="handleLink") {{ user.name }}
+      a(class="photo-info__link pointer"
+        :href="userLink"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        @mousedown.prevent) {{ info.userName }}
       span on
-      span(class="photo-info__link pointer"
-        :data-link="vendor.link"
-        @click="handleLink") {{ vendor.name }}
+      a(class="photo-info__link pointer"
+        :href="vendorLink"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        @mousedown.prevent) {{ info.vendor }}
     div(v-if="info.tags && info.tags.length"
       class="photo-info__tags")
       span tag: {{ info.tags.join(',') }}
@@ -32,30 +36,27 @@ export default Vue.extend({
     info: Object
   },
   computed: {
-    user () {
-      const { userName, userLink } = this.info || {}
-      return {
-        name: userName || '',
-        link: userLink || ''
+    vendorLink (): string {
+      const { vendor } = this.info as any
+      const { VUE_APP_UNSPLASH_APP_NAME: unsplashAppName } = process.env
+      switch (vendor) {
+        case 'Unsplash':
+          return `https://unsplash.com/?utm_source=${unsplashAppName}&utm_medium=referral`
+        case 'Pexels':
+          return 'https://www.pexels.com/'
+        default:
+          return ''
       }
     },
-    vendor () {
-      const { vendorName, vendorLink } = this.info || {}
-      return {
-        name: vendorName || '',
-        link: vendorLink || ''
+    userLink (): string {
+      const { vendor, userLink } = this.info as any
+      const { VUE_APP_UNSPLASH_APP_NAME: unsplashAppName } = process.env
+      switch (vendor) {
+        case 'Unsplash':
+          return `${userLink}?utm_source=${unsplashAppName}&utm_medium=referral`
+        default:
+          return userLink
       }
-    },
-    tags () {
-      const { tags } = this.info || {}
-      return [...tags]
-    }
-  },
-  methods: {
-    handleLink (evt: Event) {
-      const linkTarget = evt.target as HTMLSpanElement
-      const { link } = linkTarget.dataset
-      link && window.open(link, '_blank')
     }
   }
 })

@@ -33,7 +33,7 @@ export default Vue.extend({
       this.$store.dispatch('photos/getPhotosFromPexels', { query: keyword })
     },
     handleLoadMore () {
-      !this.pending && this.$store.dispatch('photos/getMorePhotosFromUnsplash')
+      !this.pending && this.$store.dispatch('photos/getMorePhotosFromPexels')
     }
   }
 })

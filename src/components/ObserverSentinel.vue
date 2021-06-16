@@ -14,7 +14,7 @@ export default Vue.extend({
     },
     rootMargin: {
       type: String,
-      default: '0px 0px 100px'
+      default: '0px 0px 300px'
     }
   },
   data (): { intersectionObserver: IntersectionObserver | null } {

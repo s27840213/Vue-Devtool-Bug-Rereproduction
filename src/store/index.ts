@@ -342,7 +342,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
   },
-  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendorName: string, vendorLink: string, tags: string[] }) {
+  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data
   }
 }

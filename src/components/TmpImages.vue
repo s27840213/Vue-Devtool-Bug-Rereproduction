@@ -18,7 +18,7 @@
  * This components is temporarily used for img section, and it will be remove in the future
  */
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -29,6 +29,7 @@ export default Vue.extend({
     GalleryPhoto
   },
   computed: {
+    ...mapState('photos', ['page']),
     ...mapGetters('photos', [
       'getCurrentPagePhotos'
     ]),
@@ -44,14 +45,16 @@ export default Vue.extend({
   },
   watch: {
     getCurrentPagePhotos(val) {
+      const [lastRow] = this.rows.slice(-1) as any
+      const lastList = (lastRow && lastRow.list) || []
       const rows = this.galleryUtils
-        .generate(val)
+        .generate(lastList.concat(val))
         .map((row, idx) => ({
           list: row,
-          id: `row${idx}`,
+          id: `row${this.page}${idx}`,
           size: row[0].preview.height + this.margin
         }))
-      this.rows = this.rows.concat(rows as any)
+      this.rows = this.rows.slice(0, -1).concat(rows as any)
     }
   },
   methods: {
