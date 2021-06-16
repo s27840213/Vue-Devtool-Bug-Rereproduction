@@ -1,5 +1,5 @@
 <template lang="pug">
-  div()
+  div(ref="text" class="text")
       p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
         :key="pIndex",
         :style="styles(p.styles)")
@@ -8,15 +8,11 @@
           :style="styles(span.styles)") {{ span.text }}
 </template>
 
-  // div(class="nu-text" ref="body")
-  //   div(class="nu-text" ref="content")
-  //     span(class="text-content" v-for="text in textContent" :style="contextStyles()") {{ text }}
-
 <script lang="ts">
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import TextUtils from '@/utils/textUtils'
+import { IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -24,25 +20,30 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
-  data() {
-    return {
-      textContent: ['']
-    }
-  },
-  mounted() {
-    // this.textContent = this.getTextContent
-  },
   watch: {
-    // 'config.text': function() {
-    //   this.textContent = this.getTextContent
-    //   setTimeout(() => {
-    //     const content = this.getContentBody
-    //     if (content.offsetHeight >= this.config.styles.height) {
-    //       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
-    //       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
-    //     }
-    //   }, 0)
-    // },
+    initSize: {
+      handler: function() {
+        console.log('initSize ')
+        setTimeout(() => {
+          const text = this.$refs.text as HTMLElement
+          text.style.width = `${this.config.styles.width}px`
+          console.log(this.config.styles.width)
+          const textHW = {
+            width: Math.ceil(text.getBoundingClientRect().width),
+            height: Math.ceil(text.getBoundingClientRect().height)
+          }
+          console.log(textHW)
+          // console.log(textHW)
+          // console.log(text)
+          const scale = this.config.styles.scale
+          // if (textHW.width >= this.config.styles.width) {
+          // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width / scale, textHW.height / scale, this.config.styles.size)
+          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
+          // }
+        }, 0)
+      },
+      deep: true
+    }
     // 'config.styles.font': function() {
     //   setTimeout(() => {
     //     const content = this.getContentBody
@@ -59,28 +60,12 @@ export default Vue.extend({
     // }
   },
   computed: {
-    // getTextContent(): string[] {
-    //   const space = /&nbsp;/g
-    //   let text = this.config.text as string
-    //   text = this.config.text.replace(space, ' ')
-    //   let textArr = text.split('<br>')
-    //   textArr = textArr.map((text) => {
-    //     if (text === '') {
-    //       text = ' '
-    //     }
-    //     return text
-    //   })
-    //   for (let i = textArr.length - 1; i >= 0; i--) {
-    //     if (textArr[i] !== ' ') {
-    //       textArr = textArr.slice(0, i + 1)
-    //       break
-    //     }
-    //   }
-    //   return textArr
-    // },
-    // getContentBody(): HTMLElement {
-    //   return this.$refs.content as HTMLElement
-    // }
+    initSize() {
+      return {
+        initWidth: (this.config as IText).styles.initWidth,
+        initHeight: (this.config as IText).styles.initHeight
+      }
+    }
   },
   methods: {
     styles(styles: any) {
@@ -104,6 +89,7 @@ export default Vue.extend({
   position: relative;
 }
 .text {
+  position: absolute;
   &__p {
       margin: 0.5em;
   }

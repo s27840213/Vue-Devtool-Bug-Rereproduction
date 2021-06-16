@@ -36,11 +36,13 @@ export interface IText extends ILayer<ITextStyle> {
 }
 
 export interface IParagraph {
+  [key: string]: string | number | Array<ISpan> | IParagraphStyle,
   spans: Array<ISpan>,
   styles: IParagraphStyle
 }
 
 export interface ISpan {
+  [key: string]: string | number | ISpanStyle,
   text: string,
   styles: ISpanStyle
 }

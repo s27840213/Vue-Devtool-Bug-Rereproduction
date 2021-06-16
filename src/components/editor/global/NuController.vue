@@ -16,16 +16,18 @@
           @dblclick="onDblClick")
         template(v-if="config.type === 'text'")
           //- div(:style="textStyle(config.styles)")
-          div(ref="text")
+          div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
+            :style="contentStyles()"
+            @keydown="onKeyDown($event)")
             p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-              :key="pIndex",
-              :style="pStyles(p.styles)")
+              :data-pindex="pIndex"
+              :key="p.id",
+              :style="textStyles(p.styles)")
               span(v-for="(span, sIndex) in p.spans" class="text__span"
-                :key="sIndex",
-                :style="pStyles(span.styles)"
-                @keydown="onKeyDown($event, pIndex, sIndex)"
-                @compositionstart="compositionStart"
-                :contenteditable="config.type === 'tmp' ? false : contentEditable")
+                :data-sindex="sIndex"
+                :key="span.id",
+                :style="textStyles(span.styles)")
+                //- :contenteditable="config.type === 'tmp' ? false : contentEditable")
         //- span(class="text-content" :style="contextStyles()" ref="text"
         //-   @keydown="onKeyDown"
         //-   @compositionstart="compositionStart"
@@ -37,7 +39,7 @@
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
           :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
-          div(v-for="(scaler, index)  in controlPoints.scalers"
+          div(v-for="(scaler, index) in controlPoints.scalers"
               class="control-point"
               :key="index * 2"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
@@ -79,6 +81,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      paragraphs: [],
       MappingUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
@@ -97,7 +100,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
+    // console.log(this.config)
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -174,13 +177,11 @@ export default Vue.extend({
     changedSize: {
       handler: function() {
         if (this.getLayerType !== 'text') return
-        // console.log('size change')
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
           if (text) {
-            // console.log(this.config.styles)
-            // console.log(this.getLayerHeight)
-            text.style.width = `${this.getLayerWidth}px`
+            this.textInit()
+            // text.style.width = `${this.getLayerWidth}px`
           }
         })
       },
@@ -217,9 +218,25 @@ export default Vue.extend({
       }
       return resizer
     },
-    pStyles(styles: any) {
+    contentStyles() {
+      return {
+        width: `${this.config.styles.width / this.getLayerScale}px`,
+        height: `${this.config.styles.height / this.getLayerScale}px`,
+        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
+        outline: 'none',
+        position: 'relative'
+        // 'transform-origin': '0px 0px'
+      }
+    },
+    textStyles(styles: any) {
       const newStyles = Object.assign({}, styles)
-      return CssConveter.convertFontStyle(Object.assign(newStyles, { color: 'rgba(10,10,10,0.5)' }))
+      if (styles.color) {
+      }
+      const textStyles = CssConveter.convertFontStyle(Object.assign(newStyles, { color: styles.color ? styles.color : '' }))
+      Object.assign(textStyles, { 'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000' })
+      return textStyles
+      // return CssConveter.convertFontStyle(Object.assign(newStyles,
+      //   { color: styles.color ? styles.color.length === 7 ? `${styles.color}00` : `${styles.color.substring(0, styles.color.length - 2)}0)` : '' }))
     },
     contextStyles() {
       const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
@@ -437,9 +454,9 @@ export default Vue.extend({
         scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
       }
       if (this.config.type === 'text') {
-        const text = this.$refs.text as HTMLElement
-        text.style.width = `${width}px`
-        text.style.height = `${height}px`
+        // const text = this.$refs.text as HTMLElement
+        // text.style.width = `${width}px`
+        // text.style.height = `${height}px`
         ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
@@ -450,6 +467,13 @@ export default Vue.extend({
     scaleEnd() {
       if (this.getLayerType === 'text') {
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+        // const text = this.$refs.text as HTMLElement
+        // text.childNodes.forEach((p, pIndex) => {
+        //   p.childNodes.forEach((span, sIndex) => {
+        //     const spanEl = span as HTMLElement
+        //     spanEl.style.fontSize = `${(this.config as IText).paragraphs[pIndex].spans[sIndex].styles.size * this.getLayerScale}px`
+        //   })
+        // })
       }
       this.isControlling = false
       StepsUtils.record()
@@ -667,8 +691,8 @@ export default Vue.extend({
     textResizeHandler(width: number, height: number): [number, number] {
       const text = this.$refs.text as HTMLElement
       if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
-        text.style.height = 'auto'
-        text.style.width = `${width}px`
+        // text.style.height = 'auto'
+        // text.style.width = `${width}px`
         height = Math.ceil(text.getBoundingClientRect().height)
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
         ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize / this.getLayerScale)
@@ -760,12 +784,22 @@ export default Vue.extend({
         this.contentEditable = true
       }
     },
-    onKeyDown(e: KeyboardEvent, pIndex: number, sIndex: number) {
+    onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text') {
-        this.onTyping(e, pIndex, sIndex)
+        const sel = window.getSelection()
+        if (sel) {
+          const range = sel.getRangeAt(0)
+          if (range) {
+            const startContainer = range.startContainer
+            const sIndex = parseInt(startContainer.parentElement?.dataset.sindex as string)
+            const pIndex = parseInt(startContainer.parentElement?.parentElement?.dataset.pindex as string)
+            this.onTyping(e, pIndex, sIndex)
+          }
+        }
       }
     },
     onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
+      console.log('ontypeing')
       ControlUtils.textStopPropagation(e)
       ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
       if (e.metaKey && e.key === 'z') {
@@ -773,22 +807,23 @@ export default Vue.extend({
         setTimeout(() => {
           const text = this.$refs.text as HTMLElement
           // text.innerHTML = this.getTextContent
-          text.style.width = `${this.getLayerWidth}px`
+          // text.style.width = `${this.getLayerWidth}px`
         }, 0)
         return
       }
       if (this.isNoCharactor(e)) return
       const text = this.$refs.text as HTMLElement
-      // text.style.width = 'auto'
-      // text.style.height = 'auto'
+      text.style.width = 'initial'
+      text.style.height = 'initial'
 
       // const textTmp = text.innerHTML
       /**
        * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
        */
       // text.style.whiteSpace = 'pre'
+      const textnode = window.getSelection()?.anchorNode as Node
       setTimeout(() => {
-        ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, window.getSelection()?.anchorNode?.textContent as string)
+        ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, textnode.textContent as string)
         /**
          * This line of code prevents the bug while deleting at beginning of the text.
          */
@@ -810,12 +845,12 @@ export default Vue.extend({
           layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
           if (layerX <= 0) {
             layerX = 0
-            text.style.width = `${this.getLayerWidth}px`
+            // text.style.width = `${this.getLayerWidth}px`
             textSize.width = this.getLayerWidth
             ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
           } else if (layerX + currTextWidth >= page.offsetWidth) {
             layerX = page.offsetWidth - this.getLayerWidth
-            text.style.width = `${this.getLayerWidth}px`
+            // text.style.width = `${this.getLayerWidth}px`
             textSize.width = this.getLayerWidth
             ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
           } else {
@@ -823,19 +858,24 @@ export default Vue.extend({
             // text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
             // const HW = this.getTextHW(text.innerHTML, this.config.styles)
             const HW = TextUtils.getTextHW(this.config)
-            text.style.width = `${HW.width}px`
+            // text.style.width = `${HW.width}px`
             textSize.width = HW.width
             textSize.height = HW.height
           }
         } else {
-          text.style.width = `${text.getBoundingClientRect().width}px` || `${this.config.widthLimit}px`
+          // text.style.width = `${text.getBoundingClientRect().width}px` || `${this.config.widthLimit}px`
           textSize.width = text.getBoundingClientRect().width || this.config.widthLimit
+          textSize.height = text.getBoundingClientRect().height
+          // textSize.height = TextUtils.getTextHW(this.config, textSize.width).height
         }
         text.style.whiteSpace = 'pre-wrap'
+        // text.style.width = `${textSize.width / this.getLayerScale}px`
+        // text.style.height = `${textSize.height / this.getLayerScale}px`
+        console.log(textSize)
         // ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
         ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getFontSize)
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width / this.getLayerScale, textSize.height / this.getLayerScale, this.getFontSize + 1)
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getLayerScale)
         StepsUtils.record()
       }, 0)
     },
@@ -955,7 +995,7 @@ export default Vue.extend({
   }
   &__span {
     text-align: left;
-    outline: none;
+    // outline: none;
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }

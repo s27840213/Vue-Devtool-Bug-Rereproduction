@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import unsplashApis from '@/apis/unsplash'
@@ -228,6 +228,13 @@ const mutations: MutationTree<IEditorState> = {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
     })
+  },
+  UPDATE_textProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number,
+    paragraphs: [IParagraph] }) {
+    /**
+     * This Mutation is used to update the text's hierarchy between paragraphs and spans while hitting the enter key or typing with selection range
+     */
+    (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs = updateInfo.paragraphs
   },
   UPDATE_textContent(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string }) {
     (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].text = updateInfo.text

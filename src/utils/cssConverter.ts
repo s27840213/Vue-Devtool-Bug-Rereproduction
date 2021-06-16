@@ -24,11 +24,30 @@ const styleMap = {
   opacity: 'opacity',
   writingMode: 'writing-mode',
   decoration: 'text-decoration',
-  style: 'font-style'
+  style: 'font-style',
+  caretColor: 'caret-color'
+} as IStyleMap
+
+const fontStyleMap = {
+  'font-family': 'fontFamily',
+  'font-weight': 'fontWeight',
+  'font-align': 'fontAlign',
+  'line-height': 'lineHeight',
+  'font-spacing': 'fontSpacing',
+  'font-size': 'fontSize',
+  'writing-mode': 'writingMode',
+  'font-style': 'fontStyle',
+  'text-decoration-line': 'decoration',
+  'text-decoration-thickness': 'decoration',
+  'text-decoration-style': 'decoration',
+  'text-decoration-color': 'decoration',
+  'letter-spacing': 'letterSpacing',
+  color: 'color'
 } as IStyleMap
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
-const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing', 'size', 'color', 'writingMode', 'decoration', 'style']
+const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
+  'size', 'color', 'writingMode', 'decoration', 'style', 'opacity', 'caretColor']
 
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {
@@ -48,10 +67,16 @@ class CssConveter {
     }
   }
 
+  fontStyleMap(prop: string): string {
+    return fontStyleMap[prop as any]
+  }
+
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
-      if (prop === 'fontSpacing' || prop === 'lineHeight') {
+      if (prop === 'opacity') {
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else if (prop === 'fontSpacing' || prop === 'lineHeight') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`

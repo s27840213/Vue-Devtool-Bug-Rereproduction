@@ -102,7 +102,7 @@ class TextUtils {
   //   document.body.removeChild(el)
   //   return textHW
   // }
-  getTextHW(content: IText) {
+  getTextHW(content: IText, width = -1) {
     const body = document.createElement('div')
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
@@ -114,18 +114,20 @@ class TextUtils {
         p.appendChild(span)
       })
       Object.assign(p.style, CssConveter.convertFontStyle(pData.styles))
-      p.style.display = 'table'
+      // p.style.display = 'table'
       p.style.margin = '0.5em'
       body.appendChild(p)
     })
     body.style.border = '1px solid blue'
-    body.style.width = 'fit-content'
+    body.style.width = width === -1 ? 'fit-content' : `${width}px`
+    body.style.whiteSpace = 'pre-wrap'
+    body.style.textAlign = 'center'
     document.body.appendChild(body)
     const textHW = {
       width: Math.ceil(body.getBoundingClientRect().width),
       height: Math.ceil(body.getBoundingClientRect().height)
     }
-    document.body.removeChild(body)
+    // document.body.removeChild(body)
     return textHW
   }
 

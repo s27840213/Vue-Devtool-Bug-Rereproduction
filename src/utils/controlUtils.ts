@@ -1,5 +1,7 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
+import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { stringToArray } from 'konva/types/shapes/Text'
 
 class Controller {
   getLength(vect: ICoordinate): number {
@@ -166,45 +168,90 @@ class Controller {
 
   textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
     if (e.key !== 'Enter' || isCompositioning) return
-    e.preventDefault()
 
-    const p = document.createElement('p')
-    const span = document.createElement('span')
+    // console.log(text)
+    // e.preventDefault()
 
-    // const range = window.getSelection()?.anchorNode?.parentElement
-    // if (range) {
-    //   range.after(span)
-    // }
+    // const p = document.createElement('p')
+    // const span = document.createElement('span')
 
-    const sel = window.getSelection() as Selection
-    const anchorNode = sel.anchorNode as any
-    const range = document.createRange()
-    // range.setStart(anchorNode, selObj.anchorOffset);
-    // range.setEnd(anchorNode, anchorNode.length);
-
-    // selObj.addRange(range);
-    // selObj.removeAllRanges()
-    const str = anchorNode.nodeValue
-    const substr = anchorNode.nodeValue?.substring(sel.anchorOffset, anchorNode.length)
-    anchorNode.nodeValue = str.substring(0, sel.anchorOffset)
-    span.textContent = substr
-    p.appendChild(span)
-    text.after(p)
+    // const sel = window.getSelection() as Selection
+    // const anchorNode = sel.anchorNode as any
+    // const range = document.createRange()
+    // const str = anchorNode.nodeValue
+    // const substr = anchorNode.nodeValue?.substring(sel.anchorOffset, anchorNode.length)
+    // anchorNode.nodeValue = str.substring(0, sel.anchorOffset)
+    // span.textContent = substr
+    // p.appendChild(span)
+    // text.after(p)
 
     // const sel = window.getSelection()
-    // if (sel) {
-    //   sel.removeAllRanges()
-    //   sel.addRange(range)
-    // }
-    // if (text.lastChild?.nodeName !== 'BR') {
-    //   const br = document.createElement('br') as HTMLBRElement
-    //   text.appendChild(br)
-    // }
+    // const range = sel?.getRangeAt(0)
+    // const startContainer = range?.startContainer
+    // const sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+    // const pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
     const pageIndex = store.state.lastSelectedPageIndex
     const layerIndex = store.getters.getCurrSelectedIndex
-    this.updateLayerInitSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, size)
-    this.updateLayerSize(pageIndex, layerIndex, text.offsetWidth, text.offsetHeight, 1)
-    this.updateTextProps(pageIndex, layerIndex, { text: text.innerHTML })
+    setTimeout(() => {
+      const paragraphs: IParagraph[] = []
+      const ps = text.childNodes
+      console.log(text)
+      ps.forEach((p, pIndex) => {
+        const spans: ISpan[] = []
+        const textLayer = (this.getLayer(pageIndex, layerIndex) as IText)
+        p.childNodes.forEach((span, sIndex) => {
+          const spanEl = span as HTMLElement
+          // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
+          const spanStyle = {
+            font: spanEl.style.fontFamily,
+            weight: spanEl.style.fontWeight,
+            size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / this.getLayer(pageIndex, layerIndex).styles.scale : '',
+            initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+            decoration: spanEl.style.textDecorationLine,
+            style: spanEl.style.fontStyle,
+            color: spanEl.style.color,
+            opacity: parseInt(spanEl.style.opacity)
+          } as ISpanStyle
+          const text = spanEl.textContent as string
+          spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+        })
+        const pEl = p as HTMLElement
+        const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+        pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
+        pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
+        pStyle.align = pEl.style.textAlign
+        paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+      })
+
+      setTimeout(() => {
+        paragraphs.forEach((p, pIndex) => {
+          p.spans.forEach((s, sIndex) => {
+            text.childNodes[pIndex].childNodes[sIndex].textContent = s.text
+          })
+        })
+        text.removeChild(text.lastChild as Node)
+      }, 0)
+      text.style.width = 'initial'
+      text.style.height = 'initial'
+      const textHW = {
+        width: Math.ceil(text.getBoundingClientRect().width),
+        height: Math.ceil(text.getBoundingClientRect().height)
+      }
+      text.style.width = `${textHW.width}px`
+      text.style.height = `${textHW.height}px`
+      const scale = this.getLayer(pageIndex, layerIndex).styles.scale
+      this.updateLayerInitSize(pageIndex, layerIndex, textHW.width / scale, textHW.height / scale, size)
+      this.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, scale)
+      this.updateTextProp(pageIndex, layerIndex, paragraphs)
+    }, 0)
+  }
+
+  getSpanLength(text: IText, pIndex: number): number {
+    return text.paragraphs[pIndex].spans.length <= 0 ? 1 : text.paragraphs[pIndex].spans.length
+  }
+
+  getLayer(pageIndex: number, layerIndex: number): ILayer | IText {
+    return store.getters.getLayer(pageIndex, layerIndex)
   }
 
   shapeCategorySorter(resizer: any, category: number) {
@@ -219,6 +266,14 @@ class Controller {
       case 2:
         return []
     }
+  }
+
+  updateTextProp(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+    store.commit('UPDATE_textProps', {
+      pageIndex,
+      layerIndex,
+      paragraphs
+    })
   }
 
   updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {

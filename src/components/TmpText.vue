@@ -26,6 +26,7 @@ div(class="temp__content")
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import { IText } from '@/interfaces/layer'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   data() {
@@ -48,7 +49,7 @@ export default Vue.extend({
                   styles: {
                     font: 'Lobster',
                     weight: 'bold',
-                    color: '#000000',
+                    color: '#2EB8E6',
                     writingMode: 'initial',
                     decoration: 'none',
                     style: 'normal',
@@ -83,7 +84,7 @@ export default Vue.extend({
                   styles: {
                     font: 'Lobster',
                     weight: 'bold',
-                    color: '#000000',
+                    color: '#008BDB',
                     writingMode: 'initial',
                     decoration: 'none',
                     style: 'normal',
@@ -96,7 +97,7 @@ export default Vue.extend({
                   styles: {
                     font: 'Lobster',
                     weight: 'normal',
-                    color: '#000000',
+                    color: '#EB5757',
                     writingMode: 'initial',
                     decoration: 'none',
                     style: 'normal',
@@ -242,9 +243,10 @@ export default Vue.extend({
         y: e.clientY - rect.y
       })
 
-      const textHW = this.getTextHW(content)
+      const textHW = textUtils.getTextHW(content)
       const data = {
         type: 'text',
+        id: Math.ceil(Math.random() * 10000),
         widthLimit: '',
         styles: Object.assign(styles, textHW),
         paragraphs: content.paragraphs
