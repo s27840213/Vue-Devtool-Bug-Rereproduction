@@ -1,5 +1,7 @@
 <template lang="pug">
-  div(ref="sentinel")
+  div(class="observer-sentinel"
+    ref="sentinel")
+    slot
 </template>
 
 <script lang="ts">
@@ -14,7 +16,7 @@ export default Vue.extend({
     },
     rootMargin: {
       type: String,
-      default: '0px 0px 300px'
+      default: '0px 0px 150px'
     }
   },
   data (): { intersectionObserver: IntersectionObserver | null } {
@@ -42,3 +44,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+  .observer-sentinel {
+    text-align: center;
+  }
+</style>

@@ -11,6 +11,10 @@
     template(#after)
       observer-sentinel(target=".temp__content"
         @callback="$emit('loadMore')")
+        svg-icon(v-if="pending"
+          :iconName="'loading'"
+          :iconColor="'gray-2'"
+          :iconWidth="'20px'")
 </template>
 
 <script lang="ts">
@@ -29,7 +33,7 @@ export default Vue.extend({
     GalleryPhoto
   },
   computed: {
-    ...mapState('photos', ['page']),
+    ...mapState('photos', ['page', 'pending']),
     ...mapGetters('photos', [
       'getCurrentPagePhotos'
     ]),
