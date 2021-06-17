@@ -80,10 +80,10 @@ export default Vue.extend({
     },
     addImage(photo: any) {
       const resizeRatio = 0.8
-      const isWider = photo.width > photo.height
-      const aspectRatio = photo.width / photo.height
-      const photoWidth = isWider ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * aspectRatio
-      const photoHeight = isWider ? (this.pageSize.width * resizeRatio) / aspectRatio : this.pageSize.height * resizeRatio
+      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const photoAspectRatio = photo.width / photo.height
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
       const config = {
         src: photo.urls.regular,
         styles: {

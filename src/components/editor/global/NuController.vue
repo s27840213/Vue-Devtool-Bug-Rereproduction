@@ -420,7 +420,7 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
+      // this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {

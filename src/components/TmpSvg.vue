@@ -162,10 +162,10 @@ export default Vue.extend({
     },
     addSvg(svgData: any) {
       const resizeRatio = 0.55
-      const isWider = svgData.size[0] > svgData.size[1]
-      const aspectRatio = svgData.size[0] / svgData.size[1]
-      const svgWidth = isWider ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * aspectRatio
-      const svgHeight = isWider ? (this.pageSize.width * resizeRatio) / aspectRatio : this.pageSize.height * resizeRatio
+      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const svgAspectRatio = svgData.size[0] / svgData.size[1]
+      const svgWidth = svgAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * svgAspectRatio
+      const svgHeight = svgAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / svgAspectRatio : this.pageSize.height * resizeRatio
       const config = {
         styles: {
           x: this.pageSize.width / 2 - svgWidth / 2,

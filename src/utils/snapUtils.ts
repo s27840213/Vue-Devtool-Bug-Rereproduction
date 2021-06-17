@@ -96,10 +96,6 @@ class SnapUtils {
           offset: layerStyles.x - layerBounding.x
         },
         {
-          pos: layerBounding.x + layerBounding.width / 2,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2
-        },
-        {
           pos: layerBounding.x + layerBounding.width,
           offset: layerStyles.x - layerBounding.x - layerBounding.width
         }
@@ -108,10 +104,6 @@ class SnapUtils {
         {
           pos: layerBounding.y,
           offset: layerStyles.y - layerBounding.y
-        },
-        {
-          pos: layerBounding.y + layerBounding.height / 2,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2
         },
         {
           pos: layerBounding.y + layerBounding.height,
@@ -218,7 +210,7 @@ class SnapUtils {
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
-    const snapResult = { width: layer.styles.width, height: layer.styles.height }
+    const snapResult = { width: layer.styles.width, height: layer.styles.height, scale: layer.styles.scale }
     // const aspectRatio = layer.styles.width / layer.styles.height
     /**
      * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
@@ -236,14 +228,20 @@ class SnapUtils {
     }
     snaplines.forEach((snapline: ISnapline) => {
       if (snapline.orientation === 'V') {
-        snapResult.width = layer.styles.width + (layer.styles.x - snapline.pos) + snapline.offset
-        offset.width = snapResult.width - layer.styles.width
+        snapResult.width = layer.styles.width + (snapline.pos - (layer.styles.x + layer.styles.width))
+        const ratio = snapResult.width / layer.styles.width
+        snapResult.height = layer.styles.height * ratio
+        snapResult.scale = layer.styles.scale * ratio
+        // offset.width = snapResult.width - layer.styles.width
       } else {
-        snapResult.height = layer.styles.height + (layer.styles.y - snapline.pos) + snapline.offset
-        offset.height = snapResult.height - layer.styles.height
+        snapResult.height = layer.styles.height + (snapline.pos - (layer.styles.y + layer.styles.height))
+        const ratio = snapResult.height / layer.styles.height
+        snapResult.width = layer.styles.width * ratio
+        snapResult.scale = layer.styles.scale * ratio
+        // offset.height = snapResult.height - layer.styles.height
       }
     })
-    LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { width: snapResult.width, height: snapResult.height })
+    LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { width: snapResult.width, height: snapResult.height, scale: snapResult.scale })
     return offset
   }
 
