@@ -22,7 +22,13 @@ export interface IEditorState {
   isOrderDropdownsOpened: boolean,
   isLayerDropdownsOpened: boolean
   isPageDropdownsOpened: boolean,
-  isColorPickerOpened: boolean
+  isColorPickerOpened: boolean,
+  currSelectedPhotoInfo: Record<string, never> | {
+    userName: string,
+    userLink: string,
+    vendor: string,
+    tags: string[]
+  }
 }
 
 export enum SidebarPanelType {

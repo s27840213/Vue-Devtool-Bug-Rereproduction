@@ -13,11 +13,26 @@ const options = {
 
 const axios = Axios.create(options)
 
+function normalized (photos: Api.IUnsplashPhoto[]): Api.IPhoto[] {
+  return photos.map(photo => ({
+    width: photo.width,
+    height: photo.height,
+    id: `${photo.id}`,
+    user: {
+      name: photo.user.name,
+      link: photo.user.links.html
+    },
+    tags: photo.tags?.map((tag: any) => tag.title) || [],
+    urls: { ...photo.urls },
+    vendor: 'Unsplash'
+  }))
+}
+
 export default {
   getPopularPhoto: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       order_by: 'popular',
       lang: 'zh-TW'
     }
@@ -26,12 +41,12 @@ export default {
       method: 'GET',
       params: searchParams
     })
-    return { results: data }
+    return { results: normalized(data) }
   },
   getPhotos: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       query: params.query || 'random',
       order_by: params.orderBy || 'relevant',
       lang: 'zh-TW'
@@ -41,6 +56,6 @@ export default {
       method: 'GET',
       params: searchParams
     })
-    return data
+    return { results: normalized(data.results) }
   }
 }

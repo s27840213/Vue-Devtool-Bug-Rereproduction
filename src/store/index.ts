@@ -7,14 +7,14 @@ import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 
-import photos from './photos'
+import photos from '@/store/photos'
 
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
   pages: [
     {
-      width: 1920,
+      width: 1080,
       height: 1080,
       backgroundColor: '#ffffff',
       backgroundImage: {
@@ -69,7 +69,8 @@ const getDefaultState = (): IEditorState => ({
   isOrderDropdownsOpened: false,
   isLayerDropdownsOpened: false,
   isPageDropdownsOpened: false,
-  isColorPickerOpened: false
+  isColorPickerOpened: false,
+  currSelectedPhotoInfo: {}
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -155,6 +156,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIColorPickerOpened(state: IEditorState) {
     return state.isPageDropdownsOpened
+  },
+  getCurrSelectedPhotoInfo(state: IEditorState) {
+    return state.currSelectedPhotoInfo
   }
 }
 
@@ -337,6 +341,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
+  },
+  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
+    state.currSelectedPhotoInfo = data
   }
 }
 

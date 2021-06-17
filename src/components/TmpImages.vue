@@ -1,47 +1,38 @@
 <template lang="pug">
-infinite-scroll(class="temp__content"
-  @callback="$emit('loadMore')")
-  div(v-for="(row, index) in rows"
-    :key="`rows${index}`",
-    :style="{ marginBottom: `${margin}px` }")
-    lazy-load(v-for="(photo, i) in row"
-      :key="photo.id")
-      img(:src="photo.urls.thumb",
-        :style="imageStyle(photo.preview, i > 0)",
-        draggable="true",
-        class="temp__img pointer"
-        @dragstart="dragStart($event,photo)"
-        @click="addImage(photo)")
+  recycle-scroller(v-else
+    class="temp__content"
+    :items="rows")
+    template(v-slot="{ item }")
+      div
+        gallery-photo(v-for="(photo, i) in item.list"
+          :style="imageStyle(photo.preview, i > 0)",
+          :photo="photo"
+          :key="photo.id")
+    template(#after)
+      observer-sentinel(target=".temp__content"
+        @callback="$emit('loadMore')")
 </template>
 
 <script lang="ts">
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
-import layerFactary from '@/utils/layerFactary'
-import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
-import InfiniteScroll from '@/components/InfiniteScroll.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default Vue.extend({
-  props: {
-    photos: {
-      type: Array,
-      default: () => []
-    }
-  },
   components: {
-    InfiniteScroll,
-    LazyLoad
+    ObserverSentinel,
+    GalleryPhoto
   },
   computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      pageSize: 'getPageSize'
-    }),
+    ...mapState('photos', ['page']),
+    ...mapGetters('photos', [
+      'getCurrentPagePhotos'
+    ]),
     margin(): number {
       return this.galleryUtils.margin
     }
@@ -49,61 +40,29 @@ export default Vue.extend({
   data() {
     return {
       rows: [],
-      galleryUtils: new GalleryUtils(260, 100, 5)
+      galleryUtils: new GalleryUtils(260, 80, 5)
     }
   },
   watch: {
-    photos(val) {
-      const rows = this.galleryUtils.generate(val) as any
-      this.rows = this.rows.concat(rows)
+    getCurrentPagePhotos(val) {
+      const [lastRow] = this.rows.slice(-1) as any
+      const lastList = (lastRow && lastRow.list) || []
+      const rows = this.galleryUtils
+        .generate(lastList.concat(val))
+        .map((row, idx) => ({
+          list: row,
+          id: `row${this.page}${idx}`,
+          size: row[0].preview.height + this.margin
+        }))
+      this.rows = this.rows.slice(0, -1).concat(rows as any)
     }
   },
   methods: {
-    dragStart(e: DragEvent, photo: any) {
-      const dataTransfer = e.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-
-      const rect = (e.target as Element).getBoundingClientRect()
-      const data = {
-        type: 'image',
-        // @/assets/img/svg/img-tmp.svg
-        src: photo.urls.regular,
-        styles: {
-          x: e.clientX - rect.x,
-          y: e.clientY - rect.y,
-          width: photo.width / 20,
-          height: photo.height / 20
-        }
-      }
-      dataTransfer.setData('data', JSON.stringify(data))
-    },
-    addImage(photo: any) {
-      const resizeRatio = 0.8
-      const pageAspectRatio = this.pageSize.width / this.pageSize.height
-      const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
-      const config = {
-        src: photo.urls.regular,
-        styles: {
-          x: this.pageSize.width / 2 - photoWidth / 2,
-          y: this.pageSize.height / 2 - photoHeight / 2,
-          width: photoWidth,
-          height: photoHeight,
-          initWidth: photoWidth,
-          initHeight: photoHeight,
-          imgWidth: photoWidth,
-          imgHeight: photoHeight
-        }
-      }
-      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
-    },
     imageStyle(attr: any, addMarginLeft: boolean) {
       return {
         width: `${attr.width}px`,
         height: `${attr.height}px`,
-        marginLeft: (addMarginLeft ? `${this.margin}px` : '0px')
+        marginLeft: `${addMarginLeft ? this.margin : 0}px`
       }
     }
   }
@@ -121,10 +80,6 @@ export default Vue.extend({
     &::-webkit-scrollbar {
       display: none;
     }
-  }
-  &__img {
-    display: inline-block;
-    background-color: #f1f1f1;
   }
 }
 </style>

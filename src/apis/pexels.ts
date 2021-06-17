@@ -12,18 +12,24 @@ const options = {
 
 const axios = Axios.create(options)
 
-function normalized (photos: Api.IPexelsPhoto[]): Api.IUnsplashPhoto[] {
+function normalized (photos: Api.IPexelsPhoto[]): Api.IPhoto[] {
   return photos.map(photo => ({
     width: photo.width,
     height: photo.height,
     id: `${photo.id}`,
+    user: {
+      name: photo.photographer,
+      link: photo.photographer_url
+    },
     urls: {
       full: photo.src.original,
       raw: photo.src.original,
       regular: photo.src.medium,
       small: photo.src.small,
       thumb: photo.src.small
-    }
+    },
+    tags: [],
+    vendor: 'Pexels'
   }))
 }
 
@@ -31,7 +37,7 @@ export default {
   getCuratedPhoto: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       locale: 'zh-TW'
     }
     const { data } = await axios.request<Api.IPexelsSearchResponse>({
@@ -44,7 +50,7 @@ export default {
   getPhotos: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 15,
+      per_page: params.perPage || 25,
       query: params.query || 'random',
       locale: 'zh-TW'
     }

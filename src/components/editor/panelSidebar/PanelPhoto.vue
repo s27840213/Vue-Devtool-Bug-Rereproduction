@@ -5,13 +5,12 @@
       @search="handleSearch")
     div(v-if="!pending && !list.length") Sorry, we couldn't find any photos for "{{ query }}".
     tmp-images(v-else
-      :photos="getCurrentPagePhotos"
       @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState, mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 
 export default Vue.extend({
@@ -23,9 +22,6 @@ export default Vue.extend({
       'query',
       'list',
       'pending'
-    ]),
-    ...mapGetters('photos', [
-      'getCurrentPagePhotos'
     ])
   },
   created () {
@@ -37,9 +33,7 @@ export default Vue.extend({
       this.$store.dispatch('photos/getPhotosFromUnsplash', { query: keyword })
     },
     handleLoadMore () {
-      if (!this.pending) {
-        this.$store.dispatch('photos/getMorePhotosFromUnsplash')
-      }
+      !this.pending && this.$store.dispatch('photos/getMorePhotosFromUnsplash')
     }
   }
 })

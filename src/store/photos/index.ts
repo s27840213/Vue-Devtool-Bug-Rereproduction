@@ -1,13 +1,13 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
-import { IUnsplashPhoto } from '@/interfaces/api'
+import { IPhoto } from '@/interfaces/api'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_TOTAL_PAGES = 'SET_TOTAL_PAGES' as const
 
 interface IPhotoState {
-  list: IUnsplashPhoto[],
+  list: IPhoto[],
   query: string,
   page: number,
   totalPages: number,
@@ -109,7 +109,7 @@ const getters: GetterTree<IPhotoState, any> = {
   },
   getCurrentPagePhotos (state) {
     const { page, list } = state
-    return list.slice((page - 1) * 15)
+    return list.slice((page - 1) * 25)
   },
   getNextParams (state) {
     const { query, page } = state
