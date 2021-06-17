@@ -1,4 +1,4 @@
-import Axios, { AxiosPromise } from 'axios'
+import Axios from 'axios'
 import type * as Api from '@/interfaces/api'
 
 const options = {
@@ -37,7 +37,7 @@ export default {
   getCuratedPhoto: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 25,
+      per_page: params.perPage,
       locale: 'zh-TW'
     }
     const { data } = await axios.request<Api.IPexelsSearchResponse>({
@@ -50,7 +50,7 @@ export default {
   getPhotos: async (params: Api.ISearchPhotoParams) => {
     const searchParams = {
       page: params.page || 1,
-      per_page: params.perPage || 25,
+      per_page: params.perPage,
       query: params.query || 'random',
       locale: 'zh-TW'
     }

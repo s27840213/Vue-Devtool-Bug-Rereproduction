@@ -3,6 +3,8 @@ import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
 import { IPhoto } from '@/interfaces/api'
 
+const UNSPLASH_PER_PAGE = 30 as const
+const PEXELS_PER_PAGE = 50 as const
 const SET_STATE = 'SET_STATE' as const
 const SET_TOTAL_PAGES = 'SET_TOTAL_PAGES' as const
 
@@ -10,6 +12,7 @@ interface IPhotoState {
   list: IPhoto[],
   query: string,
   page: number,
+  perPage: number,
   totalPages: number,
   pending: boolean
 }
@@ -18,6 +21,7 @@ const getDefaultState = (): IPhotoState => ({
   list: [],
   query: '',
   page: 0,
+  perPage: 0,
   totalPages: 0,
   pending: false
 })
@@ -25,8 +29,12 @@ const getDefaultState = (): IPhotoState => ({
 const actions: ActionTree<IPhotoState, unknown> = {
   async getPhotosFromUnsplash ({ commit }, params = {}) {
     commit(SET_STATE, { pending: true, list: [] })
+    if (!params.perPage) {
+      params.perPage = UNSPLASH_PER_PAGE
+    }
     try {
       const { results } = await (params.query ? unsplash.getPhotos(params) : unsplash.getPopularPhoto(params))
+      console.log(results)
       commit(SET_STATE, {
         list: results,
         page: 1,
@@ -56,6 +64,9 @@ const actions: ActionTree<IPhotoState, unknown> = {
   },
   async getPhotosFromPexels ({ commit }, params = {}) {
     commit(SET_STATE, { pending: true, list: [] })
+    if (!params.perPage) {
+      params.perPage = PEXELS_PER_PAGE
+    }
     try {
       const { results } = await (params.query ? pexels.getPhotos(params) : pexels.getCuratedPhoto(params))
       commit(SET_STATE, {
@@ -108,13 +119,14 @@ const getters: GetterTree<IPhotoState, any> = {
     return state.list
   },
   getCurrentPagePhotos (state) {
-    const { page, list } = state
-    return list.slice((page - 1) * 25)
+    const { page, list, perPage } = state
+    return list.slice((page - 1) * perPage)
   },
   getNextParams (state) {
-    const { query, page } = state
+    const { query, page, perPage } = state
     return {
       query,
+      perPage,
       page: page + 1
     }
   }
