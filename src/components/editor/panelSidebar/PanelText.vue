@@ -14,10 +14,10 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
-import CssConverter from '@/utils/cssConverter'
 import GeneralUtils from '@/utils/generalUtils'
 import TextUtils from '@/utils/textUtils'
 import { mapGetters } from 'vuex'
+import { IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -26,43 +26,91 @@ export default Vue.extend({
   data() {
     return {
       headingFormat: {
-        text: 'New Text',
         styles: {
-          font: 'Lobster',
-          weight: 'bold',
-          align: 'text-align',
-          color: '#000000',
-          writingMode: 'initial',
-          decoration: 'none',
-          style: 'normal',
-          size: 50
-        }
+          writingMode: 'normal'
+        },
+        paragraphs: [
+          {
+            styles: {
+              align: 'text-align',
+              fontSpacing: 0,
+              lineHeight: -1
+            },
+            spans: [
+              {
+                text: 'New Text',
+                styles: {
+                  font: 'Lobster',
+                  weight: 'bold',
+                  color: '#000000',
+                  writingMode: 'initial',
+                  decoration: 'none',
+                  style: 'normal',
+                  opacity: 1,
+                  size: 50
+                }
+              }
+            ]
+          }
+        ]
       },
       subheadingFormat: {
-        text: 'New Text',
         styles: {
-          font: 'Lobster',
-          weight: 'bold',
-          align: 'text-align',
-          color: '#000000',
-          writingMode: 'initial',
-          decoration: 'none',
-          style: 'normal',
-          size: 18
-        }
+          writingMode: 'normal'
+        },
+        paragraphs: [
+          {
+            styles: {
+              align: 'text-align',
+              fontSpacing: 0,
+              lineHeight: -1
+            },
+            spans: [
+              {
+                text: 'New Text',
+                styles: {
+                  font: 'Lobster',
+                  weight: 'bold',
+                  color: '#000000',
+                  writingMode: 'initial',
+                  decoration: 'none',
+                  style: 'normal',
+                  opacity: 1,
+                  size: 18
+                }
+              }
+            ]
+          }
+        ]
       },
       bodyFormat: {
-        text: 'New Text',
         styles: {
-          font: 'Lobster',
-          weight: 'normal',
-          align: 'text-align',
-          color: '#000000',
-          writingMode: 'initial',
-          decoration: 'none',
-          style: 'normal',
-          size: 14
-        }
+          writingMode: 'normal'
+        },
+        paragraphs: [
+          {
+            styles: {
+              align: 'text-align',
+              fontSpacing: 0,
+              lineHeight: -1
+            },
+            spans: [
+              {
+                text: 'New Text',
+                styles: {
+                  font: 'Lobster',
+                  weight: 'bold',
+                  color: '#000000',
+                  writingMode: 'initial',
+                  decoration: 'none',
+                  style: 'normal',
+                  opacity: 1,
+                  size: 14
+                }
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -82,17 +130,17 @@ export default Vue.extend({
       switch (type) {
         case 'heading': {
           const format = GeneralUtils.deepCopy(this.headingFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format))
           return format
         }
         case 'subheading': {
           const format = GeneralUtils.deepCopy(this.subheadingFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format))
           return format
         }
         case 'body': {
           const format = GeneralUtils.deepCopy(this.bodyFormat)
-          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format.text, format.styles, 'auto'))
+          Object.assign(format.styles, { x: pageStyles.width / 2, y: pageStyles.height / 2 }, TextUtils.getTextHW(format))
           return format
         }
       }
