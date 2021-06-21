@@ -127,7 +127,7 @@ class TextUtils {
       width: Math.ceil(body.getBoundingClientRect().width),
       height: Math.ceil(body.getBoundingClientRect().height)
     }
-    // document.body.removeChild(body)
+    document.body.removeChild(body)
     return textHW
   }
 

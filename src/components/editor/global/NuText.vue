@@ -26,20 +26,13 @@ export default Vue.extend({
         console.log('initSize ')
         setTimeout(() => {
           const text = this.$refs.text as HTMLElement
-          text.style.width = `${this.config.styles.width}px`
-          console.log(this.config.styles.width)
+          const scale = this.config.styles.scale
+          // text.style.width = `${Math.ceil(this.config.styles.width / scale)}px`
           const textHW = {
             width: Math.ceil(text.getBoundingClientRect().width),
             height: Math.ceil(text.getBoundingClientRect().height)
           }
-          console.log(textHW)
-          // console.log(textHW)
-          // console.log(text)
-          const scale = this.config.styles.scale
-          // if (textHW.width >= this.config.styles.width) {
-          // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width / scale, textHW.height / scale, this.config.styles.size)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
-          // }
         }, 0)
       },
       deep: true
@@ -71,13 +64,6 @@ export default Vue.extend({
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
     }
-    // contextStyles() {
-    //   const _styles = Object.assign({}, this.config.styles)
-    //   const styles = Object.assign(_styles, { size: this.config.styles.size / this.config.styles.scale })
-    //   delete styles.width
-    //   delete styles.height
-    //   return CssConveter.convertFontStyle(styles)
-    // }
   }
 })
 </script>
@@ -99,13 +85,5 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
-  // text-align: left;
-  // position: relative;
-  // display: inline-block;
-  // outline: none;
-  // // white-space: nowrap
-  // white-space: pre-wrap;
-  // overflow-wrap: break-word;
-  // user-select: none;
 }
 </style>

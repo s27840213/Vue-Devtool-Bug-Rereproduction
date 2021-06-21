@@ -24,12 +24,12 @@ export default Vue.extend({
   methods: {
     styles() {
       const HW = { width: 0, height: 0 }
-      if (this.config.type === 'image') {
+      if (this.config.type === 'image' || this.config.type === 'text') {
         /**
          * Divided by the scale for synchronizing the scale applied at layer-scale
          */
-        HW.width = this.config.styles.width / this.config.styles.scale
-        HW.height = this.config.styles.height / this.config.styles.scale
+        HW.width = Math.ceil(this.config.styles.width / this.config.styles.scale)
+        HW.height = Math.ceil(this.config.styles.height / this.config.styles.scale)
       } else {
         HW.width = this.config.styles.initWidth
         HW.height = this.config.styles.initHeight

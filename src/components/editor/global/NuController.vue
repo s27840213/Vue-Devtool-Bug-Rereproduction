@@ -15,7 +15,6 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type === 'text'")
-          //- div(:style="textStyle(config.styles)")
           div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
             :style="contentStyles()"
             @keydown="onKeyDown($event)")
@@ -27,11 +26,6 @@
                 :data-sindex="sIndex"
                 :key="span.id",
                 :style="textStyles(span.styles)")
-                //- :contenteditable="config.type === 'tmp' ? false : contentEditable")
-        //- span(class="text-content" :style="contextStyles()" ref="text"
-        //-   @keydown="onKeyDown"
-        //-   @compositionstart="compositionStart"
-        //-   :contenteditable="config.type === 'tmp' ? false : contentEditable")
         div(v-if="isActive && isLocked"
             class="nu-controller__lock-icon")
           svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
@@ -90,6 +84,7 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
+      text: { pIndex: NaN, sIndex: NaN, offset: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
@@ -97,6 +92,44 @@ export default Vue.extend({
       isCompositoning: false,
       isSnapping: false,
       contentEditable: false
+    }
+  },
+  updated: function () {
+    if (this.getLayerType === 'text' && !this.isControlling) {
+      this.$nextTick(function () {
+        const text = this.$refs.text as HTMLElement
+        // (this.config as IText).paragraphs.forEach((p, pIndex) => {
+        //   p.spans.forEach((s, sIndex) => {
+        //     console.log('sIndex: ', sIndex, 'pIndex: ', pIndex)
+        //     text.childNodes[pIndex].childNodes[sIndex].textContent = s.text
+        //   })
+        // })
+        if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+          text.removeChild(text.lastChild)
+        }
+        text.childNodes.forEach((p, pIndex) => {
+          (p as HTMLElement).childNodes.forEach((span, sIndex) => {
+            span.textContent = (this.config as IText).paragraphs[pIndex].spans[sIndex].text
+          })
+        })
+        if (window.getSelection()) {
+          var sel = window.getSelection() as Selection
+          if (sel.rangeCount !== 0) {
+            var range = sel?.getRangeAt(0)
+            if (!Number.isNaN(this.text.pIndex) && !Number.isNaN(this.text.sIndex) && this.text.offset >= 0) {
+              const node = (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild
+              // console.log(node)
+              if (node) {
+                // console.log(node)
+                range.setStart(node as Node, this.text.offset)
+                range.setEnd(node as Node, this.text.offset)
+                sel.removeAllRanges()
+                sel.addRange(range)
+              }
+            }
+          }
+        }
+      })
     }
   },
   mounted() {
@@ -166,7 +199,7 @@ export default Vue.extend({
   watch: {
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
+    }
     // 'config.styles.size': function() {
     //   if (this.getLayerType !== 'text') return
     //   this.$nextTick(() => {
@@ -174,19 +207,19 @@ export default Vue.extend({
     //     text.style.width = `${this.getLayerWidth}px`
     //   })
     // }
-    changedSize: {
-      handler: function() {
-        if (this.getLayerType !== 'text') return
-        this.$nextTick(() => {
-          const text = this.$refs.text as HTMLElement
-          if (text) {
-            this.textInit()
-            // text.style.width = `${this.getLayerWidth}px`
-          }
-        })
-      },
-      deep: true
-    }
+    // changedSize: {
+    //   handler: function() {
+    //     if (this.getLayerType !== 'text') return
+    //     this.$nextTick(() => {
+    //       const text = this.$refs.text as HTMLElement
+    //       if (text) {
+    //         this.textInit()
+    //         // text.style.width = `${this.getLayerWidth}px`
+    //       }
+    //     })
+    //   },
+    //   deep: true
+    // }
   },
   methods: {
     ...mapMutations({
@@ -220,8 +253,8 @@ export default Vue.extend({
     },
     contentStyles() {
       return {
-        width: `${this.config.styles.width / this.getLayerScale}px`,
-        height: `${this.config.styles.height / this.getLayerScale}px`,
+        width: `${Math.ceil(this.config.styles.width / this.getLayerScale)}px`,
+        height: `${Math.ceil(this.config.styles.height / this.getLayerScale)}px`,
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
         outline: 'none',
         position: 'relative'
@@ -553,7 +586,7 @@ export default Vue.extend({
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
-      let scale = this.getLayerScale
+      const scale = this.getLayerScale
       if (this.getLayerType === 'image') {
         this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
       } else if (this.getLayerType === 'shape') {
@@ -564,7 +597,6 @@ export default Vue.extend({
         ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
       } else if (this.getLayerType === 'text') {
         [width, height] = this.textResizeHandler(width, height)
-        scale = 1
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -691,11 +723,9 @@ export default Vue.extend({
     textResizeHandler(width: number, height: number): [number, number] {
       const text = this.$refs.text as HTMLElement
       if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
-        // text.style.height = 'auto'
-        // text.style.width = `${width}px`
         height = Math.ceil(text.getBoundingClientRect().height)
         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getFontSize / this.getLayerScale)
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getFontSize)
       }
       return [width, height]
     },
@@ -776,59 +806,115 @@ export default Vue.extend({
       console.log('xxx')
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
-    onClick() {
-      this.textClickHandler()
+    onClick(e: MouseEvent) {
+      this.textClickHandler(e)
     },
-    textClickHandler() {
+    textClickHandler(e: MouseEvent) {
       if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
         this.contentEditable = true
+      }
+      if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+        const sel = window.getSelection()
+        if (sel) {
+          const range = sel.getRangeAt(0)
+          if (range && sel.toString() === '') {
+            const startContainer = range.startContainer
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            this.text.offset = sel.anchorOffset
+          } else if (sel.toString() !== '') {
+            console.log('A range is selected')
+          }
+        }
       }
     },
     onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text') {
+        const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         if (sel) {
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
-            const sIndex = parseInt(startContainer.parentElement?.dataset.sindex as string)
-            const pIndex = parseInt(startContainer.parentElement?.parentElement?.dataset.pindex as string)
-            this.onTyping(e, pIndex, sIndex)
+            if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
+              console.log('NaN')
+              e.preventDefault()
+              return
+            }
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            if (e.key === 'Backspace') {
+              if (this.text.sIndex === 0 && this.text.pIndex !== 0 && sel.anchorOffset === 0) {
+                ControlUtils.textStopPropagation(e)
+                const pNode = text.childNodes[this.text.pIndex - 1]
+                const spanNode = pNode.childNodes[pNode.childNodes.length - 1]
+                this.text.offset = (spanNode.textContent as string).length - 1
+                this.text.sIndex = pNode.childNodes.length - 1
+                this.text.pIndex -= 1
+              } else if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
+                e.preventDefault()
+                return
+              } else {
+                console.log('bakcspace')
+                ControlUtils.textStopPropagation(e)
+                this.text.offset = sel.anchorOffset - 1
+                const textNode = text.childNodes[this.text.pIndex].childNodes[this.text.sIndex]
+              }
+            } else if (e.key === 'Enter') {
+              this.text.offset = 0
+              this.text.sIndex = 0
+              this.text.pIndex += 1
+            } else {
+              console.log('key')
+              this.text.offset = sel.anchorOffset + 1
+            }
+            console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
+            // this.onTyping(e, pIndex, sIndex)
           }
         }
+        const observer = new MutationObserver(ControlUtils.textEnter)
+        observer.observe(text, {
+          characterData: true,
+          childList: true,
+          subtree: true
+          // attributes: true,
+          // attributeOldValue: true,
+          // characterDataOldValue: true
+        })
       }
     },
     onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
-      console.log('ontypeing')
+      if (e.key === 'Enter') return
+      this.isControlling = true
       ControlUtils.textStopPropagation(e)
-      ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
+      // ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
       if (e.metaKey && e.key === 'z') {
         StepsUtils.undo()
         setTimeout(() => {
           const text = this.$refs.text as HTMLElement
-          // text.innerHTML = this.getTextContent
-          // text.style.width = `${this.getLayerWidth}px`
         }, 0)
         return
       }
-      if (this.isNoCharactor(e)) return
+      if (this.isNoCharactor(e)) {
+        this.isControlling = false
+        return
+      }
       const text = this.$refs.text as HTMLElement
       text.style.width = 'initial'
       text.style.height = 'initial'
-
-      // const textTmp = text.innerHTML
       /**
        * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
        */
       // text.style.whiteSpace = 'pre'
-      const textnode = window.getSelection()?.anchorNode as Node
+      const textNode = window.getSelection()?.anchorNode as Node
       setTimeout(() => {
-        ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, textnode.textContent as string)
+        if (textNode) {
+          // ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, textNode.textContent as string)
+        }
         /**
          * This line of code prevents the bug while deleting at beginning of the text.
          */
         // if (e.key === 'Backspace' && textTmp === text.innerHTML) return
-        if (e.key === 'Backspace') return
         // const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
         const isTextOneLine = this.config.paragraphs.length === 1
         const textSize = {
@@ -863,20 +949,21 @@ export default Vue.extend({
             textSize.height = HW.height
           }
         } else {
-          // text.style.width = `${text.getBoundingClientRect().width}px` || `${this.config.widthLimit}px`
           textSize.width = text.getBoundingClientRect().width || this.config.widthLimit
           textSize.height = text.getBoundingClientRect().height
-          // textSize.height = TextUtils.getTextHW(this.config, textSize.width).height
+          // textSize.height = text.offsetHeight
+          console.log(textSize)
+          console.log(text)
         }
         text.style.whiteSpace = 'pre-wrap'
         // text.style.width = `${textSize.width / this.getLayerScale}px`
         // text.style.height = `${textSize.height / this.getLayerScale}px`
-        console.log(textSize)
         // ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
         ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
         ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width / this.getLayerScale, textSize.height / this.getLayerScale, this.getFontSize + 1)
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getLayerScale)
         StepsUtils.record()
+        this.isControlling = false
       }, 0)
     },
     getTextHW(innerText: string, styles: any): { width: number, height: number } {

@@ -56,17 +56,22 @@ export default Vue.extend({
           size: [100, 100]
         },
         {
-          category: 2,
+          category: 1,
           color: ['#EDC5B1'],
           svg: `<?xml version="1.0" encoding="utf-8"?>
-                <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+                <!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
                 <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <circle fill="\${color[0]}" cx="400" cy="400" r="265"/>
+                  viewBox="0 0 347.76 599.51" style="enable-background:new 0 0 347.76 599.51;" xml:space="preserve">
+                <style type="text/css">
+                  .st0{fill:\${color[0]}}
+                </style>
+                <rect class="st0" width="347.76" height="87.51"/>
+                <rect y="87.51" class="st0" width="347.76" height="325"/>
+                <path class="st0" d="M0,481.34c0,65.26,77.85,118.17,173.88,118.17s173.88-52.91,173.88-118.17v-68.83H0V481.34z"/>
                 </svg>
                 `,
           path: '',
-          size: [200, 200]
+          size: [100, 100 * 599.51 / 347.76]
         },
         {
           category: 0,
@@ -113,6 +118,7 @@ export default Vue.extend({
     const body = this.$refs.body as [HTMLElement]
     for (let i = 0; i < body.length; i++) {
       const div = document.createElement('div')
+      div.style.width = '100px'
       div.innerHTML = this.svgFormatter(this.contents[i].svg, this.contents[i].color as [string])
       body[i].appendChild(div)
     }
@@ -172,8 +178,9 @@ export default Vue.extend({
     }
   }
   &__item {
-    // border: 1px solid blue;
-    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   &__svg {
     // width: auto;
