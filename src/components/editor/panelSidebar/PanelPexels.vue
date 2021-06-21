@@ -30,10 +30,10 @@ export default Vue.extend({
   methods: {
     async handleSearch (keyword?: string) {
       await this.$store.commit('photos/SET_STATE', { list: [] })
-      this.$store.dispatch('photos/getPhotosFromUnsplash', { query: keyword })
+      this.$store.dispatch('photos/getPhotosFromPexels', { query: keyword })
     },
     handleLoadMore () {
-      !this.pending && this.$store.dispatch('photos/getMorePhotosFromUnsplash')
+      !this.pending && this.$store.dispatch('photos/getMorePhotosFromPexels')
     }
   }
 })

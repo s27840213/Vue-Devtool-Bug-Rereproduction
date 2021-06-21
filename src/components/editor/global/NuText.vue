@@ -20,6 +20,14 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
+  computed: {
+    initSize(): any {
+      return {
+        initWidth: (this.config as IText).styles.initWidth,
+        initHeight: (this.config as IText).styles.initHeight
+      }
+    }
+  },
   watch: {
     initSize: {
       handler: function() {
@@ -51,14 +59,6 @@ export default Vue.extend({
     //   ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.config.styles.size)
     //   ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
     // }
-  },
-  computed: {
-    initSize() {
-      return {
-        initWidth: (this.config as IText).styles.initWidth,
-        initHeight: (this.config as IText).styles.initHeight
-      }
-    }
   },
   methods: {
     styles(styles: any) {

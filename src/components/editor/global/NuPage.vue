@@ -23,13 +23,12 @@
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       span {{config.name}}
     div(class='pages-wrapper'
-        :style="wrapperStyles()"
-        @mousemove="coordinateHandler($event)")
-      div(class="coordinate" ref="coordinate")
-        div(class="coordinate__val coordinate__width")
-          span {{coordinateWidth* (100/scaleRatio)}}px
-        div(class="coordinate__val coordinate__height")
-          span {{coordinateHeight*(100/scaleRatio)}}px
+        :style="wrapperStyles()")
+      //- div(class="coordinate" ref="coordinate")
+      //-   div(class="coordinate__val coordinate__width")
+      //-     span {{coordinateWidth* (100/scaleRatio)}}px
+      //-   div(class="coordinate__val coordinate__height")
+      //-     span {{coordinateHeight*(100/scaleRatio)}}px
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="snap-area")
           div(v-for="line in closestSnaplines.v"

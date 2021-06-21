@@ -4,15 +4,15 @@
       div(class="subtitle-2 text-gray-2") New Design
       div(class="subtitle-2 text-gray-2") File
       div(class="subtitle-2 text-gray-2") Resize
-      svg-icon(class="pointer"
+      svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
-        :iconColor="'gray-2'"
+        :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
         @click.native="ShortcutUtils.undo()")
-      svg-icon(class="pointer"
+      svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
-        :iconColor="'gray-2'"
+        :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
         @click.native="ShortcutUtils.redo()")
     div
       svg-icon(:iconName="'share-alt'"
@@ -39,11 +39,21 @@
 import Vue from 'vue'
 import FileUtils from '@/utils/fileUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {
     return {
-      ShortcutUtils
+      ShortcutUtils,
+      StepsUtils
+    }
+  },
+  computed: {
+    isInFirstStep(): boolean {
+      return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
+    },
+    isInLastStep(): boolean {
+      return (StepsUtils.currStep === (StepsUtils.steps.length - 1)) && (StepsUtils.steps.length > 1)
     }
   },
   methods: {

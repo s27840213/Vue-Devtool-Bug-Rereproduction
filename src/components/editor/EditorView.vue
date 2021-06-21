@@ -17,7 +17,6 @@
       //-         :layerIndex="getLastSelectedLayerIndex"
       //-         :pageIndex="getLastSelectedPageIndex"
       //-         :config="getLastLayer")
-
 </template>
 
 <script lang="ts">
@@ -43,6 +42,9 @@ export default Vue.extend({
   mounted() {
     StepsUtils.record()
     this.editorView = document.querySelector('.editor-view') as HTMLElement
+    const editorViewBox = this.$el as HTMLElement
+    const resizeRatio = Math.min(editorViewBox.clientWidth / this.pageSize.width, editorViewBox.clientHeight / this.pageSize.height) * 0.8
+    this.setPageScaleRatio(Math.round(this.pageScaleRatio * resizeRatio))
   },
   computed: {
     ...mapGetters({
@@ -50,7 +52,9 @@ export default Vue.extend({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      pageSize: 'getPageSize',
+      pageScaleRatio: 'getPageScaleRatio'
     })
     // getLastLayer(): ILayer {
     //   const page = this.$refs[`page-${this.getLastSelectedPageIndex}`] as [Vue]
@@ -80,7 +84,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setPageScaleRatio: 'SET_pageScaleRatio'
     }),
     selectStart(e: MouseEvent) {
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {

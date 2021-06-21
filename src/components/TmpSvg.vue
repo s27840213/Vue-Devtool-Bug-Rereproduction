@@ -1,10 +1,11 @@
 
 <template lang="pug">
 div(class="temp__content")
-  div(class="temp__item" v-for="svg in contents",
+  div(class="temp__item pointer" v-for="svg in contents",
       ref="body"
       draggable="true",
-      @dragstart="dragStart($event, svg)")
+      @dragstart="dragStart($event, svg)"
+      @click="addSvg(svg)")
 </template>
 
 <script lang="ts">
@@ -12,6 +13,9 @@ div(class="temp__content")
  * This components is temporarily used for text section, and it will be remove in the future
  */
 import Vue from 'vue'
+import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -123,6 +127,12 @@ export default Vue.extend({
       body[i].appendChild(div)
     }
   },
+  computed: {
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      pageSize: 'getPageSize'
+    })
+  },
   methods: {
     styles(svg: any) {
       return {
@@ -155,6 +165,26 @@ export default Vue.extend({
         svg = svg.replace(reg, color[i])
       }
       return svg
+    },
+    addSvg(svgData: any) {
+      const resizeRatio = 0.55
+      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const svgAspectRatio = svgData.size[0] / svgData.size[1]
+      const svgWidth = svgAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * svgAspectRatio
+      const svgHeight = svgAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / svgAspectRatio : this.pageSize.height * resizeRatio
+      const config = {
+        styles: {
+          x: this.pageSize.width / 2 - svgWidth / 2,
+          y: this.pageSize.height / 2 - svgHeight / 2,
+          width: svgWidth,
+          height: svgHeight,
+          initWidth: svgWidth,
+          initHeight: svgHeight,
+          color: svgData.color
+        }
+      }
+      Object.assign(config, svgData)
+      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newShape(config))
     }
   }
 })

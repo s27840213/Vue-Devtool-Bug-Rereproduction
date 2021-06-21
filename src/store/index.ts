@@ -5,7 +5,9 @@ import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
 import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
-import orderMutation from '@/store/mutations/order'
+import zindexUtils from '@/utils/zindexUtils'
+
+import photos from '@/store/photos'
 
 Vue.use(Vuex)
 
@@ -67,7 +69,8 @@ const getDefaultState = (): IEditorState => ({
   isOrderDropdownsOpened: false,
   isLayerDropdownsOpened: false,
   isPageDropdownsOpened: false,
-  isColorPickerOpened: false
+  isColorPickerOpened: false,
+  currSelectedPhotoInfo: {}
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -153,6 +156,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIColorPickerOpened(state: IEditorState) {
     return state.isPageDropdownsOpened
+  },
+  getCurrSelectedPhotoInfo(state: IEditorState) {
+    return state.currSelectedPhotoInfo
   }
 }
 
@@ -253,6 +259,48 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
   },
+  UPDATE_layerOrder(state: IEditorState, updateInfo: { type: string }): void {
+    const lastSelectedPageIndex = state.lastSelectedPageIndex
+    const layerIndex = state.currSelectedInfo.index
+    const layerNum = state.pages[lastSelectedPageIndex].layers.length
+    switch (updateInfo.type) {
+      case 'front': {
+        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
+        state.pages[lastSelectedPageIndex].layers.push(layer[0])
+        state.currSelectedInfo.index = layerNum - 1
+        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        break
+      }
+      case 'back': {
+        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
+        state.pages[lastSelectedPageIndex].layers.unshift(layer[0])
+        state.currSelectedInfo.index = 0
+        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        break
+      }
+      case 'forward': {
+        if (layerIndex === layerNum - 1) {
+          zindexUtils.reassignZindex(lastSelectedPageIndex)
+          break
+        }
+        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
+        state.pages[lastSelectedPageIndex].layers.splice(layerIndex + 1, 0, ...layer)
+        state.currSelectedInfo.index = layerIndex + 1
+        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        break
+      }
+      case 'backward': {
+        if (layerIndex === 0) {
+          break
+        }
+        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
+        state.pages[lastSelectedPageIndex].layers.splice(layerIndex - 1, 0, ...layer)
+        state.currSelectedInfo.index = layerIndex - 1
+        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        break
+      }
+    }
+  },
   UPDATE_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       if (typeof v === 'number') {
@@ -333,18 +381,20 @@ const mutations: MutationTree<IEditorState> = {
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
   },
-  ...orderMutation
+  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
+    state.currSelectedPhotoInfo = data
+  }
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-  async getRandomPhoto({ commit }, { count }) {
-    try {
-      const { data } = await unsplashApis.getRandomPhoto(count)
-      commit('SET_photos', data)
-    } catch (error) {
-      console.log(error)
-    }
-  },
+  // async getRandomPhoto({ commit }, { count }) {
+  //   try {
+  //     const { data } = await unsplashApis.getRandomPhoto(count)
+  //     commit('SET_photos', data)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // },
   async getAssets({ commit }, { token }) {
     try {
       const { data } = await userApis.getAssets(token)
@@ -362,9 +412,11 @@ const actions: ActionTree<IEditorState, unknown> = {
     }
   }
 }
+
 export default new Vuex.Store({
   state,
   getters,
   mutations,
-  actions
+  actions,
+  modules: { photos }
 })

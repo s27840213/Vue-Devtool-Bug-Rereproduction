@@ -26,9 +26,10 @@
                 :data-sindex="sIndex"
                 :key="span.id",
                 :style="textStyles(span.styles)")
-        div(v-if="isActive && isLocked"
-            class="nu-controller__lock-icon")
-          svg-icon(:iconName="'lock'" :iconWidth="'20px'" :iconColor="'red'"
+        div(v-if="isActive && isLocked && (scaleRatio >20)"
+            class="nu-controller__lock-icon"
+            :style="`transform: scale(${100/scaleRatio})`")
+          svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
@@ -343,7 +344,6 @@ export default Vue.extend({
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
-          // console.log(this.isActive)
           if (this.pageIndex === this.lastSelectedPageIndex) {
             // if (this.getLayerType === 'text' && !this.isActive) {
             //   GroupUtils.select([targetIndex])
@@ -353,7 +353,6 @@ export default Vue.extend({
             // }
             GroupUtils.select([targetIndex])
           }
-          // console.log(this.isActive)
         }
       }
 
@@ -494,7 +493,7 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
+      // this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
@@ -646,7 +645,7 @@ export default Vue.extend({
         this.imgClipping(width, height, offsetX, offsetY)
       }
     },
-    imgScaling(layerWidth:number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
+    imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, layerWidth, layerHeight, this.getLayerScale)
       let imgWidth = this.imgInitWH.width
       let imgHeight = this.imgInitWH.height
@@ -803,7 +802,6 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
-      console.log('xxx')
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
     },
     onClick(e: MouseEvent) {

@@ -4,6 +4,7 @@ import AlignUtils from '@/utils/alignUtils'
 import OrderUtils from './orderUtils'
 import Vue from 'vue'
 import groupUtils from './groupUtils'
+import layerUtils from './layerUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align', 'distribute-vertically', 'distribute-horizontally']
 const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
@@ -92,13 +93,8 @@ class MappingUtils {
       case 'unlock': {
         const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
         const currSelectedIndex = store.getters.getCurrSelectedIndex
-        store.commit('UPDATE_layerProps', {
-          pageIndex: lastSelectedPageIndex,
-          layerIndex: currSelectedIndex,
-          props: {
-            locked: !store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked
-          }
-        })
+        const isLocked = store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked
+        layerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, { locked: !isLocked })
         break
       }
       case 'trash': {

@@ -20,6 +20,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
+import MathUtils from '@/utils/mathUtils'
 
 export default Vue.extend({
   props: {
@@ -159,8 +160,9 @@ export default Vue.extend({
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x /= this.getLayerScale
-      offsetPos.y /= this.getLayerScale
+
+      offsetPos.x = (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.y = (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
@@ -212,8 +214,9 @@ export default Vue.extend({
       let height = this.getImgHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
-      const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const [dx, dy] = [diff.x / this.config.styles.scale, diff.y / this.config.styles.scale]
+      const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))

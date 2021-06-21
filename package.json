@@ -19,9 +19,11 @@
     "vue-color": "^2.8.1",
     "vue-recyclerview": "^0.4.1",
     "vue-router": "^3.5.1",
+    "vue-virtual-scroller": "^1.0.10",
     "vuex": "^3.4.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.170",
     "@types/vue-color": "^2.4.3",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
