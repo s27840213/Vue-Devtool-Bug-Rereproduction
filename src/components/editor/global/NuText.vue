@@ -25,23 +25,24 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    initSize(): any {
+    updateTextSize(): any {
+      const config = this.config as IText
       return {
-        initWidth: (this.config as IText).styles.initWidth,
-        initHeight: (this.config as IText).styles.initHeight
+        initWidth: config.styles.initWidth,
+        initHeight: config.styles.initHeight,
+        paragraphs: config.paragraphs
       }
     }
   },
   watch: {
-    initSize: {
+    updateTextSize: {
       handler: function() {
-        console.log('initSize ')
+        console.log('changedSizeProps')
         setTimeout(() => {
           const text = this.$refs.text as HTMLElement
           const scale = this.config.styles.scale
           text.style.width = this.config.widthLimit === -1 ? 'fit-content' : `${this.config.widthLimit}px`
           text.style.height = 'fit-content'
-          console.log(this.config.widthLimit)
           const textHW = {
             width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
             height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))

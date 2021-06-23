@@ -2,6 +2,7 @@ import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
+import { directive } from 'vue/types/umd'
 
 class TextUtils {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
@@ -37,47 +38,47 @@ class TextUtils {
       }
       if (!div || !range || !range.startContainer || !range.endContainer ||
         typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
-      for (let i = 0; i < div.childNodes.length; i++) {
+
+      const prop = this.propIndicator(div, start, end, iconName)
+      console.log(prop)
+      for (let i = start.pIndex; i < div.childNodes.length; i++) {
         const p = div.childNodes[i]
         const pEl = p as HTMLElement
-        if (parseInt(pEl.dataset.pindex as string) === start.pIndex) {
-          // newnode.innerText = value.substr(startOffset)
-          // node.nodeValue = value.substr(0, startOffset)
-          for (let j = 0; j < p.childNodes.length; j++) {
-            const span = p.childNodes[j]
-            const spanEl = span as HTMLElement
-            const value = spanEl.innerText
-            // console.log(span)
-            // console.log(value.substr(0, start.offset))
-            if (parseInt(spanEl.dataset.sindex as string) === start.sIndex) {
-              spanEl.innerText = value.substr(0, start.offset)
-              const newSpan = document.createElement('span')
-              newSpan.innerText = value.substr(start.offset)
-              const spanStyle = this.spanPropsHandler(spanEl, iconName)
-              Object.assign(newSpan.style, spanStyle)
-              span.after(newSpan)
-              j++
-            } else if (parseInt(spanEl.dataset.sindex as string) > start.sIndex) {
-              Object.assign(spanEl.style, this.spanPropsHandler(spanEl, iconName))
+        const pindex = parseInt(pEl.dataset.pindex as string)
+        for (let j = 0; j < p.childNodes.length; j++) {
+          const span = p.childNodes[j]
+          const spanEl = span as HTMLElement
+          const sindex = parseInt(spanEl.dataset.sindex as string)
+          const text = spanEl.innerText
+          if (pindex === start.pIndex && sindex === start.sIndex) {
+            spanEl.innerText = text.substr(0, start.offset)
+            const newSpan = document.createElement('span')
+            newSpan.innerText = text.substr(start.offset)
+            Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
+            span.after(newSpan)
+            j++
+            if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+              newSpan.innerText = text.substring(start.offset, end.offset)
+              console.log(text)
+              const thirdSpan = document.createElement('span')
+              thirdSpan.innerText = text.substr(end.offset)
+              Object.assign(thirdSpan.style, this.spanStyleTransformer(spanEl, {}))
+              newSpan.after(thirdSpan)
+              break
             }
-          }
-          // Object.assign(span.style, pEl.style)
-        }
-        if (parseInt(pEl.dataset.pindex as string) === end.pIndex) {
-          for (let j = 0; j < p.childNodes.length; j++) {
-            const span = p.childNodes[j]
-            const spanEl = span as HTMLElement
-            const value = spanEl.innerText
+          } else if (pindex === start.pIndex && sindex < start.sIndex) {
+            continue
+          } else if (pindex === end.pIndex && sindex === end.sIndex) {
             if (parseInt(spanEl.dataset.sindex as string) === end.sIndex) {
-              spanEl.innerText = value.substr(end.offset)
-              console.log(value.substr(end.offset))
+              spanEl.innerText = text.substr(end.offset)
               const newSpan = document.createElement('span')
-              newSpan.innerText = value.substr(0, end.offset)
-              const spanStyle = this.spanPropsHandler(spanEl, iconName)
-              Object.assign(newSpan.style, spanStyle)
+              newSpan.innerText = text.substr(0, end.offset)
+              Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
               span.before(newSpan)
               break
             }
+          } else if (pindex < end.pIndex || (pindex === end.pIndex && sindex <= end.sIndex)) {
+            Object.assign(spanEl.style, this.spanStyleTransformer(spanEl, prop))
           }
         }
       }
@@ -95,15 +96,51 @@ class TextUtils {
     }
   }
 
-  spanStyleTransformer(spanEl: HTMLElement, prop: { [key: string]: string }) {
+  propIndicator(text: Node, start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, iconName: string): { [key:string]: string } {
+    const prop: { [key: string]: string } = {}
+    let flag = false
+    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+      const p = text.childNodes[pidx]
+      for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
+        const span = p.childNodes[sidx]
+        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
+        if (iconName === 'bold') {
+          prop.fontWeight = 'normal'
+          if ((span as HTMLElement).style.fontWeight === 'normal') {
+            prop.fontWeight = 'bold'
+            flag = true
+            break
+          }
+        } else if (iconName === 'underline') {
+          prop.textDecorationLine = 'none'
+          if ((span as HTMLElement).style.textDecorationLine === 'none') {
+            prop.textDecorationLine = 'underline'
+            flag = true
+            break
+          }
+        } else if (iconName === 'italic') {
+          prop.fontStyle = 'normal'
+          if ((span as HTMLElement).style.fontStyle === 'normal') {
+            prop.fontStyle = 'italic'
+            flag = true
+            break
+          }
+        }
+      }
+      if (flag) break
+    }
+    return prop
+  }
+
+  spanStyleTransformer(span: HTMLElement, prop: { [key: string]: string }): ISpanCssStyle {
     const spanStyle = {
-      fontFamily: spanEl.style.fontFamily,
-      fontWeight: spanEl.style.fontWeight,
-      fontSize: spanEl.style.fontSize,
-      textDecorationLine: spanEl.style.textDecorationLine,
-      fontStyle: spanEl.style.fontStyle,
-      color: spanEl.style.color,
-      opacity: spanEl.style.opacity
+      fontFamily: span.style.fontFamily,
+      fontWeight: span.style.fontWeight,
+      fontSize: span.style.fontSize,
+      textDecorationLine: span.style.textDecorationLine,
+      fontStyle: span.style.fontStyle,
+      color: span.style.color,
+      opacity: span.style.opacity
     }
     return Object.assign(spanStyle, prop)
   }
@@ -115,27 +152,27 @@ class TextUtils {
   }
 
   spanPropsHandler(span: HTMLElement, iconName: string): ISpanCssStyle {
+    const prop: { [key: string]: string } = {}
     if (iconName === 'bold') {
       let fontWeight = 'normal'
       if (span.style.fontWeight === 'normal') {
         fontWeight = 'bold'
       }
-      return this.spanStyleTransformer(span, { fontWeight })
+      prop.fontWeight = fontWeight
     } else if (iconName === 'underline') {
       let textDecorationLine = 'none'
       if (span.style.textDecorationLine === 'none') {
         textDecorationLine = 'underline'
       }
-      return this.spanStyleTransformer(span, { textDecorationLine })
+      prop.textDecorationLine = textDecorationLine
     } else if (iconName === 'italic') {
       let fontStyle = 'normal'
       if (span.style.fontStyle === 'normal') {
         fontStyle = 'italic'
       }
-      return this.spanStyleTransformer(span, { fontStyle })
-    } else {
-      return this.spanStyleTransformer(span, {})
+      prop.fontStyle = fontStyle
     }
+    return this.spanStyleTransformer(span, prop)
   }
 
   textVertical() {

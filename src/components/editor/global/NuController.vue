@@ -15,7 +15,7 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type === 'text'")
-          div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
+          div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable" spellcheck="false"
             :style="contentStyles()"
             @keydown="onKeyDown($event)")
             p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
@@ -87,7 +87,7 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
-      text: { pIndex: NaN, sIndex: NaN, offset: 0, end: { pIndex: NaN, sIndex: NaN, offset: 0 } },
+      text: { pIndex: NaN, sIndex: NaN, offset: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
@@ -117,27 +117,20 @@ export default Vue.extend({
         })
         if (window.getSelection()) {
           var sel = window.getSelection() as Selection
-          if (sel.rangeCount !== 0) {
+          if (sel.rangeCount !== 0 && sel.toString() === '') {
             var range = sel?.getRangeAt(0)
             if (!Number.isNaN(this.text.pIndex) && !Number.isNaN(this.text.sIndex) && this.text.offset >= 0) {
               /**
-               * The specified pIndex, sIndex node might be undefined, this is caused as some node was deleted before re-render (before sIndex be refresh)
+               * The specified pIndex, sIndex node might be undefined, this would be caused as some node was deleted before re-render (before sIndex be refresh)
                */
               if (typeof (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex] === 'undefined') {
                 this.text.sIndex -= 1
+                this.text.sIndex = this.text.sIndex >= 0 ? this.text.sIndex : 0
               }
               const node = (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild
               if (node) {
                 range.setStart(node as Node, this.text.offset)
-                if (!Number.isNaN(this.text.end.pIndex)) {
-                  const endNode = (this.$refs.text as HTMLElement).childNodes[this.text.end.pIndex].childNodes[this.text.end.sIndex].firstChild
-                  range.setEnd(endNode as Node, this.text.end.offset)
-                  // console.log('sIndex: ', this.text.end.sIndex, 'pIndex: ', this.text.end.pIndex)
-                  console.log('is ranged')
-                } else {
-                  console.log('not range')
-                  range.setEnd(node as Node, this.text.offset)
-                }
+                range.setEnd(node as Node, this.text.offset)
                 sel.removeAllRanges()
                 sel.addRange(range)
               }
@@ -360,9 +353,10 @@ export default Vue.extend({
       }
 
       if (this.config.type === 'text') {
-        const text = this.$refs.text as HTMLElement
+        this.text.pIndex = NaN
+        this.text.sIndex = NaN
+        this.text.offset = NaN
         this.initTranslate = this.getLayerPos
-        // text.innerHTML = this.getTextContent
         this.isGetMoved = false
         this.contentEditable = true
       }
@@ -817,26 +811,20 @@ export default Vue.extend({
         this.contentEditable = true
       }
       if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        this.text.end.pIndex = NaN
-        this.text.end.sIndex = NaN
-        this.text.end.offset = NaN
         const sel = window.getSelection()
-        if (sel) {
+        if (sel && sel.rangeCount !== 0) {
+          console.log('-----820------')
           const range = sel.getRangeAt(0)
           if (range && sel.toString() === '') {
             const startContainer = range.startContainer
             this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
             this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            this.text.offset = sel.anchorOffset
+            this.text.offset = range.startOffset
           } else if (sel.toString() !== '') {
             const startContainer = range.startContainer
             this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
             this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            this.text.offset = sel.anchorOffset
-            const endContainer = range.endContainer
-            this.text.end.sIndex = parseInt(endContainer?.parentElement?.dataset.sindex as string)
-            this.text.end.pIndex = parseInt(endContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            this.text.end.offset = range.endOffset
+            this.text.offset = range.startOffset
             console.log('A range is selected')
           }
         }
@@ -847,48 +835,24 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         if (sel) {
+          console.log('-----840------')
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
             if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
               console.log('NaN')
-              e.preventDefault()
-              return
+              // e.preventDefault()
+              // return
             }
             this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
             this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
             if (e.key === 'Backspace') {
-              if (this.text.sIndex === 0 && this.text.pIndex !== 0 && sel.anchorOffset === 0) {
-                ControlUtils.textStopPropagation(e)
-                // const pNode = text.childNodes[this.text.pIndex - 1]
-                // const spanNode = pNode.childNodes[pNode.childNodes.length - 1]
-                // this.text.offset = (spanNode.textContent as string).length - 1
-                // this.text.sIndex = pNode.childNodes.length - 1
-                // this.text.pIndex -= 1
-              } else if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
+              if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
                 return
               } else {
-                console.log('bakcspace')
                 ControlUtils.textStopPropagation(e)
-                // this.text.offset = sel.anchorOffset - 1 >= 0 ? sel.anchorOffset - 1 : 0
-                // const textNode = text.childNodes[this.text.pIndex].childNodes[this.text.sIndex]
               }
-            } else if (e.key === 'Enter') {
-              console.log(range)
-              this.text.offset = 0
-              this.text.sIndex = 0
-              this.text.pIndex += 1
-            } else if (e.key.length !== 1 && e.key !== 'Space') {
-              this.text.offset = sel.anchorOffset
-              // const range = new Range()
-              // range.setStart(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, sel.anchorOffset + 1)
-              // range.setEnd(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, sel.anchorOffset + 2)
-              // range.collapse(true)
-              // sel.removeAllRanges()
-              // sel.addRange(range)
-            } else {
-              this.text.offset = sel.anchorOffset + 1
             }
             console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
             // this.onTyping(e, pIndex, sIndex)
@@ -916,8 +880,9 @@ export default Vue.extend({
           const text = mutation.target as HTMLElement
           if (window.getSelection()) {
             const sel = window.getSelection()
+            console.log('xxxxxxxxxxxxxxx')
             const startContainer = sel?.getRangeAt(0).startContainer
-            this.text.offset = sel?.anchorOffset as number
+            this.text.offset = sel?.getRangeAt(0).startOffset as number
             this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
             this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
           }
@@ -975,6 +940,8 @@ export default Vue.extend({
           }
           if (removedP.length !== 0) {
             this.text.pIndex += 1
+            this.text.sIndex = 0
+            this.text.offset = 0
           }
           console.log(removedP)
           removedP.forEach(p => {
@@ -1016,6 +983,7 @@ export default Vue.extend({
           }
           if (window.getSelection()) {
             const sel = window.getSelection()
+            console.log('-----1013------')
             const startContainer = sel?.getRangeAt(0).startContainer
             this.text.offset = sel?.anchorOffset as number
             this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
@@ -1062,16 +1030,10 @@ export default Vue.extend({
             styles: {
               width: textHW.width,
               height: textHW.height,
-              scale
-            }
-          })
-          store.commit('UPDATE_layerStyles', {
-            pageIndex,
-            layerIndex,
-            styles: {
               initWidth: Math.ceil(textHW.width / scale),
               initHeight: Math.ceil(textHW.height / scale),
-              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize
+              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize,
+              scale
             }
           })
           store.commit('UPDATE_textProps', {

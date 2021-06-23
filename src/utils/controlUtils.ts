@@ -127,14 +127,6 @@ class Controller {
     }
   }
 
-  // shapeResizerHandler(scaleX: number, scaleY: numb) {
-  //   let scaleX = this.scale.scaleX
-  //   let scaleY = this.scale.scaleY
-  //   scaleX = width / initWidth === 1 ? scaleX : width / initWidth * scaleX
-  //   scaleY = height / initHeight === 1 ? scaleY : height / initHeight * scaleY
-  //   ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
-  // }
-
   textStopPropagation(e: KeyboardEvent) {
     if (e.key === 'Backspace' || e.key === ' ') {
       e.stopPropagation()
@@ -243,10 +235,14 @@ class Controller {
         const scale = store.getters.getLayer(pageIndex, layerIndex).styles.scale
         ps.forEach((p) => {
           const spans: ISpan[] = []
-          p.childNodes.forEach((span) => {
+          for (const span of p.childNodes) {
             if (span instanceof HTMLElement) {
               // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
               const spanEl = span as HTMLElement
+              const text = spanEl.innerText as string
+              if (text === '') {
+                continue
+              }
               const spanStyle = {
                 font: spanEl.style.fontFamily,
                 weight: spanEl.style.fontWeight,
@@ -257,10 +253,9 @@ class Controller {
                 color: spanEl.style.color,
                 opacity: parseInt(spanEl.style.opacity)
               } as ISpanStyle
-              const text = spanEl.innerText as string
               spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
             }
-          })
+          }
           const pEl = p as HTMLElement
           const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
           pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
@@ -300,23 +295,6 @@ class Controller {
       } else {
         console.log(mutation.type)
         console.log(mutation)
-        // let text = mutation.target as HTMLElement
-        // while (text.nodeName !== 'DIV' && text.parentElement) {
-        //   text = text.parentElement
-        // }
-        // let pIndex = -1
-        // const removedP = []
-        // for (const p of text.childNodes) {
-        //   const pEl = p as HTMLElement
-        //   console.log(pEl.dataset.pindex)
-        //   if (parseInt(pEl.dataset.pindex as string) === pIndex) {
-        //     // text.removeChild(p)
-        //     removedP.push(p)
-        //     // break
-        //   } else {
-        //     pIndex = parseInt(pEl.dataset.pindex as string)
-        //   }
-        // }
       }
     }
   }
@@ -409,7 +387,6 @@ class Controller {
   }
 
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
-    console.log(width)
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
