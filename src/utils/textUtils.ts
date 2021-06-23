@@ -1,6 +1,6 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
-import { IText } from '@/interfaces/layer'
+import { ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
 
 class TextUtils {
@@ -9,46 +9,133 @@ class TextUtils {
   get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   onPropertyClick(iconName: string) {
-    if (iconName.substring(0, 10) === 'text-align') {
-      this.textAlign(iconName)
-    } else if (iconName === 'bold') {
-      this.textBold()
-    } else if (iconName === 'underline') {
-      this.textUnderline()
-    } else if (iconName === 'italic') {
-      this.textItalic()
-    } else if (iconName === 'font-vertical') {
-      this.textVertical()
+    if (window.getSelection() && window.getSelection()?.toString() !== '') {
+      const sel = window.getSelection()
+      const range = sel?.getRangeAt(0)
+      let div = range?.commonAncestorContainer
+      while (div?.parentNode && div?.nodeName !== 'DIV') {
+        div = div?.parentNode
+      }
+      const observer = new MutationObserver(ControlUtils.onTyping)
+      observer.observe(div as HTMLElement, {
+        characterData: true,
+        childList: true,
+        subtree: true,
+        attributes: false,
+        attributeOldValue: false,
+        characterDataOldValue: false
+      })
+      const start = {
+        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
+        offset: range?.startOffset
+      }
+      const end = {
+        pIndex: parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range?.endContainer?.parentElement?.dataset.sindex as string),
+        offset: range?.endOffset
+      }
+      if (!div || !range || !range.startContainer || !range.endContainer ||
+        typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
+      for (let i = 0; i < div.childNodes.length; i++) {
+        const p = div.childNodes[i]
+        const pEl = p as HTMLElement
+        if (parseInt(pEl.dataset.pindex as string) === start.pIndex) {
+          // newnode.innerText = value.substr(startOffset)
+          // node.nodeValue = value.substr(0, startOffset)
+          for (let j = 0; j < p.childNodes.length; j++) {
+            const span = p.childNodes[j]
+            const spanEl = span as HTMLElement
+            const value = spanEl.innerText
+            // console.log(span)
+            // console.log(value.substr(0, start.offset))
+            if (parseInt(spanEl.dataset.sindex as string) === start.sIndex) {
+              spanEl.innerText = value.substr(0, start.offset)
+              const newSpan = document.createElement('span')
+              newSpan.innerText = value.substr(start.offset)
+              const spanStyle = this.spanPropsHandler(spanEl, iconName)
+              Object.assign(newSpan.style, spanStyle)
+              span.after(newSpan)
+              j++
+            } else if (parseInt(spanEl.dataset.sindex as string) > start.sIndex) {
+              Object.assign(spanEl.style, this.spanPropsHandler(spanEl, iconName))
+            }
+          }
+          // Object.assign(span.style, pEl.style)
+        }
+        if (parseInt(pEl.dataset.pindex as string) === end.pIndex) {
+          for (let j = 0; j < p.childNodes.length; j++) {
+            const span = p.childNodes[j]
+            const spanEl = span as HTMLElement
+            const value = spanEl.innerText
+            if (parseInt(spanEl.dataset.sindex as string) === end.sIndex) {
+              spanEl.innerText = value.substr(end.offset)
+              console.log(value.substr(end.offset))
+              const newSpan = document.createElement('span')
+              newSpan.innerText = value.substr(0, end.offset)
+              const spanStyle = this.spanPropsHandler(spanEl, iconName)
+              Object.assign(newSpan.style, spanStyle)
+              span.before(newSpan)
+              break
+            }
+          }
+        }
+      }
+      // if (iconName.substring(0, 10) === 'text-align') {
+      //   this.textAlign(iconName)
+      // } else if (iconName === 'bold') {
+      //   this.textBold()
+      // } else if (iconName === 'underline') {
+      //   this.textUnderline()
+      // } else if (iconName === 'italic') {
+      //   this.textItalic()
+      // } else if (iconName === 'font-vertical') {
+      //   this.textVertical()
+      // }
     }
   }
 
-  textAlign(iconName: string) {
+  spanStyleTransformer(spanEl: HTMLElement, prop: { [key: string]: string }) {
+    const spanStyle = {
+      fontFamily: spanEl.style.fontFamily,
+      fontWeight: spanEl.style.fontWeight,
+      fontSize: spanEl.style.fontSize,
+      textDecorationLine: spanEl.style.textDecorationLine,
+      fontStyle: spanEl.style.fontStyle,
+      color: spanEl.style.color,
+      opacity: spanEl.style.opacity
+    }
+    return Object.assign(spanStyle, prop)
+  }
+
+  // TODO: align is for paragraphs
+  textAlign(span: HTMLElement, iconName: string) {
     const align = iconName.substring(11, iconName.length)
-    this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
+    // this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
   }
 
-  textBold() {
-    let weight = 'normal'
-    if (this.getCurrLayer.styles.weight === 'normal') {
-      weight = 'bold'
+  spanPropsHandler(span: HTMLElement, iconName: string): ISpanCssStyle {
+    if (iconName === 'bold') {
+      let fontWeight = 'normal'
+      if (span.style.fontWeight === 'normal') {
+        fontWeight = 'bold'
+      }
+      return this.spanStyleTransformer(span, { fontWeight })
+    } else if (iconName === 'underline') {
+      let textDecorationLine = 'none'
+      if (span.style.textDecorationLine === 'none') {
+        textDecorationLine = 'underline'
+      }
+      return this.spanStyleTransformer(span, { textDecorationLine })
+    } else if (iconName === 'italic') {
+      let fontStyle = 'normal'
+      if (span.style.fontStyle === 'normal') {
+        fontStyle = 'italic'
+      }
+      return this.spanStyleTransformer(span, { fontStyle })
+    } else {
+      return this.spanStyleTransformer(span, {})
     }
-    this.updateTextStyles(this.pageIndex, this.layerIndex, { weight })
-  }
-
-  textUnderline() {
-    let decoration = 'none'
-    if (this.getCurrLayer.styles.decoration === 'none') {
-      decoration = 'underline'
-    }
-    this.updateTextStyles(this.pageIndex, this.layerIndex, { decoration })
-  }
-
-  textItalic() {
-    let style = 'normal'
-    if (this.getCurrLayer.styles.style === 'normal') {
-      style = 'italic'
-    }
-    this.updateTextStyles(this.pageIndex, this.layerIndex, { style })
   }
 
   textVertical() {

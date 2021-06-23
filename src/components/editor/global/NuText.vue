@@ -13,6 +13,7 @@ import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -21,6 +22,9 @@ export default Vue.extend({
     layerIndex: Number
   },
   computed: {
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio'
+    }),
     initSize(): any {
       return {
         initWidth: (this.config as IText).styles.initWidth,
@@ -35,11 +39,15 @@ export default Vue.extend({
         setTimeout(() => {
           const text = this.$refs.text as HTMLElement
           const scale = this.config.styles.scale
-          // text.style.width = `${Math.ceil(this.config.styles.width / scale)}px`
+          text.style.width = this.config.widthLimit === -1 ? 'fit-content' : `${this.config.widthLimit}px`
+          text.style.height = 'fit-content'
+          console.log(this.config.widthLimit)
           const textHW = {
-            width: Math.ceil(text.getBoundingClientRect().width),
-            height: Math.ceil(text.getBoundingClientRect().height)
+            width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+            height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
           }
+          text.style.width = `${Math.ceil(textHW.width / scale)}px`
+          text.style.height = `${Math.ceil(textHW.height / scale)}px`
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
         }, 0)
       },
@@ -75,6 +83,7 @@ export default Vue.extend({
   position: relative;
 }
 .text {
+  // margin: auto;
   position: absolute;
   &__p {
       margin: 0.5em;

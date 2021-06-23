@@ -141,86 +141,7 @@ class Controller {
     }
   }
 
-  // textEnter(e: KeyboardEvent, text: HTMLElement, isCompositioning: boolean, size: number) {
-  //   if (e.key !== 'Enter' || isCompositioning) return
-  //   // console.log(text)
-  //   // e.preventDefault()
-
-  //   // const p = document.createElement('p')
-  //   // const span = document.createElement('span')
-
-  //   // const sel = window.getSelection() as Selection
-  //   // const anchorNode = sel.anchorNode as any
-  //   // const range = document.createRange()
-  //   // const str = anchorNode.nodeValue
-  //   // const substr = anchorNode.nodeValue?.substring(sel.anchorOffset, anchorNode.length)
-  //   // anchorNode.nodeValue = str.substring(0, sel.anchorOffset)
-  //   // span.textContent = substr
-  //   // p.appendChild(span)
-  //   // text.after(p)
-
-  //   // const sel = window.getSelection()
-  //   // const range = sel?.getRangeAt(0)
-  //   // const startContainer = range?.startContainer
-  //   // const sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-  //   // const pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-  //   const pageIndex = store.state.lastSelectedPageIndex
-  //   const layerIndex = store.getters.getCurrSelectedIndex
-  //   console.log(text)
-  //   setTimeout(() => {
-  //     const paragraphs: IParagraph[] = []
-  //     const ps = text.childNodes
-  //     console.log(text)
-  //     ps.forEach((p, pIndex) => {
-  //       const spans: ISpan[] = []
-  //       const textLayer = (this.getLayer(pageIndex, layerIndex) as IText)
-  //       p.childNodes.forEach((span, sIndex) => {
-  //         const spanEl = span as HTMLElement
-  //         // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
-  //         const spanStyle = {
-  //           font: spanEl.style.fontFamily,
-  //           weight: spanEl.style.fontWeight,
-  //           size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / this.getLayer(pageIndex, layerIndex).styles.scale : '',
-  //           initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-  //           decoration: spanEl.style.textDecorationLine,
-  //           style: spanEl.style.fontStyle,
-  //           color: spanEl.style.color,
-  //           opacity: parseInt(spanEl.style.opacity)
-  //         } as ISpanStyle
-  //         const text = spanEl.textContent as string
-  //         spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
-  //       })
-  //       const pEl = p as HTMLElement
-  //       const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
-  //       pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
-  //       pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
-  //       pStyle.align = pEl.style.textAlign
-  //       paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
-  //     })
-  //     setTimeout(() => {
-  //       paragraphs.forEach((p, pIndex) => {
-  //         p.spans.forEach((s, sIndex) => {
-  //           text.childNodes[pIndex].childNodes[sIndex].textContent = s.text
-  //         })
-  //       })
-  //       text.removeChild(text.lastChild as Node)
-  //     }, 0)
-  //     text.style.width = 'initial'
-  //     text.style.height = 'initial'
-  //     const textHW = {
-  //       width: Math.ceil(text.getBoundingClientRect().width),
-  //       height: Math.ceil(text.getBoundingClientRect().height)
-  //     }
-  //     text.style.width = `${textHW.width}px`
-  //     text.style.height = `${textHW.height}px`
-  //     const scale = this.getLayer(pageIndex, layerIndex).styles.scale
-  //     this.updateLayerInitSize(pageIndex, layerIndex, textHW.width / scale, textHW.height / scale, size)
-  //     this.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, scale)
-  //     this.updateTextProp(pageIndex, layerIndex, paragraphs)
-  //   }, 0)
-  // }
-
-  textEnter(mutations: MutationRecord[], observer: MutationObserver) {
+  onTyping(mutations: MutationRecord[], observer: MutationObserver) {
     observer.disconnect()
     const pageIndex = store.state.lastSelectedPageIndex
     const layerIndex = store.getters.getCurrSelectedIndex
@@ -310,8 +231,9 @@ class Controller {
             paragraphs
           })
         }
-      } else if (mutation.type === 'characterData') {
+      } else if (mutation.type === 'characterData' || mutation.type === 'childList') {
         console.log('characterData')
+        // console.log(mutation)
         const paragraphs: IParagraph[] = []
         let text = mutation.target as HTMLElement
         while (text.nodeName !== 'DIV' && text.parentElement) {
@@ -322,20 +244,22 @@ class Controller {
         ps.forEach((p) => {
           const spans: ISpan[] = []
           p.childNodes.forEach((span) => {
-            const spanEl = span as HTMLElement
-            // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
-            const spanStyle = {
-              font: spanEl.style.fontFamily,
-              weight: spanEl.style.fontWeight,
-              size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
-              initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-              decoration: spanEl.style.textDecorationLine,
-              style: spanEl.style.fontStyle,
-              color: spanEl.style.color,
-              opacity: parseInt(spanEl.style.opacity)
-            } as ISpanStyle
-            const text = spanEl.innerText as string
-            spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+            if (span instanceof HTMLElement) {
+              // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
+              const spanEl = span as HTMLElement
+              const spanStyle = {
+                font: spanEl.style.fontFamily,
+                weight: spanEl.style.fontWeight,
+                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+                initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+                decoration: spanEl.style.textDecorationLine,
+                style: spanEl.style.fontStyle,
+                color: spanEl.style.color,
+                opacity: parseInt(spanEl.style.opacity)
+              } as ISpanStyle
+              const text = spanEl.innerText as string
+              spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+            }
           })
           const pEl = p as HTMLElement
           const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
@@ -485,6 +409,7 @@ class Controller {
   }
 
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
+    console.log(width)
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,

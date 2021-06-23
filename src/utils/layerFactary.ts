@@ -41,7 +41,7 @@ class LayerFactary {
   newText(config: any): IText {
     const basicConfig = {
       type: 'text',
-      widthLimit: '',
+      widthLimit: -1,
       active: false,
       shown: false,
       locked: false,

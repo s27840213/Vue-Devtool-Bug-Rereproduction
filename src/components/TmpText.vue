@@ -48,7 +48,7 @@ export default Vue.extend({
                   text: 'Happy  ',
                   styles: {
                     font: 'Lobster',
-                    weight: 'bold',
+                    weight: 'normal',
                     color: '#2EB8E6',
                     writingMode: 'initial',
                     decoration: 'none',
@@ -58,16 +58,29 @@ export default Vue.extend({
                   }
                 },
                 {
-                  text: 'newYear',
+                  text: 'newYear ',
                   styles: {
                     font: 'normal',
-                    weight: 'bold',
+                    weight: 'normal',
                     color: '#000000',
                     writingMode: 'initial',
                     decoration: 'none',
                     style: 'normal',
                     opacity: 1,
                     size: 25
+                  }
+                },
+                {
+                  text: 'Mmnnhm',
+                  styles: {
+                    font: 'normal',
+                    weight: 'normal',
+                    color: '#2EB344',
+                    writingMode: 'initial',
+                    decoration: 'none',
+                    style: 'normal',
+                    opacity: 1,
+                    size: 22
                   }
                 }
               ]
@@ -305,7 +318,7 @@ export default Vue.extend({
     height: auto;
     display: grid;
     grid-auto-rows: auto;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     row-gap: 20px;
     column-gap: 10px;
     padding-top: 20px;

@@ -60,12 +60,14 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IText } from '@/interfaces/layer'
+import { IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
+import { config } from 'vue/types/umd'
+import store from '@/store'
 
 export default Vue.extend({
   props: {
@@ -85,7 +87,7 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
-      text: { pIndex: NaN, sIndex: NaN, offset: 0 },
+      text: { pIndex: NaN, sIndex: NaN, offset: 0, end: { pIndex: NaN, sIndex: NaN, offset: 0 } },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
@@ -118,12 +120,24 @@ export default Vue.extend({
           if (sel.rangeCount !== 0) {
             var range = sel?.getRangeAt(0)
             if (!Number.isNaN(this.text.pIndex) && !Number.isNaN(this.text.sIndex) && this.text.offset >= 0) {
+              /**
+               * The specified pIndex, sIndex node might be undefined, this is caused as some node was deleted before re-render (before sIndex be refresh)
+               */
+              if (typeof (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex] === 'undefined') {
+                this.text.sIndex -= 1
+              }
               const node = (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild
-              // console.log(node)
               if (node) {
-                // console.log(node)
                 range.setStart(node as Node, this.text.offset)
-                range.setEnd(node as Node, this.text.offset)
+                if (!Number.isNaN(this.text.end.pIndex)) {
+                  const endNode = (this.$refs.text as HTMLElement).childNodes[this.text.end.pIndex].childNodes[this.text.end.sIndex].firstChild
+                  range.setEnd(endNode as Node, this.text.end.offset)
+                  // console.log('sIndex: ', this.text.end.sIndex, 'pIndex: ', this.text.end.pIndex)
+                  console.log('is ranged')
+                } else {
+                  console.log('not range')
+                  range.setEnd(node as Node, this.text.offset)
+                }
                 sel.removeAllRanges()
                 sel.addRange(range)
               }
@@ -308,11 +322,6 @@ export default Vue.extend({
       const el = this.$refs.text as HTMLElement
       el.removeEventListener('compositionend', this.compositionEnd)
     },
-    // triggerTextEditor(pageIndex: number, layerIndex: number) {
-    //   LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-    //     textEditable: true
-    //   })
-    // },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
@@ -345,12 +354,6 @@ export default Vue.extend({
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
           if (this.pageIndex === this.lastSelectedPageIndex) {
-            // if (this.getLayerType === 'text' && !this.isActive) {
-            //   GroupUtils.select([targetIndex])
-            //   window.removeEventListener('mouseup', this.moveEnd)
-            //   window.removeEventListener('mousemove', this.moving)
-            //   return
-            // }
             GroupUtils.select([targetIndex])
           }
         }
@@ -607,7 +610,7 @@ export default Vue.extend({
       }
       /**
        * Below is a conclusion of checking-if-the-Resizer-exceed-limit for the top/left resizer
-       * The origin algorithm is described as in imgContorller.vue: moving section
+       * The origin derived algorithm is described as in imgContorller.vue: moving section
        */
       if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
         imgPos.x += offsetX / this.getLayerScale
@@ -666,7 +669,7 @@ export default Vue.extend({
        * Below is used to make sure the imgHW are always larger than (at least equal to) the layerHW,
        * This guarantee the exceedLimitation returns the expect value.
        * p.s. The reason of this the problem which the imgHW somehow smaller than the layerHW might
-       * be caused by the 'nubmer-rounding' of the ratio.
+       * be caused by the 'rounding-number' of the ratio.
        */
       if (imgHeight < layerHeight) {
         imgHeight = layerHeight
@@ -690,6 +693,8 @@ export default Vue.extend({
         this.imgBuffer.x = -(imgWidth - this.imgInitWH.width) / 2
         this.imgBuffer.y = -(imgHeight - this.imgInitWH.height) / 2
       }
+      // TODO: still got some problem after layer being scaled.
+
       // if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
       //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x - this.imgBuffer.x, imgPos.y - this.imgBuffer.y)
       // } else {
@@ -812,6 +817,9 @@ export default Vue.extend({
         this.contentEditable = true
       }
       if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+        this.text.end.pIndex = NaN
+        this.text.end.sIndex = NaN
+        this.text.end.offset = NaN
         const sel = window.getSelection()
         if (sel) {
           const range = sel.getRangeAt(0)
@@ -821,6 +829,14 @@ export default Vue.extend({
             this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
             this.text.offset = sel.anchorOffset
           } else if (sel.toString() !== '') {
+            const startContainer = range.startContainer
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            this.text.offset = sel.anchorOffset
+            const endContainer = range.endContainer
+            this.text.end.sIndex = parseInt(endContainer?.parentElement?.dataset.sindex as string)
+            this.text.end.pIndex = parseInt(endContainer?.parentElement?.parentElement?.dataset.pindex as string)
+            this.text.end.offset = range.endOffset
             console.log('A range is selected')
           }
         }
@@ -844,126 +860,331 @@ export default Vue.extend({
             if (e.key === 'Backspace') {
               if (this.text.sIndex === 0 && this.text.pIndex !== 0 && sel.anchorOffset === 0) {
                 ControlUtils.textStopPropagation(e)
-                const pNode = text.childNodes[this.text.pIndex - 1]
-                const spanNode = pNode.childNodes[pNode.childNodes.length - 1]
-                this.text.offset = (spanNode.textContent as string).length - 1
-                this.text.sIndex = pNode.childNodes.length - 1
-                this.text.pIndex -= 1
+                // const pNode = text.childNodes[this.text.pIndex - 1]
+                // const spanNode = pNode.childNodes[pNode.childNodes.length - 1]
+                // this.text.offset = (spanNode.textContent as string).length - 1
+                // this.text.sIndex = pNode.childNodes.length - 1
+                // this.text.pIndex -= 1
               } else if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
                 return
               } else {
                 console.log('bakcspace')
                 ControlUtils.textStopPropagation(e)
-                this.text.offset = sel.anchorOffset - 1
-                const textNode = text.childNodes[this.text.pIndex].childNodes[this.text.sIndex]
+                // this.text.offset = sel.anchorOffset - 1 >= 0 ? sel.anchorOffset - 1 : 0
+                // const textNode = text.childNodes[this.text.pIndex].childNodes[this.text.sIndex]
               }
             } else if (e.key === 'Enter') {
+              console.log(range)
               this.text.offset = 0
               this.text.sIndex = 0
               this.text.pIndex += 1
+            } else if (e.key.length !== 1 && e.key !== 'Space') {
+              this.text.offset = sel.anchorOffset
+              // const range = new Range()
+              // range.setStart(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, sel.anchorOffset + 1)
+              // range.setEnd(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, sel.anchorOffset + 2)
+              // range.collapse(true)
+              // sel.removeAllRanges()
+              // sel.addRange(range)
             } else {
-              console.log('key')
               this.text.offset = sel.anchorOffset + 1
             }
             console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
             // this.onTyping(e, pIndex, sIndex)
           }
         }
-        const observer = new MutationObserver(ControlUtils.textEnter)
+        const observer = new MutationObserver(this.onTyping)
         observer.observe(text, {
           characterData: true,
           childList: true,
-          subtree: true
-          // attributes: true,
-          // attributeOldValue: true,
-          // characterDataOldValue: true
+          subtree: true,
+          attributes: false,
+          attributeOldValue: false,
+          characterDataOldValue: false
         })
       }
     },
-    onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
-      if (e.key === 'Enter') return
-      this.isControlling = true
-      ControlUtils.textStopPropagation(e)
-      // ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
-      if (e.metaKey && e.key === 'z') {
-        StepsUtils.undo()
-        setTimeout(() => {
-          const text = this.$refs.text as HTMLElement
-        }, 0)
-        return
-      }
-      if (this.isNoCharactor(e)) {
-        this.isControlling = false
-        return
-      }
-      const text = this.$refs.text as HTMLElement
-      text.style.width = 'initial'
-      text.style.height = 'initial'
-      /**
-       * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
-       */
-      // text.style.whiteSpace = 'pre'
-      const textNode = window.getSelection()?.anchorNode as Node
-      setTimeout(() => {
-        if (textNode) {
-          // ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, textNode.textContent as string)
-        }
-        /**
-         * This line of code prevents the bug while deleting at beginning of the text.
-         */
-        // if (e.key === 'Backspace' && textTmp === text.innerHTML) return
-        // const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
-        const isTextOneLine = this.config.paragraphs.length === 1
-        const textSize = {
-          width: Math.ceil(text.getBoundingClientRect().width),
-          height: text.getBoundingClientRect().height
-        }
-        let layerX = this.getLayerPos.x
-        const layerY = this.getLayerPos.y
-        // TODO: take the rotate angle into pos-compensation consideration
-        if (this.config.widthLimit === '' && isTextOneLine) {
-          const page = this.$parent.$el as HTMLElement
-          const currTextWidth = isTextOneLine ? text.getBoundingClientRect().width : this.getLayerWidth
-          // const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
-          layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
-          if (layerX <= 0) {
-            layerX = 0
-            // text.style.width = `${this.getLayerWidth}px`
-            textSize.width = this.getLayerWidth
-            ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          } else if (layerX + currTextWidth >= page.offsetWidth) {
-            layerX = page.offsetWidth - this.getLayerWidth
-            // text.style.width = `${this.getLayerWidth}px`
-            textSize.width = this.getLayerWidth
-            ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          } else {
-            // text.style.width = `${text.getBoundingClientRect().width}px`
-            // text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
-            // const HW = this.getTextHW(text.innerHTML, this.config.styles)
-            const HW = TextUtils.getTextHW(this.config)
-            // text.style.width = `${HW.width}px`
-            textSize.width = HW.width
-            textSize.height = HW.height
+    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
+      observer.disconnect()
+      const pageIndex = store.state.lastSelectedPageIndex
+      const layerIndex = store.getters.getCurrSelectedIndex
+      console.log('mutation observer')
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.target.nodeName === 'DIV') {
+          const paragraphs: IParagraph[] = []
+          const text = mutation.target as HTMLElement
+          if (window.getSelection()) {
+            const sel = window.getSelection()
+            const startContainer = sel?.getRangeAt(0).startContainer
+            this.text.offset = sel?.anchorOffset as number
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
           }
+          console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
+          const ps = text.childNodes
+          const scale = store.getters.getLayer(pageIndex, layerIndex).styles.scale
+          ps.forEach((p) => {
+            const spans: ISpan[] = []
+            p.childNodes.forEach((span) => {
+              const spanEl = span as HTMLElement
+              // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
+              const spanStyle = {
+                font: spanEl.style.fontFamily,
+                weight: spanEl.style.fontWeight,
+                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+                initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+                decoration: spanEl.style.textDecorationLine,
+                style: spanEl.style.fontStyle,
+                color: spanEl.style.color,
+                opacity: parseInt(spanEl.style.opacity)
+              } as ISpanStyle
+              const text = spanEl.innerText as string
+              if (text !== '') {
+                spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+              }
+            })
+            const pEl = p as HTMLElement
+            const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+            pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
+            pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
+            pStyle.align = pEl.style.textAlign
+            if (spans.length !== 0) {
+              paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+            }
+          })
+          console.log(paragraphs)
+          text.style.width = 'initial'
+          text.style.height = 'initial'
+          const textHW = {
+            width: Math.ceil(text.getBoundingClientRect().width),
+            height: Math.ceil(text.getBoundingClientRect().height)
+          }
+          let pIndex = -1
+          const removedP = []
+          for (const p of text.childNodes) {
+            const pEl = p as HTMLElement
+            console.log(pEl.dataset.pindex)
+            if (parseInt(pEl.dataset.pindex as string) === pIndex) {
+              // text.removeChild(p)
+              removedP.push(p)
+              // break
+            } else {
+              pIndex = parseInt(pEl.dataset.pindex as string)
+            }
+          }
+          if (removedP.length !== 0) {
+            this.text.pIndex += 1
+          }
+          console.log(removedP)
+          removedP.forEach(p => {
+            text.removeChild(p)
+          })
+          store.commit('UPDATE_layerStyles', {
+            pageIndex,
+            layerIndex,
+            styles: {
+              width: textHW.width,
+              height: textHW.height,
+              scale
+            }
+          })
+          store.commit('UPDATE_layerStyles', {
+            pageIndex,
+            layerIndex,
+            styles: {
+              initWidth: Math.ceil(textHW.width / scale),
+              initHeight: Math.ceil(textHW.height / scale),
+              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize
+            }
+          })
+          if (paragraphs.length !== 0) {
+            store.commit('UPDATE_textProps', {
+              pageIndex,
+              layerIndex,
+              paragraphs
+            })
+          }
+          break
+        } else if (mutation.type === 'characterData' || mutation.type === 'childList') {
+          console.log('characterData')
+          // console.log(mutation)
+          const paragraphs: IParagraph[] = []
+          let text = mutation.target as HTMLElement
+          while (text.nodeName !== 'DIV' && text.parentElement) {
+            text = text.parentElement
+          }
+          if (window.getSelection()) {
+            const sel = window.getSelection()
+            const startContainer = sel?.getRangeAt(0).startContainer
+            this.text.offset = sel?.anchorOffset as number
+            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+          }
+          const ps = text.childNodes
+          const scale = store.getters.getLayer(pageIndex, layerIndex).styles.scale
+          ps.forEach((p) => {
+            const spans: ISpan[] = []
+            p.childNodes.forEach((span) => {
+              if (span instanceof HTMLElement) {
+                // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
+                const spanEl = span as HTMLElement
+                const spanStyle = {
+                  font: spanEl.style.fontFamily,
+                  weight: spanEl.style.fontWeight,
+                  size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+                  initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+                  decoration: spanEl.style.textDecorationLine,
+                  style: spanEl.style.fontStyle,
+                  color: spanEl.style.color,
+                  opacity: parseInt(spanEl.style.opacity)
+                } as ISpanStyle
+                const text = spanEl.innerText as string
+                spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+              }
+            })
+            const pEl = p as HTMLElement
+            const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+            pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
+            pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
+            pStyle.align = pEl.style.textAlign
+            paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+          })
+          text.style.width = 'initial'
+          text.style.height = 'initial'
+          const textHW = {
+            width: Math.ceil(text.getBoundingClientRect().width),
+            height: Math.ceil(text.getBoundingClientRect().height)
+          }
+          store.commit('UPDATE_layerStyles', {
+            pageIndex,
+            layerIndex,
+            styles: {
+              width: textHW.width,
+              height: textHW.height,
+              scale
+            }
+          })
+          store.commit('UPDATE_layerStyles', {
+            pageIndex,
+            layerIndex,
+            styles: {
+              initWidth: Math.ceil(textHW.width / scale),
+              initHeight: Math.ceil(textHW.height / scale),
+              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize
+            }
+          })
+          store.commit('UPDATE_textProps', {
+            pageIndex,
+            layerIndex,
+            paragraphs
+          })
         } else {
-          textSize.width = text.getBoundingClientRect().width || this.config.widthLimit
-          textSize.height = text.getBoundingClientRect().height
-          // textSize.height = text.offsetHeight
-          console.log(textSize)
-          console.log(text)
+          console.log(mutation.type)
+          console.log(mutation)
+          // let text = mutation.target as HTMLElement
+          // while (text.nodeName !== 'DIV' && text.parentElement) {
+          //   text = text.parentElement
+          // }
+          // let pIndex = -1
+          // const removedP = []
+          // for (const p of text.childNodes) {
+          //   const pEl = p as HTMLElement
+          //   console.log(pEl.dataset.pindex)
+          //   if (parseInt(pEl.dataset.pindex as string) === pIndex) {
+          //     // text.removeChild(p)
+          //     removedP.push(p)
+          //     // break
+          //   } else {
+          //     pIndex = parseInt(pEl.dataset.pindex as string)
+          //   }
+          // }
         }
-        text.style.whiteSpace = 'pre-wrap'
-        // text.style.width = `${textSize.width / this.getLayerScale}px`
-        // text.style.height = `${textSize.height / this.getLayerScale}px`
-        // ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
-        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width / this.getLayerScale, textSize.height / this.getLayerScale, this.getFontSize + 1)
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getLayerScale)
-        StepsUtils.record()
-        this.isControlling = false
-      }, 0)
+      }
     },
+    // onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
+    //   if (e.key === 'Enter') return
+    //   this.isControlling = true
+    //   ControlUtils.textStopPropagation(e)
+    //   // ControlUtils.textEnter(e, this.$refs.text as HTMLElement, this.isCompositoning, this.config.styles.size)
+    //   if (e.metaKey && e.key === 'z') {
+    //     StepsUtils.undo()
+    //     setTimeout(() => {
+    //       const text = this.$refs.text as HTMLElement
+    //     }, 0)
+    //     return
+    //   }
+    //   if (this.isNoCharactor(e)) {
+    //     this.isControlling = false
+    //     return
+    //   }
+    //   const text = this.$refs.text as HTMLElement
+    //   text.style.width = 'initial'
+    //   text.style.height = 'initial'
+    //   /**
+    //    * Set the whiteSpace to 'pre' is used for getting the rect-size of the text content.
+    //    */
+    //   // text.style.whiteSpace = 'pre'
+    //   const textNode = window.getSelection()?.anchorNode as Node
+    //   setTimeout(() => {
+    //     if (textNode) {
+    //       // ControlUtils.updateTextContent(this.pageIndex, this.layerIndex, pIndex, sIndex, textNode.textContent as string)
+    //     }
+    //     /**
+    //      * This line of code prevents the bug while deleting at beginning of the text.
+    //      */
+    //     // if (e.key === 'Backspace' && textTmp === text.innerHTML) return
+    //     // const isTextOneLine = Math.abs(this.getLayerHeight - text.offsetHeight) < text.offsetHeight
+    //     const isTextOneLine = this.config.paragraphs.length === 1
+    //     const textSize = {
+    //       width: Math.ceil(text.getBoundingClientRect().width),
+    //       height: text.getBoundingClientRect().height
+    //     }
+    //     let layerX = this.getLayerPos.x
+    //     const layerY = this.getLayerPos.y
+    //     // TODO: take the rotate angle into pos-compensation consideration
+    //     if (this.config.widthLimit === '' && isTextOneLine) {
+    //       const page = this.$parent.$el as HTMLElement
+    //       const currTextWidth = isTextOneLine ? text.getBoundingClientRect().width : this.getLayerWidth
+    //       // const currTextWidth = isTextOneLine ? this.getTextHW(text.innerHTML, this.config.styles).width : this.getLayerWidth
+    //       layerX = -(currTextWidth - this.getLayerWidth) / 2 + this.getLayerPos.x
+    //       if (layerX <= 0) {
+    //         layerX = 0
+    //         // text.style.width = `${this.getLayerWidth}px`
+    //         textSize.width = this.getLayerWidth
+    //         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+    //       } else if (layerX + currTextWidth >= page.offsetWidth) {
+    //         layerX = page.offsetWidth - this.getLayerWidth
+    //         // text.style.width = `${this.getLayerWidth}px`
+    //         textSize.width = this.getLayerWidth
+    //         ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+    //       } else {
+    //         // text.style.width = `${text.getBoundingClientRect().width}px`
+    //         // text.style.width = `${this.getTextHW(text.innerHTML, this.config.styles).width}px`
+    //         // const HW = this.getTextHW(text.innerHTML, this.config.styles)
+    //         const HW = TextUtils.getTextHW(this.config)
+    //         // text.style.width = `${HW.width}px`
+    //         textSize.width = HW.width
+    //         textSize.height = HW.height
+    //       }
+    //     } else {
+    //       textSize.width = text.getBoundingClientRect().width || this.config.widthLimit
+    //       textSize.height = text.getBoundingClientRect().height
+    //       // textSize.height = text.offsetHeight
+    //       console.log(textSize)
+    //       console.log(text)
+    //     }
+    //     text.style.whiteSpace = 'pre-wrap'
+    //     // text.style.width = `${textSize.width / this.getLayerScale}px`
+    //     // text.style.height = `${textSize.height / this.getLayerScale}px`
+    //     // ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, props)
+    //     ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
+    //     ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width / this.getLayerScale, textSize.height / this.getLayerScale, this.getFontSize + 1)
+    //     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, this.getLayerScale)
+    //     StepsUtils.record()
+    //     this.isControlling = false
+    //   }, 0)
+    // },
     getTextHW(innerText: string, styles: any): { width: number, height: number } {
       const el = document.createElement('span')
       const text = this.$refs.text as HTMLElement

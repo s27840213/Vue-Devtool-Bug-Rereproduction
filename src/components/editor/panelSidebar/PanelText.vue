@@ -17,7 +17,6 @@ import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import TextUtils from '@/utils/textUtils'
 import { mapGetters } from 'vuex'
-import { IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
