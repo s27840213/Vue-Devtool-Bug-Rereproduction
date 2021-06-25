@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(ref="text" class="text")
+  div(ref="text" class="nu-text text")
       p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
         :key="pIndex",
         :style="styles(p.styles)")
@@ -79,9 +79,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-text {
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  // display: flex;
+  // flex-direction: column;
+  // position: relative;
 }
 .text {
   // margin: auto;

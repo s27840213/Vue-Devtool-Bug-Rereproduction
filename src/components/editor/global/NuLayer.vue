@@ -6,8 +6,9 @@
     div(class='layer-scale'
         :class="{'layer-text': config.type === 'text'}"
         :style="scaleStyles()")
-      nu-image(v-if="config.imgControl" style="opacity: 0.45"
-              :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
+      div(v-if="config.imgControl" :style="backImageStyle()")
+        nu-image(style="opacity: 0.45"
+                :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex")
@@ -61,9 +62,6 @@ export default Vue.extend({
       const zindex = (this.layerIndex + 1) * 99
       const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
         { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
-      if (this.config.imgControl) {
-        styles.transform = `translate3d(${this.config.styles.x}px , ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg)`
-      }
       return styles
     },
     scaleStyles() {
@@ -74,6 +72,17 @@ export default Vue.extend({
       return {
         transform: `scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
         'transform-style': this.config.type === 'group' ? 'flat' : (this.config.type === 'tmp' && this.config.styles.zindex > 0) ? 'flat' : 'preserve-3d'
+      }
+    },
+    backImageStyle() {
+      const HW = { width: 0, height: 0 }
+      HW.width = Math.ceil(this.config.styles.width / this.config.styles.scale)
+      HW.height = Math.ceil(this.config.styles.height / this.config.styles.scale)
+      return {
+        position: 'absolute',
+        transform: 'translate(-50%, -50%)',
+        width: `${HW.width}px`,
+        height: `${HW.height}px`
       }
     },
     onDrop(e: DragEvent) {

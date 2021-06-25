@@ -875,12 +875,14 @@ export default Vue.extend({
       const layerIndex = store.getters.getCurrSelectedIndex
       console.log('mutation observer')
       for (const mutation of mutations) {
+        /**
+         * New line
+         */
         if (mutation.type === 'childList' && mutation.target.nodeName === 'DIV') {
           const paragraphs: IParagraph[] = []
           const text = mutation.target as HTMLElement
           if (window.getSelection()) {
             const sel = window.getSelection()
-            console.log('xxxxxxxxxxxxxxx')
             const startContainer = sel?.getRangeAt(0).startContainer
             this.text.offset = sel?.getRangeAt(0).startOffset as number
             this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex

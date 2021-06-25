@@ -2,7 +2,8 @@
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2") {{textFont}}
+      span(class="body-2 text-gray-2")
+      //- {{font()}}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
@@ -74,7 +75,9 @@ export default Vue.extend({
     }),
     textFont: {
       get() {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
+        // return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
+        const font = TextUtils.propReader('fontFamily')
+        return typeof font !== 'undefined' ? font : 'multi-fonts'
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
@@ -89,6 +92,8 @@ export default Vue.extend({
     fontSize: {
       get() {
         return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+        // const size = TextUtils.propReader('fontSize')
+        // return typeof size !== 'undefined' ? Math.ceil(parseInt(size)) : '--'
       },
       set(value) {
         this.$store.commit('UPDATE_layerStyles', {
@@ -176,6 +181,11 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number) {
       TextUtils.fontSizeStepping(step)
+    },
+    font() {
+      console.log('fontChanged')
+      const font = TextUtils.propReader('fontFamily')
+      return typeof font !== 'undefined' ? font : 'multi-fonts'
     }
   }
 })

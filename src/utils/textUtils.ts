@@ -9,7 +9,7 @@ class TextUtils {
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
-  onPropertyClick(iconName: string) {
+  onPropertyClick(propName: string) {
     if (window.getSelection() && window.getSelection()?.toString() !== '') {
       const sel = window.getSelection()
       const range = sel?.getRangeAt(0)
@@ -39,7 +39,7 @@ class TextUtils {
       if (!div || !range || !range.startContainer || !range.endContainer ||
         typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
 
-      const prop = this.propIndicator(div, start, end, iconName)
+      const prop = this.propIndicator(div, start, end, propName)
       console.log(prop)
       for (let i = start.pIndex; i < div.childNodes.length; i++) {
         const p = div.childNodes[i]
@@ -96,7 +96,58 @@ class TextUtils {
     }
   }
 
-  propIndicator(text: Node, start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, iconName: string): { [key:string]: string } {
+  propReader (prop: string): string | undefined {
+    if (window.getSelection()) {
+      const sel = window.getSelection()
+      const range = sel?.getRangeAt(0)
+      let div = range?.commonAncestorContainer
+      while (div?.parentNode && div?.nodeName !== 'DIV') {
+        div = div?.parentNode
+      }
+      const start = {
+        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
+        offset: range?.startOffset
+      }
+      const end: { [key: string]: number } = {}
+
+      if (window.getSelection()?.toString() !== '') {
+        end.pIndex = parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string)
+        end.sIndex = parseInt(range?.endContainer?.parentElement?.dataset.sindex as string)
+        end.offset = range?.endOffset as number
+      }
+
+      if (!div || !range || !range.startContainer || !range.endContainer ||
+        typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
+
+      let flag = false
+      let origin = ''
+      if (prop === 'fontFamily') {
+        origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontFamily
+      } else if (prop === 'fontSize') {
+        origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontSize
+      }
+      for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+        const p = div.childNodes[pidx]
+        for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
+          const span = p.childNodes[sidx] as HTMLElement
+          if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
+          console.log(flag)
+          if (prop === 'fontFamily' && origin !== span.style.fontFamily) {
+            flag = true
+            break
+          } else if (prop === 'fontSize' && origin !== span.style.fontSize) {
+            flag = true
+            break
+          }
+        }
+        if (flag) break
+      }
+      return flag ? undefined : origin
+    }
+  }
+
+  propIndicator(text: Node, start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string): { [key:string]: string } {
     const prop: { [key: string]: string } = {}
     let flag = false
     for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
@@ -104,28 +155,37 @@ class TextUtils {
       for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
         const span = p.childNodes[sidx]
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        if (iconName === 'bold') {
-          prop.fontWeight = 'normal'
-          if ((span as HTMLElement).style.fontWeight === 'normal') {
-            prop.fontWeight = 'bold'
-            flag = true
+        switch (propName) {
+          case 'bold': {
+            prop.fontWeight = 'normal'
+            if ((span as HTMLElement).style.fontWeight === 'normal') {
+              prop.fontWeight = 'bold'
+              flag = true
+            }
             break
           }
-        } else if (iconName === 'underline') {
-          prop.textDecorationLine = 'none'
-          if ((span as HTMLElement).style.textDecorationLine === 'none') {
-            prop.textDecorationLine = 'underline'
-            flag = true
+          case 'underline': {
+            prop.textDecorationLine = 'none'
+            if ((span as HTMLElement).style.textDecorationLine === 'none') {
+              prop.textDecorationLine = 'underline'
+              flag = true
+            }
             break
           }
-        } else if (iconName === 'italic') {
-          prop.fontStyle = 'normal'
-          if ((span as HTMLElement).style.fontStyle === 'normal') {
-            prop.fontStyle = 'italic'
-            flag = true
+          case 'italic': {
+            prop.fontStyle = 'normal'
+            if ((span as HTMLElement).style.fontStyle === 'normal') {
+              prop.fontStyle = 'italic'
+              flag = true
+            }
             break
+          }
+          default: {
+            prop.fontFamily = propName
+            flag = true
           }
         }
+        if (flag) break
       }
       if (flag) break
     }
@@ -151,29 +211,29 @@ class TextUtils {
     // this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
   }
 
-  spanPropsHandler(span: HTMLElement, iconName: string): ISpanCssStyle {
-    const prop: { [key: string]: string } = {}
-    if (iconName === 'bold') {
-      let fontWeight = 'normal'
-      if (span.style.fontWeight === 'normal') {
-        fontWeight = 'bold'
-      }
-      prop.fontWeight = fontWeight
-    } else if (iconName === 'underline') {
-      let textDecorationLine = 'none'
-      if (span.style.textDecorationLine === 'none') {
-        textDecorationLine = 'underline'
-      }
-      prop.textDecorationLine = textDecorationLine
-    } else if (iconName === 'italic') {
-      let fontStyle = 'normal'
-      if (span.style.fontStyle === 'normal') {
-        fontStyle = 'italic'
-      }
-      prop.fontStyle = fontStyle
-    }
-    return this.spanStyleTransformer(span, prop)
-  }
+  // spanPropsHandler(span: HTMLElement, iconName: string): ISpanCssStyle {
+  //   const prop: { [key: string]: string } = {}
+  //   if (iconName === 'bold') {
+  //     let fontWeight = 'normal'
+  //     if (span.style.fontWeight === 'normal') {
+  //       fontWeight = 'bold'
+  //     }
+  //     prop.fontWeight = fontWeight
+  //   } else if (iconName === 'underline') {
+  //     let textDecorationLine = 'none'
+  //     if (span.style.textDecorationLine === 'none') {
+  //       textDecorationLine = 'underline'
+  //     }
+  //     prop.textDecorationLine = textDecorationLine
+  //   } else if (iconName === 'italic') {
+  //     let fontStyle = 'normal'
+  //     if (span.style.fontStyle === 'normal') {
+  //       fontStyle = 'italic'
+  //     }
+  //     prop.fontStyle = fontStyle
+  //   }
+  //   return this.spanStyleTransformer(span, prop)
+  // }
 
   textVertical() {
     let writingMode = 'initial'

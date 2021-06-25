@@ -15,12 +15,6 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number
   },
-  computed: {
-    // isClipped(): boolean {
-    //   return this.config.path !== ''
-    //   // return !(this.config.styles.initWidth === this.config.styles.width && this.config.styles.initHeight === this.config.styles.height)
-    // }
-  },
   methods: {
     styles() {
       const HW = { width: 0, height: 0 }

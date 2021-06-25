@@ -60,7 +60,7 @@
           :style="styles()")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
-            component(:is="layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
               :key="`controller-${index}`"
               :layerIndex="index"

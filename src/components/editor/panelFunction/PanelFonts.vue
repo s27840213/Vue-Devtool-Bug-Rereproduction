@@ -59,8 +59,7 @@ export default Vue.extend({
       this.$emit('closeFontsPanel')
     },
     setFont(font: string) {
-      LayerUtils.updateLayerStyles(this.lastSelectedPageIndex, this.currSelectedIndex, { font: font })
-      TextUtils.updateLayerSize()
+      TextUtils.onPropertyClick(font)
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]
