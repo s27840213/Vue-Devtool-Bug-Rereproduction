@@ -9,14 +9,28 @@ class TextUtils {
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
-  onPropertyClick(propName: string) {
-    if (window.getSelection() && window.getSelection()?.toString() !== '') {
-      const sel = window.getSelection()
-      const range = sel?.getRangeAt(0)
-      let div = range?.commonAncestorContainer
-      while (div?.parentNode && div?.nodeName !== 'DIV') {
-        div = div?.parentNode
+  onPropertyClick(propName: string, value = '', selStart = {}, selEnd = {}, el = {}) {
+    const sel = this.getSelection()
+    if (sel && Object.keys(sel.end).length !== 0) {
+      const div = sel.div
+      const start = {
+        pIndex: 0,
+        sIndex: 0,
+        offset: 0
       }
+      const end = {
+        pIndex: 0,
+        sIndex: 0,
+        offset: 0
+      }
+      if (Object.keys(selStart).length === 0 && Object.keys(selEnd).length === 0) {
+        Object.assign(start, sel.start)
+        Object.assign(end, sel.end)
+      } else {
+        Object.assign(start, selStart)
+        Object.assign(end, selEnd)
+      }
+
       const observer = new MutationObserver(ControlUtils.onTyping)
       observer.observe(div as HTMLElement, {
         characterData: true,
@@ -26,20 +40,8 @@ class TextUtils {
         attributeOldValue: false,
         characterDataOldValue: false
       })
-      const start = {
-        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
-        offset: range?.startOffset
-      }
-      const end = {
-        pIndex: parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string),
-        sIndex: parseInt(range?.endContainer?.parentElement?.dataset.sindex as string),
-        offset: range?.endOffset
-      }
-      if (!div || !range || !range.startContainer || !range.endContainer ||
-        typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
 
-      const prop = this.propIndicator(div, start, end, propName)
+      const prop = this.propIndicator(div, start, end, propName, value)
       console.log(prop)
       for (let i = start.pIndex; i < div.childNodes.length; i++) {
         const p = div.childNodes[i]
@@ -54,6 +56,7 @@ class TextUtils {
             spanEl.innerText = text.substr(0, start.offset)
             const newSpan = document.createElement('span')
             newSpan.innerText = text.substr(start.offset)
+            // apply props
             Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
             span.after(newSpan)
             j++
@@ -82,72 +85,63 @@ class TextUtils {
           }
         }
       }
-      // if (iconName.substring(0, 10) === 'text-align') {
-      //   this.textAlign(iconName)
-      // } else if (iconName === 'bold') {
-      //   this.textBold()
-      // } else if (iconName === 'underline') {
-      //   this.textUnderline()
-      // } else if (iconName === 'italic') {
-      //   this.textItalic()
-      // } else if (iconName === 'font-vertical') {
-      //   this.textVertical()
-      // }
     }
   }
 
+  /**
+   *
+   * @param prop A string about the desired props: fontSize/fontFamily.
+   * @returns The desired props value accord to the current selection range.
+   */
   propReader (prop: string): string | undefined {
-    if (window.getSelection()) {
-      const sel = window.getSelection()
-      const range = sel?.getRangeAt(0)
-      let div = range?.commonAncestorContainer
-      while (div?.parentNode && div?.nodeName !== 'DIV') {
-        div = div?.parentNode
-      }
-      const start = {
-        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
-        offset: range?.startOffset
-      }
-      const end: { [key: string]: number } = {}
-
-      if (window.getSelection()?.toString() !== '') {
-        end.pIndex = parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string)
-        end.sIndex = parseInt(range?.endContainer?.parentElement?.dataset.sindex as string)
-        end.offset = range?.endOffset as number
-      }
-
-      if (!div || !range || !range.startContainer || !range.endContainer ||
-        typeof start.offset === 'undefined' || typeof end.offset === 'undefined') return
-
-      let flag = false
-      let origin = ''
-      if (prop === 'fontFamily') {
-        origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontFamily
-      } else if (prop === 'fontSize') {
-        origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontSize
-      }
-      for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-        const p = div.childNodes[pidx]
-        for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
-          const span = p.childNodes[sidx] as HTMLElement
-          if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-          console.log(flag)
-          if (prop === 'fontFamily' && origin !== span.style.fontFamily) {
-            flag = true
-            break
-          } else if (prop === 'fontSize' && origin !== span.style.fontSize) {
-            flag = true
-            break
-          }
-        }
-        if (flag) break
-      }
-      return flag ? undefined : origin
+    const sel = this.getSelection()
+    if (!sel) return
+    const div = sel.div
+    const start = {
+      pIndex: 0,
+      sIndex: 0,
+      offset: 0
     }
+    const end = {
+      pIndex: 0,
+      sIndex: 0,
+      offset: 0
+    }
+    Object.assign(start, sel.start)
+    Object.assign(end, sel.end)
+
+    // selection is not a range (only caret)
+    if (Object.keys(end).length === 0) {
+      return (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style[`${prop}` as any]
+    }
+
+    let flag = false
+    let origin = ''
+    if (prop === 'fontFamily') {
+      origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontFamily
+    } else if (prop === 'fontSize') {
+      origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontSize
+    }
+    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+      const p = div.childNodes[pidx]
+      for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
+        const span = p.childNodes[sidx] as HTMLElement
+        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
+        console.log(flag)
+        if (prop === 'fontFamily' && origin !== span.style.fontFamily) {
+          flag = true
+          break
+        } else if (prop === 'fontSize' && origin !== span.style.fontSize) {
+          flag = true
+          break
+        }
+      }
+      if (flag) break
+    }
+    return flag ? undefined : origin
   }
 
-  propIndicator(text: Node, start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string): { [key:string]: string } {
+  propIndicator(text: Node, start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value = ''): { [key:string]: string } {
     const prop: { [key: string]: string } = {}
     let flag = false
     for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
@@ -180,10 +174,17 @@ class TextUtils {
             }
             break
           }
-          default: {
-            prop.fontFamily = propName
+          case 'fontFamily': {
+            prop.fontFamily = value
             flag = true
+            break
           }
+          case 'fontSize': {
+            prop.fontSize = `${value}px`
+            flag = true
+            break
+          }
+          default: { }
         }
         if (flag) break
       }
@@ -193,6 +194,7 @@ class TextUtils {
   }
 
   spanStyleTransformer(span: HTMLElement, prop: { [key: string]: string }): ISpanCssStyle {
+    console.log(prop)
     const spanStyle = {
       fontFamily: span.style.fontFamily,
       fontWeight: span.style.fontWeight,
@@ -201,8 +203,13 @@ class TextUtils {
       fontStyle: span.style.fontStyle,
       color: span.style.color,
       opacity: span.style.opacity
+      // shadow-:
     }
     return Object.assign(spanStyle, prop)
+  }
+
+  isArrowKey(e: KeyboardEvent): boolean {
+    return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
   }
 
   // TODO: align is for paragraphs
@@ -210,30 +217,6 @@ class TextUtils {
     const align = iconName.substring(11, iconName.length)
     // this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
   }
-
-  // spanPropsHandler(span: HTMLElement, iconName: string): ISpanCssStyle {
-  //   const prop: { [key: string]: string } = {}
-  //   if (iconName === 'bold') {
-  //     let fontWeight = 'normal'
-  //     if (span.style.fontWeight === 'normal') {
-  //       fontWeight = 'bold'
-  //     }
-  //     prop.fontWeight = fontWeight
-  //   } else if (iconName === 'underline') {
-  //     let textDecorationLine = 'none'
-  //     if (span.style.textDecorationLine === 'none') {
-  //       textDecorationLine = 'underline'
-  //     }
-  //     prop.textDecorationLine = textDecorationLine
-  //   } else if (iconName === 'italic') {
-  //     let fontStyle = 'normal'
-  //     if (span.style.fontStyle === 'normal') {
-  //       fontStyle = 'italic'
-  //     }
-  //     prop.fontStyle = fontStyle
-  //   }
-  //   return this.spanStyleTransformer(span, prop)
-  // }
 
   textVertical() {
     let writingMode = 'initial'
@@ -252,6 +235,8 @@ class TextUtils {
   }
 
   fontSizeStepping(step: number) {
+    this.getSelection()
+
     let size = this.getCurrLayer.styles.size
     if (size) {
       if (typeof size === 'string') {
@@ -270,22 +255,36 @@ class TextUtils {
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
-  // getTextHW(text: string, styles: any, width = `${this.getCurrLayer.widthLimit as number}px`) {
-  //   const el = document.createElement('span')
-  //   el.style.whiteSpace = 'pre-wrap'
-  //   el.style.display = 'inline-block'
-  //   el.style.overflowWrap = 'break-word'
-  //   el.style.width = width
-  //   el.innerHTML = text
-  //   Object.assign(el.style, CssConveter.convertFontStyle(styles))
-  //   document.body.appendChild(el)
-  //   const textHW = {
-  //     width: Math.ceil(el.getBoundingClientRect().width),
-  //     height: Math.ceil(el.getBoundingClientRect().height)
-  //   }
-  //   document.body.removeChild(el)
-  //   return textHW
-  // }
+  getSelection(): { div: Node, start: { [key: string]: number }, end: { [key: string]: number } } | undefined {
+    if (window.getSelection()) {
+      const sel = window.getSelection()
+      const range = sel?.getRangeAt(0)
+      let div = range?.commonAncestorContainer
+      while (div?.parentNode && div?.nodeName !== 'DIV') {
+        div = div?.parentNode
+      }
+      const start = {
+        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
+        offset: range?.startOffset as number
+      }
+
+      if (!div || !range || !range.startContainer || !range.endContainer) return undefined
+      const end: { [key: string]: number } = {}
+
+      if (window.getSelection()?.toString() !== '') {
+        end.pIndex = parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string)
+        end.sIndex = parseInt(range?.endContainer?.parentElement?.dataset.sindex as string)
+        end.offset = range?.endOffset as number
+      }
+      return {
+        div,
+        start,
+        end
+      }
+    }
+  }
+
   getTextHW(content: IText, width = -1) {
     const body = document.createElement('div')
     content.paragraphs.forEach(pData => {

@@ -161,7 +161,6 @@ class Controller {
             } as ISpanStyle
             const text = spanEl.innerText as string
             if (text !== '') {
-              console.log(text)
               spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
             }
           })
@@ -185,7 +184,6 @@ class Controller {
         const removedP = []
         for (const p of text.childNodes) {
           const pEl = p as HTMLElement
-          console.log(pEl.dataset.pindex)
           if (parseInt(pEl.dataset.pindex as string) === pIndex) {
             // text.removeChild(p)
             removedP.push(p)

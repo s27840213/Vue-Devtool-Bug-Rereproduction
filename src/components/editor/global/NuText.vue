@@ -37,8 +37,8 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
-        console.log('changedSizeProps')
-        setTimeout(() => {
+        console.log('updateTextSize')
+        this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
           const scale = this.config.styles.scale
           text.style.width = this.config.widthLimit === -1 ? 'fit-content' : `${this.config.widthLimit}px`
@@ -47,10 +47,11 @@ export default Vue.extend({
             width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
             height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
           }
+          console.log(textHW)
           text.style.width = `${Math.ceil(textHW.width / scale)}px`
           text.style.height = `${Math.ceil(textHW.height / scale)}px`
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
-        }, 0)
+        })
       },
       deep: true
     }
@@ -91,7 +92,6 @@ export default Vue.extend({
   }
   &__span {
     text-align: left;
-    outline: none;
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }

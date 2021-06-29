@@ -2,17 +2,16 @@
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2")
-      //- {{font()}}
+      span(class="body-2 text-gray-2") {{ fontFamily }}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
-        input(class="body-2 text-gray-2" type="number" v-model="fontSize")
+        input(class="body-2 text-gray-2" type="text" @mousedown="fontSizeInput" v-model="fontSize")
         div(class="text-setting__font-stepper")
-          svg-icon(class="pointer" @click.native="fontSizeStepping(2)"
+          svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
             :iconName="'chevron-up'" :iconColor="'gray-2'" :iconWidth="'9px'")
-          svg-icon(class="pointer" @click.native="fontSizeStepping(-2)"
+          svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
             :iconName="'chevron-down'" :iconColor="'gray-2'" :iconWidth="'14px'")
         //- svg-icon(class="pointer"
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
@@ -52,6 +51,9 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
+import store from '@/store'
+import { IText } from '@/interfaces/layer'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -63,8 +65,31 @@ export default Vue.extend({
         'sans-serif',
         'Manrop',
         'Lobster'
-      ]
+      ],
+      selection: {
+        start: {
+          sIndex: 0,
+          pIndex: 0,
+          offset: 0
+        },
+        end: {
+          sIndex: 0,
+          pIndex: 0,
+          offset: 0
+        }
+      },
+      fontFamily: '',
+      size: '--'
     }
+  },
+  mounted() {
+    this.$root.$on('textSelection', (selectRange: boolean) => {
+      const font = TextUtils.propReader('fontFamily')
+      this.fontFamily = typeof font !== 'undefined' ? font : 'multi-fonts'
+
+      const size = TextUtils.propReader('fontSize')
+      this.size = typeof size !== 'undefined' ? size : '--'
+    })
   },
   computed: {
     ...mapGetters({
@@ -91,22 +116,17 @@ export default Vue.extend({
     },
     fontSize: {
       get() {
-        return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+        return this.size
+        // return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
         // const size = TextUtils.propReader('fontSize')
         // return typeof size !== 'undefined' ? Math.ceil(parseInt(size)) : '--'
       },
       set(value) {
-        this.$store.commit('UPDATE_layerStyles', {
-          pageIndex: this.lastSelectedPageIndex,
-          layerIndex: this.currSelectedIndex,
-          styles: {
-            size: value
-          }
-        })
-        if (typeof value === 'string') {
-          const step = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size - parseInt(value)
-          TextUtils.fontSizeStepping(step)
-        }
+        TextUtils.onPropertyClick('fontSize', value as string, this.selection.start, this.selection.end)
+        // if (typeof value === 'string') {
+        //   const step = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size - parseInt(value)
+        //   TextUtils.fontSizeStepping(step)
+        // }
       }
     },
     textColor: {
@@ -180,12 +200,57 @@ export default Vue.extend({
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {
-      TextUtils.fontSizeStepping(step)
+      // TextUtils.fontSizeStepping(step)
+      const sel = TextUtils.getSelection()
+      if (sel) {
+        Object.assign(this.selection.start, sel.start)
+        Object.assign(this.selection.end, sel.end)
+      }
+      setTimeout(() => {
+        const select = window.getSelection()
+        if (select) {
+          const range = new Range()
+          const node = sel?.div.childNodes[sel.start.pIndex].childNodes[sel.start.sIndex].firstChild as Node
+          range.setStart(node, sel?.start.offset as number)
+          const start = {
+            pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+            sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
+            offset: range?.startOffset as number
+          }
+          console.log(node)
+          select.removeAllRanges()
+          select.addRange(range)
+
+          const config = (this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as IText)
+          console.log(config.paragraphs[start.pIndex])
+          const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
+          this.updateLayerParagraphs(this.lastSelectedPageIndex, this.currSelectedIndex, start.pIndex, start.sIndex, { size: fontSize + step })
+
+          const size = TextUtils.propReader('fontSize')
+          this.size = typeof size !== 'undefined' ? size : '--'
+        }
+      }, 0)
     },
-    font() {
-      console.log('fontChanged')
-      const font = TextUtils.propReader('fontFamily')
-      return typeof font !== 'undefined' ? font : 'multi-fonts'
+    fontSizeInput() {
+      const sel = TextUtils.getSelection()
+      if (sel) {
+        Object.assign(this.selection.start, sel.start)
+        Object.assign(this.selection.end, sel.end)
+      }
+      console.log(this.selection)
+    },
+    updateLayerParagraphs(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, props: { [key: string]: string | number }) {
+      const config = this.getLayer(pageIndex, layerIndex) as IText
+      const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
+      console.log(config.paragraphs[pIndex].spans[sIndex].styles.size)
+      Object.assign(paragraphs[pIndex].spans[sIndex].styles, props)
+      console.log(props)
+      console.log(paragraphs[pIndex].spans[sIndex].styles.size)
+      store.commit('UPDATE_layerProps', {
+        pageIndex,
+        layerIndex,
+        props: { paragraphs }
+      })
     }
   }
 })

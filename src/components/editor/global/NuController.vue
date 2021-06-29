@@ -25,7 +25,7 @@
               span(v-for="(span, sIndex) in p.spans" class="text__span"
                 :data-sindex="sIndex"
                 :key="span.id",
-                :style="textStyles(span.styles)")
+                :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -41,18 +41,19 @@
               @mousedown.left.stop="scaleStart")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart")
-            div(class="resize-bar"
+            div(class="control-point__resize-bar"
                 :key="index * 2 + 1"
                 :style="resizerBarStyles(resizer)")
             div(class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
-          div(class="rotaterWrapper")
-            div(class="rotater" @mousedown.left.stop="rotateStart")
+          div(class="control-point__rotater-wrapper")
+            div(class="control-point__rotater" @mousedown.left.stop="rotateStart")
               svg-icon(:iconName="'rotate'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import MathUtils from '@/utils/mathUtils'
+import { v4 as uuidv4 } from 'uuid'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -78,7 +79,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      paragraphs: [],
       MappingUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
@@ -97,49 +97,6 @@ export default Vue.extend({
       contentEditable: false
     }
   },
-  updated: function () {
-    if (this.getLayerType === 'text' && !this.isControlling) {
-      this.$nextTick(function () {
-        const text = this.$refs.text as HTMLElement
-        // (this.config as IText).paragraphs.forEach((p, pIndex) => {
-        //   p.spans.forEach((s, sIndex) => {
-        //     console.log('sIndex: ', sIndex, 'pIndex: ', pIndex)
-        //     text.childNodes[pIndex].childNodes[sIndex].textContent = s.text
-        //   })
-        // })
-        if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
-          text.removeChild(text.lastChild)
-        }
-        text.childNodes.forEach((p, pIndex) => {
-          (p as HTMLElement).childNodes.forEach((span, sIndex) => {
-            span.textContent = (this.config as IText).paragraphs[pIndex].spans[sIndex].text
-          })
-        })
-        if (window.getSelection()) {
-          var sel = window.getSelection() as Selection
-          if (sel.rangeCount !== 0 && sel.toString() === '') {
-            var range = sel?.getRangeAt(0)
-            if (!Number.isNaN(this.text.pIndex) && !Number.isNaN(this.text.sIndex) && this.text.offset >= 0) {
-              /**
-               * The specified pIndex, sIndex node might be undefined, this would be caused as some node was deleted before re-render (before sIndex be refresh)
-               */
-              if (typeof (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex] === 'undefined') {
-                this.text.sIndex -= 1
-                this.text.sIndex = this.text.sIndex >= 0 ? this.text.sIndex : 0
-              }
-              const node = (this.$refs.text as HTMLElement).childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild
-              if (node) {
-                range.setStart(node as Node, this.text.offset)
-                range.setEnd(node as Node, this.text.offset)
-                sel.removeAllRanges()
-                sel.addRange(range)
-              }
-            }
-          }
-        }
-      })
-    }
-  },
   mounted() {
     // console.log(this.config)
     const body = this.$refs.body as HTMLElement
@@ -150,7 +107,6 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
-    this.textInit()
   },
   computed: {
     ...mapGetters({
@@ -208,26 +164,6 @@ export default Vue.extend({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     }
-    // 'config.styles.size': function() {
-    //   if (this.getLayerType !== 'text') return
-    //   this.$nextTick(() => {
-    //     const text = this.$refs.text as HTMLElement
-    //     text.style.width = `${this.getLayerWidth}px`
-    //   })
-    // }
-    // changedSize: {
-    //   handler: function() {
-    //     if (this.getLayerType !== 'text') return
-    //     this.$nextTick(() => {
-    //       const text = this.$refs.text as HTMLElement
-    //       if (text) {
-    //         this.textInit()
-    //         // text.style.width = `${this.getLayerWidth}px`
-    //       }
-    //     })
-    //   },
-    //   deep: true
-    // }
   },
   methods: {
     ...mapMutations({
@@ -289,16 +225,6 @@ export default Vue.extend({
         'writing-mode': this.config.styles.writingMode
       }
       return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
-    },
-    textInit() {
-      if (this.getLayerType !== 'text') return
-      const text = this.$refs.text as HTMLElement
-      const textConfig = this.config as IText
-      textConfig.paragraphs.forEach((p, pIndex) => {
-        p.spans.forEach((s, sIndex) => {
-          text.childNodes[pIndex].childNodes[sIndex].textContent = s.text
-        })
-      })
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -814,19 +740,12 @@ export default Vue.extend({
         const sel = window.getSelection()
         if (sel && sel.rangeCount !== 0) {
           console.log('-----820------')
+          this.$root.$emit('textSelection', sel.toString() !== '')
           const range = sel.getRangeAt(0)
-          if (range && sel.toString() === '') {
-            const startContainer = range.startContainer
-            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            this.text.offset = range.startOffset
-          } else if (sel.toString() !== '') {
-            const startContainer = range.startContainer
-            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            this.text.offset = range.startOffset
-            console.log('A range is selected')
-          }
+          const startContainer = range.startContainer
+          this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+          this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+          this.text.offset = range.startOffset
         }
       }
     },
@@ -835,17 +754,22 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         if (sel) {
-          console.log('-----840------')
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
+            console.log('-----840------')
+            // console.log(startContainer?.parentElement)
             if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
               console.log('NaN')
               // e.preventDefault()
               // return
             }
-            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            // setTimeout(() => {
+            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+            //   // console.log('update in nextick')
+            //   // console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
+            // }, 0)
             if (e.key === 'Backspace') {
               if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
@@ -854,11 +778,10 @@ export default Vue.extend({
                 ControlUtils.textStopPropagation(e)
               }
             }
-            console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
             // this.onTyping(e, pIndex, sIndex)
           }
         }
-        const observer = new MutationObserver(this.onTyping)
+        const observer = new MutationObserver(this.onTyping(e))
         observer.observe(text, {
           characterData: true,
           childList: true,
@@ -869,33 +792,38 @@ export default Vue.extend({
         })
       }
     },
-    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
-      observer.disconnect()
-      const pageIndex = store.state.lastSelectedPageIndex
-      const layerIndex = store.getters.getCurrSelectedIndex
-      console.log('mutation observer')
-      for (const mutation of mutations) {
-        /**
-         * New line
-         */
-        if (mutation.type === 'childList' && mutation.target.nodeName === 'DIV') {
-          const paragraphs: IParagraph[] = []
-          const text = mutation.target as HTMLElement
-          if (window.getSelection()) {
-            const sel = window.getSelection()
-            const startContainer = sel?.getRangeAt(0).startContainer
-            this.text.offset = sel?.getRangeAt(0).startOffset as number
-            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-          }
-          console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
-          const ps = text.childNodes
-          const scale = store.getters.getLayer(pageIndex, layerIndex).styles.scale
-          ps.forEach((p) => {
-            const spans: ISpan[] = []
-            p.childNodes.forEach((span) => {
-              const spanEl = span as HTMLElement
-              // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
+    onTyping(e: KeyboardEvent) {
+      return (mutations: MutationRecord[], observer: MutationObserver) => {
+        observer.disconnect()
+        const paragraphs: IParagraph[] = []
+        const scale = this.getLayerScale
+        const div = this.$refs.text as HTMLElement
+        const ps = div.childNodes
+        const config = (this.config as IText)
+        ps.forEach((p, pIndex) => {
+          const spans: ISpan[] = []
+          // let flag = true
+          for (const [sIndex, span] of p.childNodes.entries()) {
+            if (span instanceof HTMLElement) {
+              let spanEl = span as HTMLElement
+              const text = spanEl.innerText as string
+              /**
+               * If the span is the same without changed, skip parse it, save rendering resouce
+               * the variable flag is used for indicating whether the paragraph changes or not
+               */
+              if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
+                spans.push((this.config as IText).paragraphs[pIndex].spans[sIndex])
+                continue
+              }
+              // flag = false
+              /**
+               *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
+               *  below detect the situation and use the style of the last span of previous p to replace it.
+               */
+              if (spanEl.style.fontFamily === '') {
+                const leng = div.childNodes[pIndex - 1].childNodes.length
+                spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
+              }
               const spanStyle = {
                 font: spanEl.style.fontFamily,
                 weight: spanEl.style.fontWeight,
@@ -906,164 +834,127 @@ export default Vue.extend({
                 color: spanEl.style.color,
                 opacity: parseInt(spanEl.style.opacity)
               } as ISpanStyle
-              const text = spanEl.innerText as string
-              if (text !== '') {
-                spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+              spanEl = span as HTMLElement
+              spans.push({ text: text, styles: spanStyle, id: uuidv4() })
+            }
+          }
+          const pEl = p as HTMLElement
+          const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+          pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
+          pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
+          pStyle.align = pEl.style.textAlign
+          // if (flag) {
+          //   paragraphs.push(config.paragraphs[pIndex])
+          // } else {
+          paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
+          // }
+        })
+        console.log(paragraphs)
+        if (window.getSelection()) {
+          const sel = window.getSelection()
+          console.log('-----968------')
+          const startContainer = sel?.getRangeAt(0).startContainer
+          // if the belowcondition is false, means some paragraph (p-node) is removed
+          if (startContainer?.parentElement?.dataset.sindex) {
+            this.text.offset = sel?.getRangeAt(0).startOffset as number
+            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+            console.log(this.text.pIndex)
+            console.log(this.text.sIndex)
+            console.log(this.text.offset)
+            // used for deleting the first span of the text, and moving the caret to the previous p
+            const isSpanDeleted = paragraphs[this.text.pIndex].spans.length < (this.config as IText).paragraphs[this.text.pIndex].spans.length
+            if (e.key !== 'Enter' && isSpanDeleted && this.text.sIndex === 1 && this.text.offset === 0) {
+              console.log(this.text.pIndex)
+              console.log(this.text.sIndex)
+              console.log(this.text.offset)
+              this.text.pIndex -= 1
+              // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
+              if (this.text.pIndex < 0) {
+                const pageIndex = this.pageIndex
+                const layerIndex = this.layerIndex
+                store.commit('UPDATE_textProps', {
+                  pageIndex,
+                  layerIndex,
+                  paragraphs
+                })
+                this.$nextTick(() => {
+                  const sel = window.getSelection()
+                  if (sel) {
+                    const range = new Range()
+                    const text = this.$refs.text as HTMLElement
+                    console.log(text)
+                    range.setStart(text.childNodes[0].childNodes[0].firstChild as Node, 0)
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                  }
+                })
               }
-            })
-            const pEl = p as HTMLElement
-            const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
-            pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
-            pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
-            pStyle.align = pEl.style.textAlign
-            if (spans.length !== 0) {
-              paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+              this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1
+              this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length
+            } else if (e.key === 'Enter') {
+              console.log(e.key === 'Enter')
+              this.text.pIndex += 1
+              this.text.sIndex = 0
+              this.text.offset = 0
             }
-          })
-          console.log(paragraphs)
-          text.style.width = 'initial'
-          text.style.height = 'initial'
-          const textHW = {
-            width: Math.ceil(text.getBoundingClientRect().width),
-            height: Math.ceil(text.getBoundingClientRect().height)
-          }
-          let pIndex = -1
-          const removedP = []
-          for (const p of text.childNodes) {
-            const pEl = p as HTMLElement
-            console.log(pEl.dataset.pindex)
-            if (parseInt(pEl.dataset.pindex as string) === pIndex) {
-              // text.removeChild(p)
-              removedP.push(p)
-              // break
-            } else {
-              pIndex = parseInt(pEl.dataset.pindex as string)
-            }
-          }
-          if (removedP.length !== 0) {
+          } else if (e.key === 'Enter') {
+            console.log('inNewLine and some node gone')
+            console.log(startContainer?.parentElement)
+            console.log(startContainer)
             this.text.pIndex += 1
             this.text.sIndex = 0
             this.text.offset = 0
-          }
-          console.log(removedP)
-          removedP.forEach(p => {
-            text.removeChild(p)
-          })
-          store.commit('UPDATE_layerStyles', {
-            pageIndex,
-            layerIndex,
-            styles: {
-              width: textHW.width,
-              height: textHW.height,
-              scale
+          } else if (TextUtils.isArrowKey(e)) {
+            /**
+             *  If the input key is ArrowKey, the startContainer will be different as the other key pressed
+             */
+            if (typeof startContainer?.parentElement !== 'undefined' && typeof startContainer?.parentElement !== 'undefined') {
+              this.text.offset = sel?.getRangeAt(0).startOffset as number
+              this.text.sIndex = parseInt((startContainer as HTMLElement).dataset.sindex as string)
+              this.text.pIndex = parseInt(startContainer?.parentElement?.dataset.pindex as string)
             }
-          })
-          store.commit('UPDATE_layerStyles', {
-            pageIndex,
-            layerIndex,
-            styles: {
-              initWidth: Math.ceil(textHW.width / scale),
-              initHeight: Math.ceil(textHW.height / scale),
-              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize
-            }
-          })
-          if (paragraphs.length !== 0) {
-            store.commit('UPDATE_textProps', {
-              pageIndex,
-              layerIndex,
-              paragraphs
-            })
+          } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
+            /**
+             * some paragraph is deleted
+             */
+            console.log(this.text.pIndex)
+            console.log(this.text.sIndex)
+            console.log(this.text.offset)
+            this.text.pIndex -= 1
+            this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1 >= 0 ? paragraphs[this.text.pIndex].spans.length - 1 : 0
+            this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex] ? paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length : 0
           }
-          break
-        } else if (mutation.type === 'characterData' || mutation.type === 'childList') {
-          console.log('characterData')
-          // console.log(mutation)
-          const paragraphs: IParagraph[] = []
-          let text = mutation.target as HTMLElement
-          while (text.nodeName !== 'DIV' && text.parentElement) {
-            text = text.parentElement
-          }
-          if (window.getSelection()) {
-            const sel = window.getSelection()
-            console.log('-----1013------')
-            const startContainer = sel?.getRangeAt(0).startContainer
-            this.text.offset = sel?.anchorOffset as number
-            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-          }
-          const ps = text.childNodes
-          const scale = store.getters.getLayer(pageIndex, layerIndex).styles.scale
-          ps.forEach((p) => {
-            const spans: ISpan[] = []
-            p.childNodes.forEach((span) => {
-              if (span instanceof HTMLElement) {
-                // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
-                const spanEl = span as HTMLElement
-                const spanStyle = {
-                  font: spanEl.style.fontFamily,
-                  weight: spanEl.style.fontWeight,
-                  size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
-                  initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-                  decoration: spanEl.style.textDecorationLine,
-                  style: spanEl.style.fontStyle,
-                  color: spanEl.style.color,
-                  opacity: parseInt(spanEl.style.opacity)
-                } as ISpanStyle
-                const text = spanEl.innerText as string
-                spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
-              }
-            })
-            const pEl = p as HTMLElement
-            const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
-            pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
-            pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
-            pStyle.align = pEl.style.textAlign
-            paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
-          })
-          text.style.width = 'initial'
-          text.style.height = 'initial'
-          const textHW = {
-            width: Math.ceil(text.getBoundingClientRect().width),
-            height: Math.ceil(text.getBoundingClientRect().height)
-          }
-          store.commit('UPDATE_layerStyles', {
-            pageIndex,
-            layerIndex,
-            styles: {
-              width: textHW.width,
-              height: textHW.height,
-              initWidth: Math.ceil(textHW.width / scale),
-              initHeight: Math.ceil(textHW.height / scale),
-              initSize: store.getters.getLayer(pageIndex, layerIndex).styles.initSize,
-              scale
-            }
-          })
-          store.commit('UPDATE_textProps', {
-            pageIndex,
-            layerIndex,
-            paragraphs
-          })
-        } else {
-          console.log(mutation.type)
-          console.log(mutation)
-          // let text = mutation.target as HTMLElement
-          // while (text.nodeName !== 'DIV' && text.parentElement) {
-          //   text = text.parentElement
-          // }
-          // let pIndex = -1
-          // const removedP = []
-          // for (const p of text.childNodes) {
-          //   const pEl = p as HTMLElement
-          //   console.log(pEl.dataset.pindex)
-          //   if (parseInt(pEl.dataset.pindex as string) === pIndex) {
-          //     // text.removeChild(p)
-          //     removedP.push(p)
-          //     // break
-          //   } else {
-          //     pIndex = parseInt(pEl.dataset.pindex as string)
-          //   }
-          // }
         }
+        paragraphs.forEach(p => {
+          if (p.spans.length === 1 && p.spans[0].text === '') {
+            p.spans[0].text = '\n'
+          }
+        })
+        const pageIndex = this.pageIndex
+        const layerIndex = this.layerIndex
+        store.commit('UPDATE_textProps', {
+          pageIndex,
+          layerIndex,
+          paragraphs
+        })
+        console.log(this.config.paragraphs)
+        const text = this.$refs.text as HTMLElement
+        this.$nextTick(() => {
+          console.log(this.text.pIndex)
+          console.log(this.text.sIndex)
+          console.log(this.text.offset)
+          if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+            text.removeChild(text.lastChild)
+          }
+          const sel = window.getSelection()
+          if (sel) {
+            const range = new Range()
+            range.setStart(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, this.text.offset)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }
+        })
       }
     },
     // onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
@@ -1199,7 +1090,6 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    white-space: pre-wrap;
     position: absolute;
     box-sizing: border-box;
     &:hover {
@@ -1230,33 +1120,32 @@ export default Vue.extend({
   }
 }
 
-.resize-bar {
-  position: absolute;
-  pointer-events: auto;
-  border: 2.5px solid #00000000;
-  color: "#00000000";
-}
-
 .control-point {
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
   border: 1.5px solid setColor(blue-2);
   transform-style: preserve-3d;
-}
 
-.rotaterWrapper {
-  position: absolute;
-  top: 100%;
-  padding: 20px;
-}
-.rotater {
-  @include size(20px, 20px);
-  position: relative;
-  left: 0;
-  top: 0;
-  pointer-events: auto;
-  cursor: move;
+  &__resize-bar {
+    position: absolute;
+    pointer-events: auto;
+    border: 2.5px solid #00000000;
+    color: "#00000000";
+  }
+  &__rotater-wrapper {
+    position: absolute;
+    top: 100%;
+    padding: 20px;
+  }
+  &__rotater {
+    @include size(20px, 20px);
+    position: relative;
+    left: 0;
+    top: 0;
+    pointer-events: auto;
+    cursor: move;
+  }
 }
 
 .text {
@@ -1265,7 +1154,6 @@ export default Vue.extend({
   }
   &__span {
     text-align: left;
-    // outline: none;
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
@@ -1273,7 +1161,6 @@ export default Vue.extend({
 
 .text-content {
   text-align: left;
-  // display: inline-block;
   outline: none;
   white-space: pre-wrap;
   overflow-wrap: break-word;
