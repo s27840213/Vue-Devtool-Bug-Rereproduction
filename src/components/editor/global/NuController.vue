@@ -15,17 +15,18 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type === 'text'")
-          div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable" spellcheck="false"
-            :style="contentStyles()"
-            @keydown="onKeyDown($event)")
-            p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-              :data-pindex="pIndex"
-              :key="p.id",
-              :style="textStyles(p.styles)")
-              span(v-for="(span, sIndex) in p.spans" class="text__span"
-                :data-sindex="sIndex"
-                :key="span.id",
-                :style="textStyles(span.styles)") {{ span.text }}
+          div(:style="scaleStyle()")
+            div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable" spellcheck="false"
+              :style="contentStyles()"
+              @keydown="onKeyDown($event)")
+              p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+                :data-pindex="pIndex"
+                :key="p.id",
+                :style="textStyles(p.styles)")
+                span(v-for="(span, sIndex) in p.spans" class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -195,13 +196,21 @@ export default Vue.extend({
       }
       return resizer
     },
+    scaleStyle() {
+      return {
+        position: 'absolute',
+        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
+      }
+    },
     contentStyles() {
       return {
         width: `${Math.ceil(this.config.styles.width / this.getLayerScale)}px`,
         height: `${Math.ceil(this.config.styles.height / this.getLayerScale)}px`,
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
         outline: 'none',
-        position: 'relative'
+        position: 'absolute',
+        transform: 'translate(-50%, -50%)'
+        // transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
+        // position: 'relative'
         // 'transform-origin': '0px 0px'
       }
     },
@@ -380,6 +389,7 @@ export default Vue.extend({
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
       }
+      // The minimum size of the layer
       if (width <= 40 || height <= 40) return
 
       const offsetSize = {
@@ -396,8 +406,10 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       const ratio = {
-        width: width / (this.config.styles.initWidth * this.config.styles.scaleX),
-        height: height / (this.config.styles.initHeight * this.config.styles.scaleY)
+        // width: width / (this.config.styles.initWidth * this.config.styles.scaleX),
+        // height: height / (this.config.styles.initHeight * this.config.styles.scaleY)
+        width: width / (this.getLayerWidth / this.getLayerScale),
+        height: height / (this.getLayerHeight / this.getLayerScale)
       }
       /**
        * TO times the initSize is for synchronizing the img-resizer.
@@ -408,28 +420,12 @@ export default Vue.extend({
       if (this.getLayerType === 'image') {
         scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
       }
-      if (this.config.type === 'text') {
-        // const text = this.$refs.text as HTMLElement
-        // text.style.width = `${width}px`
-        // text.style.height = `${height}px`
-        ControlUtils.updateFontSize(this.pageIndex, this.layerIndex, this.config.styles.initSize * scale)
-      }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
       // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
-      if (this.getLayerType === 'text') {
-        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-        // const text = this.$refs.text as HTMLElement
-        // text.childNodes.forEach((p, pIndex) => {
-        //   p.childNodes.forEach((span, sIndex) => {
-        //     const spanEl = span as HTMLElement
-        //     spanEl.style.fontSize = `${(this.config as IText).paragraphs[pIndex].spans[sIndex].styles.size * this.getLayerScale}px`
-        //   })
-        // })
-      }
       this.isControlling = false
       StepsUtils.record()
 
@@ -615,17 +611,6 @@ export default Vue.extend({
       }
       // TODO: still got some problem after layer being scaled.
 
-      // if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
-      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x - this.imgBuffer.x, imgPos.y - this.imgBuffer.y)
-      // } else {
-      //   // ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
-      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x - this.imgBuffer.x, imgPos.y - this.imgBuffer.y)
-      // }
-      // if (this.control.isHorizon) {
-      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, imgPos.y)
-      // } else {
-      //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, this.config.styles.imgY)
-      // }
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth, imgHeight)
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
@@ -739,7 +724,7 @@ export default Vue.extend({
       if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         const sel = window.getSelection()
         if (sel && sel.rangeCount !== 0) {
-          console.log('-----820------')
+          console.log('-----742------')
           this.$root.$emit('textSelection', sel.toString() !== '')
           const range = sel.getRangeAt(0)
           const startContainer = range.startContainer
@@ -757,19 +742,14 @@ export default Vue.extend({
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
-            console.log('-----840------')
-            // console.log(startContainer?.parentElement)
             if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
               console.log('NaN')
               // e.preventDefault()
               // return
             }
-            // setTimeout(() => {
+            // TODO: deletion at the begining of the text cause bug.
             this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
             this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            //   // console.log('update in nextick')
-            //   // console.log('sIndex: ', this.text.sIndex, 'pIndex: ', this.text.pIndex, 'offset: ', this.text.offset)
-            // }, 0)
             if (e.key === 'Backspace') {
               if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
@@ -796,7 +776,6 @@ export default Vue.extend({
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
         const paragraphs: IParagraph[] = []
-        const scale = this.getLayerScale
         const div = this.$refs.text as HTMLElement
         const ps = div.childNodes
         const config = (this.config as IText)
@@ -827,7 +806,7 @@ export default Vue.extend({
               const spanStyle = {
                 font: spanEl.style.fontFamily,
                 weight: spanEl.style.fontWeight,
-                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
                 initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
                 decoration: spanEl.style.textDecorationLine,
                 style: spanEl.style.fontStyle,
@@ -852,7 +831,6 @@ export default Vue.extend({
         console.log(paragraphs)
         if (window.getSelection()) {
           const sel = window.getSelection()
-          console.log('-----968------')
           const startContainer = sel?.getRangeAt(0).startContainer
           // if the belowcondition is false, means some paragraph (p-node) is removed
           if (startContainer?.parentElement?.dataset.sindex) {
@@ -938,7 +916,6 @@ export default Vue.extend({
           layerIndex,
           paragraphs
         })
-        console.log(this.config.paragraphs)
         const text = this.$refs.text as HTMLElement
         this.$nextTick(() => {
           console.log(this.text.pIndex)
@@ -1040,22 +1017,6 @@ export default Vue.extend({
     //     this.isControlling = false
     //   }, 0)
     // },
-    getTextHW(innerText: string, styles: any): { width: number, height: number } {
-      const el = document.createElement('span')
-      const text = this.$refs.text as HTMLElement
-      el.style.width = `${text.getBoundingClientRect().width}px`
-      el.innerHTML = innerText
-      document.body.appendChild(el)
-      el.style.whiteSpace = 'pre-wrap'
-      el.style.overflowWrap = 'break-word'
-      Object.assign(el.style, CssConveter.convertFontStyle(styles))
-      const textHW = {
-        width: Math.ceil(el.getBoundingClientRect().width),
-        height: Math.ceil(el.getBoundingClientRect().height)
-      }
-      document.body.removeChild(el)
-      return textHW
-    },
     isNoCharactor(e: KeyboardEvent): boolean {
       if (e.key === 'Backspace') {
         return false

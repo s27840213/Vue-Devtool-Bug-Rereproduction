@@ -197,6 +197,7 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     onPropertyClick(iconName: string) {
+      console.log('🤣🤣')
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {
@@ -242,10 +243,7 @@ export default Vue.extend({
     updateLayerParagraphs(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, props: { [key: string]: string | number }) {
       const config = this.getLayer(pageIndex, layerIndex) as IText
       const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
-      console.log(config.paragraphs[pIndex].spans[sIndex].styles.size)
       Object.assign(paragraphs[pIndex].spans[sIndex].styles, props)
-      console.log(props)
-      console.log(paragraphs[pIndex].spans[sIndex].styles.size)
       store.commit('UPDATE_layerProps', {
         pageIndex,
         layerIndex,

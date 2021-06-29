@@ -28,8 +28,8 @@ export default Vue.extend({
     updateTextSize(): any {
       const config = this.config as IText
       return {
-        initWidth: config.styles.initWidth,
-        initHeight: config.styles.initHeight,
+        width: config.styles.width,
+        height: config.styles.height,
         paragraphs: config.paragraphs
       }
     }
@@ -47,10 +47,14 @@ export default Vue.extend({
             width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
             height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
           }
-          console.log(textHW)
+          // const initHW = {
+          //   initWidth: Math.ceil(textHW.width / scale),
+          //   initHeight: Math.ceil
+          // }
           text.style.width = `${Math.ceil(textHW.width / scale)}px`
           text.style.height = `${Math.ceil(textHW.height / scale)}px`
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
+          // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
         })
       },
       deep: true

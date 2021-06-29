@@ -127,7 +127,6 @@ class TextUtils {
       for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
         const span = p.childNodes[sidx] as HTMLElement
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        console.log(flag)
         if (prop === 'fontFamily' && origin !== span.style.fontFamily) {
           flag = true
           break
