@@ -152,7 +152,7 @@ class Controller {
             const spanStyle = {
               font: spanEl.style.fontFamily,
               weight: spanEl.style.fontWeight,
-              size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+              size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
               initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
               decoration: spanEl.style.textDecorationLine,
               style: spanEl.style.fontStyle,
@@ -244,7 +244,7 @@ class Controller {
               const spanStyle = {
                 font: spanEl.style.fontFamily,
                 weight: spanEl.style.fontWeight,
-                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) / scale : '',
+                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
                 initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
                 decoration: spanEl.style.textDecorationLine,
                 style: spanEl.style.fontStyle,

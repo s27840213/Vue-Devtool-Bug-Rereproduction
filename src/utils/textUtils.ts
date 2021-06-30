@@ -179,7 +179,7 @@ class TextUtils {
             break
           }
           case 'fontSize': {
-            prop.fontSize = `${value}px`
+            prop.fontSize = `${Math.ceil(value)}px`
             flag = true
             break
           }
@@ -193,7 +193,6 @@ class TextUtils {
   }
 
   spanStyleTransformer(span: HTMLElement, prop: { [key: string]: string }): ISpanCssStyle {
-    console.log(prop)
     const spanStyle = {
       fontFamily: span.style.fontFamily,
       fontWeight: span.style.fontWeight,
@@ -204,6 +203,7 @@ class TextUtils {
       opacity: span.style.opacity
       // shadow-:
     }
+    console.log(spanStyle)
     return Object.assign(spanStyle, prop)
   }
 

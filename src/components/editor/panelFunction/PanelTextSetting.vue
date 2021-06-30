@@ -197,7 +197,7 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     onPropertyClick(iconName: string) {
-      console.log('🤣🤣')
+      // console.log('🤣🤣')
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {
@@ -218,17 +218,15 @@ export default Vue.extend({
             sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
             offset: range?.startOffset as number
           }
-          console.log(node)
           select.removeAllRanges()
           select.addRange(range)
 
           const config = (this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as IText)
-          console.log(config.paragraphs[start.pIndex])
           const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-          this.updateLayerParagraphs(this.lastSelectedPageIndex, this.currSelectedIndex, start.pIndex, start.sIndex, { size: fontSize + step })
+          this.updateLayerParagraphs(this.lastSelectedPageIndex, this.currSelectedIndex, start.pIndex, start.sIndex, { size: Math.ceil(fontSize + step) })
 
           const size = TextUtils.propReader('fontSize')
-          this.size = typeof size !== 'undefined' ? size : '--'
+          this.size = `${Math.ceil(fontSize + step)}px`
         }
       }, 0)
     },
