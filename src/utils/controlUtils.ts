@@ -1,4 +1,5 @@
 import store from '@/store'
+import { v4 as uuidv4 } from 'uuid'
 import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { stringToArray } from 'konva/types/shapes/Text'
@@ -137,7 +138,6 @@ class Controller {
     observer.disconnect()
     const pageIndex = store.state.lastSelectedPageIndex
     const layerIndex = store.getters.getCurrSelectedIndex
-    console.log('mutation observer')
     for (const mutation of mutations) {
       if (mutation.type === 'childList' && mutation.target.nodeName === 'DIV') {
         const paragraphs: IParagraph[] = []
@@ -161,7 +161,7 @@ class Controller {
             } as ISpanStyle
             const text = spanEl.innerText as string
             if (text !== '') {
-              spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+              spans.push({ text: text, styles: spanStyle, id: uuidv4() })
             }
           })
           const pEl = p as HTMLElement
@@ -170,7 +170,7 @@ class Controller {
           pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
           pStyle.align = pEl.style.textAlign
           if (spans.length !== 0) {
-            paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+            paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
           }
         })
         console.log(paragraphs)
@@ -192,7 +192,6 @@ class Controller {
             pIndex = parseInt(pEl.dataset.pindex as string)
           }
         }
-        console.log(removedP)
         removedP.forEach(p => {
           text.removeChild(p)
         })
@@ -222,8 +221,6 @@ class Controller {
           })
         }
       } else if (mutation.type === 'characterData' || mutation.type === 'childList') {
-        console.log('characterData')
-        // console.log(mutation)
         const paragraphs: IParagraph[] = []
         let text = mutation.target as HTMLElement
         while (text.nodeName !== 'DIV' && text.parentElement) {
@@ -251,7 +248,7 @@ class Controller {
                 color: spanEl.style.color,
                 opacity: parseInt(spanEl.style.opacity)
               } as ISpanStyle
-              spans.push({ text: text, styles: spanStyle, id: Math.ceil(Math.random() * 10000) })
+              spans.push({ text: text, styles: spanStyle, id: uuidv4() })
             }
           }
           const pEl = p as HTMLElement
@@ -259,7 +256,7 @@ class Controller {
           pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
           pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
           pStyle.align = pEl.style.textAlign
-          paragraphs.push({ styles: pStyle, spans: spans, id: Math.ceil(Math.random() * 10000) })
+          paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
         })
         text.style.width = 'initial'
         text.style.height = 'initial'
@@ -290,9 +287,6 @@ class Controller {
           layerIndex,
           paragraphs
         })
-      } else {
-        console.log(mutation.type)
-        console.log(mutation)
       }
     }
   }

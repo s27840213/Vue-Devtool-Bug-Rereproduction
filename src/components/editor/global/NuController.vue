@@ -519,6 +519,15 @@ export default Vue.extend({
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
+    textResizeHandler(width: number, height: number): [number, number] {
+      const text = this.$refs.text as HTMLElement
+      if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
+        height = Math.ceil(text.getBoundingClientRect().height)
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
+        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getFontSize)
+      }
+      return [width, height]
+    },
     resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
       const imgPos = {
         x: this.control.imgX,
@@ -628,15 +637,6 @@ export default Vue.extend({
         ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, offsetX + imgX, offsetY + imgY)
       }
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-    },
-    textResizeHandler(width: number, height: number): [number, number] {
-      const text = this.$refs.text as HTMLElement
-      if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
-        height = Math.ceil(text.getBoundingClientRect().height)
-        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getFontSize)
-      }
-      return [width, height]
     },
     resizeEnd() {
       this.imgBuffer = { width: 0, height: 0, x: 0, y: 0 }
@@ -837,15 +837,15 @@ export default Vue.extend({
             this.text.offset = sel?.getRangeAt(0).startOffset as number
             this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
             this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            console.log(this.text.pIndex)
-            console.log(this.text.sIndex)
-            console.log(this.text.offset)
+            // console.log(this.text.pIndex)
+            // console.log(this.text.sIndex)
+            // console.log(this.text.offset)
             // used for deleting the first span of the text, and moving the caret to the previous p
             const isSpanDeleted = paragraphs[this.text.pIndex].spans.length < (this.config as IText).paragraphs[this.text.pIndex].spans.length
             if (e.key !== 'Enter' && isSpanDeleted && this.text.sIndex === 1 && this.text.offset === 0) {
-              console.log(this.text.pIndex)
-              console.log(this.text.sIndex)
-              console.log(this.text.offset)
+              // console.log(this.text.pIndex)
+              // console.log(this.text.sIndex)
+              // console.log(this.text.offset)
               this.text.pIndex -= 1
               // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
               if (this.text.pIndex < 0) {
@@ -871,15 +871,15 @@ export default Vue.extend({
               this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1
               this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length
             } else if (e.key === 'Enter') {
-              console.log(e.key === 'Enter')
+              // console.log(e.key === 'Enter')
               this.text.pIndex += 1
               this.text.sIndex = 0
               this.text.offset = 0
             }
           } else if (e.key === 'Enter') {
-            console.log('inNewLine and some node gone')
-            console.log(startContainer?.parentElement)
-            console.log(startContainer)
+            // console.log('inNewLine and some node gone')
+            // console.log(startContainer?.parentElement)
+            // console.log(startContainer)
             this.text.pIndex += 1
             this.text.sIndex = 0
             this.text.offset = 0
@@ -896,9 +896,9 @@ export default Vue.extend({
             /**
              * some paragraph is deleted
              */
-            console.log(this.text.pIndex)
-            console.log(this.text.sIndex)
-            console.log(this.text.offset)
+            // console.log(this.text.pIndex)
+            // console.log(this.text.sIndex)
+            // console.log(this.text.offset)
             this.text.pIndex -= 1
             this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1 >= 0 ? paragraphs[this.text.pIndex].spans.length - 1 : 0
             this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex] ? paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length : 0

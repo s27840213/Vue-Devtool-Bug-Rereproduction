@@ -86,7 +86,6 @@ export default Vue.extend({
     this.$root.$on('textSelection', (selectRange: boolean) => {
       const font = TextUtils.propReader('fontFamily')
       this.fontFamily = typeof font !== 'undefined' ? font : 'multi-fonts'
-
       const size = TextUtils.propReader('fontSize')
       this.size = typeof size !== 'undefined' ? size : '--'
     })
@@ -115,11 +114,9 @@ export default Vue.extend({
       }
     },
     fontSize: {
-      get() {
+      get(): string {
         return this.size
         // return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
-        // const size = TextUtils.propReader('fontSize')
-        // return typeof size !== 'undefined' ? Math.ceil(parseInt(size)) : '--'
       },
       set(value) {
         TextUtils.onPropertyClick('fontSize', value as string, this.selection.start, this.selection.end)
@@ -130,7 +127,7 @@ export default Vue.extend({
       }
     },
     textColor: {
-      get() {
+      get(): string {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.color
       },
       set(value) {
@@ -144,7 +141,7 @@ export default Vue.extend({
       }
     },
     lineHeight: {
-      get() {
+      get(): number {
         const value = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
         return value === -1 ? -1 : value * 1000
       },
@@ -160,7 +157,7 @@ export default Vue.extend({
       }
     },
     fontSpacing: {
-      get() {
+      get(): number {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing * 1000
       },
       set(value) {
@@ -175,7 +172,7 @@ export default Vue.extend({
       }
     },
     opacity: {
-      get() {
+      get(): number {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
       },
       set(value) {
@@ -202,6 +199,7 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number) {
       // TextUtils.fontSizeStepping(step)
+      // used for test, need to refresh and direct update to vuex
       const sel = TextUtils.getSelection()
       if (sel) {
         Object.assign(this.selection.start, sel.start)
@@ -224,8 +222,6 @@ export default Vue.extend({
           const config = (this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as IText)
           const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
           this.updateLayerParagraphs(this.lastSelectedPageIndex, this.currSelectedIndex, start.pIndex, start.sIndex, { size: Math.ceil(fontSize + step) })
-
-          const size = TextUtils.propReader('fontSize')
           this.size = `${Math.ceil(fontSize + step)}px`
         }
       }, 0)
@@ -239,6 +235,7 @@ export default Vue.extend({
       console.log(this.selection)
     },
     updateLayerParagraphs(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, props: { [key: string]: string | number }) {
+      // couldn't work still, need to re-organize the structure of the update logic
       const config = this.getLayer(pageIndex, layerIndex) as IText
       const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
       Object.assign(paragraphs[pIndex].spans[sIndex].styles, props)
