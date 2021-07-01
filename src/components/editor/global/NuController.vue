@@ -14,10 +14,13 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        template(v-if="config.type === 'text'")
+        template(v-if="config.type === 'text' && config.active")
           div(:style="scaleStyle()")
-            div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable" spellcheck="false"
+            div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
+              spellcheck="false"
               :style="contentStyles()"
+              @compositionstart="isCompositoning = true"
+              @compositionend="isCompositoning = false"
               @keydown="onKeyDown($event)")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -69,7 +72,6 @@ import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import { config } from 'vue/types/umd'
-import store from '@/store'
 
 export default Vue.extend({
   props: {
@@ -88,11 +90,10 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
-      text: { pIndex: NaN, sIndex: NaN, offset: 0 },
+      // text: { pIndex: NaN, sIndex: NaN, offset: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
-      isGetMoved: false,
       isCompositoning: false,
       isSnapping: false,
       contentEditable: false
@@ -155,6 +156,13 @@ export default Vue.extend({
   watch: {
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
+    },
+    isActive() {
+      if (this.getLayerType === 'text' && !this.isActive) {
+        this.contentEditable = false
+        const paragraphs: IParagraph[] = this.textParser()
+        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { paragraphs })
+      }
     }
   },
   methods: {
@@ -231,16 +239,6 @@ export default Vue.extend({
         shown
       })
     },
-    compositionStart() {
-      this.isCompositoning = true
-      const el = this.$refs.text as HTMLElement
-      el.addEventListener('compositionend', this.compositionEnd)
-    },
-    compositionEnd() {
-      this.isCompositoning = false
-      const el = this.$refs.text as HTMLElement
-      el.removeEventListener('compositionend', this.compositionEnd)
-    },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
@@ -255,7 +253,31 @@ export default Vue.extend({
     },
 
     moveStart(event: MouseEvent) {
-      if (this.getLayerType === 'text' && this.isActive && this.contentEditable) return
+      this.initTranslate = this.getLayerPos
+      if (this.getLayerType === 'text') {
+        if (this.isActive && this.contentEditable) {
+          return
+        } else if (!this.isActive) {
+          let targetIndex = this.layerIndex
+          if (!GeneralUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) && this.currSelectedInfo.index >= 0) {
+            GroupUtils.deselect()
+            targetIndex = this.config.styles.zindex - 1
+            this.setLastSelectedPageIndex(this.pageIndex)
+            this.setLastSelectedLayerIndex(this.layerIndex)
+          }
+          if (this.pageIndex === this.lastSelectedPageIndex) {
+            GroupUtils.select([targetIndex])
+          }
+          if (!this.config.locked) {
+            this.isControlling = true
+            this.initialPos = MouseUtils.getMouseAbsPoint(event)
+            window.addEventListener('mouseup', this.moveEnd)
+            window.addEventListener('mousemove', this.moving)
+          }
+          return
+        }
+        this.contentEditable = true
+      }
       if (!this.config.locked) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
@@ -275,15 +297,6 @@ export default Vue.extend({
             GroupUtils.select([targetIndex])
           }
         }
-      }
-
-      if (this.config.type === 'text') {
-        this.text.pIndex = NaN
-        this.text.sIndex = NaN
-        this.text.offset = NaN
-        this.initTranslate = this.getLayerPos
-        this.isGetMoved = false
-        this.contentEditable = true
       }
     },
     moving(event: MouseEvent) {
@@ -317,15 +330,14 @@ export default Vue.extend({
     },
     moveEnd() {
       if (this.isActive) {
+        console.log('this.contentEditable')
+        console.log(this.contentEditable)
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if (this.getLayerType === 'text' && (posDiff.x > 3 || posDiff.y > 3)) {
-          this.isGetMoved = true
+        if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
-        } else {
-          this.contentEditable = true
         }
         this.isControlling = false
         this.setCursorStyle('default')
@@ -721,18 +733,18 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.getLayerType === 'text' && this.isActive && !this.isGetMoved) {
-        this.contentEditable = true
+      if (this.getLayerType === 'text' && this.isActive) {
+        // this.contentEditable = true
         if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
           const sel = window.getSelection()
           if (sel && sel.rangeCount !== 0) {
             console.log('-----742------')
             this.$root.$emit('textSelection', sel.toString() !== '')
-            const range = sel.getRangeAt(0)
-            const startContainer = range.startContainer
-            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            this.text.offset = range.startOffset
+            // const range = sel.getRangeAt(0)
+            // const startContainer = range.startContainer
+            // this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            // this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            // this.text.offset = range.startOffset
           }
         }
       }
@@ -741,6 +753,11 @@ export default Vue.extend({
       if (this.config.type === 'text') {
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
+        const start = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: 0
+        }
         if (sel) {
           const range = sel.getRangeAt(0)
           if (range) {
@@ -751,20 +768,19 @@ export default Vue.extend({
               // return
             }
             // TODO: deletion at the begining of the text cause bug.
-            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+            start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            start.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
             if (e.key === 'Backspace') {
-              if (this.text.sIndex === 0 && this.text.pIndex === 0 && sel.anchorOffset === 0) {
+              if (start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
                 return
               } else {
                 ControlUtils.textStopPropagation(e)
               }
             }
-            // this.onTyping(e, pIndex, sIndex)
           }
         }
-        const observer = new MutationObserver(this.onTyping(e))
+        const observer = new MutationObserver(this.onTyping(e, start))
         observer.observe(text, {
           characterData: true,
           childList: true,
@@ -775,167 +791,161 @@ export default Vue.extend({
         })
       }
     },
-    onTyping(e: KeyboardEvent) {
-      return (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const paragraphs: IParagraph[] = []
-        const div = this.$refs.text as HTMLElement
-        const ps = div.childNodes
-        const config = (this.config as IText)
-        ps.forEach((p, pIndex) => {
-          const spans: ISpan[] = []
-          // let flag = true
-          for (const [sIndex, span] of p.childNodes.entries()) {
-            if (span instanceof HTMLElement) {
-              let spanEl = span as HTMLElement
-              const text = spanEl.innerText as string
-              /**
-               * If the span is the same without changed, skip parse it, save rendering resouce
-               * the variable flag is used for indicating whether the paragraph changes or not
-               */
-              if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
-                spans.push((this.config as IText).paragraphs[pIndex].spans[sIndex])
-                continue
-              }
-              // flag = false
-              /**
-               *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
-               *  below detect the situation and use the style of the last span of previous p to replace it.
-               */
-              if (spanEl.style.fontFamily === '') {
-                const leng = div.childNodes[pIndex - 1].childNodes.length
-                spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-              }
-              const spanStyle = {
-                font: spanEl.style.fontFamily,
-                weight: spanEl.style.fontWeight,
-                size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-                initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-                decoration: spanEl.style.textDecorationLine,
-                style: spanEl.style.fontStyle,
-                color: spanEl.style.color,
-                opacity: parseInt(spanEl.style.opacity)
-              } as ISpanStyle
-              spanEl = span as HTMLElement
-              spans.push({ text: text, styles: spanStyle, id: uuidv4() })
-            }
+    onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
+      /**
+       * If is composing, the width/height updated to the vuex would be done by controller.
+       * Otherwise, any other mutation to the ITex config which causing layer' size change would be updated in nu-text component
+       */
+      if (this.isCompositoning) {
+        setTimeout(() => {
+          const text = this.$refs.text as HTMLElement
+          const scale = this.config.styles.scale
+          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit}px`
+          text.style.height = 'max-content'
+          const textHW = {
+            width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+            height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
           }
-          const pEl = p as HTMLElement
-          const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
-          pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
-          pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
-          pStyle.align = pEl.style.textAlign
-          // if (flag) {
-          //   paragraphs.push(config.paragraphs[pIndex])
-          // } else {
-          paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
-          // }
-        })
-        console.log(paragraphs)
+          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { isComposing: true })
+          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
+        }, 0)
+      }
+      return (mutations: MutationRecord[], observer: MutationObserver) => {
+        if (this.isCompositoning) {
+          return
+        } else if (this.config.isComposing) {
+          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { isComposing: false })
+        }
+
+        observer.disconnect()
+        const paragraphs: IParagraph[] = this.textParser()
         if (window.getSelection()) {
           const sel = window.getSelection()
           const startContainer = sel?.getRangeAt(0).startContainer
-          // if the belowcondition is false, means some paragraph (p-node) is removed
+          let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
+          // if the below condition is false, means some paragraph (p-node) is removed
           if (startContainer?.parentElement?.dataset.sindex) {
-            this.text.offset = sel?.getRangeAt(0).startOffset as number
-            this.text.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            this.text.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            // console.log(this.text.pIndex)
-            // console.log(this.text.sIndex)
-            // console.log(this.text.offset)
+            offset = sel?.getRangeAt(0).startOffset as number
+            sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
             // used for deleting the first span of the text, and moving the caret to the previous p
-            const isSpanDeleted = paragraphs[this.text.pIndex].spans.length < (this.config as IText).paragraphs[this.text.pIndex].spans.length
-            if (e.key !== 'Enter' && isSpanDeleted && this.text.sIndex === 1 && this.text.offset === 0) {
-              // console.log(this.text.pIndex)
-              // console.log(this.text.sIndex)
-              // console.log(this.text.offset)
-              this.text.pIndex -= 1
+            const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
+            if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
+              pIndex -= 1
               // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-              if (this.text.pIndex < 0) {
-                const pageIndex = this.pageIndex
-                const layerIndex = this.layerIndex
-                store.commit('UPDATE_textProps', {
-                  pageIndex,
-                  layerIndex,
-                  paragraphs
-                })
-                this.$nextTick(() => {
-                  const sel = window.getSelection()
-                  if (sel) {
-                    const range = new Range()
-                    const text = this.$refs.text as HTMLElement
-                    console.log(text)
-                    range.setStart(text.childNodes[0].childNodes[0].firstChild as Node, 0)
-                    sel.removeAllRanges()
-                    sel.addRange(range)
-                  }
-                })
+              if (pIndex < 0) {
+                [pIndex, sIndex, offset] = [0, 0, 0]
               }
-              this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1
-              this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length
+              sIndex = paragraphs[pIndex].spans.length - 1
+              offset = paragraphs[pIndex].spans[sIndex].text.length
             } else if (e.key === 'Enter') {
-              // console.log(e.key === 'Enter')
-              this.text.pIndex += 1
-              this.text.sIndex = 0
-              this.text.offset = 0
+              [sIndex, offset] = [0, 0]
+              pIndex += 1
             }
           } else if (e.key === 'Enter') {
             // console.log('inNewLine and some node gone')
             // console.log(startContainer?.parentElement)
             // console.log(startContainer)
-            this.text.pIndex += 1
-            this.text.sIndex = 0
-            this.text.offset = 0
+            [sIndex, offset] = [0, 0]
+            pIndex += 1
           } else if (TextUtils.isArrowKey(e)) {
             /**
              *  If the input key is ArrowKey, the startContainer will be different as the other key pressed
              */
             if (typeof startContainer?.parentElement !== 'undefined' && typeof startContainer?.parentElement !== 'undefined') {
-              this.text.offset = sel?.getRangeAt(0).startOffset as number
-              this.text.sIndex = parseInt((startContainer as HTMLElement).dataset.sindex as string)
-              this.text.pIndex = parseInt(startContainer?.parentElement?.dataset.pindex as string)
+              offset = sel?.getRangeAt(0).startOffset as number
+              sIndex = parseInt((startContainer as HTMLElement).dataset.sindex as string)
+              pIndex = parseInt(startContainer?.parentElement?.dataset.pindex as string)
             }
           } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
             /**
              * some paragraph is deleted
              */
-            // console.log(this.text.pIndex)
-            // console.log(this.text.sIndex)
-            // console.log(this.text.offset)
-            this.text.pIndex -= 1
-            this.text.sIndex = paragraphs[this.text.pIndex].spans.length - 1 >= 0 ? paragraphs[this.text.pIndex].spans.length - 1 : 0
-            this.text.offset = paragraphs[this.text.pIndex].spans[this.text.sIndex] ? paragraphs[this.text.pIndex].spans[this.text.sIndex].text.length : 0
+            pIndex -= 1
+            sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
+            offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
+          }
+          const text = this.$refs.text as HTMLElement
+          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { paragraphs })
+          this.$nextTick(() => {
+            console.log(pIndex)
+            console.log(sIndex)
+            console.log(offset)
+            if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+              text.removeChild(text.lastChild)
+            }
+            const sel = window.getSelection()
+            if (sel) {
+              const range = new Range()
+              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+              sel.removeAllRanges()
+              sel.addRange(range)
+            }
+          })
+        }
+      }
+    },
+    textParser(): IParagraph[] {
+      const paragraphs: IParagraph[] = []
+      const div = this.$refs.text as HTMLElement
+      const ps = div.childNodes
+      const config = (this.config as IText)
+      ps.forEach((p, pIndex) => {
+        const spans: ISpan[] = []
+        // let flag = true
+        for (const [sIndex, span] of p.childNodes.entries()) {
+          if (span instanceof HTMLElement) {
+            let spanEl = span as HTMLElement
+            const text = spanEl.innerText as string
+            /**
+             * If the span is the same without changed, skip parse it, save rendering resouce
+             * the variable flag is used for indicating whether the paragraph changes or not
+             */
+            if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
+              spans.push((this.config as IText).paragraphs[pIndex].spans[sIndex])
+              continue
+            }
+            // flag = false
+            /**
+             *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
+             *  below detect the situation and use the style of the last span of previous p to replace it.
+             */
+            if (spanEl.style.fontFamily === '') {
+              const leng = div.childNodes[pIndex - 1].childNodes.length
+              spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
+            }
+            const spanStyle = {
+              font: spanEl.style.fontFamily,
+              weight: spanEl.style.fontWeight,
+              size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+              initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
+              decoration: spanEl.style.textDecorationLine,
+              style: spanEl.style.fontStyle,
+              color: spanEl.style.color,
+              opacity: parseInt(spanEl.style.opacity)
+            } as ISpanStyle
+            spanEl = span as HTMLElement
+            spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           }
         }
-        paragraphs.forEach(p => {
-          if (p.spans.length === 1 && p.spans[0].text === '') {
-            p.spans[0].text = '\n'
-          }
-        })
-        const pageIndex = this.pageIndex
-        const layerIndex = this.layerIndex
-        store.commit('UPDATE_textProps', {
-          pageIndex,
-          layerIndex,
-          paragraphs
-        })
-        const text = this.$refs.text as HTMLElement
-        this.$nextTick(() => {
-          console.log(this.text.pIndex)
-          console.log(this.text.sIndex)
-          console.log(this.text.offset)
-          if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
-            text.removeChild(text.lastChild)
-          }
-          const sel = window.getSelection()
-          if (sel) {
-            const range = new Range()
-            range.setStart(text.childNodes[this.text.pIndex].childNodes[this.text.sIndex].firstChild as Node, this.text.offset)
-            sel.removeAllRanges()
-            sel.addRange(range)
-          }
-        })
-      }
+        const pEl = p as HTMLElement
+        const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+        pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
+        pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
+        pStyle.align = pEl.style.textAlign
+        // if (flag) {
+        //   paragraphs.push(config.paragraphs[pIndex])
+        // } else {
+        paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
+        // }
+      })
+      console.log(paragraphs)
+      paragraphs.forEach(p => {
+        if (p.spans.length === 1 && p.spans[0].text === '') {
+          p.spans[0].text = '\n'
+        }
+      })
+      return paragraphs
     },
     // onTyping(e: KeyboardEvent, pIndex: number, sIndex: number) {
     //   if (e.key === 'Enter') return

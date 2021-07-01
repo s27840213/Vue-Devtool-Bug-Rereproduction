@@ -321,7 +321,7 @@ class Controller {
     })
   }
 
-  updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | null }) {
+  updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph[] }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,

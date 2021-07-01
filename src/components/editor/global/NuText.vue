@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(ref="text" class="nu-text text")
+  div(ref="text" class="nu-text text" :style="textStyles()")
       p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
         :key="pIndex",
         :style="styles(p.styles)")
@@ -37,24 +37,23 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
+        if (this.config.isComposing) return
+
         console.log('updateTextSize')
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
           const scale = this.config.styles.scale
-          text.style.width = this.config.widthLimit === -1 ? 'fit-content' : `${this.config.widthLimit}px`
-          text.style.height = 'fit-content'
+          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit}px`
+          text.style.height = 'max-content'
           const textHW = {
             width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
             height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
           }
-          // const initHW = {
-          //   initWidth: Math.ceil(textHW.width / scale),
-          //   initHeight: Math.ceil
-          // }
-          text.style.width = `${Math.ceil(textHW.width / scale)}px`
-          text.style.height = `${Math.ceil(textHW.height / scale)}px`
+          console.log('textHW')
+          console.log(textHW)
+          // text.style.width = `${Math.ceil(textHW.width / scale)}px`
+          // text.style.height = `${Math.ceil(textHW.height / scale)}px`
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
-          // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
         })
       },
       deep: true
@@ -77,6 +76,11 @@ export default Vue.extend({
   methods: {
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
+    },
+    textStyles() {
+      return {
+        opacity: this.config.type === 'text' && this.config.active ? 0 : 1
+      }
     }
   }
 })

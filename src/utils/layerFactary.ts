@@ -43,6 +43,7 @@ class LayerFactary {
     const basicConfig = {
       type: 'text',
       widthLimit: -1,
+      isComposing: false,
       active: false,
       shown: false,
       locked: false,
@@ -87,8 +88,6 @@ class LayerFactary {
       ]
     }
     Object.assign(basicConfig.styles, config.styles)
-    // console.log('config')
-    // console.log(config)
     delete config.styles
     return Object.assign(basicConfig, config)
   }

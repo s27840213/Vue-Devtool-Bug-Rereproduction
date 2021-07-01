@@ -34,7 +34,6 @@ class TextUtils {
       }
 
       const prop = this.propIndicator(div, start, end, propName, value)
-      console.log(prop)
       const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
       let isStartContainerDivide = true
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {

@@ -33,7 +33,8 @@ export interface ILayer<T extends IStyle = IStyle> {
 
 export interface IText extends ILayer<ITextStyle> {
   paragraphs: Array<IParagraph>,
-  widthLimit: number
+  widthLimit: number,
+  isComposing: boolean
 }
 
 export interface IParagraph {
@@ -69,16 +70,6 @@ export interface ISpanStyle {
   decoration: string,
   style: string,
   opacity: number
-}
-
-export interface ISpanCssStyle {
-  fontFamily: string
-  fontWeight: string
-  fontSize: string
-  textDecorationLine: string,
-  fontStyle: string,
-  color: string,
-  opacity: string
 }
 
 export interface IShape extends ILayer<IStyle> {
