@@ -718,19 +718,19 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
+      if (this.getLayerType === 'text' && this.isActive && !this.isGetMoved) {
         this.contentEditable = true
-      }
-      if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        const sel = window.getSelection()
-        if (sel && sel.rangeCount !== 0) {
-          console.log('-----742------')
-          this.$root.$emit('textSelection', sel.toString() !== '')
-          const range = sel.getRangeAt(0)
-          const startContainer = range.startContainer
-          this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-          this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-          this.text.offset = range.startOffset
+        if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+          const sel = window.getSelection()
+          if (sel && sel.rangeCount !== 0) {
+            console.log('-----742------')
+            this.$root.$emit('textSelection', sel.toString() !== '')
+            const range = sel.getRangeAt(0)
+            const startContainer = range.startContainer
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            this.text.offset = range.startOffset
+          }
         }
       }
     },
