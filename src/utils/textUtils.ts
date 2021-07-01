@@ -3,7 +3,6 @@ import store from '@/store'
 import { ISpan, ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
 import { directive } from 'vue/types/umd'
-import { setImmediate } from 'timers'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 

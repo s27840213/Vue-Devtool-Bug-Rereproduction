@@ -115,12 +115,6 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    changedSize(): any {
-      return {
-        width: this.getLayerWidth,
-        height: this.getLayerHeight
-      }
-    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -154,9 +148,6 @@ export default Vue.extend({
     getFontSize(): number {
       return this.config.styles.size
     },
-    // getTextContent(): string {
-    //   return this.config.text
-    // },
     getLayerScale(): number {
       return this.config.styles.scale
     }
