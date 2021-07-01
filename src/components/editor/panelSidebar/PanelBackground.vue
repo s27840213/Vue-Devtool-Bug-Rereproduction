@@ -3,7 +3,7 @@
     search-bar(:placeholder="'Search background'")
     span(class="text-left mt-10") Color
     div(class="panel-bg__colors")
-      div(v-for="color in colorPresets"
+      div(v-for="color in defaultColor"
         class="panel-bg__color"
         :style="colorStyles(color)"
         @click="setBgColor(color)")
@@ -21,18 +21,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      colorPresets: [
-        '#F2994A',
-        '#F2C94C',
-        '#219653',
-        '#9B51E0',
-        '#BB6BD9',
-        '#EB5757',
-        '#2F80ED',
-        '#2D9CDB',
-        '#56CCF2',
-        '#FFFFFF'
-      ]
     }
   },
   computed: {
@@ -40,13 +28,15 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      defaultColor: 'color/getDefaultColor'
     })
   },
   methods: {
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
-      _setBgColor: 'SET_backgroundColor'
+      _setBgColor: 'SET_backgroundColor',
+      setIsColorPickerOpened: 'SET_isColorPickerOpened'
     }),
     colorStyles(color: string) {
       return {
@@ -58,6 +48,7 @@ export default Vue.extend({
         pageIndex: this.lastSelectedPageIndex,
         color: color
       })
+      // this.setIsColorPickerOpened(true)
     }
   }
 })

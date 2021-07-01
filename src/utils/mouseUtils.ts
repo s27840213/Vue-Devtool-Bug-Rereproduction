@@ -68,6 +68,7 @@ class MouseUtils {
       active: false,
       shown: false,
       locked: false,
+      moved: false,
       styles: {
         x: x,
         y: y,

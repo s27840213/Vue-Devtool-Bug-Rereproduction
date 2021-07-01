@@ -12,6 +12,7 @@ class LayerFactary {
       active: false,
       shown: false,
       locked: false,
+      moved: false,
       imgControl: false,
       isClipped: false,
       styles: {
@@ -45,6 +46,7 @@ class LayerFactary {
       active: false,
       shown: false,
       locked: false,
+      moved: false,
       styles: {
         x: 0,
         y: 0,
@@ -97,6 +99,7 @@ class LayerFactary {
       active: false,
       shown: false,
       locked: false,
+      moved: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -121,6 +124,7 @@ class LayerFactary {
       active: true,
       shown: false,
       locked: false,
+      moved: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -150,6 +154,7 @@ class LayerFactary {
       size: [0, 0],
       category: 0,
       locked: false,
+      moved: false,
       styles: {
         x: 0,
         y: 0,

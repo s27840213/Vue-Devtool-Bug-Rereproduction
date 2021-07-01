@@ -27,6 +27,7 @@ export interface ILayer<T extends IStyle = IStyle> {
   active: boolean,
   shown: boolean,
   locked: boolean,
+  moved: boolean,
   styles: T
 }
 

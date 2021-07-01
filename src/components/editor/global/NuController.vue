@@ -271,7 +271,6 @@ export default Vue.extend({
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
       }
-
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
@@ -300,6 +299,9 @@ export default Vue.extend({
       if (this.isActive) {
         event.preventDefault()
         this.setCursorStyle('move')
+        if (!this.config.moved) {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+        }
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
         GroupUtils.movingTmp(
@@ -368,6 +370,10 @@ export default Vue.extend({
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
       let width = this.getLayerWidth
       let height = this.getLayerHeight
 
@@ -474,6 +480,9 @@ export default Vue.extend({
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
       let width = this.getLayerWidth
       let height = this.getLayerHeight
 
@@ -664,6 +673,9 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
       const vectA = {
         x: this.initialPos.x - this.center.x,
         y: this.initialPos.y - this.center.y
@@ -1111,7 +1123,7 @@ export default Vue.extend({
 
 .text {
   &__p {
-      margin: 0.5em;
+    margin: 0.5em;
   }
   &__span {
     text-align: left;

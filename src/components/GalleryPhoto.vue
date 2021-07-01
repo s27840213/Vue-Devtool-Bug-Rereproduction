@@ -19,6 +19,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import LazyLoad from '@/components/LazyLoad.vue'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -30,7 +31,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      pageSize: 'getPageSize'
+      pageSize: 'getPageSize',
+      getLayers: 'getLayers'
     })
   },
   methods: {
@@ -62,11 +64,17 @@ export default Vue.extend({
       const photoAspectRatio = photo.width / photo.height
       const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
       const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+      const imageLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
+        return (layer.type === 'image') && (!layer.moved) && (layer.src === photo.urls.regular)
+      }) as Array<IImage>
+
+      const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
+      const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
       const config = {
         src: photo.urls.regular,
         styles: {
-          x: this.pageSize.width / 2 - photoWidth / 2,
-          y: this.pageSize.height / 2 - photoHeight / 2,
+          x: x,
+          y: y,
           width: photoWidth,
           height: photoHeight,
           initWidth: photoWidth,
