@@ -115,12 +115,6 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    changedSize(): any {
-      return {
-        width: this.getLayerWidth,
-        height: this.getLayerHeight
-      }
-    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -154,9 +148,6 @@ export default Vue.extend({
     getFontSize(): number {
       return this.config.styles.size
     },
-    // getTextContent(): string {
-    //   return this.config.text
-    // },
     getLayerScale(): number {
       return this.config.styles.scale
     }
@@ -730,7 +721,7 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
+      if (this.getLayerType === 'text' && this.isActive && !this.isGetMoved) {
         this.contentEditable = true
         if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
           const sel = window.getSelection()

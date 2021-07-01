@@ -24,12 +24,12 @@
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @click.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         :key="`gp-action-icon-${index}`"
         class="pointer"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @click.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
       property-bar
         input(class="body-2 text-gray-2" type="number" v-model="lineHeight")
@@ -194,13 +194,13 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     onPropertyClick(iconName: string) {
-      // console.log('🤣🤣')
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {
       // TextUtils.fontSizeStepping(step)
       // used for test, need to refresh and direct update to vuex
       const sel = TextUtils.getSelection()
+      console.log(sel)
       if (sel) {
         Object.assign(this.selection.start, sel.start)
         Object.assign(this.selection.end, sel.end)

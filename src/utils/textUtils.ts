@@ -1,8 +1,10 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
-import { ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
+import { ISpan, ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
 import { directive } from 'vue/types/umd'
+import GeneralUtils from './generalUtils'
+import Vue from 'vue'
 
 class TextUtils {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
@@ -31,62 +33,129 @@ class TextUtils {
         Object.assign(end, selEnd)
       }
 
-      const observer = new MutationObserver(ControlUtils.onTyping)
-      observer.observe(div as HTMLElement, {
-        characterData: true,
-        childList: true,
-        subtree: true,
-        attributes: false,
-        attributeOldValue: false,
-        characterDataOldValue: false
-      })
-
       const prop = this.propIndicator(div, start, end, propName, value)
       console.log(prop)
-      for (let i = start.pIndex; i < div.childNodes.length; i++) {
-        const p = div.childNodes[i]
-        const pEl = p as HTMLElement
-        const pindex = parseInt(pEl.dataset.pindex as string)
-        for (let j = 0; j < p.childNodes.length; j++) {
-          const span = p.childNodes[j]
-          const spanEl = span as HTMLElement
-          const sindex = parseInt(spanEl.dataset.sindex as string)
-          const text = spanEl.innerText
-          if (pindex === start.pIndex && sindex === start.sIndex) {
-            spanEl.innerText = text.substr(0, start.offset)
-            const newSpan = document.createElement('span')
-            newSpan.innerText = text.substr(start.offset)
-            // apply props
-            Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
-            span.after(newSpan)
-            j++
-            if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-              newSpan.innerText = text.substring(start.offset, end.offset)
-              console.log(text)
-              const thirdSpan = document.createElement('span')
-              thirdSpan.innerText = text.substr(end.offset)
-              Object.assign(thirdSpan.style, this.spanStyleTransformer(spanEl, {}))
-              newSpan.after(thirdSpan)
-              break
-            }
-          } else if (pindex === start.pIndex && sindex < start.sIndex) {
+      const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
+      let isStartContainerDivide = true
+      for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
+        const p = config.paragraphs[pIndex]
+        for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
+          const span = p.spans[sIndex]
+          const text = span.text
+          if (pIndex === start.pIndex && sIndex < start.sIndex) {
             continue
-          } else if (pindex === end.pIndex && sindex === end.sIndex) {
-            if (parseInt(spanEl.dataset.sindex as string) === end.sIndex) {
-              spanEl.innerText = text.substr(end.offset)
-              const newSpan = document.createElement('span')
-              newSpan.innerText = text.substr(0, end.offset)
-              Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
-              span.before(newSpan)
-              break
+          } else if (pIndex === start.pIndex && sIndex === start.sIndex) {
+            span.text = text.substr(0, start.offset)
+
+            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+            newSpan.text = text.substr(start.offset, text.length)
+            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
+
+            config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, newSpan)
+            if (span.text === '') {
+              config.paragraphs[pIndex].spans.splice(sIndex, 1)
+              isStartContainerDivide = false
             }
-          } else if (pindex < end.pIndex || (pindex === end.pIndex && sindex <= end.sIndex)) {
-            Object.assign(spanEl.style, this.spanStyleTransformer(spanEl, prop))
+
+            if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+              newSpan.text = text.substring(start.offset, end.offset)
+
+              const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+              thirdSpan.text = text.substr(end.offset)
+              Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
+              if (thirdSpan.text !== '') {
+                config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, thirdSpan)
+              }
+              break
+            } else if (start.pIndex === end.pIndex && isStartContainerDivide) {
+              sIndex++
+              end.sIndex++
+            }
+          } else if (pIndex === end.pIndex && sIndex === end.sIndex) {
+            span.text = text.substr(end.offset)
+
+            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+            newSpan.text = text.substr(0, end.offset)
+            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
+            if (span.text === '') {
+              config.paragraphs[pIndex].spans.splice(sIndex, 1, newSpan)
+            } else {
+              config.paragraphs[pIndex].spans.splice(sIndex, 0, newSpan)
+            }
+            break
+          } else if (pIndex < end.pIndex || (pIndex === end.pIndex && sIndex < end.sIndex)) {
+            console.log(config.paragraphs[pIndex].spans[sIndex])
+            Object.assign(span.styles, this.spanStylesTransformer(span, prop))
           }
         }
       }
+      ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+      Vue.nextTick(() => {
+        if (sel && Object.keys(sel.end).length !== 0) {
+          const range = new Range()
+          if (isStartContainerDivide) {
+            start.sIndex++
+            if (start.pIndex === end.pIndex) {
+              end.sIndex++
+            }
+          }
+          const nodeStart = sel.div.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node
+          const nodeEnd = sel.div.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node
+          range.setStart(nodeStart, 0)
+          range.setEnd(nodeEnd, config.paragraphs[end.pIndex].spans[end.sIndex].text.length)
+
+          const select = window.getSelection()
+          if (select) {
+            select.removeAllRanges()
+            select.addRange(range)
+          }
+        }
+      })
     }
   }
+  // const prop = this.propIndicator(div, start, end, propName, value)
+  // for (let i = start.pIndex; i < div.childNodes.length; i++) {
+  //   const p = div.childNodes[i]
+  //   const pEl = p as HTMLElement
+  //   const pindex = parseInt(pEl.dataset.pindex as string)
+  //   for (let j = 0; j < p.childNodes.length; j++) {
+  //     const span = p.childNodes[j]
+  //     const spanEl = span as HTMLElement
+  //     const sindex = parseInt(spanEl.dataset.sindex as string)
+  //     const text = spanEl.innerText
+  //     if (pindex === start.pIndex && sindex === start.sIndex) {
+  //       spanEl.innerText = text.substr(0, start.offset)
+  //       const newSpan = document.createElement('span')
+  //       newSpan.innerText = text.substr(start.offset)
+  //       // apply props
+  //       Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
+  //       span.after(newSpan)
+  //       j++
+  //       if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+  //         newSpan.innerText = text.substring(start.offset, end.offset)
+  //         console.log(text)
+  //         const thirdSpan = document.createElement('span')
+  //         thirdSpan.innerText = text.substr(end.offset)
+  //         Object.assign(thirdSpan.style, this.spanStyleTransformer(spanEl, {}))
+  //         newSpan.after(thirdSpan)
+  //         break
+  //       }
+  //     } else if (pindex === start.pIndex && sindex < start.sIndex) {
+  //       continue
+  //     } else if (pindex === end.pIndex && sindex === end.sIndex) {
+  //       if (parseInt(spanEl.dataset.sindex as string) === end.sIndex) {
+  //         spanEl.innerText = text.substr(end.offset)
+  //         const newSpan = document.createElement('span')
+  //         newSpan.innerText = text.substr(0, end.offset)
+  //         Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
+  //         span.before(newSpan)
+  //         break
+  //       }
+  //     } else if (pindex < end.pIndex || (pindex === end.pIndex && sindex <= end.sIndex)) {
+  //       Object.assign(spanEl.style, this.spanStyleTransformer(spanEl, prop))
+  //     }
+  //   }
+  // }
 
   /**
    *
@@ -150,36 +219,44 @@ class TextUtils {
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
         switch (propName) {
           case 'bold': {
-            prop.fontWeight = 'normal'
+            // prop.fontWeight = 'normal'
+            prop.weight = 'normal'
             if ((span as HTMLElement).style.fontWeight === 'normal') {
-              prop.fontWeight = 'bold'
+              // prop.fontWeight = 'bold'
+              prop.weight = 'bold'
               flag = true
             }
             break
           }
           case 'underline': {
-            prop.textDecorationLine = 'none'
+            // prop.textDecorationLine = 'none'
+            prop.decoration = 'none'
             if ((span as HTMLElement).style.textDecorationLine === 'none') {
-              prop.textDecorationLine = 'underline'
+              // prop.textDecorationLine = 'underline'
+              prop.decoration = 'underline'
               flag = true
             }
             break
           }
           case 'italic': {
-            prop.fontStyle = 'normal'
+            // prop.fontStyle = 'normal'
+            prop.style = 'normal'
             if ((span as HTMLElement).style.fontStyle === 'normal') {
-              prop.fontStyle = 'italic'
+              // prop.fontStyle = 'italic'
+              prop.style = 'italic'
               flag = true
             }
             break
           }
           case 'fontFamily': {
-            prop.fontFamily = value
+            // prop.fontFamily = value
+            prop.font = value
             flag = true
             break
           }
           case 'fontSize': {
-            prop.fontSize = `${value}px`
+            // prop.fontSize = `${value}px`
+            prop.size = `${value}px`
             flag = true
             break
           }
@@ -193,7 +270,6 @@ class TextUtils {
   }
 
   spanStyleTransformer(span: HTMLElement, prop: { [key: string]: string }): ISpanCssStyle {
-    console.log(prop)
     const spanStyle = {
       fontFamily: span.style.fontFamily,
       fontWeight: span.style.fontWeight,
@@ -202,9 +278,21 @@ class TextUtils {
       fontStyle: span.style.fontStyle,
       color: span.style.color,
       opacity: span.style.opacity
-      // shadow-:
     }
     return Object.assign(spanStyle, prop)
+  }
+
+  spanStylesTransformer(span: ISpan | undefined, prop: { [key: string]: string }): ISpanStyle {
+    const spanStyles = {
+      font: span ? span.styles.font : '',
+      weight: span ? span.styles.weight : '',
+      size: span ? span.styles.size : NaN,
+      decoration: span ? span.styles.decoration : '',
+      style: span ? span.styles.style : '',
+      color: span ? span.styles.color : '',
+      opacity: span ? span.styles.opacity : NaN
+    }
+    return Object.assign(spanStyles, prop)
   }
 
   isArrowKey(e: KeyboardEvent): boolean {

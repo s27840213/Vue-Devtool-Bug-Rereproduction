@@ -65,7 +65,7 @@ export interface ISpanStyle {
   weight: string,
   color: string,
   size: number,
-  initSize: number,
+  // initSize: number,
   decoration: string,
   style: string,
   opacity: number

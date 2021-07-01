@@ -313,7 +313,7 @@ class Controller {
     }
   }
 
-  updateTextProp(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+  updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,
