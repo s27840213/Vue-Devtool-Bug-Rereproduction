@@ -271,7 +271,6 @@ export default Vue.extend({
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
       }
-
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
@@ -300,6 +299,9 @@ export default Vue.extend({
       if (this.isActive) {
         event.preventDefault()
         this.setCursorStyle('move')
+        if (!this.config.moved) {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+        }
         const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
         const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
         GroupUtils.movingTmp(
@@ -368,6 +370,10 @@ export default Vue.extend({
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
       let width = this.getLayerWidth
       let height = this.getLayerHeight
 
@@ -474,6 +480,9 @@ export default Vue.extend({
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
       let width = this.getLayerWidth
       let height = this.getLayerHeight
 
@@ -664,6 +673,9 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
       const vectA = {
         x: this.initialPos.x - this.center.x,
         y: this.initialPos.y - this.center.y
@@ -720,17 +732,17 @@ export default Vue.extend({
     textClickHandler(e: MouseEvent) {
       if (this.config.type === 'text' && this.isActive && !this.isGetMoved) {
         this.contentEditable = true
-      }
-      if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        const sel = window.getSelection()
-        if (sel && sel.rangeCount !== 0) {
-          console.log('-----742------')
-          this.$root.$emit('textSelection', sel.toString() !== '')
-          const range = sel.getRangeAt(0)
-          const startContainer = range.startContainer
-          this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-          this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-          this.text.offset = range.startOffset
+        if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+          const sel = window.getSelection()
+          if (sel && sel.rangeCount !== 0) {
+            console.log('-----742------')
+            this.$root.$emit('textSelection', sel.toString() !== '')
+            const range = sel.getRangeAt(0)
+            const startContainer = range.startContainer
+            this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
+            this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
+            this.text.offset = range.startOffset
+          }
         }
       }
     },
@@ -1111,7 +1123,7 @@ export default Vue.extend({
 
 .text {
   &__p {
-      margin: 0.5em;
+    margin: 0.5em;
   }
   &__span {
     text-align: left;

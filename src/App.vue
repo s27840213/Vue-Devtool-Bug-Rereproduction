@@ -23,11 +23,8 @@
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
         tabindex="0")
-      //- chrome-picker(v-show="isPageDropdownsOpened"
-      //-   @blur.native="setIsPageDropdownsOpened(false)"
-      //-   @click.native="setIsPageDropdownsOpened(false)"
-      //-   tabindex="0"
-      //-   v-model="colors")
+      color-picker(v-if="isColorPickerOpened"
+        tabindex="0")
 </template>
 
 <script lang="ts">
@@ -37,6 +34,7 @@ import DropdownsOrder from '@/components//dropdowns/DropdownsOrder.vue'
 import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 import { Chrome } from 'vue-color'
+import ColorPicker from '@/components/ColorPicker.vue'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 
 export default Vue.extend({
@@ -45,17 +43,14 @@ export default Vue.extend({
     DropdownsLayer,
     DropdownsPage,
     'chrome-picker': Chrome,
+    ColorPicker,
     PhotoInfo
   },
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0,
-      colors: {
-        hex: '#194d33',
-        a: 1
-      }
+      coordinateHeight: 0
     }
   },
   mounted() {
@@ -67,6 +62,7 @@ export default Vue.extend({
       isOrderDropdownsOpened: 'getIsOrderDropdownsOpened',
       isLayerDropdownsOpened: 'getIsLayerDropdownsOpened',
       isPageDropdownsOpened: 'getIsPageDropdownsOpened',
+      isColorPickerOpened: 'getIsColorPickerOpened',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo'
     })
   },
@@ -75,6 +71,7 @@ export default Vue.extend({
       _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened',
       _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       _setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened',
+      _setIsColorPickerOpened: 'SET_isColorPickerOpened',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
     }),
     coordinateHandler(e: MouseEvent) {
@@ -100,7 +97,7 @@ export default Vue.extend({
     },
     setIsColorPickerOpened(isOpened: boolean) {
       this.$nextTick(() => {
-        this._setIsPageDropdownsOpened(isOpened)
+        this._setIsColorPickerOpened(isOpened)
       })
     },
     setCurrSelectedPhotoInfo() {
@@ -163,4 +160,8 @@ export default Vue.extend({
     pointer-events: initial;
   }
 }
+
+// .vc-chrome-toggle-btn {
+//   display: none;
+// }
 </style>

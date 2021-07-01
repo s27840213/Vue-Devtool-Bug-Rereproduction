@@ -279,6 +279,7 @@ class GroupUtils {
       layer.styles.rotate = (layer.styles.rotate + tmpLayer.styles.rotate) % 360
       layer.shown = false
       layer.locked = tmpLayer.locked
+      layer.moved = tmpLayer.moved
     })
 
     return layers

@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
+import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
 import store from '@/store'
 

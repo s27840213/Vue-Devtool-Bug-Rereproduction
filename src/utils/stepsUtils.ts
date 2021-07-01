@@ -1,6 +1,5 @@
 // import store from '@/store'
 import store from '@/store'
-import { IPage } from '@/interfaces/page'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { IStep } from '@/interfaces/steps'

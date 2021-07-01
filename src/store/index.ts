@@ -8,6 +8,7 @@ import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
+import color from '@/store/module/color'
 
 Vue.use(Vuex)
 
@@ -26,6 +27,48 @@ const getDefaultState = (): IEditorState => ({
           active: false,
           shown: false,
           locked: false,
+          moved: false,
+          imgControl: false,
+          styles: {
+            x: 0,
+            y: 0,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: 0,
+            height: 0,
+            initWidth: 0,
+            initHeight: 0,
+            imgX: 0,
+            imgY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            zindex: -1,
+            opacity: 100
+          }
+        },
+        posX: -1,
+        posY: -1
+      },
+      name: 'Default Page',
+      layers: [
+      ]
+    },
+    {
+      width: 1080,
+      height: 1080,
+      backgroundColor: '#ffffff',
+      backgroundImage: {
+        src: 'none',
+        config: {
+          type: 'image',
+          src: 'none',
+          clipPath: '',
+          active: false,
+          shown: false,
+          locked: false,
+          moved: false,
           imgControl: false,
           styles: {
             x: 0,
@@ -154,8 +197,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getIsPageDropdownsOpened(state: IEditorState) {
     return state.isPageDropdownsOpened
   },
-  getIColorPickerOpened(state: IEditorState) {
-    return state.isPageDropdownsOpened
+  getIsColorPickerOpened(state: IEditorState) {
+    return state.isColorPickerOpened
   },
   getCurrSelectedPhotoInfo(state: IEditorState) {
     return state.currSelectedPhotoInfo
@@ -235,8 +278,10 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
     })
   },
-  UPDATE_textProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number,
-    paragraphs: [IParagraph] }) {
+  UPDATE_textProps(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number,
+    paragraphs: [IParagraph]
+  }) {
     /**
      * This Mutation is used to update the text's hierarchy between paragraphs and spans while hitting the enter key or typing with selection range
      */
@@ -245,8 +290,10 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_textContent(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string }) {
     (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].text = updateInfo.text
   },
-  UPDATE_textStyle(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number, sIndex: number,
-    styles: { [key: string]: number | string } }) {
+  UPDATE_textStyle(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, pIndex: number, sIndex: number,
+    styles: { [key: string]: number | string }
+  }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].styles[k] = v
     })
@@ -380,6 +427,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
+    console.log(state.isColorPickerOpened)
   },
   SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data
@@ -418,5 +466,8 @@ export default new Vuex.Store({
   getters,
   mutations,
   actions,
-  modules: { photos }
+  modules: {
+    photos,
+    color
+  }
 })

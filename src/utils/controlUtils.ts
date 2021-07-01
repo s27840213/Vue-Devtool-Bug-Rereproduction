@@ -31,33 +31,33 @@ class Controller {
     return {
       scalers: [
         {
-          width: `${10 * (100 / scaleRatio)}px`,
-          height: `${10 * (100 / scaleRatio)}px`,
+          width: '8px',
+          height: '8px',
           left: '0',
           top: '0',
-          transform: 'translate3d(-50%,-50%,0)',
+          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
           borderRadius: '50%'
         },
         {
-          width: `${10 * (100 / scaleRatio)}px`,
-          height: `${10 * (100 / scaleRatio)}px`,
-          transform: 'translate3d(50%,-50%,0)',
+          width: '8px',
+          height: '8px',
+          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
           right: '0',
           top: '0',
           borderRadius: '50%'
         },
         {
-          width: `${10 * (100 / scaleRatio)}px`,
-          height: `${10 * (100 / scaleRatio)}px`,
-          transform: 'translate3d(50%,50%,0)',
+          width: '8px',
+          height: '8px',
+          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
           right: '0',
           bottom: '0',
           borderRadius: '50%'
         },
         {
-          width: `${10 * (100 / scaleRatio)}px`,
-          height: `${10 * (100 / scaleRatio)}px`,
-          transform: 'translate3d(-50%,50%,0)',
+          width: '8px',
+          height: '8px',
+          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
           left: '0',
           bottom: '0',
           borderRadius: '50%'
