@@ -14,6 +14,7 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
 import { mapGetters } from 'vuex'
+import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   props: {
@@ -28,50 +29,46 @@ export default Vue.extend({
     updateTextSize(): any {
       const config = this.config as IText
       return {
-        width: config.styles.width,
-        height: config.styles.height,
-        paragraphs: config.paragraphs
+        // width: config.styles.width,
+        // height: config.styles.height,
+        paragraphs: config.paragraphs,
+        active: config.active
       }
+    },
+    getLayerScale(): number {
+      return this.config.styles.scale
     }
   },
   watch: {
     updateTextSize: {
       handler: function() {
-        if (this.config.isComposing) return
-
-        console.log('updateTextSize')
+        if (this.config.isTyping) {
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+          return
+        }
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
-          const scale = this.config.styles.scale
-          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit}px`
-          text.style.height = 'max-content'
-          const textHW = {
-            width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
-            height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+          if (!this.config.active) {
+            console.log(this.config.styles.width)
+            text.style.width = `${this.config.styles.width / this.getLayerScale}px`
+            // text.style.height = 'max-content'
+            text.style.height = `${this.config.styles.height / this.getLayerScale}px`
+          } else {
+            text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+            text.style.height = 'max-content'
+            // text.style.height = 'max-content'
+            const textHW = {
+              width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+              height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+            }
+            text.style.width = `${textHW.width / this.getLayerScale}px`
+            text.style.height = `${textHW.height / this.getLayerScale}px`
+            ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
           }
-          console.log('textHW')
-          console.log(textHW)
-          // text.style.width = `${Math.ceil(textHW.width / scale)}px`
-          // text.style.height = `${Math.ceil(textHW.height / scale)}px`
-          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
         })
       },
       deep: true
     }
-    // 'config.styles.font': function() {
-    //   setTimeout(() => {
-    //     const content = this.getContentBody
-    //     ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, this.config.styles.size)
-    //     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, content.offsetWidth, content.offsetHeight, 1)
-    //   }, 0)
-    // }
-
-    // 'config.styles.size': function() {
-    //   const textHW = TextUtils.getTextHW(this.config.text)
-    //   console.log(textHW)
-    //   ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.config.styles.size)
-    //   ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
-    // }
   },
   methods: {
     styles(styles: any) {
@@ -79,7 +76,7 @@ export default Vue.extend({
     },
     textStyles() {
       return {
-        opacity: this.config.type === 'text' && this.config.active ? 0 : 1
+        opacity: this.config.active ? 0 : 1
       }
     }
   }
@@ -93,6 +90,7 @@ export default Vue.extend({
   // position: relative;
 }
 .text {
+  height: 'max-content';
   // margin: auto;
   position: absolute;
   &__p {

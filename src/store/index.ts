@@ -290,14 +290,6 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_textContent(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string }) {
     (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].text = updateInfo.text
   },
-  UPDATE_textStyle(state: IEditorState, updateInfo: {
-    pageIndex: number, layerIndex: number, pIndex: number, sIndex: number,
-    styles: { [key: string]: number | string }
-  }) {
-    Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].styles[k] = v
-    })
-  },
   UPDATE_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v

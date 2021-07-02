@@ -19,8 +19,8 @@
             div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
               spellcheck="false"
               :style="contentStyles()"
-              @compositionstart="isCompositoning = true"
-              @compositionend="isCompositoning = false"
+              @compositionstart="isComposing = true"
+              @compositionend="isComposing = false"
               @keydown="onKeyDown($event)")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -90,11 +90,10 @@ export default Vue.extend({
       initialWH: { width: 0, height: 0 },
       imgInitWH: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
-      // text: { pIndex: NaN, sIndex: NaN, offset: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
-      isCompositoning: false,
+      isComposing: false,
       isSnapping: false,
       contentEditable: false
     }
@@ -161,7 +160,7 @@ export default Vue.extend({
       if (this.getLayerType === 'text' && !this.isActive) {
         this.contentEditable = false
         const paragraphs: IParagraph[] = this.textParser()
-        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { paragraphs })
+        ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
       }
     }
   },
@@ -203,14 +202,12 @@ export default Vue.extend({
     },
     contentStyles() {
       return {
-        width: `${Math.ceil(this.config.styles.width / this.getLayerScale)}px`,
-        height: `${Math.ceil(this.config.styles.height / this.getLayerScale)}px`,
+        width: `${this.config.styles.width / this.getLayerScale}px`,
+        height: `${this.config.styles.height / this.getLayerScale}px`,
+        // height: 'max-content',
         outline: 'none',
         position: 'absolute',
         transform: 'translate(-50%, -50%)'
-        // transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
-        // position: 'relative'
-        // 'transform-origin': '0px 0px'
       }
     },
     textStyles(styles: any) {
@@ -428,6 +425,8 @@ export default Vue.extend({
       let scale = Math.max(ratio.width, ratio.height)
       if (this.getLayerType === 'image') {
         scale *= typeof this.config.styles.initSize === 'undefined' ? 1 : this.config.styles.initSize
+      } else if (this.getLayerType === 'text') {
+        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
@@ -488,17 +487,17 @@ export default Vue.extend({
       }
       let width = this.getLayerWidth
       let height = this.getLayerHeight
+      const initWidth = this.initialWH.width
+      const initHeight = this.initialWH.height
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const [dx, dy] = [diff.x, diff.y]
+      const [dx, dy] = [diff.x / (this.scaleRatio / 100), diff.y / (this.scaleRatio / 100)]
 
       const offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) : 0
       const offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 && offsetHeight === 0) return
 
-      const initWidth = this.initialWH.width
-      const initHeight = this.initialWH.height
       width = offsetWidth + initWidth
       height = offsetHeight + initHeight
       if (width <= 20 || height <= 20) return
@@ -534,9 +533,9 @@ export default Vue.extend({
     textResizeHandler(width: number, height: number): [number, number] {
       const text = this.$refs.text as HTMLElement
       if (text && this.config.styles.writingMode.substring(0, 8) !== 'vertical') {
-        height = Math.ceil(text.getBoundingClientRect().height)
-        ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-        ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getFontSize)
+        text.style.height = 'max-content'
+        height = Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
       }
       return [width, height]
     },
@@ -734,17 +733,10 @@ export default Vue.extend({
     },
     textClickHandler(e: MouseEvent) {
       if (this.getLayerType === 'text' && this.isActive) {
-        // this.contentEditable = true
-        if (window.getSelection() && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+        if ((this.$refs.text as HTMLElement).contains(e.target as Node)) {
           const sel = window.getSelection()
           if (sel && sel.rangeCount !== 0) {
-            console.log('-----742------')
             this.$root.$emit('textSelection', sel.toString() !== '')
-            // const range = sel.getRangeAt(0)
-            // const startContainer = range.startContainer
-            // this.text.sIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) ? parseInt(startContainer?.parentElement?.dataset.sindex as string) : this.text.sIndex
-            // this.text.pIndex = !Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)) ? parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string) : this.text.pIndex
-            // this.text.offset = range.startOffset
           }
         }
       }
@@ -796,25 +788,24 @@ export default Vue.extend({
        * If is composing, the width/height updated to the vuex would be done by controller.
        * Otherwise, any other mutation to the ITex config which causing layer' size change would be updated in nu-text component
        */
-      if (this.isCompositoning) {
-        setTimeout(() => {
-          const text = this.$refs.text as HTMLElement
-          const scale = this.config.styles.scale
-          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit}px`
-          text.style.height = 'max-content'
-          const textHW = {
-            width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
-            height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
-          }
-          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { isComposing: true })
-          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, scale)
-        }, 0)
-      }
+      setTimeout(() => {
+        const text = this.$refs.text as HTMLElement
+        text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+        text.style.height = 'max-content'
+        const textHW = {
+          width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+          height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+        }
+        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+        text.style.height = `${this.config.styles.height / this.getLayerScale}px`
+        console.log(this.config.styles.width)
+      }, 0)
       return (mutations: MutationRecord[], observer: MutationObserver) => {
-        if (this.isCompositoning) {
+        if (this.isComposing) {
           return
         } else if (this.config.isComposing) {
-          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { isComposing: false })
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isComposing: false })
         }
 
         observer.disconnect()
@@ -866,7 +857,7 @@ export default Vue.extend({
             offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
           }
           const text = this.$refs.text as HTMLElement
-          ControlUtils.updateTextProps(this.pageIndex, this.layerIndex, { paragraphs })
+          ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           this.$nextTick(() => {
             console.log(pIndex)
             console.log(sIndex)

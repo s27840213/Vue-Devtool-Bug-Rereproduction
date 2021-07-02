@@ -321,31 +321,6 @@ class Controller {
     })
   }
 
-  updateTextProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph[] }) {
-    store.commit('UPDATE_layerProps', {
-      pageIndex,
-      layerIndex,
-      props
-    })
-  }
-
-  updateTextContent(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string) {
-    store.commit('UPDATE_textContent', {
-      pageIndex, layerIndex, pIndex, sIndex, text
-    })
-  }
-
-  updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: {
-        x,
-        y
-      }
-    })
-  }
-
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
@@ -378,6 +353,28 @@ class Controller {
     })
   }
 
+  // updateLayerProps(pageIndex: number, layerIndex: number, ...propsArr: ({ [key: string]: number | string | boolean })[]) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: number | string | boolean }) {
+    // propsArr.forEach(props => {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props
+    })
+    // })
+  }
+
+  updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        x,
+        y
+      }
+    })
+  }
+
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
@@ -386,18 +383,6 @@ class Controller {
         width,
         height,
         scale
-      }
-    })
-  }
-
-  updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: {
-        initWidth,
-        initHeight,
-        initSize
       }
     })
   }
@@ -413,22 +398,24 @@ class Controller {
     })
   }
 
-  updateFontSize(pageIndex: number, layerIndex: number, size: number) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: {
-        size
-      }
-    })
-  }
-
   updateLayerRotate(pageIndex: number, layerIndex: number, rotate: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles: {
         rotate
+      }
+    })
+  }
+
+  updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: {
+        initWidth,
+        initHeight,
+        initSize
       }
     })
   }

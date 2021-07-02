@@ -2,7 +2,7 @@
   div(class="text-setting")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2") {{ fontFamily }}
+      span(class="body-2 text-gray-2") {{ textFont }}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
@@ -84,10 +84,10 @@ export default Vue.extend({
   },
   mounted() {
     this.$root.$on('textSelection', (selectRange: boolean) => {
-      const font = TextUtils.propReader('fontFamily')
-      this.fontFamily = typeof font !== 'undefined' ? font : 'multi-fonts'
-      const size = TextUtils.propReader('fontSize')
-      this.size = typeof size !== 'undefined' ? size : '--'
+      const sel = TextUtils.getSelection()
+      if (sel) {
+        this.$forceUpdate()
+      }
     })
   },
   computed: {
@@ -98,25 +98,19 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     textFont: {
-      get() {
-        // return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
+      cache: false,
+      get(): string {
         const font = TextUtils.propReader('fontFamily')
         return typeof font !== 'undefined' ? font : 'multi-fonts'
-      },
-      set(value) {
-        this.$store.commit('UPDATE_layerStyles', {
-          pageIndex: this.lastSelectedPageIndex,
-          layerIndex: this.currSelectedIndex,
-          styles: {
-            font: value
-          }
-        })
       }
+      // set(value) {
+      // }
     },
     fontSize: {
+      cache: false,
       get(): string {
-        return this.size
-        // return Math.round(this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size)
+        const size = TextUtils.propReader('fontSize')
+        return typeof size !== 'undefined' ? size : '--'
       },
       set(value) {
         TextUtils.onPropertyClick('fontSize', value as string, this.selection.start, this.selection.end)

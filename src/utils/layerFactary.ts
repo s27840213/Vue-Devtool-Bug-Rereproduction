@@ -43,7 +43,7 @@ class LayerFactary {
     const basicConfig = {
       type: 'text',
       widthLimit: -1,
-      isComposing: false,
+      isTyping: false,
       active: false,
       shown: false,
       locked: false,

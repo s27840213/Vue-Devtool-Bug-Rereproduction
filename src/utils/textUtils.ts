@@ -1,6 +1,6 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
-import { ISpan, ISpanCssStyle, ISpanStyle, IText } from '@/interfaces/layer'
+import { ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
 import { directive } from 'vue/types/umd'
 import GeneralUtils from './generalUtils'
@@ -63,10 +63,11 @@ class TextUtils {
               thirdSpan.text = text.substr(end.offset)
               Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
               if (thirdSpan.text !== '') {
-                config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, thirdSpan)
+                config.paragraphs[pIndex].spans.splice(isStartContainerDivide ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
               }
               break
-            } else if (start.pIndex === end.pIndex && isStartContainerDivide) {
+            }
+            if (start.pIndex === end.pIndex && isStartContainerDivide) {
               sIndex++
               end.sIndex++
             }
@@ -83,7 +84,6 @@ class TextUtils {
             }
             break
           } else if (pIndex < end.pIndex || (pIndex === end.pIndex && sIndex < end.sIndex)) {
-            console.log(config.paragraphs[pIndex].spans[sIndex])
             Object.assign(span.styles, this.spanStylesTransformer(span, prop))
           }
         }
@@ -91,13 +91,10 @@ class TextUtils {
       ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       Vue.nextTick(() => {
         if (sel && Object.keys(sel.end).length !== 0) {
-          const range = new Range()
           if (isStartContainerDivide) {
             start.sIndex++
-            if (start.pIndex === end.pIndex) {
-              end.sIndex++
-            }
           }
+          const range = new Range()
           const nodeStart = sel.div.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node
           const nodeEnd = sel.div.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node
           range.setStart(nodeStart, 0)
@@ -112,49 +109,6 @@ class TextUtils {
       })
     }
   }
-  // const prop = this.propIndicator(div, start, end, propName, value)
-  // for (let i = start.pIndex; i < div.childNodes.length; i++) {
-  //   const p = div.childNodes[i]
-  //   const pEl = p as HTMLElement
-  //   const pindex = parseInt(pEl.dataset.pindex as string)
-  //   for (let j = 0; j < p.childNodes.length; j++) {
-  //     const span = p.childNodes[j]
-  //     const spanEl = span as HTMLElement
-  //     const sindex = parseInt(spanEl.dataset.sindex as string)
-  //     const text = spanEl.innerText
-  //     if (pindex === start.pIndex && sindex === start.sIndex) {
-  //       spanEl.innerText = text.substr(0, start.offset)
-  //       const newSpan = document.createElement('span')
-  //       newSpan.innerText = text.substr(start.offset)
-  //       // apply props
-  //       Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
-  //       span.after(newSpan)
-  //       j++
-  //       if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-  //         newSpan.innerText = text.substring(start.offset, end.offset)
-  //         console.log(text)
-  //         const thirdSpan = document.createElement('span')
-  //         thirdSpan.innerText = text.substr(end.offset)
-  //         Object.assign(thirdSpan.style, this.spanStyleTransformer(spanEl, {}))
-  //         newSpan.after(thirdSpan)
-  //         break
-  //       }
-  //     } else if (pindex === start.pIndex && sindex < start.sIndex) {
-  //       continue
-  //     } else if (pindex === end.pIndex && sindex === end.sIndex) {
-  //       if (parseInt(spanEl.dataset.sindex as string) === end.sIndex) {
-  //         spanEl.innerText = text.substr(end.offset)
-  //         const newSpan = document.createElement('span')
-  //         newSpan.innerText = text.substr(0, end.offset)
-  //         Object.assign(newSpan.style, this.spanStyleTransformer(spanEl, prop))
-  //         span.before(newSpan)
-  //         break
-  //       }
-  //     } else if (pindex < end.pIndex || (pindex === end.pIndex && sindex <= end.sIndex)) {
-  //       Object.assign(spanEl.style, this.spanStyleTransformer(spanEl, prop))
-  //     }
-  //   }
-  // }
 
   /**
    *
@@ -268,19 +222,6 @@ class TextUtils {
     return prop
   }
 
-  spanStyleTransformer(span: HTMLElement, prop: { [key: string]: string }): ISpanCssStyle {
-    const spanStyle = {
-      fontFamily: span.style.fontFamily,
-      fontWeight: span.style.fontWeight,
-      fontSize: span.style.fontSize,
-      textDecorationLine: span.style.textDecorationLine,
-      fontStyle: span.style.fontStyle,
-      color: span.style.color,
-      opacity: span.style.opacity
-    }
-    return Object.assign(spanStyle, prop)
-  }
-
   spanStylesTransformer(span: ISpan | undefined, prop: { [key: string]: string }): ISpanStyle {
     const spanStyles = {
       font: span ? span.styles.font : '',
@@ -342,25 +283,27 @@ class TextUtils {
   }
 
   getSelection(): { div: Node, start: { [key: string]: number }, end: { [key: string]: number } } | undefined {
-    if (window.getSelection()) {
-      const sel = window.getSelection()
-      const range = sel?.getRangeAt(0)
-      let div = range?.commonAncestorContainer
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+
+    const range = sel?.getRangeAt(0)
+    if (range) {
+      let div = range.commonAncestorContainer
       while (div?.parentNode && div?.nodeName !== 'DIV') {
         div = div?.parentNode
       }
       const start = {
-        pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-        sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
-        offset: range?.startOffset as number
+        pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range.startContainer?.parentElement?.dataset.sindex as string),
+        offset: range.startOffset as number
       }
 
       if (!div || !range || !range.startContainer || !range.endContainer) return undefined
-      const end: { [key: string]: number } = {}
 
+      const end: { [key: string]: number } = {}
       if (window.getSelection()?.toString() !== '') {
-        end.pIndex = parseInt(range?.endContainer?.parentElement?.parentElement?.dataset.pindex as string)
-        end.sIndex = parseInt(range?.endContainer?.parentElement?.dataset.sindex as string)
+        end.pIndex = parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string)
+        end.sIndex = parseInt(range.endContainer?.parentElement?.dataset.sindex as string)
         end.offset = range?.endOffset as number
       }
       return {

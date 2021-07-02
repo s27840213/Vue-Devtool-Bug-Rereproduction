@@ -22,8 +22,8 @@ export default Vue.extend({
         /**
          * Divided by the scale for synchronizing the scale applied at layer-scale
          */
-        HW.width = Math.ceil(this.config.styles.width / this.config.styles.scale)
-        HW.height = Math.ceil(this.config.styles.height / this.config.styles.scale)
+        HW.width = this.config.styles.width / this.config.styles.scale
+        HW.height = this.config.styles.height / this.config.styles.scale
       } else {
         HW.width = this.config.styles.initWidth
         HW.height = this.config.styles.initHeight
