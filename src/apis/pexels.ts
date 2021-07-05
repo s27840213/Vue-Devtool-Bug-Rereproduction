@@ -11,6 +11,7 @@ const options = {
 }
 
 const axios = Axios.create(options)
+const REGEX_JAPANESE = /[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]/
 
 function normalized (photos: Api.IPexelsPhoto[]): Api.IPhoto[] {
   return photos.map(photo => ({
@@ -53,6 +54,9 @@ export default {
       per_page: params.perPage,
       query: params.query || 'random',
       locale: 'zh-TW'
+    }
+    if (REGEX_JAPANESE.test(params.query)) {
+      searchParams.locale = 'ja-JP'
     }
     const { data } = await axios.request<Api.IPexelsSearchResponse>({
       url: '/search',
