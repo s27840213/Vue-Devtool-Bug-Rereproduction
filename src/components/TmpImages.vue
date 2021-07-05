@@ -10,7 +10,8 @@
           :key="photo.id")
     template(#after)
       observer-sentinel(target=".temp__content"
-        @callback="$emit('loadMore')")
+        @callback="$emit('loadMore')"
+        :rootMargin="'0px 0px 400px'")
         svg-icon(v-if="pending"
           :iconName="'loading'"
           :iconColor="'gray-2'"
@@ -44,21 +45,22 @@ export default Vue.extend({
   data() {
     return {
       rows: [],
-      galleryUtils: new GalleryUtils(260, 80, 5)
+      prevLastRow: [],
+      galleryUtils: new GalleryUtils(260, 70, 5)
     }
   },
   watch: {
     getCurrentPagePhotos(val) {
-      const [lastRow] = this.rows.slice(-1) as any
-      const lastList = (lastRow && lastRow.list) || []
+      const { prevLastRow } = this
       const rows = this.galleryUtils
-        .generate(lastList.concat(val))
+        .generate(prevLastRow.concat(val))
         .map((row, idx) => ({
           list: row,
           id: `row${this.page}${idx}`,
           size: row[0].preview.height + this.margin
         }))
-      this.rows = this.rows.slice(0, -1).concat(rows as any)
+      this.prevLastRow = (rows.splice(-1)[0].list || []) as any
+      this.rows = this.rows.concat(rows as any)
     }
   },
   methods: {

@@ -37,7 +37,7 @@ export default Vue.extend({
   methods: {
     handleCallback: throttle(function (this: any) {
       this.$emit('callback')
-    }, 2000)
+    }, 500)
   },
   destroyed () {
     this.intersectionObserver && this.intersectionObserver.disconnect()

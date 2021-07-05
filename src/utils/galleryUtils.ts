@@ -34,7 +34,7 @@ export default class GalleryUtils {
       const nextWidth = next.preview?.width || 0
       rowData.sumOfWidth += current.preview?.width || 0
       rowData.imgs.push(current)
-      const nextMargin = (rowData.imgs.length + 1) * this.margin
+      const nextMargin = rowData.imgs.length * this.margin
       const excludeNext = !nextWidth || (rowData.sumOfWidth + nextWidth + nextMargin) > this.galleryWidth
       if (excludeNext) {
         rows.push({ ...rowData })

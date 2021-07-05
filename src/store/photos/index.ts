@@ -34,7 +34,6 @@ const actions: ActionTree<IPhotoState, unknown> = {
     }
     try {
       const { results } = await (params.query ? unsplash.getPhotos(params) : unsplash.getPopularPhoto(params))
-      console.log(results)
       commit(SET_STATE, {
         list: results,
         page: 1,
