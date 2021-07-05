@@ -8,10 +8,11 @@
           :style="imageStyle(photo.preview, i > 0)",
           :photo="photo"
           :key="photo.id")
+        observer-sentinel(v-if="item.index === 2"
+          target=".temp__content"
+          @callback="handleLoadMore(item.page)")
     template(#after)
-      observer-sentinel(target=".temp__content"
-        @callback="$emit('loadMore')"
-        :rootMargin="'0px 0px 400px'")
+      div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"
           :iconColor="'gray-2'"
@@ -46,7 +47,7 @@ export default Vue.extend({
     return {
       rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(260, 70, 5)
+      galleryUtils: new GalleryUtils(260, 75, 5)
     }
   },
   watch: {
@@ -57,6 +58,8 @@ export default Vue.extend({
         .map((row, idx) => ({
           list: row,
           id: `row${this.page}${idx}`,
+          page: this.page,
+          index: idx,
           size: row[0].preview.height + this.margin
         }))
       this.prevLastRow = (rows.splice(-1)[0].list || []) as any
@@ -69,6 +72,11 @@ export default Vue.extend({
         width: `${attr.width}px`,
         height: `${attr.height}px`,
         marginLeft: `${addMarginLeft ? this.margin : 0}px`
+      }
+    },
+    handleLoadMore (nextPage: number): void {
+      if (nextPage === this.page) {
+        this.$emit('loadMore')
       }
     }
   }
