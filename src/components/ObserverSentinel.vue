@@ -16,7 +16,7 @@ export default Vue.extend({
     },
     rootMargin: {
       type: String,
-      default: '0px 0px 150px'
+      default: '0px'
     }
   },
   data (): { intersectionObserver: IntersectionObserver | null } {
@@ -37,7 +37,7 @@ export default Vue.extend({
   methods: {
     handleCallback: throttle(function (this: any) {
       this.$emit('callback')
-    }, 2000)
+    }, 500)
   },
   destroyed () {
     this.intersectionObserver && this.intersectionObserver.disconnect()

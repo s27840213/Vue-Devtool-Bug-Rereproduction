@@ -5,18 +5,16 @@
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
-    lazy-load
-      img(:src="photo.urls.thumb",
-        draggable="true",
-        class="gallery-photo__img pointer"
-        @dragstart="dragStart($event,photo)"
-        @click="addImage(photo)")
+    img(:src="photo.urls.thumb",
+      draggable="true",
+      class="gallery-photo__img pointer"
+      @dragstart="dragStart($event,photo)"
+      @click="addImage(photo)")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import LazyLoad from '@/components/LazyLoad.vue'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
@@ -25,9 +23,7 @@ export default Vue.extend({
   props: {
     photo: Object
   },
-  components: {
-    LazyLoad
-  },
+  components: {},
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',

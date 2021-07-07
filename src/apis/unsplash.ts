@@ -12,6 +12,7 @@ const options = {
 }
 
 const axios = Axios.create(options)
+const REGEX_JAPANESE = /[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]/
 
 function normalized (photos: Api.IUnsplashPhoto[]): Api.IPhoto[] {
   return photos.map(photo => ({
@@ -50,6 +51,9 @@ export default {
       query: params.query || 'random',
       order_by: params.orderBy || 'relevant',
       lang: 'zh-TW'
+    }
+    if (REGEX_JAPANESE.test(params.query)) {
+      searchParams.lang = 'ja'
     }
     const { data } = await axios.request<Api.IUnsplashSearchResponse>({
       url: '/search/photos',

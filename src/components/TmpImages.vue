@@ -8,9 +8,11 @@
           :style="imageStyle(photo.preview, i > 0)",
           :photo="photo"
           :key="photo.id")
+        observer-sentinel(v-if="item.index === 2"
+          target=".temp__content"
+          @callback="handleLoadMore(item.page)")
     template(#after)
-      observer-sentinel(target=".temp__content"
-        @callback="$emit('loadMore')")
+      div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"
           :iconColor="'gray-2'"
@@ -44,21 +46,24 @@ export default Vue.extend({
   data() {
     return {
       rows: [],
-      galleryUtils: new GalleryUtils(260, 80, 5)
+      prevLastRow: [],
+      galleryUtils: new GalleryUtils(260, 75, 5)
     }
   },
   watch: {
     getCurrentPagePhotos(val) {
-      const [lastRow] = this.rows.slice(-1) as any
-      const lastList = (lastRow && lastRow.list) || []
+      const { prevLastRow } = this
       const rows = this.galleryUtils
-        .generate(lastList.concat(val))
+        .generate(prevLastRow.concat(val))
         .map((row, idx) => ({
           list: row,
           id: `row${this.page}${idx}`,
+          page: this.page,
+          index: idx,
           size: row[0].preview.height + this.margin
         }))
-      this.rows = this.rows.slice(0, -1).concat(rows as any)
+      this.prevLastRow = (rows.splice(-1)[0].list || []) as any
+      this.rows = this.rows.concat(rows as any)
     }
   },
   methods: {
@@ -67,6 +72,11 @@ export default Vue.extend({
         width: `${attr.width}px`,
         height: `${attr.height}px`,
         marginLeft: `${addMarginLeft ? this.margin : 0}px`
+      }
+    },
+    handleLoadMore (nextPage: number): void {
+      if (nextPage === this.page) {
+        this.$emit('loadMore')
       }
     }
   }
