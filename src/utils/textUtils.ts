@@ -246,7 +246,6 @@ class TextUtils {
       const p = config.paragraphs[pidx]
       for (let sidx = 0; sidx < p.spans.length; sidx++) {
         const span = p.spans[sidx]
-        console.log('333')
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
         switch (propName) {
           case 'bold': {
@@ -371,7 +370,7 @@ class TextUtils {
       }
 
       if (!div || (div as HTMLElement).id.match('text') === null || !range || !range.startContainer || !range.endContainer) return undefined
-      // TODO:
+      console.log(div as HTMLElement)
       const isRanged = window.getSelection()?.toString() !== ''
       const end: { [key: string]: number } = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,

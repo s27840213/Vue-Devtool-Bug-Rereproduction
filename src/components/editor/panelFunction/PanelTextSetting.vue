@@ -68,14 +68,14 @@ export default Vue.extend({
       ],
       selection: {
         start: {
-          sIndex: 0,
-          pIndex: 0,
-          offset: 0
+          sIndex: NaN,
+          pIndex: NaN,
+          offset: NaN
         },
         end: {
-          sIndex: 0,
-          pIndex: 0,
-          offset: 0
+          sIndex: NaN,
+          pIndex: NaN,
+          offset: NaN
         }
       },
       fontSize: ''
