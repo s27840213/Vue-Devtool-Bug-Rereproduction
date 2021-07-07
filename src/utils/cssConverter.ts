@@ -112,6 +112,15 @@ class CssConveter {
 
     return result
   }
+
+  getKeyByValue(object: any, value: string): string {
+    return Object.keys(object).find(key => object[key] === value)!
+  }
+
+  fontStyleKeyMap(prop: string): string {
+    const propInCss = this.getKeyByValue(fontStyleMap, prop)
+    return this.getKeyByValue(styleMap, propInCss)
+  }
 }
 
 export default new CssConveter()

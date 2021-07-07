@@ -61,6 +61,7 @@ export default Vue.extend({
     setFont(font: string) {
       TextUtils.onPropertyClick('fontFamily', font)
       this.$emit('closeFontsPanel')
+      this.$nextTick(() => this.$root.$emit('updateTextPanel'))
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]

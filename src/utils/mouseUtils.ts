@@ -28,10 +28,10 @@ class MouseUtils {
   }
 
   onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 },
-    clipPath = '', clipperStyles: IStyle | null = null) {
-    let layer = this.onDropHandler(e, pageIndex, targetOffset)
+    clipPath = '', isClipper: boolean, clipperStyles: IStyle | null = null) {
+    let layer = this.onDropHandler(e, pageIndex, targetOffset) as IImage
     if (layer && clipperStyles && layer.type === 'image') {
-      layer = this.clipperHandler(layer, clipPath, clipperStyles) as IImage
+      layer = this.clipperHandler(layer, clipPath, isClipper, clipperStyles)
       if (layer) {
         store.commit('DELETE_layer', {
           pageIndex, layerIndex
@@ -86,35 +86,42 @@ class MouseUtils {
     }
 
     let layer
-    if (data.type === 'image') {
-      const imgStyles = {
-        imgX: 0,
-        imgY: 0,
-        imgWidth: layerConfig.styles.initWidth,
-        imgHeight: layerConfig.styles.initHeight
+    switch (data.type) {
+      case 'image': {
+        const imgStyles = {
+          imgX: 0,
+          imgY: 0,
+          imgWidth: layerConfig.styles.initWidth,
+          imgHeight: layerConfig.styles.initHeight
+        }
+        Object.assign(layerConfig.styles, imgStyles)
+        Object.assign(layerConfig, { src: data.src, imgControl: false })
+        if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
+          this.backgroundHandler(pageIndex, layerConfig)
+          return
+        } else {
+          layer = LayerFactary.newImage(layerConfig as IImage)
+        }
+        break
       }
-      Object.assign(layerConfig.styles, imgStyles)
-      Object.assign(layerConfig, { src: data.src, imgControl: false })
-      if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
-        this.backgroundHandler(pageIndex, layerConfig)
-        return
-      } else {
-        layer = LayerFactary.newImage(layerConfig as IImage)
+      case 'text': {
+        const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
+        Object.assign(layerConfig.styles, data.styles)
+        layerConfig.styles.x = tmpPos.x
+        layerConfig.styles.y = tmpPos.y
+        layerConfig.paragraphs = data.paragraphs
+        layer = LayerFactary.newText(layerConfig)
+        break
       }
-    } else if (data.type === 'text') {
-      const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
-      Object.assign(layerConfig.styles, data.styles)
-      layerConfig.styles.x = tmpPos.x
-      layerConfig.styles.y = tmpPos.y
-      layerConfig.paragraphs = data.paragraphs
-      layer = LayerFactary.newText(layerConfig)
-    } else if (data.type === 'shape') {
-      const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
-      Object.assign(layerConfig.styles, data.styles)
-      layerConfig.styles.x = tmpPos.x
-      layerConfig.styles.y = tmpPos.y
-      delete data.styles
-      layer = LayerFactary.newShape(Object.assign(layerConfig, data))
+      case 'shape': {
+        const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
+        Object.assign(layerConfig.styles, data.styles)
+        layerConfig.styles.x = tmpPos.x
+        layerConfig.styles.y = tmpPos.y
+        delete data.styles
+        layer = LayerFactary.newShape(Object.assign(layerConfig, data))
+        break
+      }
     }
     return layer
   }
@@ -126,7 +133,7 @@ class MouseUtils {
     })
   }
 
-  clipperHandler(layer: ILayer, clipPath: string, clipperStyles: IStyle): ILayer {
+  clipperHandler(layer: IImage, clipPath: string, isClipper: boolean, clipperStyles: IStyle): IImage {
     /**
      * If the drop-in target is a clipped-Image, setting the initial size as the layer size.
      */
@@ -144,7 +151,7 @@ class MouseUtils {
     }
 
     /**
-     * Here's to determine the img's initial width/height
+     * Below determines the img's initial width/height
      */
     let scaleRatio: number
     const scaleImg = (scaleRatio: number) => {
@@ -180,7 +187,8 @@ class MouseUtils {
     }
     Object.assign(layer.styles, newStyles)
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
-    layer.isClipped = true
+    console.log(isClipper)
+    layer.isClipper = isClipper
     return layer
   }
 }

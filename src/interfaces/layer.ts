@@ -34,7 +34,6 @@ export interface ILayer<T extends IStyle = IStyle> {
 export interface IText extends ILayer<ITextStyle> {
   paragraphs: Array<IParagraph>,
   widthLimit: number,
-  isTyping: boolean
 }
 
 export interface IParagraph {
@@ -50,14 +49,14 @@ export interface ISpan {
 }
 
 export interface ITextStyle extends IStyle {
-  writingMode: string
+  writingMode: string,
+  align: string,
 }
 
 export interface IParagraphStyle {
   [key: string]: number | string | undefined,
   lineHeight: number,
   fontSpacing: number,
-  align: string
 }
 
 export interface ISpanStyle {
@@ -66,7 +65,6 @@ export interface ISpanStyle {
   weight: string,
   color: string,
   size: number,
-  // initSize: number,
   decoration: string,
   style: string,
   opacity: number
@@ -81,7 +79,8 @@ export interface IShape extends ILayer<IStyle> {
 }
 export interface IImage extends ILayer<IImageStyle> {
   src: string,
-  clipPath?: string,
+  clipPath: string,
+  isClipper: boolean,
   imgControl: boolean
 }
 export interface IGroup extends ILayer<IStyle> {

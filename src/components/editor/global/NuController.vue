@@ -15,10 +15,10 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type === 'text' && config.active")
-          div(:style="scaleStyle()")
-            div(ref="text" :contenteditable="config.type === 'tmp' ? false : contentEditable"
-              spellcheck="false"
-              :style="contentStyles()"
+          div(:style="textScaleStyle()")
+            div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+              :style="textBodyStyle()"
+              :contenteditable="config.type === 'tmp' ? false : contentEditable"
               @compositionstart="isComposing = true"
               @compositionend="isComposing = false"
               @keydown="onKeyDown($event)")
@@ -65,7 +65,7 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IImage, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -160,7 +160,7 @@ export default Vue.extend({
       if (this.getLayerType === 'text' && !this.isActive) {
         this.contentEditable = false
         const paragraphs: IParagraph[] = this.textParser()
-        ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
       }
     }
   },
@@ -182,54 +182,43 @@ export default Vue.extend({
     },
     resizer(controlPoints: any) {
       let resizer = controlPoints.resizers
-      if (this.getLayerType === 'text') {
-        resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
-          : controlPoints.resizers.slice(0, 2)
-      } else if (this.getLayerType === 'image') {
-        resizer = this.config.isClipped ? [] : resizer
-      } else if (this.getLayerType === 'shape') {
-        resizer = ControlUtils.shapeCategorySorter(resizer, this.config.category)
-      } else if (this.getLayerType === 'tmp') {
-        resizer = []
+      switch (this.getLayerType) {
+        case 'text':
+          resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
+            : controlPoints.resizers.slice(0, 2)
+          break
+        case 'image':
+          resizer = this.config.isClipper ? [] : resizer
+          break
+        case 'shape':
+          resizer = ControlUtils.shapeCategorySorter(resizer, this.config.category)
+          break
+        case 'tmp':
+          resizer = []
+          break
       }
       return resizer
     },
-    scaleStyle() {
+    textScaleStyle() {
       return {
         position: 'absolute',
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    contentStyles() {
+    textBodyStyle() {
       return {
         width: `${this.config.styles.width / this.getLayerScale}px`,
         height: `${this.config.styles.height / this.getLayerScale}px`,
-        // height: 'max-content',
         outline: 'none',
         position: 'absolute',
         transform: 'translate(-50%, -50%)'
       }
     },
     textStyles(styles: any) {
-      const newStyles = Object.assign({}, styles)
-      if (styles.color) {
-      }
-      const textStyles = CssConveter.convertFontStyle(Object.assign(newStyles, { color: styles.color ? styles.color : '' }))
+      // const textStyles = CssConveter.convertFontStyle(Object.assign(newStyles, { color: styles.color ? styles.color : '' }))
+      const textStyles = CssConveter.convertFontStyle(styles)
       Object.assign(textStyles, { 'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000' })
       return textStyles
-      // return CssConveter.convertFontStyle(Object.assign(newStyles,
-      //   { color: styles.color ? styles.color.length === 7 ? `${styles.color}00` : `${styles.color.substring(0, styles.color.length - 2)}0)` : '' }))
-    },
-    contextStyles() {
-      const zindex = this.config.type === 'tmp' ? (this.layerIndex + 1) * 50 : (this.layerIndex + 1) * 100 + 10
-      const styles = {
-        transform: `translate3d(0px, 0px, ${zindex}px)`,
-        color: 'rgba(10,10,10,0.5)',
-        'font-size': `${this.getFontSize}px`,
-        'caret-color': this.contentEditable && !this.isControlling ? '#000000' : '#00000000',
-        'writing-mode': this.config.styles.writingMode
-      }
-      return Object.assign(CssConveter.convertFontStyle(this.config.styles), styles)
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -327,8 +316,6 @@ export default Vue.extend({
     },
     moveEnd() {
       if (this.isActive) {
-        console.log('this.contentEditable')
-        console.log(this.contentEditable)
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
@@ -460,15 +447,15 @@ export default Vue.extend({
       this.control.imgX = this.config.styles.imgX
       this.control.imgY = this.config.styles.imgY
       this.initTranslate = this.getLayerPos
+      this.initialPos = { x: event.clientX, y: event.clientY }
+
       const vect = MouseUtils.getMouseRelPoint(event, center)
       const angeleInRad = this.getLayerRotate * Math.PI / 180
       const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
-
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
 
-      this.initialPos = { x: event.clientX, y: event.clientY }
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
       this.currCursorStyling(event)
@@ -726,7 +713,18 @@ export default Vue.extend({
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path || this.config.clipPath, this.config.styles)
+      switch (this.getLayerType) {
+        case 'image': {
+          const config = this.config as IImage
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.isClipper, config.styles)
+          break
+        }
+        case 'shape': {
+          const config = this.config as IShape
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, true, config.styles)
+          break
+        }
+      }
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
@@ -736,7 +734,7 @@ export default Vue.extend({
         if ((this.$refs.text as HTMLElement).contains(e.target as Node)) {
           const sel = window.getSelection()
           if (sel && sel.rangeCount !== 0) {
-            this.$root.$emit('textSelection', sel.toString() !== '')
+            this.$root.$emit('updateTextPanel')
           }
         }
       }
@@ -784,10 +782,7 @@ export default Vue.extend({
       }
     },
     onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
-      /**
-       * If is composing, the width/height updated to the vuex would be done by controller.
-       * Otherwise, any other mutation to the ITex config which causing layer' size change would be updated in nu-text component
-       */
+      // Update the layer's width/height
       setTimeout(() => {
         const text = this.$refs.text as HTMLElement
         text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
@@ -796,10 +791,8 @@ export default Vue.extend({
           width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
           height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
         }
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
         text.style.height = `${this.config.styles.height / this.getLayerScale}px`
-        console.log(this.config.styles.width)
       }, 0)
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         if (this.isComposing) {
@@ -857,11 +850,8 @@ export default Vue.extend({
             offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
           }
           const text = this.$refs.text as HTMLElement
-          ControlUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           this.$nextTick(() => {
-            console.log(pIndex)
-            console.log(sIndex)
-            console.log(offset)
             if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
               text.removeChild(text.lastChild)
             }
@@ -883,23 +873,20 @@ export default Vue.extend({
       const config = (this.config as IText)
       ps.forEach((p, pIndex) => {
         const spans: ISpan[] = []
-        // let flag = true
         for (const [sIndex, span] of p.childNodes.entries()) {
           if (span instanceof HTMLElement) {
             let spanEl = span as HTMLElement
             const text = spanEl.innerText as string
             /**
-             * If the span is the same without changed, skip parse it, save rendering resouce
-             * the variable flag is used for indicating whether the paragraph changes or not
+             * If the span is the same without changed, skip parse it
              */
             if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
               spans.push((this.config as IText).paragraphs[pIndex].spans[sIndex])
               continue
             }
-            // flag = false
             /**
              *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
-             *  below detect the situation and use the style of the last span of previous p to replace it.
+             *  below detecting the situation and use the style of the last span of previous p to replace it.
              */
             if (spanEl.style.fontFamily === '') {
               const leng = div.childNodes[pIndex - 1].childNodes.length
@@ -924,13 +911,8 @@ export default Vue.extend({
         pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
         pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
         pStyle.align = pEl.style.textAlign
-        // if (flag) {
-        //   paragraphs.push(config.paragraphs[pIndex])
-        // } else {
         paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
-        // }
       })
-      console.log(paragraphs)
       paragraphs.forEach(p => {
         if (p.spans.length === 1 && p.spans[0].text === '') {
           p.spans[0].text = '\n'

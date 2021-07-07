@@ -42,14 +42,9 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
-        if (this.config.isTyping) {
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-          return
-        }
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
           if (!this.config.active) {
-            console.log(this.config.styles.width)
             text.style.width = `${this.config.styles.width / this.getLayerScale}px`
             // text.style.height = 'max-content'
             text.style.height = `${this.config.styles.height / this.getLayerScale}px`

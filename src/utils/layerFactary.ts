@@ -14,7 +14,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
-      isClipped: false,
+      isClipper: false,
       styles: {
         x: 0,
         y: 0,
@@ -60,14 +60,14 @@ class LayerFactary {
         initWidth: config.styles.width ? config.styles.width : 0,
         initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
-        writingMode: 'initial'
+        writingMode: 'initial',
+        align: 'left'
       },
       paragraphs: [
         {
           styles: {
-            align: 'left',
-            lineHeight: -1,
-            fontSpacing: 0
+            fontSpacing: 0,
+            lineHeight: -1
           },
           spans: [
             {
@@ -78,7 +78,6 @@ class LayerFactary {
                 weight: 'normal',
                 color: '#000000',
                 size: 72,
-                initSize: config.styles.size ? config.styles.size : 72,
                 decoration: 'none',
                 style: 'normal'
               }

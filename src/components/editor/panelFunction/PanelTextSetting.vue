@@ -7,7 +7,9 @@
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
-        input(class="body-2 text-gray-2" type="text" @mousedown="fontSizeInput" v-model="fontSize")
+        input(class="body-2 text-gray-2" type="text" @mousedown="textRangeRecorder()"
+        @keyup="changeSize($event)" @blur="onBlur"
+        v-model="fontSize")
         div(class="text-setting__font-stepper")
           svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
             :iconName="'chevron-up'" :iconColor="'gray-2'" :iconWidth="'9px'")
@@ -51,9 +53,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import store from '@/store'
 import { IText } from '@/interfaces/layer'
-import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -78,14 +78,15 @@ export default Vue.extend({
           offset: 0
         }
       },
-      fontFamily: '',
-      size: '--'
+      fontSize: ''
     }
   },
   mounted() {
-    this.$root.$on('textSelection', (selectRange: boolean) => {
+    this.$root.$on('updateTextPanel', () => {
       const sel = TextUtils.getSelection()
       if (sel) {
+        const size = TextUtils.propReader('fontSize')
+        this.fontSize = typeof size !== 'undefined' ? size.split('px')[0] : '--'
         this.$forceUpdate()
       }
     })
@@ -103,23 +104,19 @@ export default Vue.extend({
         const font = TextUtils.propReader('fontFamily')
         return typeof font !== 'undefined' ? font : 'multi-fonts'
       }
-      // set(value) {
-      // }
     },
-    fontSize: {
-      cache: false,
-      get(): string {
-        const size = TextUtils.propReader('fontSize')
-        return typeof size !== 'undefined' ? size : '--'
-      },
-      set(value) {
-        TextUtils.onPropertyClick('fontSize', value as string, this.selection.start, this.selection.end)
-        // if (typeof value === 'string') {
-        //   const step = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.size - parseInt(value)
-        //   TextUtils.fontSizeStepping(step)
-        // }
-      }
-    },
+    // fontSize: {
+    //   cache: false,
+    //   get(): string {
+    //     const size = TextUtils.propReader('fontSize')
+    //     return typeof size !== 'undefined' ? size.split('px')[0] : '--'
+    //   },
+    //   set(value) {
+    //     if (typeof value === 'string' && this.isValidSize(value)) {
+    //       TextUtils.onPropertyClick('fontSize', parseInt(value), this.selection.start, this.selection.end)
+    //     }
+    //   }
+    // },
     textColor: {
       get(): string {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.color
@@ -191,53 +188,42 @@ export default Vue.extend({
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {
-      // TextUtils.fontSizeStepping(step)
-      // used for test, need to refresh and direct update to vuex
       const sel = TextUtils.getSelection()
-      console.log(sel)
       if (sel) {
-        Object.assign(this.selection.start, sel.start)
-        Object.assign(this.selection.end, sel.end)
-      }
-      setTimeout(() => {
-        const select = window.getSelection()
-        if (select) {
-          const range = new Range()
-          const node = sel?.div.childNodes[sel.start.pIndex].childNodes[sel.start.sIndex].firstChild as Node
-          range.setStart(node, sel?.start.offset as number)
-          const start = {
-            pIndex: parseInt(range?.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-            sIndex: parseInt(range?.startContainer?.parentElement?.dataset.sindex as string),
-            offset: range?.startOffset as number
-          }
-          select.removeAllRanges()
-          select.addRange(range)
-
-          const config = (this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as IText)
-          const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-          this.updateLayerParagraphs(this.lastSelectedPageIndex, this.currSelectedIndex, start.pIndex, start.sIndex, { size: Math.ceil(fontSize + step) })
-          this.size = `${Math.ceil(fontSize + step)}px`
+        const start = {
+          pIndex: sel.start.pIndex,
+          sIndex: sel.start.sIndex
         }
-      }, 0)
+        const config = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as IText
+        const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
+        TextUtils.onPropertyClick('fontSize', fontSize + step)
+        this.fontSize = `${parseInt(this.fontSize) + step}`
+      }
     },
-    fontSizeInput() {
+    isValidSize(value: string) {
+      return value.match(/^-?\d+$/) && parseInt(value) > 0
+    },
+    textRangeRecorder() {
       const sel = TextUtils.getSelection()
       if (sel) {
         Object.assign(this.selection.start, sel.start)
         Object.assign(this.selection.end, sel.end)
       }
-      console.log(this.selection)
     },
-    updateLayerParagraphs(pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, props: { [key: string]: string | number }) {
-      // couldn't work still, need to re-organize the structure of the update logic
-      const config = this.getLayer(pageIndex, layerIndex) as IText
-      const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
-      Object.assign(paragraphs[pIndex].spans[sIndex].styles, props)
-      store.commit('UPDATE_layerProps', {
-        pageIndex,
-        layerIndex,
-        props: { paragraphs }
-      })
+    changeSize(e: KeyboardEvent) {
+      if (e.key === 'Enter' && this.isValidSize(this.fontSize)) {
+        TextUtils.onPropertyClick('fontSize', parseInt(this.fontSize), this.selection.start, this.selection.end)
+      }
+    },
+    onBlur() {
+      console.log('onBlur')
+      const nan = {
+        pIndex: NaN,
+        sIndex: NaN,
+        offset: NaN
+      }
+      Object.assign(this.selection.start, nan)
+      Object.assign(this.selection.end, nan)
     }
   }
 })

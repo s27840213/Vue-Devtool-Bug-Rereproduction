@@ -313,14 +313,6 @@ class Controller {
     }
   }
 
-  updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
-    store.commit('UPDATE_textProps', {
-      pageIndex,
-      layerIndex,
-      paragraphs
-    })
-  }
-
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,

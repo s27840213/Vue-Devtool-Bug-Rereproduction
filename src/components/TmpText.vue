@@ -13,17 +13,12 @@ div(class="temp__content")
         :style="textStyles(span.styles)") {{ span.text }}
 </template>
 
-  // div(class="temp__item"
-  //     v-for="content in contents",
-  //     :style="contextStyles(content.styles)"
-  //     draggable="true"
-  //     @dragstart="dragStart($event, content)") {{ content.text }}
-
 <script lang="ts">
 /**
  * This components is temporarily used for text section, and it will be remove in the future
  */
 import Vue from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 import CssConveter from '@/utils/cssConverter'
 import { IText } from '@/interfaces/layer'
 import textUtils from '@/utils/textUtils'
@@ -34,12 +29,12 @@ export default Vue.extend({
       contents: [
         {
           styles: {
-            // writingMode: 'vertical-lr'
+            writingMode: 'horizontal-tb',
+            align: 'text-align'
           },
           paragraphs: [
             {
               styles: {
-                align: 'text-align',
                 fontSpacing: 0,
                 lineHeight: -1
               },
@@ -87,7 +82,6 @@ export default Vue.extend({
             },
             {
               styles: {
-                align: 'text-align',
                 fontSpacing: 0,
                 lineHeight: -1
               },
@@ -124,12 +118,12 @@ export default Vue.extend({
         },
         {
           styles: {
-
+            writingMode: 'horizontal-tb',
+            align: 'text-align'
           },
           paragraphs: [
             {
               styles: {
-                align: 'text-align',
                 fontSpacing: 0,
                 lineHeight: -1
               },
@@ -152,162 +146,33 @@ export default Vue.extend({
           ]
         }
       ]
-      // {
-      //   text: 'Happy',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'initial',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // },
-      // {
-      //   text: 'New Year',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'initial',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // },
-      // {
-      //   text: 'Mary',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'initial',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // },
-      // {
-      //   text: 'Christmas',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'initial',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // },
-      // {
-      //   text: '虎虎生風',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'vertical-lr',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // },
-      // {
-      //   text: '平安喜樂',
-      //   styles: {
-      //     font: 'Lobster',
-      //     weight: 'bold',
-      //     align: 'text-align',
-      //     color: '#000000',
-      //     writingMode: 'vertical-lr',
-      //     decoration: 'none',
-      //     style: 'normal',
-      //     size: 25
-      //   }
-      // }
     }
   },
   methods: {
-    // styles() {
-    //   return {
-    //     'font-family': 'Lobster',
-    //     'font-weight': 'bold',
-    //     'font-size': '25px',
-    //     'text-align': 'center',
-    //     'writing-mode': 'initial',
-    //     'text-decoration': 'none',
-    //     color: '#000000'
-    //   }
-    // },
-    dragStart(e: DragEvent, content: any) {
+    dragStart(e: DragEvent, text: IText) {
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
 
       const rect = (e.target as Element).getBoundingClientRect()
-      const styles = Object.assign({}, content.styles)
+      const styles = Object.assign({}, text.styles)
       Object.assign(styles, {
         x: e.clientX - rect.x,
         y: e.clientY - rect.y
       })
-
-      const textHW = textUtils.getTextHW(content)
       const data = {
         type: 'text',
-        id: Math.ceil(Math.random() * 10000),
-        widthLimit: '',
-        styles: Object.assign(styles, textHW),
-        paragraphs: content.paragraphs
+        id: uuidv4(),
+        widthLimit: -1,
+        styles: Object.assign(styles, textUtils.getTextHW(text)),
+        paragraphs: text.paragraphs
       }
 
       dataTransfer.setData('data', JSON.stringify(data))
     },
     textStyles(styles: any) {
       return CssConveter.convertFontStyle(styles)
-    },
-    getTextHW(content: IText) {
-      const body = document.createElement('div')
-      content.paragraphs.forEach(pData => {
-        const p = document.createElement('p')
-        pData.spans.forEach(spanData => {
-          const span = document.createElement('span')
-          span.textContent = spanData.text
-          Object.assign(span.style, this.textStyles(spanData.styles))
-          span.style.whiteSpace = 'pre'
-          p.appendChild(span)
-        })
-        Object.assign(p.style, this.textStyles(pData.styles))
-        p.style.display = 'table'
-        p.style.margin = '0.5em'
-        body.appendChild(p)
-      })
-      body.style.border = '1px solid blue'
-      body.style.width = 'fit-content'
-      document.body.appendChild(body)
-      const textHW = {
-        width: Math.ceil(body.getBoundingClientRect().width),
-        height: Math.ceil(body.getBoundingClientRect().height)
-      }
-      document.body.removeChild(body)
-      return textHW
     }
-    // getTextHW(text: string, styles: any) {
-    //   const el = document.createElement('span')
-    //   el.textContent = text
-    //   Object.assign(el.style, this.contextStyles(styles))
-    //   document.body.appendChild(el)
-    //   const textHW = {
-    //     width: Math.ceil(el.getBoundingClientRect().width),
-    //     height: Math.ceil(el.getBoundingClientRect().height)
-    //   }
-    //   document.body.removeChild(el)
-    //   return textHW
-    // }
   }
 })
 </script>
@@ -330,8 +195,6 @@ export default Vue.extend({
   }
   &__item {
     display:block;
-    // justify-content:center;
-    // align-items:center;
     border: 1px solid blue;
   }
 }
