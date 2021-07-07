@@ -2,7 +2,6 @@ import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { IParagraph, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import CssConveter from '@/utils/cssConverter'
-import { directive } from 'vue/types/umd'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 
@@ -313,10 +312,10 @@ class TextUtils {
   }
 
   // TODO: align is for paragraphs
-  textAlign(span: HTMLElement, iconName: string) {
-    const align = iconName.substring(11, iconName.length)
-    // this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
-  }
+  // textAlign(span: HTMLElement, iconName: string) {
+  //   const align = iconName.substring(11, iconName.length)
+  //   this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
+  // }
 
   textVertical() {
     let writingMode = 'initial'

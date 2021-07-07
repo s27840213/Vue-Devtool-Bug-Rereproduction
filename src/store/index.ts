@@ -29,6 +29,7 @@ const getDefaultState = (): IEditorState => ({
           locked: false,
           moved: false,
           imgControl: false,
+          isClipper: false,
           styles: {
             x: 0,
             y: 0,
@@ -70,6 +71,7 @@ const getDefaultState = (): IEditorState => ({
           locked: false,
           moved: false,
           imgControl: false,
+          isClipper: false,
           styles: {
             x: 0,
             y: 0,
