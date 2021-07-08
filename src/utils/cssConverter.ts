@@ -121,6 +121,19 @@ class CssConveter {
     const propInCss = this.getKeyByValue(fontStyleMap, prop)
     return this.getKeyByValue(styleMap, propInCss)
   }
+
+  convertTextShadow (x:number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
+    return {
+      textShadow: `${color} ${x}px ${y}px ${blur || 0}px`
+    }
+  }
+
+  convertTextStorke(width: number, color: string, fill: string): Partial<CSSStyleDeclaration> {
+    return {
+      webkitTextStroke: `${width}px ${color}`,
+      webkitTextFillColor: fill
+    }
+  }
 }
 
 export default new CssConveter()

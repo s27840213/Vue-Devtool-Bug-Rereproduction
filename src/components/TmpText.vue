@@ -30,7 +30,8 @@ export default Vue.extend({
         {
           styles: {
             writingMode: 'horizontal-tb',
-            align: 'text-align'
+            align: 'text-align',
+            textEffect: {}
           },
           paragraphs: [
             {
@@ -119,7 +120,8 @@ export default Vue.extend({
         {
           styles: {
             writingMode: 'horizontal-tb',
-            align: 'text-align'
+            align: 'text-align',
+            textEffect: {}
           },
           paragraphs: [
             {

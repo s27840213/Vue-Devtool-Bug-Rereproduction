@@ -53,12 +53,15 @@ import Vue from 'vue'
 import { Chrome } from 'vue-color'
 
 export default Vue.extend({
+  props: {
+    currentColor: String
+  },
   components: {
     'chrome-picker': Chrome
   },
   data() {
     return {
-      color: '#194d33',
+      color: this.currentColor || '#194d33',
       brandColors: ['#2D9CDB'],
       documentColors: ['#2D9CDB', '#56CCF2', '#9B51E0', '#BB6BD9', '#4F4F4F', '#828282', '#F2F2F2'],
       defaultColors: ['#EB5757', '#F2994A', '#F2C94C', '#219653', '#27AE60', '#6FCF97', '#2F80ED', '#2D9CDB', '#56CCF2', '#9B51E0', '#BB6BD9', '#4F4F4F', '#828282', '#F2F2F2']
@@ -128,6 +131,7 @@ export default Vue.extend({
     },
     updateHex(val: any) {
       this.color = val.hex
+      this.$emit('update', val.hex)
     },
     colorStyles(color: string) {
       return {
@@ -141,6 +145,7 @@ export default Vue.extend({
     },
     setColor(color: string) {
       this.color = color
+      this.$emit('update', color)
     }
   }
 })
