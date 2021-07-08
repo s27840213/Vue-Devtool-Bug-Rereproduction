@@ -91,7 +91,7 @@ class Controller {
   }
 
   convertTextEffect (effect: any) {
-    const { distance, angle, opacity, color, blur, spread, stroke, fontSize } = effect
+    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize } = effect || {}
     const unit = this.shadowScale * fontSize
     const storkeWidth = this.storkeScale * fontSize
 
@@ -102,7 +102,7 @@ class Controller {
     const effectStroke = stroke * 0.01 + 0.1
     const effectOpacity = opacity * 0.01
 
-    switch (effect.name) {
+    switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
           effectShadowOffset * Math.cos(angle * Math.PI / 180),

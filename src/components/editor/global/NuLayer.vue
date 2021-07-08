@@ -63,12 +63,13 @@ export default Vue.extend({
       const zindex = (this.layerIndex + 1) * 99
       const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
         { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
-      styles.opacity = this.config.active ? '0' : '1'
-
-      Object.assign(
-        styles,
-        TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      )
+      if (this.config.type === 'text') {
+        styles.opacity = this.config.active ? '0' : '1'
+        Object.assign(
+          styles,
+          TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+        )
+      }
       return styles
     },
     scaleStyles() {
