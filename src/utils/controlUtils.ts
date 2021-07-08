@@ -299,16 +299,24 @@ class Controller {
     return store.getters.getLayer(pageIndex, layerIndex)
   }
 
-  shapeCategorySorter(resizer: any, category: number) {
+  shapeCategorySorter(resizers: any, category: string, scaleType: number) {
     switch (category) {
-      // category: 0 => 線條，可以修改顏色，線條粗細，線條樣式，端點樣式
-      case 0:
+      // category: A => 線條，可以修改顏色，線條粗細，線條樣式，端點樣式
+      case 'A':
         return []
-      // category: 1 => 形狀，可以修改顏色，以及等比例/非等比例縮放
-      case 1:
-        return resizer
-      // category: 2 => 複雜內容，可以修改顏色，以及等比例縮放
-      case 2:
+      // category: B => 形狀，可以修改顏色，以及等比例/非等比例縮放
+      case 'B':
+        return resizers
+      // category: C => 複雜內容，可以修改顏色，以及等比例縮放
+      case 'C':
+        switch (scaleType) {
+          case 1:
+            return resizers
+          case 2:
+            return resizers.slice(0, 2)
+          case 3:
+            return resizers.slice(2, 4)
+        }
         return []
     }
   }
@@ -418,6 +426,16 @@ class Controller {
       layerIndex,
       props: {
         clipPath
+      }
+    })
+  }
+
+  updateShapePatchDiff(pageIndex: number, layerIndex: number, pDiff: number[]) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        pDiff
       }
     })
   }

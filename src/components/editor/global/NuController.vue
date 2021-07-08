@@ -72,6 +72,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import { config } from 'vue/types/umd'
+import { concat } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -181,23 +182,23 @@ export default Vue.extend({
       return Object.assign(resizerStyle, HW)
     },
     resizer(controlPoints: any) {
-      let resizer = controlPoints.resizers
+      let resizers = controlPoints.resizers
       switch (this.getLayerType) {
         case 'text':
-          resizer = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
+          resizers = this.config.styles.writingMode.substring(0, 8) === 'vertical' ? controlPoints.resizers.slice(2, 4)
             : controlPoints.resizers.slice(0, 2)
           break
         case 'image':
-          resizer = this.config.isClipper ? [] : resizer
+          resizers = this.config.isClipper ? [] : resizers
           break
         case 'shape':
-          resizer = ControlUtils.shapeCategorySorter(resizer, this.config.category)
+          resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
           break
         case 'tmp':
-          resizer = []
+          resizers = []
           break
       }
-      return resizer
+      return resizers
     },
     textScaleStyle() {
       return {
@@ -460,7 +461,7 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
       this.currCursorStyling(event)
 
-      if (this.getLayerType === 'shape' && this.config.category === 1) {
+      if (this.getLayerType === 'shape' && this.config.category === 'B') {
         this.scale = {
           scaleX: this.config.styles.scaleX,
           scaleY: this.config.styles.scaleY
@@ -503,16 +504,26 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       const scale = this.getLayerScale
-      if (this.getLayerType === 'image') {
-        this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
-      } else if (this.getLayerType === 'shape') {
-        let scaleX = this.scale.scaleX
-        let scaleY = this.scale.scaleY
-        scaleX = width / initWidth === 1 ? scaleX : width / initWidth * scaleX
-        scaleY = height / initHeight === 1 ? scaleY : height / initHeight * scaleY
-        ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
-      } else if (this.getLayerType === 'text') {
-        [width, height] = this.textResizeHandler(width, height)
+      switch (this.getLayerType) {
+        case 'image':
+          this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
+          break
+        case 'shape':
+          if (this.config.category === 'C') {
+            const patchDiffX = width * this.config.ratio / this.getLayerScale - this.config.vSize[0]
+            const patchDiffY = height * this.config.ratio / this.getLayerScale - this.config.vSize[1]
+            ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getLayerScale)
+            ControlUtils.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
+          } else {
+            let scaleX = this.scale.scaleX
+            let scaleY = this.scale.scaleY
+            scaleX = width / initWidth === 1 ? scaleX : width / initWidth * scaleX
+            scaleY = height / initHeight === 1 ? scaleY : height / initHeight * scaleY
+            ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
+          }
+          break
+        case 'text':
+          [width, height] = this.textResizeHandler(width, height)
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)

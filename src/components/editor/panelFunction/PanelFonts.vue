@@ -36,7 +36,13 @@ export default Vue.extend({
       fontPreset: [
         'sans-serif',
         'Manrop',
-        'Lobster'
+        'Lobster',
+        'Noto Sans TC',
+        'cwTeXKai',
+        'SweiSpringCJKtc-Regular',
+        'SoukouMincho',
+        'SetoFont',
+        'GenJyuuGothicX-P-Regular'
       ]
     }
   },

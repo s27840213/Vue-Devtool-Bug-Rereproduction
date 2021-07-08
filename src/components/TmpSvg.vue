@@ -15,38 +15,44 @@ div(class="temp__content")
 import Vue from 'vue'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import { mapGetters } from 'vuex'
+import tmpJSON from '@/svgJSON/full-config.json'
+import tmpJSON2 from '@/svgJSON/full-config2.json'
+import tmpJSON3 from '@/svgJSON/full-config3.json'
+import tmpJSON4 from '@/svgJSON/full-config4.json'
+import tmpJSON5 from '@/svgJSON/full-config5.json'
+import tmpJSON6 from '@/svgJSON/full-config6.json'
 
 export default Vue.extend({
   data() {
     return {
-      contents: [
-        {
-          category: 1,
-          color: ['#2EB8E6'],
-          svg: `<?xml version="1.0" encoding="utf-8"?>
-                <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-                <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  viewBox="0 0 180 120" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <path fill="\${color[0]}" d="M0 0 L0 120 180 120 180 0z"/>
-                </svg>
-                `,
-          path: 'M0 0 L0 120 180 120 180 0z',
-          size: [180, 120]
-        },
-        {
-          category: 1,
-          color: ['#808080'],
-          svg: `<?xml version="1.0" encoding="utf-8"?>
-                <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-                <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  viewBox="0 0 250 250" style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                <path fill="\${color[0]}" d="M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z"/>
-                </svg>
-                `,
-          path: 'M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z',
-          size: [250, 250]
-        },
+      contents_: [
+        // {
+        //   category: 'A',
+        //   vSize: [180, 120],
+        //   styleArray: [],
+        //   color: ['#2EB8E6'],
+        //   svg: `<path class=\"$style[0]\" d=\"M0 0 L0 120 180 120 180 0z\"/>`,
+        //   path: 'M0 0 L0 120 180 120 180 0z',
+        //   size: [180, 120]
+        // },
+        // {
+        //   category: 'B',
+        //   scaleType: 1,
+        //   vSize: [250, 250],
+        //   styleArray: [],
+        //   color: ['#808080'],
+        //   svg: `<?xml version="1.0" encoding="utf-8"?>
+        //         <!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+        //         <svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        //           viewBox="0 0 250 250" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+        //         <path fill="\${color[0]}" d="M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z"/>
+        //         </svg>
+        //         `,
+        //   path: 'M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z',
+        //   size: [250, 250]
+        // },
         {
           category: 2,
           color: ['#EB5757'],
@@ -105,7 +111,8 @@ export default Vue.extend({
         {
           category: 2,
           color: ['#fe0000', '#000095', '#fff'],
-          svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600"><g fill-rule="evenodd">
+          svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+                <g fill-rule="evenodd">
                 <path d="M0 0h900v600H0z" fill="\${color[0]}"/>
                 <path d="M0 0h450v300H0z" fill="\${color[1]}"/>
                 </g>
@@ -118,20 +125,46 @@ export default Vue.extend({
       ]
     }
   },
-  mounted() {
+  // mounted() {
+  //   const body = this.$refs.body as [HTMLElement]
+  //   for (let i = 0; i < body.length; i++) {
+  //     const div = document.createElement('div')
+  //     div.style.width = '100px'
+  //     div.innerHTML = this.svgFormatter(this.contents[i].svg, this.contents[i].color as [string])
+  //     body[i].appendChild(div)
+  //   }
+  // },
+  async mounted() {
     const body = this.$refs.body as [HTMLElement]
-    for (let i = 0; i < body.length; i++) {
-      const div = document.createElement('div')
-      div.style.width = '100px'
-      div.innerHTML = this.svgFormatter(this.contents[i].svg, this.contents[i].color as [string])
-      body[i].appendChild(div)
+    for (let i = 0; i < this.contents.length; i++) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      svg.setAttribute('viewBox', `0 0 ${this.contents[i].vSize[0]} ${this.contents[i].vSize[1]}`)
+
+      const className = shapeUtils.classGenerator()
+      const styleText = shapeUtils.styleFormatter(className, this.contents[i].styleArray, this.contents[i].color, this.contents[i].size ?? [])
+      shapeUtils.addStyleTag(styleText)
+
+      if (this.contents[i].category === 'C') {
+        const transText = shapeUtils.transFormatter(className, this.contents[i].transArray ?? [], {
+          cSize: this.contents[i].cSize,
+          pSize: this.contents[i].pSize,
+          pDiff: [0, 0],
+          pOfst: 10
+        })
+        shapeUtils.addStyleTag(transText)
+      }
+      svg.innerHTML = shapeUtils.svgFormatter(this.contents[i].svg, className, this.contents[i].styleArray.length, this.contents[i].transArray?.length ?? 0)
+      body[i].appendChild(svg)
     }
   },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       pageSize: 'getPageSize'
-    })
+    }),
+    contents() {
+      return tmpJSON.concat(tmpJSON2).concat(tmpJSON3).concat(tmpJSON4).concat(tmpJSON5).concat(tmpJSON6)
+    }
   },
   methods: {
     styles(svg: any) {
@@ -159,28 +192,26 @@ export default Vue.extend({
       Object.assign(data, svgData)
       dataTransfer.setData('data', JSON.stringify(data))
     },
-    svgFormatter(svg: string, color: [string]): string {
-      for (let i = 0; i < color.length; i++) {
-        const reg = new RegExp('\\${color\\[' + i + '\\]}', 'g')
-        svg = svg.replace(reg, color[i])
-      }
-      return svg
-    },
     addSvg(svgData: any) {
       const resizeRatio = 0.55
       const pageAspectRatio = this.pageSize.width / this.pageSize.height
-      const svgAspectRatio = svgData.size[0] / svgData.size[1]
+      const svgAspectRatio = svgData.vSize[0] / svgData.vSize[1]
       const svgWidth = svgAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * svgAspectRatio
       const svgHeight = svgAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / svgAspectRatio : this.pageSize.height * resizeRatio
+
+      svgData.ratio = (svgData.vSize[0] / svgWidth)
+      svgData.className = shapeUtils.classGenerator()
       const config = {
         styles: {
           x: this.pageSize.width / 2 - svgWidth / 2,
           y: this.pageSize.height / 2 - svgHeight / 2,
           width: svgWidth,
           height: svgHeight,
-          initWidth: svgWidth,
-          initHeight: svgHeight,
-          color: svgData.color
+          initWidth: svgData.vSize[0],
+          initHeight: svgData.vSize[1],
+          scale: svgWidth / svgData.vSize[0],
+          color: svgData.color,
+          vSize: svgData.vSize
         }
       }
       Object.assign(config, svgData)
@@ -196,7 +227,8 @@ export default Vue.extend({
     height: auto;
     display: grid;
     grid-auto-rows: auto;
-    grid-template-columns: repeat(2, 1fr);
+    // grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     row-gap: 20px;
     column-gap: 10px;
     padding-top: 20px;

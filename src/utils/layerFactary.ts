@@ -147,10 +147,18 @@ class LayerFactary {
       active: false,
       shown: false,
       path: '',
-      color: [''],
+      // color: [''],
+      color: [],
+      size: [],
       svg: '',
-      size: [0, 0],
-      category: 0,
+      // size: [0, 0],
+      vSize: [0, 0],
+      cSize: [0, 0],
+      pSize: [0, 0],
+      pDiff: [0, 0],
+      ratio: 1,
+      category: '',
+      className: '',
       locked: false,
       moved: false,
       styles: {
@@ -165,7 +173,8 @@ class LayerFactary {
         initWidth: 0,
         initHeight: 0,
         zindex: -1,
-        opacity: 100
+        opacity: 100,
+        vSize: [0, 0]
       }
     }
     Object.assign(basicConfig.styles, config.styles)

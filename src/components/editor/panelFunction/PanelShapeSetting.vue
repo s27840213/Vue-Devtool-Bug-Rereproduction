@@ -36,6 +36,7 @@ export default Vue.extend({
   data() {
     return {
       colorPresets: [
+        '#000000',
         '#F2994A',
         '#F2C94C',
         '#219653',
@@ -45,7 +46,7 @@ export default Vue.extend({
         '#2F80ED',
         '#2D9CDB',
         '#56CCF2',
-        '#FFFFFF'
+        '#FF0000'
       ],
       currSelectedColorIndex: 0,
       paletteRecord: [{ key: 0, value: -1 }]

@@ -135,7 +135,7 @@ class MouseUtils {
 
   clipperHandler(layer: IImage, clipPath: string, isClipper: boolean, clipperStyles: IStyle): IImage {
     /**
-     * If the drop-in target is a clipped-Image, setting the initial size as the layer size.
+     * If the clipper is already clipped an image, setting the initial size as the layer size.
      */
     if (typeof clipperStyles.imgX !== 'undefined') {
       clipperStyles.initWidth = clipperStyles.width / clipperStyles.scale
@@ -187,7 +187,6 @@ class MouseUtils {
     }
     Object.assign(layer.styles, newStyles)
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
-    console.log(isClipper)
     layer.isClipper = isClipper
     return layer
   }

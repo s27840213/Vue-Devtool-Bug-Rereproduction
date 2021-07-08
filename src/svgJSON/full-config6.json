@@ -1,0 +1,30 @@
+[{
+    "category": "B",
+    "vSize": [180, 120],
+    "styleArray": ["fill:$color[0]"],
+    "color": ["#2EB8E6"],
+    "svg": "<path class=\"$style[0]\" d=\"M0 0 L0 120 180 120 180 0z\"/>",
+    "path": "M0 0 L0 120 180 120 180 0z"
+}, {
+    "category": "B",
+    "scaleType": 1,
+    "vSize": [250, 250],
+    "styleArray": ["fill:$color[0]"],
+    "color": ["#808080"],
+    "svg": "<path class=\"$style[0]\" d=\"M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z\"/>",
+    "path": "M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z"
+}, {
+    "category": "A",
+    "vSize": [100, 100],
+    "styleArray": ["fill:$color[0]"],
+    "color": ["#EB5757"],
+    "svg": "<path class=\"$style[0]\" d=\"M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z\"/>",
+    "path": "M10,30 A20,20,0,0,1,50,30 A20,20,0,0,1,90,30 Q90,60,50,90 Q10,60,10,30 Z"
+}, {
+    "category": "A",
+    "vSize": [900, 600],
+    "styleArray": ["fill:$color[0]", "fill:$color[1]", "fill:$color[2]"],
+    "color": ["#fe0000", "#000095", "#fff"],
+    "svg": "<g fill-rule=\"evenodd\"> <path d = \"M0 0h900v600H0z\" class=\"$style[0]\"/> <path d = \"M0 0h450v300H0z\" class=\"$style[1]\"/> </g> <path d = \"M225 37.5l-56.25 209.928L322.428 93.75 112.5 150l209.928 56.25L168.75 52.572 225 262.5l56.25-209.928L127.572 206.25 337.5 150 127.572 93.75 281.25 247.428 225 37.5\" class=\"$style[2]\" paint-order=\"markers fill stroke\"/> <circle cy = \"150\" cx=\"225\" r=\"60\" class=\"$style[2]\" stroke=\"#000095\" stroke-width=\"7.5\"/>",
+    "path": ""
+}]
