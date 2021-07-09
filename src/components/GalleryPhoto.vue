@@ -27,6 +27,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      scaleRatio: 'getPageScaleRatio',
       pageSize: 'getPageSize',
       getLayers: 'getLayers'
     })
@@ -40,16 +41,18 @@ export default Vue.extend({
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
 
+      const width = photo.width / 20
+      const height = photo.height / 20
       const rect = (e.target as Element).getBoundingClientRect()
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
         src: photo.urls.regular,
         styles: {
-          x: e.clientX - rect.x,
-          y: e.clientY - rect.y,
-          width: photo.width / 20,
-          height: photo.height / 20
+          x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
+          y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
+          width: width,
+          height: height
         }
       }
       dataTransfer.setData('data', JSON.stringify(data))

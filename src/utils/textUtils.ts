@@ -370,7 +370,6 @@ class TextUtils {
       }
 
       if (!div || (div as HTMLElement).id.match('text') === null || !range || !range.startContainer || !range.endContainer) return undefined
-      console.log(div as HTMLElement)
       const isRanged = window.getSelection()?.toString() !== ''
       const end: { [key: string]: number } = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,

@@ -1,4 +1,3 @@
-// import store from '@/store'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
@@ -147,11 +146,9 @@ class LayerFactary {
       active: false,
       shown: false,
       path: '',
-      // color: [''],
       color: [],
       size: [],
       svg: '',
-      // size: [0, 0],
       vSize: [0, 0],
       cSize: [0, 0],
       pSize: [0, 0],
@@ -173,8 +170,7 @@ class LayerFactary {
         initWidth: 0,
         initHeight: 0,
         zindex: -1,
-        opacity: 100,
-        vSize: [0, 0]
+        opacity: 100
       }
     }
     Object.assign(basicConfig.styles, config.styles)

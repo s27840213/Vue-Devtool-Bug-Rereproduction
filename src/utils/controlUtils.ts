@@ -1,11 +1,15 @@
 import store from '@/store'
 import { v4 as uuidv4 } from 'uuid'
 import { ICoordinate } from '@/interfaces/frame'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { stringToArray } from 'konva/types/shapes/Text'
 import { SidebarPanelType } from '@/store/types'
 
 class Controller {
+  get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
+  get layerIndex(): number { return store.getters.getCurrSelectedIndex }
+  get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
+
   getLength(vect: ICoordinate): number {
     const sqareSum = Math.pow(vect.x, 2) + Math.pow(vect.y, 2)
     return Math.sqrt(sqareSum)
@@ -301,13 +305,12 @@ class Controller {
 
   shapeCategorySorter(resizers: any, category: string, scaleType: number) {
     switch (category) {
-      // category: A => 線條，可以修改顏色，線條粗細，線條樣式，端點樣式
+      // category: A => 只能被等比例縮放
       case 'A':
         return []
-      // category: B => 形狀，可以修改顏色，以及等比例/非等比例縮放
+      // category: B => 等比例/非等比例縮放
+      // category: C => 可被等比例縮放，也可沿着水平/垂直方向伸縮，伸縮時四個角落的形狀固定不變
       case 'B':
-        return resizers
-      // category: C => 複雜內容，可以修改顏色，以及等比例縮放
       case 'C':
         switch (scaleType) {
           case 1:
@@ -318,6 +321,31 @@ class Controller {
             return resizers.slice(2, 4)
         }
         return []
+    }
+  }
+
+  resizeShapeHandler(config: IShape, scale: { scaleX: number, scaleY: number }, initHW: { width: number, height: number }, width: number, height: number) {
+    switch (config.category) {
+      case 'A': {
+        console.log('shape of category A should not have resizer!')
+        break
+      }
+      case 'B': {
+        let scaleX = scale.scaleX
+        let scaleY = scale.scaleY
+        scaleX = width / initHW.width === 1 ? scaleX : width / initHW.width * scaleX
+        scaleY = height / initHW.height === 1 ? scaleY : height / initHW.height * scaleY
+        this.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
+        break
+      }
+      case 'C': {
+        const scale = config.styles.scale
+        const patchDiffX = width * config.ratio / scale - config.vSize[0]
+        const patchDiffY = height * config.ratio / scale - config.vSize[1]
+        this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
+        this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
+        break
+      }
     }
   }
 

@@ -509,18 +509,7 @@ export default Vue.extend({
           this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
         case 'shape':
-          if (this.config.category === 'C') {
-            const patchDiffX = width * this.config.ratio / this.getLayerScale - this.config.vSize[0]
-            const patchDiffY = height * this.config.ratio / this.getLayerScale - this.config.vSize[1]
-            ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width / this.getLayerScale, height / this.getLayerScale, this.getLayerScale)
-            ControlUtils.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
-          } else {
-            let scaleX = this.scale.scaleX
-            let scaleY = this.scale.scaleY
-            scaleX = width / initWidth === 1 ? scaleX : width / initWidth * scaleX
-            scaleY = height / initHeight === 1 ? scaleY : height / initHeight * scaleY
-            ControlUtils.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
-          }
+          ControlUtils.resizeShapeHandler(this.config, this.scale, this.initialWH, width, height)
           break
         case 'text':
           [width, height] = this.textResizeHandler(width, height)
@@ -742,12 +731,30 @@ export default Vue.extend({
     },
     textClickHandler(e: MouseEvent) {
       if (this.getLayerType === 'text' && this.isActive) {
-        if ((this.$refs.text as HTMLElement).contains(e.target as Node)) {
-          const sel = window.getSelection()
-          if (sel && sel.rangeCount !== 0) {
-            this.$root.$emit('updateTextPanel')
+        const selStart = TextUtils.getSelection()?.start
+        const paragraphs: IParagraph[] = this.textParser()
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+
+        const text = this.$refs.text as HTMLElement
+        this.$nextTick(() => {
+          if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+            text.removeChild(text.lastChild)
           }
-        }
+          const sel = window.getSelection()
+          if (sel && selStart) {
+            const range = new Range()
+            console.log(selStart)
+            range.setStart(text.childNodes[selStart.pIndex].childNodes[selStart.sIndex].firstChild as Node, selStart.offset)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }
+          if ((this.$refs.text as HTMLElement).contains(e.target as Node)) {
+            const sel = window.getSelection()
+            if (sel && sel.rangeCount !== 0) {
+              this.$root.$emit('updateTextPanel')
+            }
+          }
+        })
       }
     },
     onKeyDown(e: KeyboardEvent) {
@@ -764,9 +771,42 @@ export default Vue.extend({
           if (range) {
             const startContainer = range.startContainer
             if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
+              /**
+               * After a whole paragraph is being deleted, the selection will return NaN (lose the caret position of it)
+               * at this moment, we update the vuex and capture the caret position
+               * the caret position is captured by the following logic
+               */
               console.log('NaN')
-              // e.preventDefault()
-              // return
+              setTimeout(() => {
+                const text = this.$refs.text as HTMLElement
+                let deletedPindex = -1
+                for (let i = 0; i < text.childElementCount; i++) {
+                  const pindex = parseInt((text.childNodes[i] as HTMLElement).dataset.pindex as string)
+                  console.log(pindex)
+                  console.log(i)
+                  if (pindex !== i) {
+                    deletedPindex = i
+                    break
+                  }
+                }
+                const paragraphs: IParagraph[] = this.textParser()
+                TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+                this.$nextTick(() => {
+                  console.log(text)
+                  if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+                    text.removeChild(text.lastChild)
+                  }
+                  const sel = window.getSelection()
+                  if (sel && start) {
+                    const range = new Range()
+                    const sLeng = (this.config as IText).paragraphs[deletedPindex - 1].spans.length
+                    const offset = (this.config as IText).paragraphs[deletedPindex - 1].spans[sLeng - 1].text.length
+                    range.setStart(text.childNodes[deletedPindex - 1].childNodes[sLeng - 1].firstChild as Node, offset)
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                  }
+                })
+              }, 0)
             }
             // TODO: deletion at the begining of the text cause bug.
             start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
@@ -779,17 +819,54 @@ export default Vue.extend({
                 ControlUtils.textStopPropagation(e)
               }
             }
+            if (e.key === 'Enter') {
+              setTimeout(() => {
+                let buff = -1
+                for (let i = 0; i < text.childElementCount; i++) {
+                  const pindex = parseInt((text.childNodes[i] as HTMLElement).dataset.pindex as string)
+                  if (buff === pindex) {
+                    break
+                  }
+                  buff = pindex
+                }
+                const paragraphs: IParagraph[] = this.textParser()
+                TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+                this.$nextTick(() => {
+                  if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+                    text.removeChild(text.lastChild)
+                  }
+                  const sel = window.getSelection()
+                  if (sel && start) {
+                    const range = new Range()
+                    range.setStart(text.childNodes[buff + 1].childNodes[0].firstChild as Node, 0)
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                  }
+                })
+              }, 0)
+            }
           }
         }
-        const observer = new MutationObserver(this.onTyping(e, start))
-        observer.observe(text, {
-          characterData: true,
-          childList: true,
-          subtree: true,
-          attributes: false,
-          attributeOldValue: false,
-          characterDataOldValue: false
-        })
+        setTimeout(() => {
+          const text = this.$refs.text as HTMLElement
+          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+          text.style.height = 'max-content'
+          const textHW = {
+            width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+            height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+          }
+          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+          text.style.height = `${this.config.styles.height / this.getLayerScale}px`
+        }, 0)
+        // const observer = new MutationObserver(this.onTyping(e, start))
+        // observer.observe(text, {
+        //   characterData: true,
+        //   childList: true,
+        //   subtree: true,
+        //   attributes: false,
+        //   attributeOldValue: false,
+        //   characterDataOldValue: false
+        // })
       }
     },
     onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
@@ -808,8 +885,6 @@ export default Vue.extend({
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         if (this.isComposing) {
           return
-        } else if (this.config.isComposing) {
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isComposing: false })
         }
 
         observer.disconnect()

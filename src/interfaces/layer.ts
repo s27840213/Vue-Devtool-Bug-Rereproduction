@@ -71,11 +71,17 @@ export interface ISpanStyle {
 }
 
 export interface IShape extends ILayer<IStyle> {
-  category: number,
-  path: string,
-  color: [string],
+  category: string,
+  scaleType?: number,
   svg: string,
-  size: [number]
+  className: string,
+  path?: string,
+  ratio: number,
+  color: [string],
+  vSize: number[],
+  cSize?: number[],
+  pSize?: number[],
+  pDiff?: number[],
 }
 export interface IImage extends ILayer<IImageStyle> {
   src: string,
