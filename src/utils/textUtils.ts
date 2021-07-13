@@ -11,6 +11,28 @@ class TextUtils {
   get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+    if (this.isBlockProperty(propName)) {
+      const config = this.getCurrLayer as IText
+      if (config.active) {
+        switch (propName) {
+          case 'text-align-left':
+            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'left' })
+            break
+          case 'text-align-center':
+            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'center' })
+            break
+          case 'text-align-right':
+            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'right' })
+            break
+          case 'font-vertical': {
+            const writingMode = config.styles.writingMode === 'initial' ? 'vertical-lr' : 'initial'
+            this.updateTextStyles(this.pageIndex, this.layerIndex, { writingMode })
+          }
+        }
+      }
+      return
+    }
+
     const sel = this.getSelection()
     const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
     const start = {
@@ -139,7 +161,6 @@ class TextUtils {
         if (select) {
           select.removeAllRanges()
           select.addRange(range)
-          console.log(range)
         }
       } else {
         const select = window.getSelection()
@@ -149,7 +170,6 @@ class TextUtils {
           range.setEnd(node, config.paragraphs[start.pIndex].spans[start.sIndex].text.length)
           select.removeAllRanges()
           select.addRange(range)
-          console.log('2')
         }
       }
     })
@@ -157,6 +177,11 @@ class TextUtils {
 
   isSelRanged(sel: { pIndex: number, sIndex: number, offset?: number }): boolean {
     return !Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)
+  }
+
+  isBlockProperty(propName: string): boolean {
+    console.log(propName.substring(0, 10))
+    return propName.substring(0, 10) === 'text-align' || propName === 'font-vertical'
   }
 
   /**
@@ -216,10 +241,6 @@ class TextUtils {
     const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
 
     if (!this.isSelRanged(end)) {
-      console.log('444')
-      console.log(end)
-      console.log(start)
-
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {

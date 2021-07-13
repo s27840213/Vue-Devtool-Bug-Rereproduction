@@ -124,6 +124,48 @@ export default Vue.extend({
           paragraphs: [
             {
               styles: {
+                fontSpaceing: 0,
+                lineHeight: -1
+              },
+              spans: [
+                {
+                  text: '中文',
+                  styles: {
+                    font: 'Noto Sans TC',
+                    weight: 'normal',
+                    color: '#2EB344',
+                    writingMode: 'initial',
+                    decoration: 'none',
+                    style: 'normal',
+                    opacity: 1,
+                    size: 28
+                  }
+                },
+                {
+                  text: '測試用',
+                  styles: {
+                    font: 'SetoFont',
+                    weight: 'normal',
+                    color: '#2EB8E6',
+                    writingMode: 'initial',
+                    decoration: 'none',
+                    style: 'normal',
+                    opacity: 1,
+                    size: 20
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          styles: {
+            writingMode: 'horizontal-tb',
+            align: 'text-align'
+          },
+          paragraphs: [
+            {
+              styles: {
                 fontSpacing: 0,
                 lineHeight: -1
               },

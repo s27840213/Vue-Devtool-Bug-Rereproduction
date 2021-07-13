@@ -26,43 +26,57 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    updateTextSize(): any {
-      const config = this.config as IText
-      return {
-        // width: config.styles.width,
-        // height: config.styles.height,
-        paragraphs: config.paragraphs,
-        active: config.active
-      }
-    },
+    // updateTextSize(): any {
+    //   const config = this.config as IText
+    //   return {
+    //     // width: config.styles.width,
+    //     // height: config.styles.height,
+    //     paragraphs: config.paragraphs,
+    //     active: config.active
+    //   }
+    // },
     getLayerScale(): number {
       return this.config.styles.scale
     }
   },
   watch: {
-    updateTextSize: {
+    'config.paragraphs': {
       handler: function() {
+        if (this.config.isTyping) return
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
-          if (!this.config.active) {
-            text.style.width = `${this.config.styles.width / this.getLayerScale}px`
-            // text.style.height = 'max-content'
-            text.style.height = `${this.config.styles.height / this.getLayerScale}px`
-          } else {
-            text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+          /**
+           * If layer is in active state, means the text-properties changes,
+           * the layer width/height needs to refresh
+           */
+          if (this.config.active) {
+            console.log('active')
             text.style.height = 'max-content'
-            // text.style.height = 'max-content'
             const textHW = {
-              width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
-              height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+              width: Math.ceil(this.config.widthLimit),
+              height: Math.ceil(this.config.styles.height)
             }
-            text.style.width = `${textHW.width / this.getLayerScale}px`
-            text.style.height = `${textHW.height / this.getLayerScale}px`
+            if (this.config.widthLimit !== -1) {
+              text.style.width = `${this.config.widthLimit / this.getLayerScale}px`
+            } else {
+              text.style.width = 'max-content'
+              textHW.width = Math.ceil(text.offsetWidth + 1)
+              textHW.height = Math.ceil(text.offsetHeight + 1)
+            }
             ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
           }
         })
       },
       deep: true
+    },
+    'config.active'() {
+      this.$nextTick(() => {
+        const text = this.$refs.text as HTMLElement
+        if (!this.config.active) {
+          text.style.width = `${this.config.styles.width / this.getLayerScale}px`
+          text.style.height = `${this.config.styles.height / this.getLayerScale}px`
+        }
+      })
     }
   },
   methods: {
@@ -71,6 +85,8 @@ export default Vue.extend({
     },
     textStyles() {
       return {
+        textAlign: this.config.styles.align,
+        writingMode: this.config.styles.writingMode,
         opacity: this.config.active ? 0 : 1
       }
     }

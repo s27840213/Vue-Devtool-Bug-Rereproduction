@@ -185,6 +185,7 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     onPropertyClick(iconName: string) {
+      console.log(iconName)
       TextUtils.onPropertyClick(iconName)
     },
     fontSizeStepping(step: number) {

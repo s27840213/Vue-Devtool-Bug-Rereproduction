@@ -5,9 +5,9 @@
     search-bar(:placeholder="'Search font'")
     div(v-for="font in fontPreset"
         class="panel-fonts__font pointer"
-        :style="{'font-family': font}"
-        @click="setFont(font)")
-      span {{font}}
+        :style="{'font-family': font.face}"
+        @click="setFont(font.face)")
+      span {{font.name}}
     div
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -34,15 +34,42 @@ export default Vue.extend({
     return {
       FileUtils,
       fontPreset: [
-        'sans-serif',
-        'Manrop',
-        'Lobster',
-        'Noto Sans TC',
-        'cwTeXKai',
-        'SweiSpringCJKtc-Regular',
-        'SoukouMincho',
-        'SetoFont',
-        'GenJyuuGothicX-P-Regular'
+        {
+          name: 'sans-serif',
+          face: 'sans-serif'
+        },
+        {
+          name: 'Manrop',
+          face: 'Manrop'
+        },
+        {
+          name: 'Lobster',
+          face: 'Lobster'
+        },
+        {
+          name: '思源黑體',
+          face: 'Noto Sans TC'
+        },
+        {
+          name: '標楷體',
+          face: 'cwTeXKai'
+        },
+        {
+          name: '獅尾四季春',
+          face: 'SweiSpringCJKtc-Regular'
+        },
+        {
+          name: '裝甲明朝',
+          face: 'SoukouMincho'
+        },
+        {
+          name: '瀨戶字體',
+          face: 'SetoFont'
+        },
+        {
+          name: '思源柔體',
+          face: 'GenJyuuGothicX-P-Regular'
+        }
       ]
     }
   },
@@ -82,7 +109,7 @@ export default Vue.extend({
     `
       document.head.appendChild(style)
       // console.log(fontName)
-      this.fontPreset.push(fontName)
+      this.fontPreset.push({ name: fontName, face: fontName })
     }
   }
 })
