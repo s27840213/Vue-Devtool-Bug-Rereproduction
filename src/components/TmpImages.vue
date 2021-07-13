@@ -1,6 +1,5 @@
 <template lang="pug">
-  recycle-scroller(v-else
-    class="temp__content"
+  recycle-scroller(class="temp__content"
     :items="rows")
     template(v-slot="{ item }")
       div
@@ -91,6 +90,7 @@ export default Vue.extend({
     text-align: left;
     box-sizing: border-box;
     overflow-y: scroll;
+    overscroll-behavior: contain;
     &::-webkit-scrollbar {
       display: none;
     }

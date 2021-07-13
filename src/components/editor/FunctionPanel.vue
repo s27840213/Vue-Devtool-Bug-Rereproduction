@@ -8,6 +8,7 @@
     //- panel-background-setting(v-if="selectedLayerNum===0")
     panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
     panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+    panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked")
 </template>
 
 <script lang="ts">
@@ -20,6 +21,7 @@ import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetti
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
+import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import { mapGetters } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -33,7 +35,8 @@ export default Vue.extend({
     PanelPhotoSetting,
     PanelPageSetting,
     PanelFonts,
-    PanelShapeSetting
+    PanelShapeSetting,
+    PanelTextEffectSetting
   },
   data() {
     return {

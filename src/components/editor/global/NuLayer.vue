@@ -28,6 +28,7 @@ import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
+import TextEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   props: {
@@ -62,6 +63,13 @@ export default Vue.extend({
       const zindex = (this.layerIndex + 1) * 99
       const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
         { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
+      if (this.config.type === 'text') {
+        styles.opacity = this.config.active ? '0' : '1'
+        Object.assign(
+          styles,
+          TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+        )
+      }
       return styles
     },
     scaleStyles() {

@@ -27,7 +27,8 @@ export default Vue.extend({
     return {
       headingFormat: {
         styles: {
-          writingMode: 'normal'
+          writingMode: 'normal',
+          textEffect: {}
         },
         paragraphs: [
           {
@@ -56,7 +57,8 @@ export default Vue.extend({
       },
       subheadingFormat: {
         styles: {
-          writingMode: 'normal'
+          writingMode: 'normal',
+          textEffect: {}
         },
         paragraphs: [
           {
@@ -85,7 +87,8 @@ export default Vue.extend({
       },
       bodyFormat: {
         styles: {
-          writingMode: 'normal'
+          writingMode: 'normal',
+          textEffect: {}
         },
         paragraphs: [
           {

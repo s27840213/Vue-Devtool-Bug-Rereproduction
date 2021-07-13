@@ -76,8 +76,7 @@ import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
-import { config } from 'vue/types/umd'
-import { concat } from 'lodash'
+import TextEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   props: {
@@ -251,7 +250,8 @@ export default Vue.extend({
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
 
