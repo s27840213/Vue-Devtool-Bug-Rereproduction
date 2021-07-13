@@ -424,8 +424,10 @@ class TextUtils {
     })
     body.style.border = '1px solid blue'
     body.style.width = width === -1 ? 'fit-content' : `${width}px`
+    body.style.height = 'fit-content'
     body.style.whiteSpace = 'pre-wrap'
     body.style.textAlign = 'center'
+    body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
     const textHW = {
       width: Math.ceil(body.getBoundingClientRect().width),

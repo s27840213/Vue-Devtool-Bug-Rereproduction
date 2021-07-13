@@ -231,7 +231,10 @@ export default Vue.extend({
     textStyles(styles: any) {
       // const textStyles = CssConveter.convertFontStyle(Object.assign(newStyles, { color: styles.color ? styles.color : '' }))
       const textStyles = CssConveter.convertFontStyle(styles)
-      Object.assign(textStyles, { 'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000' })
+      Object.assign(textStyles, {
+        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
+        writingMode: this.config.styles.writingMode
+      })
       return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {

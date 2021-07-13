@@ -26,21 +26,21 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    // updateTextSize(): any {
-    //   const config = this.config as IText
-    //   return {
-    //     // width: config.styles.width,
-    //     // height: config.styles.height,
-    //     paragraphs: config.paragraphs,
-    //     active: config.active
-    //   }
-    // },
+    updateTextSize(): any {
+      const config = this.config as IText
+      return {
+        // width: config.styles.width,
+        // height: config.styles.height,
+        paragraphs: config.paragraphs,
+        writingMode: config.styles.writingMode
+      }
+    },
     getLayerScale(): number {
       return this.config.styles.scale
     }
   },
   watch: {
-    'config.paragraphs': {
+    updateTextSize: {
       handler: function() {
         if (this.config.isTyping) return
         this.$nextTick(() => {
