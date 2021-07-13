@@ -69,10 +69,11 @@ class MappingUtils {
         return OrderUtils.bringToBack
       }
       case 'distribute-vertically': {
-        return groupUtils.reselect()
+        AlignUtils.distribueVr()
         break
       }
       case 'distribute-horizontally': {
+        AlignUtils.distribueHr()
         break
       }
       case 'layers-alt': {
