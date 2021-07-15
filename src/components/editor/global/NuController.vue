@@ -548,12 +548,12 @@ export default Vue.extend({
       const text = this.$refs.text as HTMLElement
       if (this.config.styles.writingMode.includes('vertical')) {
         text.style.width = 'max-content'
-        width = Math.ceil(text.offsetWidth + 1)
+        width = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: height })
       } else {
         text.style.height = 'max-content'
         // height = Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
-        height = Math.ceil(text.offsetHeight + 1)
+        height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
       }
       return [width, height]
@@ -908,8 +908,8 @@ export default Vue.extend({
         text.style.height = 'max-content'
       }
       const textHW = {
-        width: Math.ceil(text.offsetWidth + 1),
-        height: Math.ceil(text.offsetHeight + 1)
+        width: Math.ceil(text.offsetWidth * this.getLayerScale + 1),
+        height: Math.ceil(text.offsetHeight * this.getLayerScale + 1)
       }
 
       let layerX = this.getLayerPos.x
@@ -945,7 +945,8 @@ export default Vue.extend({
         layerY = trans.y
       }
       text.style.width = `${textHW.width / this.getLayerScale}px`
-      textHW.height = Math.ceil(text.offsetHeight)
+      textHW.width = Math.ceil(text.offsetWidth * this.getLayerScale + 1)
+      textHW.height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)

@@ -14,7 +14,6 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
 import { mapGetters } from 'vuex'
-import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   props: {
@@ -29,8 +28,6 @@ export default Vue.extend({
     updateTextSize(): any {
       const config = this.config as IText
       return {
-        // width: config.styles.width,
-        // height: config.styles.height,
         paragraphs: config.paragraphs,
         writingMode: config.styles.writingMode
       }
@@ -61,8 +58,9 @@ export default Vue.extend({
             }
           }
 
-          const width = Math.ceil(text.offsetWidth + 1)
-          const height = Math.ceil(text.offsetHeight + 1)
+          const width = Math.ceil(text.offsetWidth * this.getLayerScale + 1)
+          const height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
+          console.log('width', width)
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.getLayerScale)
         })
       },
