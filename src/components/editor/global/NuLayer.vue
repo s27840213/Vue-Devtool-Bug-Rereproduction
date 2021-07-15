@@ -4,7 +4,6 @@
       @dragover.prevent,
       @dragenter.prevent)
     div(class='layer-scale'
-        :class="{'layer-text': config.type === 'text'}"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
@@ -126,7 +125,8 @@ export default Vue.extend({
 }
 .layer-scale {
   position: absolute;
-  // transform-origin: top left;
+  top: 0;
+  left: 0;
 }
 .test-index {
   position: absolute;

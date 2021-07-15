@@ -152,7 +152,6 @@ class Controller {
           const spans: ISpan[] = []
           p.childNodes.forEach((span) => {
             const spanEl = span as HTMLElement
-            // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
             const spanStyle = {
               font: spanEl.style.fontFamily,
               weight: spanEl.style.fontWeight,
@@ -236,7 +235,6 @@ class Controller {
           const spans: ISpan[] = []
           for (const span of p.childNodes) {
             if (span instanceof HTMLElement) {
-              // console.log(spanEl.style.color.substring(0, spanEl.style.color.length - 3))
               const spanEl = span as HTMLElement
               const text = spanEl.innerText as string
               if (text === '') {

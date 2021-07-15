@@ -32,7 +32,7 @@ export default Vue.extend({
         width: `${HW.width}px`,
         height: `${HW.height}px`,
         position: 'absolute',
-        transform: 'translate(-50%, -50%)',
+        // transform: 'translate(-50%, -50%)',
         'clip-path': this.config.clipPath,
         'background-color': '#00000001'
       }

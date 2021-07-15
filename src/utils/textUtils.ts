@@ -5,6 +5,15 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 
+const fontPropsMap = {
+  fontSize: 'size',
+  fontFamily: 'font',
+  bold: 'weight',
+  italic: 'style',
+  underline: 'decoration',
+  color: 'color'
+}
+
 class TextUtils {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
@@ -12,27 +21,43 @@ class TextUtils {
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.isBlockProperty(propName)) {
-      const config = this.getCurrLayer as IText
-      if (config.active) {
-        switch (propName) {
-          case 'text-align-left':
-            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'left' })
-            break
-          case 'text-align-center':
-            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'center' })
-            break
-          case 'text-align-right':
-            this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'right' })
-            break
-          case 'font-vertical': {
-            const writingMode = config.styles.writingMode === 'initial' ? 'vertical-lr' : 'initial'
-            this.updateTextStyles(this.pageIndex, this.layerIndex, { writingMode })
-          }
+      this.blockPropertyHandler(propName)
+    } else {
+      this.spanPropertyHandler(propName, value, selStart, selEnd)
+    }
+  }
+
+  isSelRanged(sel: { pIndex: number, sIndex: number, offset?: number }): boolean {
+    return !Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)
+  }
+
+  isBlockProperty(propName: string): boolean {
+    return propName.includes('text-align') || propName === 'font-vertical'
+  }
+
+  blockPropertyHandler(propName: string) {
+    const config = this.getCurrLayer as IText
+    if (config.active) {
+      switch (propName) {
+        case 'text-align-left':
+          this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'left' })
+          break
+        case 'text-align-center':
+          this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'center' })
+          break
+        case 'text-align-right':
+          this.updateTextStyles(this.pageIndex, this.layerIndex, { align: 'right' })
+          break
+        case 'font-vertical': {
+          const writingMode = config.styles.writingMode === 'initial' || config.styles.writingMode.includes('horizontal')
+            ? 'vertical-lr' : 'initial'
+          this.updateTextStyles(this.pageIndex, this.layerIndex, { writingMode })
         }
       }
-      return
     }
+  }
 
+  spanPropertyHandler(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     const sel = this.getSelection()
     const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
     const start = {
@@ -58,8 +83,7 @@ class TextUtils {
     } else {
       return
     }
-
-    let isStartContainerDivide = true
+    let isStartContainerDivided = true
     const prop = this.propIndicator(start, end, propName, value || '')
 
     if (this.isSelRanged(end)) {
@@ -80,7 +104,7 @@ class TextUtils {
             config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, newSpan)
             if (span.text === '') {
               config.paragraphs[pIndex].spans.splice(sIndex, 1)
-              isStartContainerDivide = false
+              isStartContainerDivided = false
             }
 
             if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
@@ -90,11 +114,11 @@ class TextUtils {
               thirdSpan.text = text.substr(end.offset)
               Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
               if (thirdSpan.text !== '') {
-                config.paragraphs[pIndex].spans.splice(isStartContainerDivide ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
+                config.paragraphs[pIndex].spans.splice(isStartContainerDivided ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
               }
               break
             }
-            if (start.pIndex === end.pIndex && isStartContainerDivide) {
+            if (start.pIndex === end.pIndex && isStartContainerDivided) {
               sIndex++
               end.sIndex++
             }
@@ -134,6 +158,9 @@ class TextUtils {
         case 'italic':
           styles.style = prop.style as string
           break
+        case 'color':
+          styles.color = value as string
+          break
         default:
           break
       }
@@ -145,7 +172,7 @@ class TextUtils {
       const range = new Range()
       const div = document.getElementById(`text-${this.layerIndex}`)
       if (this.isSelRanged(end) && div) {
-        if (isStartContainerDivide) {
+        if (isStartContainerDivided) {
           if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
             start.sIndex++
             end.sIndex++
@@ -175,24 +202,27 @@ class TextUtils {
     })
   }
 
-  isSelRanged(sel: { pIndex: number, sIndex: number, offset?: number }): boolean {
-    return !Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)
-  }
-
-  isBlockProperty(propName: string): boolean {
-    console.log(propName.substring(0, 10))
-    return propName.substring(0, 10) === 'text-align' || propName === 'font-vertical'
+  paragraphPropsHandler(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+    if (value && this.isSelRanged(selStart)) {
+      console.log(value)
+      switch (propName) {
+        case 'fontSpacing':
+          this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { fontSpacing: value })
+          break
+        case 'lineHeight':
+          this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { lineHeight: value })
+      }
+    }
   }
 
   /**
-   *
-   * @param prop A string about the desired props: fontSize/fontFamily.
+   * @param prop A string refers to the desired props: fontSize/fontFamily/color/weight/style...
    * @returns The desired props value accord to the current selection range.
    */
-  propReader (prop: string): string | undefined {
+  propReader (prop: string): string | number |undefined {
     const sel = this.getSelection()
     if (!sel || (sel.div as HTMLElement).id.match('text') === null) return
-    const div = sel.div
+    const config = this.getCurrLayer as IText
     const start = {
       pIndex: 0,
       sIndex: 0,
@@ -205,31 +235,71 @@ class TextUtils {
     }
     Object.assign(start, sel.start)
     Object.assign(end, sel.end)
-
     // selection is not a range (only caret)
-    if (!this.isSelRanged(end)) {
-      return (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style[`${prop}` as any]
+    if (this.isSelRanged(start) && !this.isSelRanged(end)) {
+      if (prop === 'fontSpacing' || prop === 'lineHeight') {
+        return config.paragraphs[start.pIndex].styles[prop]
+      } else if (prop === 'fontFamily' || prop === 'fontSize' || prop === 'color' || prop === 'bold' || prop === 'italic') {
+        return config.paragraphs[start.pIndex].spans[start.sIndex].styles[fontPropsMap[prop]]
+      }
     }
 
     let flag = false
-    let origin = ''
-    if (prop === 'fontFamily') {
-      origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontFamily
-    } else if (prop === 'fontSize') {
-      origin = (div.childNodes[start.pIndex].childNodes[start.sIndex] as HTMLElement).style.fontSize
-    }
-    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-      const p = div.childNodes[pidx]
-      for (let sidx = 0; sidx < p.childNodes.length; sidx++) {
-        const span = p.childNodes[sidx] as HTMLElement
-        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        if (prop === 'fontFamily' && origin !== span.style.fontFamily) {
-          flag = true
-          break
-        } else if (prop === 'fontSize' && origin !== span.style.fontSize) {
-          flag = true
-          break
+    let origin: string | number = ''
+    switch (prop) {
+      case 'fontSpacing':
+        origin = config.paragraphs[start.pIndex].styles.fontSpacing
+        break
+      case 'lineHeight':
+        origin = config.paragraphs[start.pIndex].styles.lineHeight
+        break
+      default:
+        if (Object.keys(fontPropsMap).includes(prop)) {
+          const i = Object.keys(fontPropsMap).indexOf(prop)
+          const v = Object.values(fontPropsMap)[i]
+          origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles[v] as string | number
         }
+    }
+
+    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+      const p = config.paragraphs[pidx]
+      if (prop === 'lineHeight' && origin !== p.styles.lineHeight) {
+        flag = true
+        break
+      } else if (prop === 'fontSpacing' && origin !== p.styles.fontSpacing) {
+        flag = true
+        break
+      } else if (prop === 'lineHeight' || prop === 'fontSpacing') continue
+
+      for (let sidx = 0; sidx < p.spans.length; sidx++) {
+        const span = p.spans[sidx]
+        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
+        if (Object.keys(fontPropsMap).includes(prop)) {
+          const i = Object.keys(fontPropsMap).indexOf(prop)
+          const v = Object.values(fontPropsMap)[i]
+          if (origin !== span.styles[v]) {
+            flag = true
+            break
+          }
+        }
+        // if (prop === 'fontFamily' && origin !== span.styles.font) {
+        //   flag = true
+        //   break
+        // } else if (prop === 'fontSize' && origin !== span.styles.size) {
+        //   flag = true
+        //   break
+        // } else if (prop === 'color' && origin !== span.styles.color) {
+        //   flag = true
+        //   break
+        // } else if (prop === 'bold' && origin !== span.styles.weight) {
+        //   flag = true
+        //   break
+        // } else if (prop === 'italic' && origin !== span.styles.style) {
+        //   flag = true
+        //   break
+        // } else if (prop === 'underline' && origin !== span.styles.decoration) {
+        //   flag = true
+        // }
       }
       if (flag) break
     }
@@ -244,7 +314,6 @@ class TextUtils {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {
-          console.log(styles.weight)
           prop.weight = styles.weight === 'normal' ? 'bold' : 'normal'
           break
         }
@@ -305,6 +374,11 @@ class TextUtils {
             flag = true
             break
           }
+          case 'color': {
+            prop.color = value
+            flag = true
+            break
+          }
           default: { }
         }
         if (flag) break
@@ -331,46 +405,8 @@ class TextUtils {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
   }
 
-  // TODO: align is for paragraphs
-  // textAlign(span: HTMLElement, iconName: string) {
-  //   const align = iconName.substring(11, iconName.length)
-  //   this.updateTextStyles(this.pageIndex, this.layerIndex, { align })
-  // }
-
-  textVertical() {
-    let writingMode = 'initial'
-    const layer = this.getCurrLayer
-    if (layer.styles.writingMode === 'initial') {
-      writingMode = 'vertical-lr'
-    }
-
-    const textSize = {
-      width: layer.styles.height,
-      height: layer.styles.width
-    }
-    ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, layer.styles.size as number)
-    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textSize.width, textSize.height, 1)
-    this.updateTextStyles(this.pageIndex, this.layerIndex, { writingMode })
-  }
-
-  fontSizeStepping(step: number) {
-    this.getSelection()
-
-    let size = this.getCurrLayer.styles.size
-    if (size) {
-      if (typeof size === 'string') {
-        size = parseInt(size) + step
-      } else if (typeof size === 'number') {
-        size += step
-      }
-      this.updateTextStyles(this.pageIndex, this.layerIndex, { size })
-    }
-    this.updateLayerSize()
-  }
-
   updateLayerSize() {
     const textHW = this.getTextHW(this.getCurrLayer)
-    // ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getCurrLayer.styles.size)
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
@@ -418,7 +454,6 @@ class TextUtils {
         p.appendChild(span)
       })
       Object.assign(p.style, CssConveter.convertFontStyle(pData.styles))
-      // p.style.display = 'table'
       p.style.margin = '0.5em'
       body.appendChild(p)
     })
@@ -438,11 +473,20 @@ class TextUtils {
   }
 
   updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number }) {
-    store.commit('UPDATE_layerStyles', ({
+    store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
       styles
-    }))
+    })
+  }
+
+  updateParagraphStyles(pageIndex: number, layerIndex: number, pIndex: number, styles: { [key: string]: string | number }) {
+    store.commit('UPDATE_paragraphStyles', {
+      pageIndex,
+      layerIndex,
+      pIndex,
+      styles
+    })
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {

@@ -284,13 +284,13 @@ const mutations: MutationTree<IEditorState> = {
     pageIndex: number, layerIndex: number,
     paragraphs: [IParagraph]
   }) {
-    /**
-     * This Mutation is used to update the text's hierarchy between paragraphs and spans while hitting the enter key or typing with selection range
-     */
     (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs = updateInfo.paragraphs
   },
-  UPDATE_textContent(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number, sIndex: number, text: string }) {
-    (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].spans[updateInfo.sIndex].text = updateInfo.text
+  UPDATE_paragraphStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number,
+    styles: { [key: string]: string | number } }) {
+    Object.entries(updateInfo.styles).forEach(([k, v]) => {
+      (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].styles[k] = v
+    })
   },
   UPDATE_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
