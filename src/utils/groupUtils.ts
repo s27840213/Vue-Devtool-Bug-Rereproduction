@@ -90,8 +90,8 @@ class GroupUtils {
     const currSelectedIndex = store.getters.getCurrSelectedIndex
     const targetLayer = store.getters.getLayer(lastSelectedPageIndex, store.getters.getCurrSelectedIndex)
     if (targetLayer.type === 'group') {
-      targetLayer.layers.forEach((layer: IGroup) => {
-        layer.styles.zindex = targetLayer.styles.zindex
+      targetLayer.layers.forEach((layer: IGroup, index: number) => {
+        layer.styles.zindex = targetLayer.styles.zindex + index
       })
       const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, {
@@ -102,6 +102,7 @@ class GroupUtils {
         zindex: -1
       })
       this.reset()
+      console.log(tmpLayer.layers)
       this.set(currSelectedIndex, tmpLayer.layers)
     }
   }

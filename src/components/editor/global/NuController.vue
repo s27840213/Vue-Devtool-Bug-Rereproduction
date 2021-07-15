@@ -728,7 +728,13 @@ export default Vue.extend({
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
-      index = this.getLayerType === 'text' && this.config.styles.writingMode.includes('vertical') ? index + 4 : index
+      switch (this.getLayerType) {
+        case 'text':
+          if (this.config.styles.writingMode.includes('vertical')) index += 4
+          break
+        case 'shape':
+          if (this.config.scaleType === 3) index += 4
+      }
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
@@ -821,70 +827,17 @@ export default Vue.extend({
     },
     onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-        const text = this.$refs.text as HTMLElement
-        if (this.config.styles.writingMode.includes('vertical')) {
-          text.style.height = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
-          text.style.width = 'max-content'
-        } else {
-          text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
-          text.style.height = 'max-content'
-        }
-        const textHW = {
-          width: Math.ceil(text.offsetWidth + 1),
-          height: Math.ceil(text.offsetHeight + 1)
-        }
-
-        let layerX = this.getLayerPos.x
-        let layerY = this.getLayerPos.y
-
-        if (this.config.widthLimit === -1) {
-          const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
-          const currTextWidth = textHW.width
-          layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
-          if (layerX <= 0) {
-            layerX = 0
-            textHW.width = this.getLayerWidth
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          } else if (layerX + currTextWidth >= pageWidth) {
-            layerX = pageWidth - this.getLayerWidth
-            textHW.width = this.getLayerWidth
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          }
-        } else {
-          const initData = {
-            xSign: 1,
-            ySign: 1,
-            x: this.getLayerPos.x,
-            y: this.getLayerPos.y,
-            angle: this.getLayerRotate * Math.PI / 180
-          }
-          const offsetSize = {
-            width: textHW.width - this.getLayerWidth,
-            height: textHW.height - this.getLayerHeight
-          }
-          const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-          layerX = trans.x
-          layerY = trans.y
-        }
-        text.style.width = `${textHW.width / this.getLayerScale}px`
-        textHW.height = Math.ceil(text.offsetHeight)
-
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-
-        if (this.isComposing) {
-          return
-        }
-
         observer.disconnect()
+        this.textSizeRefresh()
+        if (this.isComposing) return
+
         const paragraphs: IParagraph[] = this.textParser()
         if (window.getSelection()) {
           const sel = window.getSelection()
           const startContainer = sel?.getRangeAt(0).startContainer
           let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
           // if the below condition is false, means some paragraph (p-node) is removed
-          if (startContainer?.parentElement?.dataset.sindex) {
+          if (typeof startContainer?.parentElement?.dataset.sindex !== 'undefined') {
             offset = sel?.getRangeAt(0).startOffset as number
             sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
             pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
@@ -943,6 +896,59 @@ export default Vue.extend({
         }
         this.$root.$emit('updateTextPanel')
       }
+    },
+    textSizeRefresh() {
+      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+      const text = this.$refs.text as HTMLElement
+      if (this.config.styles.writingMode.includes('vertical')) {
+        text.style.height = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+        text.style.width = 'max-content'
+      } else {
+        text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
+        text.style.height = 'max-content'
+      }
+      const textHW = {
+        width: Math.ceil(text.offsetWidth + 1),
+        height: Math.ceil(text.offsetHeight + 1)
+      }
+
+      let layerX = this.getLayerPos.x
+      let layerY = this.getLayerPos.y
+
+      if (this.config.widthLimit === -1) {
+        const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
+        const currTextWidth = textHW.width
+        layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
+        if (layerX <= 0) {
+          layerX = 0
+          textHW.width = this.getLayerWidth
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+        } else if (layerX + currTextWidth >= pageWidth) {
+          layerX = pageWidth - this.getLayerWidth
+          textHW.width = this.getLayerWidth
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+        }
+      } else {
+        const initData = {
+          xSign: 1,
+          ySign: 1,
+          x: this.getLayerPos.x,
+          y: this.getLayerPos.y,
+          angle: this.getLayerRotate * Math.PI / 180
+        }
+        const offsetSize = {
+          width: textHW.width - this.getLayerWidth,
+          height: textHW.height - this.getLayerHeight
+        }
+        const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
+        layerX = trans.x
+        layerY = trans.y
+      }
+      text.style.width = `${textHW.width / this.getLayerScale}px`
+      textHW.height = Math.ceil(text.offsetHeight)
+
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
     },
     textParser(): IParagraph[] {
       const paragraphs: IParagraph[] = []

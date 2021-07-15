@@ -27,14 +27,6 @@ class TextUtils {
     }
   }
 
-  isSelRanged(sel: { pIndex: number, sIndex: number, offset?: number }): boolean {
-    return !Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)
-  }
-
-  isBlockProperty(propName: string): boolean {
-    return propName.includes('text-align') || propName === 'font-vertical'
-  }
-
   blockPropertyHandler(propName: string) {
     const config = this.getCurrLayer as IText
     if (config.active) {
@@ -70,11 +62,11 @@ class TextUtils {
       sIndex: 0,
       offset: 0
     }
-    if (!sel && !this.isSelRanged(selStart) && !this.isSelRanged(selEnd)) {
+    if (!sel && !this.isSel(selStart) && !this.isSel(selEnd)) {
       end.pIndex = config.paragraphs.length - 1
       end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-    } else if (this.isSelRanged(selStart) || this.isSelRanged(selEnd)) {
+    } else if (this.isSel(selStart) || this.isSel(selEnd)) {
       Object.assign(start, selStart)
       Object.assign(end, selEnd)
     } else if (sel) {
@@ -86,7 +78,7 @@ class TextUtils {
     let isStartContainerDivided = true
     const prop = this.propIndicator(start, end, propName, value || '')
 
-    if (this.isSelRanged(end)) {
+    if (this.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
         const p = config.paragraphs[pIndex]
         for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
@@ -140,7 +132,7 @@ class TextUtils {
         }
       }
       this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
-    } else if (!this.isSelRanged(end)) {
+    } else if (!this.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'fontSize':
@@ -171,7 +163,7 @@ class TextUtils {
       const select = window.getSelection()
       const range = new Range()
       const div = document.getElementById(`text-${this.layerIndex}`)
-      if (this.isSelRanged(end) && div) {
+      if (this.isSel(end) && div) {
         if (isStartContainerDivided) {
           if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
             start.sIndex++
@@ -203,8 +195,7 @@ class TextUtils {
   }
 
   paragraphPropsHandler(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
-    if (value && this.isSelRanged(selStart)) {
-      console.log(value)
+    if (value && this.isSel(selStart)) {
       switch (propName) {
         case 'fontSpacing':
           this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { fontSpacing: value })
@@ -213,6 +204,7 @@ class TextUtils {
           this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { lineHeight: value })
       }
     }
+    // TODOs: paragraphs with selEnd
   }
 
   /**
@@ -236,7 +228,8 @@ class TextUtils {
     Object.assign(start, sel.start)
     Object.assign(end, sel.end)
     // selection is not a range (only caret)
-    if (this.isSelRanged(start) && !this.isSelRanged(end)) {
+    console.log(start)
+    if (this.isSel(start) && !this.isSel(end)) {
       if (prop === 'fontSpacing' || prop === 'lineHeight') {
         return config.paragraphs[start.pIndex].styles[prop]
       } else if (prop === 'fontFamily' || prop === 'fontSize' || prop === 'color' || prop === 'bold' || prop === 'italic') {
@@ -310,7 +303,7 @@ class TextUtils {
     const prop: { [key: string]: string | number } = {}
     const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
 
-    if (!this.isSelRanged(end)) {
+    if (!this.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {
@@ -470,6 +463,14 @@ class TextUtils {
     }
     document.body.removeChild(body)
     return textHW
+  }
+
+  isSel(sel: { pIndex: number, sIndex: number, offset?: number }): boolean {
+    return !Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)
+  }
+
+  isBlockProperty(propName: string): boolean {
+    return propName.includes('text-align') || propName === 'font-vertical'
   }
 
   updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number }) {

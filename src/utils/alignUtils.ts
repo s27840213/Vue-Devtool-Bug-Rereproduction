@@ -301,7 +301,26 @@ class AlignUtils {
   }
 
   distribueHr(): void {
-    console.log('empty')
+    let tmpStyles = LayerUtils.getTmpLayer().styles
+    const rotateDeg = tmpStyles.rotate
+    if (rotateDeg !== 0) {
+      GroupUtils.reselect()
+      tmpStyles = LayerUtils.getTmpLayer().styles
+    }
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const totalWidth = tmpStyles.width
+    const totalLayersWidth = currSelectedInfo.layers.reduce((acc: number, layer: IShape | IText | IImage | IGroup | ITmp) => {
+      return acc + layer.styles.width
+    }, 0)
+    const spacing = (totalWidth - totalLayersWidth) / (currSelectedInfo.layers.length - 1)
+    // first sort the selected array accroding to x
+    currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.x - b.styles.x)
+    for (let i = 0; i < currSelectedInfo.layers.length; i++) {
+      Object.assign(currSelectedInfo.layers[i].styles, {
+        x: i === 0 ? 0 : currSelectedInfo.layers[i - 1].styles.x + currSelectedInfo.layers[i - 1].styles.width + spacing
+      })
+    }
+    currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.zindex - b.styles.zindex)
   }
 
   distribueVr(): void {
@@ -312,17 +331,19 @@ class AlignUtils {
       tmpStyles = LayerUtils.getTmpLayer().styles
     }
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
-      const layerBounding = mathUtils.getBounding(layer)
-      const offset: { [index: string]: number } = {
-        x: layer.styles.x - layerBounding.x,
-        y: layer.styles.y - layerBounding.y,
-        width: layerBounding.width,
-        height: layerBounding.height
-      }
-      Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'bottom'))
-    })
-    GroupUtils.reselect()
+    const totalHeight = tmpStyles.height
+    const totalLayersHeight = currSelectedInfo.layers.reduce((acc: number, layer: IShape | IText | IImage | IGroup | ITmp) => {
+      return acc + layer.styles.height
+    }, 0)
+    const spacing = (totalHeight - totalLayersHeight) / (currSelectedInfo.layers.length - 1)
+    // first sort the selected array accroding to x
+    currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.y - b.styles.y)
+    for (let i = 0; i < currSelectedInfo.layers.length; i++) {
+      Object.assign(currSelectedInfo.layers[i].styles, {
+        y: i === 0 ? 0 : currSelectedInfo.layers[i - 1].styles.y + currSelectedInfo.layers[i - 1].styles.height + spacing
+      })
+    }
+    currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.zindex - b.styles.zindex)
   }
 
   getAlignPos(tmpStyles: IStyle, layerStyles: IStyle, offset: { [index: string]: number }, type: string): { [key: string]: number } {
