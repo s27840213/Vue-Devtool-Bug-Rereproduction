@@ -359,9 +359,9 @@ class Controller {
         }
         this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
         this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
-        return false
       }
     }
+    return false
   }
 
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {
