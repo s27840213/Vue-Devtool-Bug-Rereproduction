@@ -107,7 +107,8 @@ export default Vue.extend({
       const svgWidth = svgAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * svgAspectRatio
       const svgHeight = svgAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / svgAspectRatio : this.pageSize.height * resizeRatio
 
-      svgData.ratio = (svgData.vSize[0] / svgWidth)
+      svgData.ratio = 1
+      // svgData.ratio = (svgData.vSize[0] / svgWidth)
       svgData.className = shapeUtils.classGenerator()
       const config = {
         styles: {

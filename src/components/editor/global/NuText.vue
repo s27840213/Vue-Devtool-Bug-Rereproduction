@@ -45,8 +45,10 @@ export default Vue.extend({
          * the layer width/height needs to refresh
          */
         if (this.config.isTyping && this.config.active) return
+        console.log('updateTextSize')
         this.$nextTick(() => {
           const text = this.$refs.text as HTMLElement
+          text.style.transform = `rotate(${-this.config.styles.rotate}deg)`
           text.style.height = 'max-content'
           text.style.width = 'max-content'
 
@@ -60,7 +62,8 @@ export default Vue.extend({
 
           const width = Math.ceil(text.offsetWidth * this.getLayerScale + 1)
           const height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
-          console.log('width', width)
+
+          text.style.transform = ''
           ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, this.getLayerScale)
         })
       },

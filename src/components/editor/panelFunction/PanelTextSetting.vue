@@ -90,7 +90,7 @@ export default Vue.extend({
   },
   mounted() {
     this.$root.$on('updateTextPanel', () => {
-      console.log('update text panel')
+      // console.log('update text panel')
       const sel = TextUtils.getSelection()
       if (sel) {
         const size = TextUtils.propReader('fontSize')
@@ -200,24 +200,7 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     propsBtnStyles(iconName: string) {
-      console.log('btn update!')
       this.$nextTick(() => {
-        // const res = TextUtils.propReader(iconName)
-        // const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }
-        // switch (iconName) {
-        //   case 'bold':
-        //     if (res === 'bold') return hitStyle
-        //     break
-        //   case 'underline':
-        //     if (res === 'underline') return hitStyle
-        //     break
-        //   case 'italic':
-        //     if (res === 'italic') return hitStyle
-        //     break
-        //   case 'font-vertical':
-        //     if (typeof res === 'string' && res.includes('verticl')) return hitStyle
-        // }
-        // return {}
         const res = TextUtils.propReader(iconName)
         const origin = { 'background-color': '', 'border-radius': '' }
         const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }

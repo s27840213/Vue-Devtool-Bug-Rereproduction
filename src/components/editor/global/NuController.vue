@@ -79,6 +79,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import { ISelection } from '@/interfaces/text'
 
 export default Vue.extend({
   props: {
@@ -221,8 +222,9 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
+      // console.log(Math.ceil(this.config.styles.width / this.getLayerScale))
       return {
-        width: `${this.config.styles.width / this.getLayerScale}px`,
+        width: `${Math.ceil(this.config.styles.width / this.getLayerScale)}px`,
         height: `${this.config.styles.height / this.getLayerScale}px`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
@@ -517,9 +519,11 @@ export default Vue.extend({
         case 'image':
           this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
-        case 'shape':
-          ControlUtils.resizeShapeHandler(this.config, this.scale, this.initialWH, width, height)
+        case 'shape': {
+          const isExceedLimit = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initialWH, width, height)
+          if (isExceedLimit) return
           break
+        }
         case 'text':
           [width, height] = this.textResizeHandler(width, height)
           offsetSize.height = height - initHeight
@@ -546,16 +550,17 @@ export default Vue.extend({
     },
     textResizeHandler(width: number, height: number): [number, number] {
       const text = this.$refs.text as HTMLElement
+      text.style.transform = `rotate(${-this.getLayerRotate}deg)`
       if (this.config.styles.writingMode.includes('vertical')) {
         text.style.width = 'max-content'
-        width = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
+        width = text.getBoundingClientRect().width / (this.scaleRatio / 100)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: height })
       } else {
         text.style.height = 'max-content'
-        // height = Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
-        height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
+        height = text.getBoundingClientRect().height / (this.scaleRatio / 100)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
       }
+      text.style.transform = ''
       return [width, height]
     },
     resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
@@ -825,95 +830,101 @@ export default Vue.extend({
         this.$root.$emit('updateTextPanel')
       }
     },
-    onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
+    onTyping(e: KeyboardEvent, start: ISelection) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
         this.textSizeRefresh()
         if (this.isComposing) return
 
         const paragraphs: IParagraph[] = this.textParser()
-        if (window.getSelection()) {
-          const sel = window.getSelection()
-          const startContainer = sel?.getRangeAt(0).startContainer
-          let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
-          // if the below condition is false, means some paragraph (p-node) is removed
-          if (typeof startContainer?.parentElement?.dataset.sindex !== 'undefined') {
-            offset = sel?.getRangeAt(0).startOffset as number
-            sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            // used for deleting the first span of the text, and moving the caret to the previous p
-            const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
-            if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
-              pIndex -= 1
-              // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-              if (pIndex < 0) {
-                [pIndex, sIndex, offset] = [0, 0, 0]
-              }
-              sIndex = paragraphs[pIndex].spans.length - 1
-              offset = paragraphs[pIndex].spans[sIndex].text.length
-            } else if (e.key === 'Enter') {
-              [sIndex, offset] = [0, 0]
-              pIndex += 1
+        const sel = TextUtils.getSelection()
+        let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
+        /**
+         * if below condition is false, means some paragraph (p-node) is removed
+         */
+        if (sel && TextUtils.isSel(sel.start)) {
+          pIndex = sel.start.pIndex
+          sIndex = sel.start.sIndex
+          offset = sel.start.offset
+          /**
+           * used for deleting the first span of the text, and moving the caret to the previous p
+           */
+          const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
+          if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
+            pIndex -= 1
+            /**
+             *  if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
+             */
+            if (pIndex < 0) {
+              [pIndex, sIndex, offset] = [0, 0, 0]
             }
+            sIndex = paragraphs[pIndex].spans.length - 1
+            offset = paragraphs[pIndex].spans[sIndex].text.length
           } else if (e.key === 'Enter') {
-            // console.log('inNewLine and some node gone')
-            // console.log(startContainer?.parentElement)
-            // console.log(startContainer)
             [sIndex, offset] = [0, 0]
             pIndex += 1
-          } else if (TextUtils.isArrowKey(e)) {
-            /**
-             *  If the input key is ArrowKey, the startContainer will be different as the other key pressed
-             */
-            if (typeof startContainer?.parentElement !== 'undefined' && typeof startContainer?.parentElement !== 'undefined') {
-              offset = sel?.getRangeAt(0).startOffset as number
-              sIndex = parseInt((startContainer as HTMLElement).dataset.sindex as string)
-              pIndex = parseInt(startContainer?.parentElement?.dataset.pindex as string)
-            }
-          } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
-            /**
-             * some paragraph is deleted
-             */
-            pIndex -= 1
-            sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
-            offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
           }
-          const text = this.$refs.text as HTMLElement
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          this.$nextTick(() => {
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-            if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
-              text.removeChild(text.lastChild)
-            }
-            const sel = window.getSelection()
-            if (sel) {
-              const range = new Range()
-              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-              sel.removeAllRanges()
-              sel.addRange(range)
-            }
-          })
+        } else if (e.key === 'Enter') {
+          [sIndex, offset] = [0, 0]
+          pIndex += 1
+        } else if (TextUtils.isArrowKey(e)) {
+          /**
+           *  If the input key is ArrowKey, the startContainer will be different (not the same node) as the other key pressed
+           */
+          if (sel && TextUtils.isSel(sel.start)) {
+            pIndex = sel.start.pIndex
+            sIndex = sel.start.sIndex
+            offset = sel.start.offset
+          }
+        } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
+          /**
+           * some paragraph is deleted
+           */
+          pIndex -= 1
+          sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
+          offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
         }
+        const text = this.$refs.text as HTMLElement
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        this.$nextTick(() => {
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+          if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+            text.removeChild(text.lastChild)
+          }
+          const sel = window.getSelection()
+          if (sel) {
+            const range = new Range()
+            range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }
+        })
         this.$root.$emit('updateTextPanel')
       }
     },
     textSizeRefresh() {
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
       const text = this.$refs.text as HTMLElement
-      if (this.config.styles.writingMode.includes('vertical')) {
+      text.style.transform = `rotate(${-this.getLayerRotate}deg)`
+      const isVertical = this.config.styles.writingMode.includes('vertical')
+      if (isVertical) {
         text.style.height = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
         text.style.width = 'max-content'
       } else {
         text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
         text.style.height = 'max-content'
       }
-      const textHW = {
-        width: Math.ceil(text.offsetWidth * this.getLayerScale + 1),
-        height: Math.ceil(text.offsetHeight * this.getLayerScale + 1)
-      }
 
+      console.log(text.style.width)
+      console.log(text.style.height)
       let layerX = this.getLayerPos.x
       let layerY = this.getLayerPos.y
+      console.log(text.getBoundingClientRect().width)
+      console.log(text.getBoundingClientRect().height)
+      const textHW = {
+        width: Math.ceil(text.getBoundingClientRect().width / (this.scaleRatio / 100)),
+        height: Math.ceil(text.getBoundingClientRect().height / (this.scaleRatio / 100))
+      }
 
       if (this.config.widthLimit === -1) {
         const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
@@ -937,16 +948,17 @@ export default Vue.extend({
           angle: this.getLayerRotate * Math.PI / 180
         }
         const offsetSize = {
-          width: textHW.width - this.getLayerWidth,
-          height: textHW.height - this.getLayerHeight
+          width: isVertical ? textHW.width - this.getLayerWidth : 0,
+          height: isVertical ? 0 : textHW.height - this.getLayerHeight
         }
         const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
         layerX = trans.x
         layerY = trans.y
       }
-      text.style.width = `${textHW.width / this.getLayerScale}px`
-      textHW.width = Math.ceil(text.offsetWidth * this.getLayerScale + 1)
-      textHW.height = Math.ceil(text.offsetHeight * this.getLayerScale + 1)
+      text.style.width = `${Math.ceil(textHW.width / this.getLayerScale)}px`
+      text.style.height = `${Math.ceil(textHW.height / this.getLayerScale)}px`
+      console.log(textHW)
+      text.style.transform = ''
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)

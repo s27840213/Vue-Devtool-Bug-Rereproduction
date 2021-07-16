@@ -322,7 +322,7 @@ class Controller {
     }
   }
 
-  resizeShapeHandler(config: IShape, scale: { scaleX: number, scaleY: number }, initHW: { width: number, height: number }, width: number, height: number) {
+  resizeShapeHandler(config: IShape, scale: { scaleX: number, scaleY: number }, initHW: { width: number, height: number }, width: number, height: number): boolean {
     switch (config.category) {
       case 'A': {
         console.log('shape of category A should not have resizer!')
@@ -340,9 +340,26 @@ class Controller {
         const scale = config.styles.scale
         const patchDiffX = width * config.ratio / scale - config.vSize[0]
         const patchDiffY = height * config.ratio / scale - config.vSize[1]
+        const pSize = config.pSize
+        switch (config.scaleType) {
+          case 1:
+            if (!pSize || pSize[0] + patchDiffX < 30 || pSize[1] + patchDiffY < 30) {
+              return true
+            }
+            break
+          case 2:
+            if (!pSize || pSize[0] + patchDiffX < 30) {
+              return true
+            }
+            break
+          case 3:
+            if (!pSize || pSize[1] + patchDiffY < 30) {
+              return true
+            }
+        }
         this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
         this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
-        break
+        return false
       }
     }
   }
@@ -402,7 +419,6 @@ class Controller {
   }
 
   updateLayerSize(pageIndex: number, layerIndex: number, width: number, height: number, scale: number) {
-    console.log(width)
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,

@@ -1,6 +1,7 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { IParagraph, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
@@ -228,7 +229,6 @@ class TextUtils {
     Object.assign(start, sel.start)
     Object.assign(end, sel.end)
     // selection is not a range (only caret)
-    console.log(start)
     if (this.isSel(start) && !this.isSel(end)) {
       if (prop === 'fontSpacing' || prop === 'lineHeight') {
         return config.paragraphs[start.pIndex].styles[prop]
@@ -275,24 +275,6 @@ class TextUtils {
             break
           }
         }
-        // if (prop === 'fontFamily' && origin !== span.styles.font) {
-        //   flag = true
-        //   break
-        // } else if (prop === 'fontSize' && origin !== span.styles.size) {
-        //   flag = true
-        //   break
-        // } else if (prop === 'color' && origin !== span.styles.color) {
-        //   flag = true
-        //   break
-        // } else if (prop === 'bold' && origin !== span.styles.weight) {
-        //   flag = true
-        //   break
-        // } else if (prop === 'italic' && origin !== span.styles.style) {
-        //   flag = true
-        //   break
-        // } else if (prop === 'underline' && origin !== span.styles.decoration) {
-        //   flag = true
-        // }
       }
       if (flag) break
     }
@@ -403,7 +385,7 @@ class TextUtils {
     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
-  getSelection(): { div: Node, start: { [key: string]: number }, end: { [key: string]: number } } | undefined {
+  getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) return
 
@@ -421,7 +403,7 @@ class TextUtils {
 
       if (!div || (div as HTMLElement).id.match('text') === null || !range || !range.startContainer || !range.endContainer) return undefined
       const isRanged = window.getSelection()?.toString() !== ''
-      const end: { [key: string]: number } = {
+      const end = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
         sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
         offset: isRanged ? range?.endOffset as number : NaN

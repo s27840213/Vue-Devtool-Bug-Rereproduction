@@ -53,8 +53,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    // const svg = this.$refs.svg as HTMLElement
-    // svg.innerHTML = this.svgFormatter(this.config.svg, this.config.color)
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 
@@ -71,8 +69,6 @@ export default Vue.extend({
   watch: {
     'config.color': {
       handler: function(newVal) {
-        // const svg = this.$refs.svg as HTMLElement
-        // svg.innerHTML = this.svgFormatter(this.config.svg, newVal)
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size)
         this.styleNode.textContent = styleText
       },
@@ -180,13 +176,6 @@ export default Vue.extend({
     layerIndex: Number
   },
   methods: {
-    // svgFormatter(svg: string, color: [string]): string {
-    //   for (let i = 0; i < color.length; i++) {
-    //     const reg = new RegExp('\\${color\\[' + i + '\\]}', 'g')
-    //     svg = svg.replace(reg, color[i])
-    //   }
-    //   return svg
-    // }
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
         return this.getMergeTemplate()
