@@ -13,10 +13,17 @@
       class="flex-between"
       v-click-outside="handleStyleModal")
       div(class="w-full text-left") Style
-      svg-icon(v-for="icon in effectOption"
+      svg-icon(v-for="icon in shadowOption"
         :key="icon"
         :iconName="`text-effect-${icon}`"
         @click.native="onEffectClick(icon)"
+        class="text-effect-setting__option pointer"
+        iconWidth="80px"
+        iconColor="gray-2")
+      div(class="w-full text-left") Shape
+      svg-icon(class="text-effect-setting__option pointer"
+        iconName="text-effect-shape"
+        @click.native="onEffectClick('shape')"
         class="text-effect-setting__option pointer"
         iconWidth="80px"
         iconColor="gray-2")
@@ -75,7 +82,8 @@ export default Vue.extend({
         lift: ['spread'],
         hollow: ['stroke'],
         splice: ['stroke', 'distance', 'angle', 'color'],
-        echo: ['distance', 'angle', 'color']
+        echo: ['distance', 'angle', 'color'],
+        shape: ['bend']
       } as { [key: string]: string[] },
       fieldRange: {
         distance: { max: 100, min: 0 },
@@ -83,7 +91,8 @@ export default Vue.extend({
         blur: { max: 100, min: 0 },
         opacity: { max: 100, min: 0 },
         spread: { max: 100, min: 0 },
-        stroke: { max: 100, min: 0 }
+        stroke: { max: 100, min: 0 },
+        bend: { max: 100, min: -100 }
       }
     }
   },
@@ -94,8 +103,8 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    effectOption (): string[] {
-      return Object.keys(this.styles)
+    shadowOption (): string[] {
+      return Object.keys(this.styles).filter(style => style !== 'shape')
     },
     fields (): string[] {
       const { styles, currentEffect } = this

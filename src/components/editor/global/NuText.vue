@@ -1,6 +1,11 @@
 <template lang="pug">
   div(ref="text" class="nu-text" :style="textStyles()")
-      p(v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      nu-curve-text(v-if="isCurveText"
+        :config="config"
+        :layerIndex="layerIndex"
+        :pageIndex="pageIndex")
+      p(v-else
+        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="pIndex",
         :style="styles(p.styles)")
         span(v-for="(span, sIndex) in p.spans" class="nu-text__span"
@@ -14,6 +19,7 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
 import { mapGetters } from 'vuex'
+import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 
 export default Vue.extend({
   props: {
@@ -21,6 +27,7 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
+  components: { NuCurveText },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
@@ -34,6 +41,10 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       return this.config.styles.scale
+    },
+    isCurveText(): any {
+      const { textEffect } = this.config.styles
+      return textEffect && textEffect.name === 'shape'
     }
   },
   watch: {
@@ -82,10 +93,13 @@ export default Vue.extend({
       return CssConveter.convertFontStyle(styles)
     },
     textStyles() {
+      const { active } = this.config
+      const { isCurveText } = this
+      const opacity = active && isCurveText ? 0.5 : 0
       return {
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        opacity: this.config.active ? 0 : 1
+        opacity: active ? opacity : 1
       }
     }
   }
