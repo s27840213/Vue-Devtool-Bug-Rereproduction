@@ -15,6 +15,7 @@ import NuTmp from '@/components/editor/global/NuTmp.vue'
 import NuGroup from '@/components/editor/global/NuGroup.vue'
 import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuController from '@/components/editor/global/NuController.vue'
+import NuSubController from '@/components/editor/global/NuSubController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
 import NuImgController from '@/components/editor/global/NuImgController.vue'
 
@@ -33,5 +34,6 @@ Vue.component('nu-group', NuGroup)
 Vue.component('nu-tmp', NuTmp)
 Vue.component('nu-clipper', NuClipper)
 Vue.component('nu-controller', NuController)
+Vue.component('nu-sub-controller', NuSubController)
 Vue.component('nu-shape', NuShape)
 Vue.component('nu-img-controller', NuImgController)

@@ -32,6 +32,17 @@
                   :data-sindex="sIndex"
                   :key="span.id",
                   :style="textStyles(span.styles)") {{ span.text }}
+        //- template(v-if="config.type==='group' && isActive")
+        //-   div(:style="groupControllerStyle()")
+        //-     nu-sub-controller(
+        //-       v-for="(layer, index) in config.layers"
+        //-       data-identifier="controller"
+        //-       :key="`sub-controller-${index}`"
+        //-       :layerIndex="index"
+        //-       :pageIndex="pageIndex"
+        //-       :config="layer"
+        //-       :color="'#219653'"
+        //-       @clickSubController="clickSubController")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -103,7 +114,8 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: false
+      contentEditable: false,
+      subControlerIndexs: []
     }
   },
   mounted() {
@@ -232,6 +244,14 @@ export default Vue.extend({
         position: 'absolute'
       }
     },
+    groupControllerStyle() {
+      return {
+        width: `${this.config.styles.width / this.getLayerScale}px`,
+        height: `${this.config.styles.height / this.getLayerScale}px`,
+        position: 'absolute',
+        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
+      }
+    },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
       Object.assign(textStyles, {
@@ -259,6 +279,7 @@ export default Vue.extend({
     },
 
     moveStart(e: MouseEvent) {
+      console.log('move start')
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
@@ -1052,6 +1073,11 @@ export default Vue.extend({
           el.focus()
         })
       }
+    },
+    clickSubController(indexs: Array<number>) {
+      indexs.unshift(this.layerIndex)
+      this.subControlerIndexs = GeneralUtils.deepCopy(indexs)
+      LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
     }
   }
 })
@@ -1141,5 +1167,4 @@ export default Vue.extend({
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
-
 </style>

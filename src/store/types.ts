@@ -19,6 +19,11 @@ export interface IEditorState {
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
     types: Set<string>
   },
+  currSubSelectedInfo: {
+    indexs: Array<number>,
+    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
+    types: Set<string>
+  },
   isOrderDropdownsOpened: boolean,
   isLayerDropdownsOpened: boolean
   isPageDropdownsOpened: boolean,

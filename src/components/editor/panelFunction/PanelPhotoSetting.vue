@@ -8,7 +8,7 @@
       btn(class="full-width" :type="'primary-mid'") Adjust
       btn(class="full-width" :type="'primary-mid'") BG Remover
     property-bar
-      input(class="body-2 text-gray-2" type="number" max="100" min="0" step="1" v-model="opacity")
+      input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
       svg-icon(class="pointer"
         :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     //- action-bar(class="flex-evenly")
@@ -23,7 +23,7 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import { ITmp, IText, IImage, IGroup } from '@/interfaces/layer'
+import { ITmp, IText, IImage, IGroup, IShape } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -36,24 +36,44 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
     opacity: {
       get(): string | number {
-        return this.currSelectedInfo.layers.length === 1 ? this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
-          : [...new Set(this.currSelectedInfo.layers.map((layer: ITmp | IText | IImage | IGroup) => {
-            return layer.styles.opacity
-          }))].length === 1 ? this.currSelectedInfo.layers[0].styles.opacity : 'mix'
-      },
-      set(value) {
-        if (this.currSelectedInfo.layers.length === 1) {
-          this.$store.commit('UPDATE_layerStyles', {
-            pageIndex: this.lastSelectedPageIndex,
-            layerIndex: this.currSelectedIndex,
-            styles: {
-              opacity: value
-            }
-          })
+        if (!this.isGroup) {
+          return this.currSelectedInfo.layers.length === 1 ? this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+            : [...new Set(this.currSelectedInfo.layers.map((layer: ITmp | IShape | IText | IImage | IGroup) => {
+              return layer.styles.opacity
+            }))].length === 1 ? this.currSelectedInfo.layers[0].styles.opacity : 'mix'
         } else {
-          this.$store.commit('UPDATE_selectedLayersStyles', {
+          return [...new Set(this.currSelectedInfo.layers[0].layers.map((layer: ITmp | IShape | IText | IImage | IGroup) => {
+            return layer.styles.opacity
+          }))].length === 1 ? this.currSelectedInfo.layers[0].layers[0].styles.opacity : 'mix'
+        }
+      },
+      set(value: number) {
+        if (value > 100) {
+          value = 100
+        }
+        if (!this.isGroup) {
+          if (this.currSelectedInfo.layers.length === 1) {
+            this.$store.commit('UPDATE_layerStyles', {
+              pageIndex: this.lastSelectedPageIndex,
+              layerIndex: this.currSelectedIndex,
+              styles: {
+                opacity: value
+              }
+            })
+          } else {
+            this.$store.commit('UPDATE_selectedLayersStyles', {
+              styles: {
+                opacity: value
+              }
+            })
+          }
+        } else {
+          this.$store.commit('UPDATE_groupLayerStyles', {
             styles: {
               opacity: value
             }

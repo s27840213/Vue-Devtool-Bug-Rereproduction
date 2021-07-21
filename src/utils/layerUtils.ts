@@ -60,6 +60,22 @@ class LayerUtils {
       props
     })
   }
+
+  updateSubLayerStyles(pageIndex: number, indexs: Array<number>, styles: { [index: string]: number | string | boolean }) {
+    store.commit('UPDATE_subLayerStyles', {
+      pageIndex,
+      indexs,
+      styles
+    })
+  }
+
+  updateSubLayerProps(pageIndex: number, indexs: Array<number>, props: { [index: string]: number | string | boolean }) {
+    store.commit('UPDATE_subLayerProps', {
+      pageIndex,
+      indexs,
+      props
+    })
+  }
 }
 
 const layerUtils = new LayerUtils()
