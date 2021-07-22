@@ -47,6 +47,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: 0,
         y: 0,
@@ -97,6 +98,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -122,6 +124,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -158,6 +161,7 @@ class LayerFactary {
       className: '',
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: 0,
         y: 0,

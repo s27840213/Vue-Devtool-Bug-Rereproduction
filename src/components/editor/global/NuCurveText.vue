@@ -26,20 +26,22 @@ export default Vue.extend({
   },
   data () {
     return {
-      transforms: [] as string[]
+      transforms: [] as string[],
+      minHeight: 0,
+      areaHeight: 0,
+      y: 0
     }
   },
   mounted () {
-    const { styles } = this.config
     this.handleCurveSpan(this.spans)
-    ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: styles.initWidth })
-    // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-    // ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
-    // ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+    this.y = this.config.styles.y
   },
   computed: {
     active(): boolean {
       return this.config.active
+    },
+    isLayerDragging(): boolean {
+      return this.config.dragging
     },
     bend(): number {
       const { textEffect } = this.config.styles
@@ -55,22 +57,28 @@ export default Vue.extend({
       )
     },
     pStyle(): any {
-      const { active } = this
-      const { initWidth } = this.config.styles
+      const { active, areaHeight, bend, minHeight, config } = this
+      const style = { margin: 0 } as any
+      style.height = `${minHeight}px`
+      if (bend >= 0) {
+        style.paddingBottom = `${areaHeight}px`
+      } else {
+        style.paddingTop = `${areaHeight}px`
+      }
       return {
-        pointerEvents: active ? 'none' : 'auto',
-        margin: '0.5em 0',
-        minWidth: `${initWidth}px`
+        ...style,
+        minWidth: `${config.styles.width / config.styles.scale}px`,
+        pointerEvents: active ? 'none' : 'auto'
       }
     },
     curveStyle(): any {
-      const { bend } = this
+      const { bend, minHeight } = this
       const style = {} as any
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
       if (bend >= 0) {
-        style.top = '0.5em'
+        style.top = `${minHeight / 2}px`
       } else {
-        style.bottom = '0.5em'
+        style.bottom = `${minHeight / 2}px`
       }
       if (bend === 0) {
         style.borderRadius = 0
@@ -83,11 +91,50 @@ export default Vue.extend({
     }
   },
   watch: {
-    bend () {
+    isLayerDragging (curr, prev) {
+      const { styles } = this.config
+      const { areaHeight } = this
+      if (prev && !curr) {
+        if (this.bend >= 0) {
+          this.y = styles.y
+        } else {
+          this.y = styles.y + (areaHeight * styles.scale)
+        }
+      }
+    },
+    areaHeight (val) {
+      const { bend, config } = this
+      if (bend < 0) {
+        ControlUtils.updateLayerPos(
+          this.pageIndex,
+          this.layerIndex,
+          config.styles.x,
+          this.y - (val * config.styles.scale)
+        )
+      } else {
+        if (config.styles.y !== this.y) {
+          ControlUtils.updateLayerPos(
+            this.pageIndex,
+            this.layerIndex,
+            config.styles.x,
+            this.y
+          )
+        }
+      }
+    },
+    bend (val) {
       this.handleCurveSpan(this.spans)
     },
     spans (newSpans) {
       this.handleCurveSpan(newSpans)
+    },
+    transforms (data: string[]) {
+      const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
+      const minY = Math.min(...positionList.map((position: string[]) => position[1]))
+      const maxY = Math.max(...positionList.map((position: string[]) => position[1]))
+      this.$nextTick(() => {
+        this.areaHeight = Math.abs(maxY - minY)
+      })
     }
   },
   methods: {
@@ -104,12 +151,17 @@ export default Vue.extend({
     handleCurveSpan (spans: any[]) {
       const { bend } = this
       if (spans.length) {
-        const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
-        const textWidth = []
-        for (let idx = 0; idx < eleSpans.length; idx++) {
-          textWidth.push(eleSpans[idx].offsetWidth)
-        }
-        this.transforms = TextEffectUtils.convertTextShape(textWidth, bend)
+        this.$nextTick(() => {
+          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
+          const textWidth = []
+          let minHeight = 0
+          for (let idx = 0; idx < eleSpans.length; idx++) {
+            textWidth.push(eleSpans[idx].offsetWidth)
+            minHeight = Math.max(minHeight, eleSpans[idx].offsetHeight)
+          }
+          this.minHeight = minHeight
+          this.transforms = TextEffectUtils.convertTextShape(textWidth, bend)
+        })
       } else {
         this.transforms = []
       }
@@ -127,7 +179,6 @@ export default Vue.extend({
   // margin: auto;
   position: absolute;
   &__p {
-    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;

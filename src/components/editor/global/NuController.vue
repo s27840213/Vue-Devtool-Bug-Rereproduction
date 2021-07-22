@@ -282,6 +282,9 @@ export default Vue.extend({
       console.log('move start')
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: true
+        })
         if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
           return
         } else if (!this.isActive) {
@@ -370,6 +373,9 @@ export default Vue.extend({
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
       }
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: false
+      })
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
