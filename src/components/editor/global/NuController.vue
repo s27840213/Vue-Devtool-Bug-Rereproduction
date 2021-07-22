@@ -170,6 +170,9 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       return this.config.styles.scale
+    },
+    isTextEditing(): boolean {
+      return !this.isControlling && this.contentEditable
     }
   },
   watch: {
@@ -182,6 +185,13 @@ export default Vue.extend({
         const paragraphs: IParagraph[] = this.textParser()
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+      }
+    },
+    isTextEditing(editing) {
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing
+        })
       }
     }
   },
@@ -241,7 +251,8 @@ export default Vue.extend({
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
         outline: 'none',
-        position: 'absolute'
+        position: 'absolute',
+        opacity: this.isTextEditing ? 1 : 0
       }
     },
     groupControllerStyle() {

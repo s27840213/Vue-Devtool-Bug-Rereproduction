@@ -48,6 +48,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
+      editing: false,
       styles: {
         x: 0,
         y: 0,

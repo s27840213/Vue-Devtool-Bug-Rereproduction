@@ -93,13 +93,13 @@ export default Vue.extend({
       return CssConveter.convertFontStyle(styles)
     },
     textStyles() {
-      const { active } = this.config
+      const { editing } = this.config
       const { isCurveText } = this
-      const opacity = active && isCurveText ? 0.5 : 0
+      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
       return {
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        opacity: active ? opacity : 1
+        opacity
       }
     }
   }
