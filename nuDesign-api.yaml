@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210722"
+  version: "20210723"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -456,7 +456,9 @@ definitions:
 
               json: File name for svg json.
 
-              content: array of svg id.
+              content: array of svg category, with category_id as id of category (for query), title as categroy name, and list as array of svg ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
 
               Url for svg preview: `${host}/${svg_id}/${preview}`. Url for svg json: `${host}/${svg_id}/${json}`.
             properties:
@@ -469,7 +471,18 @@ definitions:
               content:
                 type: array
                 items:
-                  type: string
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
             required:
               - content
               - host
@@ -487,7 +500,15 @@ definitions:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
       - type: object
+        required:
+          - locale
         properties:
           category:
             type: number
             description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
