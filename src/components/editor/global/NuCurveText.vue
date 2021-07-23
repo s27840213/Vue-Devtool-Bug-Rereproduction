@@ -2,8 +2,7 @@
   p(class="nu-text__p" ref="curveText" @click="onClick" :style="pStyle")
     template
       div(v-show="active"  class="nu-text__curve" :style="curveStyle")
-        svg-icon(iconName="curve-center"
-          iconWidth="13px")
+        svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
       :key="sIndex",
@@ -12,7 +11,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -37,6 +36,9 @@ export default Vue.extend({
     this.y = this.config.styles.y
   },
   computed: {
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio'
+    }),
     active(): boolean {
       return this.config.active
     },
@@ -87,6 +89,14 @@ export default Vue.extend({
         ...style,
         height: `${radius * 2}px`,
         width: `${radius * 2}px`
+      }
+    },
+    curveIconStyle(): any {
+      const { config: { styles }, scaleRatio } = this
+      const size = 13 / (scaleRatio * 0.01)
+      return {
+        width: `${size / styles.scale}px`,
+        height: `${size / styles.scale}px`
       }
     }
   },
