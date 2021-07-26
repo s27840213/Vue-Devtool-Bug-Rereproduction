@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-group")
-    btn(v-if="!isLocked" class="full-width"
+    btn(v-if="!isLocked && (isGroup() || selectedLayerNum>1)" class="full-width"
       :type="'primary-lg'"
       @click.native=" isGroup()? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup()?'Ungroup':'Group'}}
     action-bar(class="flex-between")
@@ -44,6 +44,9 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
     isLocked() {
       return LayerUtils.getTmpLayer().locked
     }

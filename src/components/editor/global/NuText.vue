@@ -1,7 +1,12 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
-        p(v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        nu-curve-text(v-if="isCurveText"
+          :config="config"
+          :layerIndex="layerIndex"
+          :pageIndex="pageIndex")
+        p(v-else
+          v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
           :key="pIndex",
           :style="styles(p.styles)")
           span(v-for="(span, sIndex) in p.spans" class="nu-text__span"
@@ -16,6 +21,7 @@ import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
+import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 
 export default Vue.extend({
   props: {
@@ -23,6 +29,7 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
+  components: { NuCurveText },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
@@ -36,6 +43,10 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       return this.config.styles.scale
+    },
+    isCurveText(): any {
+      const { textEffect } = this.config.styles
+      return textEffect && textEffect.name === 'shape'
     }
   },
   watch: {
@@ -101,9 +112,12 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
+      const { editing } = this.config
+      const { isCurveText } = this
+      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
       return {
         writingMode: this.config.styles.writingMode,
-        opacity: this.config.active ? 0 : 1
+        opacity
       }
     }
   }

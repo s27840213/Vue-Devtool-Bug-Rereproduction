@@ -12,7 +12,6 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        // await store.dispatch('getRandomPhoto', { count: 30 })
         const url = location.href
         let token = ''
         if (url.indexOf('?') !== -1) {

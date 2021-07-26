@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel p-20")
+  div(v-if="!isGroup" class="function-panel p-20")
     panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
     panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked"
       @openFontsPanel="openFontsPanel()")
@@ -9,6 +9,16 @@
     panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
     panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
     panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked")
+  div(v-else class="function-panel p-20")
+    panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+    panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
+      @openFontsPanel="openFontsPanel()")
+    panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
+    panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked")
+    //- panel-background-setting(v-if="selectedLayerNum===0")
+    panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
+    panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+    panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked")
 </template>
 
 <script lang="ts">
@@ -25,6 +35,7 @@ import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextE
 import { mapGetters } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
+import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -54,6 +65,17 @@ export default Vue.extend({
     },
     isLocked(): boolean {
       return LayerUtils.getTmpLayer().locked
+    },
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    groupTypes(): Set<string> {
+      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+        return layer.type
+      })
+      console.log(new Set(types))
+      return new Set(types)
     }
   },
   watch: {

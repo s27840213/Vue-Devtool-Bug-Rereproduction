@@ -31,6 +31,7 @@ const getDefaultState = (): IEditorState => ({
           moved: false,
           imgControl: false,
           isClipper: false,
+          dragging: false,
           styles: {
             x: 0,
             y: 0,
@@ -73,6 +74,7 @@ const getDefaultState = (): IEditorState => ({
           moved: false,
           imgControl: false,
           isClipper: false,
+          dragging: false,
           styles: {
             x: 0,
             y: 0,
@@ -109,6 +111,11 @@ const getDefaultState = (): IEditorState => ({
   photos: [],
   currSelectedInfo: {
     index: -1,
+    layers: [],
+    types: new Set<string>()
+  },
+  currSubSelectedInfo: {
+    indexs: [],
     layers: [],
     types: new Set<string>()
   },
@@ -181,6 +188,13 @@ const getters: GetterTree<IEditorState, unknown> = {
     types: Set<string>
   } {
     return state.currSelectedInfo
+  },
+  getCurrSubSelectedInfo(state: IEditorState): {
+    indexs: Array<number>,
+    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
+    types: Set<string>
+  } {
+    return state.currSubSelectedInfo
   },
   getCurrSelectedIndex(state: IEditorState) {
     return state.currSelectedInfo.index
@@ -281,14 +295,35 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
     })
   },
+  UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, indexs: Array<number>, props: { [key: string]: string | number | boolean | IParagraph } }) {
+    const indexs = updateInfo.indexs
+    const outestIndex = indexs.shift() as number
+    const outestLayer = state.pages[updateInfo.pageIndex].layers[outestIndex] as IGroup
+    const getTargetSubLayer = (indexs: Array<number>, currLayer: IGroup): IShape | IText | IImage | IGroup => {
+      if (indexs.length === 0) {
+        return currLayer
+      } else {
+        const tmp = currLayer.layers[indexs.shift() as number] as IGroup
+        return getTargetSubLayer(indexs, tmp)
+      }
+    }
+
+    const target = getTargetSubLayer(indexs, outestLayer)
+
+    Object.entries(updateInfo.props).forEach(([k, v]) => {
+      target[k] = v
+    })
+  },
   UPDATE_textProps(state: IEditorState, updateInfo: {
     pageIndex: number, layerIndex: number,
     paragraphs: [IParagraph]
   }) {
     (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs = updateInfo.paragraphs
   },
-  UPDATE_paragraphStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, pIndex: number,
-    styles: { [key: string]: string | number } }) {
+  UPDATE_paragraphStyles(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, pIndex: number,
+    styles: { [key: string]: string | number }
+  }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IText).paragraphs[updateInfo.pIndex].styles[k] = v
     })
@@ -352,6 +387,14 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
+  UPDATE_groupLayerStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
+    Object.entries(updateInfo.styles).forEach(([k, v]) => {
+      (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+        layer.styles[k] = v
+      })
+    })
+    state.currSelectedInfo.layers[0].layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
+  },
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
@@ -409,6 +452,9 @@ const mutations: MutationTree<IEditorState> = {
     state.photos = [...data]
   },
   SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
+    Object.assign(state.currSelectedInfo, data)
+  },
+  SET_currSubSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
   },
   SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {

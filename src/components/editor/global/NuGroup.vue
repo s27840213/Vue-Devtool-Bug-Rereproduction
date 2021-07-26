@@ -33,7 +33,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.nu-tmp {
+.nu-group {
   position: absolute;
   transform-style: flat;
 }

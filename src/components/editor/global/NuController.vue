@@ -104,7 +104,8 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: false
+      contentEditable: false,
+      subControlerIndexs: []
     }
   },
   mounted() {
@@ -160,6 +161,9 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       return this.config.styles.scale
+    },
+    isTextEditing(): boolean {
+      return !this.isControlling && this.contentEditable
     }
   },
   watch: {
@@ -182,6 +186,13 @@ export default Vue.extend({
         }
       },
       deep: true
+    },
+    isTextEditing(editing) {
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing
+        })
+      }
     }
   },
   methods: {
@@ -246,10 +257,19 @@ export default Vue.extend({
         // width: 'max-content',
         // height: 'max-content',
         width: isVertical ? 'auto' : '',
-        height: isVertical ? '' : 'auto'
+        height: isVertical ? '' : 'auto',
         // transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
         // textAlign: this.config.styles.align,
         // writingMode: this.config.styles.writingMode
+        opacity: this.isTextEditing ? 1 : 0
+      }
+    },
+    groupControllerStyle() {
+      return {
+        width: `${this.config.styles.width / this.getLayerScale}px`,
+        height: `${this.config.styles.height / this.getLayerScale}px`,
+        position: 'absolute',
+        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
     textStyles(styles: any) {
@@ -289,8 +309,12 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
+      console.log('move start')
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: true
+        })
         if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
           return
         } else if (!this.isActive) {
@@ -379,6 +403,9 @@ export default Vue.extend({
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
       }
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: false
+      })
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -1013,6 +1040,11 @@ export default Vue.extend({
           el.focus()
         })
       }
+    },
+    clickSubController(indexs: Array<number>) {
+      indexs.unshift(this.layerIndex)
+      this.subControlerIndexs = GeneralUtils.deepCopy(indexs)
+      LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
     }
   }
 })
@@ -1120,5 +1152,4 @@ export default Vue.extend({
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
-
 </style>

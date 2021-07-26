@@ -1,0 +1,564 @@
+swagger: "2.0"
+info:
+  version: "20210726"
+  title: apiTemplate
+host: api.vivipic.com
+schemes:
+  - https
+paths:
+  /list-asset:
+    post:
+      description: 列出所有使用者上傳之檔案
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/listAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-svg:
+    post:
+      description: 取得所有svg設計列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listSvgInput
+          required: true
+          schema:
+            $ref: "#/definitions/listSvgInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listSvgOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-template:
+    post:
+      description: 取得所有template設計列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listTemplateInput
+          required: true
+          schema:
+            $ref: "#/definitions/listTemplateInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listTemplateOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-text:
+    post:
+      description: 列出所有文字設計列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listTextInput
+          required: true
+          schema:
+            $ref: "#/definitions/listTextInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listTextOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /login:
+    post:
+      description: 進入app時呼叫，取得上傳/下載之url
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: loginInput
+          required: true
+          schema:
+            $ref: "#/definitions/loginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  "/put-asset/{asset_id}/{category_id}":
+    post:
+      description: 上傳使用者個人檔案後呼叫，將檔案資訊儲存在資料庫
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          type: string
+        - name: asset_id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: putAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/putAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/putAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  "/put-design/{design_id}/{type}":
+    post:
+      description: 上傳公開設計(template或文字...)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: path
+          required: true
+          type: string
+        - name: design_id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: putDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/putDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/putDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /svg-parser:
+    post:
+      description: 解析svg檔並轉換成json（APP不需使用）
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: svgParserInput
+          required: true
+          schema:
+            $ref: "#/definitions/svgParserInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/svgParserOutput"
+definitions:
+  uploadMap:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Root url for upload files.
+      fields:
+        type: object
+        description: Append all fields to upload form.
+        properties: {}
+      path:
+        type: string
+        description: Allowed path for upload.
+  listAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            properties:
+              photo:
+                $ref: "#/definitions/assetMap"
+              video:
+                $ref: "#/definitions/assetMap"
+              font:
+                $ref: "#/definitions/assetMap"
+              design:
+                $ref: "#/definitions/assetMap"
+            required:
+              - design
+              - font
+              - photo
+              - video
+  svgParserInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - category
+          - folder
+          - scale_type
+        properties:
+          folder:
+            type: string
+            description: svg folder name in S3 (no ending slash)
+          category:
+            type: string
+            description: svg category (A/B/C)
+          scale_type:
+            type: number
+            description: scale type (1/2/3)
+          duplicate:
+            type: number
+            description: create duplicate entry in database
+  putAssetInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - file_ext
+          - file_name
+        properties:
+          file_name:
+            type: string
+            description: Original file name (to be displayed in app)
+          file_ext:
+            type: string
+            description: Original file extension (without dot)
+  listTextOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for text preview and json.
+
+              preview: File name for text preview.
+
+              json: File name for text json.
+
+              content: array of text category, with category_id as id of category (for query), title as categroy name, and list as array of text ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
+
+              Url for text preview: `${host}/${text_id}/${preview}`. Url for text json: `${host}/${text_id}/${json}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              json:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - host
+              - json
+              - preview
+  listTemplateOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for template preview and json.
+
+              preview: File name for template preview.
+
+              json: File name for template json.
+
+              content: array of template category, with category_id as id of category (for query), title as categroy name, and list as array of template ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
+
+              Url for template preview: `${host}/${template_id}/${preview}`. Url for template json: `${host}/${template_id}/${json}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              json:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - host
+              - json
+              - preview
+  listTemplateInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
+  assetMap:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Category title for assets
+      content:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Asset id
+            file_name:
+              type: string
+              description: File name for asset, for display purpose
+            file_ext:
+              type: string
+              description: File extension for asset
+    description: To access the original file of the asset, the url is
+      ${dl_url}/${id}/original
+  svgParserOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          msg:
+            type: string
+            description: error message
+  loginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+               How to upload file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}${assetId}/original`. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`
+
+              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
+               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+            required:
+              - download_url
+              - upload_map
+  Empty:
+    type: object
+    title: Empty Schema
+  apiCommonInput:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
+        description: User token
+  listTextInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
+  putAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
+  putDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          update:
+            type: number
+            description: 0 to insert new design, 1 to update existed design
+          meta:
+            type: string
+            description: json string for optional data
+  apiCommonResponse:
+    type: object
+    required:
+      - flag
+    properties:
+      flag:
+        type: number
+        description: "0: success, 1: fail, 2: token invalid"
+  loginInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          account:
+            type: string
+            description: User account
+          password:
+            type: string
+            description: User password
+  listSvgOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for svg preview and json.
+
+              preview: File name for svg preview.
+
+              json: File name for svg json.
+
+              content: array of svg category, with category_id as id of category (for query), title as categroy name, and list as array of svg ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
+
+              Url for svg preview: `${host}/${svg_id}/${preview}`. Url for svg json: `${host}/${svg_id}/${json}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              json:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - host
+              - json
+              - preview
+  putDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
+  listAssetInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - {}
+  listSvgInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
