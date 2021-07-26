@@ -156,7 +156,6 @@ class Controller {
               font: spanEl.style.fontFamily,
               weight: spanEl.style.fontWeight,
               size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-              initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
               decoration: spanEl.style.textDecorationLine,
               style: spanEl.style.fontStyle,
               color: spanEl.style.color,
@@ -322,7 +321,8 @@ class Controller {
     }
   }
 
-  resizeShapeHandler(config: IShape, scale: { scaleX: number, scaleY: number }, initHW: { width: number, height: number }, width: number, height: number): boolean {
+  resizeShapeHandler(config: IShape, scale: { scaleX: number, scaleY: number }, initHW: { width: number, height: number }, width: number, height: number): [number, number] {
+    const SIZE_LIMIT = 30
     switch (config.category) {
       case 'A': {
         console.log('shape of category A should not have resizer!')
@@ -338,30 +338,39 @@ class Controller {
       }
       case 'C': {
         const scale = config.styles.scale
-        const patchDiffX = width * config.ratio / scale - config.vSize[0]
-        const patchDiffY = height * config.ratio / scale - config.vSize[1]
+        let patchDiffX = width * config.ratio / scale - config.vSize[0]
+        let patchDiffY = height * config.ratio / scale - config.vSize[1]
         const pSize = config.pSize
+        let isExceeedLimit = false
         switch (config.scaleType) {
           case 1:
-            if (!pSize || pSize[0] + patchDiffX < 30 || pSize[1] + patchDiffY < 30) {
-              return true
+            if (pSize && (pSize[0] + patchDiffX < SIZE_LIMIT || pSize[1] + patchDiffY < SIZE_LIMIT)) {
+              patchDiffX = pSize[0] + patchDiffX < SIZE_LIMIT ? SIZE_LIMIT - pSize[0] : patchDiffX
+              patchDiffY = pSize[1] + patchDiffY < SIZE_LIMIT ? SIZE_LIMIT - pSize[1] : patchDiffY
+              width = patchDiffX === SIZE_LIMIT - pSize[0] ? (patchDiffX + config.vSize[0]) * scale / config.ratio : width
+              height = patchDiffY === SIZE_LIMIT - pSize[1] ? (patchDiffY + config.vSize[1]) * scale / config.ratio : height
+              isExceeedLimit = true
             }
             break
           case 2:
-            if (!pSize || pSize[0] + patchDiffX < 30) {
-              return true
+            if (pSize && pSize[0] + patchDiffX < SIZE_LIMIT) {
+              patchDiffX = pSize[0] + patchDiffX < SIZE_LIMIT ? SIZE_LIMIT - pSize[0] : patchDiffX
+              width = patchDiffX === SIZE_LIMIT - pSize[0] ? (patchDiffX + config.vSize[0]) * scale / config.ratio : width
+              isExceeedLimit = true
             }
             break
           case 3:
-            if (!pSize || pSize[1] + patchDiffY < 30) {
-              return true
+            if (pSize && pSize[1] + patchDiffY < SIZE_LIMIT) {
+              patchDiffY = pSize[1] + patchDiffY < SIZE_LIMIT ? SIZE_LIMIT - pSize[1] : patchDiffY
+              height = patchDiffY === SIZE_LIMIT - pSize[1] ? (patchDiffY + config.vSize[1]) * scale / config.ratio : height
+              isExceeedLimit = true
             }
         }
-        this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
         this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
+        this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
       }
     }
-    return false
+    return [width, height]
   }
 
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {

@@ -9,6 +9,7 @@ import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
 import color from '@/store/module/color'
+import text from '@/store/text'
 
 Vue.use(Vuex)
 
@@ -462,6 +463,7 @@ export default new Vuex.Store({
   actions,
   modules: {
     photos,
+    text,
     color
   }
 })

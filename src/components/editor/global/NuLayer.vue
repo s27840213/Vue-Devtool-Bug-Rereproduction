@@ -87,7 +87,8 @@ export default Vue.extend({
       HW.height = Math.ceil(this.config.styles.height / this.config.styles.scale)
       return {
         position: 'absolute',
-        transform: 'translate(-50%, -50%)',
+        top: 0,
+        left: 0,
         width: `${HW.width}px`,
         height: `${HW.height}px`
       }
@@ -124,7 +125,7 @@ export default Vue.extend({
   }
 }
 .layer-scale {
-  position: absolute;
+  // position: absolute;
   top: 0;
   left: 0;
 }

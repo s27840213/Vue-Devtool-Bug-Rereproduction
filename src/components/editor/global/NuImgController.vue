@@ -21,6 +21,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
+import { off } from 'process'
 
 export default Vue.extend({
   props: {
@@ -37,7 +38,8 @@ export default Vue.extend({
       initImgControllerPos: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false }
+      control: { xSign: 1, ySign: 1, isHorizon: false },
+      isSnappedInVertical: false
     }
   },
   computed: {
@@ -198,8 +200,6 @@ export default Vue.extend({
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
-
-      // Get client point as no rotation
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
@@ -224,19 +224,13 @@ export default Vue.extend({
 
       const initWidth = this.initialWH.width
       const initHeight = this.initialWH.height
-      // if (Math.abs(offsetWidth) >= 3 || Math.abs(offsetHeight) >= 3) {
-      //   offsetWidth /= 2
-      //   offsetHeight /= 2
-      // }
 
       if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
         width = offsetWidth + initWidth
         height = width * initHeight / initWidth
-        // offsetHeight = height - initHeight
       } else {
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
-        // offsetWidth = width - initWidth
       }
       if (width <= 40 || height <= 40) return
 
@@ -244,15 +238,10 @@ export default Vue.extend({
         width: width - initWidth,
         height: height - initHeight
       }
-      // if (Math.abs(offsetSize.width) >= 3 || Math.abs(offsetSize.height) >= 3) {
-      //   offsetSize.width /= 2
-      //   offsetSize.height /= 2
-      // }
-      const img = {
+      const imgPos = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
-
       const baseLine = {
         x: -width / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
@@ -262,31 +251,44 @@ export default Vue.extend({
         height: (height - this.config.styles.height / this.getLayerScale) / 2
       }
 
-      // const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      // offsetPos.x /= this.getLayerScale
-      // offsetPos.y /= this.getLayerScale
-      // const imgPos = this.imgPosMapper(offsetPos)
-      // let reachLimit = false
-      if (Math.abs(img.x - baseLine.x) > translateLimit.width) {
-        return
-        // img.x = img.x - baseOffset.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
-        // img.y = this.getImgY
-        // width = tmpHW.width
-        // height = tmpHW.height
+      const ratio = width / height
+      if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
+        if (this.control.xSign < 0) {
+          imgPos.x = 0
+          offsetSize.width = this.initImgPos.imgX
+        } else {
+          /**
+           *   -this.initImgPos.imgX - width / 2 + (this.config.styles.width / this.getLayerScale) / 2 = (width - this.config.styles.width / this.getLayerScale) / 2
+           *  => -this.initImgPos.imgX = width - this.config.styles.width
+           *  => width = this.config.styles.width  - this.initImgPos.imgX
+           *  => offsetSize.width + initWidth = this.config.styles.styles.width - this.initImgPos.imgX
+           */
+          offsetSize.width = this.config.styles.width - this.initImgPos.imgX - initWidth
+        }
+        offsetSize.height = offsetSize.width / ratio
+        imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+        height = offsetSize.height + initHeight
+        width = offsetSize.width + initWidth
+
+        baseLine.x = -width / 2 + (this.config.styles.width / this.getLayerScale) / 2
+        baseLine.y = -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
+        translateLimit.width = (width - this.config.styles.width / this.getLayerScale) / 2
+        translateLimit.height = (height - this.config.styles.height / this.getLayerScale) / 2
       }
-      if (Math.abs(img.y - baseLine.y) > translateLimit.height) {
-        return
-        // const tmpY = img.y
-        // img.y = img.y - baseOffset.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
-        // const diffRatio = (tmpY - img.y) / (tmpY - this.initImgPos.imgY)
-        // img.x = this.getImgX
-        // width = initWidth + offsetWidth * diffRatio
-        // height = initHeight + offsetHeight * diffRatio
+      if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
+        if (this.control.ySign < 0) {
+          imgPos.y = 0
+          offsetSize.height = this.initImgPos.imgY
+        } else {
+          offsetSize.height = this.config.styles.height - this.initImgPos.imgY - initHeight
+        }
+        offsetSize.width = offsetSize.height * ratio
+        imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
+        height = offsetSize.height + initHeight
+        width = offsetSize.width + initWidth
       }
-      // if (!reachLimit) {
-      //   }
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, img.x, img.y)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
     },
     scaleEnd() {
       this.isControlling = false
