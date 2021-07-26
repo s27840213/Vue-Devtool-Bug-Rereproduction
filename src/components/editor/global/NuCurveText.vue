@@ -139,11 +139,35 @@ export default Vue.extend({
       this.handleCurveSpan(newSpans)
     },
     transforms (data: string[]) {
+      const { scale } = this.config.styles
       const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
-      const minY = Math.min(...positionList.map((position: string[]) => position[1]))
-      const maxY = Math.max(...positionList.map((position: string[]) => position[1]))
+      const midLeng = Math.floor(positionList.length / 2)
+      const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
+      const maxY = Math.max.apply(null, positionList.map((position: string[]) => position[1]))
+      const minX = Math.max
+        .apply(
+          null,
+          positionList
+            .slice(0, midLeng)
+            .map((position: string[]) => position[0])
+        )
+      const maxX = Math.max
+        .apply(
+          null,
+          positionList
+            .slice(midLeng)
+            .map((position: string[]) => position[0])
+        )
       this.$nextTick(() => {
         this.areaHeight = Math.abs(maxY - minY)
+        ControlUtils.updateLayerProps(
+          this.pageIndex,
+          this.layerIndex,
+          {
+            width: Math.abs(maxX + minX) * 1.1 * scale,
+            widthLimit: Math.abs(maxX + minX) * 1.1 * scale
+          }
+        )
       })
     }
   },
