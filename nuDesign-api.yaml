@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210723"
+  version: "20210726"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -272,7 +272,9 @@ definitions:
 
               json: File name for text json.
 
-              content: array of text id.
+              content: array of text category, with category_id as id of category (for query), title as categroy name, and list as array of text ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
 
               Url for text preview: `${host}/${text_id}/${preview}`. Url for text json: `${host}/${text_id}/${json}`.
             properties:
@@ -285,7 +287,18 @@ definitions:
               content:
                 type: array
                 items:
-                  type: string
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
             required:
               - content
               - host
@@ -306,7 +319,9 @@ definitions:
 
               json: File name for template json.
 
-              content: array of template id.
+              content: array of template category, with category_id as id of category (for query), title as categroy name, and list as array of template ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
 
               Url for template preview: `${host}/${template_id}/${preview}`. Url for template json: `${host}/${template_id}/${json}`.
             properties:
@@ -319,7 +334,18 @@ definitions:
               content:
                 type: array
                 items:
-                  type: string
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
             required:
               - content
               - host
@@ -328,7 +354,19 @@ definitions:
   listTemplateInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
-      - {}
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
   assetMap:
     type: object
     properties:
@@ -406,7 +444,19 @@ definitions:
   listTextInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
-      - {}
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: "country code for locale, ex: tw, us, jp..."
+          page_index:
+            type: number
+            description: pagination index
   putAssetOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
