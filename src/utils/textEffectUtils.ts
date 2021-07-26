@@ -17,8 +17,7 @@ class Controller {
         distance: 50,
         angle: 45,
         blur: 20,
-        opacity: 60,
-        color: ''
+        opacity: 60
       }, // 陰影
       lift: {
         spread: 50
@@ -29,13 +28,11 @@ class Controller {
       splice: {
         distance: 50,
         angle: 45,
-        stroke: 50,
-        color: ''
+        stroke: 50
       }, // 出竅
       echo: {
         distance: 50,
-        angle: 45,
-        color: ''
+        angle: 45
       }, // 雙重陰影
       shape: {
         bend: 40
@@ -94,7 +91,7 @@ class Controller {
   }
 
   convertTextEffect (effect: any) {
-    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize } = effect || {}
+    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor } = effect || {}
     const unit = this.shadowScale * fontSize
     const storkeWidth = this.storkeScale * fontSize
 
@@ -136,7 +133,7 @@ class Controller {
           ),
           ...CssConverter.convertTextStorke(
             effectStroke * storkeWidth,
-            this.convertColor2rgba(color, 1),
+            this.convertColor2rgba(strokeColor, 1),
             'transparent'
           )
         }
@@ -168,6 +165,7 @@ class Controller {
       Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
     }
     textEffect.color = textEffect.color || this.getLayerMainColor()
+    textEffect.strokeColor = textEffect.strokeColor || this.getLayerMainColor()
     textEffect.fontSize = this.getLayerFontSize()
     TextUtils.updateTextStyles(
       TextUtils.pageIndex,
