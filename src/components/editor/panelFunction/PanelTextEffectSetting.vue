@@ -82,7 +82,7 @@
       div(class="flex-start text-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shapeOption"
           :key="`shape-${icon}`"
-          :iconName="`text-effect-${icon}`"
+          :iconName="`text-shape-${icon}`"
           @click.native="onShapeClick(icon)"
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
