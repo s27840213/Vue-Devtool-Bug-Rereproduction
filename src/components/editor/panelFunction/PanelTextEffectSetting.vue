@@ -1,61 +1,110 @@
 <template lang="pug">
   div(class="text-effect-setting")
-    action-bar(class="flex-between pointer"
-      @click.native="handleStyleModal")
-      svg-icon(:iconName="`text-effect-${currentEffect}`"
-        iconWidth="44px"
-        iconColor="gray-2")
-      span(class="text-effect-setting__name text-left") Text Effect
-      svg-icon(iconName="caret-down"
-        iconWidth="10px"
-        iconColor="gray-2")
-    action-bar(v-if="openModal"
-      class="flex-between"
-      v-click-outside="handleStyleModal")
-      div(class="w-full text-left") Style
-      svg-icon(v-for="icon in shadowOption"
-        :key="icon"
-        :iconName="`text-effect-${icon}`"
-        @click.native="onEffectClick(icon)"
-        class="text-effect-setting__option pointer"
-        iconWidth="80px"
-        iconColor="gray-2")
-      div(class="w-full text-left") Shape
-      svg-icon(class="text-effect-setting__option pointer"
-        iconName="text-effect-shape"
-        @click.native="onEffectClick('shape')"
-        class="text-effect-setting__option pointer"
-        iconWidth="80px"
-        iconColor="gray-2")
-    action-bar(v-show="fields.length && !openModal"
-      class="flex-between")
-      div(v-for="field in fields"
-        :key="field"
-        class="text-effect-setting__field")
-        div(class="text-effect-setting__field-name") {{ field }}
-        input(class="text-effect-setting__range-input"
-          :value="currentLayer[field]"
-          :max="fieldRange[field].max"
-          :min="fieldRange[field].min"
-          :name="field"
-          @input="handleEffectUpdate"
-          type="range")
-        input(class="text-effect-setting__value-input"
-          :value="currentLayer[field]"
-          :name="field"
-          @change="handleEffectUpdate"
-          type="number")
-      div(v-if="canChangeColor"
-        class="text-effect-setting__field")
-        div(class="text-effect-setting__field-name") Color
-        div(class="text-effect-setting__value-input"
-          :style="{ backgroundColor: currentLayer.color }"
-          @click="handleColorModal")
-        color-picker(v-if="openColorPicker"
-          class="text-effect-setting__color-picker"
-          v-click-outside="handleColorModal"
-          :currentColor="currentLayer.color"
-          @update="handleColorUpdate")
+    div(class="w-full text-left mb-10 text-blue-1 label-lg") Text Effect
+    action-bar
+      div(class="flex-between text-effect-setting__options mb-10")
+        svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
+          :key="`shadow-${icon}`"
+          :iconName="`text-effect-${icon}`"
+          @click.native="onEffectClick(icon)"
+          class="text-effect-setting__option pointer"
+          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
+          iconWidth="60px"
+          iconColor="gray-2")
+      div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
+        class="w-full text-effect-setting__form")
+        div(v-for="field in shadowFields"
+          :key="field"
+          class="text-effect-setting__field")
+          div(class="text-effect-setting__field-name") {{ field }}
+          input(class="text-effect-setting__range-input"
+            :value="currentStyle.textEffect[field]"
+            :max="fieldRange[field].max"
+            :min="fieldRange[field].min"
+            :name="field"
+            @input="handleEffectUpdate"
+            type="range")
+          input(class="text-effect-setting__value-input"
+            :value="currentStyle.textEffect[field]"
+            :name="field"
+            @change="handleEffectUpdate"
+            type="number")
+        div(v-if="canChangeColor"
+          class="text-effect-setting__field")
+          div(class="text-effect-setting__field-name") Color
+          div(class="text-effect-setting__value-input"
+            :style="{ backgroundColor: currentStyle.textEffect.color }"
+            @click="handleColorModal")
+          color-picker(v-if="openColorPicker"
+            class="text-effect-setting__color-picker"
+            v-click-outside="handleColorModal"
+            :currentColor="currentStyle.textEffect.color"
+            @update="handleColorUpdate")
+      div(class="flex-between text-effect-setting__options mb-10")
+        svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
+          :key="`shadow-${icon}`"
+          :iconName="`text-effect-${icon}`"
+          @click.native="onEffectClick(icon)"
+          class="text-effect-setting__option pointer"
+          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
+          iconWidth="60px"
+          iconColor="gray-2")
+      div(v-if="shadowOption.slice(3).includes(currentEffect)"
+        class="w-full text-effect-setting__form")
+        div(v-for="field in shadowFields"
+          :key="field"
+          class="text-effect-setting__field")
+          div(class="text-effect-setting__field-name") {{ field }}
+          input(class="text-effect-setting__range-input"
+            :value="currentStyle.textEffect[field]"
+            :max="fieldRange[field].max"
+            :min="fieldRange[field].min"
+            :name="field"
+            @input="handleEffectUpdate"
+            type="range")
+          input(class="text-effect-setting__value-input"
+            :value="currentStyle.textEffect[field]"
+            :name="field"
+            @change="handleEffectUpdate"
+            type="number")
+        div(v-if="canChangeColor"
+          class="text-effect-setting__field")
+          div(class="text-effect-setting__field-name") Color
+          div(class="text-effect-setting__value-input"
+            :style="{ backgroundColor: currentStyle.textEffect.color }"
+            @click="handleColorModal")
+          color-picker(v-if="openColorPicker"
+            class="text-effect-setting__color-picker"
+            v-click-outside="handleColorModal"
+            :currentColor="currentStyle.textEffect.color"
+            @update="handleColorUpdate")
+      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") Shape
+      div(class="flex-start text-effect-setting__options mb-10")
+        svg-icon(v-for="(icon, idx) in shapeOption"
+          :key="`shape-${icon}`"
+          :iconName="`text-effect-${icon}`"
+          @click.native="onShapeClick(icon)"
+          class="text-effect-setting__option pointer"
+          :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
+          iconWidth="60px"
+          iconColor="gray-2")
+      div(class="w-full text-effect-setting__form")
+        div(v-for="field in shapeFields"
+          :key="field"
+          class="text-effect-setting__field")
+          div(class="text-effect-setting__field-name") {{ field }}
+          input(class="text-effect-setting__range-input"
+            :value="currentStyle.textShape[field]"
+            :max="fieldRange[field].max"
+            :min="fieldRange[field].min"
+            :name="field"
+            @input="handleShapeUpdate"
+            type="range")
+          input(class="text-effect-setting__value-input"
+            :value="currentStyle.textShape[field]"
+            :name="field"
+            @change="handleShapeUpdate"
+            type="number")
 </template>
 
 <script lang="ts">
@@ -63,6 +112,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 
 export default Vue.extend({
@@ -76,14 +126,17 @@ export default Vue.extend({
     return {
       openModal: false,
       openColorPicker: false,
-      styles: {
+      effects: {
         none: [],
         shadow: ['distance', 'angle', 'blur', 'opacity', 'color'],
         lift: ['spread'],
         hollow: ['stroke'],
         splice: ['stroke', 'distance', 'angle', 'color'],
-        echo: ['distance', 'angle', 'color'],
-        shape: ['bend']
+        echo: ['distance', 'angle', 'color']
+      } as { [key: string]: string[] },
+      shapes: {
+        none: [],
+        curve: ['bend']
       } as { [key: string]: string[] },
       fieldRange: {
         distance: { max: 100, min: 0 },
@@ -104,25 +157,40 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     shadowOption (): string[] {
-      return Object.keys(this.styles).filter(style => style !== 'shape')
+      return Object.keys(this.effects)
     },
-    fields (): string[] {
-      const { styles, currentEffect } = this
-      return styles[currentEffect].filter(field => field !== 'color')
+    shapeOption (): string[] {
+      return Object.keys(this.shapes)
+    },
+    shadowFields (): string[] {
+      const { effects, currentEffect } = this
+      return effects[currentEffect].filter(field => field !== 'color')
+    },
+    shapeFields (): string[] {
+      const { shapes, currentShape } = this
+      return shapes[currentShape]
     },
     canChangeColor (): boolean {
-      const { styles, currentEffect } = this
-      return styles[currentEffect].includes('color')
+      const { effects, currentEffect } = this
+      return effects[currentEffect].includes('color')
     },
-    currentLayer (): any {
+    currentStyle (): any {
       const { styles } = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
-      return styles.textEffect || {}
+      return styles
     },
     currentEffect (): string {
-      return this.currentLayer.name || 'none'
+      const { textEffect = {} } = this.currentStyle
+      return textEffect.name || 'none'
+    },
+    currentShape (): string {
+      const { textShape = {} } = this.currentStyle
+      return textShape.name || 'none'
     }
   },
   methods: {
+    optionStyle (idx: number) {
+      return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
+    },
     handleStyleModal () {
       this.openModal = !this.openModal
     },
@@ -130,8 +198,10 @@ export default Vue.extend({
       this.openColorPicker = !this.openColorPicker
     },
     onEffectClick(effectName: string): void {
-      this.openModal = false
       TextEffectUtils.setTextEffect(effectName)
+    },
+    onShapeClick(shapeName: string): void {
+      TextShapeUtils.setTextShape(shapeName)
     },
     handleEffectUpdate (event: Event): void {
       const { currentEffect, fieldRange } = this
@@ -139,6 +209,16 @@ export default Vue.extend({
       const { max, min } = (fieldRange as any)[name]
       window.requestAnimationFrame(() => {
         TextEffectUtils.setTextEffect(currentEffect, {
+          [name]: value > max ? max : (value < min ? min : value)
+        })
+      })
+    },
+    handleShapeUpdate (event: Event): void {
+      const { currentShape, fieldRange } = this
+      const { name, value } = event.target as HTMLInputElement
+      const { max, min } = (fieldRange as any)[name]
+      window.requestAnimationFrame(() => {
+        TextShapeUtils.setTextShape(currentShape, {
           [name]: value > max ? max : (value < min ? min : value)
         })
       })
@@ -156,16 +236,24 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .text-effect-setting {
   font-size: 14px;
+  &__form {
+    background: #fff;
+  }
   &__name {
     flex: 1;
     padding: 0 12px;
+  }
+  &__options {
+    display: flex;
+    width: 212px;
   }
   &__option {
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
-    &:hover {
+    &:hover,
+    &--selected {
       border-color: #3C64B1;
     }
   }
@@ -220,10 +308,19 @@ export default Vue.extend({
   }
 }
 .action-bar {
-  padding: 10px 15px;
+  padding: 10px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .w-full {
   @include size(100%, 100%);
+}
+.mx-16 {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+.text-shape-title {
+  font-size: 16px;
+  font-weight: bold;
 }
 </style>

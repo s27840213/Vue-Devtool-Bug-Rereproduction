@@ -14,8 +14,8 @@ import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import GroupUtils from '@/utils/groupUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -35,6 +35,13 @@ export default Vue.extend({
     this.handleCurveSpan(this.spans)
     this.y = this.config.styles.y
   },
+  destroyed () {
+    ControlUtils.updateLayerProps(
+      this.pageIndex,
+      this.layerIndex,
+      { widthLimit: -1 }
+    )
+  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
@@ -46,8 +53,8 @@ export default Vue.extend({
       return this.config.dragging
     },
     bend(): number {
-      const { textEffect } = this.config.styles
-      return +textEffect.bend
+      const { textShape } = this.config.styles
+      return +textShape.bend
     },
     spans(): any {
       const { paragraphs } = this.config
@@ -194,7 +201,7 @@ export default Vue.extend({
             minHeight = Math.max(minHeight, eleSpans[idx].offsetHeight)
           }
           this.minHeight = minHeight
-          this.transforms = TextEffectUtils.convertTextShape(textWidth, bend)
+          this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
         })
       } else {
         this.transforms = []
