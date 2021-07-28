@@ -47,6 +47,8 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
+      editing: false,
       styles: {
         x: 0,
         y: 0,
@@ -54,8 +56,8 @@ class LayerFactary {
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: 0,
-        height: 0,
+        width: config.styles.width ? config.styles.width : 0,
+        height: config.styles.width ? config.styles.width : 0,
         initWidth: config.styles.width ? config.styles.width : 0,
         initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
@@ -97,6 +99,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -122,6 +125,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -158,6 +162,7 @@ class LayerFactary {
       className: '',
       locked: false,
       moved: false,
+      dragging: false,
       styles: {
         x: 0,
         y: 0,

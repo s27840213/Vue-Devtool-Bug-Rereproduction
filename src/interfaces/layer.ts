@@ -28,12 +28,17 @@ export interface ILayer<T extends IStyle = IStyle> {
   shown: boolean,
   locked: boolean,
   moved: boolean,
+  dragging: boolean,
   styles: T
 }
 
 export interface IText extends ILayer<ITextStyle> {
   paragraphs: Array<IParagraph>,
   widthLimit: number,
+  editing: boolean,
+  isHeading?: boolean,
+  isSubheading?: boolean,
+  isBody?: boolean,
 }
 
 export interface IParagraph {

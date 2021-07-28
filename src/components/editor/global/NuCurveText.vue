@@ -1,9 +1,8 @@
 <template lang="pug">
-  p(class="nu-text__p" ref="curveText" @click="onClick" :style="pStyle")
+  p(class="nu-text__p" ref="curveText" :style="pStyle")
     template
       div(v-show="active"  class="nu-text__curve" :style="curveStyle")
-        svg-icon(iconName="curve-center"
-          iconWidth="13px")
+        svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
       :key="sIndex",
@@ -12,11 +11,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import GroupUtils from '@/utils/groupUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -26,24 +24,36 @@ export default Vue.extend({
   },
   data () {
     return {
-      transforms: [] as string[]
+      transforms: [] as string[],
+      minHeight: 0,
+      areaHeight: 0,
+      y: 0
     }
   },
   mounted () {
-    const { styles } = this.config
     this.handleCurveSpan(this.spans)
-    ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: styles.initWidth })
-    // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
-    // ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
-    // ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+    this.y = this.config.styles.y
+  },
+  destroyed () {
+    ControlUtils.updateLayerProps(
+      this.pageIndex,
+      this.layerIndex,
+      { widthLimit: -1 }
+    )
   },
   computed: {
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio'
+    }),
     active(): boolean {
       return this.config.active
     },
+    isLayerDragging(): boolean {
+      return this.config.dragging
+    },
     bend(): number {
-      const { textEffect } = this.config.styles
-      return +textEffect.bend
+      const { textShape } = this.config.styles
+      return +textShape.bend
     },
     spans(): any {
       const { paragraphs } = this.config
@@ -55,22 +65,28 @@ export default Vue.extend({
       )
     },
     pStyle(): any {
-      const { active } = this
-      const { initWidth } = this.config.styles
+      const { active, areaHeight, bend, minHeight, config } = this
+      const style = { margin: 0 } as any
+      style.height = `${minHeight}px`
+      if (bend >= 0) {
+        style.paddingBottom = `${areaHeight}px`
+      } else {
+        style.paddingTop = `${areaHeight}px`
+      }
       return {
-        pointerEvents: active ? 'none' : 'auto',
-        margin: '0.5em 0',
-        minWidth: `${initWidth}px`
+        ...style,
+        minWidth: `${config.styles.width / config.styles.scale}px`,
+        pointerEvents: active ? 'none' : 'auto'
       }
     },
     curveStyle(): any {
-      const { bend } = this
+      const { bend, minHeight } = this
       const style = {} as any
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
       if (bend >= 0) {
-        style.top = '0.5em'
+        style.top = `${minHeight / 2}px`
       } else {
-        style.bottom = '0.5em'
+        style.bottom = `${minHeight / 2}px`
       }
       if (bend === 0) {
         style.borderRadius = 0
@@ -80,14 +96,85 @@ export default Vue.extend({
         height: `${radius * 2}px`,
         width: `${radius * 2}px`
       }
+    },
+    curveIconStyle(): any {
+      const { config: { styles }, scaleRatio } = this
+      const size = 13 / (scaleRatio * 0.01)
+      return {
+        width: `${size / styles.scale}px`,
+        height: `${size / styles.scale}px`
+      }
     }
   },
   watch: {
-    bend () {
+    isLayerDragging (curr, prev) {
+      const { styles } = this.config
+      const { areaHeight } = this
+      if (prev && !curr) {
+        if (this.bend >= 0) {
+          this.y = styles.y
+        } else {
+          this.y = styles.y + (areaHeight * styles.scale)
+        }
+      }
+    },
+    areaHeight (val) {
+      const { bend, config } = this
+      if (bend < 0) {
+        ControlUtils.updateLayerPos(
+          this.pageIndex,
+          this.layerIndex,
+          config.styles.x,
+          this.y - (val * config.styles.scale)
+        )
+      } else {
+        if (config.styles.y !== this.y) {
+          ControlUtils.updateLayerPos(
+            this.pageIndex,
+            this.layerIndex,
+            config.styles.x,
+            this.y
+          )
+        }
+      }
+    },
+    bend (val) {
       this.handleCurveSpan(this.spans)
     },
     spans (newSpans) {
       this.handleCurveSpan(newSpans)
+    },
+    transforms (data: string[]) {
+      const { scale, width } = this.config.styles
+      const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
+      const midLeng = Math.floor(positionList.length / 2)
+      const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
+      const maxY = Math.max.apply(null, positionList.map((position: string[]) => position[1]))
+      const minX = Math.max
+        .apply(
+          null,
+          positionList
+            .slice(0, midLeng)
+            .map((position: string[]) => position[0])
+        )
+      const maxX = Math.max
+        .apply(
+          null,
+          positionList
+            .slice(midLeng)
+            .map((position: string[]) => position[0])
+        )
+      const areaWidth = Math.abs(maxX + minX) * 1.1 * scale
+      this.$nextTick(() => {
+        this.areaHeight = Math.abs(maxY - minY)
+        if (areaWidth > width) {
+          ControlUtils.updateLayerProps(
+            this.pageIndex,
+            this.layerIndex,
+            { width: areaWidth, widthLimit: areaWidth }
+          )
+        }
+      })
     }
   },
   methods: {
@@ -104,18 +191,20 @@ export default Vue.extend({
     handleCurveSpan (spans: any[]) {
       const { bend } = this
       if (spans.length) {
-        const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
-        const textWidth = []
-        for (let idx = 0; idx < eleSpans.length; idx++) {
-          textWidth.push(eleSpans[idx].offsetWidth)
-        }
-        this.transforms = TextEffectUtils.convertTextShape(textWidth, bend)
+        this.$nextTick(() => {
+          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
+          const textWidth = []
+          let minHeight = 0
+          for (let idx = 0; idx < eleSpans.length; idx++) {
+            textWidth.push(eleSpans[idx].offsetWidth)
+            minHeight = Math.max(minHeight, eleSpans[idx].offsetHeight)
+          }
+          this.minHeight = minHeight
+          this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
+        })
       } else {
         this.transforms = []
       }
-    },
-    onClick () {
-      GroupUtils.select([this.layerIndex])
     }
   }
 })
@@ -127,7 +216,6 @@ export default Vue.extend({
   // margin: auto;
   position: absolute;
   &__p {
-    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;

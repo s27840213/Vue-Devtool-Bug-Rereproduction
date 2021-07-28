@@ -10,6 +10,7 @@ import uploadUtils from '@/utils/uploadUtils'
 
 import photos from '@/store/photos'
 import color from '@/store/module/color'
+import text from '@/store/text'
 
 Vue.use(Vuex)
 
@@ -31,6 +32,7 @@ const getDefaultState = (): IEditorState => ({
           moved: false,
           imgControl: false,
           isClipper: false,
+          dragging: false,
           styles: {
             x: 0,
             y: 0,
@@ -73,6 +75,7 @@ const getDefaultState = (): IEditorState => ({
           moved: false,
           imgControl: false,
           isClipper: false,
+          dragging: false,
           styles: {
             x: 0,
             y: 0,
@@ -550,6 +553,7 @@ export default new Vuex.Store({
   actions,
   modules: {
     photos,
+    text,
     color
   }
 })

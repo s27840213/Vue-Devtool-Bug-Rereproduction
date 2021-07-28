@@ -1,8 +1,8 @@
 <template lang="pug">
-  img(class="nu-image" ref="body"
-  :style="styles()"
-  draggable="false"
-  :src="config.src")
+  div(class="nu-image"
+      :style="styles()"
+      draggable="false")
+    img(class="nu-image__picture" :src="config.src")
 </template>
 
 <script lang="ts">
@@ -30,5 +30,10 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
+  &__picture {
+    object-fit: fill;
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

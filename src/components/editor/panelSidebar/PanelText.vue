@@ -16,8 +16,9 @@ import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import TextUtils from '@/utils/textUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
@@ -28,12 +29,13 @@ export default Vue.extend({
       headingFormat: {
         styles: {
           writingMode: 'normal',
-          textEffect: {}
+          textEffect: {},
+          textShape: {}
         },
         paragraphs: [
           {
             styles: {
-              align: 'text-align',
+              align: 'center',
               fontSpacing: 0,
               lineHeight: -1
             },
@@ -58,12 +60,13 @@ export default Vue.extend({
       subheadingFormat: {
         styles: {
           writingMode: 'normal',
-          textEffect: {}
+          textEffect: {},
+          textShape: {}
         },
         paragraphs: [
           {
             styles: {
-              align: 'text-align',
+              align: 'center',
               fontSpacing: 0,
               lineHeight: -1
             },
@@ -88,12 +91,13 @@ export default Vue.extend({
       bodyFormat: {
         styles: {
           writingMode: 'normal',
-          textEffect: {}
+          textEffect: {},
+          textShape: {}
         },
         paragraphs: [
           {
             styles: {
-              align: 'text-align',
+              align: 'center',
               fontSpacing: 0,
               lineHeight: -1
             },
@@ -121,10 +125,14 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       pageSize: 'getPageSize',
-      getLayers: 'getLayers'
+      getLayers: 'getLayers',
+      getPage: 'getPage'
     })
   },
   methods: {
+    ...mapMutations({
+      updateLayerProps: 'UPDATE_layerProps'
+    }),
     addText(type: string) {
       const newTextLayer = LayerFactary.newText(this.generateFormat(type))
       LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
@@ -144,6 +152,14 @@ export default Vue.extend({
             y = textLayers[0].styles.y
           }
           Object.assign(format.styles, { x: x, y: y }, size)
+
+          /**
+           * Check if there already exist an heading on the page. If not, set the new one as.
+           */
+          const page = this.getPage(this.lastSelectedPageIndex) as IPage
+          if (!page.layers.find(l => l.type === 'text' && (l as IText).isHeading)) {
+            Object.assign(format, { isHeading: true })
+          }
           return format
         }
         case 'subheading': {
@@ -158,8 +174,12 @@ export default Vue.extend({
           if (y > this.pageSize.height) {
             y = textLayers[0].styles.y
           }
-
           Object.assign(format.styles, { x: x, y: y }, size)
+
+          const page = this.getPage(this.lastSelectedPageIndex) as IPage
+          if (!page.layers.find(l => l.type === 'text' && (l as IText).isSubheading)) {
+            Object.assign(format, { isSubheading: true })
+          }
           return format
         }
         case 'body': {
@@ -174,8 +194,12 @@ export default Vue.extend({
           if (y > this.pageSize.height) {
             y = textLayers[0].styles.y
           }
-
           Object.assign(format.styles, { x: x, y: y }, size)
+
+          const page = this.getPage(this.lastSelectedPageIndex) as IPage
+          if (!page.layers.find(l => l.type === 'text' && (l as IText).isBody)) {
+            Object.assign(format, { isBody: true })
+          }
           return format
         }
       }

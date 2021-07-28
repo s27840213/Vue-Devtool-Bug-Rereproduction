@@ -75,7 +75,11 @@ export default Vue.extend({
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
        * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
        */
+      const width = this.config.styles.width / this.config.styles.scale
+      const height = this.config.styles.height / this.config.styles.scale
       return {
+        width: `${width}px`,
+        height: `${height}px`,
         transform: `scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
         'transform-style': this.config.type === 'group' ? 'flat' : (this.config.type === 'tmp' && this.config.styles.zindex > 0) ? 'flat' : 'preserve-3d'
       }
@@ -86,7 +90,8 @@ export default Vue.extend({
       HW.height = Math.ceil(this.config.styles.height / this.config.styles.scale)
       return {
         position: 'absolute',
-        transform: 'translate(-50%, -50%)',
+        top: 0,
+        left: 0,
         width: `${HW.width}px`,
         height: `${HW.height}px`
       }
@@ -123,7 +128,7 @@ export default Vue.extend({
   }
 }
 .layer-scale {
-  position: absolute;
+  // position: absolute;
   top: 0;
   left: 0;
 }
