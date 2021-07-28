@@ -93,8 +93,8 @@ export default Vue.extend({
     },
     setFont(font: string) {
       TextUtils.onPropertyClick('fontFamily', font)
+      TextUtils.updateTextPropsState({ font })
       this.$emit('closeFontsPanel')
-      this.$nextTick(() => this.$root.$emit('updateTextPanel'))
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]
@@ -108,7 +108,6 @@ export default Vue.extend({
       }
     `
       document.head.appendChild(style)
-      // console.log(fontName)
       this.fontPreset.push({ name: fontName, face: fontName })
     }
   }

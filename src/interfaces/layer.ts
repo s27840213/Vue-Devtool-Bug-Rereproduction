@@ -35,7 +35,10 @@ export interface ILayer<T extends IStyle = IStyle> {
 export interface IText extends ILayer<ITextStyle> {
   paragraphs: Array<IParagraph>,
   widthLimit: number,
-  editing: boolean
+  editing: boolean,
+  isHeading?: boolean,
+  isSubheading?: boolean,
+  isBody?: boolean,
 }
 
 export interface IParagraph {

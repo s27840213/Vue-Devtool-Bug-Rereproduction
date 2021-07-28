@@ -1,14 +1,14 @@
 <template lang="pug">
-  div(class="text-setting" @mousedown="textRangeRecorder($event)")
+  div(class="text-setting" @mousedown="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2") {{ textFont }}
+      span(class="body-2 text-gray-2") {{ props.font }}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar
         input(class="body-2 text-gray-2" type="text" @keyup="setSize($event)" @blur="onBlur"
-        v-model="fontSize")
+        v-model.lazy="props.fontSize")
         div(class="text-setting__font-stepper")
           svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
             :iconName="'chevron-up'" :iconColor="'gray-2'" :iconWidth="'9px'")
@@ -18,40 +18,41 @@
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color")
         div(class="color-slip"
-          :style="{'background-color': textColor}"
+          :style="{'background-color': props.color}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10")
-          input(class="body-2 text-gray-2" v-model="textColor" @keyup="setColor($event)")
+          input(class="body-2 text-gray-2" v-model.lazy="props.color" @keyup="setColor($event)")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"
         v-click-outside="handleColorModal"
-        :currentColor="textColor"
+        :currentColor="props.color"
         @update="handleColorUpdate")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
+        class="pointer"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
-        class="pointer"
+        :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
-        //- :style="propsBtnStyles(icon)"
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        :key="`gp-action-icon-${index}`"
         class="pointer"
+        :key="`gp-action-icon-${index}`"
+        :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
       property-bar
-        input(class="body-2 text-gray-2" type="number" v-model="lineHeight" @keyup="setHeight($event)" @blur="onBlur")
+        input(class="body-2 text-gray-2" type="text" v-model.lazy="props.lineHeight" @keyup="setHeight($event)" @blur="onBlur")
         svg-icon(class="pointer"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
       property-bar
-        input(class="body-2 text-gray-2" type="number" v-model="fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
+        input(class="body-2 text-gray-2" type="text" v-model.lazy="props.fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
         svg-icon(class="pointer"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
-      property-bar
-        input(class="body-2 text-gray-2" type="number" v-model="opacity" @keyup="setOpacity($event)" @blur="onBlur")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
+      //- property-bar
+      //-   input(class="body-2 text-gray-2" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
+      //-   svg-icon(class="pointer"
+      //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
@@ -81,42 +82,18 @@ export default Vue.extend({
         'Manrop',
         'Lobster'
       ],
-      openColorPicker: false,
-      fontSize: '',
-      textFont: '',
-      lineHeight: '',
-      fontSpacing: '',
-      textColor: '#000000'
+      openColorPicker: false
     }
   },
-  watch: {
-    sel: {
-      handler (val) {
-        console.log('selection changed!')
-        const size = TextUtils.propReader('fontSize')
-        this.fontSize = typeof size === 'number' ? size.toString() : '--'
-
-        const space = TextUtils.propReader('fontSpacing')
-        this.fontSpacing = typeof space === 'number' ? ((space as number) * 100).toString() : '--'
-
-        const height = TextUtils.propReader('lineHeight')
-        this.lineHeight = typeof height === 'number' ? height.toString() : '--'
-
-        const font = TextUtils.propReader('fontFamily')
-        this.textFont = typeof font === 'string' ? font : 'multi-fonts'
-
-        const btns = ['bold', 'italic', 'underline']
-        for (const icon of btns) {
-          this.propsBtnStyles(icon)
-        }
-
-        this.textColor = typeof TextUtils.propReader('color') === 'string' ? TextUtils.propReader('color') as string : '--'
-      },
-      deep: true
-    }
+  mounted() {
+    TextUtils.updateTextPropsState()
+    this.$forceUpdate()
+  },
+  destroyed() {
+    this.$store.commit('text/SET_default')
   },
   computed: {
-    ...mapState('text', ['sel']),
+    ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -199,37 +176,52 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     handleColorModal() {
+      console.log(this.sel)
       this.openColorPicker = !this.openColorPicker
+      if (!this.openColorPicker) {
+        const sel = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: NaN
+        }
+        TextUtils.updateSelection(sel, sel)
+      }
     },
     handleColorUpdate (color: string) {
-      this.textColor = color
-      TextUtils.spanPropertyHandler('color', this.textColor, this.sel.start, this.sel.end)
+      console.log(this.sel)
+      TextUtils.spanPropertyHandler('color', color, this.sel.start, this.sel.end)
+      TextUtils.updateTextPropsState()
     },
     propsBtnStyles(iconName: string) {
-      this.$nextTick(() => {
-        const res = TextUtils.propReader(iconName)
-        const origin = { 'background-color': '', 'border-radius': '' }
-        const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }
-        switch (iconName) {
-          case 'bold':
-            if (res === 'bold') Object.assign(origin, hitStyle)
-            break
-          case 'underline':
-            if (res === 'underline') Object.assign(origin, hitStyle)
-            break
-          case 'italic':
-            if (res === 'italic') Object.assign(origin, hitStyle)
-            break
-          case 'font-vertical':
-            if (typeof res === 'string' && res.includes('verticl')) Object.assign(origin, hitStyle)
-        }
-        const icon = document.getElementById(`icon-${iconName}`) as HTMLElement
-        Object.assign(icon.style, origin)
-      })
+      const origin = { 'background-color': '', 'border-radius': '' }
+      const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }
+      switch (iconName) {
+        case 'bold':
+          if (this.props.isBold) return hitStyle
+          break
+        case 'underline':
+          if (this.props.isUnderline) return hitStyle
+          break
+        case 'italic':
+          if (this.props.isItalic) return hitStyle
+          break
+        case 'font-vertical':
+          if (this.props.isVertical) return hitStyle
+          break
+        case 'text-align-left':
+          if (this.props.textAlign === 'left') return hitStyle
+          break
+        case 'text-align-center':
+          if (this.props.textAlign === 'center') return hitStyle
+          break
+        case 'text-align-right':
+          if (this.props.textAlign === 'right') return hitStyle
+      }
+      return origin
     },
     onPropertyClick(iconName: string) {
       TextUtils.onPropertyClick(iconName)
-      this.propsBtnStyles(iconName)
+      TextUtils.updateTextPropsState()
     },
     fontSizeStepping(step: number) {
       const sel = TextUtils.getSelection()
@@ -241,47 +233,49 @@ export default Vue.extend({
         const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
         const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
         TextUtils.spanPropertyHandler('fontSize', fontSize + step)
-        this.fontSize = `${fontSize + step}`
+        TextUtils.updateTextPropsState()
       }
     },
     isValidInt(value: string) {
-      return value.match(/^-?\d+$/) && parseInt(value) > 0
+      return value.match(/^-?\d+$/) && parseInt(value) >= 0
     },
     isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/) && parseFloat(value) > 0
+      return value.match(/[+-]?\d+(\.\d+)?/) && parseFloat(value) >= 0
     },
     isValidHexColor(value: string) {
       return value.match(/^#[0-9A-F]{6}$/)
     },
     textRangeRecorder(e: MouseEvent) {
-      // if (e && (e.target as HTMLElement).nodeName === 'INPUT') {
       const sel = TextUtils.getSelection()
-      if (sel) {
-        this.$store.commit('text/UPDATE_selection', {
-          start: sel.start,
-          end: sel.end
-        })
+      if ((e.target as HTMLElement).nodeName === 'INPUT' && sel) {
+        TextUtils.updateSelection(sel.start, sel.end)
+      } else if ((e.target as HTMLElement) === this.$refs.body as HTMLElement) {
+        const nan = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: NaN
+        }
+        TextUtils.updateSelection(nan, nan)
       }
-      // }
     },
     setSize(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidInt(this.fontSize)) {
-        TextUtils.spanPropertyHandler('fontSize', parseInt(this.fontSize), this.sel.start, this.sel.end)
+      if (e.key === 'Enter' && this.isValidInt(this.props.fontSize)) {
+        TextUtils.spanPropertyHandler('fontSize', parseInt(this.props.fontSize), this.sel.start, this.sel.end)
       }
     },
     setSpacing(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidInt(this.fontSpacing)) {
-        TextUtils.paragraphPropsHandler('fontSpacing', parseInt(this.fontSpacing) / 100, this.sel.start, this.sel.end)
+      if (e.key === 'Enter' && this.isValidInt(this.props.fontSpacing)) {
+        TextUtils.paragraphPropsHandler('fontSpacing', parseInt(this.props.fontSpacing) / 100, this.sel.start, this.sel.end)
       }
     },
     setHeight(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidFloat(this.lineHeight)) {
-        TextUtils.paragraphPropsHandler('lineHeight', parseFloat(this.lineHeight), this.sel.start, this.sel.end)
+      if (e.key === 'Enter' && this.isValidFloat(this.props.lineHeight)) {
+        TextUtils.paragraphPropsHandler('lineHeight', parseFloat(this.props.lineHeight), this.sel.start, this.sel.end)
       }
     },
     setColor(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidHexColor(this.textColor)) {
-        TextUtils.spanPropertyHandler('color', this.textColor, this.sel.start, this.sel.end)
+      if (e.key === 'Enter' && this.isValidHexColor(this.props.color)) {
+        TextUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
       }
     },
     onBlur() {

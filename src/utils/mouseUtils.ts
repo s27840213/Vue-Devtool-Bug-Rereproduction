@@ -7,6 +7,7 @@ import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import TextUtils from './textUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -46,6 +47,9 @@ class MouseUtils {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       LayerUtils.addLayers(pageIndex, layer)
+      if (layer.type === 'text') {
+        TextUtils.updateTextPropsState()
+      }
       StepsUtils.record()
     }
   }

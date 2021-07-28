@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-shape")
+  div(class="nu-shape" :style="styles()")
     svg(:view-box.camel="viewBoxFormatter")
       defs
         filter(v-if="config.category === 'C'" :id="config.className" v-html="filterFormatter")
@@ -52,6 +52,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log('xxxx')
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 
@@ -175,6 +176,13 @@ export default Vue.extend({
     layerIndex: Number
   },
   methods: {
+    styles() {
+      console.log('ccc')
+      return {
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`
+      }
+    },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
         return this.getMergeTemplate()

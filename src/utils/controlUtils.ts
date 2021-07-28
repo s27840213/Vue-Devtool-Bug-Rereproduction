@@ -405,15 +405,12 @@ class Controller {
     })
   }
 
-  // updateLayerProps(pageIndex: number, layerIndex: number, ...propsArr: ({ [key: string]: number | string | boolean })[]) {
   updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: number | string | boolean }) {
-    // propsArr.forEach(props => {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
       props
     })
-    // })
   }
 
   updateLayerPos(pageIndex: number, layerIndex: number, x: number, y: number) {

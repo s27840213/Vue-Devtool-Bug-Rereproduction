@@ -15,24 +15,24 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type === 'text' && config.active")
-          div(class="text__scale" :style="textScaleStyle()")
-            div(class="text__wrapper" :style="textWrapperStyle()")
-              div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-                :style="textBodyStyle()"
-                class="text__body"
-                :contenteditable="config.type === 'tmp' ? false : contentEditable"
-                @compositionstart="isComposing = true"
-                @compositionend="isComposing = false"
-                @keydown="onKeyDown($event)"
-                @keyup="onKeyUp($event)")
-                p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-                  :data-pindex="pIndex"
-                  :key="p.id",
-                  :style="textStyles(p.styles)")
-                  span(v-for="(span, sIndex) in p.spans" class="text__span"
-                    :data-sindex="sIndex"
-                    :key="span.id",
-                    :style="textStyles(span.styles)") {{ span.text }}
+          //- div(class="text__scale" :style="textScaleStyle()")
+          div(class="text__wrapper" :style="textWrapperStyle()")
+            div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+              :style="textBodyStyle()"
+              class="text__body"
+              :contenteditable="config.type === 'tmp' ? false : contentEditable"
+              @compositionstart="isComposing = true"
+              @compositionend="isComposing = false"
+              @keydown="onKeyDown($event)"
+              @keyup="onKeyUp($event)")
+              p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+                :data-pindex="pIndex"
+                :key="p.id",
+                :style="textStyles(p.styles)")
+                span(v-for="(span, sIndex) in p.spans" class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -96,8 +96,8 @@ export default Vue.extend({
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
-      initialWH: { width: 0, height: 0 },
-      imgInitWH: { width: 0, height: 0 },
+      initSize: { width: 0, height: 0 },
+      initImgSize: { width: 0, height: 0 },
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
@@ -244,6 +244,7 @@ export default Vue.extend({
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
+        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -412,7 +413,7 @@ export default Vue.extend({
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
 
-      this.initialWH = {
+      this.initSize = {
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
@@ -450,8 +451,8 @@ export default Vue.extend({
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
 
-      const initWidth = this.initialWH.width
-      const initHeight = this.initialWH.height
+      const initWidth = this.initSize.width
+      const initHeight = this.initSize.height
       if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
         width = offsetWidth + initWidth
         height = width * initHeight / initWidth
@@ -518,7 +519,7 @@ export default Vue.extend({
       const rect = body.getBoundingClientRect()
       const center = ControlUtils.getRectCenter(rect)
 
-      this.initialWH = {
+      this.initSize = {
         width: this.getLayerWidth,
         height: this.getLayerHeight
       }
@@ -542,7 +543,7 @@ export default Vue.extend({
           scaleY: this.config.styles.scaleY
         }
       } else if (this.getLayerType === 'image') {
-        this.imgInitWH = {
+        this.initImgSize = {
           width: this.config.styles.imgWidth,
           height: this.config.styles.imgHeight
         }
@@ -557,8 +558,8 @@ export default Vue.extend({
       }
       let width = this.getLayerWidth
       let height = this.getLayerHeight
-      const initWidth = this.initialWH.width
-      const initHeight = this.initialWH.height
+      const initWidth = this.initSize.width
+      const initHeight = this.initSize.height
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
@@ -583,7 +584,7 @@ export default Vue.extend({
           this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
         case 'shape': {
-          [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initialWH, width, height)
+          [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initImgSize, width, height)
           break
         }
         case 'text':
@@ -630,10 +631,10 @@ export default Vue.extend({
       } else {
         width += offsetX
         height += offsetY
-        if (this.control.isHorizon && width - imgPos.x * this.getLayerScale > this.imgInitWH.width * this.getLayerScale) {
+        if (this.control.isHorizon && width - imgPos.x * this.getLayerScale > this.initImgSize.width * this.getLayerScale) {
           return true
         }
-        if (!this.control.isHorizon && height - imgPos.y * this.getLayerScale > this.imgInitWH.height * this.getLayerScale) {
+        if (!this.control.isHorizon && height - imgPos.y * this.getLayerScale > this.initImgSize.height * this.getLayerScale) {
           return true
         }
       }
@@ -646,7 +647,7 @@ export default Vue.extend({
         offsetX = offsetWidth
         offsetY = offsetHeight
       }
-      if (this.resizeExceedLimit(this.initialWH.width, this.initialWH.height, offsetWidth, offsetHeight)) {
+      if (this.resizeExceedLimit(this.initSize.width, this.initSize.height, offsetWidth, offsetHeight)) {
         if (this.imgBuffer.width === 0 && this.imgBuffer.height === 0) {
           this.imgScaling(width + offsetWidth, height + offsetHeight, 0, 0)
           this.imgBuffer.width = offsetWidth
@@ -659,8 +660,8 @@ export default Vue.extend({
     },
     imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, layerWidth, layerHeight, this.getLayerScale)
-      let imgWidth = this.imgInitWH.width
-      let imgHeight = this.imgInitWH.height
+      let imgWidth = this.initImgSize.width
+      let imgHeight = this.initImgSize.height
       const imgPos = {
         x: this.control.imgX,
         y: this.control.imgY
@@ -694,15 +695,15 @@ export default Vue.extend({
         imgHeight = layerWidth * ratio
       }
       if (this.control.isHorizon) {
-        imgPos.y -= (imgHeight - this.imgInitWH.height) / 2
+        imgPos.y -= (imgHeight - this.initImgSize.height) / 2
         imgPos.x = this.control.xSign > 0 ? -(imgWidth - width) : 0
       } else {
-        imgPos.x -= (imgWidth - this.imgInitWH.width) / 2
+        imgPos.x -= (imgWidth - this.initImgSize.width) / 2
         imgPos.y = this.control.ySign > 0 ? -(imgHeight - height) : 0
       }
       if (this.imgBuffer.x === 0 && this.imgBuffer.y === 0) {
-        this.imgBuffer.x = -(imgWidth - this.imgInitWH.width) / 2
-        this.imgBuffer.y = -(imgHeight - this.imgInitWH.height) / 2
+        this.imgBuffer.x = -(imgWidth - this.initImgSize.width) / 2
+        this.imgBuffer.y = -(imgHeight - this.initImgSize.height) / 2
       }
 
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
@@ -719,6 +720,7 @@ export default Vue.extend({
       const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
 
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, (offsetX ?? 0) / scale + imgX, (offsetY ?? 0) / scale + imgY)
+      ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, this.initImgSize.width, this.initImgSize.height)
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
     resizeEnd() {
@@ -822,12 +824,13 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.getLayerType === 'text' && this.isActive) {
-        if ((this.$refs.text as HTMLElement).contains(e.target as Node)) {
-          if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-            // this.$root.$emit('updateTextPanel')
-            const sel = TextUtils.getSelection()
-            if (sel) { TextUtils.updateTextSelection(sel.start, sel.end) }
+      TextUtils.updateTextPropsState()
+      console.log(this.isActive)
+      if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+          const sel = TextUtils.getSelection()
+          if (sel) {
+            TextUtils.updateTextSelection(sel.start, sel.end)
           }
         }
       }
@@ -876,7 +879,7 @@ export default Vue.extend({
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        // this.$root.$emit('updateTextPanel')
+        TextUtils.updateTextPropsState()
         const sel = TextUtils.getSelection()
         this.$store.commit('text/UPDATE_selection', {
           start: sel?.start,
@@ -947,6 +950,7 @@ export default Vue.extend({
           this.textSizeRefresh(this.config)
         }
 
+        TextUtils.updateTextPropsState()
         const text = this.$refs.text as HTMLElement
         this.$nextTick(() => {
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
