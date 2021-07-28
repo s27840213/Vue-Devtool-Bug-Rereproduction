@@ -52,6 +52,7 @@ class UploadUtils {
   async getTmpJSON() {
     this.loginOutput.download_url = this.loginOutput.download_url.replace('*', 'edit/temp.json')
     console.log(this.loginOutput.download_url)
+    // const response = await fetch(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
     const response = await fetch(this.loginOutput.download_url)
     response.json().then((json) => {
       console.log(json)
