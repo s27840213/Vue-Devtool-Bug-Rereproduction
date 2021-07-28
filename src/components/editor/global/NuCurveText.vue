@@ -1,5 +1,5 @@
 <template lang="pug">
-  p(class="nu-text__p" ref="curveText" @click="onClick" :style="pStyle")
+  p(class="nu-text__p" ref="curveText" :style="pStyle")
     template
       div(v-show="active"  class="nu-text__curve" :style="curveStyle")
         svg-icon(iconName="curve-center" :style="curveIconStyle")
@@ -14,8 +14,7 @@ import Vue from 'vue'
 import { mapMutations, mapGetters } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import GroupUtils from '@/utils/groupUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -35,6 +34,13 @@ export default Vue.extend({
     this.handleCurveSpan(this.spans)
     this.y = this.config.styles.y
   },
+  destroyed () {
+    ControlUtils.updateLayerProps(
+      this.pageIndex,
+      this.layerIndex,
+      { widthLimit: -1 }
+    )
+  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
@@ -46,8 +52,8 @@ export default Vue.extend({
       return this.config.dragging
     },
     bend(): number {
-      const { textEffect } = this.config.styles
-      return +textEffect.bend
+      const { textShape } = this.config.styles
+      return +textShape.bend
     },
     spans(): any {
       const { paragraphs } = this.config
@@ -139,7 +145,7 @@ export default Vue.extend({
       this.handleCurveSpan(newSpans)
     },
     transforms (data: string[]) {
-      const { scale } = this.config.styles
+      const { scale, width } = this.config.styles
       const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
       const midLeng = Math.floor(positionList.length / 2)
       const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
@@ -158,16 +164,16 @@ export default Vue.extend({
             .slice(midLeng)
             .map((position: string[]) => position[0])
         )
+      const areaWidth = Math.abs(maxX + minX) * 1.1 * scale
       this.$nextTick(() => {
         this.areaHeight = Math.abs(maxY - minY)
-        ControlUtils.updateLayerProps(
-          this.pageIndex,
-          this.layerIndex,
-          {
-            width: Math.abs(maxX + minX) * 1.1 * scale,
-            widthLimit: Math.abs(maxX + minX) * 1.1 * scale
-          }
-        )
+        if (areaWidth > width) {
+          ControlUtils.updateLayerProps(
+            this.pageIndex,
+            this.layerIndex,
+            { width: areaWidth, widthLimit: areaWidth }
+          )
+        }
       })
     }
   },
@@ -194,14 +200,11 @@ export default Vue.extend({
             minHeight = Math.max(minHeight, eleSpans[idx].offsetHeight)
           }
           this.minHeight = minHeight
-          this.transforms = TextEffectUtils.convertTextShape(textWidth, bend)
+          this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
         })
       } else {
         this.transforms = []
       }
-    },
-    onClick () {
-      GroupUtils.select([this.layerIndex])
     }
   }
 })

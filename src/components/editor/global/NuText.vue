@@ -45,8 +45,8 @@ export default Vue.extend({
       return this.config.styles.scale
     },
     isCurveText(): any {
-      const { textEffect } = this.config.styles
-      return textEffect && textEffect.name === 'shape'
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
     }
   },
   watch: {

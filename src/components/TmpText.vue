@@ -31,7 +31,8 @@ export default Vue.extend({
           styles: {
             writingMode: 'horizontal-tb',
             align: 'center',
-            textEffect: {}
+            textEffect: {},
+            textShape: {}
           },
           paragraphs: [
             {
@@ -116,7 +117,8 @@ export default Vue.extend({
           styles: {
             writingMode: 'horizontal-tb',
             align: 'center',
-            textEffect: {}
+            textEffect: {},
+            textShape: {}
           },
           paragraphs: [
             {
@@ -157,7 +159,8 @@ export default Vue.extend({
           styles: {
             writingMode: 'horizontal-tb',
             align: 'center',
-            textEffect: {}
+            textEffect: {},
+            textShape: {}
           },
           paragraphs: [
             {
