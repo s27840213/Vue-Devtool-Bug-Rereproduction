@@ -6,14 +6,19 @@
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
-      property-bar
-        input(class="body-2 text-gray-2" type="text" @keyup="setSize($event)" @blur="onBlur"
-        v-model.lazy="props.fontSize")
-        div(class="text-setting__font-stepper")
-          svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
-            :iconName="'chevron-up'" :iconColor="'gray-2'" :iconWidth="'9px'")
-          svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
-            :iconName="'chevron-down'" :iconColor="'gray-2'" :iconWidth="'14px'")
+      property-bar(class="relative")
+        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
+          :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+        button(@click="handleValueModal")
+          input(class="body-2 text-gray-2 center" type="text" @keyup="setSize($event)" @blur="onBlur"
+            v-model.lazy="props.fontSize")
+        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
+          :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+        value-selector(v-if="openValueSelector"
+                    class="text-setting__value-selector"
+                    v-click-outside="handleValueModal"
+                    @update="handleValueUpdate")
+        //- div(class="text-setting__font-stepper")
         //- svg-icon(class="pointer"
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color")
@@ -44,15 +49,15 @@
       property-bar
         input(class="body-2 text-gray-2" type="text" v-model.lazy="props.lineHeight" @keyup="setHeight($event)" @blur="onBlur")
         svg-icon(class="pointer"
-          :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
+          :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
       property-bar
         input(class="body-2 text-gray-2" type="text" v-model.lazy="props.fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
         svg-icon(class="pointer"
-          :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
-      //- property-bar
-      //-   input(class="body-2 text-gray-2" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
-      //-   svg-icon(class="pointer"
-      //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
+          :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
+      property-bar
+        input(class="body-2 text-gray-2" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
+        svg-icon(class="pointer"
+          :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
@@ -61,16 +66,20 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IText } from '@/interfaces/layer'
+import { ILayer, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
-import { values } from 'lodash'
+import ValueSelector from '@/components/ValueSelector.vue'
+import GeneralUtils from '@/utils/generalUtils'
 import { ISelection } from '@/interfaces/text'
+import { values } from 'lodash'
+import { Group } from 'konva/types/Group'
 
 export default Vue.extend({
   components: {
     SearchBar,
-    ColorPicker
+    ColorPicker,
+    ValueSelector
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -82,12 +91,14 @@ export default Vue.extend({
         'Manrop',
         'Lobster'
       ],
-      openColorPicker: false
+      openColorPicker: false,
+      openValueSelector: false
     }
   },
   mounted() {
-    TextUtils.updateTextPropsState()
-    this.$forceUpdate()
+    if (this.currSelectedInfo.layers.length === 1) {
+      TextUtils.updateTextPropsState()
+    }
   },
   destroyed() {
     this.$store.commit('text/SET_default')
@@ -97,62 +108,13 @@ export default Vue.extend({
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
+      currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    // textFont: {
-    //   cache: false,
-    //   get(): string {
-    //     console.log('text font')
-    //     const font = TextUtils.propReader('fontFamily')
-    //     return typeof font === 'string' ? font : 'multi-fonts'
-    //   }
-    // },
-    // textColor: {
-    //   get(): string {
-    //     return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.color
-    //   },
-    //   set(value) {
-    //     this.$store.commit('UPDATE_layerStyles', {
-    //       pageIndex: this.lastSelectedPageIndex,
-    //       layerIndex: this.currSelectedIndex,
-    //       styles: {
-    //         color: value
-    //       }
-    //     })
-    //   }
-    // },
-    // lineHeight: {
-    //   get(): number {
-    //     const value = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.lineHeight
-    //     return value === -1 ? -1 : value * 1000
-    //   },
-    //   set(value) {
-    //     this.$store.commit('UPDATE_layerStyles', {
-    //       pageIndex: this.lastSelectedPageIndex,
-    //       layerIndex: this.currSelectedIndex,
-    //       styles: {
-    //         lineHeight: typeof value === 'string' ? parseInt(value) / 1000 : value
-    //       }
-    //     })
-    //     TextUtils.updateLayerSize()
-    //   }
-    // },
-    // fontSpacing: {
-    //   get(): number {
-    //     return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.fontSpacing * 1000
-    //   },
-    //   set(value) {
-    //     this.$store.commit('UPDATE_layerStyles', {
-    //       pageIndex: this.lastSelectedPageIndex,
-    //       layerIndex: this.currSelectedIndex,
-    //       styles: {
-    //         fontSpacing: typeof value === 'string' ? parseInt(value) / 1000 : value
-    //       }
-    //     })
-    //     TextUtils.updateLayerSize()
-    //   }
-    // },
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
     opacity: {
       get(): number {
         return this.getLayer(this.pageIndex, this.layerIndex).styles.opacity
@@ -176,7 +138,6 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     handleColorModal() {
-      console.log(this.sel)
       this.openColorPicker = !this.openColorPicker
       if (!this.openColorPicker) {
         const sel = {
@@ -188,8 +149,29 @@ export default Vue.extend({
       }
     },
     handleColorUpdate (color: string) {
-      console.log(this.sel)
-      TextUtils.spanPropertyHandler('color', color, this.sel.start, this.sel.end)
+      if (this.currSelectedInfo.layers.length === 1) {
+        TextUtils.spanPropertyHandler('color', color, this.sel.start, this.sel.end)
+      } else {
+        const nan = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: NaN
+        }
+        const tmpLayerGroup = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex))
+        for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
+          const layer = this.currSelectedInfo.layers[i]
+          if (layer.type === 'text') {
+            TextUtils.spanPropertyHandler('color', color, nan, nan, i, tmpLayerGroup)
+          }
+        }
+      }
+      // TextUtils.updateTextPropsState()
+    },
+    handleValueModal() {
+      this.openValueSelector = !this.openValueSelector
+    },
+    handleValueUpdate(value: number) {
+      TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
       TextUtils.updateTextPropsState()
     },
     propsBtnStyles(iconName: string) {
@@ -247,9 +229,11 @@ export default Vue.extend({
     },
     textRangeRecorder(e: MouseEvent) {
       const sel = TextUtils.getSelection()
+      console.log((e.target as HTMLElement).nodeName)
       if ((e.target as HTMLElement).nodeName === 'INPUT' && sel) {
         TextUtils.updateSelection(sel.start, sel.end)
       } else if ((e.target as HTMLElement) === this.$refs.body as HTMLElement) {
+        // console.log((e.target as HTMLElement).nodeName)
         const nan = {
           pIndex: NaN,
           sIndex: NaN,
@@ -278,16 +262,46 @@ export default Vue.extend({
         TextUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
       }
     },
-    onBlur() {
-      const nan = {
-        pIndex: NaN,
-        sIndex: NaN,
-        offset: NaN
+    setOpacity(e: KeyboardEvent) {
+      console.log(this.currSelectedInfo)
+      if (e.key === 'Enter' && (this.props.opacity >= 0 && this.props.opacity <= 100)) {
+        if (!this.isGroup) {
+          if (this.currSelectedInfo.layers.length === 1) {
+            this.$store.commit('UPDATE_layerStyles', {
+              pageIndex: this.pageIndex,
+              layerIndex: this.currSelectedIndex,
+              styles: {
+                opacity: this.props.opacity
+              }
+            })
+          } else {
+            this.$store.commit('UPDATE_selectedLayersStyles', {
+              styles: {
+                opacity: this.props.opacity
+              }
+            })
+          }
+        } else {
+          this.$store.commit('UPDATE_groupLayerStyles', {
+            styles: {
+              opacity: this.props.opacity
+            }
+          })
+        }
       }
-      this.$store.commit('text/UPDATE_selection', {
-        start: nan,
-        end: nan
-      })
+    },
+    onBlur() {
+      if (!this.openValueSelector) {
+        const nan = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: NaN
+        }
+        this.$store.commit('text/UPDATE_selection', {
+          start: nan,
+          end: nan
+        })
+      }
     }
   }
 })
@@ -316,7 +330,7 @@ export default Vue.extend({
   &__row5 {
     display: grid;
     grid-template-rows: auto auto;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     row-gap: 10px;
     column-gap: 20px;
   }
@@ -332,6 +346,11 @@ export default Vue.extend({
     right: 0px;
     top: 0px;
   }
+  &__value-selector {
+    position: absolute;
+    transform: translate(45%);
+    top: 75%;
+  }
   &__font-stepper {
     display: flex;
     flex-direction: column;
@@ -341,4 +360,14 @@ export default Vue.extend({
   height: 100%;
   width: 40%;
 }
+
+.center {
+  text-align: center;
+  margin: auto;
+}
+
+.relative {
+  position: relative;
+}
+
 </style>

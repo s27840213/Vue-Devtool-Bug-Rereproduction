@@ -177,7 +177,6 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      console.log('ccc')
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`

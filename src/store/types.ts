@@ -1,11 +1,13 @@
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { ITextState } from './text'
 /**
  * @param {object} currcurrSelectedLayers - used to record the info of selected layers
  *    @param {number} pageIndex - used to record where page the selected layers is
  *    @param {number[]} layers - all indexs of selected layers
  */
 export interface IEditorState {
+  text?: ITextState,
   pages: Array<IPage>,
   currSidebarPanelType: number,
   currFunctionPanelType: number,

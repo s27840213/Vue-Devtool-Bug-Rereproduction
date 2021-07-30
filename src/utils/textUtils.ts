@@ -1,7 +1,7 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { v4 as uuidv4 } from 'uuid'
-import { IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
@@ -24,13 +24,28 @@ class TextUtils {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getLayer() { return store.getters.getLayer }
-  get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
+  get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.isBlockProperty(propName)) {
       this.blockPropertyHandler(propName)
     } else {
-      this.spanPropertyHandler(propName, value, selStart, selEnd)
+      if (this.currSelectedInfo.layers.length === 1) {
+        this.spanPropertyHandler(propName, value, selStart, selEnd)
+      } else {
+        const nan = {
+          pIndex: NaN,
+          sIndex: NaN,
+          offset: NaN
+        }
+        for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
+          const layer = this.currSelectedInfo.layers[i]
+          if (layer.type === 'text') {
+            this.spanPropertyHandler(propName, value, nan, nan, i)
+          }
+        }
+      }
     }
   }
 
@@ -56,9 +71,16 @@ class TextUtils {
     }
   }
 
-  spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection) {
+  spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection, tmpLayerIndex?: number, tmpLayerGroup? : ITmp) {
     const sel = this.getSelection()
-    const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
+    // const config = GeneralUtils.deepCopy(typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getLayer(this.pageIndex, tmpLayerIndex)) as IText
+    let config: IText
+    if (typeof tmpLayerIndex === 'undefined') {
+      config = this.getCurrLayer as IText
+    } else {
+      config = GeneralUtils.deepCopy((tmpLayerGroup ?? this.getCurrLayer as ITmp).layers[tmpLayerIndex]) as IText
+    }
+
     let start = {
       pIndex: 0,
       sIndex: 0,
@@ -69,8 +91,8 @@ class TextUtils {
       sIndex: 0,
       offset: 0
     }
-    // TODO: //
-    if (!sel || (sel && !this.isSel(sel.start) && !this.isSel(sel.end) && !this.isSel(selStart) && !this.isSel(selEnd))) {
+    // if (sel && !this.isSel(sel.start) && !this.isSel(selStart) && !this.isSel(selEnd)) {
+    if (!sel && !this.isSel(selEnd)) {
       /**
        * If there is no selection given by either the window or the input params,
        * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
@@ -89,8 +111,48 @@ class TextUtils {
     }
 
     let isStartContainerDivided = true
-    const prop = this.propIndicator(start, end, propName, value || '')
-
+    // TODOs://
+    // const prop = typeof tmpLayerIndex === 'undefined' ? this.propIndicator(start, end, propName, value || '') : { color: value }
+    let prop: { [key: string]: number | string } = {}
+    if (typeof tmpLayerIndex === 'undefined') {
+      prop = this.propIndicator(start, end, propName, value || '')
+    } else {
+      const tmpLayerGroup = this.getCurrLayer as ITmp
+      let flag = false
+      for (let i = 0; i < tmpLayerGroup.layers.length && !flag; i++) {
+        if (tmpLayerGroup.layers[i].type === 'text') {
+          const tmpLayer = tmpLayerGroup.layers[i] as IText
+          const propBuff = this.propIndicator(
+            {
+              pIndex: 0,
+              sIndex: 0
+            },
+            {
+              pIndex: tmpLayer.paragraphs.length - 1,
+              sIndex: tmpLayer.paragraphs[tmpLayer.paragraphs.length - 1].spans.length - 1
+            }, propName, value || '', tmpLayer
+          )
+          switch (propName) {
+            case 'bold': {
+              prop.weight = 'normal'
+              if (propBuff.weight === 'bold') {
+                prop.weight = 'bold'
+                flag = true
+              }
+              break
+            }
+            case 'color': {
+              prop.color = value as string
+              flag = true
+              break
+            }
+          }
+        }
+      }
+    }
+    console.log('log prop')
+    console.log(prop)
+    console.log(tmpLayerIndex)
     if (this.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
         const p = config.paragraphs[pIndex]
@@ -145,7 +207,11 @@ class TextUtils {
         }
       }
       [start, end] = this.spanMerger(config.paragraphs, start, end)
-      this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+      if (typeof tmpLayerIndex === 'undefined') {
+        this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+      } else {
+        // this.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+      }
     } else if (!this.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
@@ -171,9 +237,13 @@ class TextUtils {
           break
       }
       [start, end] = this.spanMerger(config.paragraphs, start, end)
-      this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+      if (typeof tmpLayerIndex === 'undefined') {
+        this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+      } else {
+        // this.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+      }
     }
-    if (!sel) return
+    if (!sel || typeof tmpLayerIndex !== 'undefined') return
     Vue.nextTick(() => {
       const select = window.getSelection()
       const range = new Range()
@@ -213,6 +283,7 @@ class TextUtils {
           this.updateTextSelection(start, end)
         }
       }
+      this.updateTextPropsState()
     })
   }
 
@@ -290,13 +361,11 @@ class TextUtils {
    * @returns The desired props value accord to the current selection range.
    */
   propReader (prop: string): string | number |undefined {
-    const sel = this.getSelection()
-    // if (!sel || (sel.div as HTMLElement).id.match('text') === null) return
+    const sel = this.isSel(store.state.text?.sel.start) ? store.state.text?.sel : this.getSelection()
     const config = this.getCurrLayer as IText
     let start
     let end
-    // TODO://
-    if (sel && this.isSel(sel.start) && (sel.div as HTMLElement).id.match('text') !== null) {
+    if (sel && this.isSel(sel.start)) {
       start = sel.start
       end = sel.end
     } else if (!sel || (sel && !this.isSel(sel.start) && !this.isSel(sel.end) && config)) {
@@ -324,7 +393,7 @@ class TextUtils {
       }
     }
 
-    let flag = false
+    let isMulti = false
     let origin: string | number = ''
     switch (prop) {
       case 'fontSpacing':
@@ -343,10 +412,10 @@ class TextUtils {
     for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
       const p = config.paragraphs[pidx]
       if (prop === 'lineHeight' && origin !== p.styles.lineHeight) {
-        flag = true
+        isMulti = true
         break
       } else if (prop === 'fontSpacing' && origin !== p.styles.fontSpacing) {
-        flag = true
+        isMulti = true
         break
       } else if (prop === 'lineHeight' || prop === 'fontSpacing') continue
 
@@ -357,19 +426,19 @@ class TextUtils {
           const i = Object.keys(fontPropsMap).indexOf(prop)
           const v = Object.values(fontPropsMap)[i]
           if (origin !== span.styles[v]) {
-            flag = true
+            isMulti = true
             break
           }
         }
       }
-      if (flag) break
+      if (isMulti) break
     }
-    return flag ? undefined : origin
+    return isMulti ? undefined : origin
   }
 
-  propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number): { [key:string]: string | number } {
+  propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key:string]: string | number } {
     const prop: { [key: string]: string | number } = {}
-    const config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
+    const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
     if (!this.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
@@ -391,7 +460,6 @@ class TextUtils {
       }
       return prop
     }
-
     let flag = false
     for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
       const p = config.paragraphs[pidx]
@@ -493,6 +561,10 @@ class TextUtils {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
         sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
         offset: isRanged ? range?.endOffset as number : NaN
+      }
+
+      if (!this.isSel(start) && !this.isSel(end)) {
+        return undefined
       }
 
       return {
@@ -687,6 +759,13 @@ class TextUtils {
     })
   }
 
+  updateSelectedParagraphs(tmpLayerIndex: number, paragraphs: IParagraph[]) {
+    store.commit('UPDATE_selectedTextProps', {
+      tmpLayerIndex,
+      paragraphs
+    })
+  }
+
   updateTextSelection(start: ISelection, end: ISelection) {
     store.commit('text/UPDATE_selection', {
       start,
@@ -713,6 +792,7 @@ class TextUtils {
       'lineHeight',
       'font',
       'color',
+      'opacity',
       'isBold',
       'isItalic',
       'isUnderline',
@@ -747,6 +827,10 @@ class TextUtils {
         }
         case 'color': {
           value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
+          break
+        }
+        case 'opacity': {
+          value = (this.getCurrLayer as IText).styles.opacity
           break
         }
         case 'isUnderline': {

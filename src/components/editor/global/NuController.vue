@@ -244,6 +244,7 @@ export default Vue.extend({
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
+        opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
@@ -824,8 +825,6 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      TextUtils.updateTextPropsState()
-      console.log(this.isActive)
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
@@ -833,6 +832,7 @@ export default Vue.extend({
             TextUtils.updateTextSelection(sel.start, sel.end)
           }
         }
+        TextUtils.updateTextPropsState()
       }
     },
     onKeyDown(e: KeyboardEvent) {
