@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import store from '@/store'
+import uploadUtils from '@/utils/uploadUtils'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -12,13 +13,16 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        const url = location.href
-        let token = ''
-        if (url.indexOf('?') !== -1) {
-          token = url.split('?')[1].split('&')[0]
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.has('token')) {
+          const token = urlParams.get('token')
           console.log(token)
-          await store.dispatch('getAssets', { token })
-          await store.dispatch('login', { token })
+          if (token) {
+            uploadUtils.setToken(token)
+            await store.dispatch('getAssets', { token })
+            await store.dispatch('login', { token })
+            uploadUtils.uploadJSON()
+          }
         }
         next()
       } catch (error) {

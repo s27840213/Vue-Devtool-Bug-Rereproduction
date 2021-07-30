@@ -6,6 +6,7 @@ import { IPage } from '@/interfaces/page'
 import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 import photos from '@/store/photos'
 import color from '@/store/module/color'
@@ -500,6 +501,7 @@ const actions: ActionTree<IEditorState, unknown> = {
     try {
       const { data } = await userApis.login(token, account, password)
       console.log(data)
+      uploadUtils.setLoginOutput(data.data)
     } catch (error) {
       console.log(error)
     }

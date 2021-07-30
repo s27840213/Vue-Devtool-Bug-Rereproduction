@@ -1,7 +1,7 @@
 <template lang="pug">
   p(class="nu-text__p" ref="curveText" :style="pStyle")
     template
-      div(v-show="active"  class="nu-text__curve" :style="curveStyle")
+      div(v-show="focus"  class="nu-text__curve" :style="curveStyle")
         svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
@@ -34,19 +34,13 @@ export default Vue.extend({
     this.handleCurveSpan(this.spans)
     this.y = this.config.styles.y
   },
-  destroyed () {
-    ControlUtils.updateLayerProps(
-      this.pageIndex,
-      this.layerIndex,
-      { widthLimit: -1 }
-    )
-  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    active(): boolean {
-      return this.config.active
+    focus(): boolean {
+      const { textShape } = this.config.styles
+      return textShape.focus
     },
     isLayerDragging(): boolean {
       return this.config.dragging
@@ -65,18 +59,11 @@ export default Vue.extend({
       )
     },
     pStyle(): any {
-      const { active, areaHeight, bend, minHeight, config } = this
-      const style = { margin: 0 } as any
-      style.height = `${minHeight}px`
-      if (bend >= 0) {
-        style.paddingBottom = `${areaHeight}px`
-      } else {
-        style.paddingTop = `${areaHeight}px`
-      }
+      const { minHeight, config } = this
       return {
-        ...style,
-        minWidth: `${config.styles.width / config.styles.scale}px`,
-        pointerEvents: active ? 'none' : 'auto'
+        margin: 0,
+        height: `${minHeight}px`,
+        minWidth: `${config.styles.width / config.styles.scale}px`
       }
     },
     curveStyle(): any {
@@ -109,23 +96,18 @@ export default Vue.extend({
   watch: {
     isLayerDragging (curr, prev) {
       const { styles } = this.config
-      const { areaHeight } = this
       if (prev && !curr) {
-        if (this.bend >= 0) {
-          this.y = styles.y
-        } else {
-          this.y = styles.y + (areaHeight * styles.scale)
-        }
+        this.y = styles.y
       }
     },
     areaHeight (val) {
-      const { bend, config } = this
+      const { bend, config, minHeight } = this
       if (bend < 0) {
         ControlUtils.updateLayerPos(
           this.pageIndex,
           this.layerIndex,
           config.styles.x,
-          this.y - (val * config.styles.scale)
+          this.y + (minHeight * config.styles.scale) - val
         )
       } else {
         if (config.styles.y !== this.y) {
@@ -138,7 +120,7 @@ export default Vue.extend({
         }
       }
     },
-    bend (val) {
+    bend () {
       this.handleCurveSpan(this.spans)
     },
     spans (newSpans) {
@@ -164,28 +146,32 @@ export default Vue.extend({
             .slice(midLeng)
             .map((position: string[]) => position[0])
         )
-      const areaWidth = Math.abs(maxX + minX) * 1.1 * scale
-      this.$nextTick(() => {
-        this.areaHeight = Math.abs(maxY - minY)
-        if (areaWidth > width) {
-          ControlUtils.updateLayerProps(
-            this.pageIndex,
-            this.layerIndex,
-            { width: areaWidth, widthLimit: areaWidth }
-          )
-        }
+      const areaWidth = Math.abs(maxX + minX) * 1.3 * scale
+      const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
+      this.areaHeight = areaHeight
+      window.requestAnimationFrame(() => {
+        ControlUtils.updateLayerSize(
+          this.pageIndex,
+          this.layerIndex,
+          areaWidth,
+          areaHeight,
+          scale
+        )
+        ControlUtils.updateLayerProps(
+          this.pageIndex,
+          this.layerIndex,
+          areaWidth > width ? { widthLimit: areaWidth } : {}
+        )
       })
     }
   },
   methods: {
-    ...mapMutations({
-      setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
-    }),
     styles(styles: any, idx: number) {
-      const { transforms } = this
+      const { transforms, bend } = this
       return Object.assign(
         CssConveter.convertFontStyle(styles),
-        { transform: transforms[idx] || 'none' }
+        { transform: transforms[idx] || 'none' },
+        bend >= 0 ? { top: 0 } : { bottom: 0 }
       )
     },
     handleCurveSpan (spans: any[]) {

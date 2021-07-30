@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210726"
+  version: "20210729"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -121,10 +121,17 @@ paths:
       parameters:
         - name: category_id
           in: path
+          description: |-
+            Category id.
+            Allowed characters: 0-9.
           required: true
           type: string
         - name: asset_id
           in: path
+          description: |-
+            Asset id.
+            Allowed characters: 0-9a-zA-Z.
+            Allowed length: 23.
           required: true
           type: string
         - in: body
@@ -150,10 +157,17 @@ paths:
       parameters:
         - name: type
           in: path
+          description: |-
+            Type (text, template...)
+            Allowed characters: a-z.
           required: true
           type: string
         - name: design_id
           in: path
+          description: |-
+            Design id.
+            Allowed characters: 0-9a-zA-Z.
+            Allowed length: 20.
           required: true
           type: string
         - in: body
@@ -363,7 +377,9 @@ definitions:
             description: category id
           locale:
             type: string
-            description: "country code for locale, ex: tw, us, jp..."
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
           page_index:
             type: number
             description: pagination index
@@ -440,7 +456,9 @@ definitions:
     properties:
       token:
         type: string
-        description: User token
+        description: |-
+          User token.
+          Allowed characters: 0-9a-zA-Z.
   listTextInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -453,7 +471,9 @@ definitions:
             description: category id
           locale:
             type: string
-            description: "country code for locale, ex: tw, us, jp..."
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
           page_index:
             type: number
             description: pagination index
@@ -558,7 +578,9 @@ definitions:
             description: category id
           locale:
             type: string
-            description: "country code for locale, ex: tw, us, jp..."
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
           page_index:
             type: number
             description: pagination index
