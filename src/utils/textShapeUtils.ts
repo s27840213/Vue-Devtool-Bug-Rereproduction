@@ -11,7 +11,8 @@ class Controller {
     return {
       none: {},
       curve: {
-        bend: 40
+        bend: 40,
+        focus: false
       }
     }
   }

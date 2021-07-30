@@ -107,7 +107,7 @@ export default Vue.extend({
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
-        height: isVertical ? '' : 'auto',
+        height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align
       }
     },

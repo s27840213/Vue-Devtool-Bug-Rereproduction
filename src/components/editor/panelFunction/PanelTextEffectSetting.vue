@@ -99,6 +99,8 @@
             :min="fieldRange[field].min"
             :name="field"
             @input="handleShapeUpdate"
+            @mousedown="handleShapeStatus(true)"
+            @mouseup="handleShapeStatus(false)"
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textShape[field]"
@@ -222,6 +224,10 @@ export default Vue.extend({
           [name]: value > max ? max : (value < min ? min : value)
         })
       })
+    },
+    handleShapeStatus (focus: boolean): void {
+      const { currentShape } = this
+      TextShapeUtils.setTextShape(currentShape, { focus })
     },
     handleColorUpdate (color: string): void {
       const { currentEffect } = this
