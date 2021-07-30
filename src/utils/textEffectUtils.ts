@@ -1,6 +1,7 @@
 import TextUtils from '@/utils/textUtils'
 import { IText } from '@/interfaces/layer'
 import CssConverter from './cssConverter'
+import store from '@/store'
 
 class Controller {
   private shadowScale = 0.2
@@ -17,32 +18,61 @@ class Controller {
         distance: 50,
         angle: 45,
         blur: 20,
-        opacity: 60
+        opacity: 60,
+        color: ''
       }, // 陰影
       lift: {
         spread: 50
       }, // 模糊陰影
       hollow: {
-        stroke: 50
+        stroke: 50,
+        color: ''
       }, // 空心
       splice: {
         distance: 50,
         angle: 45,
-        stroke: 50
+        stroke: 50,
+        color: ''
       }, // 出竅
       echo: {
         distance: 50,
-        angle: 45
+        angle: 45,
+        color: ''
       } // 雙重陰影
     }
   }
 
   getCurrentLayer (): IText {
-    return TextUtils.getCurrLayer || {}
+    const currLayer = TextUtils.getCurrLayer
+    const multiLayers = currLayer.layers as any[]
+    for (const index in multiLayers) {
+      if (multiLayers[index].type === 'text') {
+        return multiLayers[index]
+      }
+    }
+    return currLayer
   }
 
-  getLayerFontSize (): number {
-    const { paragraphs = [] } = this.getCurrentLayer()
+  getSubTextLayerIndexs (): number[] {
+    const indexs = [] as number[]
+    const currLayer = TextUtils.getCurrLayer
+    const multiLayers = currLayer.layers as any[]
+    for (const index in multiLayers) {
+      if (multiLayers[index].type === 'text') {
+        indexs.push(+index)
+      }
+    }
+    return indexs
+  }
+
+  getSpecSubTextLayer (index: number): IText {
+    const currLayer = TextUtils.getCurrLayer
+    const multiLayers = currLayer.layers as any[]
+    return multiLayers && multiLayers[index]
+  }
+
+  getLayerFontSize (index?: number): number {
+    const { paragraphs = [] } = typeof index === 'number' ? this.getSpecSubTextLayer(index) : this.getCurrentLayer()
     let maxFontSize = 0
     for (let idx = 0; idx < paragraphs.length; idx++) {
       const spanFontSizeList = paragraphs[idx].spans.map(span => span.styles.size || 0)
@@ -51,8 +81,8 @@ class Controller {
     return maxFontSize
   }
 
-  getLayerMainColor (): string {
-    const { paragraphs = [] } = this.getCurrentLayer()
+  getLayerMainColor (index?: number): string {
+    const { paragraphs = [] } = typeof index === 'number' ? this.getSpecSubTextLayer(index) : this.getCurrentLayer()
     const colors = {} as { [key: string]: number }
     for (const idx in paragraphs) {
       const spans = paragraphs[idx].spans
@@ -152,23 +182,46 @@ class Controller {
     }
   }
 
-  setTextEffect (effect: string, attrs?: any): void {
-    const { styles: { textEffect: styleTextEffect } } = this.getCurrentLayer()
-    const textEffect = {} as any
+  setTextEffect (effect: string, attrs = {} as any): void {
+    const subLayerIndexs = this.getSubTextLayerIndexs()
     const defaultAttrs = this.effects[effect]
-    if (styleTextEffect && (styleTextEffect as any).name === effect) {
-      Object.assign(textEffect, styleTextEffect, attrs)
+
+    if (subLayerIndexs.length) {
+      subLayerIndexs.forEach(index => {
+        const { styles: { textEffect: subTextEffect } } = this.getSpecSubTextLayer(index)
+        const textEffect = {} as any
+        if (subTextEffect && (subTextEffect as any).name === effect) {
+          Object.assign(textEffect, subTextEffect, attrs)
+        } else {
+          Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
+        }
+        textEffect.color = textEffect.color || this.getLayerMainColor(index)
+        textEffect.strokeColor = textEffect.strokeColor || this.getLayerMainColor(index)
+        textEffect.fontSize = this.getLayerFontSize(index)
+        store.commit('SET_subLayerStyles', {
+          pageIndex: TextUtils.pageIndex,
+          primaryLayerIndex: TextUtils.layerIndex,
+          subLayerIndex: index,
+          styles: { textEffect }
+        })
+      })
     } else {
-      Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
+      const { styles: { textEffect: styleTextEffect } } = this.getCurrentLayer()
+      const textEffect = {} as any
+      if (styleTextEffect && (styleTextEffect as any).name === effect) {
+        Object.assign(textEffect, styleTextEffect, attrs)
+      } else {
+        Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
+      }
+      textEffect.color = textEffect.color || this.getLayerMainColor()
+      textEffect.strokeColor = textEffect.strokeColor || this.getLayerMainColor()
+      textEffect.fontSize = this.getLayerFontSize()
+      TextUtils.updateTextStyles(
+        TextUtils.pageIndex,
+        TextUtils.layerIndex,
+        { textEffect }
+      )
     }
-    textEffect.color = textEffect.color || this.getLayerMainColor()
-    textEffect.strokeColor = textEffect.strokeColor || this.getLayerMainColor()
-    textEffect.fontSize = this.getLayerFontSize()
-    TextUtils.updateTextStyles(
-      TextUtils.pageIndex,
-      TextUtils.layerIndex,
-      { textEffect }
-    )
   }
 }
 

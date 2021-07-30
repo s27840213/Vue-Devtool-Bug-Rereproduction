@@ -1,5 +1,7 @@
+import TextEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
 import { IText } from '@/interfaces/layer'
+import store from '@/store'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -18,7 +20,15 @@ class Controller {
   }
 
   getCurrentLayer (): IText {
-    return TextUtils.getCurrLayer || {}
+    return TextEffectUtils.getCurrentLayer() || {}
+  }
+
+  getSubTextLayerIndexs (): number[] {
+    return TextEffectUtils.getSubTextLayerIndexs()
+  }
+
+  getSpecSubTextLayer (index: number): IText {
+    return TextEffectUtils.getSpecSubTextLayer(index)
   }
 
   getRadiusByBend (bend: number) {
@@ -26,19 +36,39 @@ class Controller {
   }
 
   setTextShape (shape: string, attrs?: any): void {
-    const { styles: { textShape: styleTextShape } } = this.getCurrentLayer()
-    const textShape = {} as any
+    const subLayerIndexs = this.getSubTextLayerIndexs()
     const defaultAttrs = this.shapes[shape]
-    if (styleTextShape && (styleTextShape as any).name === shape) {
-      Object.assign(textShape, styleTextShape, attrs)
+
+    if (subLayerIndexs.length) {
+      subLayerIndexs.forEach(index => {
+        const { styles: { textShape: styleTextShape } } = this.getSpecSubTextLayer(index)
+        const textShape = {} as any
+        if (styleTextShape && (styleTextShape as any).name === shape) {
+          Object.assign(textShape, styleTextShape, attrs)
+        } else {
+          Object.assign(textShape, defaultAttrs, attrs, { name: shape })
+        }
+        store.commit('SET_subLayerStyles', {
+          pageIndex: TextUtils.pageIndex,
+          primaryLayerIndex: TextUtils.layerIndex,
+          subLayerIndex: index,
+          styles: { textShape }
+        })
+      })
     } else {
-      Object.assign(textShape, defaultAttrs, attrs, { name: shape })
+      const { styles: { textShape: styleTextShape } } = this.getCurrentLayer()
+      const textShape = {} as any
+      if (styleTextShape && (styleTextShape as any).name === shape) {
+        Object.assign(textShape, styleTextShape, attrs)
+      } else {
+        Object.assign(textShape, defaultAttrs, attrs, { name: shape })
+      }
+      TextUtils.updateTextStyles(
+        TextUtils.pageIndex,
+        TextUtils.layerIndex,
+        { textShape }
+      )
     }
-    TextUtils.updateTextStyles(
-      TextUtils.pageIndex,
-      TextUtils.layerIndex,
-      { textShape }
-    )
   }
 
   convertTextShape (textWidth: number[], bend: number): string[] {
