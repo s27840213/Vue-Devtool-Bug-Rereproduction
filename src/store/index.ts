@@ -3,7 +3,6 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
 import { IPage } from '@/interfaces/page'
-import unsplashApis from '@/apis/unsplash'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -109,7 +108,6 @@ const getDefaultState = (): IEditorState => ({
   lastSelectedPageIndex: 0,
   lastSelectedLayerIndex: -1,
   clipboard: [],
-  photos: [],
   currSelectedInfo: {
     index: -1,
     layers: [],
@@ -179,9 +177,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getClipboard(state: IEditorState): Array<ITmp> {
     return state.clipboard
-  },
-  getPhotos(state: IEditorState) {
-    return state.photos
   },
   getCurrSelectedInfo(state: IEditorState): {
     index: number,
@@ -457,9 +452,6 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []
   },
-  SET_photos(state: IEditorState, data) {
-    state.photos = [...data]
-  },
   SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
   },
@@ -481,6 +473,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data
+  },
+  SET_subLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText)[]
+    Object.assign(layers[subLayerIndex].styles, styles)
   }
 }
 

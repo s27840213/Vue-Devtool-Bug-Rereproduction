@@ -111,7 +111,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
@@ -152,12 +151,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
-    }),
     shadowOption (): string[] {
       return Object.keys(this.effects)
     },
@@ -177,7 +170,7 @@ export default Vue.extend({
       return effects[currentEffect].includes('color')
     },
     currentStyle (): any {
-      const { styles } = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      const { styles } = TextEffectUtils.getCurrentLayer()
       return styles
     },
     currentEffect (): string {

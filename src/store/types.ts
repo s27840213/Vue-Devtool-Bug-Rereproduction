@@ -15,7 +15,6 @@ export interface IEditorState {
   lastSelectedPageIndex: number,
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
-  photos: Array<unknown>,
   currSelectedInfo: {
     index: number,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
