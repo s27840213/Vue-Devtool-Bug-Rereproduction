@@ -61,7 +61,8 @@ export default Vue.extend({
         if (this.config.isTyping) return
         this.$nextTick(() => {
           const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-          if (this.currSelectedInfo.index !== -1 && this.currSelectedInfo.layers.length === 1) {
+          console.log(this.currSelectedInfo.layers.length)
+          if (this.currSelectedInfo.layers.length === 1) {
             ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
           } else {
             this.updateSelectedLayerStyles({

@@ -10,13 +10,14 @@
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(@click="handleValueModal")
-          input(class="body-2 text-gray-2 center record-selection" type="text" @keyup="setSize($event)" @blur="onBlur"
+          input(class="body-2 text-gray-2 center" type="text" @keyup="setSize($event)" @blur="onBlur"
             v-model.lazy="props.fontSize")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
-                    class="text-setting__value-selector"
+                    class="text-setting__value-selector record-selection"
                     v-click-outside="handleValueModal"
+                    :value="props.fontSize"
                     @update="handleValueUpdate")
         //- div(class="text-setting__font-stepper")
         //- svg-icon(class="pointer"
@@ -86,20 +87,15 @@ export default Vue.extend({
   },
   data() {
     return {
-      fontPreset: [
-        'sans-serif',
-        'Manrop',
-        'Lobster'
-      ],
       openColorPicker: false,
       openValueSelector: false
     }
   },
   mounted() {
-    if (this.currSelectedInfo.layers.length === 1) {
-      // this.$store.commit('text/SET_default')
-      TextUtils.updateTextPropsState()
-    }
+    // if (!TextUtils.getCurrLayer.layers) {
+    // this.$store.commit('text/SET_default')
+    TextUtils.updateTextPropsState()
+    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -168,6 +164,8 @@ export default Vue.extend({
       this.openValueSelector = !this.openValueSelector
     },
     handleValueUpdate(value: number) {
+      console.log(this.sel.start)
+      console.log(this.sel.end)
       TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
       TextUtils.updateTextPropsState()
     },

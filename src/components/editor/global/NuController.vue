@@ -170,12 +170,17 @@ export default Vue.extend({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    isActive() {
-      if (this.getLayerType === 'text' && !this.isActive && this.currSelectedInfo.layers.length === 1) {
-        this.contentEditable = false
-        const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+    isActive(val) {
+      if (this.getLayerType === 'text' && !val) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing: false
+        })
+        if (this.currSelectedInfo.layers.length === 1) {
+          this.contentEditable = false
+          const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+        }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
         TextUtils.updateTextPropsState()
       }

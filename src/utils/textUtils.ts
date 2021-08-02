@@ -63,40 +63,40 @@ class TextUtils {
 
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getLayer() { return store.getters.getLayer }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.isBlockProperty(propName)) {
-      if (this.currSelectedInfo.layers.length === 1) {
-        this.blockPropertyHandler(propName)
-      } else {
-        const tmpLayerGroup = this.getCurrLayer as ITmp
-        for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
-          if (tmpLayerGroup.layers[i].type === 'text') {
+      const currLayer = this.getCurrLayer
+      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
+        const groupLayer = currLayer
+        for (let i = 0; i < groupLayer.layers.length; i++) {
+          if (groupLayer.layers[i].type === 'text') {
             this.blockPropertyHandler(propName, i)
           }
         }
+      } else {
+        this.blockPropertyHandler(propName)
       }
     } else {
-      if (this.currSelectedInfo.layers.length === 1) {
-        this.spanPropertyHandler(propName, value, selStart, selEnd)
-      } else {
+      const currLayer = this.getCurrLayer
+      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
         const nan = {
           pIndex: NaN,
           sIndex: NaN,
           offset: NaN
         }
         /**
-         * Check the tmpLayerGroup's property indicated value
+         * Check the LayerGroup's property indicated value
          */
         let flag = false
         let propValue: number | string | undefined
-        const tmpLayerGroup = this.getCurrLayer as ITmp
-        for (let i = 0; i < tmpLayerGroup.layers.length && !flag; i++) {
-          if (tmpLayerGroup.layers[i].type === 'text') {
-            const tmpLayer = tmpLayerGroup.layers[i] as IText
+        const groupLayer = this.getCurrLayer
+        for (let i = 0; i < groupLayer.layers.length && !flag; i++) {
+          if (groupLayer.layers[i].type === 'text') {
+            const tmpLayer = groupLayer.layers[i] as IText
             const propBuff = this.propIndicator(
               {
                 pIndex: 0,
@@ -143,12 +143,14 @@ class TextUtils {
             }
           }
         }
-        for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
-          const layer = tmpLayerGroup.layers[i]
+        for (let i = 0; i < groupLayer.layers.length; i++) {
+          const layer = groupLayer.layers[i]
           if (layer.type === 'text') {
             this.spanPropertyHandler(propName, propValue, nan, nan, i)
           }
         }
+      } else {
+        this.spanPropertyHandler(propName, value, selStart, selEnd)
       }
     }
   }
@@ -189,7 +191,6 @@ class TextUtils {
     } else {
       config = GeneralUtils.deepCopy((this.getCurrLayer as ITmp).layers[tmpLayerIndex]) as IText
     }
-
     let start = {
       pIndex: 0,
       sIndex: 0,
@@ -200,8 +201,9 @@ class TextUtils {
       sIndex: 0,
       offset: 0
     }
-    // if (sel && !this.isSel(sel.start) && !this.isSel(selStart) && !this.isSel(selEnd)) {
+    console.log(sel)
     if (!sel && !this.isSel(selEnd)) {
+      console.log('qewqeqwerqwrfds')
       /**
        * If there is no selection given by either the window or the input params,
        * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
@@ -229,6 +231,8 @@ class TextUtils {
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
     }
+    console.log(start)
+    console.log(end)
     if (this.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
         const p = config.paragraphs[pIndex]
@@ -297,20 +301,12 @@ class TextUtils {
         case 'fontFamily':
           styles.font = value as string
           break
-        case 'bold':
-          styles.weight = prop.weight as string
+        default: {
+          const i = Object.keys(fontPropsMap).indexOf(propName)
+          const v = Object.values(fontPropsMap)[i]
+          styles[v] = prop[v]
           break
-        case 'underline':
-          styles.decoration = prop.decoration as string
-          break
-        case 'italic':
-          styles.style = prop.style as string
-          break
-        case 'color':
-          styles.color = value as string
-          break
-        default:
-          break
+        }
       }
       [start, end] = this.spanMerger(config.paragraphs, start, end)
       if (typeof tmpLayerIndex === 'undefined') {
