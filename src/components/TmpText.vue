@@ -44,7 +44,7 @@ export default Vue.extend({
                 {
                   text: 'Happy  ',
                   styles: {
-                    font: 'Lobster',
+                    font: 'Manrop',
                     weight: 'normal',
                     color: '#2EB8E6',
                     decoration: 'none',
@@ -56,7 +56,7 @@ export default Vue.extend({
                 {
                   text: 'newYear ',
                   styles: {
-                    font: 'normal',
+                    font: 'Manrop',
                     weight: 'normal',
                     color: '#000000',
                     decoration: 'none',
@@ -68,7 +68,7 @@ export default Vue.extend({
                 {
                   text: 'Mmnnhm',
                   styles: {
-                    font: 'normal',
+                    font: 'Manrop',
                     weight: 'normal',
                     color: '#2EB344',
                     decoration: 'none',
