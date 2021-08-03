@@ -53,6 +53,22 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    fetch('https://d28vpyd7xcfiwl.cloudfront.net/NuVCei56OafX/edit/temp.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMjh2cHlkN3hjZml3bC5jbG91ZGZyb250Lm5ldC9OdVZDZWk1Nk9hZlgvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTYyNjgyNDI0ODE0MH19fV19&Key-Pair-Id=KEUNR6VVD9BE6&Signature=LLRBIP6M28S-3M834il0LBWSgFFZstzmiOtXGxGi0UOYWN~5BCVrCTMW5KQBpuNs595vXnn27QO6svNN8YbgYVT4odxVb6IOgChZ31t9DLHOFEvukti7pRfVN5tr4QDywuc~zTzkbCm1tafPQs5FQZO9zsxAwJ3bMi7jrXi6kAUGWflq52VB6lmMq1AaiGKyAcaRvuMia1C0yVEZ8yS~GUI4fr7NROkht6mAxU6Lh0W1Bp-o7jtfXw7gsREsJbvGAKG1Msw~b1riWMw7L-yJ~v7vpDsggqZ97-qwZ36DRkt-N2BEARdqKAJKZn7MjYsF-Z4f3SlN4ksrof3lNiiPtg__')
+      .then((response) => {
+        return response.json()
+      })
+      .then((myJson) => {
+        this.$store.commit('SET_pages', myJson)
+      })
+    /*
+    fetch('https://template.vivipic.com/svg/file.json')
+      .then((response) => {
+        return response.json()
+      })
+      .then((myJson) => {
+        this.$store.commit('SET_pages', myJson)
+      })
+    */
   },
   computed: {
     ...mapGetters({

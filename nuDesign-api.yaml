@@ -111,7 +111,7 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  "/put-asset/{asset_id}/{category_id}":
+  "/put-asset/{asset_id}/{category}":
     post:
       description: 上傳使用者個人檔案後呼叫，將檔案資訊儲存在資料庫
       consumes:
@@ -119,11 +119,11 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: category_id
+        - name: category
           in: path
           description: |-
-            Category id.
-            Allowed characters: 0-9.
+            Asset category (image, font, design...)
+            Allowed characters: a-z.
           required: true
           type: string
         - name: asset_id

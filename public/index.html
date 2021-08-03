@@ -13,5 +13,14 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <script>
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "https://api.vivipic.com/list-svg", true);
+      xhr.setRequestHeader('content-type', 'application/json');
+      xhr.send(JSON.stringify({ token: '122' }));
+      xhr.onload = function() {
+        console.log(this);
+      };
+      </script>
   </body>
 </html>
