@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210729"
+  version: "20210803"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -183,6 +183,23 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /register:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: registerInput
+          required: true
+          schema:
+            $ref: "#/definitions/registerInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
   /svg-parser:
     post:
       description: 解析svg檔並轉換成json（APP不需使用）
@@ -365,6 +382,16 @@ definitions:
               - host
               - json
               - preview
+  registerInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - meta
+        properties:
+          meta:
+            type: string
+            description: meta data
   listTemplateInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -427,15 +454,23 @@ definitions:
               upload_map: Map for uploading files to path in private bucket
 
               upload_admin_map: Map for uploading files to path in public bucket.
-               How to upload file:
+               How to upload asset file:
               1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
 
-              2. Append key with name as 'key' and value as `${uploadMap.path}${assetId}/original`. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters
 
               3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`
 
               4. Append key with name as 'file' and value as the File Object of the selected file or Blob
                5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
             properties:
               download_url:
                 type: string
