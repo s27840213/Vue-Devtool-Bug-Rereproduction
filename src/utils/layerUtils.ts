@@ -29,6 +29,7 @@ class LayerUtils {
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
     store.commit('SET_lastSelectedLayerIndex', -1)
+    ZindexUtils.reassignZindex(store.getters.getCurrSelectedPageIndex)
   }
 
   getLayer(pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | ITmp {
