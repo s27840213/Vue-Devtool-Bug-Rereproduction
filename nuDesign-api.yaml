@@ -457,9 +457,9 @@ definitions:
                How to upload asset file:
               1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
 
-              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
 
-              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
 
               4. Append key with name as 'file' and value as the File Object of the selected file or Blob
                5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
