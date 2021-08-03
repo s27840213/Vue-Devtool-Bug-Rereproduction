@@ -61,7 +61,7 @@ export const tmpFontsPreset = [
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
 
-  get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
+  get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getLayer() { return store.getters.getLayer }
@@ -436,7 +436,7 @@ class TextUtils {
    * @param prop A string refers to the desired props: fontSize/fontFamily/color/weight/style...
    * @returns The desired props value accord to the current selection range.
    */
-  propReader (propName: string): string | number |undefined {
+  propReader(propName: string): string | number | undefined {
     if (this.currSelectedInfo.layers.length === 1) {
       return this.propReadOfLayer(propName)
     } else {
@@ -534,7 +534,7 @@ class TextUtils {
     return isMulti ? undefined : origin
   }
 
-  propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key:string]: string | number } {
+  propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {
     const prop: { [key: string]: string | number } = {}
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
@@ -885,7 +885,7 @@ class TextUtils {
     })
   }
 
-  updateTextPropsState (prop: { [key: string]: string | number | boolean } | undefined = undefined) {
+  updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
     if (typeof prop !== 'undefined') {
       store.commit('text/UPDATE_Props', prop)
       return
@@ -939,7 +939,7 @@ class TextUtils {
           value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
           break
         }
-        case 'font' : {
+        case 'font': {
           const font = tmpFontsPreset.find(font => font.face === this.propReader('fontFamily'))?.name
           value = typeof font === 'string' ? font : 'multi-fonts'
           break

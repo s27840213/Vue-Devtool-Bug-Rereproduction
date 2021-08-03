@@ -238,7 +238,7 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   &:focus {
-    outline: 2px solid red;
+    outline: 1px solid setColor(blue-2);
   }
 }
 
