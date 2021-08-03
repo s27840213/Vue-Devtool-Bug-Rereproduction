@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="text-setting" @mousedown="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
-    property-bar(class="pointer" @click.native="openFontsPanel")
+    property-bar(class="pointer record-selection" @click.native="openFontsPanel")
       span(class="body-2 text-gray-2") {{ props.font }}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
@@ -15,18 +15,19 @@
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
-                    class="text-setting__value-selector"
+                    class="text-setting__value-selector record-selection"
                     v-click-outside="handleValueModal"
+                    :value="props.fontSize"
                     @update="handleValueUpdate")
         //- div(class="text-setting__font-stepper")
         //- svg-icon(class="pointer"
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color")
         div(class="color-slip"
-          :style="{'background-color': props.color}"
+          :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10")
-          input(class="body-2 text-gray-2" v-model.lazy="props.color" @keyup="setColor($event)")
+          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @keyup="setColor($event)")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"
         v-click-outside="handleColorModal"
@@ -47,15 +48,15 @@
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
       property-bar
-        input(class="body-2 text-gray-2" type="text" v-model.lazy="props.lineHeight" @keyup="setHeight($event)" @blur="onBlur")
+        input(class="body-2 text-gray-2 record-selection" type="text" v-model.lazy="props.lineHeight" @keyup="setHeight($event)" @blur="onBlur")
         svg-icon(class="pointer"
           :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
       property-bar
-        input(class="body-2 text-gray-2" type="text" v-model.lazy="props.fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
+        input(class="body-2 text-gray-2 record-selection" type="text" v-model.lazy="props.fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
         svg-icon(class="pointer"
           :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
       property-bar
-        input(class="body-2 text-gray-2" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
+        input(class="body-2 text-gray-2 record-selection" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
 </template>
@@ -86,22 +87,15 @@ export default Vue.extend({
   },
   data() {
     return {
-      fontPreset: [
-        'sans-serif',
-        'Manrop',
-        'Lobster'
-      ],
       openColorPicker: false,
       openValueSelector: false
     }
   },
   mounted() {
-    if (this.currSelectedInfo.layers.length === 1) {
-      TextUtils.updateTextPropsState()
-    }
-  },
-  destroyed() {
-    this.$store.commit('text/SET_default')
+    // if (!TextUtils.getCurrLayer.layers) {
+    // this.$store.commit('text/SET_default')
+    TextUtils.updateTextPropsState()
+    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -157,20 +151,21 @@ export default Vue.extend({
           sIndex: NaN,
           offset: NaN
         }
-        const tmpLayerGroup = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex))
         for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
           const layer = this.currSelectedInfo.layers[i]
           if (layer.type === 'text') {
-            TextUtils.spanPropertyHandler('color', color, nan, nan, i, tmpLayerGroup)
+            TextUtils.spanPropertyHandler('color', color, nan, nan, i)
           }
         }
       }
-      // TextUtils.updateTextPropsState()
+      TextUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
     },
     handleValueUpdate(value: number) {
+      console.log(this.sel.start)
+      console.log(this.sel.end)
       TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
       TextUtils.updateTextPropsState()
     },
@@ -229,17 +224,8 @@ export default Vue.extend({
     },
     textRangeRecorder(e: MouseEvent) {
       const sel = TextUtils.getSelection()
-      console.log((e.target as HTMLElement).nodeName)
-      if ((e.target as HTMLElement).nodeName === 'INPUT' && sel) {
+      if ((e.target as HTMLElement).classList.contains('record-selection') && sel) {
         TextUtils.updateSelection(sel.start, sel.end)
-      } else if ((e.target as HTMLElement) === this.$refs.body as HTMLElement) {
-        // console.log((e.target as HTMLElement).nodeName)
-        const nan = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: NaN
-        }
-        TextUtils.updateSelection(nan, nan)
       }
     },
     setSize(e: KeyboardEvent) {

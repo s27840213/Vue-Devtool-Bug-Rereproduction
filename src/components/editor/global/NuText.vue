@@ -19,7 +19,7 @@ import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 
@@ -32,7 +32,8 @@ export default Vue.extend({
   components: { NuCurveText },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      currSelectedInfo: 'getCurrSelectedInfo'
     }),
     updateTextSize(): any {
       const config = this.config as IText
@@ -57,49 +58,30 @@ export default Vue.extend({
          * If below conditions is pass, means the text-properties changes,
          * the layer width/height needs to refresh
          */
-        if (this.config.isTyping && this.config.active) return
+        if (this.config.isTyping) return
         this.$nextTick(() => {
-          // console.log('ddd')
-          // const text = this.$refs.text as HTMLElement
-          // const transform = text.style.transform
-          // const isVertical = this.config.styles.writingMode.includes('vertical')
-          // text.style.transform = `rotate(${-this.config.styles.rotate}deg)`
-
-          // if (isVertical) {
-          //   text.style.height = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
-          //   text.style.width = 'max-content'
-          // } else {
-          //   text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
-          //   text.style.height = 'max-content'
-          // }
-
-          // const textHW = {
-          //   width: text.getBoundingClientRect().width / (this.scaleRatio / 100),
-          //   height: text.getBoundingClientRect().height / (this.scaleRatio / 100)
-          // }
-
-          // textHW.width += isVertical ? TextUtils.MARGIN_FONTSIZE : 0
-          // textHW.height += isVertical ? 0 : TextUtils.MARGIN_FONTSIZE
-
-          // text.style.transform = transform
-          // text.style.width = isVertical ? 'auto' : ''
-          // text.style.height = isVertical ? '' : 'auto'
           const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-
-          ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+          console.log(this.currSelectedInfo.layers.length)
+          if (this.currSelectedInfo.layers.length === 1) {
+            ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+          } else {
+            this.updateSelectedLayerStyles({
+              styles: {
+                width: textHW.width,
+                height: textHW.height
+              },
+              layerIndex: this.layerIndex
+            })
+          }
         })
       },
       deep: true
     }
-    // 'config.active'() {
-    //   const text = this.$refs.text as HTMLElement
-    //   if (!this.config.active) {
-    //     text.style.width = `${this.config.styles.width / this.getLayerScale}px`
-    //     text.style.height = `${this.config.styles.height / this.getLayerScale}px`
-    //   }
-    // }
   },
   methods: {
+    ...mapMutations({
+      updateSelectedLayerStyles: 'UPDATE_selectedLayersStyles'
+    }),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
     },

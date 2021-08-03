@@ -6,7 +6,7 @@
     div(v-for="font in fontPreset"
         class="panel-fonts__font pointer"
         :style="{'font-family': font.face}"
-        @click="setFont(font.face)")
+        @click="setFont(font)")
       span {{font.name}}
     div
       svg-icon(class="panel-fonts__close pointer"
@@ -21,10 +21,10 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import FileUtils from '@/utils/fileUtils'
-import TextUtils from '@/utils/textUtils'
+import TextUtils, { tmpFontsPreset } from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -33,47 +33,11 @@ export default Vue.extend({
   data() {
     return {
       FileUtils,
-      fontPreset: [
-        {
-          name: 'sans-serif',
-          face: 'sans-serif'
-        },
-        {
-          name: 'Manrop',
-          face: 'Manrop'
-        },
-        {
-          name: 'Lobster',
-          face: 'Lobster'
-        },
-        {
-          name: '思源黑體',
-          face: 'Noto Sans TC'
-        },
-        {
-          name: '標楷體',
-          face: 'cwTeXKai'
-        },
-        {
-          name: '獅尾四季春',
-          face: 'SweiSpringCJKtc-Regular'
-        },
-        {
-          name: '裝甲明朝',
-          face: 'SoukouMincho'
-        },
-        {
-          name: '瀨戶字體',
-          face: 'SetoFont'
-        },
-        {
-          name: '思源柔體',
-          face: 'GenJyuuGothicX-P-Regular'
-        }
-      ]
+      fontPreset: tmpFontsPreset
     }
   },
   computed: {
+    ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -91,10 +55,9 @@ export default Vue.extend({
     closeFontsPanel() {
       this.$emit('closeFontsPanel')
     },
-    setFont(font: string) {
-      TextUtils.onPropertyClick('fontFamily', font)
-      TextUtils.updateTextPropsState({ font })
-      this.$emit('closeFontsPanel')
+    setFont(font: { name: string, face: string }) {
+      TextUtils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
+      TextUtils.updateTextPropsState({ font: font.name })
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]

@@ -4,6 +4,7 @@
     nu-layer(v-for="(layer,index) in config.layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
+      :layerIndex="index"
       :config="layer"
       :style="{'outline': '2px solid #7190CC'}")
 </template>

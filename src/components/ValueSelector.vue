@@ -13,9 +13,17 @@
 import Vue from 'vue'
 
 export default Vue.extend({
+  props: {
+    value: String
+  },
   data() {
     return {
       currentValue: NaN
+    }
+  },
+  mounted() {
+    if (typeof this.value !== 'undefined') {
+      this.currentValue = parseInt(this.value)
     }
   },
   methods: {

@@ -169,19 +169,26 @@ export default Vue.extend({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    isActive() {
-      if (this.getLayerType === 'text' && !this.isActive) {
-        this.contentEditable = false
-        const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+    isActive(val) {
+      if (this.getLayerType === 'text' && !val) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing: false
+        })
+        if (this.currSelectedInfo.layers.length === 1) {
+          this.contentEditable = false
+          const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+        }
+      } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
+        TextUtils.updateTextPropsState()
       }
     },
     sel: {
       handler(val) {
-        if (!TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-          console.log('update the para')
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText))
+        const text = this.$refs.text as HTMLElement
+        if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
+          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
         }
       },
       deep: true
@@ -250,18 +257,10 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
-      // console.log(Math.ceil(this.config.styles.width / this.getLayerScale))
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        // width: `${Math.ceil(this.config.styles.width / this.getLayerScale)}px`,
-        // height: `${this.config.styles.height / this.getLayerScale}px`,
-        // width: 'max-content',
-        // height: 'max-content',
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : 'auto',
-        // transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
-        // textAlign: this.config.styles.align,
-        // writingMode: this.config.styles.writingMode
         opacity: this.isTextEditing ? 1 : 0
       }
     },
@@ -484,8 +483,6 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       const ratio = {
-        // width: width / (this.config.styles.initWidth * this.config.styles.scaleX),
-        // height: height / (this.config.styles.initHeight * this.config.styles.scaleY)
         width: width / (this.getLayerWidth / this.getLayerScale),
         height: height / (this.getLayerHeight / this.getLayerScale)
       }
@@ -896,7 +893,6 @@ export default Vue.extend({
     onTyping(e: KeyboardEvent, start: ISelection) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
-        // if (this.isComposing) return
 
         const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
         const sel = TextUtils.getSelection()
@@ -1017,21 +1013,6 @@ export default Vue.extend({
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-      // this.$nextTick(() => {
-      //   text.style.width = 'max-content'
-      //   text.style.height = 'max-content'
-      //   console.log(text.getBoundingClientRect().width)
-
-      //   const newHW = {
-      //     width: text.getBoundingClientRect().width / (this.scaleRatio / 100),
-      //     height: text.getBoundingClientRect().height / (this.scaleRatio / 100)
-      //   }
-      //   console.log(newHW)
-      //   if (newHW.height !== textHW.height && count < 5) this.textSizeRefresh(++count)
-      //   text.style.width = isVertical ? 'auto' : ''
-      //   text.style.height = isVertical ? '' : 'auto'
-      //   text.style.transform = ''
-      // })
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return
