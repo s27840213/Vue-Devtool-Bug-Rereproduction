@@ -16,8 +16,8 @@
             spellcheck="false"
             v-model="color"
             maxlength="7")
-        svg-icon(class="pointer"
-        :iconName="'color-picker'" :iconWidth="'20px'" :iconColor="'gray-2'")
+        //- svg-icon(class="pointer"
+        //- :iconName="'color-picker'" :iconWidth="'20px'" :iconColor="'gray-2'")
       div(class="color-picker__colors")
         div(class="text-left")
           span(class="body-1") Brand Kit
@@ -110,6 +110,7 @@ export default Vue.extend({
         }
       }
       console.log('#' + result)
+      this.$emit('update', `#${result}`)
       return `#${result}`
     }
   },
@@ -131,7 +132,6 @@ export default Vue.extend({
     },
     updateHex(val: any) {
       this.color = val.hex
-      this.$emit('update', val.hex)
     },
     colorStyles(color: string) {
       return {

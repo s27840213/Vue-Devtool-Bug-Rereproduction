@@ -23,8 +23,6 @@
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
         tabindex="0")
-      color-picker(v-if="isColorPickerOpened"
-        tabindex="0")
 </template>
 
 <script lang="ts">
