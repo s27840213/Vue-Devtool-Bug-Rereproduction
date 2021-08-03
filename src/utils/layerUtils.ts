@@ -3,6 +3,7 @@ import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
+import FocusUtils from './focusUtils'
 
 class LayerUtils {
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
@@ -13,9 +14,8 @@ class LayerUtils {
     ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
     store.commit('SET_lastSelectedPageIndex', pageIndex)
-    const targetPage = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
-    targetPage.focus()
-    GroupUtils.select([store.getters.getLayers(pageIndex).length - 1])
+    FocusUtils.focusElement(`.nu-page-${pageIndex}`, false)
+    GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
   }
 
   addLayersToPos(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, pos: number) {
@@ -36,7 +36,7 @@ class LayerUtils {
   }
 
   getTmpLayer(): ITmp {
-    return store.getters.getLayer(store.getters.getLastSelectedPageIndex, store.getters.getCurrSelectedIndex)
+    return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
   updateLayersOrder(pageIndex: number) {

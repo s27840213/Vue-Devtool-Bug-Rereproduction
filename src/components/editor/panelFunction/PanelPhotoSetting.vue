@@ -42,7 +42,7 @@ export default Vue.extend({
     opacity: {
       get(): string | number {
         if (!this.isGroup) {
-          return this.currSelectedInfo.layers.length === 1 ? this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
+          return this.currSelectedInfo.layers.length === 1 ? this.getLayer(this.currSelectedInfo.pageIndex, this.currSelectedIndex).styles.opacity
             : [...new Set(this.currSelectedInfo.layers.map((layer: ITmp | IShape | IText | IImage | IGroup) => {
               return layer.styles.opacity
             }))].length === 1 ? this.currSelectedInfo.layers[0].styles.opacity : 'mix'
@@ -59,7 +59,7 @@ export default Vue.extend({
         if (!this.isGroup) {
           if (this.currSelectedInfo.layers.length === 1) {
             this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: this.lastSelectedPageIndex,
+              pageIndex: this.currSelectedInfo.pageIndex,
               layerIndex: this.currSelectedIndex,
               styles: {
                 opacity: value

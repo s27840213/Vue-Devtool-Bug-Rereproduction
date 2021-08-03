@@ -105,8 +105,7 @@ class MappingUtils {
     }
   }
 
-  mappingLayers(indexs: number[]) {
-    const pageIndex = store.getters.getLastSelectedPageIndex
+  mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
     return indexs.map(index => layers[index])
   }

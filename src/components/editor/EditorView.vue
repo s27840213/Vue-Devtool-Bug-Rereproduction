@@ -1,7 +1,10 @@
 <template lang="pug">
-  div(class="editor-view bg-gray-5"  @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
+  div(class="editor-view bg-gray-5"
+      @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     div(class="editor-canvas")
-      div(class="page-container" ref="container")
+      div(class="page-container"
+          ref="container"
+          @click.left.self="outerClick($event)")
         nu-page(v-for="(page,index) in pages"
           :ref="`page-${index}`"
           :key="`page-${index}`"
@@ -26,6 +29,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
+import PageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -36,7 +40,8 @@ export default Vue.extend({
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
-      pageIndex: -1
+      pageIndex: -1,
+      currActivePageIndex: -1
     }
   },
   mounted() {
@@ -45,11 +50,16 @@ export default Vue.extend({
     const editorViewBox = this.$el as HTMLElement
     const resizeRatio = Math.min(editorViewBox.clientWidth / this.pageSize.width, editorViewBox.clientHeight / this.pageSize.height) * 0.8
     this.setPageScaleRatio(Math.round(this.pageScaleRatio * resizeRatio))
+    this.$nextTick(() => {
+      this.currActivePageIndex = PageUtils.activeMostCentralPage()
+    })
+    document.addEventListener('blur', this.detectBlur, true)
   },
   computed: {
     ...mapGetters({
       pages: 'getPages',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
@@ -85,8 +95,13 @@ export default Vue.extend({
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio'
     }),
+    outerClick(e: MouseEvent) {
+      this.setCurrActivePageIndex(-1)
+      PageUtils.activeMostCentralPage()
+    },
     selectStart(e: MouseEvent) {
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
         ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
@@ -110,6 +125,11 @@ export default Vue.extend({
         clientY: this.currentAbsPos.y
       })
       document.documentElement.dispatchEvent(event)
+
+      if (this.geCurrActivePageIndex === -1) {
+        PageUtils.activeMostCentralPage()
+      }
+      // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
       GroupUtils.deselect()
@@ -139,7 +159,7 @@ export default Vue.extend({
       if (layerIndexs.length > 0) {
         console.log(`Overlap num: ${layerIndexs.length}`)
         // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(layerIndexs)
+        GroupUtils.select(this.pageIndex, layerIndexs)
       }
     },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
@@ -160,6 +180,17 @@ export default Vue.extend({
         pageIndex: this.pageIndex,
         layerIndexs: [...layerIndexs]
       })
+    },
+    detectBlur(event: Event) {
+      // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
+      // or we just put the function in this callback function, the activeElement will always get 'BODY'
+      setTimeout(() => {
+        this.$nextTick(() => {
+          if (document.activeElement?.tagName === 'BODY') {
+            this.geCurrActivePageIndex === -1 ? PageUtils.activeMostCentralPage() : PageUtils.activeCurrActivePage()
+          }
+        })
+      }, 0)
     }
   }
 })
