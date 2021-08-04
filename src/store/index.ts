@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
@@ -10,6 +10,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import photos from '@/store/photos'
 import color from '@/store/module/color'
 import text from '@/store/text'
+import objects from '@/store/objects'
 
 Vue.use(Vuex)
 
@@ -124,7 +125,8 @@ const getDefaultState = (): IEditorState => ({
   isLayerDropdownsOpened: false,
   isPageDropdownsOpened: false,
   isColorPickerOpened: false,
-  currSelectedPhotoInfo: {}
+  currSelectedPhotoInfo: {},
+  jsonMap: {}
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -224,6 +226,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedPhotoInfo(state: IEditorState) {
     return state.currSelectedPhotoInfo
+  },
+  getJson(state: IEditorState) {
+    return (id: string) => state.jsonMap[id]
   }
 }
 
@@ -492,6 +497,26 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText)[]
     Object.assign(layers[subLayerIndex].styles, styles)
+  },
+  SET_contentJson(state: IEditorState, json: { [key: string]: any }) {
+    Object.assign(state.jsonMap, json)
+  },
+  UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
+    const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data
+    const targetLayer = state.pages[pageIndex].layers[layerIndex] as IGroup | ITmp
+    if (targetLayer.layers) {
+      targetLayer.layers.forEach((layer, idx) => {
+        const matchType = type ? type.includes(layer.type) : true
+        const matchSubLayerIndex = typeof subLayerIndex === 'undefined' || idx === subLayerIndex
+        if (matchType && matchSubLayerIndex) {
+          props && Object.assign(targetLayer.layers[idx], props)
+          styles && Object.assign(targetLayer.layers[idx].styles, styles)
+        }
+      })
+    } else {
+      props && Object.assign(targetLayer, props)
+      styles && Object.assign(targetLayer.styles, styles)
+    }
   }
 }
 
@@ -531,6 +556,7 @@ export default new Vuex.Store({
   modules: {
     photos,
     text,
-    color
+    color,
+    objects
   }
 })

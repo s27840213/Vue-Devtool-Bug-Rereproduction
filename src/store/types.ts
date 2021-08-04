@@ -40,7 +40,8 @@ export interface IEditorState {
     userLink: string,
     vendor: string,
     tags: string[]
-  }
+  },
+  jsonMap: any
 }
 
 export enum SidebarPanelType {
@@ -70,4 +71,13 @@ export enum LayerType {
   'nu-shape',
   'nu-text',
   'nu-group'
+}
+
+export interface ISpecLayerData {
+  pageIndex: number,
+  layerIndex: number,
+  subLayerIndex?: number,
+  props?: { [key: string]: any },
+  styles?: { [key: string]: any },
+  type?: string[]
 }
