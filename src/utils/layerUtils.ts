@@ -4,6 +4,7 @@ import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
 import FocusUtils from './focusUtils'
+import { ISpecLayerData } from '@/store/types'
 
 class LayerUtils {
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
@@ -75,6 +76,18 @@ class LayerUtils {
       pageIndex,
       indexs,
       props
+    })
+  }
+
+  updateSpecLayerData(data: ISpecLayerData) {
+    const { pageIndex, layerIndex, subLayerIndex, styles, props, type } = data
+    store.commit('UPDATE_specLayerData', {
+      pageIndex,
+      layerIndex,
+      subLayerIndex,
+      props,
+      styles,
+      type
     })
   }
 }
