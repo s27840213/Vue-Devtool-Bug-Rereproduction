@@ -92,10 +92,10 @@ class MappingUtils {
         break
       }
       case 'unlock': {
-        const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+        const currSelecteInfo = store.getters.getCurrSelectedInfo
         const currSelectedIndex = store.getters.getCurrSelectedIndex
-        const isLocked = store.getters.getLayer(lastSelectedPageIndex, currSelectedIndex).locked
-        layerUtils.updateLayerProps(lastSelectedPageIndex, currSelectedIndex, { locked: !isLocked })
+        const isLocked = store.getters.getLayer(currSelecteInfo.pageIndex, currSelecteInfo.index).locked
+        layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: !isLocked })
         break
       }
       case 'trash': {
@@ -105,8 +105,7 @@ class MappingUtils {
     }
   }
 
-  mappingLayers(indexs: number[]) {
-    const pageIndex = store.getters.getLastSelectedPageIndex
+  mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
     return indexs.map(index => layers[index])
   }

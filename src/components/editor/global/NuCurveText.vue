@@ -25,6 +25,7 @@ export default Vue.extend({
   data () {
     return {
       transforms: [] as string[],
+      textHeight: [] as number[],
       minHeight: 0,
       areaHeight: 0,
       y: 0
@@ -167,11 +168,12 @@ export default Vue.extend({
   },
   methods: {
     styles(styles: any, idx: number) {
-      const { transforms, bend } = this
+      const { transforms, bend, textHeight, minHeight } = this
+      const baseline = `${(minHeight - textHeight[idx]) / 2}px`
       return Object.assign(
         CssConveter.convertFontStyle(styles),
         { transform: transforms[idx] || 'none' },
-        bend >= 0 ? { top: 0 } : { bottom: 0 }
+        bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
     handleCurveSpan (spans: any[]) {
@@ -180,11 +182,15 @@ export default Vue.extend({
         this.$nextTick(() => {
           const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
           const textWidth = []
+          const textHeight = []
           let minHeight = 0
           for (let idx = 0; idx < eleSpans.length; idx++) {
-            textWidth.push(eleSpans[idx].offsetWidth)
-            minHeight = Math.max(minHeight, eleSpans[idx].offsetHeight)
+            const { offsetWidth, offsetHeight } = eleSpans[idx]
+            textWidth.push(offsetWidth)
+            textHeight.push(offsetHeight)
+            minHeight = Math.max(minHeight, offsetHeight)
           }
+          this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
         })

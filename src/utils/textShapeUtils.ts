@@ -66,7 +66,7 @@ class Controller {
       TextUtils.updateTextStyles(
         TextUtils.pageIndex,
         TextUtils.layerIndex,
-        { textShape }
+        { textShape, writingMode: 'horizontal-tb' }
       )
     }
   }

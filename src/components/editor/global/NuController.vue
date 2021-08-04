@@ -81,7 +81,6 @@ import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import { ISelection } from '@/interfaces/text'
-import { transform } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -188,7 +187,7 @@ export default Vue.extend({
       }
     },
     sel: {
-      handler (val) {
+      handler(val) {
         const text = this.$refs.text as HTMLElement
         if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
@@ -312,7 +311,6 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
-      console.log('move start')
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -329,7 +327,7 @@ export default Vue.extend({
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
           if (this.pageIndex === this.lastSelectedPageIndex) {
-            GroupUtils.select([targetIndex])
+            GroupUtils.select(this.pageIndex, [targetIndex])
           }
           if (!this.config.locked) {
             this.isControlling = true
@@ -350,14 +348,22 @@ export default Vue.extend({
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
-          if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && this.currSelectedInfo.index >= 0) {
-            GroupUtils.deselect()
+          // 沒按 shift/crtl/cmd 其中一個按鍵， 且目前已有選擇某 Layer
+          if (this.currSelectedInfo.index >= 0) {
+            if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+              GroupUtils.deselect()
+              targetIndex = this.config.styles.zindex - 1
+              this.setLastSelectedPageIndex(this.pageIndex)
+              this.setLastSelectedLayerIndex(this.layerIndex)
+            }
+            if (this.pageIndex === this.lastSelectedPageIndex) {
+              GroupUtils.select(this.pageIndex, [targetIndex])
+            }
+          } else {
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
-          }
-          if (this.pageIndex === this.lastSelectedPageIndex) {
-            GroupUtils.select([targetIndex])
+            GroupUtils.select(this.pageIndex, [targetIndex])
           }
         }
       }
@@ -1022,7 +1028,7 @@ export default Vue.extend({
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
         if (this.currSelectedInfo.index < 0) {
-          GroupUtils.select([this.layerIndex])
+          GroupUtils.select(this.pageIndex, [this.layerIndex])
         }
         this.$nextTick(() => {
           const el = document.querySelector('.dropdowns--layer') as HTMLElement

@@ -511,7 +511,7 @@ export default Vue.extend({
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
         if (this.currSelectedInfo.index < 0) {
-          GroupUtils.select([this.layerIndex])
+          // GroupUtils.select([this.layerIndex])
         }
         this.$nextTick(() => {
           const el = document.querySelector('.dropdowns--layer') as HTMLElement

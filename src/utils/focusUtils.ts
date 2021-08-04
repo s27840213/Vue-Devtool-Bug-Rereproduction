@@ -8,9 +8,9 @@ class FocusUtils {
     targetPage.focus()
   }
 
-  focusElment(el: string) {
+  focusElement(el: string, scrollTo: boolean) {
     const target = document.querySelector(el) as HTMLElement
-    target.focus()
+    target.focus({ preventScroll: scrollTo })
   }
 }
 

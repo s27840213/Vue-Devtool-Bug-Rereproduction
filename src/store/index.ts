@@ -106,9 +106,11 @@ const getDefaultState = (): IEditorState => ({
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   lastSelectedPageIndex: 0,
+  currActivePageIndex: -1,
   lastSelectedLayerIndex: -1,
   clipboard: [],
   currSelectedInfo: {
+    pageIndex: -1,
     index: -1,
     layers: [],
     types: new Set<string>()
@@ -172,6 +174,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLastSelectedPageIndex(state: IEditorState): number {
     return state.lastSelectedPageIndex
   },
+  getCurrActivePageIndex(state: IEditorState): number {
+    return state.currActivePageIndex
+  },
   getLastSelectedLayerIndex(state: IEditorState): number {
     return state.lastSelectedLayerIndex
   },
@@ -179,6 +184,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.clipboard
   },
   getCurrSelectedInfo(state: IEditorState): {
+    pageIndex: number,
     index: number,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
     types: Set<string>
@@ -191,6 +197,9 @@ const getters: GetterTree<IEditorState, unknown> = {
     types: Set<string>
   } {
     return state.currSubSelectedInfo
+  },
+  getCurrSelectedPageIndex(state: IEditorState) {
+    return state.currSelectedInfo.pageIndex
   },
   getCurrSelectedIndex(state: IEditorState) {
     return state.currSelectedInfo.index
@@ -245,6 +254,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_lastSelectedPageIndex(state: IEditorState, index: number) {
     state.lastSelectedPageIndex = index
   },
+  SET_currActivePageIndex(state: IEditorState, index: number) {
+    state.currActivePageIndex = index
+  },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
   },
@@ -264,13 +276,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
-  },
-  REMOVE_backgroundImage(state: IEditorState) {
-    Object.assign(state.pages[state.lastSelectedPageIndex].backgroundImage, {
-      src: 'none',
-      posX: -1,
-      posY: -1
-    })
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -333,43 +338,42 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
   },
   UPDATE_layerOrder(state: IEditorState, updateInfo: { type: string }): void {
-    const lastSelectedPageIndex = state.lastSelectedPageIndex
     const layerIndex = state.currSelectedInfo.index
-    const layerNum = state.pages[lastSelectedPageIndex].layers.length
+    const layerNum = state.pages[state.currSelectedInfo.pageIndex].layers.length
     switch (updateInfo.type) {
       case 'front': {
-        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
-        state.pages[lastSelectedPageIndex].layers.push(layer[0])
+        const layer = state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex, 1)
+        state.pages[state.currSelectedInfo.pageIndex].layers.push(layer[0])
         state.currSelectedInfo.index = layerNum - 1
-        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        zindexUtils.reassignZindex(state.currSelectedInfo.pageIndex)
         break
       }
       case 'back': {
-        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
-        state.pages[lastSelectedPageIndex].layers.unshift(layer[0])
+        const layer = state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex, 1)
+        state.pages[state.currSelectedInfo.pageIndex].layers.unshift(layer[0])
         state.currSelectedInfo.index = 0
-        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        zindexUtils.reassignZindex(state.currSelectedInfo.pageIndex)
         break
       }
       case 'forward': {
         if (layerIndex === layerNum - 1) {
-          zindexUtils.reassignZindex(lastSelectedPageIndex)
+          zindexUtils.reassignZindex(state.currSelectedInfo.pageIndex)
           break
         }
-        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
-        state.pages[lastSelectedPageIndex].layers.splice(layerIndex + 1, 0, ...layer)
+        const layer = state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex, 1)
+        state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex + 1, 0, ...layer)
         state.currSelectedInfo.index = layerIndex + 1
-        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        zindexUtils.reassignZindex(state.currSelectedInfo.pageIndex)
         break
       }
       case 'backward': {
         if (layerIndex === 0) {
           break
         }
-        const layer = state.pages[lastSelectedPageIndex].layers.splice(layerIndex, 1)
-        state.pages[lastSelectedPageIndex].layers.splice(layerIndex - 1, 0, ...layer)
+        const layer = state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex, 1)
+        state.pages[state.currSelectedInfo.pageIndex].layers.splice(layerIndex - 1, 0, ...layer)
         state.currSelectedInfo.index = layerIndex - 1
-        zindexUtils.reassignZindex(lastSelectedPageIndex)
+        zindexUtils.reassignZindex(state.currSelectedInfo.pageIndex)
         break
       }
     }
@@ -394,18 +398,18 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number }, layerIndex?: number }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
       if (typeof updateInfo.layerIndex !== 'undefined') {
-        (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.layerIndex].styles[k] = v
+        (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.layerIndex].styles[k] = v
       } else {
-        (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+        (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
           layer.styles[k] = v
         })
       }
     })
-    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_selectedTextParagraphs(state: IEditorState, updateInfo: { tmpLayerIndex: number, paragraphs: [IParagraph] }) {
-    ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
-    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
+    state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number }}) {
     const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
@@ -418,11 +422,11 @@ const mutations: MutationTree<IEditorState> = {
     state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
-    (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
     Object.assign(state.currSelectedInfo, {
-      layers: (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+      layers: (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
     })
   },
   // DELETE_textParagraphsSpans(state: IEditorState, deleteInfo: { pageIndex: number, layerIndex: number, pIndex: number | number[], sIndex: number | number[] }) {
@@ -454,7 +458,7 @@ const mutations: MutationTree<IEditorState> = {
       console.log('You didn\'t select any layer')
       return
     }
-    state.pages[state.lastSelectedPageIndex].layers.splice(index, 1)
+    state.pages[state.currSelectedInfo.pageIndex].layers.splice(index, 1)
   },
   SET_clipboard(state: IEditorState, tmpLayer: IShape | IText | IImage | IGroup) {
     state.clipboard = [JSON.parse(JSON.stringify(tmpLayer))]

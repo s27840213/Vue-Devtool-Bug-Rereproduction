@@ -144,6 +144,7 @@ export default Vue.extend({
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
     }),
     styles(type: string) {
@@ -182,7 +183,9 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
+      GroupUtils.deselect()
       this.setLastSelectedPageIndex(this.pageIndex)
+      this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
         sel.empty()
@@ -193,7 +196,6 @@ export default Vue.extend({
           ControlUtils.updateImgControl(this.pageIndex, i, false)
         }
       }
-      GroupUtils.deselect()
     },
     setFocus(): void {
       this.$nextTick(() => {
@@ -236,7 +238,7 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   &:focus {
-    outline: none;
+    outline: 1px solid setColor(blue-2);
   }
 }
 

@@ -1,11 +1,15 @@
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ITextState } from './text'
+
 /**
- * @param {object} currcurrSelectedLayers - used to record the info of selected layers
- *    @param {number} pageIndex - used to record where page the selected layers is
- *    @param {number[]} layers - all indexs of selected layers
+ * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
+ * @param {number} currActivePageIndex
+ *    -> 若使用者點擊 Page 會使該 Page 變為 active 狀態，此刻當 Page 的 focus 因為點 Sidebar 或 Function Panel 的 button 而跑掉時，以此判斷說要重新 focus 的 Page 為何
+ *    -> 若為 -1 ， focus 最接近中線的 Page
+ *    -> 若不為 -1 ， focus 該 index 的 Page
  */
+
 export interface IEditorState {
   text?: ITextState,
   pages: Array<IPage>,
@@ -13,9 +17,11 @@ export interface IEditorState {
   currFunctionPanelType: number,
   pageScaleRatio: number,
   lastSelectedPageIndex: number,
+  currActivePageIndex: number,
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
   currSelectedInfo: {
+    pageIndex: number,
     index: number,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
     types: Set<string>

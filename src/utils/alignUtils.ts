@@ -9,12 +9,12 @@ import LayerUtils from '@/utils/layerUtils'
 class AlignUtils {
   leftAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
       const layer = currSelectedInfo.layers[0] as ILayer
       const bouding = mathUtils.getBounding(layer)
       const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         x: 0 + offset
       })
     } else {
@@ -39,7 +39,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -49,7 +49,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg
@@ -60,11 +60,11 @@ class AlignUtils {
 
   centerHrAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
-      const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
+      const pageWidth = store.getters.getPage(currSelectedInfo.pageIndex).width
       const layerWidth = currSelectedInfo.layers[0].styles.width
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         x: (pageWidth / 2) - (layerWidth / 2)
       })
     } else {
@@ -82,7 +82,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -92,7 +92,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg
@@ -103,13 +103,13 @@ class AlignUtils {
 
   rightAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
       const layer = currSelectedInfo.layers[0] as ILayer
       const bouding = mathUtils.getBounding(layer)
       const offset = layer.styles.rotate === 0 ? 0 : layer.styles.x - bouding.x
-      const pageWidth = store.getters.getPage(lastSelectedPageIndex).width
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      const pageWidth = store.getters.getPage(currSelectedInfo.pageIndex).width
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         x: pageWidth - bouding.width + offset
       })
     } else {
@@ -134,7 +134,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -144,7 +144,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg
@@ -155,12 +155,12 @@ class AlignUtils {
 
   topAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
       const layer = currSelectedInfo.layers[0] as ILayer
       const bouding = mathUtils.getBounding(layer)
       const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         y: 0 + offset
       })
     } else {
@@ -186,7 +186,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -196,7 +196,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg
@@ -207,11 +207,11 @@ class AlignUtils {
 
   centerVrAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
-      const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
+      const pageHeight = store.getters.getPage(currSelectedInfo.pageIndex).height
       const layerHeight = currSelectedInfo.layers[0].styles.height
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         y: (pageHeight / 2) - (layerHeight / 2)
       })
     } else {
@@ -229,7 +229,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -239,7 +239,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg
@@ -250,13 +250,13 @@ class AlignUtils {
 
   bottomAlign(): void {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+
     if (currSelectedInfo.layers.length === 1) {
       const layer = currSelectedInfo.layers[0] as ILayer
       const bouding = mathUtils.getBounding(layer)
       const offset = layer.styles.rotate === 0 ? 0 : layer.styles.y - bouding.y
-      const pageHeight = store.getters.getPage(lastSelectedPageIndex).height
-      LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+      const pageHeight = store.getters.getPage(currSelectedInfo.pageIndex).height
+      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
         y: pageHeight - bouding.height + offset
       })
     } else {
@@ -281,7 +281,7 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // The formular we used here is record in the google doc Translation Calculation2
         // If you got some problem, just go to see that document. It's a little bit hard to understand
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
@@ -291,7 +291,7 @@ class AlignUtils {
           y: center3.y - center2.y
         }
         tmpStyles = LayerUtils.getTmpLayer().styles
-        LayerUtils.updateLayerStyles(lastSelectedPageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
           rotate: rotateDeg

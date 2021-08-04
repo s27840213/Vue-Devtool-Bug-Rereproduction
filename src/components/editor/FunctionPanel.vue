@@ -74,7 +74,6 @@ export default Vue.extend({
       const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
         return layer.type
       })
-      console.log(new Set(types))
       return new Set(types)
     }
   },

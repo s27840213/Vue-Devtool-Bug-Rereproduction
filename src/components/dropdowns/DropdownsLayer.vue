@@ -57,7 +57,7 @@ export default Vue.extend({
       _layerNum: 'getLayersNum'
     }),
     layerNum(): number {
-      return this._layerNum(this.lastSelectedPageIndex)
+      return this.currSelectedInfo.pageIndex === -1 ? 0 : this._layerNum(this.currSelectedInfo.pageIndex)
     }
   },
   methods: {
@@ -132,7 +132,7 @@ export default Vue.extend({
     },
     setBackgroundImage() {
       this._setBackgroundImage({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.currSelectedInfo.pageIndex,
         config: (this.currSelectedInfo.layers[0] as IImage)
       })
       ShortcutUtils.del()

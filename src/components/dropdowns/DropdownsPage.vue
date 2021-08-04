@@ -65,12 +65,8 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      _layerNum: 'getLayersNum',
       _detachedBackgroundImage: 'getBackgroundImage'
-    }),
-    layerNum(): number {
-      return this._layerNum(this.lastSelectedPageIndex)
-    }
+    })
   },
   methods: {
     ...mapMutations({

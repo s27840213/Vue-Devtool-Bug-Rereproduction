@@ -26,6 +26,7 @@ class UploadUtils {
     })
 
     formData.append('key', `${this.loginOutput.upload_map.path}edit/temp.json`)
+    // only for template
     formData.append('Content-Disposition', `attachment filename*=UTF-8''${encodeURIComponent('temp.json')}`)
     const xhr = new XMLHttpRequest()
 
@@ -51,12 +52,11 @@ class UploadUtils {
 
   async getTmpJSON() {
     this.loginOutput.download_url = this.loginOutput.download_url.replace('*', 'edit/temp.json')
-    console.log(this.loginOutput.download_url)
-    // const response = await fetch(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
-    const response = await fetch(this.loginOutput.download_url)
+    console.log(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
+    const response = await fetch(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
+    // const response = await fetch(this.loginOutput.download_url)
     response.json().then((json) => {
-      console.log(json)
-      // store.commit('SET_pages', json)
+      store.commit('SET_pages', json)
     })
   }
 

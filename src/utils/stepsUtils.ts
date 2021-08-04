@@ -43,7 +43,7 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.set(this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
   }
 
   redo() {
@@ -54,7 +54,7 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.set(this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
   }
 
   reset() {
