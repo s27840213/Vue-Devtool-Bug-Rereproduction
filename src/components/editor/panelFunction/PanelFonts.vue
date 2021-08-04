@@ -5,7 +5,7 @@
     search-bar(:placeholder="'Search font'")
     div(v-for="font in fontPreset"
         class="panel-fonts__font pointer"
-        :style="{'font-family': font.face}"
+        :style="styles(font)"
         @click="setFont(font)")
       span {{font.name}}
     div
@@ -25,6 +25,7 @@ import { mapGetters, mapState } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils, { tmpFontsPreset } from '@/utils/textUtils'
+import { set } from 'vue/types/umd'
 
 export default Vue.extend({
   components: {
@@ -33,7 +34,13 @@ export default Vue.extend({
   data() {
     return {
       FileUtils,
-      fontPreset: tmpFontsPreset
+      fontPreset: tmpFontsPreset,
+      currFont: ''
+    }
+  },
+  mounted() {
+    if (this.props.font) {
+      this.currFont = this.props.font
     }
   },
   computed: {
@@ -58,6 +65,7 @@ export default Vue.extend({
     setFont(font: { name: string, face: string }) {
       TextUtils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
       TextUtils.updateTextPropsState({ font: font.name })
+      this.currFont = font.name
     },
     updateFontPreset(e: any) {
       const target = e.target.files[0]
@@ -72,6 +80,13 @@ export default Vue.extend({
     `
       document.head.appendChild(style)
       this.fontPreset.push({ name: fontName, face: fontName })
+    },
+    styles(font: { name: string, face: string }) {
+      return {
+        'font-family': font.face,
+        'background-color': this.currFont === font.name ? 'rgba(15, 40, 71, 0.14)' : '',
+        'border-radius': this.currFont === font.name ? '5px' : ''
+      }
     }
   }
 })
@@ -91,7 +106,12 @@ export default Vue.extend({
     }
   }
   &__font {
+    transition: background-color .1s linear;
     font-size: 18px;
+    padding: 5px;
+    > span {
+      display: inline-block;
+    }
   }
   &__close {
     position: absolute;

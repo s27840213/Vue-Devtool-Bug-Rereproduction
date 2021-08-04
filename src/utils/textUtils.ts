@@ -201,9 +201,7 @@ class TextUtils {
       sIndex: 0,
       offset: 0
     }
-    console.log(sel)
-    if (!sel && !this.isSel(selEnd)) {
-      console.log('qewqeqwerqwrfds')
+    if (!sel && !this.isSel(selStart) && !this.isSel(selEnd)) {
       /**
        * If there is no selection given by either the window or the input params,
        * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
@@ -231,8 +229,6 @@ class TextUtils {
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
     }
-    console.log(start)
-    console.log(end)
     if (this.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
         const p = config.paragraphs[pIndex]
@@ -419,21 +415,42 @@ class TextUtils {
     return [start, end]
   }
 
-  paragraphPropsHandler(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
-    if (value && this.isSel(selStart)) {
+  paragraphPropsHandler(propName: string, value: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+    if (this.currSelectedInfo.layers.length === 1) {
+      if (!this.isSel(selStart) && !this.isSel(selEnd)) {
+        Object.assign(selStart, { pIndex: 0, sIndex: 0, offset: 0 })
+        Object.assign(selEnd, { pIndex: (this.getCurrLayer as IText).paragraphs.length, sIndex: 0, offset: 0 })
+      } else {
+        selEnd.pIndex = selStart.pIndex
+      }
       switch (propName) {
         case 'fontSpacing':
-          this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { fontSpacing: value })
+          for (let pIndex = selStart.pIndex; pIndex <= selEnd.pIndex; pIndex++) {
+            this.updateParagraphStyles(this.pageIndex, this.layerIndex, pIndex, { fontSpacing: value })
+          }
           break
         case 'lineHeight':
-          this.updateParagraphStyles(this.pageIndex, this.layerIndex, selStart.pIndex, { lineHeight: value })
+          for (let pIndex = selStart.pIndex; pIndex <= selEnd.pIndex; pIndex++) {
+            this.updateParagraphStyles(this.pageIndex, this.layerIndex, pIndex, { lineHeight: value })
+          }
+      }
+    } else {
+      for (let index = 0; index < this.currSelectedInfo.layers.length; index++) {
+        if (this.currSelectedInfo.layers[index].type === 'text') {
+          switch (propName) {
+            case 'fontSpacing':
+              this.updateSelectedParaProps(index, { fontSpacing: value })
+              break
+            case 'lineHeight':
+              this.updateSelectedParaProps(index, { lineHeight: value })
+          }
+        }
       }
     }
-    // TODOs: paragraphs with selEnd
   }
 
   /**
-   * @param prop A string refers to the desired props: fontSize/fontFamily/color/weight/style...
+   * @param propName A string refers to the desired props: fontSize/fontFamily/color/weight/style...
    * @returns The desired props value accord to the current selection range.
    */
   propReader (propName: string): string | number |undefined {
@@ -868,6 +885,13 @@ class TextUtils {
     store.commit('UPDATE_selectedLayersStyles', {
       styles,
       layerIndex
+    })
+  }
+
+  updateSelectedParaProps(tmpLayerIndex: number, props: { [key: string]: string | number }) {
+    store.commit('UPDATE_selectedTextParagraphsProp', {
+      tmpLayerIndex,
+      props
     })
   }
 

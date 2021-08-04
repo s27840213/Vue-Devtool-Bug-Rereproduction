@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -21,9 +22,12 @@ export default Vue.extend({
       currentValue: NaN
     }
   },
+  computed: {
+    ...mapState('text', ['sel', 'props'])
+  },
   mounted() {
-    if (typeof this.value !== 'undefined') {
-      this.currentValue = parseInt(this.value)
+    if (this.props.fontSize) {
+      this.currentValue = parseInt(this.props.fontSize) ?? NaN
     }
   },
   methods: {

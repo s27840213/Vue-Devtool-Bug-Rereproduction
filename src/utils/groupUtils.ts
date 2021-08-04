@@ -256,9 +256,29 @@ class GroupUtils {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset
-      layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
-      layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
-      layer.styles.scale *= tmpLayer.styles.scale
+      if (layer.type === 'image') {
+        layer = layer as IImage
+        const width = layer.styles.width as number * tmpLayer.styles.scale
+        const height = layer.styles.height as number * tmpLayer.styles.scale
+
+        layer.styles.width = width
+        layer.styles.height = height
+        layer.styles.imgHeight *= tmpLayer.styles.scale
+        layer.styles.imgWidth *= tmpLayer.styles.scale
+        layer.styles.imgX *= tmpLayer.styles.scale
+        layer.styles.imgY *= tmpLayer.styles.scale
+
+        layer.clipPath = `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`
+        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        layer.styles.x = shiftX
+        layer.styles.y = shiftY
+      } else {
+        layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+        layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
+        layer.styles.scale *= tmpLayer.styles.scale
+      }
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {

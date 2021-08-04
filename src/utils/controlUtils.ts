@@ -341,7 +341,6 @@ class Controller {
         let patchDiffX = width * config.ratio / scale - config.vSize[0]
         let patchDiffY = height * config.ratio / scale - config.vSize[1]
         const pSize = config.pSize
-        let isExceeedLimit = false
         switch (config.scaleType) {
           case 1:
             if (pSize && (pSize[0] + patchDiffX < SIZE_LIMIT || pSize[1] + patchDiffY < SIZE_LIMIT)) {
@@ -349,21 +348,18 @@ class Controller {
               patchDiffY = pSize[1] + patchDiffY < SIZE_LIMIT ? SIZE_LIMIT - pSize[1] : patchDiffY
               width = patchDiffX === SIZE_LIMIT - pSize[0] ? (patchDiffX + config.vSize[0]) * scale / config.ratio : width
               height = patchDiffY === SIZE_LIMIT - pSize[1] ? (patchDiffY + config.vSize[1]) * scale / config.ratio : height
-              isExceeedLimit = true
             }
             break
           case 2:
             if (pSize && pSize[0] + patchDiffX < SIZE_LIMIT) {
               patchDiffX = pSize[0] + patchDiffX < SIZE_LIMIT ? SIZE_LIMIT - pSize[0] : patchDiffX
               width = patchDiffX === SIZE_LIMIT - pSize[0] ? (patchDiffX + config.vSize[0]) * scale / config.ratio : width
-              isExceeedLimit = true
             }
             break
           case 3:
             if (pSize && pSize[1] + patchDiffY < SIZE_LIMIT) {
               patchDiffY = pSize[1] + patchDiffY < SIZE_LIMIT ? SIZE_LIMIT - pSize[1] : patchDiffY
               height = patchDiffY === SIZE_LIMIT - pSize[1] ? (patchDiffY + config.vSize[1]) * scale / config.ratio : height
-              isExceeedLimit = true
             }
         }
         this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])

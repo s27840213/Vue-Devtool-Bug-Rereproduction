@@ -23,8 +23,9 @@
               :contenteditable="config.type === 'tmp' ? false : contentEditable"
               @compositionstart="isComposing = true"
               @compositionend="isComposing = false"
-              @keydown="onKeyDown($event)"
-              @keyup="onKeyUp($event)")
+              @keydown="onKeyDown"
+              @click.right="onTextRightClick"
+              @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
                 :key="p.id",
@@ -182,6 +183,7 @@ export default Vue.extend({
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
+        this.$store.commit('text/SET_default')
         TextUtils.updateTextPropsState()
       }
     },
@@ -820,6 +822,10 @@ export default Vue.extend({
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
+    },
+    onTextRightClick() {
+      const sel = window.getSelection()
+      console.log(sel?.toString())
     },
     textClickHandler(e: MouseEvent) {
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {

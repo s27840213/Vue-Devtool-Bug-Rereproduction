@@ -17,7 +17,6 @@
         value-selector(v-if="openValueSelector"
                     class="text-setting__value-selector record-selection"
                     v-click-outside="handleValueModal"
-                    :value="props.fontSize"
                     @update="handleValueUpdate")
         //- div(class="text-setting__font-stepper")
         //- svg-icon(class="pointer"
