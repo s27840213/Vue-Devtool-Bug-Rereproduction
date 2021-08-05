@@ -25,19 +25,16 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       pageSize: 'getPageSize',
       getJson: 'getJson'
-    }),
-    json (): any {
-      return this.getJson(this.objectId)
-    }
+    })
   },
   mounted () {
-    if (!this.json) {
+    if (!this.getJson(this.objectId)) {
       this.$emit('init', this.objectId)
     }
   },
   methods: {
     dragStart(event: DragEvent) {
-      const { json } = this
+      const json = this.getJson(this.objectId)
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -72,7 +69,7 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(config))
     },
     addSvg() {
-      const { json } = this
+      const json = this.getJson(this.objectId)
       const resizeRatio = 0.55
       const pageAspectRatio = this.pageSize.width / this.pageSize.height
       const svgAspectRatio = json.vSize[0] / json.vSize[1]
