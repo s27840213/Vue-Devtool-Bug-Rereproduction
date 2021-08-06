@@ -16,12 +16,21 @@ const routes: Array<RouteConfig> = [
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.has('token')) {
           const token = urlParams.get('token')
-          console.log(token)
+
           if (token) {
             uploadUtils.setToken(token)
             await store.dispatch('getAssets', { token })
             await store.dispatch('login', { token })
-            uploadUtils.uploadJSON()
+            // uploadUtils.uploadTmpJSON()
+          }
+        }
+        console.log(urlParams.has('type'), urlParams.has('design_id'))
+        if (urlParams.has('type') && urlParams.has('design_id')) {
+          const type = urlParams.get('type')
+          const designId = urlParams.get('design_id')
+          console.log(type, designId)
+          if (type && designId) {
+            uploadUtils.getTemplate(type, designId)
           }
         }
         next()

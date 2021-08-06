@@ -13,6 +13,7 @@ import { ITextState } from './text'
 export interface IEditorState {
   text?: ITextState,
   pages: Array<IPage>,
+  designId: string,
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,

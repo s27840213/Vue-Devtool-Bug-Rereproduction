@@ -14,6 +14,8 @@ class LayerFactary {
       moved: false,
       imgControl: false,
       isClipper: false,
+      dragging: false,
+      designId: '',
       styles: {
         x: 0,
         y: 0,
@@ -48,6 +50,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
+      designId: '',
       editing: false,
       styles: {
         x: 0,
@@ -100,6 +103,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
+      designId: '',
       styles: {
         x: styles.x,
         y: styles.y,
@@ -126,6 +130,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
+      designId: '',
       styles: {
         x: styles.x,
         y: styles.y,
@@ -163,6 +168,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
+      designId: '',
       styles: {
         x: 0,
         y: 0,

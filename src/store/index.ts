@@ -33,6 +33,7 @@ const getDefaultState = (): IEditorState => ({
           imgControl: false,
           isClipper: false,
           dragging: false,
+          designId: '',
           styles: {
             x: 0,
             y: 0,
@@ -57,7 +58,8 @@ const getDefaultState = (): IEditorState => ({
       },
       name: 'Default Page',
       layers: [
-      ]
+      ],
+      designId: ''
     },
     {
       width: 1080,
@@ -76,6 +78,7 @@ const getDefaultState = (): IEditorState => ({
           imgControl: false,
           isClipper: false,
           dragging: false,
+          designId: '',
           styles: {
             x: 0,
             y: 0,
@@ -100,9 +103,11 @@ const getDefaultState = (): IEditorState => ({
       },
       name: 'Default Page',
       layers: [
-      ]
+      ],
+      designId: ''
     }
   ],
+  designId: '',
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
@@ -137,6 +142,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPages(state): Array<IPage> {
     return state.pages
+  },
+  getDesignId(state): string {
+    return state.designId
   },
   getPageSize(state: IEditorState) {
     return {
@@ -235,6 +243,15 @@ const getters: GetterTree<IEditorState, unknown> = {
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     state.pages = newPages
+  },
+  ADD_page(state: IEditorState, newPages: IPage) {
+    state.pages.push(newPages)
+  },
+  SET_designId(state: IEditorState, designId: string) {
+    state.designId = designId
+  },
+  SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
+    state.pages[updateInfo.pageIndex].designId = updateInfo.designId
   },
   UPDATE_pageProps(state: IEditorState, updateInfo: { pageIndex: number, props: { [key: string]: string | number } }) {
     /**
@@ -416,7 +433,7 @@ const mutations: MutationTree<IEditorState> = {
     ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
     state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
-  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number }}) {
+  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
     const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       for (let pIndex = 0; pIndex < pLeng; pIndex++) {

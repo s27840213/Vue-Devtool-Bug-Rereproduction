@@ -1,4 +1,7 @@
 import store from '@/store'
+import text from '@/store/text'
+import generalUtils from './generalUtils'
+import LayerUtils from './layerUtils'
 
 class UploadUtils {
   loginOutput: any
@@ -10,14 +13,110 @@ class UploadUtils {
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    this.getTmpJSON()
+    // this.getTmpJSON()
   }
 
   setToken(token: string) {
     this.token = token
   }
 
-  uploadJSON() {
+  uploadText() {
+    const designId = this.generateRandomString(20)
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+
+    LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
+      designId: designId
+    })
+
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_admin_map.fields[key])
+    })
+
+    formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/config.json`)
+    // only for template
+    formData.append('Content-Disposition', `attachment filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    const xhr = new XMLHttpRequest()
+
+    const textInfo = Object.assign(generalUtils.deepCopy(currSelectedInfo.layers[0]), { active: false })
+
+    console.log(textInfo)
+
+    const blob = new Blob([JSON.stringify(textInfo)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
+
+    xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
+    xhr.send(formData)
+    xhr.onload = () => {
+      const currSelectedInfo = store.getters.getCurrSelectedInfo
+      const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex))
+      pageJSON.layers = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)
+
+      console.log(pageJSON)
+      const formData = new FormData()
+      Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+        formData.append(key, this.loginOutput.upload_admin_map.fields[key])
+      })
+
+      formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/page.json`)
+      // only for template
+      formData.append('Content-Disposition', `attachment filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      const xhrReq = new XMLHttpRequest()
+
+      const textInfo = Object.assign(generalUtils.deepCopy(currSelectedInfo.layers[0]), { active: false })
+
+      const blob = new Blob([JSON.stringify(textInfo)], { type: 'application/json' })
+      formData.append('file', blob)
+
+      xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
+      xhrReq.send(formData)
+      xhrReq.onload = () => {
+        console.log(xhrReq)
+      }
+    }
+  }
+
+  uploadTemplate() {
+    const designId = this.generateRandomString(20)
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const pageIndex = store.getters.getLastSelectedPageIndex
+    store.commit('SET_pageDesignId', {
+      pageIndex: pageIndex,
+      designId: designId
+    })
+    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex))
+
+    console.log(pageJSON)
+
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_admin_map.fields[key])
+    })
+
+    formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
+    // only for template
+    formData.append('Content-Disposition', `attachment filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    const xhr = new XMLHttpRequest()
+
+    const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
+
+    xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
+    xhr.send(formData)
+    xhr.onload = () => {
+      console.log(xhr)
+    }
+  }
+
+  uploadTmpJSON() {
     const assetId = this.generateAssetId()
 
     const formData = new FormData()
@@ -29,23 +128,20 @@ class UploadUtils {
     // only for template
     formData.append('Content-Disposition', `attachment filename*=UTF-8''${encodeURIComponent('temp.json')}`)
     const xhr = new XMLHttpRequest()
-
+    console.log(this.loginOutput)
     setInterval(() => {
       const pagesJSON = store.getters.getPages
-      console.log(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
-        console.log(blob)
         formData.set('file', blob)
       } else {
-        console.log(blob)
         formData.append('file', blob)
       }
 
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
       xhr.onload = function () {
-        console.log(this)
+        // console.log(this)
       }
     }, 5000)
   }
@@ -57,6 +153,17 @@ class UploadUtils {
     // const response = await fetch(this.loginOutput.download_url)
     response.json().then((json) => {
       store.commit('SET_pages', json)
+    })
+  }
+
+  async getTemplate(type: string, designId: string) {
+    const jsonName = type === 'template' ? 'config.json' : 'page.json'
+    console.log(jsonName)
+    // const response = await fetch('https://template.vivipic.com/template/RmOWHPtI2i7sVlxsGTv2/config.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMjh2cHlkN3hjZml3bC5jbG91ZGZyb250Lm5ldC9OdVZDZWk1Nk9hZlh1bHMxOVg2ci8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNjI4MjMxNjgzNzUwfX19XX0_&Key-Pair-Id=KEUNR6VVD9BE6&Signature=j3x43OwbT7~59SlKaPOA3T0yGm7ik-cIkuO19zzk3b2kTArqdtJ05phA~C1p-FZ0WUgLXBoK2leSiySzy-egZYMfviV19AiZ6oLNJiW7HeEgJhxHrra2nrl7b9SK1utuUrx9p~SvJzXTN5csQXJ8nZ6TsbeB1nNAubtF26TTL5s~2ZTHGRZrpV-MU61qJz6wvHcLwIa7iE4thVYg2HD2M431ggyJ3okiUqca4fo-XolOCicnLmDrIWiBt8lPDcFaPZyAKc-pxSNp3SzRHtipESTNDs2-6aoT3XlIkQUGUketD0gLvrH-WyNvclKdWsctLHtqOQbaz9UCJ2vUNdycQg__')
+    const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}`)
+    response.json().then((json) => {
+      console.log(json)
+      store.commit('SET_pages', [json])
     })
   }
 

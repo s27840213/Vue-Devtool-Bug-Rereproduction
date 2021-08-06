@@ -1,5 +1,26 @@
 <template lang="pug">
   div(class="dropdowns dropdowns--layer bg-gray-6")
+    template(v-if="")
+      div(class="dropdowns__item"
+          @click="uploadMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="uploadMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{uploadMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+    template(v-if="currSelectedInfo.layers[0].designId !==''")
+      div(class="dropdowns__item"
+          @click="updateMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="updateMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{updateMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
+    hr(class="dropdowns__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`dropdowns__shortcut-${index}`"
         class="dropdowns__item"
@@ -44,6 +65,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import FocusUtils from '@/utils/focusUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { IImage } from '@/interfaces/layer'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -58,6 +80,32 @@ export default Vue.extend({
     }),
     layerNum(): number {
       return this.currSelectedInfo.pageIndex === -1 ? 0 : this._layerNum(this.currSelectedInfo.pageIndex)
+    },
+    getType(): Array<string> {
+      console.log(this.currSelectedInfo.types)
+      return [...this.currSelectedInfo.types]
+    },
+    uploadMenu(): any {
+      return {
+        icon: 'copy',
+        text: `Upload ${this.getType[0]}`,
+        shortcutText: '',
+        action: () => {
+          console.log(this.currSelectedInfo.layers)
+          console.log(`upload ${this.getType[0]}`)
+          uploadUtils.uploadText()
+        }
+      }
+    },
+    updateMenu(): any {
+      return {
+        icon: 'copy',
+        text: `Update ${this.getType[0]}`,
+        shortcutText: '',
+        action: () => {
+          console.log(`update ${this.getType[0]}`)
+        }
+      }
     }
   },
   methods: {
