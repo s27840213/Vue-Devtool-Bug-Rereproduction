@@ -4,7 +4,8 @@
         nu-curve-text(v-if="isCurveText"
           :config="config"
           :layerIndex="layerIndex"
-          :pageIndex="pageIndex")
+          :pageIndex="pageIndex"
+          :subLayerIndex="subLayerIndex")
         p(v-else
           v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
           :key="pIndex",
@@ -27,7 +28,8 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    subLayerIndex: Number
   },
   components: { NuCurveText },
   computed: {
@@ -61,7 +63,8 @@ export default Vue.extend({
         if (this.config.isTyping) return
         this.$nextTick(() => {
           const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-          if (this.currSelectedInfo.layers.length === 1) {
+          // if (this.currSelectedInfo.layers.length === 1) {
+          if (!this.subLayerIndex) {
             ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
           } else {
             this.updateSelectedLayerStyles({
@@ -69,7 +72,7 @@ export default Vue.extend({
                 width: textHW.width,
                 height: textHW.height
               },
-              layerIndex: this.layerIndex
+              layerIndex: this.subLayerIndex
             })
           }
         })

@@ -4,6 +4,8 @@
     nu-layer(v-for="(layer,index) in config.layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
+      :layerIndex="layerIndex"
+      :subLayerIndex="index"
       :config="layer")
 </template>
 
@@ -14,7 +16,8 @@ import { mapGetters } from 'vuex'
 export default Vue.extend({
   props: {
     config: Object,
-    pageIndex: Number
+    pageIndex: Number,
+    layerIndex: Number
   },
   computed: {
     ...mapGetters({

@@ -521,6 +521,7 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
     const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data
     const targetLayer = state.pages[pageIndex].layers[layerIndex] as IGroup | ITmp
+    if (!targetLayer) { return }
     if (targetLayer.layers) {
       targetLayer.layers.forEach((layer, idx) => {
         const matchType = type ? type.includes(layer.type) : true
