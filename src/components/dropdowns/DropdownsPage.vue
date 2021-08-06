@@ -10,6 +10,16 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+    template(v-if="hasDesignId")
+      div(class="dropdowns__item"
+          @click="updateMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="updateMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{updateMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     div(v-for="(data,index) in shortcutMenu()"
         :key="`dropdowns__shortcut-${index}`"
         class="dropdowns__item"
@@ -84,17 +94,21 @@ export default Vue.extend({
         text: 'Update single-page template',
         shortcutText: '',
         action: () => {
-          console.log('update')
+          uploadUtils.updateTemplate()
         }
       }
     }
   },
   computed: {
     ...mapGetters({
+      getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       _detachedBackgroundImage: 'getBackgroundImage'
-    })
+    }),
+    hasDesignId(): boolean {
+      return this.getPage(this.lastSelectedPageIndex).designId !== ''
+    }
   },
   methods: {
     ...mapMutations({

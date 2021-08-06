@@ -24,7 +24,6 @@ const routes: Array<RouteConfig> = [
             // uploadUtils.uploadTmpJSON()
           }
         }
-        console.log(urlParams.has('type'), urlParams.has('design_id'))
         if (urlParams.has('type') && urlParams.has('design_id')) {
           const type = urlParams.get('type')
           const designId = urlParams.get('design_id')
