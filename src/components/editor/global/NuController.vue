@@ -1037,12 +1037,10 @@ export default Vue.extend({
       LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
     },
     handleTextProps(props: { [key: string]: any }) {
-      const { pageIndex } = this
-      const { index: layerIndex, layers } = this.currSelectedInfo
-      const isGroup = layers.length > 1
+      const { pageIndex, layerIndex } = this
       LayerUtils.updateSpecLayerData({
         pageIndex,
-        layerIndex: isGroup ? layerIndex : this.layerIndex,
+        layerIndex,
         props,
         type: ['text']
       })

@@ -20,7 +20,8 @@ export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
-    pageIndex: Number
+    pageIndex: Number,
+    subLayerIndex: Number
   },
   data () {
     return {
@@ -37,8 +38,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      scaleRatio: 'getPageScaleRatio'
     }),
     focus(): boolean {
       const { textShape } = this.config.styles
@@ -185,12 +185,11 @@ export default Vue.extend({
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
       const { styles, props } = updateInfo
-      const { pageIndex, layerIndex, currSelectedInfo } = this
-      const isGroup = currSelectedInfo.layers.length > 1
+      const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({
         pageIndex,
-        layerIndex: isGroup ? currSelectedInfo.index : layerIndex,
-        subLayerIndex: isGroup ? layerIndex : undefined,
+        layerIndex,
+        subLayerIndex,
         styles,
         props
       })
