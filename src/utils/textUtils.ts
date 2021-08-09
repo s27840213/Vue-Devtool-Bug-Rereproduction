@@ -64,6 +64,7 @@ class TextUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get getCurrSel() { return store.state.text?.sel }
   get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
@@ -220,8 +221,8 @@ class TextUtils {
     }
 
     let isStartContainerDivided = true
-    // const prop = typeof tmpLayerIndex === 'undefined' ? this.propIndicator(start, end, propName, value || '') : { [fontPropsMap[propName]]: value }
     let prop: { [key: string]: string | number }
+    // If temLayerIndex === 'undefined', means this function is now handler non-group-layer
     if (typeof tmpLayerIndex === 'undefined') {
       prop = this.propIndicator(start, end, propName, value || '')
     } else {
@@ -298,10 +299,11 @@ class TextUtils {
           styles.font = value as string
           break
         default: {
-          const i = Object.keys(fontPropsMap).indexOf(propName)
-          const v = Object.values(fontPropsMap)[i]
-          styles[v] = prop[v]
-          break
+          // const i = Object.keys(fontPropsMap).indexOf(propName)
+          // const v = Object.values(fontPropsMap)[i]
+          // styles[v] = prop[v]
+          // break
+          this.updateTextPropsState({ isBold: 'bold' })
         }
       }
       [start, end] = this.spanMerger(config.paragraphs, start, end)
@@ -312,6 +314,7 @@ class TextUtils {
       }
     }
     if (!sel || typeof tmpLayerIndex !== 'undefined') return
+    // below is used to re-select the caret-range after the props are applied
     Vue.nextTick(() => {
       const select = window.getSelection()
       const range = new Range()
@@ -336,23 +339,64 @@ class TextUtils {
           select.addRange(range)
           this.updateTextSelection(start, end)
         }
+        this.updateTextPropsState()
       } else {
         const select = window.getSelection()
         if (select && div) {
           const node = div.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node
-          range.setStart(node, 0)
-          range.setEnd(node, config.paragraphs[start.pIndex].spans[start.sIndex].text.length)
-          select.removeAllRanges()
-          select.addRange(range)
+          if (propName === 'fontFamily' || propName === 'fontSize') {
+            // range.setStart(node, 0)
+            // range.setEnd(node, config.paragraphs[start.pIndex].spans[start.sIndex].text.length)
 
-          start.offset = 0
-          Object.assign(end, start)
-          end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
+            start.offset = 0
+            console.log(start)
+            Object.assign(end, start)
+            end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
+            this.updateTextPropsState()
+          } else {
+            end = {
+              pIndex: start.pIndex,
+              sIndex: start.sIndex,
+              offset: start.offset
+            }
+            // range.setStart(node, start.offset)
+            // range.setEnd(node, start.offset)
+          }
+          // select.removeAllRanges()
+          // select.addRange(range)
           this.updateTextSelection(start, end)
+          this.focus(start, end)
         }
       }
-      this.updateTextPropsState()
+      // this.updateTextPropsState()
     })
+  }
+
+  focus(start?: ISelection, end?: ISelection) {
+    const text = document.getElementById(`text-${this.layerIndex}`) as HTMLElement
+    text.focus()
+    const range = new Range()
+
+    if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
+      start = {} as ISelection
+      Object.assign(start, this.getCurrSel.start)
+    } else if (!this.getCurrSel || !this.isSel(this.getCurrSel.start)) {
+      return
+    }
+    start = start as ISelection
+    range.setStart(text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node, start.offset)
+
+    if (end && this.isSel(end)) {
+      range.setEnd(text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node, end.offset)
+    }
+    setTimeout(() => {
+      const sel = window.getSelection()
+      if (sel) {
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }
+      console.log('focus')
+    }, 0)
   }
 
   spanMerger(paragraphs: IParagraph[], start: ISelection, end: ISelection): [ISelection, ISelection] {
@@ -793,14 +837,14 @@ class TextUtils {
   }
 
   isSameSpanStyles(span: ISpanStyle, preSpan: ISpanStyle): boolean {
-    let flag = true
+    let isSameSpanStyles = true
     for (const k of Object.keys(span)) {
       if (span[k] !== preSpan[k] && span[k] !== '' && !Number.isNaN(span[k])) {
-        flag = false
+        isSameSpanStyles = false
         break
       }
     }
-    return flag
+    return isSameSpanStyles
   }
 
   isSel(sel?: { pIndex: number, sIndex: number, offset?: number }): boolean {
@@ -906,6 +950,18 @@ class TextUtils {
     store.commit('text/UPDATE_selection', {
       start,
       end
+    })
+  }
+
+  setSelectionDefault() {
+    const nan = {
+      pIndex: NaN,
+      sIndex: NaN,
+      offset: NaN
+    }
+    store.commit('text/UPDATE_selection', {
+      start: nan,
+      end: nan
     })
   }
 

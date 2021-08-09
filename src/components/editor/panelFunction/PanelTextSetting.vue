@@ -197,7 +197,7 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextUtils.onPropertyClick(iconName)
-      TextUtils.updateTextPropsState()
+      // TextUtils.updateTextPropsState()
     },
     fontSizeStepping(step: number) {
       const sel = TextUtils.getSelection()

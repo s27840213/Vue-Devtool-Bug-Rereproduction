@@ -1,10 +1,17 @@
+import Vue from 'vue'
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { ILayer } from '@/interfaces/layer'
+import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import TextUtils from './textUtils'
+import { stat } from 'fs'
+import { start } from 'repl'
+import { ISelection } from '@/interfaces/text'
+import { profileEnd } from 'console'
+import text from '@/store/text'
 
 class ShortcutHandler {
   // target: HTMLElement
@@ -54,6 +61,114 @@ class ShortcutHandler {
       }
     }
     ZindexUtils.reassignZindex(lastSelectedPageIndex)
+  }
+
+  textCopy() {
+    const sel = window.getSelection()
+    if (sel) {
+      navigator.clipboard.writeText(sel.toString())
+    }
+  }
+
+  textPaste() {
+    const sel = window.getSelection()
+    if (sel && sel.rangeCount !== 0) {
+      const selPos = TextUtils.getSelection()?.start as ISelection
+      const selEnd = TextUtils.getSelection()?.end as ISelection
+      const paragraphs = GeneralUtils.deepCopy((TextUtils.getCurrLayer as IText).paragraphs) as IParagraph[]
+
+      if (TextUtils.isSel(selEnd)) {
+        // Used to delete the selected-text-range
+        const textTrimming = () => {
+          paragraphs[selPos.pIndex].spans[selPos.sIndex].text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text.substring(0, selPos.offset)
+          paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text = paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text.substr(selEnd.offset)
+        }
+        if (selPos.pIndex === selEnd.pIndex) {
+          // The startSel and endSel is at the same paragraph and span
+          if (selPos.sIndex === selEnd.sIndex) {
+            const text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text
+            const removedText = text.substring(selPos.offset, selEnd.offset)
+            paragraphs[selPos.pIndex].spans[selPos.sIndex].text = text.replace(removedText, '')
+          } else {
+            textTrimming()
+            paragraphs[selEnd.pIndex].spans.splice(selPos.sIndex + 1, selEnd.sIndex - selPos.sIndex - 1)
+          }
+        } else {
+          textTrimming()
+          paragraphs[selPos.pIndex].spans.splice(selPos.sIndex + 1)
+          paragraphs[selEnd.pIndex].spans.splice(0, selEnd.sIndex)
+          if (selEnd.pIndex - selPos.pIndex > 1) {
+            paragraphs.splice(selPos.pIndex + 1, selEnd.pIndex - selPos.pIndex - 1)
+          }
+        }
+      }
+
+      const spanBuff: ISpan[] = []
+      const paraStyles: IParagraphStyle = GeneralUtils.deepCopy(paragraphs[selPos.pIndex].styles)
+      const spanStyles: ISpanStyle = GeneralUtils.deepCopy(paragraphs[selPos.pIndex].spans[selPos.sIndex].styles)
+      const selFinalPos: ISelection = Object.assign({}, selPos)
+      navigator.clipboard.readText().then((text) => {
+        const textArr = text.split('\n\n')
+        for (let i = 0; i < textArr.length; i++, selPos.pIndex++) {
+          let pastedText = textArr[i]
+          const p = paragraphs[selPos.pIndex]
+          if (i === 0) {
+            // store the rest spans of to the textBuffer
+            for (let sidx = selPos.sIndex; sidx < p.spans.length; sidx++) {
+              if (sidx === selPos.sIndex) {
+                if (textArr.length === 1) {
+                  pastedText += p.spans[selPos.sIndex].text.substr(selPos.offset)
+                  selFinalPos.offset += textArr[i].length
+                  p.spans[selPos.sIndex].text = p.spans[selPos.sIndex].text.substr(0, selPos.offset)
+                  p.spans[selPos.sIndex].text += pastedText
+                  break
+                }
+                const span = GeneralUtils.deepCopy(p.spans[sidx])
+                if ((span.text = span.text.substr(selPos.offset))) {
+                  spanBuff.push(span)
+                }
+                p.spans[selPos.sIndex].text = p.spans[selPos.sIndex].text.substr(0, selPos.offset)
+                p.spans[selPos.sIndex].text += pastedText
+                continue
+              }
+              const span = GeneralUtils.deepCopy(p.spans[sidx])
+              spanBuff.push(span)
+            }
+            if (textArr.length !== 1) {
+              p.spans.splice(selPos.sIndex + 1, p.spans.length)
+            }
+            continue
+          }
+          const newPara: IParagraph = {
+            styles: GeneralUtils.deepCopy(paraStyles) as IParagraphStyle,
+            spans: [
+              {
+                text: pastedText,
+                styles: GeneralUtils.deepCopy(spanStyles) as ISpanStyle
+              }
+            ]
+          }
+          paragraphs.splice(selPos.pIndex, 0, newPara)
+          selFinalPos.pIndex++
+        }
+        if (spanBuff.length) {
+          console.log(spanBuff)
+          paragraphs.splice(selPos.pIndex, 0, {
+            styles: paraStyles,
+            spans: spanBuff
+          })
+        }
+        TextUtils.updateTextParagraphs(TextUtils.pageIndex, TextUtils.layerIndex, paragraphs)
+        Vue.nextTick(() => {
+          if (textArr.length !== 1) {
+            selFinalPos.sIndex = paragraphs[selFinalPos.pIndex].spans.length - 1
+            selFinalPos.offset = paragraphs[selFinalPos.pIndex].spans[selFinalPos.sIndex].text.length
+          }
+          TextUtils.updateSelection(selFinalPos, selFinalPos)
+          TextUtils.focus()
+        })
+      })
+    }
   }
 
   del() {
