@@ -13,5 +13,6 @@ export interface IPage {
   backgroundColor: string,
   backgroundImage: IBackgroundImage,
   name: string,
-  layers: Array<IShape | IText | IImage | IGroup>
+  layers: Array<IShape | IText | IImage | IGroup>,
+  designId: string
 }

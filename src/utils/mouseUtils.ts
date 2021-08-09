@@ -74,6 +74,7 @@ class MouseUtils {
       locked: false,
       moved: false,
       dragging: false,
+      designId: '',
       styles: {
         x: x,
         y: y,

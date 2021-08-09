@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
@@ -10,6 +10,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import photos from '@/store/photos'
 import color from '@/store/module/color'
 import text from '@/store/text'
+import objects from '@/store/objects'
 
 Vue.use(Vuex)
 
@@ -32,6 +33,7 @@ const getDefaultState = (): IEditorState => ({
           imgControl: false,
           isClipper: false,
           dragging: false,
+          designId: '',
           styles: {
             x: 0,
             y: 0,
@@ -56,7 +58,8 @@ const getDefaultState = (): IEditorState => ({
       },
       name: 'Default Page',
       layers: [
-      ]
+      ],
+      designId: ''
     },
     {
       width: 1080,
@@ -75,6 +78,7 @@ const getDefaultState = (): IEditorState => ({
           imgControl: false,
           isClipper: false,
           dragging: false,
+          designId: '',
           styles: {
             x: 0,
             y: 0,
@@ -99,9 +103,11 @@ const getDefaultState = (): IEditorState => ({
       },
       name: 'Default Page',
       layers: [
-      ]
+      ],
+      designId: ''
     }
   ],
+  designId: '',
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
@@ -124,7 +130,8 @@ const getDefaultState = (): IEditorState => ({
   isLayerDropdownsOpened: false,
   isPageDropdownsOpened: false,
   isColorPickerOpened: false,
-  currSelectedPhotoInfo: {}
+  currSelectedPhotoInfo: {},
+  jsonMap: {}
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -135,6 +142,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPages(state): Array<IPage> {
     return state.pages
+  },
+  getDesignId(state): string {
+    return state.designId
   },
   getPageSize(state: IEditorState) {
     return {
@@ -224,12 +234,24 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedPhotoInfo(state: IEditorState) {
     return state.currSelectedPhotoInfo
+  },
+  getJson(state: IEditorState) {
+    return (id: string) => state.jsonMap[id]
   }
 }
 
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     state.pages = newPages
+  },
+  ADD_page(state: IEditorState, newPages: IPage) {
+    state.pages.push(newPages)
+  },
+  SET_designId(state: IEditorState, designId: string) {
+    state.designId = designId
+  },
+  SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
+    state.pages[updateInfo.pageIndex].designId = updateInfo.designId
   },
   UPDATE_pageProps(state: IEditorState, updateInfo: { pageIndex: number, props: { [key: string]: string | number } }) {
     /**
@@ -411,7 +433,7 @@ const mutations: MutationTree<IEditorState> = {
     ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
     state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
-  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number }}) {
+  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
     const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       for (let pIndex = 0; pIndex < pLeng; pIndex++) {
@@ -492,6 +514,27 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText)[]
     Object.assign(layers[subLayerIndex].styles, styles)
+  },
+  SET_contentJson(state: IEditorState, json: { [key: string]: any }) {
+    Object.assign(state.jsonMap, json)
+  },
+  UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
+    const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data
+    const targetLayer = state.pages[pageIndex].layers[layerIndex] as IGroup | ITmp
+    if (!targetLayer) { return }
+    if (targetLayer.layers) {
+      targetLayer.layers.forEach((layer, idx) => {
+        const matchType = type ? type.includes(layer.type) : true
+        const matchSubLayerIndex = typeof subLayerIndex === 'undefined' || idx === subLayerIndex
+        if (matchType && matchSubLayerIndex) {
+          props && Object.assign(targetLayer.layers[idx], props)
+          styles && Object.assign(targetLayer.layers[idx].styles, styles)
+        }
+      })
+    } else {
+      props && Object.assign(targetLayer, props)
+      styles && Object.assign(targetLayer.styles, styles)
+    }
   }
 }
 
@@ -531,6 +574,7 @@ export default new Vuex.Store({
   modules: {
     photos,
     text,
-    color
+    color,
+    objects
   }
 })

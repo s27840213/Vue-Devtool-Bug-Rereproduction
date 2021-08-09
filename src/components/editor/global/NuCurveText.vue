@@ -12,15 +12,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
-import ControlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
-    pageIndex: Number
+    pageIndex: Number,
+    subLayerIndex: Number
   },
   data () {
     return {
@@ -68,7 +69,8 @@ export default Vue.extend({
       }
     },
     curveStyle(): any {
-      const { bend, minHeight } = this
+      const { bend, minHeight, scaleRatio } = this
+      const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as any
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
       if (bend >= 0) {
@@ -81,6 +83,7 @@ export default Vue.extend({
       }
       return {
         ...style,
+        borderWidth,
         height: `${radius * 2}px`,
         width: `${radius * 2}px`
       }
@@ -102,23 +105,13 @@ export default Vue.extend({
       }
     },
     areaHeight (val) {
-      const { bend, config, minHeight } = this
+      const { bend, config } = this
       if (bend < 0) {
-        ControlUtils.updateLayerPos(
-          this.pageIndex,
-          this.layerIndex,
-          config.styles.x,
-          this.y + (minHeight * config.styles.scale) - val
-        )
-      } else {
-        if (config.styles.y !== this.y) {
-          ControlUtils.updateLayerPos(
-            this.pageIndex,
-            this.layerIndex,
-            config.styles.x,
-            this.y
-          )
-        }
+        const y = this.y + (config.styles.height - val)
+        this.y = y
+        this.handleCurveTextUpdate({
+          styles: { y }
+        })
       }
     },
     bend () {
@@ -151,18 +144,10 @@ export default Vue.extend({
       const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
       this.areaHeight = areaHeight
       window.requestAnimationFrame(() => {
-        ControlUtils.updateLayerSize(
-          this.pageIndex,
-          this.layerIndex,
-          areaWidth,
-          areaHeight,
-          scale
-        )
-        ControlUtils.updateLayerProps(
-          this.pageIndex,
-          this.layerIndex,
-          areaWidth > width ? { widthLimit: areaWidth } : {}
-        )
+        this.handleCurveTextUpdate({
+          styles: { width: areaWidth, height: areaHeight },
+          props: areaWidth > width ? { widthLimit: areaWidth } : {}
+        })
       })
     }
   },
@@ -197,6 +182,17 @@ export default Vue.extend({
       } else {
         this.transforms = []
       }
+    },
+    handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
+      const { styles, props } = updateInfo
+      const { pageIndex, layerIndex, subLayerIndex } = this
+      LayerUtils.updateSpecLayerData({
+        pageIndex,
+        layerIndex,
+        subLayerIndex,
+        styles,
+        props
+      })
     }
   }
 })

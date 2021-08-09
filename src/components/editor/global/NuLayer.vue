@@ -10,7 +10,7 @@
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config"
-        :pageIndex="pageIndex" :layerIndex="layerIndex")
+        :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //- div(class="test-index")
     //-   span {{layerIndex}}
     //- div(class="test-angle")
@@ -33,7 +33,8 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    subLayerIndex: Number
   },
   data() {
     return {

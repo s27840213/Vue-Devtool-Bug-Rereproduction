@@ -29,6 +29,7 @@ export interface ILayer<T extends IStyle = IStyle> {
   locked: boolean,
   moved: boolean,
   dragging: boolean,
+  designId: string,
   styles: T
 }
 

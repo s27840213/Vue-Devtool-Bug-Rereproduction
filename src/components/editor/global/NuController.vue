@@ -177,11 +177,17 @@ export default Vue.extend({
     },
     isActive(val) {
       if (this.getLayerType === 'text' && !val) {
+<<<<<<< HEAD
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing: false
         })
         if (this.currSelectedInfo.layers.length <= 1) {
           this.contentEditable = false
+=======
+        this.contentEditable = false
+        this.handleTextProps({ editing: false })
+        if (this.currSelectedInfo.layers.length === 1) {
+>>>>>>> 6cf12272668a3f3aa8fb64b4a4ed2bb2eea45d54
           const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -202,10 +208,8 @@ export default Vue.extend({
       deep: true
     },
     isTextEditing(editing) {
-      if (this.getLayerType === 'text') {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          editing
-        })
+      if (this.getLayerType === 'text' && this.currSelectedInfo.layers.length === 1) {
+        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing })
       }
     }
   },
@@ -319,9 +323,6 @@ export default Vue.extend({
     moveStart(e: MouseEvent) {
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          dragging: true
-        })
         if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
           return
         } else if (!this.isActive) {
@@ -341,6 +342,7 @@ export default Vue.extend({
             window.addEventListener('mouseup', this.moveEnd)
             window.addEventListener('mousemove', this.moving)
           }
+          this.handleTextProps({ dragging: true })
           return
         }
         this.contentEditable = true
@@ -350,6 +352,7 @@ export default Vue.extend({
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
+        this.handleTextProps({ dragging: true })
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -404,6 +407,7 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd() {
+      this.handleTextProps({ dragging: false })
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -418,9 +422,6 @@ export default Vue.extend({
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
       }
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: false
-      })
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -1033,6 +1034,15 @@ export default Vue.extend({
       indexs.unshift(this.layerIndex)
       this.subControlerIndexs = GeneralUtils.deepCopy(indexs)
       LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
+    },
+    handleTextProps(props: { [key: string]: any }) {
+      const { pageIndex, layerIndex } = this
+      LayerUtils.updateSpecLayerData({
+        pageIndex,
+        layerIndex,
+        props,
+        type: ['text']
+      })
     }
   }
 })

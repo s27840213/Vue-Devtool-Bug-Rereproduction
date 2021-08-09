@@ -1,5 +1,25 @@
 <template lang="pug">
   div(class="dropdowns dropdowns--page bg-gray-6")
+    template(v-if="")
+      div(class="dropdowns__item"
+          @click="uploadMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="uploadMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{uploadMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+    template(v-if="hasDesignId")
+      div(class="dropdowns__item"
+          @click="updateMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="updateMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{updateMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     div(v-for="(data,index) in shortcutMenu()"
         :key="`dropdowns__shortcut-${index}`"
         class="dropdowns__item"
@@ -29,6 +49,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -58,15 +79,36 @@ export default Vue.extend({
           zindex: -1,
           opacity: 100
         }
+      },
+      uploadMenu: {
+        icon: 'copy',
+        text: 'Upload single-page template',
+        shortcutText: '',
+        action: () => {
+          console.log('Upload template')
+          uploadUtils.uploadTemplate()
+        }
+      },
+      updateMenu: {
+        icon: 'copy',
+        text: 'Update single-page template',
+        shortcutText: '',
+        action: () => {
+          uploadUtils.updateTemplate()
+        }
       }
     }
   },
   computed: {
     ...mapGetters({
+      getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       _detachedBackgroundImage: 'getBackgroundImage'
-    })
+    }),
+    hasDesignId(): boolean {
+      return this.getPage(this.lastSelectedPageIndex).designId !== ''
+    }
   },
   methods: {
     ...mapMutations({

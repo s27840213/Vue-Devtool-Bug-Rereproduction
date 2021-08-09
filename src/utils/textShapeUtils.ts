@@ -35,39 +35,67 @@ class Controller {
     return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6)
   }
 
+  getTextShapeStyles (layer: IText, shape: string, attrs?: any) {
+    const {
+      textShape: styleTextShape,
+      width,
+      height
+    } = layer.styles
+    const props = {} as { [key: string]: any }
+    const defaultAttrs = this.shapes[shape]
+    const styles = {
+      textShape: {},
+      writingMode: 'horizontal-tb'
+    } as { [key: string]: any }
+    if (styleTextShape && (styleTextShape as any).name === shape) {
+      Object.assign(styles.textShape, styleTextShape, attrs)
+    } else {
+      styles.textShape = {
+        ...defaultAttrs,
+        ...attrs,
+        name: shape,
+        initWidth: width,
+        initHeight: height
+      }
+    }
+    if (shape === 'none') {
+      styles.height = (styleTextShape as any).initHeight
+      styles.width = (styleTextShape as any).initWidth
+      styles.textShape = {}
+      props.widthLimit = -1
+    }
+    return { styles, props }
+  }
+
   setTextShape (shape: string, attrs?: any): void {
     const subLayerIndexs = this.getSubTextLayerIndexs()
-    const defaultAttrs = this.shapes[shape]
-
     if (subLayerIndexs.length) {
       subLayerIndexs.forEach(index => {
-        const { styles: { textShape: styleTextShape } } = this.getSpecSubTextLayer(index)
-        const textShape = {} as any
-        if (styleTextShape && (styleTextShape as any).name === shape) {
-          Object.assign(textShape, styleTextShape, attrs)
-        } else {
-          Object.assign(textShape, defaultAttrs, attrs, { name: shape })
-        }
-        store.commit('SET_subLayerStyles', {
+        const { styles, props } = this.getTextShapeStyles(
+          this.getSpecSubTextLayer(index),
+          shape,
+          attrs
+        )
+        store.commit('UPDATE_specLayerData', {
           pageIndex: TextUtils.pageIndex,
-          primaryLayerIndex: TextUtils.layerIndex,
+          layerIndex: TextUtils.layerIndex,
           subLayerIndex: index,
-          styles: { textShape }
+          styles,
+          props
         })
       })
     } else {
-      const { styles: { textShape: styleTextShape } } = this.getCurrentLayer()
-      const textShape = {} as any
-      if (styleTextShape && (styleTextShape as any).name === shape) {
-        Object.assign(textShape, styleTextShape, attrs)
-      } else {
-        Object.assign(textShape, defaultAttrs, attrs, { name: shape })
-      }
-      TextUtils.updateTextStyles(
-        TextUtils.pageIndex,
-        TextUtils.layerIndex,
-        { textShape, writingMode: 'horizontal-tb' }
+      const { styles, props } = this.getTextShapeStyles(
+        this.getCurrentLayer(),
+        shape,
+        attrs
       )
+      store.commit('UPDATE_specLayerData', {
+        pageIndex: TextUtils.pageIndex,
+        layerIndex: TextUtils.layerIndex,
+        styles,
+        props
+      })
     }
   }
 

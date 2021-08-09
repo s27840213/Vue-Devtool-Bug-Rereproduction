@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210803"
+  version: "20210806"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -24,6 +24,27 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/listAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-background:
+    post:
+      description: 取得所有background設計列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listBackgroundInput
+          required: true
+          schema:
+            $ref: "#/definitions/listBackgroundInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listBackgroundOutput"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -253,6 +274,24 @@ definitions:
               - font
               - photo
               - video
+  listBackgroundInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          page_index:
+            type: number
+            description: pagination index
   svgParserInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -392,6 +431,53 @@ definitions:
           meta:
             type: string
             description: meta data
+  listBackgroundOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for background preview and json.
+
+              preview: File name for background preview.
+
+              json: File name for background json.
+
+              content: array of background category, with category_id as id of category (for query), title as categroy name, and list as array of background ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
+
+              Url for background preview: `${host}/${background_id}/${preview}`. Url for background json: `${host}/${background_id}/${json}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              json:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - host
+              - json
+              - preview
   listTemplateInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
