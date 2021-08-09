@@ -65,6 +65,7 @@ class TextUtils {
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrSel() { return store.state.text?.sel }
+  get getCurrTextProps() { return store.state.text?.props }
   get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
@@ -222,7 +223,7 @@ class TextUtils {
 
     let isStartContainerDivided = true
     let prop: { [key: string]: string | number }
-    // If temLayerIndex === 'undefined', means this function is now handler non-group-layer
+    // If temLayerIndex equals to 'undefined', means this function is now handler non-group-layer
     if (typeof tmpLayerIndex === 'undefined') {
       prop = this.propIndicator(start, end, propName, value || '')
     } else {
@@ -298,12 +299,28 @@ class TextUtils {
         case 'fontFamily':
           styles.font = value as string
           break
-        default: {
-          // const i = Object.keys(fontPropsMap).indexOf(propName)
-          // const v = Object.values(fontPropsMap)[i]
-          // styles[v] = prop[v]
-          // break
-          this.updateTextPropsState({ isBold: 'bold' })
+        case 'bold': {
+          if (this.getCurrTextProps?.weight === 'bold') {
+            this.updateTextPropsState({ weight: 'normal' })
+          } else {
+            this.updateTextPropsState({ weight: 'bold' })
+          }
+          break
+        }
+        case 'italic': {
+          if (this.getCurrTextProps?.style === 'italic') {
+            this.updateTextPropsState({ style: 'normal' })
+          } else {
+            this.updateTextPropsState({ style: 'italic' })
+          }
+          break
+        }
+        case 'underline': {
+          if (this.getCurrTextProps?.decoration === 'underline') {
+            this.updateTextPropsState({ decoration: 'none' })
+          } else {
+            this.updateTextPropsState({ decoration: 'underline' })
+          }
         }
       }
       [start, end] = this.spanMerger(config.paragraphs, start, end)
@@ -314,12 +331,9 @@ class TextUtils {
       }
     }
     if (!sel || typeof tmpLayerIndex !== 'undefined') return
-    // below is used to re-select the caret-range after the props are applied
+    // Below is used to re-select the caret-range after the props are applied
     Vue.nextTick(() => {
-      const select = window.getSelection()
-      const range = new Range()
-      const div = document.getElementById(`text-${this.layerIndex}`)
-      if (this.isSel(end) && div) {
+      if (this.isSel(end)) {
         if (isStartContainerDivided) {
           if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
             start.sIndex++
@@ -329,27 +343,14 @@ class TextUtils {
             start.sIndex++
           }
         }
-        const nodeStart = div.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node
-        const nodeEnd = div.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node
-        range.setStart(nodeStart, start.offset)
-        range.setEnd(nodeEnd, end.offset)
-
-        if (select) {
-          select.removeAllRanges()
-          select.addRange(range)
-          this.updateTextSelection(start, end)
-        }
+        this.focus(start, end)
+        this.updateTextSelection(start, end)
         this.updateTextPropsState()
       } else {
         const select = window.getSelection()
-        if (select && div) {
-          const node = div.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node
+        if (select) {
           if (propName === 'fontFamily' || propName === 'fontSize') {
-            // range.setStart(node, 0)
-            // range.setEnd(node, config.paragraphs[start.pIndex].spans[start.sIndex].text.length)
-
             start.offset = 0
-            console.log(start)
             Object.assign(end, start)
             end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
             this.updateTextPropsState()
@@ -359,11 +360,7 @@ class TextUtils {
               sIndex: start.sIndex,
               offset: start.offset
             }
-            // range.setStart(node, start.offset)
-            // range.setEnd(node, start.offset)
           }
-          // select.removeAllRanges()
-          // select.addRange(range)
           this.updateTextSelection(start, end)
           this.focus(start, end)
         }
@@ -374,7 +371,6 @@ class TextUtils {
 
   focus(start?: ISelection, end?: ISelection) {
     const text = document.getElementById(`text-${this.layerIndex}`) as HTMLElement
-    text.focus()
     const range = new Range()
 
     if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
@@ -387,6 +383,7 @@ class TextUtils {
     range.setStart(text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node, start.offset)
 
     if (end && this.isSel(end)) {
+      console.log('xxx')
       range.setEnd(text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node, end.offset)
     }
     setTimeout(() => {
@@ -395,7 +392,6 @@ class TextUtils {
         sel.removeAllRanges()
         sel.addRange(range)
       }
-      console.log('focus')
     }, 0)
   }
 
@@ -626,30 +622,30 @@ class TextUtils {
         const span = p.spans[sidx]
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
         switch (propName) {
-          case 'bold': {
-            prop.weight = 'normal'
-            if (span.styles.weight === 'normal') {
-              prop.weight = 'bold'
-              flag = true
-            }
-            break
-          }
-          case 'underline': {
-            prop.decoration = 'none'
-            if (span.styles.decoration === 'none') {
-              prop.decoration = 'underline'
-              flag = true
-            }
-            break
-          }
-          case 'italic': {
-            prop.style = 'normal'
-            if (span.styles.style === 'normal') {
-              prop.style = 'italic'
-              flag = true
-            }
-            break
-          }
+          // case 'bold': {
+          //   prop.weight = 'normal'
+          //   if (span.styles.weight === 'normal') {
+          //     prop.weight = 'bold'
+          //     flag = true
+          //   }
+          //   break
+          // }
+          // case 'underline': {
+          //   prop.decoration = 'none'
+          //   if (span.styles.decoration === 'none') {
+          //     prop.decoration = 'underline'
+          //     flag = true
+          //   }
+          //   break
+          // }
+          // case 'italic': {
+          //   prop.style = 'normal'
+          //   if (span.styles.style === 'normal') {
+          //     prop.style = 'italic'
+          //     flag = true
+          //   }
+          //   break
+          // }
           case 'fontFamily': {
             if (typeof value === 'string') {
               prop.font = value
@@ -807,6 +803,45 @@ class TextUtils {
         p.spans[0].text = '\n'
       }
     })
+
+    const sel = this.getSelection()
+    if (sel && this.isSel(sel.start)) {
+      const currPropsState = this.getCurrTextProps
+      if (currPropsState && paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) {
+        let isSameSpanStyles = true
+        if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.weight !== currPropsState.weight) {
+          isSameSpanStyles = false
+        } else if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.style !== currPropsState.style) {
+          isSameSpanStyles = false
+        } else if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.decoration !== currPropsState.decoration) {
+          isSameSpanStyles = false
+        }
+        if (!isSameSpanStyles) {
+          console.log(currPropsState.decoration)
+          const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
+          const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)
+          const newSpanStyles = Object.assign(GeneralUtils.deepCopy(selSpan.styles), {
+            weight: currPropsState.weight,
+            style: currPropsState.style,
+            decoration: currPropsState.decoration
+          })
+          paragraphs[sel.start.pIndex].spans[sel.start.sIndex].text = selSpan.text.slice(0, sel.start.offset - 1)
+          paragraphs[sel.start.pIndex].spans.splice(sel.start.sIndex + 1, 0, {
+            styles: newSpanStyles,
+            text: selSpan.text[sel.start.offset - 1]
+          })
+          if (selSpan.text.substr(sel.start.offset)) {
+            paragraphs[sel.start.pIndex].spans.splice(sel.start.sIndex + 2, 0, {
+              styles: originSpanStyles,
+              text: selSpan.text.substr(sel.start.offset)
+            })
+          }
+          Object.assign(sel.start, { sIndex: sel.start.sIndex + 1, offset: 1 })
+          this.updateTextSelection(sel.start, sel.end)
+        }
+      }
+    }
+
     return paragraphs
   }
 
@@ -978,9 +1013,9 @@ class TextUtils {
       'font',
       'color',
       'opacity',
-      'isBold',
-      'isItalic',
-      'isUnderline',
+      'weight',
+      'style',
+      'decoration',
       'isVertical'
     ]
     props.forEach(k => {
@@ -1032,19 +1067,16 @@ class TextUtils {
           value = (this.getCurrLayer as IText).styles.opacity
           break
         }
-        case 'isUnderline': {
-          const res = this.propReader('underline')
-          value = res === 'underline'
+        case 'decoration': {
+          value = this.propReader('underline')
           break
         }
-        case 'isBold': {
-          const res = this.propReader('bold')
-          value = res === 'bold'
+        case 'weight': {
+          value = this.propReader('bold')
           break
         }
-        case 'isItalic': {
-          const res = this.propReader('italic')
-          value = res === 'italic'
+        case 'style': {
+          value = this.propReader('italic')
           break
         }
         case 'isVertical': {

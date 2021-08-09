@@ -12,9 +12,9 @@ export interface ITextState {
     font: string,
     color: string,
     opacity: number,
-    isBold: boolean,
-    isItalic: boolean,
-    isUnderline: boolean,
+    weight: string,
+    style: string,
+    decoration: string,
     isVertical: boolean
   }
 }
@@ -40,9 +40,9 @@ const getDefaultState = (): ITextState => ({
     font: 'multi-fonts',
     color: '#000000',
     opacity: 100,
-    isBold: false,
-    isItalic: false,
-    isUnderline: false,
+    weight: 'normal',
+    style: 'normal',
+    decoration: 'none',
     isVertical: false
   }
 })
