@@ -417,6 +417,7 @@ export default Vue.extend({
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
         StepsUtils.record()
+        LayerUtils.isOutOfBoundary()
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false

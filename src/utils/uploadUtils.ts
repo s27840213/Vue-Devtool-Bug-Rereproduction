@@ -88,7 +88,7 @@ class UploadUtils {
       pageIndex: pageIndex,
       designId: designId
     })
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex))
+    const pageJSON = [generalUtils.deepCopy(store.getters.getPage(pageIndex))]
 
     console.log(pageJSON)
 
@@ -120,10 +120,8 @@ class UploadUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
-    console.log('update')
-    console.log(designId)
 
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex))
+    const pageJSON = [generalUtils.deepCopy(store.getters.getPage(pageIndex))]
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -194,7 +192,7 @@ class UploadUtils {
     const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${this.generateRandomString(6)}`)
     response.json().then((json) => {
       console.log(json)
-      store.commit('SET_pages', [json])
+      store.commit('SET_pages', json)
     })
   }
 

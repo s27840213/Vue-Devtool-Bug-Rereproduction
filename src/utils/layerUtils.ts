@@ -5,8 +5,11 @@ import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
 import FocusUtils from './focusUtils'
 import { ISpecLayerData } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 
 class LayerUtils {
+  get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,
@@ -37,7 +40,7 @@ class LayerUtils {
     return store.getters.getLayer(pageIndex, layerIndex)
   }
 
-  getTmpLayer(): ITmp {
+  getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -89,6 +92,16 @@ class LayerUtils {
       styles,
       type
     })
+  }
+
+  isOutOfBoundary() {
+    const pageInfo = store.getters.getPage(this.currSelectedInfo.pageIndex) as IPage
+    const targetLayer = this.getTmpLayer()
+
+    if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
+      (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
+      console.log('Is out of bound!')
+    }
   }
 }
 
