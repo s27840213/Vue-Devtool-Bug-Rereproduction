@@ -565,6 +565,30 @@ const actions: ActionTree<IEditorState, unknown> = {
     } catch (error) {
       console.log(error)
     }
+  },
+  async register({ commit }, { type = '0', uname, account, upass }) {
+    try {
+      const meta = { type: type, uname: uname, account: account, upass: upass }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('register', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  async verifyVcode({ commit }, { type = '2', account, vcode }) {
+    try {
+      const meta = { type: type, account: account, vcode: vcode }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('verify vcode', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
   }
 }
 

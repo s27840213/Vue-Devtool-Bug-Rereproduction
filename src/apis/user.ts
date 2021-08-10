@@ -20,5 +20,12 @@ export default {
     method: 'POST',
     data: {
     }
+  }),
+  register: (token: string, meta: string): AxiosPromise => axios('/register', {
+    method: 'POST',
+    data: {
+      token,
+      meta
+    }
   })
 }
