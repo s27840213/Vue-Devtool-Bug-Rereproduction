@@ -29,7 +29,7 @@ const routes: Array<RouteConfig> = [
           const designId = urlParams.get('design_id')
           console.log(type, designId)
           if (type && designId) {
-            uploadUtils.getTemplate(type, designId)
+            uploadUtils.getDesign(type, designId)
           }
         }
         next()

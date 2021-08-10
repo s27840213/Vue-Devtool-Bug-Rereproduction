@@ -550,7 +550,7 @@ const actions: ActionTree<IEditorState, unknown> = {
   async getAssets({ commit }, { token }) {
     try {
       const { data } = await userApis.getAssets(token)
-      console.log(data)
+      return data
     } catch (error) {
       console.log(error)
     }
