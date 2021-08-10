@@ -173,13 +173,13 @@ export default Vue.extend({
       const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }
       switch (iconName) {
         case 'bold':
-          if (this.props.isBold) return hitStyle
+          if (this.props.weight === 'bold') return hitStyle
           break
         case 'underline':
-          if (this.props.isUnderline) return hitStyle
+          if (this.props.decoration === 'underline') return hitStyle
           break
         case 'italic':
-          if (this.props.isItalic) return hitStyle
+          if (this.props.style === 'italic') return hitStyle
           break
         case 'font-vertical':
           if (this.props.isVertical) return hitStyle
@@ -197,7 +197,7 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextUtils.onPropertyClick(iconName)
-      TextUtils.updateTextPropsState()
+      // TextUtils.updateTextPropsState()
     },
     fontSizeStepping(step: number) {
       const sel = TextUtils.getSelection()

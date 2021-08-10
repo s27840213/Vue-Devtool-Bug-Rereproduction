@@ -65,6 +65,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import FocusUtils from '@/utils/focusUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { IImage } from '@/interfaces/layer'
+import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
@@ -123,8 +124,12 @@ export default Vue.extend({
           text: 'Copy',
           shortcutText: 'Cmd+C',
           action: () => {
-            ShortcutUtils.copy()
-            FocusUtils.focusLastSelectedPage()
+            if (TextUtils.getSelection()) {
+              ShortcutUtils.textCopy()
+            } else {
+              ShortcutUtils.copy()
+              FocusUtils.focusLastSelectedPage()
+            }
           }
         },
         {
@@ -132,8 +137,12 @@ export default Vue.extend({
           text: 'Paste',
           shortcutText: 'Cmd+V',
           action: () => {
-            ShortcutUtils.paste()
-            FocusUtils.focusLastSelectedPage()
+            if (TextUtils.getSelection()) {
+              ShortcutUtils.textPaste()
+            } else {
+              FocusUtils.focusLastSelectedPage()
+              ShortcutUtils.paste()
+            }
           }
         },
         {

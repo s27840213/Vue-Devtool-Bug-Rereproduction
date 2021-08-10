@@ -24,7 +24,10 @@
               @compositionstart="isComposing = true"
               @compositionend="isComposing = false"
               @keydown="onKeyDown"
-              @click.right="onTextRightClick"
+              @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+              @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+              @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+              @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
               @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -65,22 +68,23 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import MathUtils from '@/utils/mathUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import { ICoordinate } from '@/interfaces/frame'
+import { IImage, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IControlPoints, IResizer } from '@/interfaces/controller'
+import { ISelection } from '@/interfaces/text'
+import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { ICoordinate } from '@/interfaces/frame'
-import { IImage, IParagraph, IShape, IText } from '@/interfaces/layer'
-import { IControlPoints, IResizer } from '@/interfaces/controller'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import { ISelection } from '@/interfaces/text'
 
 export default Vue.extend({
   props: {
@@ -92,6 +96,7 @@ export default Vue.extend({
   data() {
     return {
       MappingUtils,
+      ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -109,7 +114,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    // console.log(this.config)
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -120,7 +124,7 @@ export default Vue.extend({
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   computed: {
-    ...mapState('text', ['sel']),
+    ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -172,11 +176,14 @@ export default Vue.extend({
     },
     isActive(val) {
       if (this.getLayerType === 'text' && !val) {
-        this.contentEditable = false
-        this.handleTextProps({ editing: false })
-        if (this.currSelectedInfo.layers.length === 1) {
-          const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing: false
+        })
+        if (this.currSelectedInfo.layers.length <= 1) {
+          this.contentEditable = false
+          // TODO: Not sure the following commented code can be removed.
+          // const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+          // TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
@@ -188,14 +195,17 @@ export default Vue.extend({
       handler(val) {
         const text = this.$refs.text as HTMLElement
         if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
+          console.log('sel handler')
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
         }
       },
       deep: true
     },
     isTextEditing(editing) {
-      if (this.getLayerType === 'text' && this.currSelectedInfo.layers.length === 1) {
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing })
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          editing
+        })
       }
     }
   },
@@ -257,7 +267,7 @@ export default Vue.extend({
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        width: isVertical ? 'auto' : '',
+        width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
         height: isVertical ? '' : 'auto',
         opacity: this.isTextEditing ? 1 : 0
       }
@@ -309,6 +319,9 @@ export default Vue.extend({
     moveStart(e: MouseEvent) {
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: true
+        })
         if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
           return
         } else if (!this.isActive) {
@@ -328,7 +341,6 @@ export default Vue.extend({
             window.addEventListener('mouseup', this.moveEnd)
             window.addEventListener('mousemove', this.moving)
           }
-          this.handleTextProps({ dragging: true })
           return
         }
         this.contentEditable = true
@@ -338,7 +350,6 @@ export default Vue.extend({
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
-        this.handleTextProps({ dragging: true })
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -393,7 +404,6 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd() {
-      this.handleTextProps({ dragging: false })
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -409,6 +419,9 @@ export default Vue.extend({
         StepsUtils.record()
         LayerUtils.isOutOfBoundary()
       }
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: false
+      })
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -823,10 +836,6 @@ export default Vue.extend({
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
     },
-    onTextRightClick() {
-      const sel = window.getSelection()
-      console.log(sel?.toString())
-    },
     textClickHandler(e: MouseEvent) {
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
@@ -839,7 +848,7 @@ export default Vue.extend({
       }
     },
     onKeyDown(e: KeyboardEvent) {
-      if (this.config.type === 'text') {
+      if (this.config.type === 'text' && !e.ctrlKey && !e.metaKey) {
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         const start = {
@@ -878,6 +887,9 @@ export default Vue.extend({
           attributeOldValue: false,
           characterDataOldValue: false
         })
+        // if (e.key === 'Enter' && this.isComposing) {
+        //   this.onTyping(e, start)([], observer)
+        // }
       }
     },
     onKeyUp(e: KeyboardEvent) {
@@ -893,26 +905,19 @@ export default Vue.extend({
     onTyping(e: KeyboardEvent, start: ISelection) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
-
         const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
         const sel = TextUtils.getSelection()
         let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
-        /**
-         * if below condition is false, means some paragraph (p-node) is removed
-         */
+        // if below condition is false, means some paragraph (p-node) is removed
         if (sel && TextUtils.isSel(sel.start)) {
           pIndex = sel.start.pIndex
           sIndex = sel.start.sIndex
           offset = sel.start.offset
-          /**
-           * used for deleting the first span of the text, and moving the caret to the previous p
-           */
+          // used for deleting the first span of the text, and moving the caret to the previous p
           const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
           if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
             pIndex -= 1
-            /**
-             *  if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-             */
+            // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
             if (pIndex < 0) {
               [pIndex, sIndex, offset] = [0, 0, 0]
             }
@@ -925,24 +930,17 @@ export default Vue.extend({
         } else if (e.key === 'Enter') {
           [sIndex, offset] = [0, 0]
           pIndex += 1
-        } else if (TextUtils.isArrowKey(e)) {
-          /**
-           *  If the input key is ArrowKey, the startContainer will be different (not the same node) as the other key pressed
-           */
-          if (sel && TextUtils.isSel(sel.start)) {
-            pIndex = sel.start.pIndex
-            sIndex = sel.start.sIndex
-            offset = sel.start.offset
-          }
+        } else if (TextUtils.isArrowKey(e) && (sel && TextUtils.isSel(sel.start))) {
+          // If the input key is ArrowKey, the startContainer will be different (not the same node) as the other key pressed
+          pIndex = sel.start.pIndex
+          sIndex = sel.start.sIndex
+          offset = sel.start.offset
         } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
-          /**
-           * some paragraph is deleted
-           */
+          // some paragraph is deleted
           pIndex -= 1
           sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
           offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
         }
-
         if (this.isComposing) {
           const config = GeneralUtils.deepCopy(this.config) as IText
           Object.assign(config.paragraphs, paragraphs)
@@ -961,15 +959,30 @@ export default Vue.extend({
           }
           const sel = window.getSelection()
           if (sel) {
+            // test
+            const currPropsState = this.props
+            let isSameSpanStyles = true
+            if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.weight !== currPropsState.weight) {
+              isSameSpanStyles = false
+            } else if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.style !== currPropsState.style) {
+              isSameSpanStyles = false
+            } else if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.decoration !== currPropsState.decoration) {
+              isSameSpanStyles = false
+            }
+            if (!isSameSpanStyles) {
+              sIndex += 1
+              offset = 1
+            }
+
             const range = new Range()
             range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
             sel.removeAllRanges()
             sel.addRange(range)
           }
-        })
-        this.$store.commit('text/UPDATE_selection', {
-          start: { pIndex, sIndex, offset },
-          end: { pIndex: NaN, sIndex: NaN, offset: NaN }
+          this.$store.commit('text/UPDATE_selection', {
+            start: { pIndex, sIndex, offset },
+            end: { pIndex: NaN, sIndex: NaN, offset: NaN }
+          })
         })
       }
     },
@@ -1036,15 +1049,6 @@ export default Vue.extend({
       indexs.unshift(this.layerIndex)
       this.subControlerIndexs = GeneralUtils.deepCopy(indexs)
       LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
-    },
-    handleTextProps(props: { [key: string]: any }) {
-      const { pageIndex, layerIndex } = this
-      LayerUtils.updateSpecLayerData({
-        pageIndex,
-        layerIndex,
-        props,
-        type: ['text']
-      })
     }
   }
 })
