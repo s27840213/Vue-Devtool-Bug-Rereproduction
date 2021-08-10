@@ -13,7 +13,7 @@ class UploadUtils {
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    // console.log(loginOutput)
+    console.log(loginOutput)
     // this.getTmpJSON()
   }
 
@@ -299,7 +299,7 @@ class UploadUtils {
     const jsonName = type === 'template' ? 'config.json' : 'page.json'
     const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${this.generateRandomString(6)}`)
     response.json().then((json) => {
-      // console.log(json)
+      console.log(json)
       store.commit('SET_pages', [json])
     })
   }

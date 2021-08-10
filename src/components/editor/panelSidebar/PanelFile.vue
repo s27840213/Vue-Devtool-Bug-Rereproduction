@@ -20,16 +20,20 @@ export default Vue.extend({
   },
   data() {
     return {
-      assets: {
-        design: [],
-        font: [],
-        image: [],
-        video: []
-      }
+      assets: {} as any,
+      dl_url: ''
     }
   },
   mounted() {
-    this._getAssets()
+    this._getAssets().then(() => {
+      if (uploadUtils.token) {
+        this.dl_url = uploadUtils.loginOutput.download_url
+        console.log(this.assets)
+        this.assets.image.content.forEach((image: any) => {
+          console.log(this.dl_url.replace('*', `asset/image/${image.id}/prev`))
+        })
+      }
+    })
   },
   methods: {
     ...mapActions({
@@ -40,9 +44,7 @@ export default Vue.extend({
     },
     async _getAssets() {
       const data = await this.getAssets({ token: uploadUtils.token })
-      console.log(data)
       Object.assign(this.assets, data.data)
-      console.log(this.assets)
     }
   }
 })

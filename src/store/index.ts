@@ -59,6 +59,7 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [
       ],
+      documentColor: [],
       designId: ''
     },
     {
@@ -104,6 +105,7 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [
       ],
+      documentColor: [],
       designId: ''
     }
   ],
