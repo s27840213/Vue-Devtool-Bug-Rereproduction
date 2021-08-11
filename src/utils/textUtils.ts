@@ -231,6 +231,7 @@ class TextUtils {
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
     }
+
     if (this.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
         const p = config.paragraphs[pIndex]
@@ -299,6 +300,9 @@ class TextUtils {
         case 'fontFamily':
           styles.font = value as string
           break
+        case 'color':
+          this.updateTextPropsState({ color: value as string })
+          break
         case 'bold': {
           if (this.getCurrTextProps?.weight === 'bold') {
             this.updateTextPropsState({ weight: 'normal' })
@@ -343,9 +347,8 @@ class TextUtils {
             start.sIndex++
           }
         }
+        // this.updateTextPropsState()
         this.focus(start, end)
-        this.updateTextSelection(start, end)
-        this.updateTextPropsState()
       } else {
         const select = window.getSelection()
         if (select) {
@@ -355,21 +358,17 @@ class TextUtils {
             end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
             this.updateTextPropsState()
           } else {
-            end = {
-              pIndex: start.pIndex,
-              sIndex: start.sIndex,
-              offset: start.offset
-            }
+            Object.assign(end, start)
           }
-          this.updateTextSelection(start, end)
-          this.focus(start, end)
         }
+        this.focus(start, end, true)
       }
       // this.updateTextPropsState()
+      this.updateTextSelection(start, end)
     })
   }
 
-  focus(start?: ISelection, end?: ISelection) {
+  focus(start?: ISelection, end?: ISelection, async = false) {
     const text = document.getElementById(`text-${this.layerIndex}`) as HTMLElement
     const range = new Range()
 
@@ -383,16 +382,29 @@ class TextUtils {
     range.setStart(text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node, start.offset)
 
     if (end && this.isSel(end)) {
-      console.log('xxx')
       range.setEnd(text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node, end.offset)
     }
-    setTimeout(() => {
+
+    const setSelection = () => {
       const sel = window.getSelection()
       if (sel) {
         sel.removeAllRanges()
         sel.addRange(range)
       }
-    }, 0)
+    }
+    /**
+     * The reason to use setTimeout is because if not put the setSelection inside it,
+     * it will not set the single-caret to the desired position.
+     * However this problem will not happen in the situation of range-selection,
+     * in the other hand, in this situation put the setSelection in the setTimeout function will casue glitch.
+     * */
+    if (async) {
+      setTimeout(() => {
+        setSelection()
+      }, 0)
+    } else {
+      setSelection()
+    }
   }
 
   spanMerger(paragraphs: IParagraph[], start: ISelection, end: ISelection): [ISelection, ISelection] {
@@ -457,6 +469,8 @@ class TextUtils {
 
   paragraphPropsHandler(propName: string, value: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.currSelectedInfo.layers.length === 1) {
+      selStart = GeneralUtils.deepCopy(selStart) as ISelection
+      selEnd = GeneralUtils.deepCopy(selEnd) as ISelection
       if (!this.isSel(selStart) && !this.isSel(selEnd)) {
         Object.assign(selStart, { pIndex: 0, sIndex: 0, offset: 0 })
         Object.assign(selEnd, { pIndex: (this.getCurrLayer as IText).paragraphs.length, sIndex: 0, offset: 0 })
@@ -515,6 +529,7 @@ class TextUtils {
 
   propReadOfLayer(prop: string, layer?: IText) {
     const sel = this.isSel(store.state.text?.sel.start) ? store.state.text?.sel : this.getSelection()
+    // If layer is assigned, means the current selected layer is a group/tmp layer
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     let start
     let end
@@ -564,7 +579,7 @@ class TextUtils {
           origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles[v] as string | number
         }
     }
-    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+    for (let pidx = start.pIndex; pidx <= end.pIndex && config.paragraphs[pidx]; pidx++) {
       const p = config.paragraphs[pidx]
       if (prop === 'lineHeight' && origin !== p.styles.lineHeight) {
         isMulti = true
@@ -622,30 +637,30 @@ class TextUtils {
         const span = p.spans[sidx]
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
         switch (propName) {
-          // case 'bold': {
-          //   prop.weight = 'normal'
-          //   if (span.styles.weight === 'normal') {
-          //     prop.weight = 'bold'
-          //     flag = true
-          //   }
-          //   break
-          // }
-          // case 'underline': {
-          //   prop.decoration = 'none'
-          //   if (span.styles.decoration === 'none') {
-          //     prop.decoration = 'underline'
-          //     flag = true
-          //   }
-          //   break
-          // }
-          // case 'italic': {
-          //   prop.style = 'normal'
-          //   if (span.styles.style === 'normal') {
-          //     prop.style = 'italic'
-          //     flag = true
-          //   }
-          //   break
-          // }
+          case 'bold': {
+            prop.weight = 'normal'
+            if (span.styles.weight === 'normal') {
+              prop.weight = 'bold'
+              flag = true
+            }
+            break
+          }
+          case 'underline': {
+            prop.decoration = 'none'
+            if (span.styles.decoration === 'none') {
+              prop.decoration = 'underline'
+              flag = true
+            }
+            break
+          }
+          case 'italic': {
+            prop.style = 'normal'
+            if (span.styles.style === 'normal') {
+              prop.style = 'italic'
+              flag = true
+            }
+            break
+          }
           case 'fontFamily': {
             if (typeof value === 'string') {
               prop.font = value
@@ -803,27 +818,32 @@ class TextUtils {
         p.spans[0].text = '\n'
       }
     })
+    return paragraphs
+  }
 
+  newPropsHandler(paragraphs: IParagraph[]): IParagraph[] {
     const sel = this.getSelection()
     if (sel && this.isSel(sel.start)) {
       const currPropsState = this.getCurrTextProps
       if (currPropsState && paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) {
-        let isSameSpanStyles = true
-        if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.weight !== currPropsState.weight) {
-          isSameSpanStyles = false
-        } else if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.style !== currPropsState.style) {
-          isSameSpanStyles = false
-        } else if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles.decoration !== currPropsState.decoration) {
-          isSameSpanStyles = false
-        }
+        const isSameSpanStyles = (() => {
+          const props = ['weight', 'style', 'decoration', 'color']
+          for (const k of props) {
+            if (paragraphs[sel.start.pIndex].spans[sel.start.sIndex].styles[k] !== currPropsState[k]) {
+              return false
+            }
+          }
+          return true
+        })()
+
         if (!isSameSpanStyles) {
-          console.log(currPropsState.decoration)
           const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
           const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)
           const newSpanStyles = Object.assign(GeneralUtils.deepCopy(selSpan.styles), {
             weight: currPropsState.weight,
             style: currPropsState.style,
-            decoration: currPropsState.decoration
+            decoration: currPropsState.decoration,
+            color: currPropsState.color
           })
           paragraphs[sel.start.pIndex].spans[sel.start.sIndex].text = selSpan.text.slice(0, sel.start.offset - 1)
           paragraphs[sel.start.pIndex].spans.splice(sel.start.sIndex + 1, 0, {
@@ -841,7 +861,6 @@ class TextUtils {
         }
       }
     }
-
     return paragraphs
   }
 
@@ -982,6 +1001,7 @@ class TextUtils {
   }
 
   updateSelection(start: ISelection, end: ISelection) {
+    console.log('xxxxx')
     store.commit('text/UPDATE_selection', {
       start,
       end

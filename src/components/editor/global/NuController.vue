@@ -187,15 +187,15 @@ export default Vue.extend({
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
-        this.$store.commit('text/SET_default')
+        // this.$store.commit('text/SET_default')
         TextUtils.updateTextPropsState()
       }
     },
     sel: {
       handler(val) {
         const text = this.$refs.text as HTMLElement
+        console.log('sel handler')
         if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-          console.log('sel handler')
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
         }
       },
@@ -896,16 +896,17 @@ export default Vue.extend({
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
         TextUtils.updateTextPropsState()
         const sel = TextUtils.getSelection()
-        this.$store.commit('text/UPDATE_selection', {
-          start: sel?.start,
-          end: sel?.end
-        })
+        TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
       }
     },
     onTyping(e: KeyboardEvent, start: ISelection) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
-        const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        if (e.key !== 'Enter' && e.key !== 'Backspace') {
+          paragraphs = TextUtils.newPropsHandler(paragraphs)
+        }
+
         const sel = TextUtils.getSelection()
         let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
         // if below condition is false, means some paragraph (p-node) is removed
@@ -913,7 +914,7 @@ export default Vue.extend({
           pIndex = sel.start.pIndex
           sIndex = sel.start.sIndex
           offset = sel.start.offset
-          // used for deleting the first span of the text, and moving the caret to the previous p
+          // Deleting the first span of the text, and moving the caret to the previous p
           const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
           if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
             pIndex -= 1
@@ -950,7 +951,6 @@ export default Vue.extend({
           this.textSizeRefresh(this.config)
         }
 
-        TextUtils.updateTextPropsState()
         const text = this.$refs.text as HTMLElement
         this.$nextTick(() => {
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -959,16 +959,18 @@ export default Vue.extend({
           }
           const sel = window.getSelection()
           if (sel) {
-            // test
             const currPropsState = this.props
-            let isSameSpanStyles = true
-            if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.weight !== currPropsState.weight) {
-              isSameSpanStyles = false
-            } else if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.style !== currPropsState.style) {
-              isSameSpanStyles = false
-            } else if (e.key !== 'Enter' && paragraphs[pIndex].spans[sIndex].styles.decoration !== currPropsState.decoration) {
-              isSameSpanStyles = false
-            }
+            const isSameSpanStyles = (() => {
+              if (e.key !== 'Enter' && e.key !== 'Backspace') {
+                const props = ['weight', 'style', 'decoration', 'color']
+                for (const k of props) {
+                  if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
+                    return false
+                  }
+                }
+              }
+              return true
+            })()
             if (!isSameSpanStyles) {
               sIndex += 1
               offset = 1
@@ -979,10 +981,8 @@ export default Vue.extend({
             sel.removeAllRanges()
             sel.addRange(range)
           }
-          this.$store.commit('text/UPDATE_selection', {
-            start: { pIndex, sIndex, offset },
-            end: { pIndex: NaN, sIndex: NaN, offset: NaN }
-          })
+          TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
+          TextUtils.updateTextPropsState()
         })
       }
     },

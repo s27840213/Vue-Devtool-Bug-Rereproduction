@@ -38,7 +38,7 @@ export default Vue.extend({
             {
               styles: {
                 fontSpacing: 0,
-                lineHeight: -1
+                lineHeight: 1.6
               },
               spans: [
                 {
@@ -82,7 +82,7 @@ export default Vue.extend({
             {
               styles: {
                 fontSpacing: 0,
-                lineHeight: -1
+                lineHeight: 1.6
               },
               spans: [
                 {
@@ -124,7 +124,7 @@ export default Vue.extend({
             {
               styles: {
                 fontSpaceing: 0,
-                lineHeight: -1
+                lineHeight: 1.6
               },
               spans: [
                 {
@@ -166,7 +166,7 @@ export default Vue.extend({
             {
               styles: {
                 fontSpacing: 0,
-                lineHeight: -1
+                lineHeight: 1.6
               },
               spans: [
                 {

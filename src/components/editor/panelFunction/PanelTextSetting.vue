@@ -10,23 +10,24 @@
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(@click="handleValueModal")
-          input(class="body-2 text-gray-2 center" type="text" @keyup="setSize($event)" @blur="onBlur"
-            v-model.lazy="props.fontSize")
+          input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
+                @change="setSize" @blur="onBlur"
+                v-model.lazy="props.fontSize")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
-                    class="text-setting__value-selector record-selection"
+                    class="text-setting__value-selector"
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
         //- div(class="text-setting__font-stepper")
         //- svg-icon(class="pointer"
         //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="text-setting__color")
-        div(class="color-slip"
+        div(class="color-slip record-selection"
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10")
-          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @keyup="setColor($event)")
+          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @change="setColor")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"
         v-click-outside="handleColorModal"
@@ -46,18 +47,55 @@
         :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="text-setting__row5")
-      property-bar
-        input(class="body-2 text-gray-2 record-selection" type="text" v-model.lazy="props.lineHeight" @keyup="setHeight($event)" @blur="onBlur")
-        svg-icon(class="pointer"
-          :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
-      property-bar
-        input(class="body-2 text-gray-2 record-selection" type="text" v-model.lazy="props.fontSpacing" @keyup="setSpacing($event)" @blur="onBlur")
-        svg-icon(class="pointer"
-          :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
-      property-bar
-        input(class="body-2 text-gray-2 record-selection" type="number" v-model="props.opacity" @keyup="setOpacity($event)" @blur="onBlur")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
+      div(class="relative")
+        property-bar
+          button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
+            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
+                  :value="props.lineHeight" @change="setHeight($event, true)" @blur="onBlur")
+          svg-icon(class="pointer"
+            :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
+        div(v-if="openSliderBar === 'lineHeight'"
+            class="text-setting__range-input-wrapper"
+            v-click-outside="handleSliderModal")
+          input(class="text-setting__range-input"
+            :value="props.lineHeight * 100"
+            :max="fieldRange.lineHeight.max"
+            :min="fieldRange.lineHeight.min"
+            type="range"
+            @input="setHeight")
+      div(class="relative")
+        property-bar
+          button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
+            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
+                  :value="props.fontSpacing" @change="setSpacing" @blur="onBlur")
+          svg-icon(class="pointer"
+            :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
+        div(v-if="openSliderBar === 'fontSpacing'"
+            class="text-setting__range-input-wrapper"
+            v-click-outside="handleSliderModal")
+          input(class="text-setting__range-input"
+            :value="props.fontSpacing"
+            :max="fieldRange.fontSpacing.max"
+            :min="fieldRange.fontSpacing.min"
+            type="range"
+            @input="setSpacing")
+      div(class="relative")
+        property-bar
+          button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
+            input(class="body-2 text-gray-2 record-selection" type="number" ref="input-opacity"
+                  :value="props.opacity" @change="setOpacity" @blur="onBlur")
+          svg-icon(class="pointer"
+            :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
+        div(v-if="openSliderBar === 'opacity'"
+            class="text-setting__range-input-wrapper right"
+            v-click-outside="handleSliderModal")
+          input(class="text-setting__range-input"
+            :value="props.opacity"
+            :max="fieldRange.opacity.max"
+            :min="fieldRange.opacity.min"
+            type="range"
+            @input="setOpacity")
+
 </template>
 
 <script lang="ts">
@@ -66,14 +104,12 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { ILayer, IText } from '@/interfaces/layer'
+import { IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import GeneralUtils from '@/utils/generalUtils'
-import { ISelection } from '@/interfaces/text'
-import { values } from 'lodash'
-import { Group } from 'konva/types/Group'
+import { parse } from 'path/posix'
+import { parseInt } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -87,7 +123,14 @@ export default Vue.extend({
   data() {
     return {
       openColorPicker: false,
-      openValueSelector: false
+      openValueSelector: false,
+      openSliderBar: 'center',
+      fieldRange: {
+        fontSize: { min: 6, max: 120 },
+        lineHeight: { min: 0, max: 300 },
+        fontSpacing: { min: -200, max: 800 },
+        opacity: { min: 0, max: 100 }
+      }
     }
   },
   mounted() {
@@ -133,27 +176,32 @@ export default Vue.extend({
     handleColorModal() {
       this.openColorPicker = !this.openColorPicker
       if (!this.openColorPicker) {
-        const sel = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: NaN
-        }
-        TextUtils.updateSelection(sel, sel)
+        TextUtils.focus(this.sel.start, this.sel.end)
       }
     },
     handleColorUpdate (color: string) {
+      const nan = {
+        pIndex: NaN,
+        sIndex: NaN,
+        offset: NaN
+      }
       if (this.currSelectedInfo.layers.length === 1) {
-        TextUtils.spanPropertyHandler('color', color, this.sel.start, this.sel.end)
+        const isSelCollapse = (() => {
+          for (const [k, v] of Object.entries(this.sel.start)) {
+            if (this.sel.end[k] !== v) return false
+          }
+          return true
+        })()
+        window.requestAnimationFrame(() => {
+          TextUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
+        })
       } else {
-        const nan = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: NaN
-        }
         for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
           const layer = this.currSelectedInfo.layers[i]
           if (layer.type === 'text') {
-            TextUtils.spanPropertyHandler('color', color, nan, nan, i)
+            window.requestAnimationFrame(() => {
+              TextUtils.spanPropertyHandler('color', color, nan, nan, i)
+            })
           }
         }
       }
@@ -161,12 +209,23 @@ export default Vue.extend({
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
+      if (this.openValueSelector) {
+        const input = this.$refs['input-fontSize'] as HTMLInputElement
+        input.focus()
+        input.select()
+      }
     },
     handleValueUpdate(value: number) {
-      console.log(this.sel.start)
-      console.log(this.sel.end)
       TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
       TextUtils.updateTextPropsState()
+    },
+    handleSliderModal(modalName = '') {
+      this.openSliderBar = modalName
+      if (modalName === 'lineHeight' || modalName === 'fontSpacing' || modalName === 'opacity') {
+        const input = this.$refs[`input-${modalName}`] as HTMLInputElement
+        input.focus()
+        input.select()
+      }
     },
     propsBtnStyles(iconName: string) {
       const origin = { 'background-color': '', 'border-radius': '' }
@@ -213,66 +272,103 @@ export default Vue.extend({
       }
     },
     isValidInt(value: string) {
-      return value.match(/^-?\d+$/) && parseInt(value) >= 0
+      return value.match(/^-?\d+$/)
     },
     isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/) && parseFloat(value) >= 0
+      return value.match(/[+-]?\d+(\.\d+)?/)
     },
     isValidHexColor(value: string) {
       return value.match(/^#[0-9A-F]{6}$/)
+    },
+    boundValue(value: number, min: number, max: number): string {
+      if (value < min) return min.toString()
+      else if (value > max) return max.toString()
+      return value.toString()
     },
     textRangeRecorder(e: MouseEvent) {
       const sel = TextUtils.getSelection()
       if ((e.target as HTMLElement).classList.contains('record-selection') && sel) {
         TextUtils.updateSelection(sel.start, sel.end)
+        console.log(sel.start.pIndex)
+        console.log(sel.end.pIndex)
+        console.log(this.sel.start.pIndex)
+        console.log(this.sel.end.pIndex)
       }
     },
-    setSize(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidInt(this.props.fontSize)) {
-        TextUtils.spanPropertyHandler('fontSize', parseInt(this.props.fontSize), this.sel.start, this.sel.end)
+    setSize(e: Event) {
+      let { value } = e.target as HTMLInputElement
+      if (this.isValidInt(value)) {
+        value = this.boundValue(parseInt(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        window.requestAnimationFrame(() => {
+          TextUtils.spanPropertyHandler('fontSize', parseInt(value), this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ fontSize: value })
+        })
       }
     },
-    setSpacing(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidInt(this.props.fontSpacing)) {
-        TextUtils.paragraphPropsHandler('fontSpacing', parseInt(this.props.fontSpacing) / 100, this.sel.start, this.sel.end)
+    setSpacing(e: Event) {
+      let { value } = e.target as HTMLInputElement
+      if (this.isValidInt(value)) {
+        value = this.boundValue(parseInt(value), this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max)
+        window.requestAnimationFrame(() => {
+          TextUtils.paragraphPropsHandler('fontSpacing', parseInt(value) / 1000, this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ fontSpacing: value })
+        })
       }
     },
-    setHeight(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidFloat(this.props.lineHeight)) {
-        TextUtils.paragraphPropsHandler('lineHeight', parseFloat(this.props.lineHeight), this.sel.start, this.sel.end)
+    setHeight(e: Event, isInput?: boolean) {
+      console.log('enter the ')
+      let { value } = e.target as HTMLInputElement
+      if (isInput && this.isValidFloat(value)) {
+        value = (parseFloat(value) * 100).toString()
+      }
+      if (this.isValidInt(value)) {
+        value = this.boundValue(parseInt(value), this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max)
+        window.requestAnimationFrame(() => {
+          console.log('this.sel.start.pIndex')
+          console.log(this.sel.start.pIndex)
+          console.log(this.sel.end.pIndex)
+          TextUtils.paragraphPropsHandler('lineHeight', parseInt(value) / 100, this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ lineHeight: parseInt(value) / 100 })
+        })
       }
     },
-    setColor(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.isValidHexColor(this.props.color)) {
-        TextUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
+    setColor(e: Event) {
+      const { value } = e.target as HTMLInputElement
+      if (this.isValidHexColor(value)) {
+        window.requestAnimationFrame(() => {
+          TextUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ color: value })
+        })
       }
     },
-    setOpacity(e: KeyboardEvent) {
-      console.log(this.currSelectedInfo)
-      if (e.key === 'Enter' && (this.props.opacity >= 0 && this.props.opacity <= 100)) {
+    setOpacity(e: Event) {
+      let { value } = e.target as HTMLInputElement
+      if (this.isValidInt(value)) {
+        value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
         if (!this.isGroup) {
           if (this.currSelectedInfo.layers.length === 1) {
             this.$store.commit('UPDATE_layerStyles', {
               pageIndex: this.pageIndex,
               layerIndex: this.currSelectedIndex,
               styles: {
-                opacity: this.props.opacity
+                opacity: parseInt(value)
               }
             })
           } else {
             this.$store.commit('UPDATE_selectedLayersStyles', {
               styles: {
-                opacity: this.props.opacity
+                opacity: parseInt(value)
               }
             })
           }
         } else {
           this.$store.commit('UPDATE_groupLayerStyles', {
             styles: {
-              opacity: this.props.opacity
+              opacity: parseInt(value)
             }
           })
         }
+        TextUtils.updateTextPropsState({ opacity: parseInt(value) })
       }
     },
     onBlur() {
@@ -328,13 +424,58 @@ export default Vue.extend({
   }
   &__color-picker {
     position: absolute;
+    z-index: 10;
     right: 0px;
     top: 0px;
   }
   &__value-selector {
     position: absolute;
+    z-index: 9;
     transform: translate(45%);
     top: 75%;
+  }
+  &__range-input-wrapper {
+    position: absolute;
+    z-index: 9;
+    // top: -20px;
+    // left: auto;
+    right: auto;
+    padding: auto;
+    margin-top: -7px;
+    width: 135px;
+    height: 35px;
+    background-color: #ffffff;
+    background-color: white;
+    box-shadow: 0 0 0 1px rgb(64 87 109 / 7%), 0 2px 12px rgb(53 71 90 / 20%);
+    border: 1px solid #d9dbe1;
+    border-radius: 3px;
+  }
+  &__range-input {
+    display: block;
+    margin: auto;
+    width: 120px;
+    height: 35px;
+    appearance: none;
+    outline: none;
+    background: none;
+    &::-webkit-slider-runnable-track {
+      height: 2px;
+      background-color: #D9DBE1;
+    }
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #3C64B1;
+      transition: .2s;
+      margin-top: -6.5px;
+      position: relative;
+    }
+  }
+  &__range-input-button {
+    width: fit-content;
   }
   &__font-stepper {
     display: flex;
@@ -349,6 +490,10 @@ export default Vue.extend({
 .center {
   text-align: center;
   margin: auto;
+}
+
+.right {
+  right: 0px;
 }
 
 .relative {
