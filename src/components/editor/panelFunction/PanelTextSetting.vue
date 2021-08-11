@@ -11,8 +11,7 @@
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(@click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-                @change="setSize" @blur="onBlur"
-                v-model.lazy="props.fontSize")
+                @change="setSize" v-model.lazy="props.fontSize")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
@@ -51,7 +50,7 @@
         property-bar
           button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
             input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
-                  :value="props.lineHeight" @change="setHeight($event, true)" @blur="onBlur")
+                  :value="props.lineHeight" @change="setHeight($event, true)")
           svg-icon(class="pointer"
             :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
         div(v-if="openSliderBar === 'lineHeight'"
@@ -67,7 +66,7 @@
         property-bar
           button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
             input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
-                  :value="props.fontSpacing" @change="setSpacing" @blur="onBlur")
+                  :value="props.fontSpacing" @change="setSpacing")
           svg-icon(class="pointer"
             :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
         div(v-if="openSliderBar === 'fontSpacing'"
@@ -83,7 +82,7 @@
         property-bar
           button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
             input(class="body-2 text-gray-2 record-selection" type="number" ref="input-opacity"
-                  :value="props.opacity" @change="setOpacity" @blur="onBlur")
+                  :value="props.opacity" @change="setOpacity")
           svg-icon(class="pointer"
             :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
         div(v-if="openSliderBar === 'opacity'"
@@ -213,11 +212,13 @@ export default Vue.extend({
         const input = this.$refs['input-fontSize'] as HTMLInputElement
         input.focus()
         input.select()
+      } else {
+        this.onBlur()
       }
     },
     handleValueUpdate(value: number) {
       TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
-      TextUtils.updateTextPropsState()
+      TextUtils.updateTextPropsState({ fontSize: value.toString() })
     },
     handleSliderModal(modalName = '') {
       this.openSliderBar = modalName
@@ -225,6 +226,8 @@ export default Vue.extend({
         const input = this.$refs[`input-${modalName}`] as HTMLInputElement
         input.focus()
         input.select()
+      } else {
+        this.onBlur()
       }
     },
     propsBtnStyles(iconName: string) {
@@ -289,10 +292,6 @@ export default Vue.extend({
       const sel = TextUtils.getSelection()
       if ((e.target as HTMLElement).classList.contains('record-selection') && sel) {
         TextUtils.updateSelection(sel.start, sel.end)
-        console.log(sel.start.pIndex)
-        console.log(sel.end.pIndex)
-        console.log(this.sel.start.pIndex)
-        console.log(this.sel.end.pIndex)
       }
     },
     setSize(e: Event) {
@@ -316,7 +315,6 @@ export default Vue.extend({
       }
     },
     setHeight(e: Event, isInput?: boolean) {
-      console.log('enter the ')
       let { value } = e.target as HTMLInputElement
       if (isInput && this.isValidFloat(value)) {
         value = (parseFloat(value) * 100).toString()
@@ -324,11 +322,8 @@ export default Vue.extend({
       if (this.isValidInt(value)) {
         value = this.boundValue(parseInt(value), this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max)
         window.requestAnimationFrame(() => {
-          console.log('this.sel.start.pIndex')
-          console.log(this.sel.start.pIndex)
-          console.log(this.sel.end.pIndex)
-          TextUtils.paragraphPropsHandler('lineHeight', parseInt(value) / 100, this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ lineHeight: parseInt(value) / 100 })
+          TextUtils.paragraphPropsHandler('lineHeight', (parseInt(value) / 100).toFixed(2), this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ lineHeight: (parseInt(value) / 100).toFixed(2) })
         })
       }
     },
@@ -372,17 +367,13 @@ export default Vue.extend({
       }
     },
     onBlur() {
-      if (!this.openValueSelector) {
-        const nan = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: NaN
-        }
-        this.$store.commit('text/UPDATE_selection', {
-          start: nan,
-          end: nan
-        })
+      const nan = {
+        pIndex: NaN,
+        sIndex: NaN,
+        offset: NaN
       }
+      TextUtils.updateSelection(nan, nan)
+      TextUtils.updateTextPropsState()
     }
   }
 })

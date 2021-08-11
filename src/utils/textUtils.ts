@@ -34,7 +34,7 @@ export const tmpFontsPreset = [
   },
   {
     name: '思源黑體',
-    face: 'Noto Sans TC'
+    face: 'NotoSansTC'
   },
   {
     name: '標楷體',
@@ -467,10 +467,12 @@ class TextUtils {
     return [start, end]
   }
 
-  paragraphPropsHandler(propName: string, value: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+  paragraphPropsHandler(propName: string, value: string | number, inStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, inEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.currSelectedInfo.layers.length === 1) {
-      selStart = GeneralUtils.deepCopy(selStart) as ISelection
-      selEnd = GeneralUtils.deepCopy(selEnd) as ISelection
+      console.log(this.getCurrSel?.start.pIndex)
+      const selStart = GeneralUtils.deepCopy(inStart) as ISelection
+      const selEnd = GeneralUtils.deepCopy(inEnd) as ISelection
+      console.log(this.getCurrSel?.start.pIndex)
       if (!this.isSel(selStart) && !this.isSel(selEnd)) {
         Object.assign(selStart, { pIndex: 0, sIndex: 0, offset: 0 })
         Object.assign(selEnd, { pIndex: (this.getCurrLayer as IText).paragraphs.length, sIndex: 0, offset: 0 })
@@ -1066,7 +1068,7 @@ class TextUtils {
         }
         case 'fontSpacing': {
           const space = this.propReader('fontSpacing')
-          value = typeof space === 'number' ? ((space as number) * 100).toString() : '--'
+          value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
           break
         }
         case 'lineHeight': {

@@ -195,9 +195,11 @@ export default Vue.extend({
       handler(val) {
         const text = this.$refs.text as HTMLElement
         console.log('sel handler')
-        if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
-        }
+        // TODO://
+        // if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
+        //   console.log('enter selllll')
+        //   TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
+        // }
       },
       deep: true
     },
@@ -208,6 +210,9 @@ export default Vue.extend({
         })
       }
     }
+  },
+  updated() {
+    // console.log('contorller updated!')
   },
   methods: {
     ...mapMutations({
