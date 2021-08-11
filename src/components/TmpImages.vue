@@ -46,7 +46,7 @@ export default Vue.extend({
     return {
       rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(260, 75, 5)
+      galleryUtils: new GalleryUtils(300, 75, 5)
     }
   },
   watch: {
@@ -89,10 +89,17 @@ export default Vue.extend({
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    overflow-y: scroll;
     overscroll-behavior: contain;
-    &::-webkit-scrollbar {
-      display: none;
+    margin-right: -7px;
+    &:hover {
+      overflow-y: scroll;
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+      &::-webkit-scrollbar-thumb {
+        border-radius: 2px;
+        background: #D9DBE1;
+      }
     }
   }
 }

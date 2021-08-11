@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-photo")
-    search-bar(class="panel-photo__search"
+    search-bar(class="mb-15"
       placeholder="input keywords..."
       @search="handleSearch")
     div(v-if="!pending && !list.length") Sorry, we couldn't find any photos for "{{ query }}".
@@ -45,8 +45,5 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
-  &__search {
-    margin-bottom: 10px;
-  }
 }
 </style>
