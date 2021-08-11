@@ -10,7 +10,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import photos from '@/store/photos'
 import color from '@/store/module/color'
 import text from '@/store/text'
-import objects from '@/store/objects'
+import objects from '@/store/module/objects'
+import templates from '@/store/module/templates'
 
 Vue.use(Vuex)
 
@@ -601,6 +602,7 @@ export default new Vuex.Store({
     photos,
     text,
     color,
-    objects
+    objects,
+    templates
   }
 })

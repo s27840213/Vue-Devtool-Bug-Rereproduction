@@ -1,24 +1,9 @@
 import axios from '@/apis'
 import authToken from './auth-token'
-
-interface IListServiceParams {
-  token?: string
-  locale: string
-  category?: number
-  pageIndex?: number
-}
-
-interface IListServiceData {
-  content: any[]
-  json: string
-  host: string
-  preview: string
-}
-
-interface IListServiceResponse {
-  data: IListServiceData
-  flag: number
-}
+import {
+  IListServiceParams,
+  IListServiceResponse
+} from '@/interfaces/api'
 
 class ListService {
   getList (path:string, params: IListServiceParams) {

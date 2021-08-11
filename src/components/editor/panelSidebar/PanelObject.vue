@@ -1,11 +1,13 @@
 <template lang="pug">
   div(class="panel-object")
-    search-bar(@search="handleSearch")
+    search-bar(class="mb-15"
+      placeholder="Search objects"
+      @search="handleSearch")
     div(v-if="isDisplayByCategory")
       div(v-for="content in contents"
         :key="content.category_id"
         class="panel-object__items")
-        category-item(v-for="item in content.list"
+        category-object-item(v-for="item in content.list"
           class="panel-object__item"
           :key="item"
           :src="`${host}${item}/${preview}`"
@@ -15,10 +17,13 @@
       :contents="contents"
       @action="handleAction")
       template(v-slot:item="{ item }")
-        category-item(class="panel-object__item"
+        category-object-item(class="panel-object__item"
           :src="`${host}${item}/${preview}`"
           :objectId="item"
           @init="fetchJson")
+    observer-sentinel(v-if="hasNextPage"
+      target=".panel-object"
+      @callback="handleLoadMore")
     div(class="text-center")
       svg-icon(v-if="pending"
         :iconName="'loading'"
@@ -28,38 +33,51 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import CategoryItem from '@/components/category/CategoryItem.vue'
+import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
+import { IListServiceContentData } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
-    CategoryItem
+    CategoryObjectItem
   },
   computed: {
     ...mapState(
       'objects',
-      ['contents', 'pending', 'host', 'json', 'preview', 'category']
+      [
+        'contents',
+        'pending',
+        'host',
+        'json',
+        'preview',
+        'category'
+      ]
     ),
+    ...mapGetters('objects', ['hasNextPage']),
     isDisplayByCategory () {
       return typeof this.category === 'number'
     }
   },
   mounted () {
-    this.$store.dispatch('objects/getObjects')
+    this.$store.dispatch('objects/getContent')
   },
   methods: {
-    handleAction (data: any) {
-      this.$store.dispatch('objects/getCategoryObjects', data.category_id)
+    handleAction (data: IListServiceContentData) {
+      const { category_id: category } = data
+      this.$store.dispatch('objects/getContent', { category })
     },
     handleSearch () {
-      this.$store.dispatch('objects/getObjects')
+      this.$store.dispatch('objects/getContent')
     },
     fetchJson (id: string) {
       this.$store.dispatch('objects/getContentJson', id)
+    },
+    handleLoadMore () {
+      console.log('handleLoadMore')
     }
   }
 })
@@ -72,14 +90,14 @@ export default Vue.extend({
     width: 80px;
     height: 80px;
     object-fit: contain;
+    vertical-align: middle;
+    margin: auto;
   }
   &__items {
     display: grid;
     grid-auto-rows: auto;
     grid-template-columns: repeat(3,1fr);
-    row-gap: 10px;
-    column-gap: 10px;
-    margin-top: 20px;
+    grid-gap: 10px;
   }
 }
 </style>
