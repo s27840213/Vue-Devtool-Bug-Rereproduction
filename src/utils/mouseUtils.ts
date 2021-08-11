@@ -8,6 +8,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import TextUtils from './textUtils'
+import PageUtils from './pageUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -56,14 +57,17 @@ class MouseUtils {
 
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
     if (e.dataTransfer === null) return
-
     const data = JSON.parse(e.dataTransfer.getData('data'))
+    // @TODO Page type json
+    if (data.type === 'page') {
+      PageUtils.updateSpecPage(pageIndex, data.json)
+      return
+    }
     const target = e.target as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y
     }
-
     const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
     const layerConfig: ILayer = {

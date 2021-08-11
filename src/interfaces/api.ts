@@ -79,3 +79,29 @@ export interface ISearchPhotoParams {
   perPage?: number
   orderBy?: 'relevant' | 'latest' | 'popular'
 }
+
+export interface IListServiceParams {
+  token?: string
+  locale: string
+  category?: number
+  pageIndex?: number
+}
+
+export interface IListServiceContentData {
+  category_id: number
+  list: string[]
+  title: string
+}
+
+export interface IListServiceData {
+  content: IListServiceContentData[]
+  json: string
+  host: string
+  preview: string
+  next_page?: number
+}
+
+export interface IListServiceResponse {
+  data: IListServiceData
+  flag: number
+}

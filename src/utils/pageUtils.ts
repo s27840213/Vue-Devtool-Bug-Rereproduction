@@ -1,5 +1,6 @@
 import store from '@/store'
 import FocusUtils from './focusUtils'
+import GeneralUtils from './generalUtils'
 
 class PageUtils {
   activeMostCentralPage(): number {
@@ -31,6 +32,15 @@ class PageUtils {
   activeCurrActivePage(): void {
     const currActivePageIndex = store.getters.getCurrActivePageIndex
     FocusUtils.focusElement(`.nu-page-${currActivePageIndex}`, true)
+  }
+
+  updateSpecPage(index: number, json: any): void {
+    const pages = store.getters.getPages
+    const pagesTmp = GeneralUtils.deepCopy(pages)
+    if (pagesTmp[index]) {
+      pagesTmp[index] = json
+      store.commit('SET_pages', pagesTmp)
+    }
   }
 }
 

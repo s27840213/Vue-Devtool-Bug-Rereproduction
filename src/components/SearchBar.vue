@@ -5,7 +5,7 @@
       type="text"
       v-model="keyword"
       :placeholder="placeholder")
-    svg-icon(:iconName="'search'" :iconColor="'gray-3'" :iconWidth="'15px'")
+    svg-icon(class="pointer" :iconName="'search'" :iconColor="'gray-3'" :iconWidth="'20px'")
 </template>
 
 <script lang="ts">
@@ -40,7 +40,7 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 10px;
+  padding: 5px 16px;
   box-sizing: border-box;
   &__input {
     width: 100%;

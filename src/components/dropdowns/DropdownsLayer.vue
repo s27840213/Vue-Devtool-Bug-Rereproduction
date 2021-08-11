@@ -10,7 +10,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="currSelectedInfo.layers[0].designId !==''")
+    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !==''")
       div(class="dropdowns__item"
           @click="updateMenu.action")
         svg-icon(
@@ -92,8 +92,6 @@ export default Vue.extend({
         text: `Upload ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
-          console.log(this.currSelectedInfo.layers)
-          console.log(`upload ${this.getType[0]}`)
           uploadUtils.uploadText()
         }
       }
@@ -104,7 +102,7 @@ export default Vue.extend({
         text: `Update ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
-          console.log(`update ${this.getType[0]}`)
+          uploadUtils.updateText()
         }
       }
     }

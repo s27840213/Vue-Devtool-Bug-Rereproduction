@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel")
     component(v-if="isActive"
-      class="p-20 border-box"
+      class="p-10 border-box"
       :style="panelStyles()"
       :is="panelComponents[currPanel]")
     img(class="btn-pack"
@@ -66,7 +66,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: '300px'
+        width: '320px'
       }
     }
   }

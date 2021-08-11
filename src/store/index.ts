@@ -10,7 +10,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import photos from '@/store/photos'
 import color from '@/store/module/color'
 import text from '@/store/text'
-import objects from '@/store/objects'
+import objects from '@/store/module/objects'
+import templates from '@/store/module/templates'
 
 Vue.use(Vuex)
 
@@ -59,6 +60,7 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [
       ],
+      documentColor: [],
       designId: ''
     },
     {
@@ -104,6 +106,7 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [
       ],
+      documentColor: [],
       designId: ''
     }
   ],
@@ -550,7 +553,7 @@ const actions: ActionTree<IEditorState, unknown> = {
   async getAssets({ commit }, { token }) {
     try {
       const { data } = await userApis.getAssets(token)
-      console.log(data)
+      return data
     } catch (error) {
       console.log(error)
     }
@@ -562,6 +565,30 @@ const actions: ActionTree<IEditorState, unknown> = {
       uploadUtils.setLoginOutput(data.data)
     } catch (error) {
       console.log(error)
+    }
+  },
+  async register({ commit }, { type = '0', uname, account, upass }) {
+    try {
+      const meta = { type: type, uname: uname, account: account, upass: upass }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('register', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  async verifyVcode({ commit }, { type = '2', account, vcode }) {
+    try {
+      const meta = { type: type, account: account, vcode: vcode }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('verify vcode', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
     }
   }
 }
@@ -575,6 +602,7 @@ export default new Vuex.Store({
     photos,
     text,
     color,
-    objects
+    objects,
+    templates
   }
 })

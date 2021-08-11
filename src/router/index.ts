@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
+import SignUp from '../views/Login/SignUp.vue'
+import Login from '../views/Login/Login.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 Vue.use(VueRouter)
@@ -29,9 +31,35 @@ const routes: Array<RouteConfig> = [
           const designId = urlParams.get('design_id')
           console.log(type, designId)
           if (type && designId) {
-            uploadUtils.getTemplate(type, designId)
+            uploadUtils.getDesign(type, designId)
           }
         }
+        next()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: '/signup',
+    name: 'SignUp',
+    component: SignUp,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        next()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
         next()
       } catch (error) {
         console.log(error)
