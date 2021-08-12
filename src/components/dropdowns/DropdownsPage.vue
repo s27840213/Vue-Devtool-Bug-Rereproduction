@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="dropdowns dropdowns--page bg-gray-6")
-    template(v-if="")
+    template(v-if="getToekn!==''")
       div(class="dropdowns__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -10,7 +10,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="hasDesignId")
+    template(v-if="hasDesignId && getToekn!==''")
       div(class="dropdowns__item"
           @click="updateMenu.action")
         svg-icon(
@@ -104,7 +104,8 @@ export default Vue.extend({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      _detachedBackgroundImage: 'getBackgroundImage'
+      _detachedBackgroundImage: 'getBackgroundImage',
+      getToekn: 'user/getToken'
     }),
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
