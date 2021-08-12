@@ -115,7 +115,10 @@ class MouseUtils {
         break
       }
       case 'text': {
-        const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
+        const tmpPos = {
+          x: e.offsetX,
+          y: e.offsetY
+        }
         Object.assign(layerConfig.styles, data.styles)
         layerConfig.styles.x = tmpPos.x
         layerConfig.styles.y = tmpPos.y
@@ -130,6 +133,18 @@ class MouseUtils {
         layerConfig.styles.y = tmpPos.y
         delete data.styles
         layer = LayerFactary.newShape(Object.assign(layerConfig, data))
+        break
+      }
+      case 'group': {
+        const tmpPos = {
+          x: e.offsetX,
+          y: e.offsetY
+        }
+        Object.assign(data.styles, tmpPos)
+        layer = LayerFactary.newGroup(
+          data.styles,
+          data.layers
+        )
         break
       }
     }
