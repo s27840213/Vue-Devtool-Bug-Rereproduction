@@ -107,8 +107,7 @@ import { IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import { parse } from 'path/posix'
-import { parseInt } from 'lodash'
+import { parseInt, toNumber } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -259,7 +258,11 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextUtils.onPropertyClick(iconName)
-      // TextUtils.updateTextPropsState()
+      console.log(this.sel.start.pIndex)
+      console.log(this.sel.end.pIndex)
+      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
+        TextUtils.updateTextPropsState()
+      }
     },
     fontSizeStepping(step: number) {
       const sel = TextUtils.getSelection()
@@ -322,8 +325,8 @@ export default Vue.extend({
       if (this.isValidInt(value)) {
         value = this.boundValue(parseInt(value), this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max)
         window.requestAnimationFrame(() => {
-          TextUtils.paragraphPropsHandler('lineHeight', (parseInt(value) / 100).toFixed(2), this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ lineHeight: (parseInt(value) / 100).toFixed(2) })
+          TextUtils.paragraphPropsHandler('lineHeight', toNumber((parseInt(value) / 100).toFixed(2)), this.sel.start, this.sel.end)
+          TextUtils.updateTextPropsState({ lineHeight: toNumber((parseInt(value) / 100).toFixed(2)) })
         })
       }
     },
@@ -372,6 +375,7 @@ export default Vue.extend({
         sIndex: NaN,
         offset: NaN
       }
+      console.log('onBlur')
       TextUtils.updateSelection(nan, nan)
       TextUtils.updateTextPropsState()
     }

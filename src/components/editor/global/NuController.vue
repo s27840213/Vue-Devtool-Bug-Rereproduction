@@ -187,7 +187,7 @@ export default Vue.extend({
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
-        // this.$store.commit('text/SET_default')
+        this.$store.commit('text/SET_default')
         TextUtils.updateTextPropsState()
       }
     },
@@ -514,7 +514,9 @@ export default Vue.extend({
           break
         }
         case 'text':
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+            widthLimit: (this.config as IText).styles.writingMode.includes('vertical') ? height : width
+          })
           break
       }
 
@@ -846,7 +848,7 @@ export default Vue.extend({
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
           if (sel) {
-            TextUtils.updateTextSelection(sel.start, sel.end)
+            TextUtils.updateSelection(sel.start, sel.end)
           }
         }
         TextUtils.updateTextPropsState()

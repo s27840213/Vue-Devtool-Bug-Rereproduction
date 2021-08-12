@@ -6,6 +6,7 @@ import { ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
+import LayerUtils from './layerUtils'
 import { Solarize } from 'konva/types/filters/Solarize'
 import { config } from 'dotenv/types'
 
@@ -178,8 +179,13 @@ class TextUtils {
         break
       case 'font-vertical': {
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = config.styles.writingMode === 'initial' || config.styles.writingMode.includes('horizontal')
-          ? 'vertical-lr' : 'initial'
+        const updateToVertical = config.styles.writingMode === 'initial' || config.styles.writingMode.includes('horizontal')
+        const writingMode = updateToVertical ? 'vertical-lr' : 'initial'
+        const { width, height } = config.styles
+        if (typeof tmpLayerIndex === 'undefined') {
+          console.log('dddddfsw')
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
+        }
         handler({ writingMode })
       }
     }
@@ -357,14 +363,16 @@ class TextUtils {
             Object.assign(end, start)
             end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
             this.updateTextPropsState()
+            this.focus(start, end)
+            this.updateSelection(start, end)
           } else {
-            Object.assign(end, start)
+            // Object.assign(end, start)
+            this.focus(start, start, true)
+            this.updateSelection(start, { pIndex: NaN, sIndex: NaN, offset: NaN })
           }
         }
-        this.focus(start, end, true)
       }
       // this.updateTextPropsState()
-      this.updateTextSelection(start, end)
     })
   }
 
@@ -467,12 +475,10 @@ class TextUtils {
     return [start, end]
   }
 
-  paragraphPropsHandler(propName: string, value: string | number, inStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, inEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+  paragraphPropsHandler(propName: string, value: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.currSelectedInfo.layers.length === 1) {
-      console.log(this.getCurrSel?.start.pIndex)
-      const selStart = GeneralUtils.deepCopy(inStart) as ISelection
-      const selEnd = GeneralUtils.deepCopy(inEnd) as ISelection
-      console.log(this.getCurrSel?.start.pIndex)
+      selStart = GeneralUtils.deepCopy(selStart) as ISelection
+      selEnd = GeneralUtils.deepCopy(selEnd) as ISelection
       if (!this.isSel(selStart) && !this.isSel(selEnd)) {
         Object.assign(selStart, { pIndex: 0, sIndex: 0, offset: 0 })
         Object.assign(selEnd, { pIndex: (this.getCurrLayer as IText).paragraphs.length, sIndex: 0, offset: 0 })
@@ -859,7 +865,7 @@ class TextUtils {
             })
           }
           Object.assign(sel.start, { sIndex: sel.start.sIndex + 1, offset: 1 })
-          this.updateTextSelection(sel.start, sel.end)
+          this.updateSelection(sel.start, sel.end)
         }
       }
     }
@@ -995,15 +1001,7 @@ class TextUtils {
     })
   }
 
-  updateTextSelection(start: ISelection, end: ISelection) {
-    store.commit('text/UPDATE_selection', {
-      start,
-      end
-    })
-  }
-
   updateSelection(start: ISelection, end: ISelection) {
-    console.log('xxxxx')
     store.commit('text/UPDATE_selection', {
       start,
       end
