@@ -18,6 +18,21 @@ class ShortcutHandler {
   // constructor(target: HTMLElement) {
   //   this.target = target
   // }
+  // async getClipboardContents() {
+  //   try {
+  //     const clipboardItems = await navigator.clipboard.read()
+
+  //     for (const clipboardItem of clipboardItems) {
+  //       for (const type of clipboardItem.types) {
+  //         const blob = await clipboardItem.getType(type)
+  //         // we can now use blob here
+  //         console.log(blob)
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error(err.name, err.message)
+  //   }
+  // }
 
   copy() {
     if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
@@ -27,7 +42,7 @@ class ShortcutHandler {
     }
   }
 
-  paste() {
+  paste(evt?: Event) {
     const clipboardInfo = store.getters.getClipboard.map((layer: ILayer) => {
       layer.styles.x += 10
       layer.styles.y += 10

@@ -27,7 +27,7 @@ const getDefaultState = (): IPhotoState => ({
 })
 
 const actions: ActionTree<IPhotoState, unknown> = {
-  async getPhotosFromUnsplash ({ commit }, params = {}) {
+  async getPhotosFromUnsplash({ commit }, params = {}) {
     commit(SET_STATE, { pending: true, list: [] })
     if (!params.perPage) {
       params.perPage = UNSPLASH_PER_PAGE
@@ -44,7 +44,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
-  async getMorePhotosFromUnsplash ({ commit, getters, state }) {
+  async getMorePhotosFromUnsplash({ commit, getters, state }) {
     const { list } = state
     const { getNextParams: params } = getters
     commit(SET_STATE, { pending: true })
@@ -61,7 +61,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
-  async getPhotosFromPexels ({ commit }, params = {}) {
+  async getPhotosFromPexels({ commit }, params = {}) {
     commit(SET_STATE, { pending: true, list: [] })
     if (!params.perPage) {
       params.perPage = PEXELS_PER_PAGE
@@ -78,7 +78,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
-  async getMorePhotosFromPexels ({ commit, getters, state }) {
+  async getMorePhotosFromPexels({ commit, getters, state }) {
     const { list } = state
     const { getNextParams: params } = getters
     commit(SET_STATE, { pending: true })
@@ -98,7 +98,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
 }
 
 const mutations: MutationTree<IPhotoState> = {
-  [SET_STATE] (state: IPhotoState, data: Partial<IPhotoState>) {
+  [SET_STATE](state: IPhotoState, data: Partial<IPhotoState>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IPhotoState>
     keys
@@ -108,20 +108,20 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  [SET_TOTAL_PAGES] (state, totalPages) {
+  [SET_TOTAL_PAGES](state, totalPages) {
     state.totalPages = totalPages
   }
 }
 
 const getters: GetterTree<IPhotoState, any> = {
-  getPhotos (state) {
+  getPhotos(state) {
     return state.list
   },
-  getCurrentPagePhotos (state) {
+  getCurrentPagePhotos(state) {
     const { page, list, perPage } = state
     return list.slice((page - 1) * perPage)
   },
-  getNextParams (state) {
+  getNextParams(state) {
     const { query, page, perPage } = state
     return {
       query,

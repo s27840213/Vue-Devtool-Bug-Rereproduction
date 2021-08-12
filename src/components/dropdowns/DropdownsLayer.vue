@@ -83,7 +83,6 @@ export default Vue.extend({
       return this.currSelectedInfo.pageIndex === -1 ? 0 : this._layerNum(this.currSelectedInfo.pageIndex)
     },
     getType(): Array<string> {
-      console.log(this.currSelectedInfo.types)
       return [...this.currSelectedInfo.types]
     },
     uploadMenu(): any {

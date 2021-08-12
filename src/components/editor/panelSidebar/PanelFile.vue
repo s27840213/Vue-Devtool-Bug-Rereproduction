@@ -1,11 +1,14 @@
 <template lang="pug">
-  div(class="panel-file")
+  div(class="panel-file"
+      @drop.stop.prevent="onDrop($event)"
+      @dragover.prevent,
+      @dragenter.prevent)
     span(class="panel-file__title text-blue-1 label-lg") My File
-    btn(class="full-width mt-20"
+    btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") Upload Image
-    div(class="tmp-gallery")
-      div(v-for="")
+    tmp-images(
+      :inFilePanel="true")
 </template>
 
 <script lang="ts">
@@ -13,38 +16,34 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
 import { mapActions } from 'vuex'
+import GalleryUtils from '@/utils/galleryUtils'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
 
 export default Vue.extend({
   components: {
-    SearchBar
+    SearchBar,
+    GalleryPhoto
   },
   data() {
     return {
-      assets: {} as any,
-      dl_url: ''
+      galleryUtils: new GalleryUtils(300, 75, 5)
     }
   },
-  mounted() {
-    this._getAssets().then(() => {
-      if (uploadUtils.token) {
-        this.dl_url = uploadUtils.loginOutput.download_url
-        console.log(this.assets)
-        this.assets.image.content.forEach((image: any) => {
-          console.log(this.dl_url.replace('*', `asset/image/${image.id}/prev`))
-        })
-      }
-    })
+  computed: {
+    margin(): number {
+      return this.galleryUtils.margin
+    }
   },
   methods: {
-    ...mapActions({
-      getAssets: 'getAssets'
-    }),
     uploadImage() {
       uploadUtils.uploadAsset()
     },
-    async _getAssets() {
-      const data = await this.getAssets({ token: uploadUtils.token })
-      Object.assign(this.assets, data.data)
+    onDrop(evt: DragEvent) {
+      const dt = evt.dataTransfer
+      if (dt) {
+        const files = dt.files
+        uploadUtils.uploadImageAsset(files)
+      }
     }
   }
 })
@@ -53,9 +52,24 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-file {
   @include size(100%, 100%);
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 1fr;
   text-align: center;
   &__title {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+  }
+}
+
+.tmp-gallery {
+  height: 100%;
+  line-height: 0;
+  text-align: left;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 </style>

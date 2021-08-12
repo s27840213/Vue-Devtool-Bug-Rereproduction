@@ -8,6 +8,7 @@ import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
 
 import photos from '@/store/photos'
+import user from '@/store/module/user'
 import color from '@/store/module/color'
 import text from '@/store/text'
 import objects from '@/store/module/objects'
@@ -542,31 +543,6 @@ const mutations: MutationTree<IEditorState> = {
 }
 
 const actions: ActionTree<IEditorState, unknown> = {
-  // async getRandomPhoto({ commit }, { count }) {
-  //   try {
-  //     const { data } = await unsplashApis.getRandomPhoto(count)
-  //     commit('SET_photos', data)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // },
-  async getAssets({ commit }, { token }) {
-    try {
-      const { data } = await userApis.getAssets(token)
-      return data
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  async login({ commit }, { token, account, password }) {
-    try {
-      const { data } = await userApis.login(token, account, password)
-      console.log(data)
-      uploadUtils.setLoginOutput(data.data)
-    } catch (error) {
-      console.log(error)
-    }
-  },
   async register({ commit }, { type = '0', uname, account, upass }) {
     try {
       const meta = { type: type, uname: uname, account: account, upass: upass }
@@ -599,6 +575,7 @@ export default new Vuex.Store({
   mutations,
   actions,
   modules: {
+    user,
     photos,
     text,
     color,

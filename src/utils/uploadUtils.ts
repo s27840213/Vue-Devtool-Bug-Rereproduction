@@ -5,11 +5,7 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 class UploadUtils {
   loginOutput: any
-  token: string
-
-  constructor() {
-    this.token = ''
-  }
+  get token(): number { return store.getters['user/getToken'] }
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
@@ -17,47 +13,47 @@ class UploadUtils {
     // this.getTmpJSON()
   }
 
-  setToken(token: string) {
-    this.token = token
-  }
-
   uploadAsset() {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', '.jpg,.png')
+    inputNode.setAttribute('accept', 'image/*')
+    inputNode.setAttribute('multiple', 'true')
     inputNode.click()
-    inputNode.addEventListener('change', (evt) => {
-      this.uploadImageAsset(evt)
+    inputNode.addEventListener('change', (evt: Event) => {
+      if (evt) {
+        const files = (<HTMLInputElement>evt.target).files
+        this.uploadImageAsset(files as FileList)
+      }
     }, false)
   }
 
-  uploadImageAsset(evt: any) {
-    const file = evt.target.files[0] as File
-    const assetId = this.generateAssetId()
-    const token = this.token
-    const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
-      formData.append(key, this.loginOutput.upload_map.fields[key])
-    })
-    formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
-    // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(file.name)}`)
-    const xhr = new XMLHttpRequest()
+  uploadImageAsset(files: FileList) {
+    for (let i = 0; i < files.length; i++) {
+      const assetId = this.generateAssetId()
+      const formData = new FormData()
+      Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+        formData.append(key, this.loginOutput.upload_map.fields[key])
+      })
+      formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
+      // only for template
+      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
+      const xhr = new XMLHttpRequest()
 
-    if (formData.has('file')) {
-      formData.set('file', file)
-    } else {
-      formData.append('file', file)
-    }
+      if (formData.has('file')) {
+        formData.set('file', files[i])
+      } else {
+        formData.append('file', files[i])
+      }
 
-    xhr.open('POST', this.loginOutput.upload_map.url, true)
-    xhr.send(formData)
-    xhr.onload = () => {
-      // console.log(xhr)
-      store.dispatch('getAssets', { token })
-      // console.log(assetId)
+      xhr.open('POST', this.loginOutput.upload_map.url, true)
+      xhr.send(formData)
+      xhr.onload = () => {
+        // setTimeout(() => {
+        //   store.dispatch('user/getAssets', { token: this.token })
+        // }, 3000)
+      }
     }
   }
 
@@ -98,7 +94,7 @@ class UploadUtils {
       const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       targetLayer.active = false
       pageJSON.layers = [targetLayer]
-      pageJSON.backgroundColor = '#ffffff'
+      pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.src = 'none'
 
       // console.log(pageJSON)
@@ -119,7 +115,6 @@ class UploadUtils {
       xhrReq.send(formData)
       xhrReq.onload = () => {
         // console.log(xhrReq)
-        // console.log(designId)
       }
     }
   }
@@ -217,7 +212,7 @@ class UploadUtils {
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
     xhr.onload = () => {
-      // console.log(designId)
+      console.log(designId)
       // console.log(`https://template.vivipic.com/template/${designId}/config.json?ver=${this.generateRandomString(6)}`)
       // console.log(xhr)
     }

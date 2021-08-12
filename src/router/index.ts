@@ -20,16 +20,15 @@ const routes: Array<RouteConfig> = [
           const token = urlParams.get('token')
 
           if (token) {
-            uploadUtils.setToken(token)
-            await store.dispatch('getAssets', { token })
-            await store.dispatch('login', { token })
+            store.commit('user/SET_token', token)
+            await store.dispatch('user/login', { token })
             // uploadUtils.uploadTmpJSON()
           }
         }
         if (urlParams.has('type') && urlParams.has('design_id')) {
           const type = urlParams.get('type')
           const designId = urlParams.get('design_id')
-          console.log(type, designId)
+
           if (type && designId) {
             uploadUtils.getDesign(type, designId)
           }

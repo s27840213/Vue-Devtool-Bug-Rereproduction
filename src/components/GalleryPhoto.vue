@@ -5,7 +5,7 @@
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
-    img(:src="photo.urls.thumb",
+    img(:src="inFilePanel ? photo.urls.full : photo.urls.thumb",
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event,photo)"
@@ -21,7 +21,11 @@ import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
-    photo: Object
+    photo: Object,
+    inFilePanel: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {},
   computed: {
@@ -40,14 +44,13 @@ export default Vue.extend({
       const dataTransfer = e.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
-
       const width = photo.width / 20
       const height = photo.height / 20
       const rect = (e.target as Element).getBoundingClientRect()
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
-        src: photo.urls.regular,
+        src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
         styles: {
           x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
           y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
@@ -64,13 +67,14 @@ export default Vue.extend({
       const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
       const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
       const imageLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        return (layer.type === 'image') && (!layer.moved) && (layer.src === photo.urls.regular)
+        const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+        return (layer.type === 'image') && (!layer.moved) && (layer.src === src)
       }) as Array<IImage>
 
       const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
       const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
       const config = {
-        src: photo.urls.regular,
+        src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
         styles: {
           x: x,
           y: y,
