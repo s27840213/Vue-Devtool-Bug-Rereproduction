@@ -85,7 +85,7 @@ export default Vue.extend({
     async onResendClicked () {
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
-      const response = await store.dispatch('register', { type: '1', uname: '', account: this.email, upass: '' })
+      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
       if (response.flag === 0) {
         const clock = window.setInterval(() => {
           this.leftTime--
@@ -100,7 +100,7 @@ export default Vue.extend({
       }
     },
     async onEnterCodeDoneClicked () {
-      const response = await store.dispatch('verifyVcode', { type: '2', account: this.email, vcode: this.vcode })
+      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode })
       if (response.flag === 0) {
         console.log('success!')
         // this.currentPageIndex = 2
