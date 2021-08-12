@@ -20,9 +20,11 @@ import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IText } from '@/interfaces/layer'
-import { mapGetters, mapMutations } from 'vuex'
+import { IFont } from '@/interfaces/text'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -31,8 +33,30 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number
   },
+  created() {
+    const fontPreset = this.fontPreset as Array<IFont>
+    let isLoadedFont = false
+    for (const p of (this.config as IText).paragraphs) {
+      for (const span of p.spans) {
+        const spanFont = span.styles.font
+        if (!fontPreset.some(font => font.face === spanFont)) {
+          isLoadedFont = true
+          const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
+          newFont.load().then(newFont => {
+            document.fonts.add(newFont)
+            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+          })
+        }
+      }
+    }
+    if (isLoadedFont) {
+      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+    }
+  },
   components: { NuCurveText },
   computed: {
+    ...mapState('text', ['fontPreset']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
@@ -58,6 +82,7 @@ export default Vue.extend({
         console.log('updateTextSize')
         /**
          * If below conditions is pass, means the text-properties changes,
+         *
          * the layer width/height needs to refresh
          */
         if (this.config.isTyping) return
@@ -103,6 +128,9 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode,
         opacity
       }
+    },
+    getFontUrl(fontFace: string): string {
+      return 'url("https://template.vivipic.com/font/ipix_12px.ttf")'
     }
   }
 })
@@ -113,12 +141,10 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     position: relative;
-
   &__body {
     outline: none;
     padding: 0;
     position: relative;
-
   }
   &__p {
       margin: 0.5em;

@@ -9,6 +9,7 @@
         "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts"
     },
     "dependencies": {
+        "@types/css-font-loading-module": "0.0.6",
         "axios": "^0.21.1",
         "core-js": "^3.10.1",
         "dotenv": "^8.2.0",

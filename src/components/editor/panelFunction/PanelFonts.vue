@@ -22,9 +22,8 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState } from 'vuex'
-import LayerUtils from '@/utils/layerUtils'
 import FileUtils from '@/utils/fileUtils'
-import TextUtils, { tmpFontsPreset } from '@/utils/textUtils'
+import TextUtils from '@/utils/textUtils'
 import { set } from 'vue/types/umd'
 
 export default Vue.extend({
@@ -34,7 +33,6 @@ export default Vue.extend({
   data() {
     return {
       FileUtils,
-      fontPreset: tmpFontsPreset,
       currFont: ''
     }
   },
@@ -44,7 +42,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -68,18 +66,18 @@ export default Vue.extend({
       this.currFont = font.name
     },
     updateFontPreset(e: any) {
-      const target = e.target.files[0]
-      const fontName: string = target.name.split('.')[0]
-      const objectUrl = window.URL.createObjectURL(target)
-      const style = document.createElement('style')
-      style.innerHTML = `
-      @font-face {
-        font-family: ${fontName};
-        src: url(${objectUrl});
-      }
-    `
-      document.head.appendChild(style)
-      this.fontPreset.push({ name: fontName, face: fontName })
+    //   const target = e.target.files[0]
+    //   const fontName: string = target.name.split('.')[0]
+    //   const objectUrl = window.URL.createObjectURL(target)
+    //   const style = document.createElement('style')
+    //   style.innerHTML = `
+    //   @font-face {
+    //     font-family: ${fontName};
+    //     src: url(${objectUrl});
+    //   }
+    // `
+    //   document.head.appendChild(style)
+    //   this.fontPreset.push({ name: fontName, face: fontName })
     },
     styles(font: { name: string, face: string }) {
       return {

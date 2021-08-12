@@ -1,4 +1,4 @@
-import { ISelection } from '@/interfaces/text'
+import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree } from 'vuex'
 
 export interface ITextState {
@@ -16,7 +16,8 @@ export interface ITextState {
     style: string,
     decoration: string,
     isVertical: boolean
-  }
+  },
+  fontPreset: Array<IFont>
 }
 
 const getDefaultState = (): ITextState => ({
@@ -44,7 +45,45 @@ const getDefaultState = (): ITextState => ({
     style: 'normal',
     decoration: 'none',
     isVertical: false
-  }
+  },
+  fontPreset: [
+    {
+      name: 'sans-serif',
+      face: 'sans-serif'
+    },
+    {
+      name: 'Manrop',
+      face: 'Manrop'
+    },
+    {
+      name: 'Lobster',
+      face: 'Lobster'
+    },
+    {
+      name: '思源黑體',
+      face: 'NotoSansTC'
+    },
+    {
+      name: '標楷體',
+      face: 'cwTeXKai'
+    },
+    {
+      name: '獅尾四季春',
+      face: 'SweiSpringCJKtc-Regular'
+    },
+    {
+      name: '裝甲明朝',
+      face: 'SoukouMincho'
+    },
+    {
+      name: '瀨戶字體',
+      face: 'SetoFont'
+    },
+    {
+      name: '思源柔體',
+      face: 'GenJyuuGothicX-P-Regular'
+    }
+  ]
 })
 const state = getDefaultState()
 const mutations: MutationTree<ITextState> = {
@@ -52,10 +91,13 @@ const mutations: MutationTree<ITextState> = {
     Object.assign(state.sel.start, data.start)
     Object.assign(state.sel.end, data.end)
   },
-  UPDATE_Props (state: ITextState, data: { [key: string]: string | boolean | number }) {
+  UPDATE_props (state: ITextState, data: { [key: string]: string | boolean | number }) {
     Object.entries(data).forEach(([k, v]) => {
       state.props[k] = v
     })
+  },
+  UPDATE_fontFace(state: ITextState, data: IFont) {
+    state.fontPreset.push(data)
   },
   SET_default (state: ITextState) {
     const defaultState = getDefaultState()

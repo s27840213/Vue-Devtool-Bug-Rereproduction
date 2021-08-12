@@ -2,7 +2,7 @@ import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { v4 as uuidv4 } from 'uuid'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
-import { ISelection } from '@/interfaces/text'
+import { IFont, ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
@@ -1020,9 +1020,13 @@ class TextUtils {
     })
   }
 
+  updateFontFace(font: IFont) {
+    store.commit('text/UPDATE_fontFace', font)
+  }
+
   updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
     if (typeof prop !== 'undefined') {
-      store.commit('text/UPDATE_Props', prop)
+      store.commit('text/UPDATE_props', prop)
       return
     }
     const props = [
@@ -1118,7 +1122,7 @@ class TextUtils {
 
       const prop: { [key: string]: string | number | boolean | undefined } = {}
       prop[k] = value
-      store.commit('text/UPDATE_Props', prop)
+      store.commit('text/UPDATE_props', prop)
     })
   }
 }

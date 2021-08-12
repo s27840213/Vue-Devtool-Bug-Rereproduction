@@ -3,3 +3,8 @@ export interface ISelection {
   sIndex: number,
   offset: number
 }
+
+export interface IFont {
+  name: string,
+  face: string
+}
