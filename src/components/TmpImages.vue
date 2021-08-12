@@ -89,16 +89,18 @@ export default Vue.extend({
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
+    margin-right: -10px;
+    scrollbar-width: thin;
     overscroll-behavior: contain;
-    margin-right: -7px;
     &:hover {
       overflow-y: scroll;
       &::-webkit-scrollbar {
-        width: 4px;
+        width: 10px;
       }
       &::-webkit-scrollbar-thumb {
-        border-radius: 2px;
+        border-radius: 5px;
         background: #D9DBE1;
+        border: 3px solid #ffffff;
       }
     }
   }
