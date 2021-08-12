@@ -7,6 +7,10 @@
     div(v-else
       class="panel-template__content")
       div(v-if="isDisplayByCategory")
+        div(class="text-left")
+          span(class="pointer" @click="handleSearch")
+            svg-icon(iconName="chevron-left"
+              iconWidth="20px")
         div(v-for="content in contents"
           :key="content.category_id"
           class="panel-template__items")
@@ -24,9 +28,9 @@
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
-      observer-sentinel(v-if="hasNextPage"
-        target=".panel-template"
-        @callback="handleLoadMore")
+      //- observer-sentinel(v-if="hasNextPage"
+      //-   target=".panel-template"
+      //-   @callback="handleLoadMore")
       div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"

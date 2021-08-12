@@ -4,6 +4,10 @@
       placeholder="Search objects"
       @search="handleSearch")
     div(v-if="isDisplayByCategory")
+      div(class="text-left")
+        span(class="pointer" @click="handleSearch")
+          svg-icon(iconName="chevron-left"
+            iconWidth="20px")
       div(v-for="content in contents"
         :key="content.category_id"
         class="panel-object__items")
@@ -21,9 +25,9 @@
           :src="`${host}${item}/${preview}`"
           :objectId="item"
           @init="fetchJson")
-    observer-sentinel(v-if="hasNextPage"
-      target=".panel-object"
-      @callback="handleLoadMore")
+    //- observer-sentinel(v-if="hasNextPage"
+    //-   target=".panel-object"
+    //-   @callback="handleLoadMore")
     div(class="text-center")
       svg-icon(v-if="pending"
         :iconName="'loading'"
