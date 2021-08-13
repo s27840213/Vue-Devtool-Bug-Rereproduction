@@ -1,7 +1,7 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { v4 as uuidv4 } from 'uuid'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
@@ -10,6 +10,8 @@ import LayerUtils from './layerUtils'
 import { ITextState } from '@/store/text'
 import { Solarize } from 'konva/types/filters/Solarize'
 import { config } from 'dotenv/types'
+import { IPage } from '@/interfaces/page'
+import LayerFactary from '@/utils/layerFactary'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -31,6 +33,8 @@ class TextUtils {
   get getLayer() { return store.getters.getLayer }
   get getTextState() { return store.state.text as ITextState }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
+  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get getPage() { return store.getters.getPage }
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
     if (this.isBlockProperty(propName)) {
@@ -1086,6 +1090,64 @@ class TextUtils {
       prop[k] = value
       store.commit('text/UPDATE_props', prop)
     })
+  }
+
+  getAddPosition (width: number, height: number) {
+    const { pageIndex, index } = this.currSelectedInfo
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const x = (page.width - width) / 2
+    const y = (page.height - height) / 2
+
+    if (pageIndex === this.lastSelectedPageIndex) {
+      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
+      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
+      const specy = currLayer.styles.y + currLayer.styles.height
+      if ((specy + height) < page.height) {
+        return { x: specx, y: specy }
+      }
+    }
+    return { x, y }
+  }
+
+  addStanardText(type: string) {
+    import(`@/assets/json/${type}.json`)
+      .then(json => {
+        const fieldMap = {
+          heading: 'isHeading',
+          subheading: 'isSubheading',
+          body: 'isBody'
+        } as { [key: string]: string }
+        const field = fieldMap[type]
+        this.addText(json, field)
+      })
+      .catch(() => {
+        console.log('Cannot find the file')
+      })
+  }
+
+  addText (json: any, field?: string) {
+    const format = GeneralUtils.deepCopy(json)
+    const size = this.getTextHW(format)
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const position = this.getAddPosition(size.width, size.height)
+    Object.assign(format.styles, position, size)
+
+    /**
+     * Check if there already exist an heading on the page. If not, set the new one as.
+     */
+    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
+      Object.assign(format, { [field]: true })
+    }
+    const newTextLayer = LayerFactary.newText(format)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+  }
+
+  addGroup (json: any) {
+    const { layers, styles } = GeneralUtils.deepCopy(json)
+    const position = this.getAddPosition(styles.width, styles.height)
+    Object.assign(styles, position)
+    const newGroupLayer = LayerFactary.newGroup(styles, layers)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 }
 
