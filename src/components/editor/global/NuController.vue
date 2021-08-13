@@ -495,7 +495,7 @@ export default Vue.extend({
         angle: angleInRad
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-
+      console.log('scaling')
       const ratio = {
         width: width / (this.getLayerWidth / this.getLayerScale),
         height: height / (this.getLayerHeight / this.getLayerScale)

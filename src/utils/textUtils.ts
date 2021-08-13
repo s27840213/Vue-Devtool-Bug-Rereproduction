@@ -921,73 +921,63 @@ class TextUtils {
     return textHW
   }
 
-  updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles
-    })
-  }
+  getAddPosition (width: number, height: number) {
+    const { pageIndex, index } = this.currSelectedInfo
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const x = (page.width - width) / 2
+    const y = (page.height - height) / 2
 
-  updateParagraphStyles(pageIndex: number, layerIndex: number, pIndex: number, styles: { [key: string]: string | number }) {
-    store.commit('UPDATE_paragraphStyles', {
-      pageIndex,
-      layerIndex,
-      pIndex,
-      styles
-    })
-  }
-
-  updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
-    store.commit('UPDATE_textProps', {
-      pageIndex,
-      layerIndex,
-      paragraphs
-    })
-  }
-
-  updateSelectedParagraphs(tmpLayerIndex: number, paragraphs: IParagraph[]) {
-    store.commit('UPDATE_selectedTextParagraphs', {
-      tmpLayerIndex,
-      paragraphs
-    })
-  }
-
-  updateSelectedLayersProps(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
-    store.commit('UPDATE_selectedLayersStyles', {
-      styles,
-      layerIndex
-    })
-  }
-
-  updateSelectedParaProps(tmpLayerIndex: number, props: { [key: string]: string | number }) {
-    store.commit('UPDATE_selectedTextParagraphsProp', {
-      tmpLayerIndex,
-      props
-    })
-  }
-
-  updateSelection(start: ISelection, end: ISelection) {
-    store.commit('text/UPDATE_selection', {
-      start,
-      end
-    })
-  }
-
-  setSelectionDefault() {
-    const nan = {
-      pIndex: NaN,
-      sIndex: NaN,
-      offset: NaN
+    if (pageIndex === this.lastSelectedPageIndex) {
+      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
+      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
+      const specy = currLayer.styles.y + currLayer.styles.height
+      if ((specy + height) < page.height) {
+        return { x: specx, y: specy }
+      }
     }
-    store.commit('text/UPDATE_selection', {
-      start: nan,
-      end: nan
-    })
+    return { x, y }
   }
 
-  updateFontFace(font: IFont) {
-    store.commit('text/UPDATE_fontFace', font)
+  addStanardText(type: string) {
+    import(`@/assets/json/${type}.json`)
+      .then(json => {
+        const fieldMap = {
+          heading: 'isHeading',
+          subheading: 'isSubheading',
+          body: 'isBody'
+        } as { [key: string]: string }
+        const field = fieldMap[type]
+        this.addText(json, field)
+      })
+      .catch(() => {
+        console.log('Cannot find the file')
+      })
+  }
+
+  addText (json: any, field?: string) {
+    const format = GeneralUtils.deepCopy(json)
+    const size = this.getTextHW(format)
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const position = this.getAddPosition(size.width, size.height)
+    Object.assign(format.styles, position, size)
+
+    /**
+     * Check if there already exist an heading on the page. If not, set the new one as.
+     */
+    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
+      Object.assign(format, { [field]: true })
+    }
+    console.log(format)
+    const newTextLayer = LayerFactary.newText(format)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+  }
+
+  addGroup (json: any) {
+    const { layers, styles } = GeneralUtils.deepCopy(json)
+    const position = this.getAddPosition(styles.width, styles.height)
+    Object.assign(styles, position)
+    const newGroupLayer = LayerFactary.newGroup(styles, layers)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 
   updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
@@ -1092,62 +1082,73 @@ class TextUtils {
     })
   }
 
-  getAddPosition (width: number, height: number) {
-    const { pageIndex, index } = this.currSelectedInfo
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
-    const x = (page.width - width) / 2
-    const y = (page.height - height) / 2
+  updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles
+    })
+  }
 
-    if (pageIndex === this.lastSelectedPageIndex) {
-      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
-      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
-      const specy = currLayer.styles.y + currLayer.styles.height
-      if ((specy + height) < page.height) {
-        return { x: specx, y: specy }
-      }
+  updateParagraphStyles(pageIndex: number, layerIndex: number, pIndex: number, styles: { [key: string]: string | number }) {
+    store.commit('UPDATE_paragraphStyles', {
+      pageIndex,
+      layerIndex,
+      pIndex,
+      styles
+    })
+  }
+
+  updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+    store.commit('UPDATE_textProps', {
+      pageIndex,
+      layerIndex,
+      paragraphs
+    })
+  }
+
+  updateSelectedParagraphs(tmpLayerIndex: number, paragraphs: IParagraph[]) {
+    store.commit('UPDATE_selectedTextParagraphs', {
+      tmpLayerIndex,
+      paragraphs
+    })
+  }
+
+  updateSelectedLayersProps(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
+    store.commit('UPDATE_selectedLayersStyles', {
+      styles,
+      layerIndex
+    })
+  }
+
+  updateSelectedParaProps(tmpLayerIndex: number, props: { [key: string]: string | number }) {
+    store.commit('UPDATE_selectedTextParagraphsProp', {
+      tmpLayerIndex,
+      props
+    })
+  }
+
+  updateSelection(start: ISelection, end: ISelection) {
+    store.commit('text/UPDATE_selection', {
+      start,
+      end
+    })
+  }
+
+  setSelectionDefault() {
+    const nan = {
+      pIndex: NaN,
+      sIndex: NaN,
+      offset: NaN
     }
-    return { x, y }
+    store.commit('text/UPDATE_selection', {
+      start: nan,
+      end: nan
+    })
   }
 
-  addStanardText(type: string) {
-    import(`@/assets/json/${type}.json`)
-      .then(json => {
-        const fieldMap = {
-          heading: 'isHeading',
-          subheading: 'isSubheading',
-          body: 'isBody'
-        } as { [key: string]: string }
-        const field = fieldMap[type]
-        this.addText(json, field)
-      })
-      .catch(() => {
-        console.log('Cannot find the file')
-      })
-  }
-
-  addText (json: any, field?: string) {
-    const format = GeneralUtils.deepCopy(json)
-    const size = this.getTextHW(format)
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
-    const position = this.getAddPosition(size.width, size.height)
-    Object.assign(format.styles, position, size)
-
-    /**
-     * Check if there already exist an heading on the page. If not, set the new one as.
-     */
-    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
-      Object.assign(format, { [field]: true })
-    }
-    const newTextLayer = LayerFactary.newText(format)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
-  }
-
-  addGroup (json: any) {
-    const { layers, styles } = GeneralUtils.deepCopy(json)
-    const position = this.getAddPosition(styles.width, styles.height)
-    Object.assign(styles, position)
-    const newGroupLayer = LayerFactary.newGroup(styles, layers)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
+  updateFontFace(font: IFont) {
+    store.commit('text/UPDATE_fontFace', font)
   }
 }
 

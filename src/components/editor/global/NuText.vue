@@ -25,6 +25,7 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
+import { calcTmpProps } from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
@@ -33,7 +34,7 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number
   },
-  created() {
+  async created() {
     const fontPreset = this.fontPreset as Array<IFont>
     let isLoadedFont = false
     for (const p of (this.config as IText).paragraphs) {
@@ -42,7 +43,7 @@ export default Vue.extend({
         if (!fontPreset.some(font => font.face === spanFont)) {
           isLoadedFont = true
           const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
-          newFont.load().then(newFont => {
+          await newFont.load().then(newFont => {
             document.fonts.add(newFont)
             TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
           })
@@ -59,7 +60,8 @@ export default Vue.extend({
     ...mapState('text', ['fontPreset']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      getLayer: 'store.getters.getLayer'
     }),
     updateTextSize(): any {
       const config = this.config as IText
@@ -89,7 +91,7 @@ export default Vue.extend({
         this.$nextTick(() => {
           const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
           //           if (this.currSelectedInfo.layers.length <= 1) {
-          if (!this.subLayerIndex) {
+          if (typeof this.subLayerIndex === 'undefined') {
             ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
           } else {
             this.updateSelectedLayerStyles({
@@ -99,6 +101,10 @@ export default Vue.extend({
               },
               layerIndex: this.subLayerIndex
             })
+
+            if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
+              const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
+            }
           }
         })
       },
@@ -129,8 +135,8 @@ export default Vue.extend({
         opacity
       }
     },
-    getFontUrl(fontFace: string): string {
-      return 'url("https://template.vivipic.com/font/ipix_12px.ttf")'
+    getFontUrl(fontID: string): string {
+      return `url("https://template.vivipic.com/font/${fontID}/font")`
     }
   }
 })
