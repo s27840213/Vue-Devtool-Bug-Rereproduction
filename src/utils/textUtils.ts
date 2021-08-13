@@ -7,6 +7,7 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 import LayerUtils from './layerUtils'
+import { ITextState } from '@/store/text'
 import { Solarize } from 'konva/types/filters/Solarize'
 import { config } from 'dotenv/types'
 
@@ -19,46 +20,6 @@ const fontPropsMap = {
   color: 'color'
 }
 
-// used for font panel as a temporary test usage
-export const tmpFontsPreset = [
-  {
-    name: 'sans-serif',
-    face: 'sans-serif'
-  },
-  {
-    name: 'Manrop',
-    face: 'Manrop'
-  },
-  {
-    name: 'Lobster',
-    face: 'Lobster'
-  },
-  {
-    name: '思源黑體',
-    face: 'NotoSansTC'
-  },
-  {
-    name: '標楷體',
-    face: 'cwTeXKai'
-  },
-  {
-    name: '獅尾四季春',
-    face: 'SweiSpringCJKtc-Regular'
-  },
-  {
-    name: '裝甲明朝',
-    face: 'SoukouMincho'
-  },
-  {
-    name: '瀨戶字體',
-    face: 'SetoFont'
-  },
-  {
-    name: '思源柔體',
-    face: 'GenJyuuGothicX-P-Regular'
-  }
-]
-
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
 
@@ -68,6 +29,7 @@ class TextUtils {
   get getCurrSel() { return store.state.text?.sel }
   get getCurrTextProps() { return store.state.text?.props }
   get getLayer() { return store.getters.getLayer }
+  get getTextState() { return store.state.text as ITextState }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
@@ -1079,7 +1041,7 @@ class TextUtils {
           break
         }
         case 'font': {
-          const font = tmpFontsPreset.find(font => font.face === this.propReader('fontFamily'))?.name
+          const font = this.getTextState.fontPreset.find(font => font.face === this.propReader('fontFamily'))?.name
           value = typeof font === 'string' ? font : 'multi-fonts'
           break
         }
