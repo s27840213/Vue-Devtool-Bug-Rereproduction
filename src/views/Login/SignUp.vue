@@ -2,29 +2,36 @@
 div(style="position:relative;")
   div(class="signup-wrapper")
     div(v-if="currentPageIndex === 0" class="signup signup-p0")
+      div
+        img(:src="require('@/assets/img/svg/signup.svg')" class="w-60")
       div(class="text-center")
         span(class="text-blue-1 h-4") SIGH UP
       div
-        btn(:type="'white-mid'") Sign up with Facebook
+        img(:src="require('@/assets/img/png/facebook.png')")
+        btn(:type="'icon-mid-body'") Sign up with Facebook
+      div
+        img(:src="require('@/assets/img/png/google.png')")
+        btn(:type="'icon-mid-body'") Sign up with Google
       div
         span or
       div
         div
-          span Name
-          property-bar
+          span(class="label-mid") Name
+          property-bar(class="mt-5")
             input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your Name")
         div
-          span Email
-          property-bar
+          span(class="label-mid") Email
+          property-bar(class="mt-5")
             input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
         div
-          span Password
-          property-bar
+          span(class="label-mid") Password
+          property-bar(class="mt-5")
             input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          span 8 or more characters with letters and numbers.
+          div(class="mt-5")
+            span(class="body-2") 8 or more characters with letters and numbers.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="signup")
@@ -77,7 +84,7 @@ export default Vue.extend({
   methods: {
     async onSignUpClicked () {
       console.log('onSignUpClicked')
-      const response = await store.dispatch('register', { type: '0', uname: this.name, account: this.email, upass: this.password })
+      const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
       }
@@ -132,17 +139,43 @@ export default Vue.extend({
   border-radius: 10px;
   padding: 32px;
   > div {
-    margin-bottom: 30px;
+    margin-bottom: 2.5vh;
   }
 }
 .signup-p0 {
   > div {
-    &:nth-child(2) { // Facebook
+    &:nth-child(1) {
       display: flex;
       justify-content: center;
-      border: 2px solid #3C64B1;
+      margin-bottom: 1vh;
     }
-    &:nth-child(3) { // -or-
+    &:nth-child(3), &:nth-child(4) { // Facebook and Google
+      margin: 0 auto;
+      display: flex;
+      // justify-content: center;
+      align-items: center;
+      height: 40px;
+      width: 80%;
+      background: linear-gradient(180deg, #FFFFFF 29.69%, #F9F9F9 100%);
+      border: 1px solid #D9DBE1;
+      border-radius: 3px;
+      margin-bottom: 2vh;
+      &:hover {
+        cursor: pointer;
+        background: setColor(gray-5);
+      }
+
+      &:active {
+        background: setColor(gray-4);
+      }
+
+      > img {
+        width: 25px;
+        height: 25px;
+        padding-left: 15%;
+      }
+    }
+    &:nth-child(5) { // -or-
       display: block;
       text-align: center;
       overflow: hidden;
@@ -168,21 +201,25 @@ export default Vue.extend({
         margin-left: 30px;
       }
     }
-    &:nth-child(4) { // input fields
+    &:nth-child(6) { // input fields
       > div {
-        margin-bottom: 15px;
+        margin-bottom: 1.5vh;
       }
     }
-    &:nth-child(5) { // sign up button
+    &:nth-child(7) { // sign up button
       display: flex;
       justify-content: center;
-      margin-top: 40px;
-      margin-bottom: 40px;
+      margin-bottom: 0;
       button {
         width: 60%;
+        height: 40px;
       }
     }
   }
+}
+
+.w-60 {
+  width: 60%;
 }
 
 .password-label {
