@@ -93,6 +93,12 @@ class UploadUtils {
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
       const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       targetLayer.active = false
+      targetLayer.isTyping = false
+      targetLayer.locked = false
+      targetLayer.dragging = false
+      targetLayer.editing = false
+
+      console.log(targetLayer)
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.src = 'none'
@@ -114,6 +120,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        console.log(designId)
         // console.log(xhrReq)
       }
     }
@@ -122,10 +129,6 @@ class UploadUtils {
   updateText() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const designId = currSelectedInfo.layers[0].designId
-
-    LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
-      designId: designId
-    })
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -138,8 +141,15 @@ class UploadUtils {
     const xhr = new XMLHttpRequest()
 
     const textInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
+
+    textInfo.active = false
+    textInfo.isTyping = false
+    textInfo.locked = false
+    textInfo.dragging = false
+    textInfo.editing = false
+
     Object.assign(textInfo, { active: false })
-    // console.log(textInfo)
+    console.log(textInfo)
 
     const blob = new Blob([JSON.stringify(textInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -245,7 +255,7 @@ class UploadUtils {
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
     xhr.onload = () => {
-      // console.log(designId)
+      console.log(designId)
       // console.log(xhr)
     }
   }

@@ -50,6 +50,13 @@ $textColor: (
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
 		}
+		&-mid-body{
+			@include body-2();
+			@include flexCenter();
+			background-color: $color;
+			color: map-get($textColor, $type);
+			padding: 10px 20px;
+		}
 		&-lg{
 			@include label-lg();
 			@include flexCenter();

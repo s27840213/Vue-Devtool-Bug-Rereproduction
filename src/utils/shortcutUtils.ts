@@ -34,6 +34,12 @@ class ShortcutHandler {
   //   }
   // }
 
+  // private getClipboardData(){
+  //   const inputNode = document.createElement('input')
+  //   inputNode.setAttribute('type', 'text')
+  //   inputNode.focus()
+  // }
+
   copy() {
     if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
       store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
