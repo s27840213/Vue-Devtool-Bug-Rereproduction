@@ -1,29 +1,37 @@
 <template lang="pug">
 div(style="position:relative;")
   div(class="login-wrapper")
-    div(class="login")
-      div(class="login__title")
+    div(v-if="currentPageIndex === 0" class="login")
+      div
+        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
+      div(class="text-center")
         span(class="text-blue-1 h-4") LOG IN
       div
-        span Email
-        property-bar
-          input(class="body-2 text-gray-2" type="email" min="0" placeholder="Your Email")
+        img(:src="require('@/assets/img/png/facebook.png')")
+        btn(:type="'icon-mid-body'") Log in with Facebook
       div
-        div(class="password-label")
-          span Password
-          span
-            a(class="text-blue-1" href="") Forgot your password
-        property-bar
-          input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
-          button(@click="isPeerPassword = !isPeerPassword")
-            svg-icon(class="pointer"
-            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-      div
-        btn(:type="'primary-mid'") Log in
+        img(:src="require('@/assets/img/png/google.png')")
+        btn(:type="'icon-mid-body'") Log in with Google
       div
         span or
       div
-        btn(:type="'white-mid'") Facebook
+        div
+          span(class="label-mid") Email
+          property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+            input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
+        div
+          div(class="disp-flex flex-between")
+            span(class="label-mid") Password
+            span
+              a(class="body-2 text-gray-3" href="") Forgot your password
+          property-bar(class="mt-5")
+            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
+            button(@click="isPeerPassword = !isPeerPassword")
+              svg-icon(class="pointer"
+              :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+      div
+        btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
+        @click.native="onLogInClicked()") Log in
 </template>
 
 <script lang="ts">
@@ -33,11 +41,24 @@ export default Vue.extend({
   name: 'Login',
   data() {
     return {
+      email: '' as string,
       password: '' as string,
+      vcode: '' as string,
+      currentPageIndex: 0 as number,
+      isLoginClicked: false as boolean,
       isPeerPassword: false as boolean
     }
   },
   computed: {
+    mailValid (): boolean {
+      if (!this.isLoginClicked) {
+        return true
+      } else if (this.email.length > 0) {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.email)
+      } else {
+        return false
+      }
+    },
     togglePeerPasswordIcon (): string {
       return `eye${this.isPeerPassword ? '-slash' : ''}`
     },
@@ -46,6 +67,10 @@ export default Vue.extend({
     }
   },
   methods: {
+    onLogInClicked () {
+      console.log('onLogInClicked')
+      this.isLoginClicked = true
+    }
   }
 })
 </script>
@@ -71,22 +96,35 @@ export default Vue.extend({
   padding: 32px;
 
   > div {
-    margin-bottom: 15px;
+    margin-bottom: 2.5vh;
     &:first-child {
-      margin-bottom: 30px;
-    }
-    // &:nth-child(4) {
-    //   display: flex;
-    //   justify-content: flex-end;
-    //   margin-bottom: 40px;
-    // }
-    &:nth-child(4) {
       display: flex;
       justify-content: center;
-      margin-top: 40px;
-      margin-bottom: 40px;
-      button {
-        width: 50%;
+      margin-bottom: 1vh;
+    }
+    &:nth-child(3), &:nth-child(4) { // Facebook and Google
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      height: 40px;
+      width: 80%;
+      background: linear-gradient(180deg, #FFFFFF 29.69%, #F9F9F9 100%);
+      border: 1px solid #D9DBE1;
+      border-radius: 3px;
+      margin-bottom: 2vh;
+      &:hover {
+        cursor: pointer;
+        background: setColor(gray-5);
+      }
+
+      &:active {
+        background: setColor(gray-4);
+      }
+
+      > img {
+        width: 25px;
+        height: 25px;
+        padding-left: 15%;
       }
     }
     &:nth-child(5) {
@@ -94,7 +132,6 @@ export default Vue.extend({
       text-align: center;
       overflow: hidden;
       white-space: nowrap;
-      margin-bottom: 40px;
       > span {
         position: relative;
         display: inline-block;
@@ -115,22 +152,39 @@ export default Vue.extend({
         left: 100%;
         margin-left: 30px;
       }
+      margin-bottom: 2vh;
     }
-    &:nth-child(6) {
+    &:nth-child(6) { // input fields
+      > div {
+        margin-bottom: 1.5vh;
+        .property-bar:focus-within {
+          border: 1px solid setColor(blue-1);
+        }
+      }
+    }
+    &:nth-child(7) { // login button
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0;
       button {
-        border: 2px solid #3C64B1;
+        width: 60%;
+        height: 40px;
       }
     }
   }
 }
 
-.login__title {
-  text-align: center;
+.w-50 {
+  width: 50%;
 }
 
-.password-label {
-  display: flex;
-  justify-content: space-between;
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+}
+
+.btn-shadow {
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
 }
 
 </style>

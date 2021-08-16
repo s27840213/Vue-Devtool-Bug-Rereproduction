@@ -3,7 +3,7 @@ div(style="position:relative;")
   div(class="signup-wrapper")
     div(v-if="currentPageIndex === 0" class="signup signup-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-60")
+        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
         span(class="text-blue-1 h-4") SIGH UP
       div
@@ -107,7 +107,7 @@ export default Vue.extend({
       }
     },
     async onEnterCodeDoneClicked () {
-      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode })
+      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
       if (response.flag === 0) {
         console.log('success!')
         // this.currentPageIndex = 2
@@ -152,7 +152,6 @@ export default Vue.extend({
     &:nth-child(3), &:nth-child(4) { // Facebook and Google
       margin: 0 auto;
       display: flex;
-      // justify-content: center;
       align-items: center;
       height: 40px;
       width: 80%;
@@ -200,10 +199,14 @@ export default Vue.extend({
         left: 100%;
         margin-left: 30px;
       }
+      margin-bottom: 2vh;
     }
     &:nth-child(6) { // input fields
       > div {
         margin-bottom: 1.5vh;
+        > div:focus-within {
+          border: 1px solid setColor(blue-1);
+        }
       }
     }
     &:nth-child(7) { // sign up button
@@ -218,13 +221,8 @@ export default Vue.extend({
   }
 }
 
-.w-60 {
-  width: 60%;
-}
-
-.password-label {
-  display: flex;
-  justify-content: space-between;
+.w-50 {
+  width: 50%;
 }
 
 .btn-shadow {
