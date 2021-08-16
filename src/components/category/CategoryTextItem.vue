@@ -22,6 +22,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      scaleRatio: 'getPageScaleRatio',
       getJson: 'getJson'
     })
   },
@@ -39,11 +40,16 @@ export default Vue.extend({
       const dataTransfer = event.dataTransfer as DataTransfer
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
+      dataTransfer.dropEffect = 'move'
       delete json.styles.x
       delete json.styles.y
-      dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
-      dataTransfer.setDragImage(image, 0, 0)
+
+      const rect = (event.target as Element).getBoundingClientRect()
+      const x = ((event.clientX - rect.x) / rect.width * image.width) * (this.scaleRatio / 100)
+      const y = ((event.clientY - rect.y) / rect.height * image.height) * (this.scaleRatio / 100)
+
+      dataTransfer.setDragImage(image, x, y)
       dataTransfer.setData('data', JSON.stringify(json))
     },
     addText() {

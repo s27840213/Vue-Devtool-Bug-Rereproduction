@@ -22,7 +22,7 @@
               class="text__body"
               :contenteditable="config.type === 'tmp' ? false : contentEditable"
               @compositionstart="isComposing = true"
-              @compositionend="isComposing = false"
+              @compositionend="composingEnd"
               @keydown="onKeyDown"
               @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
               @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
@@ -181,9 +181,12 @@ export default Vue.extend({
         })
         if (this.currSelectedInfo.layers.length <= 1) {
           this.contentEditable = false
+          console.log(this.isComposing)
           // TODO: Not sure the following commented code can be removed.
+          // if (this.isComposing) {
           // const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
           // TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          // }
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
@@ -495,7 +498,6 @@ export default Vue.extend({
         angle: angleInRad
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-      console.log('scaling')
       const ratio = {
         width: width / (this.getLayerWidth / this.getLayerScale),
         height: height / (this.getLayerHeight / this.getLayerScale)
@@ -873,8 +875,11 @@ export default Vue.extend({
               // return
             }
             // TODO: deletion at the begining of the text cause bug.
-            start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
             start.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+            start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
+            // start.offset = sel.anchorOffset
+            TextUtils.updateSelection(start, start)
+
             if (e.key === 'Backspace') {
               if (start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0) {
                 e.preventDefault()
@@ -885,7 +890,7 @@ export default Vue.extend({
             }
           }
         }
-        const observer = new MutationObserver(this.onTyping(e, start))
+        const observer = new MutationObserver(this.onTyping(e, this.isComposing))
         observer.observe(text, {
           characterData: true,
           childList: true,
@@ -894,9 +899,6 @@ export default Vue.extend({
           attributeOldValue: false,
           characterDataOldValue: false
         })
-        // if (e.key === 'Enter' && this.isComposing) {
-        //   this.onTyping(e, start)([], observer)
-        // }
       }
     },
     onKeyUp(e: KeyboardEvent) {
@@ -906,7 +908,19 @@ export default Vue.extend({
         TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
       }
     },
-    onTyping(e: KeyboardEvent, start: ISelection) {
+    composingEnd() {
+      this.isComposing = false
+      console.log(TextUtils.getSelection()?.start.pIndex)
+      console.log(TextUtils.getSelection()?.start.sIndex)
+      console.log(TextUtils.getSelection()?.start.offset)
+      const start = TextUtils.getSelection()?.start
+      if (start) {
+        TextUtils.updateSelection(start, start)
+      }
+      const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+    },
+    onTyping(e: KeyboardEvent, isComposing: boolean) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
         let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
@@ -915,7 +929,10 @@ export default Vue.extend({
         }
 
         const sel = TextUtils.getSelection()
-        let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
+        let { pIndex, sIndex, offset } = this.sel.start
+        console.log(pIndex)
+        console.log(sIndex)
+        console.log(offset)
         // if below condition is false, means some paragraph (p-node) is removed
         if (sel && TextUtils.isSel(sel.start)) {
           pIndex = sel.start.pIndex
@@ -956,41 +973,46 @@ export default Vue.extend({
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           this.textSizeRefresh(this.config)
-        }
-
-        const text = this.$refs.text as HTMLElement
-        this.$nextTick(() => {
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-          if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
-            text.removeChild(text.lastChild)
-          }
-          const sel = window.getSelection()
-          if (sel) {
-            const currPropsState = this.props
-            const isSameSpanStyles = (() => {
-              if (e.key !== 'Enter' && e.key !== 'Backspace') {
-                const props = ['weight', 'style', 'decoration', 'color']
-                for (const k of props) {
-                  if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
-                    return false
+          const text = this.$refs.text as HTMLElement
+          this.$nextTick(() => {
+            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+            if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
+              text.removeChild(text.lastChild)
+            }
+            const sel = window.getSelection()
+            if (sel) {
+              const currPropsState = this.props
+              const isSameSpanStyles = (() => {
+                if (e.key !== 'Enter' && e.key !== 'Backspace') {
+                  const props = ['weight', 'style', 'decoration', 'color']
+                  for (const k of props) {
+                    if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
+                      return false
+                    }
                   }
                 }
+                return true
+              })()
+              if (!isSameSpanStyles) {
+                sIndex += 1
+                offset = 1
               }
-              return true
-            })()
-            if (!isSameSpanStyles) {
-              sIndex += 1
-              offset = 1
-            }
 
-            const range = new Range()
-            range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-            sel.removeAllRanges()
-            sel.addRange(range)
-          }
-          TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-          TextUtils.updateTextPropsState()
-        })
+              if (isComposing) {
+                pIndex = this.sel.start.pIndex
+                sIndex = this.sel.start.sIndex
+                offset = this.sel.start.offset
+              }
+
+              const range = new Range()
+              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+              sel.removeAllRanges()
+              sel.addRange(range)
+            }
+            TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
+            TextUtils.updateTextPropsState()
+          })
+        }
       }
     },
     textSizeRefresh(text: IText) {

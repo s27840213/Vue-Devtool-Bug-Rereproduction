@@ -1,31 +1,27 @@
 {
-  "styles": {
-    "writingMode": "normal",
-    "textEffect": {},
-    "textShape": {}
-  },
-  "paragraphs": [
-    {
-      "styles": {
-        "align": "center",
-        "fontSpacing": 0,
-        "lineHeight": -1
-      },
-      "spans": [
-        {
-          "text": "New Text",
-          "styles": {
-            "font": "Lobster",
-            "weight": "bold",
-            "color": "#000000",
-            "writingMode": "initial",
-            "decoration": "none",
-            "style": "normal",
-            "opacity": 1,
-            "size": 18
-          }
-        }
-      ]
-    }
-  ]
+    "styles": {
+        "writingMode": "normal",
+        "textEffect": {},
+        "textShape": {}
+    },
+    "paragraphs": [{
+        "styles": {
+            "align": "center",
+            "fontSpacing": 0,
+            "lineHeight": -1
+        },
+        "spans": [{
+            "text": "New Text",
+            "styles": {
+                "font": "Lobster",
+                "weight": "bold",
+                "color": "#000000",
+                "writingMode": "initial",
+                "decoration": "none",
+                "style": "normal",
+                "opacity": 1,
+                "size": 18
+            }
+        }]
+    }]
 }

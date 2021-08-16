@@ -101,9 +101,9 @@ export default Vue.extend({
               },
               layerIndex: this.subLayerIndex
             })
-
             if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
               const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
+              LayerUtils.updateLayerStyles(this.pageIndex, this.currSelectedInfo.index, { width, height })
             }
           }
         })

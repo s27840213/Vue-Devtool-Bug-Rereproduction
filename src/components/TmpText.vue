@@ -56,7 +56,7 @@ export default Vue.extend({
                 {
                   text: 'newYear ',
                   styles: {
-                    font: 'ipix_12px',
+                    font: 'Manrop',
                     weight: 'normal',
                     color: '#000000',
                     decoration: 'none',
