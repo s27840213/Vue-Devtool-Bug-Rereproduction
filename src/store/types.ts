@@ -42,7 +42,12 @@ export interface IEditorState {
     vendor: string,
     tags: string[]
   },
-  jsonMap: any
+  jsonMap: any,
+  textInfo: {
+    heading: Array<string>,
+    subheading: Array<string>,
+    body: Array<string>
+  }
 }
 
 export enum SidebarPanelType {

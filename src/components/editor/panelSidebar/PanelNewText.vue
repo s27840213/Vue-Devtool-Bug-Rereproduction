@@ -6,18 +6,12 @@
       div(class="panel-text__buttons mb-10")
         btn(class="full-width mb-10"
           :type="'text-heading'"
-          draggable="true"
-          @dragstart="dragStart($event, 'heading')"
           @click.native="handleAddText('heading')") Heading
         btn(class="full-width mb-10"
           :type="'text-subheading'"
-          draggable="true"
-          @dragstart="dragStart($event, 'subheading')"
           @click.native="handleAddText('subheading')") Subheading
         btn(class="full-width"
           :type="'text-body'"
-          draggable="true"
-          @dragstart="dragStart($event, 'body')"
           @click.native="handleAddText('body')") Body
       div(v-for="content in contents"
         :key="content.category_id"
@@ -47,7 +41,6 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListColumn from '@/components/category/CategoryListColumn.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import TextUtils from '@/utils/textUtils'
-
 export default Vue.extend({
   components: {
     SearchBar,
@@ -77,34 +70,6 @@ export default Vue.extend({
     this.$store.dispatch('textStock/getContent')
   },
   methods: {
-    dragStart(event: DragEvent, type: string) {
-      console.log('xxx')
-      const dataTransfer = event.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-
-      const rect = (event.target as Element).getBoundingClientRect()
-      const x = (event.clientX - rect.x) * (this.scaleRatio / 100)
-      const y = (event.clientY - rect.y) * (this.scaleRatio / 100)
-
-      import(`@/assets/json/${type}.json`)
-        .then(json => {
-          const fieldMap = {
-            heading: 'isHeading',
-            subheading: 'isSubheading',
-            body: 'isBody'
-          } as { [key: string]: string }
-          const field = fieldMap[type]
-
-          json.field = field
-          Object.assign(json.styles, { x, y })
-          console.log(json)
-          dataTransfer.setData('data', JSON.stringify(json))
-        })
-        .catch(() => {
-          console.log('Cannot find the file')
-        })
-    },
     handleAction (data: IListServiceContentData) {
       const { category_id: category } = data
       this.$store.dispatch('textStock/getContent', { category })

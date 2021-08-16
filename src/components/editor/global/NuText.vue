@@ -19,15 +19,17 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IText } from '@/interfaces/layer'
+import { IParagraph, IText } from '@/interfaces/layer'
 import { IFont } from '@/interfaces/text'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  components: { NuCurveText },
   props: {
     config: Object,
     pageIndex: Number,
@@ -55,13 +57,38 @@ export default Vue.extend({
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
     }
   },
-  components: { NuCurveText },
+  mounted() {
+    console.log('mounted!')
+    console.log(this.config)
+    if (this.config.isHeading) {
+      if (this.getTextInfo.heading.length) {
+        const paraStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].styles)
+        const spanStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].spans[0].styles)
+        const paragraphs = [] as Array<IParagraph>
+        for (const text of this.getTextInfo.heading) {
+          paragraphs.push({
+            styles: paraStyles,
+            spans: [{
+              styles: spanStyles,
+              text: text
+            }]
+          })
+        }
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+      }
+    } else if (this.config.isSubheading) {
+      // TODO
+    } else if (this.config.isBody) {
+      // TODO
+    }
+  },
   computed: {
     ...mapState('text', ['fontPreset']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'store.getters.getLayer'
+      getLayer: 'store.getters.getLayer',
+      getTextInfo: 'getTextInfo'
     }),
     updateTextSize(): any {
       const config = this.config as IText

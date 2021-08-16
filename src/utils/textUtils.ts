@@ -1109,7 +1109,27 @@ class TextUtils {
     })
   }
 
+  setTextInfo(textInfo: { [key: string]: Array<string> }) {
+    store.commit('SET_textInfo', textInfo)
+  }
+
+  textInfoUpdater(field: string, paragraphs: IParagraph[]) {
+    const textArr = []
+    for (const p of paragraphs) {
+      let text = ''
+      for (const span of p.spans) {
+        text += span.text
+      }
+      textArr.push(text)
+    }
+    this.setTextInfo({ [field]: textArr })
+  }
+
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+    const config = this.getLayer(pageIndex, layerIndex) as IText
+    if (config.isHeading) {
+      this.textInfoUpdater('heading', paragraphs)
+    }
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,
