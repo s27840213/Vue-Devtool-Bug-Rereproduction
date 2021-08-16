@@ -31,6 +31,10 @@ class ListService {
   getText (params: IListServiceParams) {
     return this.getList('text', params)
   }
+
+  getBackground (params: IListServiceParams) {
+    return this.getList('background', params)
+  }
 }
 
 export default new ListService()

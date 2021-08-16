@@ -14,6 +14,7 @@ import text from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import background from '@/store/module/background'
 
 Vue.use(Vuex)
 
@@ -554,6 +555,7 @@ export default new Vuex.Store({
     color,
     objects,
     templates,
-    textStock
+    textStock,
+    background
   }
 })

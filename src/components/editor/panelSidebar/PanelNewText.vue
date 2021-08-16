@@ -74,7 +74,7 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.$store.dispatch('textStock/getContent')
+    this.$store.dispatch('textStock/getContent', { category: 0 })
   },
   methods: {
     dragStart(event: DragEvent, type: string) {
