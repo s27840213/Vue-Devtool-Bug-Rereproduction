@@ -18,7 +18,7 @@ class UploadUtils {
     // It will be remove by JS garbage collection system sooner or later
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', 'image/*')
+    inputNode.setAttribute('accept', 'image/*,.heic')
     inputNode.setAttribute('multiple', 'true')
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
@@ -50,9 +50,7 @@ class UploadUtils {
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
       xhr.onload = () => {
-        // setTimeout(() => {
-        //   store.dispatch('user/getAssets', { token: this.token })
-        // }, 3000)
+        console.log(xhr)
       }
     }
   }
