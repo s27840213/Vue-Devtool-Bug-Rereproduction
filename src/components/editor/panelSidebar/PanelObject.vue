@@ -3,7 +3,8 @@
     search-bar(class="mb-15"
       placeholder="Search objects"
       @search="handleSearch")
-    div(v-if="isDisplayByCategory")
+    div(v-if="isDisplayByCategory"
+      class="panel-object__content")
       div(class="text-left")
         span(class="pointer" @click="handleSearch")
           svg-icon(iconName="chevron-left"
@@ -90,6 +91,31 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-object {
   @include size(100%, 100%);
+  display: flex;
+  flex-direction: column;
+  &__content {
+    flex: 1;
+    margin-right: -10px;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      visibility: hidden;
+      background-color: #d9dbe1;
+      border: 3px solid #ffffff;
+    }
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+      }
+    }
+  }
   &__item {
     width: 80px;
     height: 80px;
