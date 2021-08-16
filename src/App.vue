@@ -34,7 +34,6 @@ import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 import { Chrome } from 'vue-color'
 import ColorPicker from '@/components/ColorPicker.vue'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
-import { tmpFontsPreset } from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {

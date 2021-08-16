@@ -7,6 +7,7 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 import LayerUtils from './layerUtils'
+import { ITextState } from '@/store/text'
 import { Solarize } from 'konva/types/filters/Solarize'
 import { config } from 'dotenv/types'
 import { IPage } from '@/interfaces/page'
@@ -21,46 +22,6 @@ const fontPropsMap = {
   color: 'color'
 }
 
-// used for font panel as a temporary test usage
-export const tmpFontsPreset = [
-  {
-    name: 'sans-serif',
-    face: 'sans-serif'
-  },
-  {
-    name: 'Manrop',
-    face: 'Manrop'
-  },
-  {
-    name: 'Lobster',
-    face: 'Lobster'
-  },
-  {
-    name: '思源黑體',
-    face: 'NotoSansTC'
-  },
-  {
-    name: '標楷體',
-    face: 'cwTeXKai'
-  },
-  {
-    name: '獅尾四季春',
-    face: 'SweiSpringCJKtc-Regular'
-  },
-  {
-    name: '裝甲明朝',
-    face: 'SoukouMincho'
-  },
-  {
-    name: '瀨戶字體',
-    face: 'SetoFont'
-  },
-  {
-    name: '思源柔體',
-    face: 'GenJyuuGothicX-P-Regular'
-  }
-]
-
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
 
@@ -70,6 +31,7 @@ class TextUtils {
   get getCurrSel() { return store.state.text?.sel }
   get getCurrTextProps() { return store.state.text?.props }
   get getLayer() { return store.getters.getLayer }
+  get getTextState() { return store.state.text as ITextState }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
   get getPage() { return store.getters.getPage }
@@ -959,6 +921,167 @@ class TextUtils {
     return textHW
   }
 
+  getAddPosition (width: number, height: number) {
+    const { pageIndex, index } = this.currSelectedInfo
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const x = (page.width - width) / 2
+    const y = (page.height - height) / 2
+
+    if (pageIndex === this.lastSelectedPageIndex) {
+      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
+      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
+      const specy = currLayer.styles.y + currLayer.styles.height
+      if ((specy + height) < page.height) {
+        return { x: specx, y: specy }
+      }
+    }
+    return { x, y }
+  }
+
+  addStanardText(type: string) {
+    import(`@/assets/json/${type}.json`)
+      .then(json => {
+        const fieldMap = {
+          heading: 'isHeading',
+          subheading: 'isSubheading',
+          body: 'isBody'
+        } as { [key: string]: string }
+        const field = fieldMap[type]
+        this.addText(json, field)
+      })
+      .catch(() => {
+        console.log('Cannot find the file')
+      })
+  }
+
+  addText (json: any, field?: string) {
+    const format = GeneralUtils.deepCopy(json)
+    const size = this.getTextHW(format)
+    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+    const position = this.getAddPosition(size.width, size.height)
+    Object.assign(format.styles, position, size)
+
+    /**
+     * Check if there already exist an heading on the page. If not, set the new one as.
+     */
+    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
+      Object.assign(format, { [field]: true })
+    }
+    console.log(format)
+    const newTextLayer = LayerFactary.newText(format)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+  }
+
+  addGroup (json: any) {
+    const { layers, styles } = GeneralUtils.deepCopy(json)
+    const position = this.getAddPosition(styles.width, styles.height)
+    Object.assign(styles, position)
+    const newGroupLayer = LayerFactary.newGroup(styles, layers)
+    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
+  }
+
+  updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
+    if (typeof prop !== 'undefined') {
+      store.commit('text/UPDATE_props', prop)
+      return
+    }
+    const props = [
+      'textAlign',
+      'fontSize',
+      'fontSpacing',
+      'lineHeight',
+      'font',
+      'color',
+      'opacity',
+      'weight',
+      'style',
+      'decoration',
+      'isVertical'
+    ]
+    props.forEach(k => {
+      let value
+      switch (k) {
+        case 'textAlign': {
+          if (this.currSelectedInfo.layers.length === 1) {
+            value = this.getCurrLayer.styles.align
+          } else {
+            const tmpLayerGroup = this.getCurrLayer as ITmp
+            for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
+              if (tmpLayerGroup.layers[i].type === 'text') {
+                const tmpLayer = tmpLayerGroup.layers[i] as IText
+                if (!value) value = tmpLayer.styles.align
+                if (value !== tmpLayer.styles.align) {
+                  value = undefined
+                  break
+                }
+              }
+            }
+          }
+          break
+        }
+        case 'fontSize': {
+          const size = this.propReader('fontSize')
+          value = typeof size === 'number' ? size.toString() : '--'
+          break
+        }
+        case 'fontSpacing': {
+          const space = this.propReader('fontSpacing')
+          value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
+          break
+        }
+        case 'lineHeight': {
+          const height = this.propReader('lineHeight')
+          value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
+          break
+        }
+        case 'font': {
+          const font = this.getTextState.fontPreset.find(font => font.face === this.propReader('fontFamily'))?.name
+          value = typeof font === 'string' ? font : 'multi-fonts'
+          break
+        }
+        case 'color': {
+          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
+          break
+        }
+        case 'opacity': {
+          value = (this.getCurrLayer as IText).styles.opacity
+          break
+        }
+        case 'decoration': {
+          value = this.propReader('underline')
+          break
+        }
+        case 'weight': {
+          value = this.propReader('bold')
+          break
+        }
+        case 'style': {
+          value = this.propReader('italic')
+          break
+        }
+        case 'isVertical': {
+          if (this.currSelectedInfo.layers.length === 1) {
+            value = this.getCurrLayer.styles.writingMode.includes('vertical')
+          } else {
+            const tmpLayerGroup = this.getCurrLayer as ITmp
+            value = true
+            for (let i = 0; i < this.currSelectedInfo.layers.length && value; i++) {
+              if (tmpLayerGroup.layers[i].type === 'text') {
+                const tmpLayer = tmpLayerGroup.layers[i] as IText
+                value = tmpLayer.styles.writingMode.includes('vertical')
+              }
+            }
+          }
+          break
+        }
+      }
+
+      const prop: { [key: string]: string | number | boolean | undefined } = {}
+      prop[k] = value
+      store.commit('text/UPDATE_props', prop)
+    })
+  }
+
   updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
@@ -1026,166 +1149,6 @@ class TextUtils {
 
   updateFontFace(font: IFont) {
     store.commit('text/UPDATE_fontFace', font)
-  }
-
-  updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
-    if (typeof prop !== 'undefined') {
-      store.commit('text/UPDATE_props', prop)
-      return
-    }
-    const props = [
-      'textAlign',
-      'fontSize',
-      'fontSpacing',
-      'lineHeight',
-      'font',
-      'color',
-      'opacity',
-      'weight',
-      'style',
-      'decoration',
-      'isVertical'
-    ]
-    props.forEach(k => {
-      let value
-      switch (k) {
-        case 'textAlign': {
-          if (this.currSelectedInfo.layers.length === 1) {
-            value = this.getCurrLayer.styles.align
-          } else {
-            const tmpLayerGroup = this.getCurrLayer as ITmp
-            for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
-              if (tmpLayerGroup.layers[i].type === 'text') {
-                const tmpLayer = tmpLayerGroup.layers[i] as IText
-                if (!value) value = tmpLayer.styles.align
-                if (value !== tmpLayer.styles.align) {
-                  value = undefined
-                  break
-                }
-              }
-            }
-          }
-          break
-        }
-        case 'fontSize': {
-          const size = this.propReader('fontSize')
-          value = typeof size === 'number' ? size.toString() : '--'
-          break
-        }
-        case 'fontSpacing': {
-          const space = this.propReader('fontSpacing')
-          value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
-          break
-        }
-        case 'lineHeight': {
-          const height = this.propReader('lineHeight')
-          value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
-          break
-        }
-        case 'font': {
-          const font = tmpFontsPreset.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : 'multi-fonts'
-          break
-        }
-        case 'color': {
-          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
-          break
-        }
-        case 'opacity': {
-          value = (this.getCurrLayer as IText).styles.opacity
-          break
-        }
-        case 'decoration': {
-          value = this.propReader('underline')
-          break
-        }
-        case 'weight': {
-          value = this.propReader('bold')
-          break
-        }
-        case 'style': {
-          value = this.propReader('italic')
-          break
-        }
-        case 'isVertical': {
-          if (this.currSelectedInfo.layers.length === 1) {
-            value = this.getCurrLayer.styles.writingMode.includes('vertical')
-          } else {
-            const tmpLayerGroup = this.getCurrLayer as ITmp
-            value = true
-            for (let i = 0; i < this.currSelectedInfo.layers.length && value; i++) {
-              if (tmpLayerGroup.layers[i].type === 'text') {
-                const tmpLayer = tmpLayerGroup.layers[i] as IText
-                value = tmpLayer.styles.writingMode.includes('vertical')
-              }
-            }
-          }
-          break
-        }
-      }
-
-      const prop: { [key: string]: string | number | boolean | undefined } = {}
-      prop[k] = value
-      store.commit('text/UPDATE_props', prop)
-    })
-  }
-
-  getAddPosition (width: number, height: number) {
-    const { pageIndex, index } = this.currSelectedInfo
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
-    const x = (page.width - width) / 2
-    const y = (page.height - height) / 2
-
-    if (pageIndex === this.lastSelectedPageIndex) {
-      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
-      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
-      const specy = currLayer.styles.y + currLayer.styles.height
-      if ((specy + height) < page.height) {
-        return { x: specx, y: specy }
-      }
-    }
-    return { x, y }
-  }
-
-  addStanardText(type: string) {
-    import(`@/assets/json/${type}.json`)
-      .then(json => {
-        const fieldMap = {
-          heading: 'isHeading',
-          subheading: 'isSubheading',
-          body: 'isBody'
-        } as { [key: string]: string }
-        const field = fieldMap[type]
-        this.addText(json, field)
-      })
-      .catch(() => {
-        console.log('Cannot find the file')
-      })
-  }
-
-  addText (json: any, field?: string) {
-    const format = GeneralUtils.deepCopy(json)
-    const size = this.getTextHW(format)
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
-    const position = this.getAddPosition(size.width, size.height)
-    Object.assign(format.styles, position, size)
-
-    /**
-     * Check if there already exist an heading on the page. If not, set the new one as.
-     */
-    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
-      Object.assign(format, { [field]: true })
-    }
-    const newTextLayer = LayerFactary.newText(format)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
-  }
-
-  addGroup (json: any) {
-    const { layers, styles } = GeneralUtils.deepCopy(json)
-    const position = this.getAddPosition(styles.width, styles.height)
-    Object.assign(styles, position)
-    const newGroupLayer = LayerFactary.newGroup(styles, layers)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 }
 

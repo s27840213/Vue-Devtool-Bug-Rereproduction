@@ -258,8 +258,7 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextUtils.onPropertyClick(iconName)
-      console.log(this.sel.start.pIndex)
-      console.log(this.sel.end.pIndex)
+      // Only select without range or none selection exist, the prop-panel update.
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
         TextUtils.updateTextPropsState()
       }
