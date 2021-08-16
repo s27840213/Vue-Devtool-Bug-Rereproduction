@@ -3,37 +3,37 @@
     search-bar(class="mb-15"
       placeholder="Search objects"
       @search="handleSearch")
-    div(v-if="isDisplayByCategory"
-      class="panel-object__content")
-      div(class="text-left")
-        span(class="pointer" @click="handleSearch")
-          svg-icon(iconName="chevron-left"
-            iconWidth="20px")
-      div(v-for="content in contents"
-        :key="content.category_id"
-        class="panel-object__items")
-        category-object-item(v-for="item in content.list"
-          class="panel-object__item"
-          :key="item"
-          :src="`${host}${item}/${preview}`"
-          :objectId="item"
-          @init="fetchJson")
-    category-list(v-else
-      :contents="contents"
-      @action="handleAction")
-      template(v-slot:item="{ item }")
-        category-object-item(class="panel-object__item"
-          :src="`${host}${item}/${preview}`"
-          :objectId="item"
-          @init="fetchJson")
+    div(class="panel-object__content")
+      div(v-if="isDisplayByCategory")
+        div(class="text-left")
+          span(class="pointer" @click="handleSearch")
+            svg-icon(iconName="chevron-left"
+              iconWidth="20px")
+        div(v-for="content in contents"
+          :key="content.category_id"
+          class="panel-object__items")
+          category-object-item(v-for="item in content.list"
+            class="panel-object__item"
+            :key="item"
+            :src="`${host}${item}/${preview}`"
+            :objectId="item"
+            @init="fetchJson")
+      category-list(v-else
+        :contents="contents"
+        @action="handleAction")
+        template(v-slot:item="{ item }")
+          category-object-item(class="panel-object__item"
+            :src="`${host}${item}/${preview}`"
+            :objectId="item"
+            @init="fetchJson")
+      div(class="text-center")
+        svg-icon(v-if="pending"
+          :iconName="'loading'"
+          :iconColor="'gray-2'"
+          :iconWidth="'20px'")
     //- observer-sentinel(v-if="hasNextPage"
     //-   target=".panel-object"
     //-   @callback="handleLoadMore")
-    div(class="text-center")
-      svg-icon(v-if="pending"
-        :iconName="'loading'"
-        :iconColor="'gray-2'"
-        :iconWidth="'20px'")
 </template>
 
 <script lang="ts">
