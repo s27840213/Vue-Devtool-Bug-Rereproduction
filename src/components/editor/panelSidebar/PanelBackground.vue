@@ -98,14 +98,10 @@ export default Vue.extend({
       })
       // this.setIsColorPickerOpened(true)
     },
-    fetchJson(id: string) {
-      this.$store.dispatch('background/getContentJson', id)
-    },
     handleSearch() {
       // this.$store.dispatch('templates/getContent')
     },
     handleColorPicker() {
-      console.log('ddddd')
       this.openColorPicker = !this.openColorPicker
     }
   }
