@@ -19,16 +19,34 @@ div(style="position:relative;")
           span(class="label-mid") Email
           property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
+          div(v-if="!mailValid" class="invalid-message")
+            span Invalid email address format.
         div
           div(class="disp-flex flex-between")
             span(class="label-mid") Password
             span
               a(class="body-2 text-gray-3" href="") Forgot your password
-          property-bar(class="mt-5")
+          property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+          div(class="invalid-message")
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
         @click.native="onLogInClicked()") Log in
@@ -59,6 +77,34 @@ export default Vue.extend({
         return false
       }
     },
+    passwordLengthValid (): boolean {
+      if (this.password.length >= 8 && this.password.length <= 18) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainEng (): boolean {
+      if (this.password.match(/.*[a-zA-Z]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainNum (): boolean {
+      if (this.password.match(/.*[0-9]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordValid (): boolean {
+      if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
+        return true
+      } else {
+        return false
+      }
+    },
     togglePeerPasswordIcon (): string {
       return `eye${this.isPeerPassword ? '-slash' : ''}`
     },
@@ -69,6 +115,9 @@ export default Vue.extend({
   methods: {
     onLogInClicked () {
       console.log('onLogInClicked')
+      console.log('passwordLengthValid', this.passwordLengthValid)
+      console.log('passwordContainEng', this.passwordContainEng)
+      console.log('passwordValid', this.passwordValid)
       this.isLoginClicked = true
     }
   }
@@ -160,6 +209,15 @@ export default Vue.extend({
         .property-bar:focus-within {
           border: 1px solid setColor(blue-1);
         }
+        .invalid-message {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          font-size: 14px;
+          font-family: Mulish;
+          color: setColor(red);
+          padding-top: 5px;
+        }
       }
     }
     &:nth-child(7) { // login button
@@ -177,9 +235,11 @@ export default Vue.extend({
 .w-50 {
   width: 50%;
 }
-
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+.input-valid {
+  border: 1px solid setColor(green-1) !important;
 }
 
 .btn-shadow {
