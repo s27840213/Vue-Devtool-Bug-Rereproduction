@@ -72,8 +72,8 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 80px;
-  background-color: #e9ecf3;
+  height: 64px;
+  background-color: #eaf1f6;
   border: 1px solid #e2e5e6;
   > div {
     &:nth-child(1) {

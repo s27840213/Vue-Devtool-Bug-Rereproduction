@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-bg")
     search-bar(:placeholder="'Search background'")
-    span(class="text-left mt-10") Color
+    span(class="text-left mt-10 text-white") Color
     div(class="panel-bg__colors")
       div(v-for="color in defaultColor"
         class="panel-bg__color"

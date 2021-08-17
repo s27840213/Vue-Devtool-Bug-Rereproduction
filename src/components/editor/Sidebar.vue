@@ -5,7 +5,7 @@
       div(class="nav-container")
         div(class="nav-item"
           v-for="(item,index) in navItem" :key="`icon-${index}`"
-          :class="currPanel === index ? 'bg-white' : 'none'"
+          :class="currPanel === index ? 'bg-nav-active' : 'none'"
           @click="switchNav(index)")
           svg-icon(:iconName="item.icon"
             :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
@@ -62,13 +62,13 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
-  box-shadow: 2px 0px 5px setColor(gray-4);
+  // box-shadow: 2px 0px 5px setColor(gray-4);
   z-index: setZindex(sidebar);
 }
 
 .logo {
   width: 100%;
-  height: 80px;
+  height: 88px;
   background-color: setColor(blue-1);
 }
 

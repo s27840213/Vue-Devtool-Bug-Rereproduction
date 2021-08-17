@@ -67,25 +67,25 @@ export default Vue.extend({
       ]
     ),
     ...mapGetters('templates', ['hasNextPage', 'emptyResultMessage']),
-    isDisplayByCategory () {
+    isDisplayByCategory() {
       return typeof this.category === 'number'
     }
   },
-  mounted () {
+  mounted() {
     this.$store.dispatch('templates/getContent')
   },
   methods: {
-    handleAction (data: IListServiceContentData) {
+    handleAction(data: IListServiceContentData) {
       const { category_id: category } = data
       this.$store.dispatch('templates/getContent', { category })
     },
-    handleSearch () {
+    handleSearch() {
       this.$store.dispatch('templates/getContent')
     },
-    fetchJson (id: string) {
+    fetchJson(id: string) {
       this.$store.dispatch('templates/getContentJson', id)
     },
-    handleLoadMore () {
+    handleLoadMore() {
       console.log('handleLoadMore')
     }
   }
@@ -113,7 +113,7 @@ export default Vue.extend({
   &__items {
     display: grid;
     grid-auto-rows: auto;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-columns: repeat(2, 1fr);
     grid-gap: 10px;
   }
 }

@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       placeholder="Search objects"
       @search="handleSearch")
-    div(v-if="isDisplayByCategory")
+    div(v-if="isDisplayByCategory" class="text-white")
       div(class="text-left")
         span(class="pointer" @click="handleSearch")
           svg-icon(iconName="chevron-left"
@@ -62,25 +62,25 @@ export default Vue.extend({
       ]
     ),
     ...mapGetters('objects', ['hasNextPage']),
-    isDisplayByCategory () {
+    isDisplayByCategory() {
       return typeof this.category === 'number'
     }
   },
-  mounted () {
+  mounted() {
     this.$store.dispatch('objects/getContent')
   },
   methods: {
-    handleAction (data: IListServiceContentData) {
+    handleAction(data: IListServiceContentData) {
       const { category_id: category } = data
       this.$store.dispatch('objects/getContent', { category })
     },
-    handleSearch () {
+    handleSearch() {
       this.$store.dispatch('objects/getContent')
     },
-    fetchJson (id: string) {
+    fetchJson(id: string) {
       this.$store.dispatch('objects/getContentJson', id)
     },
-    handleLoadMore () {
+    handleLoadMore() {
       console.log('handleLoadMore')
     }
   }
@@ -100,7 +100,7 @@ export default Vue.extend({
   &__items {
     display: grid;
     grid-auto-rows: auto;
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-gap: 10px;
   }
 }

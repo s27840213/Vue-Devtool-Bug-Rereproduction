@@ -3,7 +3,7 @@
     div(v-for="item in contents"
       :key="item.category_id"
       class="category-list mb-5")
-      div(class="category-list__header py-10")
+      div(class="category-list__header py-10 text-bold text-white")
         div {{item.title}}
         div(class="category-list__action pointer"
           @click="onAction(item)")
@@ -31,12 +31,12 @@ export default Vue.extend({
     CategoryListColumn
   },
   computed: {
-    listName () {
+    listName() {
       return this.columns ? 'category-list-column' : 'category-list-row'
     }
   },
   methods: {
-    onAction (item: any) {
+    onAction(item: any) {
       this.$emit('action', item)
     }
   }
@@ -52,7 +52,7 @@ export default Vue.extend({
   }
   &__action {
     &:hover {
-      color: #4EABE6;
+      color: #4eabe6;
     }
   }
 }

@@ -112,7 +112,6 @@ export default Vue.extend({
   $this: &;
   position: relative;
   display: inline-block;
-  background-color: #f1f1f1;
   &__more {
     position: absolute;
     top: 0px;
