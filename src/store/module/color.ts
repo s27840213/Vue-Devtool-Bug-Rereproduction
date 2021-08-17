@@ -1,11 +1,10 @@
-import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
-Vue.use(Vuex)
 interface IColorState {
   defaultColor: Array<string>,
   brandColor: Array<string>,
-  documentColor: Array<string>
+  documentColor: Array<string>,
+  defaultBgColor: Array<string>
 }
 
 const getDefaultState = (): IColorState => ({
@@ -26,15 +25,29 @@ const getDefaultState = (): IColorState => ({
     '#F2F2F2',
     '#FFFFFF'
   ],
+  defaultBgColor: [
+    '#F2994A',
+    '#F2C94C',
+    '#219653',
+    '#9B51E0',
+    '#BB6BD9',
+    '#EB5757',
+    '#2F80ED',
+    '#2D9CDB',
+    '#56CCF2',
+    '#FFFFFF'
+  ],
   brandColor: [],
   documentColor: []
 })
 
 const state = getDefaultState()
-
 const getters: GetterTree<IColorState, unknown> = {
   getDefaultColor(state): Array<string> {
     return state.defaultColor
+  },
+  getDefaultBgColor(state): Array<string> {
+    return state.defaultBgColor
   },
   getBrandColor(state): Array<string> {
     return state.brandColor

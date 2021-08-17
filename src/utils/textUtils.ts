@@ -955,10 +955,21 @@ class TextUtils {
   }
 
   addText (json: any, field?: string) {
-    const format = GeneralUtils.deepCopy(json)
-    const size = this.getTextHW(format)
+    const format = GeneralUtils.deepCopy(json) as IText
     const page = this.getPage(this.lastSelectedPageIndex) as IPage
-    const position = this.getAddPosition(size.width, size.height)
+
+    const size = {} as { [key: string]: number }
+    if (format.styles && format.styles.height && format.styles.width) {
+      Object.assign(size, { width: format.styles.width, height: format.styles.height })
+    } else {
+      Object.assign(size, this.getTextHW(format))
+    }
+    const position = {} as { [key: string]: number }
+    if (format.styles && typeof format.styles.x !== 'undefined' && typeof format.styles.y !== 'undefined') {
+      Object.assign(position, { x: format.styles.x, y: format.styles.y })
+    } else {
+      Object.assign(position, this.getAddPosition(size.width, size.height))
+    }
     Object.assign(format.styles, position, size)
 
     /**
@@ -967,7 +978,6 @@ class TextUtils {
     if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
       Object.assign(format, { [field]: true })
     }
-    console.log(format)
     const newTextLayer = LayerFactary.newText(format)
     LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
   }

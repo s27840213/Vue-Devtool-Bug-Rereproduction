@@ -12,6 +12,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
+import { IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -22,6 +23,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      scaleRatio: 'getPageScaleRatio',
       getJson: 'getJson'
     })
   },
@@ -36,18 +38,25 @@ export default Vue.extend({
     },
     dragStart(event: DragEvent) {
       const json = this.getJson(this.objectId)
+      Object.assign(json.styles, { x: undefined, y: undefined })
+      Object.assign(json, { editing: false })
       const dataTransfer = event.dataTransfer as DataTransfer
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
-      delete json.styles.x
-      delete json.styles.y
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
-      dataTransfer.setDragImage(image, 0, 0)
+
+      const rect = (event.target as Element).getBoundingClientRect()
+      const x = ((event.clientX - rect.x) / rect.width * image.width) * (this.scaleRatio / 100)
+      const y = ((event.clientY - rect.y) / rect.height * image.height) * (this.scaleRatio / 100)
+
+      dataTransfer.setDragImage(image, x, y)
       dataTransfer.setData('data', JSON.stringify(json))
     },
     addText() {
-      const json = this.getJson(this.objectId)
+      const json = this.getJson(this.objectId) as IText
+      Object.assign(json.styles, { x: undefined, y: undefined })
+      Object.assign(json, { editing: false })
       switch (json.type) {
         case 'text':
           return TextUtils.addText(json)

@@ -37,10 +37,14 @@ const actions: ActionTree<IUser, unknown> = {
   async login({ commit }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      commit('SET_downloadUrl', data.data.download_url)
-      uploadUtils.setLoginOutput(data.data)
+      if (data.flag === 0) {
+        commit('SET_downloadUrl', data.data.download_url)
+        uploadUtils.setLoginOutput(data.data)
+      }
+      return Promise.resolve(data)
     } catch (error) {
       console.log(error)
+      return Promise.reject(error)
     }
   },
   async register({ commit }, { type = '0', uname, account, upass }) {
@@ -55,9 +59,9 @@ const actions: ActionTree<IUser, unknown> = {
       return Promise.reject(error)
     }
   },
-  async verifyVcode({ commit }, { type = '2', account, vcode }) {
+  async verifyVcode({ commit }, { type = '2', account, vcode, getUserId }) {
     try {
-      const meta = { type: type, account: account, vcode: vcode }
+      const meta = { type: type, account: account, vcode: vcode, getUserId: getUserId }
       console.log(JSON.stringify(meta))
       const { data } = await userApis.register('token', JSON.stringify(meta))
       console.log('verify vcode', data)

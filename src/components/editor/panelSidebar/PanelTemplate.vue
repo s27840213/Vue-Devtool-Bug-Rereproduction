@@ -99,9 +99,25 @@ export default Vue.extend({
   flex-direction: column;
   &__content {
     flex: 1;
+    margin-right: -10px;
     overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: thin;
     &::-webkit-scrollbar {
-      display: none;
+      width: 10px;
+      height: 10px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      visibility: hidden;
+      background-color: #d9dbe1;
+      border: 3px solid #ffffff;
+    }
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+      }
     }
   }
   &__item {

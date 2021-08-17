@@ -48,9 +48,9 @@ class MouseUtils {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       LayerUtils.addLayers(pageIndex, layer)
-      if (layer.type === 'text') {
-        TextUtils.updateTextPropsState()
-      }
+      // if (layer.type === 'text') {
+      //   TextUtils.updateTextPropsState()
+      // }
       StepsUtils.record()
     }
   }
@@ -123,7 +123,9 @@ class MouseUtils {
         layerConfig.styles.x = tmpPos.x
         layerConfig.styles.y = tmpPos.y
         layerConfig.paragraphs = data.paragraphs
-        layer = LayerFactary.newText(layerConfig)
+        // layer = LayerFactary.newText(layerConfig)
+        TextUtils.addText(layerConfig, data.field)
+        TextUtils.updateTextPropsState()
         break
       }
       case 'shape': {
