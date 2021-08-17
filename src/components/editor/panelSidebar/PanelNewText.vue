@@ -131,8 +131,8 @@ export default Vue.extend({
     flex: 1;
     margin-right: -10px;
     overflow-y: scroll;
+    overflow-x: hidden;
     scrollbar-width: thin;
-    overscroll-behavior: contain;
     &::-webkit-scrollbar {
       width: 10px;
       height: 10px;
