@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
-        span(class="text-blue-1 h-4") LOG IN
+        span(class="text-blue-1 h-5") LOG IN
       div
         img(:src="require('@/assets/img/png/facebook.png')")
         btn(:type="'icon-mid-body'") Log in with Facebook
@@ -18,9 +18,9 @@ div(style="position:relative;")
         div
           span(class="label-mid") Email
           property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
           div(v-if="!mailValid" class="invalid-message")
-            span Invalid email address format.
+            span {{ mailErrorMessage }}
         div
           div(class="disp-flex flex-between")
             span(class="label-mid") Password
@@ -31,22 +31,8 @@ div(style="position:relative;")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(class="invalid-message")
-            div(class="disp-flex align-center")
-              svg-icon(class="pointer"
-              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
-            div(class="disp-flex align-center")
-              svg-icon(class="pointer"
-              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
-            div(class="disp-flex align-center")
-              svg-icon(class="pointer"
-              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
+          div(v-if="!passwordValid" class="invalid-message")
+            span Please enter your password.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
         @click.native="onLogInClicked()") Log in
@@ -78,29 +64,17 @@ export default Vue.extend({
         return false
       }
     },
-    passwordLengthValid (): boolean {
-      if (this.password.length >= 8 && this.password.length <= 18) {
-        return true
+    mailErrorMessage (): string {
+      if (this.email.length === 0) {
+        return 'Please enter your email.'
       } else {
-        return false
-      }
-    },
-    passwordContainEng (): boolean {
-      if (this.password.match(/.*[a-zA-Z]+.*/)) {
-        return true
-      } else {
-        return false
-      }
-    },
-    passwordContainNum (): boolean {
-      if (this.password.match(/.*[0-9]+.*/)) {
-        return true
-      } else {
-        return false
+        return 'Invalid email address format.'
       }
     },
     passwordValid (): boolean {
-      if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
+      if (!this.isLoginClicked) {
+        return true
+      } else if (this.password.length > 0) {
         return true
       } else {
         return false
@@ -117,6 +91,9 @@ export default Vue.extend({
     async onLogInClicked () {
       console.log('onLogInClicked')
       this.isLoginClicked = true
+      if (!this.mailValid || !this.passwordValid) {
+        return
+      }
       const response = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (response.flag === 0) {
         console.log('success!', response)
@@ -146,10 +123,10 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  padding: 32px;
+  padding: 0 32px 20px 32px;
 
   > div {
-    margin-bottom: 2.5vh;
+    margin-bottom: 2vh;
     &:first-child {
       display: flex;
       justify-content: center;
@@ -241,9 +218,6 @@ export default Vue.extend({
 }
 .input-invalid {
   border: 1px solid setColor(red) !important;
-}
-.input-valid {
-  border: 1px solid setColor(green-1) !important;
 }
 
 .btn-shadow {

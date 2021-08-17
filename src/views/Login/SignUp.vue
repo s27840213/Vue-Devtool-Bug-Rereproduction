@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
-        span(class="text-blue-1 h-4") SIGH UP
+        span(class="text-blue-1 h-5") SIGH UP
       div
         img(:src="require('@/assets/img/png/facebook.png')")
         btn(:type="'icon-mid-body'") Sign up with Facebook
@@ -17,21 +17,39 @@ div(style="position:relative;")
       div
         div
           span(class="label-mid") Name
-          property-bar(class="mt-5")
+          property-bar(class="mt-5" :class="{'input-invalid': !nameValid}")
             input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your Name")
+          div(v-if="!nameValid" class="invalid-message")
+            span Please enter your name.
         div
           span(class="label-mid") Email
-          property-bar(class="mt-5")
-            input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
+          property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
+          div(v-if="!mailValid" class="invalid-message")
+            span {{ mailErrorMessage }}
         div
           span(class="label-mid") Password
-          property-bar(class="mt-5")
+          property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(class="mt-5")
-            span(class="body-2") 8 or more characters with letters and numbers.
+          div(class="invalid-message")
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="signup")
@@ -70,10 +88,66 @@ export default Vue.extend({
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
+      isSignUpClicked: false as boolean,
       isPeerPassword: false as boolean
     }
   },
   computed: {
+    nameValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.name.length > 0) {
+        return true
+      } else {
+        return false
+      }
+    },
+    mailValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.email.length > 0) {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.email)
+      } else {
+        return false
+      }
+    },
+    mailErrorMessage (): string {
+      if (this.email.length === 0) {
+        return 'Please enter your email.'
+      } else {
+        return 'Invalid email address format.'
+      }
+    },
+    passwordLengthValid (): boolean {
+      if (this.password.length >= 8 && this.password.length <= 18) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainEng (): boolean {
+      if (this.password.match(/.*[a-zA-Z]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainNum (): boolean {
+      if (this.password.match(/.*[0-9]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
+        return true
+      } else {
+        return false
+      }
+    },
     togglePeerPasswordIcon (): string {
       return `eye${this.isPeerPassword ? '-slash' : ''}`
     },
@@ -84,6 +158,10 @@ export default Vue.extend({
   methods: {
     async onSignUpClicked () {
       console.log('onSignUpClicked')
+      this.isSignUpClicked = true
+      if (!this.nameValid || !this.mailValid || !this.passwordValid) {
+        return
+      }
       const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
@@ -137,9 +215,9 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  padding: 32px;
+  padding: 0 32px 20px 32px;
   > div {
-    margin-bottom: 2.5vh;
+    margin-bottom: 2vh;
   }
 }
 .signup-p0 {
@@ -203,9 +281,18 @@ export default Vue.extend({
     }
     &:nth-child(6) { // input fields
       > div {
-        margin-bottom: 1.5vh;
-        > div:focus-within {
+        margin-bottom: 1vh;
+        .property-bar:focus-within {
           border: 1px solid setColor(blue-1);
+        }
+        .invalid-message {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          font-size: 14px;
+          font-family: Mulish;
+          color: setColor(red);
+          padding-top: 10px;
         }
       }
     }
@@ -223,6 +310,9 @@ export default Vue.extend({
 
 .w-50 {
   width: 50%;
+}
+.input-invalid {
+  border: 1px solid setColor(red) !important;
 }
 
 .btn-shadow {
