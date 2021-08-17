@@ -24,13 +24,13 @@ div(style="position:relative;")
         div
           span(class="label-mid") Email
           property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" placeholder="Your Email")
           div(v-if="!mailValid" class="invalid-message")
             span {{ mailErrorMessage }}
         div
           span(class="label-mid") Password
           property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
-            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
+            input(class="body-2 text-gray-2" v-model="password" type="number" placeholder="Your Password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
@@ -54,12 +54,14 @@ div(style="position:relative;")
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="signup")
       div(class="text-center")
-        span(class="text-blue-1 h-4") Verify code is sent
+        span(class="text-blue-1 h-4") Verification code is sent
       div
         span We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
       div
-        property-bar
-          input(class="body-2 text-gray-2" v-model="vcode" type="text" min="0" placeholder="Enter code")
+        property-bar(:class="{'input-invalid': !vcodeValid}")
+          input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
+        div(v-if="!vcodeValid" class="invalid-message")
+          span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
       div(
@@ -89,6 +91,8 @@ export default Vue.extend({
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
+      vcodeErrorMessage: 'Invalid verification code.' as string,
+      isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean
     }
   },
@@ -153,6 +157,15 @@ export default Vue.extend({
     },
     togglePeerPasswordInput (): string {
       return `${this.isPeerPassword ? 'text' : 'password'}`
+    },
+    vcodeValid (): boolean {
+      if (!this.isVcodeClicked) {
+        return true
+      } else if (this.vcode.length > 0) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
@@ -165,9 +178,14 @@ export default Vue.extend({
       const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
+        this.isVcodeClicked = false
       }
     },
     async onResendClicked () {
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
       const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
@@ -185,11 +203,22 @@ export default Vue.extend({
       }
     },
     async onEnterCodeDoneClicked () {
+      this.isVcodeClicked = true
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
+      if (!this.vcodeValid) {
+        this.vcodeErrorMessage = 'Please enter the verification code.'
+        return
+      }
       const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
       if (response.flag === 0) {
         console.log('success!')
         // this.currentPageIndex = 2
       } else {
+        this.vcode = ''
+        this.vcodeErrorMessage = response.msg
         console.log(response.msg)
       }
     }
@@ -215,12 +244,16 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  padding: 0 32px 20px 32px;
+  padding: 32px;
   > div {
     margin-bottom: 2vh;
+    .property-bar:focus-within {
+      border: 1px solid setColor(blue-1);
+    }
   }
 }
 .signup-p0 {
+  padding: 0 32px 20px 32px;
   > div {
     &:nth-child(1) {
       display: flex;
@@ -282,18 +315,6 @@ export default Vue.extend({
     &:nth-child(6) { // input fields
       > div {
         margin-bottom: 1vh;
-        .property-bar:focus-within {
-          border: 1px solid setColor(blue-1);
-        }
-        .invalid-message {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          font-size: 14px;
-          font-family: Mulish;
-          color: setColor(red);
-          padding-top: 10px;
-        }
       }
     }
     &:nth-child(7) { // sign up button
@@ -313,6 +334,15 @@ export default Vue.extend({
 }
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+.invalid-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 14px;
+  font-family: Mulish;
+  color: setColor(red);
+  padding-top: 10px;
 }
 
 .btn-shadow {
