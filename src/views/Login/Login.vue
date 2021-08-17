@@ -54,6 +54,7 @@ div(style="position:relative;")
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
 
 export default Vue.extend({
   name: 'Login',
@@ -113,12 +114,15 @@ export default Vue.extend({
     }
   },
   methods: {
-    onLogInClicked () {
+    async onLogInClicked () {
       console.log('onLogInClicked')
-      console.log('passwordLengthValid', this.passwordLengthValid)
-      console.log('passwordContainEng', this.passwordContainEng)
-      console.log('passwordValid', this.passwordValid)
       this.isLoginClicked = true
+      const response = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
+      if (response.flag === 0) {
+        console.log('success!', response)
+      } else {
+        console.log('failed', response.msg)
+      }
     }
   }
 })

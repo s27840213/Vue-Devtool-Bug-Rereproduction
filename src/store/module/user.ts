@@ -37,10 +37,14 @@ const actions: ActionTree<IUser, unknown> = {
   async login({ commit }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      commit('SET_downloadUrl', data.data.download_url)
-      uploadUtils.setLoginOutput(data.data)
+      if (data.flag === 0) {
+        commit('SET_downloadUrl', data.data.download_url)
+        uploadUtils.setLoginOutput(data.data)
+      }
+      return Promise.resolve(data)
     } catch (error) {
       console.log(error)
+      return Promise.reject(error)
     }
   },
   async register({ commit }, { type = '0', uname, account, upass }) {
