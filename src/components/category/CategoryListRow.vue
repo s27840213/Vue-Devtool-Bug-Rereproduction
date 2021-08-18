@@ -87,14 +87,14 @@ export default Vue.extend({
       // background-color: setColor(gray-4);
       &--left {
         left: -1px;
-        background: linear-gradient(90deg, #FFFFFF 22%, rgba(255, 255, 255, 0) 85%);
+        background: linear-gradient(90deg, #2c2f43 22%, rgba(255, 255, 255, 0) 85%);
         #{$this}__icon {
           left: 3px;
         }
       }
       &--right {
         right: -1px;
-        background: linear-gradient(270deg, #FFFFFF 22%, rgba(255, 255, 255, 0) 85%);
+        background: linear-gradient(270deg, #2c2f43 22%, rgba(255, 255, 255, 0) 85%);
         #{$this}__icon {
           right: 3px;
         }

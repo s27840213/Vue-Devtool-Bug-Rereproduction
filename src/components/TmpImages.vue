@@ -14,7 +14,7 @@
       div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"
-          :iconColor="'gray-2'"
+          :iconColor="'white'"
           :iconWidth="'20px'")
 </template>
 
@@ -102,7 +102,7 @@ export default Vue.extend({
       border-radius: 5px;
       visibility: hidden;
       background-color: #d9dbe1;
-      border: 3px solid #ffffff;
+      border: 3px solid #2c2f43;
     }
     &:hover {
       &::-webkit-scrollbar-thumb {
