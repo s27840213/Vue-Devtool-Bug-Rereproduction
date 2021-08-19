@@ -1,3 +1,4 @@
+import { IAssetPhoto } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import text from '@/store/text'
@@ -5,7 +6,9 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 class UploadUtils {
   loginOutput: any
-  get token(): number { return store.getters['user/getToken'] }
+  get token(): string { return store.getters['user/getToken'] }
+  get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
+  get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
 
   // private handleEvent(e: any) {
   //   console.log(`${e.type}: ${e.loaded} bytes transferred, and total ${e.total}\n`)
@@ -44,6 +47,7 @@ class UploadUtils {
 
   uploadImageAsset(files: FileList) {
     for (let i = 0; i < files.length; i++) {
+      const reader = new FileReader()
       const assetId = this.generateAssetId()
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -60,14 +64,56 @@ class UploadUtils {
         formData.append('file', files[i])
       }
 
-      xhr.open('POST', this.loginOutput.upload_map.url, true)
-      xhr.upload.onprogress = function (event) {
-        console.log(`${event.loaded}/${event.total}`)
+      reader.onload = (evt) => {
+        const img = new Image()
+        img.src = evt.target?.result as string
+        img.onload = (evt) => {
+          store.commit('user/ADD_PREVIEW', {
+            imageFile: img,
+            assetId: assetId
+          })
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          let increaseInterval = undefined as any
+          xhr.upload.onprogress = (event) => {
+            const uploadProgress = Math.floor(event.loaded / event.total * 100)
+            store.commit('user/UPDATE_PROGRESS', {
+              assetId: assetId,
+              progress: uploadProgress / 2
+            })
+            if (uploadProgress === 100) {
+              increaseInterval = setInterval(() => {
+                const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
+                  return img.id === assetId
+                })
+                const curr = this.images[targetIndex].progress as number
+                const increaseNum = (90 - curr) * 0.05
+                this.images[targetIndex].progress = curr + increaseNum
+              }, 10)
+            }
+          }
+          xhr.send(formData)
+          xhr.onload = () => {
+            const token = this.token
+            const interval = setInterval(() => {
+              fetch(this.downloadUrl.replace('*', `asset/image/${assetId}/prev`)).then((response) => {
+                if (response.status !== 200) {
+                  console.log('The preview image has not been created yet.')
+                } else {
+                  store.commit('user/UPDATE_PROGRESS', {
+                    assetId: assetId,
+                    progress: 100
+                  })
+                  store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                  clearInterval(interval)
+                  clearInterval(increaseInterval)
+                }
+              })
+            }, 2000)
+          }
+        }
       }
-      xhr.send(formData)
-      xhr.onload = () => {
-        console.log(xhr)
-      }
+
+      reader.readAsDataURL(files[i])
     }
   }
 

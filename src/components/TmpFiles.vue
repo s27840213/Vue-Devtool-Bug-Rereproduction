@@ -28,7 +28,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import uploadUtils from '@/utils/uploadUtils'
+import { IUserImageContentData } from '@/interfaces/api'
 
 export default Vue.extend({
   props: {
@@ -48,20 +48,33 @@ export default Vue.extend({
     ]),
     ...mapGetters('user', [
       'getToken',
+      'getImages',
+      'getIsPending',
       'getUserAssets',
       'getDownloadUrl'
     ]),
     margin(): number {
       return this.galleryUtils.margin
+    },
+    rows(): any {
+      if (this.getImages.length > 0) {
+        const rows = this.galleryUtils.generate(this.getImages)
+          .map((row, idx) => ({
+            list: row,
+            id: `row${idx}`,
+            page: this.page,
+            index: idx,
+            size: row[0].preview.height + this.margin
+          }))
+        return rows
+      }
+      return []
     }
   },
   data() {
     return {
-      rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(300, 75, 5),
-      photos: [
-      ]
+      galleryUtils: new GalleryUtils(300, 75, 5)
     }
   },
   watch: {
@@ -78,55 +91,10 @@ export default Vue.extend({
         }))
       this.prevLastRow = (rows.splice(-1)[0].list || []) as any
       this.rows = this.rows.concat(rows as any)
-    },
+    }
     // temparaily used for handling user assets
-    getUserAssets: {
-      handler: function (newVal) {
-        this.photos = newVal.image ? newVal.image.content.map((image: any) => {
-          const aspectRatio = image.width / image.height
-          const prevW = image.width > image.height ? image.width : 384 * aspectRatio
-          const prevH = image.height > image.width ? image.height : 384 / aspectRatio
-          return {
-            width: image.width,
-            height: image.height,
-            preview: {
-              width: prevW,
-              height: prevH
-            },
-            urls: {
-              prev: this.getDownloadUrl.replace('*', `asset/image/${image.id}/prev`),
-              full: this.getDownloadUrl.replace('*', `asset/image/${image.id}/full`),
-              larg: this.getDownloadUrl.replace('*', `asset/image/${image.id}/larg`),
-              original: this.getDownloadUrl.replace('*', `asset/image/${image.id}/original`)
-            }
-          }
-        }) : []
-
-        if (this.photos.length > 0) {
-          const rows = this.galleryUtils.generate(this.photos)
-            .map((row, idx) => ({
-              list: row,
-              id: `row${idx}`,
-              page: this.page,
-              index: idx,
-              size: row[0].preview.height + this.margin
-            }))
-
-          this.rows = rows as any
-        }
-      },
-      deep: true
-    }
-  },
-  mounted() {
-    if (this.inFilePanel) {
-      this._getAssets()
-    }
   },
   methods: {
-    ...mapActions({
-      getAssets: 'user/getAssets'
-    }),
     imageStyle(attr: any, addMarginLeft: boolean) {
       return {
         width: `${attr.width}px`,
@@ -138,9 +106,6 @@ export default Vue.extend({
       if (nextPage === this.page && !this.inFilePanel) {
         this.$emit('loadMore')
       }
-    },
-    async _getAssets() {
-      await this.getAssets({ token: this.getToken })
     }
   }
 })

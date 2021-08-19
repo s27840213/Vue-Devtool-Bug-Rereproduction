@@ -42,7 +42,8 @@ export interface IEditorState {
     vendor: string,
     tags: string[]
   },
-  jsonMap: any
+  jsonMap: any,
+  isPopupOpen: boolean
 }
 
 export enum SidebarPanelType {

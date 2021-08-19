@@ -137,7 +137,8 @@ const getDefaultState = (): IEditorState => ({
   isPageDropdownsOpened: false,
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
-  jsonMap: {}
+  jsonMap: {},
+  isPopupOpen: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -243,6 +244,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getJson(state: IEditorState) {
     return (id: string) => state.jsonMap[id]
+  },
+  getIsPopupOpen(state) {
+    return state.isPopupOpen
   }
 }
 
@@ -542,6 +546,9 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
+  },
+  SET_isPopupOpen(state: IEditorState, isOpen) {
+    state.isPopupOpen = isOpen
   }
 }
 

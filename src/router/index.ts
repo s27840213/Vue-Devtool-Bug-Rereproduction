@@ -20,8 +20,9 @@ const routes: Array<RouteConfig> = [
           const token = urlParams.get('token')
 
           if (token) {
-            store.commit('user/SET_token', token)
+            store.commit('user/SET_STATE', { token })
             await store.dispatch('user/login', { token })
+            await store.dispatch('user/getAssets', { token })
             // uploadUtils.uploadTmpJSON()
           }
         }

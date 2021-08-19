@@ -10,6 +10,12 @@
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event,photo)"
       @click="addImage(photo)")
+    div(v-if="isUploading"
+        class="gallery-photo__progress")
+      div(class="gallery-photo__progress-bar"
+        :style="{'width': `${photo.progress}%`}")
+    //- div(v-if="photo.progress && photo.progress !== 100" class="gallery-photo__progress")
+    //-   span {{}}
 </template>
 
 <script lang="ts">
@@ -34,7 +40,10 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       pageSize: 'getPageSize',
       getLayers: 'getLayers'
-    })
+    }),
+    isUploading(): boolean {
+      return this.photo.progress && this.photo.progress !== 100
+    }
   },
   methods: {
     ...mapMutations({
@@ -61,32 +70,34 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(data))
     },
     addImage(photo: any) {
-      const resizeRatio = 0.8
-      const pageAspectRatio = this.pageSize.width / this.pageSize.height
-      const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
-      const imageLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
-        return (layer.type === 'image') && (!layer.moved) && (layer.src === src)
-      }) as Array<IImage>
+      if (!this.isUploading) {
+        const resizeRatio = 0.8
+        const pageAspectRatio = this.pageSize.width / this.pageSize.height
+        const photoAspectRatio = photo.width / photo.height
+        const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+        const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+        const imageLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
+          const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+          return (layer.type === 'image') && (!layer.moved) && (layer.src === src)
+        }) as Array<IImage>
 
-      const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
-      const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
-      const config = {
-        src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
-        styles: {
-          x: x,
-          y: y,
-          width: photoWidth,
-          height: photoHeight,
-          initWidth: photoWidth,
-          initHeight: photoHeight,
-          imgWidth: photoWidth,
-          imgHeight: photoHeight
+        const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
+        const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
+        const config = {
+          src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
+          styles: {
+            x: x,
+            y: y,
+            width: photoWidth,
+            height: photoHeight,
+            initWidth: photoWidth,
+            initHeight: photoHeight,
+            imgWidth: photoWidth,
+            imgHeight: photoHeight
+          }
         }
+        layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
       }
-      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
     },
     showPhotoInfo(evt: Event) {
       const { user, tags, vendor } = this.photo
@@ -111,7 +122,8 @@ export default Vue.extend({
 .gallery-photo {
   $this: &;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
   &__more {
     position: absolute;
     top: 0px;
@@ -133,6 +145,23 @@ export default Vue.extend({
     position: absolute;
     top: 0;
     right: 0;
+  }
+  &__progress {
+    width: 90%;
+    height: 10px;
+    bottom: 4px;
+    position: absolute;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid setColor(gray-4);
+    box-shadow: 2px 2px 5px setColor(blue-1);
+    box-sizing: border-box;
+    &-bar {
+      height: 100%;
+      background-color: setColor(red);
+      transition: width 0.3s;
+    }
   }
   &:hover {
     #{$this}__more {

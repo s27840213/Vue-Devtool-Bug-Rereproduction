@@ -60,6 +60,23 @@ export interface IPhoto {
   vendor?: string
 }
 
+export interface IAssetPhoto {
+  width: number,
+  height: number,
+  id: string
+  progress?: number,
+  preview: {
+    width: number,
+    height: number,
+  },
+  urls: {
+    prev: string,
+    full: string,
+    larg: string,
+    original: string
+  }
+}
+
 export interface IPexelsSearchResponse {
   photos: IPexelsPhoto[]
   page: number
@@ -104,4 +121,28 @@ export interface IListServiceData {
 export interface IListServiceResponse {
   data: IListServiceData
   flag: number
+}
+
+export interface IUserAssetsData {
+  design: {
+    content: Array<string>,
+  },
+  font: {
+    content: Array<string>,
+  },
+  image: {
+    content: Array<IUserImageContentData>,
+  },
+  video: {
+    content: Array<string>,
+  }
+}
+
+export interface IUserImageContentData {
+  color: Array<string>,
+  file_ext: string,
+  file_name: string,
+  width: number,
+  height: number,
+  id: string
 }
