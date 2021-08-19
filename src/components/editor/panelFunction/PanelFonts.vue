@@ -24,7 +24,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
-import { set } from 'vue/types/umd'
+import TextPropUTils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: {
@@ -61,8 +61,8 @@ export default Vue.extend({
       this.$emit('closeFontsPanel')
     },
     setFont(font: { name: string, face: string }) {
-      TextUtils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
-      TextUtils.updateTextPropsState({ font: font.name })
+      TextPropUTils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
+      TextPropUTils.updateTextPropsState({ font: font.name })
       this.currFont = font.name
     },
     updateFontPreset(e: any) {

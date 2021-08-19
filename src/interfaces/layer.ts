@@ -63,6 +63,7 @@ export interface IParagraphStyle {
   [key: string]: number | string | undefined,
   lineHeight: number,
   fontSpacing: number,
+  size: number
 }
 
 export interface ISpanStyle {
@@ -77,6 +78,7 @@ export interface ISpanStyle {
 }
 
 export interface IShape extends ILayer<IStyle> {
+  // svgID: string,
   category: string,
   scaleType?: number,
   svg: string,
@@ -87,7 +89,7 @@ export interface IShape extends ILayer<IStyle> {
   vSize: number[],
   cSize?: number[],
   pSize?: number[],
-  pDiff?: number[],
+  pDiff?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
   src: string,

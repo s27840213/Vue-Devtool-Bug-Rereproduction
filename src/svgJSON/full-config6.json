@@ -9,10 +9,10 @@
 }, {
     "category": "B",
     "scaleType": 1,
-    "vSize": [250, 250],
     "styleArray": ["fill:$color[0]"],
     "color": ["#808080"],
     "svg": "<path class=\"$style[0]\" d=\"M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z\"/>",
+    "vSize": [250, 250],
     "path": "M125 0a125 125 0 1 0 0 250a125 125 0 1 0 0-250z"
 }, {
     "category": "A",

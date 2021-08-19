@@ -9,6 +9,7 @@ import { IPage } from '@/interfaces/page'
 
 class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
 
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
     store.commit('ADD_newLayers', {
@@ -32,8 +33,16 @@ class LayerUtils {
 
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
+    console.log(this.currSelectedInfo.index)
     store.commit('SET_lastSelectedLayerIndex', -1)
     ZindexUtils.reassignZindex(store.getters.getCurrSelectedPageIndex)
+  }
+
+  deleteLayer(index: number) {
+    store.commit('DELETE_layer', {
+      pageIndex: this.lastSelectedPageIndex,
+      layerIndex: index
+    })
   }
 
   getLayer(pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | ITmp {

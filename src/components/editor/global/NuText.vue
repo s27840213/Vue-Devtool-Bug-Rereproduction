@@ -180,7 +180,8 @@ export default Vue.extend({
     position: relative;
   }
   &__p {
-      margin: 0.5em;
+    // margin: 0.5em;
+    margin: 0;
   }
   &__span {
     text-align: left;
