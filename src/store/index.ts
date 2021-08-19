@@ -6,6 +6,7 @@ import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import GeneralUtils from '@/utils/generalUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -243,7 +244,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.currSelectedPhotoInfo
   },
   getJson(state: IEditorState) {
-    return (id: string) => state.jsonMap[id]
+    return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
   },
   getIsPopupOpen(state) {
     return state.isPopupOpen

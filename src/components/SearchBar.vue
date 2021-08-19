@@ -5,6 +5,12 @@
       type="text"
       v-model="keyword"
       :placeholder="placeholder")
+    svg-icon(v-if="clear && keyword"
+      class="pointer mr-5"
+      iconName="close"
+      iconColor="gray-3"
+      iconWidth="20px"
+      @click.native="onClear")
     svg-icon(class="pointer" :iconName="'search'" :iconColor="'gray-3'" :iconWidth="'20px'")
 </template>
 
@@ -18,6 +24,13 @@ export default Vue.extend({
     placeholder: {
       type: String,
       default: 'Search from our template'
+    },
+    clear: {
+      type: Boolean
+    },
+    defaultKeyword: {
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -25,10 +38,19 @@ export default Vue.extend({
       keyword: ''
     }
   },
+  watch: {
+    defaultKeyword (val) {
+      this.keyword = val
+    }
+  },
   methods: {
     onSearch (event: Event) {
       event.preventDefault()
       this.$emit('search', this.keyword)
+    },
+    onClear () {
+      this.keyword = ''
+      this.$emit('search', '')
     }
   }
 })
@@ -43,7 +65,7 @@ export default Vue.extend({
   padding: 5px 16px;
   box-sizing: border-box;
   &__input {
-    width: 100%;
+    flex: 1;
     margin-right: 10px;
     background-color: transparent;
   }

@@ -6,34 +6,46 @@ import {
 } from '@/interfaces/api'
 
 class ListService {
-  getList (path:string, params: IListServiceParams) {
+  getList (params: IListServiceParams) {
     const data = {
       token: authToken().token,
-      locale: params.locale,
-      category: params.category,
-      page_index: params.pageIndex
+      type: params.type,
+      locale: params.locale || 'tw',
+      page_index: params.pageIndex,
+      list_all: params.listAll,
+      keyword: params.keyword
     }
+
     return axios.request<IListServiceResponse>({
-      url: `/list-${path}`,
+      url: '/list-design',
       method: 'POST',
       data
     })
   }
 
   getSvg (params: IListServiceParams) {
-    return this.getList('svg', params)
+    params.type = 'svg'
+    return this.getList(params)
   }
 
   getTemplate (params: IListServiceParams) {
-    return this.getList('template', params)
+    params.type = 'template'
+    return this.getList(params)
   }
 
   getText (params: IListServiceParams) {
-    return this.getList('text', params)
+    params.type = 'text'
+    return this.getList(params)
   }
 
   getBackground (params: IListServiceParams) {
-    return this.getList('background', params)
+    params.type = 'background'
+    return this.getList(params)
+  }
+
+  getFont (params: IListServiceParams) {
+    params.type = 'font'
+    return this.getList(params)
   }
 }
 

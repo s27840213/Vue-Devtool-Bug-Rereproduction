@@ -1,16 +1,31 @@
 import { IListServiceContentData } from '@/interfaces/api'
 
-export interface IListModuleState {
+export interface IListAssetsState {
   contents: IListServiceContentData[]
   query: string
+  json: string
+  category : number | undefined
   page: number
   nextPage: number | undefined
   perPage: number
   pending: boolean
   host: string
-  json: string
   preview: string
   locale: string
-  category: number | undefined
+  error: string
+}
+
+export interface IListModuleState {
+  content: IListServiceContentData[]
+  categories: IListServiceContentData[]
+  keyword: string
+  page: number
+  nextPage: number | undefined
+  perPage: number
+  pending: boolean
+  host: string
+  data: string
+  preview: string
+  locale: string
   error: string
 }

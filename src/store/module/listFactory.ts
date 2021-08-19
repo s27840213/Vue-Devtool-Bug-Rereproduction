@@ -4,36 +4,49 @@ import { IListModuleState } from '@/interfaces/module'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_CONTENT = 'SET_CONTENT' as const
+const SET_CATEGORIES = 'SET_CATEGORIES' as const
 const SET_MORE_CONTENT = 'SET_MORE_CONTENT' as const
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
-    contents: [],
-    query: '',
+    content: [],
+    categories: [],
+    keyword: '',
     page: 0,
     perPage: 0,
     nextPage: 0,
     pending: false,
     host: '',
-    json: '',
+    data: '',
     preview: '',
     locale: 'tw',
-    category: undefined,
     error: ''
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
+    getCategories: async ({ commit, state }) => {
+      const { locale } = state
+      commit(SET_STATE, { pending: true, categories: [] })
+      try {
+        const { data } = await this.api({ locale, listAll: 0 })
+        commit(SET_CATEGORIES, data.data)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+
     getContent: async ({ commit, state }, params = {}) => {
       const { locale } = state
-      const { category } = params
-      commit(SET_STATE, { pending: true, category, contents: [] })
+      const { keyword } = params
+      commit(SET_STATE, { pending: true, keyword, content: [] })
       try {
-        const { data } = await this.api({ locale, category })
+        const { data } = await this.api({ locale, keyword, listAll: 1 })
         commit(SET_CONTENT, data.data)
       } catch (error) {
         console.log(error)
       }
     },
+
     getMoreContent: async ({ commit, getters }) => {
       const { nextParams, hasNextPage } = getters
       if (!hasNextPage) { return }
@@ -46,9 +59,9 @@ export default function (this: any) {
       }
     },
     getContentJson: async ({ commit, state }, id: string) => {
-      const { json, host } = state
+      const { data, host } = state
       try {
-        const response = await fetch(`${host}/${id}/${json}`).then(response => response.json())
+        const response = await fetch(`${host}/${id}/${data}`).then(response => response.json())
         commit('SET_contentJson', { [id]: response }, { root: true })
         return response
       } catch (error) {
@@ -68,16 +81,23 @@ export default function (this: any) {
           }
         })
     },
-    [SET_CONTENT] (state: IListModuleState, objects: any) {
-      state.contents = objects.content
-      state.host = objects.host
-      state.json = objects.json
+    [SET_CATEGORIES] (state: IListModuleState, objects: IListServiceData) {
+      state.categories = objects.content
+      state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
+      state.data = objects.data
+      state.preview = objects.preview
+      state.pending = false
+    },
+    [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
+      state.content = objects.content
+      state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
+      state.data = objects.data
       state.preview = objects.preview
       state.pending = false
       state.nextPage = objects.next_page
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
-      state.contents = state.contents.concat(objects.content)
+      state.content = state.content.concat(objects.content)
       state.pending = false
       state.nextPage = objects.next_page
     }
@@ -85,10 +105,11 @@ export default function (this: any) {
 
   const getters: GetterTree<IListModuleState, any> = {
     nextParams (state) {
-      const { nextPage, category, locale } = state
+      const { nextPage, keyword, locale } = state
       return {
         locale,
-        category,
+        keyword,
+        listAll: 1,
         page_index: nextPage
       }
     },
