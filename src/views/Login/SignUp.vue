@@ -18,19 +18,19 @@ div(style="position:relative;")
         div
           span(class="label-mid") Name
           property-bar(class="mt-5" :class="{'input-invalid': !nameValid}")
-            input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your Name")
+            input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your name")
           div(v-if="!nameValid" class="invalid-message")
             span Please enter your name.
         div
           span(class="label-mid") Email
           property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" placeholder="Your Email")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" placeholder="Your email")
           div(v-if="!mailValid" class="invalid-message")
             span {{ mailErrorMessage }}
         div
           span(class="label-mid") Password
           property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
-            input(class="body-2 text-gray-2" v-model="password" type="number" placeholder="Your Password" :type="togglePeerPasswordInput")
+            input(class="body-2 text-gray-2" v-model="password" type="number" placeholder="Your password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
@@ -54,9 +54,9 @@ div(style="position:relative;")
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="signup")
       div(class="text-center")
-        span(class="text-blue-1 h-4") Verification code is sent
+        span(class="text-blue-1 h-5") Verification code is sent
       div
-        span We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
+        span(class="body-2") We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
           input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
@@ -64,9 +64,8 @@ div(style="position:relative;")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(
-        v-if="resendAvailable" class="disp-flex flex-between align-center"
-        style="height:30px; margin-bottom: 0;")
+      div(v-if="resendAvailable" class="disp-flex flex-between align-center"
+      style="height:30px; margin-bottom: 0;")
         span didn't receive email?
         btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
       div(v-else class="disp-flex align-center text-gray-3"
@@ -310,7 +309,7 @@ export default Vue.extend({
         left: 100%;
         margin-left: 30px;
       }
-      margin-bottom: 2vh;
+      margin-bottom: 0;
     }
     &:nth-child(6) { // input fields
       > div {

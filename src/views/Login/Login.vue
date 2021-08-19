@@ -1,7 +1,7 @@
 <template lang="pug">
 div(style="position:relative;")
   div(class="login-wrapper")
-    div(v-if="currentPageIndex === 0" class="login")
+    div(v-if="currentPageIndex === 0" class="login login-p0")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
@@ -18,24 +18,97 @@ div(style="position:relative;")
         div
           span(class="label-mid") Email
           property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your email")
           div(v-if="!mailValid" class="invalid-message")
             span {{ mailErrorMessage }}
         div
           div(class="disp-flex flex-between")
             span(class="label-mid") Password
-            span
-              a(class="body-2 text-gray-3" href="") Forgot your password
+            btn(:type="'icon'" class="text-gray-3 body-2 forgot-pwd" @click.native="onForgotClicked()") Forgot your password
           property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
-            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
+            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
           div(v-if="!passwordValid" class="invalid-message")
-            span Please enter your password.
+            span {{ passwordErrorMessage }}
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
         @click.native="onLogInClicked()") Log in
+    div(v-if="currentPageIndex === 1" class="login")
+      div(class="text-center")
+        span(class="text-blue-1 h-5") Forgot you password?
+      div
+        span(class="body-2") Don't worry, please enter your email.<br> We will send an email to help you reset the password.
+      div
+        property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+          input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
+        div(v-if="!mailValid" class="invalid-message")
+          span {{ mailErrorMessage }}
+      div(class="disp-flex" style="justify-content: center;")
+        btn(:type="'primary-mid'" class="btn-shadow w-50 body-1"
+        @click.native="onSendEmailClicked()") Send email
+      div(class="disp-flex" style="justify-content: center;")
+        btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow w-50"
+        @click.native="onBackClicked()") Back to login
+    div(v-if="currentPageIndex === 2" class="login")
+      div(class="text-center")
+        span(class="text-blue-1 h-5") Verification code is sent
+      div
+        span(class="body-2") We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
+      div
+        property-bar(:class="{'input-invalid': !vcodeValid}")
+          input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
+        div(v-if="!vcodeValid" class="invalid-message")
+          span {{ vcodeErrorMessage }}
+      div(style="margin-bottom: 15px;")
+        btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
+      div(v-if="resendAvailable" class="disp-flex flex-between align-center"
+      style="height:30px; margin-bottom: 0;")
+        span didn't receive email?
+        btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
+      div(v-else class="disp-flex align-center text-gray-3"
+      style="height:30px; margin-bottom: 0;")
+        span {{ leftTimeText }}
+    div(v-if="currentPageIndex === 3" class="login")
+      div(class="text-center")
+        span(class="text-blue-1 h-5") Choose a new password
+      div
+        div
+          span(class="label-mid") New password
+        property-bar(class="mt-5" :class="{'input-invalid': !resetPasswordValid}")
+          input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your password" :type="togglePeerPasswordInput")
+          button(@click="isPeerPassword = !isPeerPassword")
+            svg-icon(class="pointer"
+            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+        div(class="invalid-message")
+          div(class="disp-flex align-center")
+            svg-icon(class="pointer"
+            :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+            :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+            span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+          div(class="disp-flex align-center")
+            svg-icon(class="pointer"
+            :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+            :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+            span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+          div(class="disp-flex align-center")
+            svg-icon(class="pointer"
+            :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+            :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+            span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
+        div(class="mt-20")
+          span(class="label-mid") Confirm new password
+        property-bar(class="mt-5" :class="{'input-invalid': !confirmPasswordValid}")
+          input(class="body-2 text-gray-2" v-model="confirmPassword" type="number" min="0" placeholder="Confirm password" :type="togglePeerPasswordInput")
+          button(@click="isPeerPassword = !isPeerPassword")
+            svg-icon(class="pointer"
+            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+        div(v-if="!confirmPasswordValid" class="invalid-message")
+            span {{ confirmErrorMessage }}
+        div(class="mt-20 disp-flex" style="justify-content: center;")
+          btn(:type="'primary-mid'" class="btn-shadow w-50" @click.native="onResetDoneClicked()") Done
+
 </template>
 
 <script lang="ts">
@@ -51,7 +124,16 @@ export default Vue.extend({
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
-      isPeerPassword: false as boolean
+      passwordErrorMessage: 'Please enter your password.' as string,
+      vcodeErrorMessage: 'Invalid verification code.' as string,
+      leftTime: 60 as number,
+      leftTimeText: '' as string,
+      resendAvailable: true as boolean,
+      isPeerPassword: false as boolean,
+      isVcodeClicked: false as boolean,
+      confirmPassword: '' as string,
+      confirmErrorMessage: '' as string,
+      isResetClicked: false as boolean
     }
   },
   computed: {
@@ -85,12 +167,64 @@ export default Vue.extend({
     },
     togglePeerPasswordInput (): string {
       return `${this.isPeerPassword ? 'text' : 'password'}`
+    },
+    vcodeValid (): boolean {
+      if (!this.isVcodeClicked) {
+        return true
+      } else if (this.vcode.length > 0) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordLengthValid (): boolean {
+      if (this.password.length >= 8 && this.password.length <= 18) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainEng (): boolean {
+      if (this.password.match(/.*[a-zA-Z]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainNum (): boolean {
+      if (this.password.match(/.*[0-9]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    resetPasswordValid (): boolean {
+      if (!this.isResetClicked) {
+        return true
+      } else if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
+        return true
+      } else {
+        return false
+      }
+    },
+    confirmPasswordValid (): boolean {
+      if (!this.isResetClicked) {
+        return true
+      } else if (this.password === this.confirmPassword && this.password.length !== 0) {
+        return true
+      } else {
+        return false
+      }
     }
+
   },
   methods: {
     async onLogInClicked () {
-      console.log('onLogInClicked')
       this.isLoginClicked = true
+      if (this.password.length === 0) {
+        this.passwordErrorMessage = 'Please enter your password.'
+        return
+      }
       if (!this.mailValid || !this.passwordValid) {
         return
       }
@@ -98,7 +232,91 @@ export default Vue.extend({
       if (response.flag === 0) {
         console.log('success!', response)
       } else {
-        console.log('failed', response.msg)
+        this.password = ''
+        this.passwordErrorMessage = response.msg
+        console.log('failed', response)
+      }
+    },
+    onForgotClicked () {
+      this.currentPageIndex = 1
+    },
+    onBackClicked () {
+      this.currentPageIndex = 0
+    },
+    async onSendEmailClicked () {
+      this.isLoginClicked = true
+      if (!this.mailValid) {
+        return
+      }
+      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
+      if (response.flag === 0) {
+        this.isVcodeClicked = false
+        this.currentPageIndex = 2
+      }
+    },
+    async onResendClicked () {
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
+      this.resendAvailable = false
+      this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
+      if (response.flag === 0) {
+        const clock = window.setInterval(() => {
+          this.leftTime--
+          this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+          if (this.leftTime === 0) {
+            window.clearInterval(clock)
+            this.resendAvailable = true
+            this.leftTimeText = ''
+            this.leftTime = 60
+          }
+        }, 1000)
+      }
+    },
+    async onEnterCodeDoneClicked () {
+      this.isVcodeClicked = true
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
+      if (!this.vcodeValid) {
+        this.vcodeErrorMessage = 'Please enter the verification code.'
+        return
+      }
+      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
+      this.vcode = ''
+      if (response.flag === 0) {
+        this.currentPageIndex = 3
+        this.isResetClicked = false
+      } else {
+        this.vcodeErrorMessage = response.msg
+        console.log(response.msg)
+      }
+    },
+    async onResetDoneClicked () {
+      this.isResetClicked = true
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
+      if (this.password.length === 0) {
+        this.confirmErrorMessage = 'Please enter the new password.'
+        return
+      } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
+        this.confirmErrorMessage = 'Your confirmation password does not match the new password.'
+        return
+      }
+      const response = await store.dispatch('user/resetPassword', { type: '3', account: this.email, upass: this.password })
+      if (response.flag === 0) {
+        this.email = ''
+        this.password = ''
+        this.confirmPassword = ''
+        this.currentPageIndex = 0
+      } else {
+        this.password = ''
+        console.log(response.msg)
       }
     }
   }
@@ -123,8 +341,17 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  padding: 0 32px 20px 32px;
+  padding: 32px;
+  > div {
+    margin-bottom: 2.5vh;
+    .property-bar:focus-within {
+      border: 1px solid setColor(blue-1);
+    }
+  }
+}
 
+.login-p0 {
+  padding: 0 32px 20px 32px;
   > div {
     margin-bottom: 2vh;
     &:first-child {
@@ -187,17 +414,11 @@ export default Vue.extend({
     &:nth-child(6) { // input fields
       > div {
         margin-bottom: 1.5vh;
-        .property-bar:focus-within {
-          border: 1px solid setColor(blue-1);
-        }
-        .invalid-message {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          font-size: 14px;
-          font-family: Mulish;
-          color: setColor(red);
-          padding-top: 5px;
+        .forgot-pwd {
+          text-decoration: underline;
+          &:hover {
+            color: setColor(blue-1);
+          }
         }
       }
     }
@@ -218,6 +439,15 @@ export default Vue.extend({
 }
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+.invalid-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 14px;
+  font-family: Mulish;
+  color: setColor(red);
+  padding-top: 5px;
 }
 
 .btn-shadow {

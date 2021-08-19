@@ -111,6 +111,18 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
       return Promise.reject(error)
     }
+  },
+  async resetPassword({ commit }, { type = '3', account, upass }) {
+    try {
+      const meta = { type: type, account: account, upass: upass }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('Reset Password', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
   }
 }
 
