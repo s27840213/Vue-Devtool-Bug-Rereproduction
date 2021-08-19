@@ -2,28 +2,26 @@
   div(class="panel-object")
     search-bar(class="mb-15"
       placeholder="Search objects"
+      clear
+      :defaultKeyword="keyword"
       @search="handleSearch")
     div(class="panel-object__content")
-      div(v-if="isDisplayByCategory")
-        div(class="text-left")
-          span(class="pointer" @click="handleSearch")
-            svg-icon(iconName="chevron-left"
-              iconWidth="20px")
-        div(v-for="content in contents"
-          :key="content.category_id"
+      div(v-if="hasSearchResult")
+        div(v-for="category in content"
+          :key="category.category_id"
           class="panel-object__items")
-          category-object-item(v-for="item in content.list"
+          category-object-item(v-for="item in category.list"
             class="panel-object__item"
             :key="item"
-            :src="`${host}${item}/${preview}`"
+            :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
       category-list(v-else
-        :contents="contents"
+        :contents="categories"
         @action="handleAction")
         template(v-slot:item="{ item }")
           category-object-item(class="panel-object__item"
-            :src="`${host}${item}/${preview}`"
+            :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
       div(class="text-center")
@@ -54,29 +52,29 @@ export default Vue.extend({
     ...mapState(
       'objects',
       [
-        'contents',
+        'categories',
+        'content',
         'pending',
         'host',
-        'json',
         'preview',
-        'category'
+        'keyword'
       ]
     ),
     ...mapGetters('objects', ['hasNextPage']),
-    isDisplayByCategory() {
-      return typeof this.category === 'number'
+    hasSearchResult () {
+      return this.keyword
     }
   },
   mounted() {
-    this.$store.dispatch('objects/getContent')
+    this.$store.dispatch('objects/getCategories')
   },
   methods: {
     handleAction(data: IListServiceContentData) {
-      const { category_id: category } = data
-      this.$store.dispatch('objects/getContent', { category })
+      const { title: keyword } = data
+      this.$store.dispatch('objects/getContent', { keyword })
     },
-    handleSearch() {
-      this.$store.dispatch('objects/getContent')
+    handleSearch(keyword = '') {
+      this.$store.dispatch('objects/getContent', { keyword })
     },
     fetchJson(id: string) {
       this.$store.dispatch('objects/getContentJson', id)

@@ -82,9 +82,11 @@ export interface ISearchPhotoParams {
 
 export interface IListServiceParams {
   token?: string
-  locale: string
-  category?: number
+  locale?: string
+  type?: 'template' | 'text' | 'svg' | 'background' | 'font'
+  keyword?: string
   pageIndex?: number
+  listAll?: 0 | 1
 }
 
 export interface IListServiceContentData {
@@ -95,7 +97,7 @@ export interface IListServiceContentData {
 
 export interface IListServiceData {
   content: IListServiceContentData[]
-  json: string
+  data: string
   host: string
   preview: string
   next_page?: number

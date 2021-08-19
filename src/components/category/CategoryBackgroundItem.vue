@@ -1,6 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     :src="src"
+    draggable="false"
     @click="addBackground"
     @error="handleNotFound")
 </template>

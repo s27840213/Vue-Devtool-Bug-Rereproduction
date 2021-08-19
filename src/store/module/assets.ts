@@ -1,13 +1,13 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import list from '@/apis/list'
 import { IListServiceData } from '@/interfaces/api'
-import { IListModuleState } from '@/interfaces/module'
+import { IListAssetsState } from '@/interfaces/module'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_CONTENT = 'SET_CONTENT' as const
 const SET_MORE_CONTENT = 'SET_MORE_CONTENT' as const
 
-const getDefaultState = (): IListModuleState => ({
+const getDefaultState = (): IListAssetsState => ({
   contents: [],
   query: '',
   page: 0,
@@ -22,13 +22,13 @@ const getDefaultState = (): IListModuleState => ({
   error: ''
 })
 
-const actions: ActionTree<IListModuleState, unknown> = {
+const actions: ActionTree<IListAssetsState, unknown> = {
   async getContent({ commit, state }, params = {}) {
     const { locale } = state
-    const { category } = params
-    commit(SET_STATE, { pending: true, category, contents: [] })
+    // const { category } = params
+    commit(SET_STATE, { pending: true, contents: [] })
     try {
-      const { data } = await list.getTemplate({ locale, category })
+      const { data } = await list.getTemplate({ locale })
       commit(SET_CONTENT, data.data)
     } catch (error) {
       console.log(error)
@@ -57,10 +57,10 @@ const actions: ActionTree<IListModuleState, unknown> = {
   }
 }
 
-const mutations: MutationTree<IListModuleState> = {
-  [SET_STATE](state: IListModuleState, data: Partial<IListModuleState>) {
+const mutations: MutationTree<IListAssetsState> = {
+  [SET_STATE](state: IListAssetsState, data: Partial<IListAssetsState>) {
     const newState = data || getDefaultState()
-    const keys = Object.keys(newState) as Array<keyof IListModuleState>
+    const keys = Object.keys(newState) as Array<keyof IListAssetsState>
     keys
       .forEach(key => {
         if (key in state) {
@@ -68,7 +68,7 @@ const mutations: MutationTree<IListModuleState> = {
         }
       })
   },
-  [SET_CONTENT](state: IListModuleState, objects: any) {
+  [SET_CONTENT](state: IListAssetsState, objects: any) {
     state.contents = objects.content
     state.host = objects.host
     state.json = objects.json
@@ -76,14 +76,14 @@ const mutations: MutationTree<IListModuleState> = {
     state.pending = false
     state.nextPage = objects.next_page
   },
-  [SET_MORE_CONTENT](state: IListModuleState, objects: IListServiceData) {
+  [SET_MORE_CONTENT](state: IListAssetsState, objects: IListServiceData) {
     state.contents = state.contents.concat(objects.content)
     state.pending = false
     state.nextPage = objects.next_page
   }
 }
 
-const getters: GetterTree<IListModuleState, any> = {
+const getters: GetterTree<IListAssetsState, any> = {
   nextParams(state) {
     const { nextPage, category, locale } = state
     return {
@@ -112,4 +112,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IListModuleState>
+} as ModuleTree<IListAssetsState>

@@ -21,10 +21,10 @@
         div(class="panel-bg__color"
           @click="setBgColor('#ffffff00')")
           svg-icon(iconName="transparent")
-      div(v-for="content in contents"
-        :key="content.category_id"
+      div(v-for="category in content"
+        :key="category.category_id"
         class="panel-bg__items")
-        category-background-item(v-for="item in content.list"
+        category-background-item(v-for="item in category.list"
           class="panel-bg__item"
           :key="item"
           :src="`${host}/${item}/${preview}`"
@@ -66,12 +66,10 @@ export default Vue.extend({
     ...mapState(
       'background',
       [
-        'contents',
+        'content',
         'pending',
         'host',
-        'json',
-        'preview',
-        'category'
+        'preview'
       ]
     ),
     ...mapGetters({
@@ -159,7 +157,7 @@ export default Vue.extend({
   &__item {
     width: 145px;
     height: 145px;
-    object-fit: contain;
+    object-fit: cover;
     vertical-align: middle;
   }
   &__items {

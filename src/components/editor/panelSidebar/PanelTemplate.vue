@@ -3,28 +3,23 @@
     search-bar(class="mb-15"
       placeholder="Search template"
       @search="handleSearch")
-    div(v-if="emptyResultMessage") {{ emptyResultMessage }}
-    div(v-else
-      class="panel-template__content")
-      div(v-if="isDisplayByCategory")
-        div(class="text-left")
-          span(class="pointer" @click="handleSearch")
-            svg-icon(iconName="chevron-left"
-              iconWidth="20px")
-        div(v-for="content in contents"
-          :key="content.category_id"
-          class="panel-template__items")
-          category-template-item(v-for="item in content.list"
-            class="panel-template__item"
-            :key="item"
+    div(class="panel-template__content")
+      category-list(:contents="categories" @action="handleAction")
+        template(v-slot:item="{ item }")
+          category-template-item(class="panel-template__item"
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
-      category-list(v-else
-        :contents="contents"
-        @action="handleAction")
-        template(v-slot:item="{ item }")
-          category-template-item(class="panel-template__item"
+      div
+        //- div(class="text-left")
+        //-   span(class="pointer" @click="handleSearch")
+        //-     svg-icon(iconName="chevron-left" iconWidth="20px")
+        div(v-for="category in content"
+          :key="category.category_id"
+          class="panel-template__items")
+          category-template-item(v-for="item in category.list"
+            class="panel-template__item"
+            :key="item"
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
@@ -58,26 +53,24 @@ export default Vue.extend({
     ...mapState(
       'templates',
       [
-        'contents',
+        'categories',
+        'content',
         'pending',
         'host',
-        'json',
         'preview',
-        'category'
+        'keyword'
       ]
     ),
-    ...mapGetters('templates', ['hasNextPage', 'emptyResultMessage']),
-    isDisplayByCategory() {
-      return typeof this.category === 'number'
-    }
+    ...mapGetters('templates', ['hasNextPage'])
   },
   mounted() {
+    this.$store.dispatch('templates/getCategories')
     this.$store.dispatch('templates/getContent')
   },
   methods: {
     handleAction(data: IListServiceContentData) {
-      const { category_id: category } = data
-      this.$store.dispatch('templates/getContent', { category })
+      const { title: keyword } = data
+      this.$store.dispatch('templates/getContent', { keyword })
     },
     handleSearch() {
       this.$store.dispatch('templates/getContent')
