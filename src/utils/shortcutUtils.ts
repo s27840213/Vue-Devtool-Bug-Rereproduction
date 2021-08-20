@@ -46,6 +46,8 @@ class ShortcutHandler {
   }
 
   paste(evt?: Event) {
+    // this.getClipboardContents()
+
     const clipboardInfo = store.getters.getClipboard.map((layer: ILayer) => {
       layer.styles.x += 10
       layer.styles.y += 10

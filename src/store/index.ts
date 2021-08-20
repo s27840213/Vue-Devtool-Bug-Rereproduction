@@ -144,7 +144,8 @@ const getDefaultState = (): IEditorState => ({
     heading: [],
     subheading: [],
     body: []
-  }
+  },
+  isPopupOpen: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -254,6 +255,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
+  },
+  getIsPopupOpen(state) {
+    return state.isPopupOpen
   }
 }
 
@@ -560,6 +564,9 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
+  },
+  SET_isPopupOpen(state: IEditorState, isOpen) {
+    state.isPopupOpen = isOpen
   }
 }
 

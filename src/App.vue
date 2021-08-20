@@ -23,6 +23,8 @@
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
         tabindex="0")
+    div(v-if="isPopupOpen"
+        class="popup-container")
 </template>
 
 <script lang="ts">
@@ -33,6 +35,7 @@ import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 import { Chrome } from 'vue-color'
 import ColorPicker from '@/components/ColorPicker.vue'
+import PopupSuccess from '@/components/PopupSuccess.vue'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 
 export default Vue.extend({
@@ -42,7 +45,8 @@ export default Vue.extend({
     DropdownsPage,
     'chrome-picker': Chrome,
     ColorPicker,
-    PhotoInfo
+    PhotoInfo,
+    PopupSuccess
   },
   data() {
     return {
@@ -61,7 +65,8 @@ export default Vue.extend({
       isLayerDropdownsOpened: 'getIsLayerDropdownsOpened',
       isPageDropdownsOpened: 'getIsPageDropdownsOpened',
       isColorPickerOpened: 'getIsColorPickerOpened',
-      currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo'
+      currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
+      isPopupOpen: 'getIsPopupOpen'
     })
   },
   methods: {
@@ -157,6 +162,19 @@ export default Vue.extend({
   > div {
     pointer-events: initial;
   }
+}
+
+.popup-container {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: setColor(gray-2, 0.6);
+  z-index: 999;
 }
 
 // .vc-chrome-toggle-btn {
