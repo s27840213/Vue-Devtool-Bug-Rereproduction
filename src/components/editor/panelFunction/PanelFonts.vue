@@ -3,17 +3,26 @@
     div(class="panel-fonts__title")
       span(class="text-blue-1 label-lg") Fonts
     search-bar(:placeholder="'Search font'")
-    div(v-for="font in fontPreset"
-        class="panel-fonts__font pointer"
-        :style="styles(font)"
-        @click="setFont(font)")
-      span {{font.name}}
+    div(v-for="category in content"
+      :key="category.category_id"
+      class="panel-fonts__items")
+      category-font-item(v-for="item in category.list"
+        class="panel-fonts__item"
+        :key="item"
+        :src="`${host}/${item}/${preview}`"
+        :objectId="item"
+        @init="fetchJson")
     div
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
         :iconWidth="'30px'"
         :iconColor="'gray-2'"
         @click.native="closeFontsPanel")
+              div(class="text-center")
+    svg-icon(v-if="pending"
+      :iconName="'loading'"
+      :iconColor="'white'"
+      :iconWidth="'20px'")
     btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
@@ -25,33 +34,46 @@ import { mapGetters, mapState } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUTils from '@/utils/textPropUtils'
+import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 
 export default Vue.extend({
   components: {
-    SearchBar
+    SearchBar,
+    CategoryFontItem
   },
   data() {
     return {
-      FileUtils,
-      currFont: ''
+      FileUtils
     }
   },
-  mounted() {
-    if (this.props.font) {
-      this.currFont = this.props.font
-    }
+  async mounted() {
+    // if (this.props.font) {
+    //   this.currFont = this.props.font
+    // }
+    console.log('font panel mounted')
+    await this.$store.dispatch('font/getContent')
+    console.log(this.content)
   },
   computed: {
+    ...mapState(
+      'font',
+      [
+        'categories',
+        'content',
+        'pending',
+        'host',
+        'preview',
+        'keyword'
+      ]
+    ),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
+    ...mapGetters('font', ['hasNextPage']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
-    }),
-    layerFont(): string {
-      return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.font
-    }
+    })
   },
   methods: {
     mappingIcons(type: string) {
@@ -63,7 +85,9 @@ export default Vue.extend({
     setFont(font: { name: string, face: string }) {
       TextPropUTils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
       TextPropUTils.updateTextPropsState({ font: font.name })
-      this.currFont = font.name
+    },
+    fetchJson (id: string) {
+      this.$store.dispatch('font/getContentJson', id)
     },
     updateFontPreset(e: any) {
     //   const target = e.target.files[0]
@@ -78,14 +102,14 @@ export default Vue.extend({
     // `
     //   document.head.appendChild(style)
     //   this.fontPreset.push({ name: fontName, face: fontName })
-    },
-    styles(font: { name: string, face: string }) {
-      return {
-        'font-family': font.face,
-        'background-color': this.currFont === font.name ? 'rgba(15, 40, 71, 0.14)' : '',
-        'border-radius': this.currFont === font.name ? '5px' : ''
-      }
     }
+    // styles(font: { name: string, face: string }) {
+    //   return {
+    //     'font-family': font.face,
+    //     'background-color': this.currFont === font.name ? 'rgba(15, 40, 71, 0.14)' : '',
+    //     'border-radius': this.currFont === font.name ? '5px' : ''
+    //   }
+    // }
   }
 })
 </script>
@@ -115,6 +139,18 @@ export default Vue.extend({
     position: absolute;
     top: 0px;
     right: 0px;
+  }
+  &__items {
+    display: grid;
+    grid-auto-rows: auto;
+    grid-template-columns: auto;
+    grid-gap: 10px;
+    margin-left: auto;
+  }
+  &__item {
+  // width:%;
+  height: 30px;
+  object-fit: contain;
   }
 }
 </style>

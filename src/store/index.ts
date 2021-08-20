@@ -6,6 +6,7 @@ import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import GeneralUtils from '@/utils/generalUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -14,6 +15,8 @@ import text from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import font from '@/store/module/font'
+import background from '@/store/module/background'
 
 Vue.use(Vuex)
 
@@ -246,7 +249,8 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.currSelectedPhotoInfo
   },
   getJson(state: IEditorState) {
-    return (id: string) => state.jsonMap[id]
+    // return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
+    return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
@@ -297,6 +301,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
+    state.pages[updateInfo.pageIndex].backgroundImage.src = ''
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.config.src
@@ -566,9 +571,11 @@ export default new Vuex.Store({
     user,
     photos,
     text,
+    font,
     color,
     objects,
     templates,
-    textStock
+    textStock,
+    background
   }
 })

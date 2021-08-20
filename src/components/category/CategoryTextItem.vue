@@ -12,6 +12,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
+import { IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -37,12 +38,12 @@ export default Vue.extend({
     },
     dragStart(event: DragEvent) {
       const json = this.getJson(this.objectId)
+      Object.assign(json.styles, { x: undefined, y: undefined })
+      Object.assign(json, { editing: false })
       const dataTransfer = event.dataTransfer as DataTransfer
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
       dataTransfer.dropEffect = 'move'
-      delete json.styles.x
-      delete json.styles.y
       dataTransfer.effectAllowed = 'move'
 
       const rect = (event.target as Element).getBoundingClientRect()
@@ -53,7 +54,9 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(json))
     },
     addText() {
-      const json = this.getJson(this.objectId)
+      const json = this.getJson(this.objectId) as IText
+      Object.assign(json.styles, { x: undefined, y: undefined })
+      Object.assign(json, { editing: false })
       switch (json.type) {
         case 'text':
           return TextUtils.addText(json)

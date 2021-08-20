@@ -13,10 +13,10 @@
         btn(class="full-width"
           :type="'text-body'"
           @click.native="handleAddText('body')") Body
-      div(v-for="content in contents"
-        :key="content.category_id"
+      div(v-for="category in content"
+        :key="category.category_id"
         class="panel-text__items")
-        category-text-item(v-for="item in content.list"
+        category-text-item(v-for="item in category.list"
           class="panel-text__item"
           :key="item"
           :src="`${host}/${item}/${preview}`"
@@ -28,7 +28,7 @@
       div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"
-          :iconColor="'gray-2'"
+          :iconColor="'white'"
           :iconWidth="'20px'")
 </template>
 
@@ -52,27 +52,45 @@ export default Vue.extend({
     ...mapState(
       'textStock',
       [
-        'contents',
+        'content',
         'pending',
         'host',
-        'json',
-        'preview',
-        'category'
+        'preview'
       ]
     ),
-    ...mapGetters('textStock', ['hasNextPage', 'emptyResultMessage']),
-    ...mapGetters({ scaleRatio: 'getPageScaleRatio' }),
-    isDisplayByCategory () {
-      return typeof this.category === 'number'
-    }
+    ...mapGetters('textStock', ['hasNextPage']),
+    ...mapGetters({ scaleRatio: 'getPageScaleRatio' })
   },
   mounted () {
     this.$store.dispatch('textStock/getContent')
   },
   methods: {
-    handleAction (data: IListServiceContentData) {
-      const { category_id: category } = data
-      this.$store.dispatch('textStock/getContent', { category })
+    dragStart(event: DragEvent, type: string) {
+      const dataTransfer = event.dataTransfer as DataTransfer
+      dataTransfer.dropEffect = 'move'
+      dataTransfer.effectAllowed = 'move'
+
+      const rect = (event.target as Element).getBoundingClientRect()
+      const x = (event.clientX - rect.x) * (this.scaleRatio / 100)
+      const y = (event.clientY - rect.y) * (this.scaleRatio / 100)
+
+      import(`@/assets/json/${type}.json`)
+        .then(json => {
+          const fieldMap = {
+            heading: 'isHeading',
+            subheading: 'isSubheading',
+            body: 'isBody'
+          } as { [key: string]: string }
+          const field = fieldMap[type]
+
+          json.field = field
+          Object.assign(json.styles, { x, y })
+          console.log(json)
+          dataTransfer.setData('data', JSON.stringify(json))
+        })
+        .catch(() => {
+          console.log('Cannot find the file')
+        })
     },
     fetchJson (id: string) {
       this.$store.dispatch('textStock/getContentJson', id)
@@ -96,8 +114,8 @@ export default Vue.extend({
     flex: 1;
     margin-right: -10px;
     overflow-y: scroll;
+    overflow-x: hidden;
     scrollbar-width: thin;
-    overscroll-behavior: contain;
     &::-webkit-scrollbar {
       width: 10px;
       height: 10px;
@@ -107,7 +125,7 @@ export default Vue.extend({
       border-radius: 5px;
       visibility: hidden;
       background-color: #d9dbe1;
-      border: 3px solid #ffffff;
+      border: 3px solid #2c2f43;
     }
     &:hover {
       &::-webkit-scrollbar-thumb {

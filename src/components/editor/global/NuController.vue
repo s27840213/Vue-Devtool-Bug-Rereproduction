@@ -64,9 +64,11 @@
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
-          div(class="control-point__rotater-wrapper")
-            div(class="control-point__rotater" @mousedown.left.stop="rotateStart")
-              svg-icon(:iconName="'rotate'" :iconWidth="'20px'" :iconColor="'gray-2'")
+          div(class="control-point__rotater-wrapper"
+              :style="`transform: scale(${100/scaleRatio})`")
+            img(class="control-point__rotater"
+              :src="require('@/assets/img/svg/rotate.svg')"
+              @mousedown.left.stop="rotateStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -894,7 +896,9 @@ export default Vue.extend({
                 e.preventDefault()
                 return
               } else {
-                ControlUtils.textStopPropagation(e)
+                if (e.key === 'Backspace' || e.key === ' ') {
+                  e.stopPropagation()
+                }
               }
             }
           }
@@ -1141,7 +1145,9 @@ export default Vue.extend({
   &__rotater-wrapper {
     position: absolute;
     top: 100%;
-    padding: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+    transform-origin: top;
   }
   &__rotater {
     @include size(20px, 20px);

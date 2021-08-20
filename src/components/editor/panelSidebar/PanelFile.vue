@@ -7,7 +7,7 @@
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") Upload Image
-    tmp-images(
+    tmp-files(
       :inFilePanel="true")
 </template>
 
@@ -15,7 +15,6 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
-import { mapActions } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 

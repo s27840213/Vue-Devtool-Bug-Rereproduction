@@ -7,6 +7,19 @@ class UploadUtils {
   loginOutput: any
   get token(): number { return store.getters['user/getToken'] }
 
+  // private handleEvent(e: any) {
+  //   console.log(`${e.type}: ${e.loaded} bytes transferred, and total ${e.total}\n`)
+  // }
+
+  // private addListeners(xhr: XMLHttpRequest) {
+  //   xhr.addEventListener('loadstart', this.handleEvent)
+  //   xhr.addEventListener('load', this.handleEvent)
+  //   xhr.addEventListener('loadend', this.handleEvent)
+  //   xhr.addEventListener('progress', this.handleEvent)
+  //   xhr.addEventListener('error', this.handleEvent)
+  //   xhr.addEventListener('abort', this.handleEvent)
+  // }
+
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
     console.log(loginOutput)
@@ -48,6 +61,9 @@ class UploadUtils {
       }
 
       xhr.open('POST', this.loginOutput.upload_map.url, true)
+      xhr.upload.onprogress = function (event) {
+        console.log(`${event.loaded}/${event.total}`)
+      }
       xhr.send(formData)
       xhr.onload = () => {
         console.log(xhr)

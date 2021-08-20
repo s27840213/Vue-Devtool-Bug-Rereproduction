@@ -3,9 +3,9 @@ div(style="position:relative;")
   div(class="signup-wrapper")
     div(v-if="currentPageIndex === 0" class="signup signup-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-60")
+        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
-        span(class="text-blue-1 h-4") SIGH UP
+        span(class="text-blue-1 h-5") SIGH UP
       div
         img(:src="require('@/assets/img/png/facebook.png')")
         btn(:type="'icon-mid-body'") Sign up with Facebook
@@ -17,31 +17,51 @@ div(style="position:relative;")
       div
         div
           span(class="label-mid") Name
-          property-bar(class="mt-5")
+          property-bar(class="mt-5" :class="{'input-invalid': !nameValid}")
             input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your Name")
+          div(v-if="!nameValid" class="invalid-message")
+            span Please enter your name.
         div
           span(class="label-mid") Email
-          property-bar(class="mt-5")
-            input(class="body-2 text-gray-2" v-model="email" type="email" min="0" placeholder="Your Email")
+          property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" placeholder="Your Email")
+          div(v-if="!mailValid" class="invalid-message")
+            span {{ mailErrorMessage }}
         div
           span(class="label-mid") Password
-          property-bar(class="mt-5")
-            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your Password" :type="togglePeerPasswordInput")
+          property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
+            input(class="body-2 text-gray-2" v-model="password" type="number" placeholder="Your Password" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(class="mt-5")
-            span(class="body-2") 8 or more characters with letters and numbers.
+          div(class="invalid-message")
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+            div(class="disp-flex align-center")
+              svg-icon(class="pointer"
+              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+              span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="signup")
       div(class="text-center")
-        span(class="text-blue-1 h-4") Verify code is sent
+        span(class="text-blue-1 h-4") Verification code is sent
       div
         span We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
       div
-        property-bar
-          input(class="body-2 text-gray-2" v-model="vcode" type="text" min="0" placeholder="Enter code")
+        property-bar(:class="{'input-invalid': !vcodeValid}")
+          input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
+        div(v-if="!vcodeValid" class="invalid-message")
+          span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
       div(
@@ -70,26 +90,102 @@ export default Vue.extend({
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
+      isSignUpClicked: false as boolean,
+      vcodeErrorMessage: 'Invalid verification code.' as string,
+      isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean
     }
   },
   computed: {
+    nameValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.name.length > 0) {
+        return true
+      } else {
+        return false
+      }
+    },
+    mailValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.email.length > 0) {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.email)
+      } else {
+        return false
+      }
+    },
+    mailErrorMessage (): string {
+      if (this.email.length === 0) {
+        return 'Please enter your email.'
+      } else {
+        return 'Invalid email address format.'
+      }
+    },
+    passwordLengthValid (): boolean {
+      if (this.password.length >= 8 && this.password.length <= 18) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainEng (): boolean {
+      if (this.password.match(/.*[a-zA-Z]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordContainNum (): boolean {
+      if (this.password.match(/.*[0-9]+.*/)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    passwordValid (): boolean {
+      if (!this.isSignUpClicked) {
+        return true
+      } else if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
+        return true
+      } else {
+        return false
+      }
+    },
     togglePeerPasswordIcon (): string {
       return `eye${this.isPeerPassword ? '-slash' : ''}`
     },
     togglePeerPasswordInput (): string {
       return `${this.isPeerPassword ? 'text' : 'password'}`
+    },
+    vcodeValid (): boolean {
+      if (!this.isVcodeClicked) {
+        return true
+      } else if (this.vcode.length > 0) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
     async onSignUpClicked () {
       console.log('onSignUpClicked')
+      this.isSignUpClicked = true
+      if (!this.nameValid || !this.mailValid || !this.passwordValid) {
+        return
+      }
       const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
+        this.isVcodeClicked = false
       }
     },
     async onResendClicked () {
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
       const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
@@ -107,11 +203,22 @@ export default Vue.extend({
       }
     },
     async onEnterCodeDoneClicked () {
-      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode })
+      this.isVcodeClicked = true
+      if (this.email.length === 0) {
+        this.currentPageIndex = 0
+        return
+      }
+      if (!this.vcodeValid) {
+        this.vcodeErrorMessage = 'Please enter the verification code.'
+        return
+      }
+      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
       if (response.flag === 0) {
         console.log('success!')
         // this.currentPageIndex = 2
       } else {
+        this.vcode = ''
+        this.vcodeErrorMessage = response.msg
         console.log(response.msg)
       }
     }
@@ -139,10 +246,14 @@ export default Vue.extend({
   border-radius: 10px;
   padding: 32px;
   > div {
-    margin-bottom: 2.5vh;
+    margin-bottom: 2vh;
+    .property-bar:focus-within {
+      border: 1px solid setColor(blue-1);
+    }
   }
 }
 .signup-p0 {
+  padding: 0 32px 20px 32px;
   > div {
     &:nth-child(1) {
       display: flex;
@@ -152,7 +263,6 @@ export default Vue.extend({
     &:nth-child(3), &:nth-child(4) { // Facebook and Google
       margin: 0 auto;
       display: flex;
-      // justify-content: center;
       align-items: center;
       height: 40px;
       width: 80%;
@@ -200,10 +310,11 @@ export default Vue.extend({
         left: 100%;
         margin-left: 30px;
       }
+      margin-bottom: 2vh;
     }
     &:nth-child(6) { // input fields
       > div {
-        margin-bottom: 1.5vh;
+        margin-bottom: 1vh;
       }
     }
     &:nth-child(7) { // sign up button
@@ -218,13 +329,20 @@ export default Vue.extend({
   }
 }
 
-.w-60 {
-  width: 60%;
+.w-50 {
+  width: 50%;
 }
-
-.password-label {
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+}
+.invalid-message {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 14px;
+  font-family: Mulish;
+  color: setColor(red);
+  padding-top: 10px;
 }
 
 .btn-shadow {

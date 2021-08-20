@@ -37,12 +37,12 @@ export default Vue.extend({
     subLayerIndex: Number
   },
   async created() {
-    const fontPreset = this.fontPreset as Array<IFont>
+    const fontStore = this.fontStore as Array<IFont>
     let isLoadedFont = false
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
         const spanFont = span.styles.font
-        if (!fontPreset.some(font => font.face === spanFont)) {
+        if (!fontStore.some(font => font.face === spanFont)) {
           isLoadedFont = true
           const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
           await newFont.load().then(newFont => {
@@ -60,30 +60,30 @@ export default Vue.extend({
   mounted() {
     console.log('mounted!')
     console.log(this.config)
-    if (this.config.isHeading) {
-      if (this.getTextInfo.heading.length) {
-        const paraStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].styles)
-        const spanStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].spans[0].styles)
-        const paragraphs = [] as Array<IParagraph>
-        for (const text of this.getTextInfo.heading) {
-          paragraphs.push({
-            styles: paraStyles,
-            spans: [{
-              styles: spanStyles,
-              text: text
-            }]
-          })
-        }
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-      }
-    } else if (this.config.isSubheading) {
-      // TODO
-    } else if (this.config.isBody) {
-      // TODO
-    }
+    // if (this.config.isHeading) {
+    //   if (this.getTextInfo.heading.length) {
+    //     const paraStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].styles)
+    //     const spanStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].spans[0].styles)
+    //     const paragraphs = [] as Array<IParagraph>
+    //     for (const text of this.getTextInfo.heading) {
+    //       paragraphs.push({
+    //         styles: paraStyles,
+    //         spans: [{
+    //           styles: spanStyles,
+    //           text: text
+    //         }]
+    //       })
+    //     }
+    //     TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+    //   }
+    // } else if (this.config.isSubheading) {
+    //   // TODO
+    // } else if (this.config.isBody) {
+    //   // TODO
+    // }
   },
   computed: {
-    ...mapState('text', ['fontPreset']),
+    ...mapState('text', ['fontStore']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',

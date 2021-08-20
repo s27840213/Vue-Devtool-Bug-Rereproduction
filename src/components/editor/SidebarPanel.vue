@@ -79,6 +79,7 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 2px 0 4px setColor(blue-1, 0.2);
+  background-color: setColor(sidebar-panel);
 }
 
 .btn-pack {

@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210806"
+  version: "20210818"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -45,6 +45,27 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/listBackgroundOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-design:
+    post:
+      description: 取得各種設計(background/font/svg/template/text)列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/listDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listDesignOutput"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -292,27 +313,6 @@ definitions:
           page_index:
             type: number
             description: pagination index
-  svgParserInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - category
-          - folder
-          - scale_type
-        properties:
-          folder:
-            type: string
-            description: svg folder name in S3 (no ending slash)
-          category:
-            type: string
-            description: svg category (A/B/C)
-          scale_type:
-            type: number
-            description: scale type (1/2/3)
-          duplicate:
-            type: number
-            description: create duplicate entry in database
   putAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -327,53 +327,6 @@ definitions:
           file_ext:
             type: string
             description: Original file extension (without dot)
-  listTextOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for text preview and json.
-
-              preview: File name for text preview.
-
-              json: File name for text json.
-
-              content: array of text category, with category_id as id of category (for query), title as categroy name, and list as array of text ids.
-
-              next_page: pagination index for next query, only for query with non-empty category param.
-
-              Url for text preview: `${host}/${text_id}/${preview}`. Url for text json: `${host}/${text_id}/${json}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              json:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
-            required:
-              - content
-              - host
-              - json
-              - preview
   listTemplateOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -518,14 +471,6 @@ definitions:
               description: File extension for asset
     description: To access the original file of the asset, the url is
       ${dl_url}/${id}/original
-  svgParserOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          msg:
-            type: string
-            description: error message
   loginOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -621,6 +566,177 @@ definitions:
       flag:
         type: number
         description: "0: success, 1: fail, 2: token invalid"
+  listSvgInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+        properties:
+          category:
+            type: number
+            description: category id
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          page_index:
+            type: number
+            description: pagination index
+  listDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for design preview and data.
+
+              preview: File name for design preview.
+
+              preview2: File name for font sample text preview, only present for font.
+
+              data: File name for design data (json for non-font, woff2 for font).
+
+              content: array of design category, with category_id as id of category, title as categroy name, and list as array of design ids. category_id will be -1 and title '' for list_all = 1.
+
+              next_page: pagination index for next query, only for query with list_all = 1.
+
+              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              preview2:
+                type: string
+              data:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - data
+              - host
+              - preview
+  svgParserInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - category
+          - folder
+          - scale_type
+        properties:
+          folder:
+            type: string
+            description: svg folder name in S3 (no ending slash)
+          category:
+            type: string
+            description: svg category (A/B/C)
+          scale_type:
+            type: number
+            description: scale type (1/2/3)
+          duplicate:
+            type: number
+            description: create duplicate entry in database
+  listTextOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for text preview and json.
+
+              preview: File name for text preview.
+
+              json: File name for text json.
+
+              content: array of text category, with category_id as id of category (for query), title as categroy name, and list as array of text ids.
+
+              next_page: pagination index for next query, only for query with non-empty category param.
+
+              Url for text preview: `${host}/${text_id}/${preview}`. Url for text json: `${host}/${text_id}/${json}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              json:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - host
+              - json
+              - preview
+  listDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, template, or text"
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          list_all:
+            type: number
+            description: 0 (default) for list first 10 elements in each category except
+              category 0. 1 for list all elements including category 0.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+  svgParserOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          msg:
+            type: string
+            description: error message
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -687,21 +803,3 @@ definitions:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
       - {}
-  listSvgInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-        properties:
-          category:
-            type: number
-            description: category id
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index

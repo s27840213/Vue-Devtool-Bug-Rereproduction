@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-brand")
+  div(class="panel-brand text-white")
     div(class="panel-brand__title mb-15")
       span(class="text-blue-1 label-lg") Brand Kit
     div(class="text-left mb-5")

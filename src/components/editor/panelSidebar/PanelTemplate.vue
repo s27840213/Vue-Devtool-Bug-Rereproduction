@@ -3,28 +3,23 @@
     search-bar(class="mb-15"
       placeholder="Search template"
       @search="handleSearch")
-    div(v-if="emptyResultMessage") {{ emptyResultMessage }}
-    div(v-else
-      class="panel-template__content")
-      div(v-if="isDisplayByCategory")
-        div(class="text-left")
-          span(class="pointer" @click="handleSearch")
-            svg-icon(iconName="chevron-left"
-              iconWidth="20px")
-        div(v-for="content in contents"
-          :key="content.category_id"
-          class="panel-template__items")
-          category-template-item(v-for="item in content.list"
-            class="panel-template__item"
-            :key="item"
+    div(class="panel-template__content")
+      category-list(:contents="categories" @action="handleAction")
+        template(v-slot:item="{ item }")
+          category-template-item(class="panel-template__item"
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
-      category-list(v-else
-        :contents="contents"
-        @action="handleAction")
-        template(v-slot:item="{ item }")
-          category-template-item(class="panel-template__item"
+      div
+        //- div(class="text-left")
+        //-   span(class="pointer" @click="handleSearch")
+        //-     svg-icon(iconName="chevron-left" iconWidth="20px")
+        div(v-for="category in content"
+          :key="category.category_id"
+          class="panel-template__items")
+          category-template-item(v-for="item in category.list"
+            class="panel-template__item"
+            :key="item"
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
@@ -34,7 +29,7 @@
       div(class="text-center")
         svg-icon(v-if="pending"
           :iconName="'loading'"
-          :iconColor="'gray-2'"
+          :iconColor="'white'"
           :iconWidth="'20px'")
 </template>
 
@@ -58,34 +53,32 @@ export default Vue.extend({
     ...mapState(
       'templates',
       [
-        'contents',
+        'categories',
+        'content',
         'pending',
         'host',
-        'json',
         'preview',
-        'category'
+        'keyword'
       ]
     ),
-    ...mapGetters('templates', ['hasNextPage', 'emptyResultMessage']),
-    isDisplayByCategory () {
-      return typeof this.category === 'number'
-    }
+    ...mapGetters('templates', ['hasNextPage'])
   },
-  mounted () {
+  mounted() {
+    this.$store.dispatch('templates/getCategories')
     this.$store.dispatch('templates/getContent')
   },
   methods: {
-    handleAction (data: IListServiceContentData) {
-      const { category_id: category } = data
-      this.$store.dispatch('templates/getContent', { category })
+    handleAction(data: IListServiceContentData) {
+      const { title: keyword } = data
+      this.$store.dispatch('templates/getContent', { keyword })
     },
-    handleSearch () {
+    handleSearch() {
       this.$store.dispatch('templates/getContent')
     },
-    fetchJson (id: string) {
+    fetchJson(id: string) {
       this.$store.dispatch('templates/getContentJson', id)
     },
-    handleLoadMore () {
+    handleLoadMore() {
       console.log('handleLoadMore')
     }
   }
@@ -99,9 +92,25 @@ export default Vue.extend({
   flex-direction: column;
   &__content {
     flex: 1;
+    margin-right: -10px;
     overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: thin;
     &::-webkit-scrollbar {
-      display: none;
+      width: 10px;
+      height: 10px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      visibility: hidden;
+      background-color: #d9dbe1;
+      border: 3px solid #2c2f43;
+    }
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+      }
     }
   }
   &__item {
@@ -113,7 +122,7 @@ export default Vue.extend({
   &__items {
     display: grid;
     grid-auto-rows: auto;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-columns: repeat(2, 1fr);
     grid-gap: 10px;
   }
 }

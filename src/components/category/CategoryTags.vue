@@ -1,17 +1,21 @@
 <template lang="pug">
-  div(class="category-row")
+  div(class="category-tags")
     div(v-if="prevIcon"
-      class="category-row__move category-row__move--left"
+      class="category-tags__move category-row__move--left"
       @click="handlePrev")
-      div(class="category-row__icon")
+      div(class="category-tags__icon")
         svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
     div(v-if="nextIcon"
-      class="category-row__move category-row__move--right"
+      class="category-tags__move category-tags__move--right"
       @click="handleNext")
-      div(class="category-row__icon")
+      div(class="category-tags__icon")
         svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-row__items" ref="items" @scroll="handleScroll")
-      slot
+    div(class="category-tags__items" ref="items" @scroll="handleScroll")
+      div(class="category-tags__tag") Women’s day
+      div(class="category-tags__tag") Spring
+      div(class="category-tags__tag") birthday
+      div(class="category-tags__tag") taiwan
+      div(class="category-tags__tag") okkk
 </template>
 
 <script lang="ts">
@@ -55,13 +59,13 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .category-row {
+  .category-tags {
     $this: &;
     position: relative;
     &__items {
       overflow: scroll;
       display: grid;
-      column-gap: 10px;
+      column-gap: 5px;
       grid-template-columns: auto;
       grid-auto-flow: column;
       scroll-behavior: smooth;
@@ -76,6 +80,14 @@ export default Vue.extend({
       position: relative;
       box-shadow: 0px 3px 10px rgba(78, 171, 230, 0.3);
     }
+    &__tag {
+      white-space: nowrap;
+      padding: 4px 10px;
+      border-radius: 16px;
+      border: 1px solid #E0E0E0;
+      color: setColor(gray-2);
+      cursor: pointer;
+    }
     &__move {
       position: absolute;
       top: 0;
@@ -87,14 +99,14 @@ export default Vue.extend({
       // background-color: setColor(gray-4);
       &--left {
         left: -1px;
-        background: linear-gradient(90deg, #2c2f43 22%, rgba(255, 255, 255, 0) 85%);
+        background: linear-gradient(90deg, #FFFFFF 22%, rgba(255, 255, 255, 0) 85%);
         #{$this}__icon {
           left: 3px;
         }
       }
       &--right {
         right: -1px;
-        background: linear-gradient(270deg, #2c2f43 22%, rgba(255, 255, 255, 0) 85%);
+        background: linear-gradient(270deg, #FFFFFF 22%, rgba(255, 255, 255, 0) 85%);
         #{$this}__icon {
           right: 3px;
         }
