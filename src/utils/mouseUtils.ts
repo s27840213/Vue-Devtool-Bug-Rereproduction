@@ -8,6 +8,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import TextUtils from './textUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 import PageUtils from './pageUtils'
 
 class MouseUtils {
@@ -125,7 +126,7 @@ class MouseUtils {
         layerConfig.paragraphs = data.paragraphs
         // layer = LayerFactary.newText(layerConfig)
         TextUtils.addText(layerConfig, data.field)
-        TextUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState()
         break
       }
       case 'shape': {

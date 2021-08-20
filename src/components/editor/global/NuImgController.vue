@@ -21,7 +21,6 @@ import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
-import { off } from 'process'
 
 export default Vue.extend({
   props: {

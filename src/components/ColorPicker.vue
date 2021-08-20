@@ -12,6 +12,7 @@
         div(class="color-picker__input")
           div(:style="{'background-color': convertedHex}")
           input(
+            ref="input"
             type="text"
             spellcheck="false"
             v-model="color"
@@ -70,6 +71,8 @@ export default Vue.extend({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     root.focus()
+    const input = this.$refs.input as HTMLInputElement
+    input.select()
   },
   computed: {
     convertedHex(): string {

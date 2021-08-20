@@ -15,6 +15,7 @@ import text from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import font from '@/store/module/font'
 import background from '@/store/module/background'
 
 Vue.use(Vuex)
@@ -139,6 +140,11 @@ const getDefaultState = (): IEditorState => ({
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
   jsonMap: {},
+  textInfo: {
+    heading: [],
+    subheading: [],
+    body: []
+  },
   isPopupOpen: false
 })
 const state = getDefaultState()
@@ -244,7 +250,11 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.currSelectedPhotoInfo
   },
   getJson(state: IEditorState) {
+    // return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
     return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
+  },
+  getTextInfo(state: IEditorState) {
+    return state.textInfo
   },
   getIsPopupOpen(state) {
     return state.isPopupOpen
@@ -310,6 +320,13 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
+  },
+  SET_textInfo(state: IEditorState, textInfo: { [key: string]: Array<string> }) {
+    Object.entries(textInfo).forEach(([k, v]) => {
+      if (Object.keys(state.textInfo).includes(k)) {
+        Object.assign(state.textInfo, { [k]: v })
+      }
+    })
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -561,6 +578,7 @@ export default new Vuex.Store({
     user,
     photos,
     text,
+    font,
     color,
     objects,
     templates,

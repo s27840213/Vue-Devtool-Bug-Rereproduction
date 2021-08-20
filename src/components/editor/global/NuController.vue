@@ -28,6 +28,8 @@
               @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
               @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
               @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+              @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+              @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
               @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -86,6 +88,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
@@ -129,6 +132,7 @@ export default Vue.extend({
     ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
@@ -177,23 +181,27 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      if (!val) {
+        // Not sure if below would lead to some problem.
+        this.setLastSelectedLayerIndex(this.layerIndex)
+      }
       if (this.getLayerType === 'text' && !val) {
+        const text = this.$refs.text as HTMLElement
+        if (text.childNodes[0].childNodes[0].nodeName !== 'SPAN') {
+          LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
+          return
+        }
+
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing: false
         })
         if (this.currSelectedInfo.layers.length <= 1) {
           this.contentEditable = false
-          console.log(this.isComposing)
-          // TODO: Not sure the following commented code can be removed.
-          // if (this.isComposing) {
-          // const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
-          // TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          // }
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
       } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
         this.$store.commit('text/SET_default')
-        TextUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState()
       }
     },
     sel: {
@@ -202,7 +210,7 @@ export default Vue.extend({
         console.log('sel handler')
         // TODO://
         // if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-        //   console.log('enter selllll')
+        //   console.log('enter sel')
         //   TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
         // }
       },
@@ -217,6 +225,7 @@ export default Vue.extend({
     }
   },
   updated() {
+    console.log(this.lastSelectedLayerIndex)
     // console.log('contorller updated!')
   },
   methods: {
@@ -855,7 +864,7 @@ export default Vue.extend({
             TextUtils.updateSelection(sel.start, sel.end)
           }
         }
-        TextUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState()
       }
     },
     onKeyDown(e: KeyboardEvent) {
@@ -887,7 +896,9 @@ export default Vue.extend({
                 e.preventDefault()
                 return
               } else {
-                ControlUtils.textStopPropagation(e)
+                if (e.key === 'Backspace' || e.key === ' ') {
+                  e.stopPropagation()
+                }
               }
             }
           }
@@ -905,7 +916,7 @@ export default Vue.extend({
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        TextUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState()
         const sel = TextUtils.getSelection()
         TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
       }
@@ -954,19 +965,16 @@ export default Vue.extend({
             [sIndex, offset] = [0, 0]
             pIndex += 1
           }
-        } else if (e.key === 'Enter') {
-          [sIndex, offset] = [0, 0]
-          pIndex += 1
-        } else if (TextUtils.isArrowKey(e) && (sel && TextUtils.isSel(sel.start))) {
-          // If the input key is ArrowKey, the startContainer will be different (not the same node) as the other key pressed
-          pIndex = sel.start.pIndex
-          sIndex = sel.start.sIndex
-          offset = sel.start.offset
-        } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
-          // some paragraph is deleted
-          pIndex -= 1
-          sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
-          offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
+        // } else if (e.key === 'Enter') {
+        //   [sIndex, offset] = [0, 0]
+        //   pIndex += 1
+        //   console.log('sssdfsdjwoer023erj0')
+        // } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
+        //   // some paragraph is deleted
+        //   console.log('dddddddddddddd')
+        //   pIndex -= 1
+        //   sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
+        //   offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
         }
         if (this.isComposing) {
           const config = GeneralUtils.deepCopy(this.config) as IText
@@ -1012,7 +1020,7 @@ export default Vue.extend({
               sel.addRange(range)
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            TextUtils.updateTextPropsState()
+            TextPropUtils.updateTextPropsState()
           })
         }
       }
@@ -1156,8 +1164,8 @@ export default Vue.extend({
 
 .text {
   &__p {
-    margin: 0.5em;
-    // margin: 0;
+    // margin: 0.5em;
+    margin: 0;
   }
   &__span {
     text-align: left;

@@ -7,20 +7,9 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 import LayerUtils from './layerUtils'
-import { ITextState } from '@/store/text'
-import { Solarize } from 'konva/types/filters/Solarize'
-import { config } from 'dotenv/types'
 import { IPage } from '@/interfaces/page'
 import LayerFactary from '@/utils/layerFactary'
-
-const fontPropsMap = {
-  fontSize: 'size',
-  fontFamily: 'font',
-  bold: 'weight',
-  italic: 'style',
-  underline: 'decoration',
-  color: 'color'
-}
+import TextPropUtils from '@/utils/textPropUtils'
 
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
@@ -28,318 +17,54 @@ class TextUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get getCurrSel() { return store.state.text?.sel }
   get getCurrTextProps() { return store.state.text?.props }
   get getLayer() { return store.getters.getLayer }
-  get getTextState() { return store.state.text as ITextState }
+  get getCurrSel() { return store.state.text?.sel }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
   get getPage() { return store.getters.getPage }
 
-  onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
-    if (this.isBlockProperty(propName)) {
-      const currLayer = this.getCurrLayer
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const groupLayer = currLayer
-        for (let i = 0; i < groupLayer.layers.length; i++) {
-          if (groupLayer.layers[i].type === 'text') {
-            this.blockPropertyHandler(propName, i)
-          }
-        }
-      } else {
-        this.blockPropertyHandler(propName)
-      }
-    } else {
-      const currLayer = this.getCurrLayer
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const nan = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: NaN
-        }
-        /**
-         * Check the LayerGroup's property indicated value
-         */
-        let flag = false
-        let propValue: number | string | undefined
-        const groupLayer = this.getCurrLayer
-        for (let i = 0; i < groupLayer.layers.length && !flag; i++) {
-          if (groupLayer.layers[i].type === 'text') {
-            const tmpLayer = groupLayer.layers[i] as IText
-            const propBuff = this.propIndicator(
-              {
-                pIndex: 0,
-                sIndex: 0
-              },
-              {
-                pIndex: tmpLayer.paragraphs.length - 1,
-                sIndex: tmpLayer.paragraphs[tmpLayer.paragraphs.length - 1].spans.length - 1
-              }, propName, value || '', tmpLayer
-            )
-            switch (propName) {
-              case 'bold':
-                propValue = 'normal'
-                if (propBuff.weight === 'bold') {
-                  propValue = 'bold'
-                  flag = true
-                }
-                break
-              case 'italic':
-                propValue = 'normal'
-                if (propBuff.style === 'italic') {
-                  propValue = 'italic'
-                  flag = true
-                }
-                break
-              case 'underline':
-                propValue = 'none'
-                if (propBuff.decoration === 'underline') {
-                  propValue = 'underline'
-                  flag = true
-                }
-                break
-              case 'fontSize':
-                propValue = value as string
-                break
-              case 'fontFamily':
-                propValue = value as string
-                break
-              case 'color': {
-                propValue = value as string
-                flag = true
-                break
-              }
-            }
-          }
-        }
-        for (let i = 0; i < groupLayer.layers.length; i++) {
-          const layer = groupLayer.layers[i]
-          if (layer.type === 'text') {
-            this.spanPropertyHandler(propName, propValue, nan, nan, i)
-          }
-        }
-      } else {
-        this.spanPropertyHandler(propName, value, selStart, selEnd)
-      }
-    }
+  isArrowKey(e: KeyboardEvent): boolean {
+    return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
   }
 
-  blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
-    const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
-      this.updateTextStyles(this.pageIndex, this.layerIndex, styles)
-    }
-    const updateSelectedLayersProps = (styles: { [key: string]: string | number | boolean }) => {
-      this.updateSelectedLayersProps(styles, tmpLayerIndex ?? NaN)
-    }
-    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersProps
-
-    switch (propName) {
-      case 'text-align-left':
-        handler({ align: 'left' })
-        break
-      case 'text-align-center':
-        handler({ align: 'center' })
-        break
-      case 'text-align-right':
-        handler({ align: 'right' })
-        break
-      case 'font-vertical': {
-        const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const updateToVertical = config.styles.writingMode === 'initial' || config.styles.writingMode.includes('horizontal')
-        const writingMode = updateToVertical ? 'vertical-lr' : 'initial'
-        const { width, height } = config.styles
-        if (typeof tmpLayerIndex === 'undefined') {
-          console.log('dddddfsw')
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
-        }
-        handler({ writingMode })
-      }
-    }
+  updateLayerSize() {
+    const textHW = this.getTextHW(this.getCurrLayer)
+    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
-  spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection, tmpLayerIndex?: number) {
-    const sel = this.getSelection()
-    let config: IText
-    if (typeof tmpLayerIndex === 'undefined') {
-      config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
-    } else {
-      config = GeneralUtils.deepCopy((this.getCurrLayer as ITmp).layers[tmpLayerIndex]) as IText
-    }
-    let start = {
-      pIndex: 0,
-      sIndex: 0,
-      offset: 0
-    }
-    let end = {
-      pIndex: 0,
-      sIndex: 0,
-      offset: 0
-    }
-    if (!sel && !this.isSel(selStart) && !this.isSel(selEnd)) {
-      /**
-       * If there is no selection given by either the window or the input params,
-       * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
-       */
-      end.pIndex = config.paragraphs.length - 1
-      end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
-      end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-    } else if (this.isSel(selStart) || this.isSel(selEnd)) {
-      Object.assign(start, selStart)
-      Object.assign(end, selEnd)
-    } else if (sel) {
-      Object.assign(start, sel.start)
-      Object.assign(end, sel.end)
-    } else {
-      return
-    }
+  getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
 
-    let isStartContainerDivided = true
-    let prop: { [key: string]: string | number }
-    // If temLayerIndex equals to 'undefined', means this function is now handler non-group-layer
-    if (typeof tmpLayerIndex === 'undefined') {
-      prop = this.propIndicator(start, end, propName, value || '')
-    } else {
-      const i = Object.keys(fontPropsMap).indexOf(propName)
-      const v = Object.values(fontPropsMap)[i]
-      prop = { [v]: value as string | number }
-    }
-
-    if (this.isSel(end)) {
-      for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
-        const p = config.paragraphs[pIndex]
-        for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
-          const span = p.spans[sIndex]
-          const text = span.text
-          if (pIndex === start.pIndex && sIndex < start.sIndex) {
-            continue
-          } else if (pIndex === start.pIndex && sIndex === start.sIndex) {
-            span.text = text.substr(0, start.offset)
-
-            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-            newSpan.text = text.substr(start.offset, text.length)
-            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
-
-            config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, newSpan)
-            if (span.text === '') {
-              config.paragraphs[pIndex].spans.splice(sIndex, 1)
-              isStartContainerDivided = false
-            }
-
-            if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-              newSpan.text = text.substring(start.offset, end.offset)
-
-              const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-              thirdSpan.text = text.substr(end.offset)
-              Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
-              if (thirdSpan.text !== '') {
-                config.paragraphs[pIndex].spans.splice(isStartContainerDivided ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
-              }
-              break
-            }
-            if (start.pIndex === end.pIndex && isStartContainerDivided) {
-              sIndex++
-              end.sIndex++
-            }
-          } else if (pIndex === end.pIndex && sIndex === end.sIndex) {
-            span.text = text.substr(end.offset)
-
-            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-            newSpan.text = text.substr(0, end.offset)
-            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
-            if (span.text === '') {
-              config.paragraphs[pIndex].spans.splice(sIndex, 1, newSpan)
-            } else {
-              config.paragraphs[pIndex].spans.splice(sIndex, 0, newSpan)
-            }
-            break
-          } else if (pIndex < end.pIndex || (pIndex === end.pIndex && sIndex < end.sIndex)) {
-            Object.assign(span.styles, this.spanStylesTransformer(span, prop))
-          }
-        }
+    const range = sel?.getRangeAt(0)
+    if (range) {
+      let div = range.commonAncestorContainer
+      while (div?.parentNode && div?.nodeName !== 'DIV') {
+        div = div?.parentNode
       }
-      [start, end] = this.spanMerger(config.paragraphs, start, end)
-      if (typeof tmpLayerIndex === 'undefined') {
-        this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
-      } else {
-        this.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+      const start = {
+        pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
+        sIndex: parseInt(range.startContainer?.parentElement?.dataset.sindex as string),
+        offset: range.startOffset as number
       }
-    } else if (!this.isSel(end)) {
-      const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      switch (propName) {
-        case 'fontSize':
-          styles.size = value as number
-          break
-        case 'fontFamily':
-          styles.font = value as string
-          break
-        case 'color':
-          this.updateTextPropsState({ color: value as string })
-          break
-        case 'bold': {
-          if (this.getCurrTextProps?.weight === 'bold') {
-            this.updateTextPropsState({ weight: 'normal' })
-          } else {
-            this.updateTextPropsState({ weight: 'bold' })
-          }
-          break
-        }
-        case 'italic': {
-          if (this.getCurrTextProps?.style === 'italic') {
-            this.updateTextPropsState({ style: 'normal' })
-          } else {
-            this.updateTextPropsState({ style: 'italic' })
-          }
-          break
-        }
-        case 'underline': {
-          if (this.getCurrTextProps?.decoration === 'underline') {
-            this.updateTextPropsState({ decoration: 'none' })
-          } else {
-            this.updateTextPropsState({ decoration: 'underline' })
-          }
-        }
+
+      if (!div || (div as HTMLElement).id.match('text') === null || !this.isSel(start) ||
+        !range || !range.startContainer || !range.endContainer) return undefined
+
+      const isRanged = window.getSelection()?.toString() !== ''
+      const end = {
+        pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
+        sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
+        offset: isRanged ? range?.endOffset as number : NaN
       }
-      [start, end] = this.spanMerger(config.paragraphs, start, end)
-      if (typeof tmpLayerIndex === 'undefined') {
-        this.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
-      } else {
-        this.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+
+      return {
+        div,
+        start,
+        end
       }
     }
-    if (!sel || typeof tmpLayerIndex !== 'undefined') return
-    // Below is used to re-select the caret-range after the props are applied
-    Vue.nextTick(() => {
-      if (this.isSel(end)) {
-        if (isStartContainerDivided) {
-          if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-            start.sIndex++
-            end.sIndex++
-            end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-          } else {
-            start.sIndex++
-          }
-        }
-        // this.updateTextPropsState()
-        this.focus(start, end)
-      } else {
-        const select = window.getSelection()
-        if (select) {
-          if (propName === 'fontFamily' || propName === 'fontSize') {
-            start.offset = 0
-            Object.assign(end, start)
-            end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-            this.updateTextPropsState()
-            this.focus(start, end)
-            this.updateSelection(start, end)
-          } else {
-            // Object.assign(end, start)
-            this.focus(start, start, true)
-            this.updateSelection(start, { pIndex: NaN, sIndex: NaN, offset: NaN })
-          }
-        }
-      }
-      // this.updateTextPropsState()
-    })
   }
 
   focus(start?: ISelection, end?: ISelection, async = false) {
@@ -381,344 +106,6 @@ class TextUtils {
     }
   }
 
-  spanMerger(paragraphs: IParagraph[], start: ISelection, end: ISelection): [ISelection, ISelection] {
-    if (!this.isSel(end)) return [start, end]
-    let isStartMerged = false
-    let isEndMerged = false
-    if (start.sIndex - 1 >= 0) {
-      const preSpan = paragraphs[start.pIndex].spans[start.sIndex - 1]
-      const span = paragraphs[start.pIndex].spans[start.sIndex]
-      if (this.isSameSpanStyles(span.styles, preSpan.styles)) {
-        isStartMerged = true
-        start.offset = preSpan.text.length
-        preSpan.text += span.text
-        paragraphs[start.pIndex].spans.splice(start.sIndex, 1)
-        start.sIndex -= 1
-        if (start.pIndex === end.pIndex) {
-          end.sIndex -= 1
-        }
-      }
-    }
-    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-      const p = paragraphs[pidx]
-      const preSpanStyle = {} as ISpanStyle
-      for (let sidx = 0; sidx < p.spans.length; sidx++) {
-        if (pidx === end.pIndex && sidx >= end.sIndex) {
-          break
-        }
-        const span = p.spans[sidx]
-        if (this.isSameSpanStyles(span.styles, preSpanStyle)) {
-          p.spans[sidx - 1].text += span.text
-          if (pidx === end.pIndex) {
-            end.sIndex -= 1
-          }
-          paragraphs[pidx].spans.splice(sidx, 1)
-          sidx -= 1
-          end.offset = paragraphs[end.pIndex].spans[end.sIndex].text.length
-        }
-        Object.assign(preSpanStyle, paragraphs[pidx].spans[sidx].styles)
-      }
-    }
-    if (end.sIndex + 1 < paragraphs[end.pIndex].spans.length) {
-      const preSpan = paragraphs[end.pIndex].spans[end.sIndex]
-      const span = paragraphs[end.pIndex].spans[end.sIndex + 1]
-      if (this.isSameSpanStyles(span.styles, preSpan.styles)) {
-        isEndMerged = true
-        if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-          end.offset = preSpan.text.length
-        }
-        preSpan.text += span.text
-        paragraphs[end.pIndex].spans.splice(end.sIndex + 1, 1)
-      }
-    }
-
-    if (!isStartMerged && !isEndMerged) {
-      start.offset = 0
-      end.offset = paragraphs[end.pIndex].spans[end.sIndex].text.length
-    } else if (isStartMerged && !isEndMerged) {
-      end.offset = paragraphs[end.pIndex].spans[end.sIndex].text.length
-    }
-    return [start, end]
-  }
-
-  paragraphPropsHandler(propName: string, value: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
-    if (this.currSelectedInfo.layers.length === 1) {
-      selStart = GeneralUtils.deepCopy(selStart) as ISelection
-      selEnd = GeneralUtils.deepCopy(selEnd) as ISelection
-      if (!this.isSel(selStart) && !this.isSel(selEnd)) {
-        Object.assign(selStart, { pIndex: 0, sIndex: 0, offset: 0 })
-        Object.assign(selEnd, { pIndex: (this.getCurrLayer as IText).paragraphs.length, sIndex: 0, offset: 0 })
-      } else {
-        selEnd.pIndex = selStart.pIndex
-      }
-      switch (propName) {
-        case 'fontSpacing':
-          for (let pIndex = selStart.pIndex; pIndex <= selEnd.pIndex; pIndex++) {
-            this.updateParagraphStyles(this.pageIndex, this.layerIndex, pIndex, { fontSpacing: value })
-          }
-          break
-        case 'lineHeight':
-          for (let pIndex = selStart.pIndex; pIndex <= selEnd.pIndex; pIndex++) {
-            this.updateParagraphStyles(this.pageIndex, this.layerIndex, pIndex, { lineHeight: value })
-          }
-      }
-    } else {
-      for (let index = 0; index < this.currSelectedInfo.layers.length; index++) {
-        if (this.currSelectedInfo.layers[index].type === 'text') {
-          switch (propName) {
-            case 'fontSpacing':
-              this.updateSelectedParaProps(index, { fontSpacing: value })
-              break
-            case 'lineHeight':
-              this.updateSelectedParaProps(index, { lineHeight: value })
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * @param propName A string refers to the desired props: fontSize/fontFamily/color/weight/style...
-   * @returns The desired props value accord to the current selection range.
-   */
-  propReader(propName: string): string | number | undefined {
-    if (this.currSelectedInfo.layers.length === 1) {
-      return this.propReadOfLayer(propName)
-    } else {
-      const tmpLayerGroup = this.getCurrLayer as ITmp
-      let propBuff: number | string | undefined
-      for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
-        if (tmpLayerGroup.layers[i].type === 'text') {
-          const tmpLayer = tmpLayerGroup.layers[i] as IText
-          if (typeof propBuff === 'undefined') {
-            propBuff = this.propReadOfLayer(propName, tmpLayer)
-          } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
-            return undefined
-          }
-        }
-      }
-      return propBuff
-    }
-  }
-
-  propReadOfLayer(prop: string, layer?: IText) {
-    const sel = this.isSel(store.state.text?.sel.start) ? store.state.text?.sel : this.getSelection()
-    // If layer is assigned, means the current selected layer is a group/tmp layer
-    const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
-    let start
-    let end
-    if (sel && this.isSel(sel.start)) {
-      start = sel.start
-      end = sel.end
-    } else if (!sel || (sel && !this.isSel(sel.start) && !this.isSel(sel.end) && config)) {
-      start = {
-        pIndex: 0,
-        sIndex: 0,
-        offset: 0
-      }
-      const pLeng = config.paragraphs.length
-      const sLeng = config.paragraphs[pLeng - 1].spans.length
-      end = {
-        pIndex: pLeng - 1,
-        sIndex: sLeng - 1,
-        offset: config.paragraphs[pLeng - 1].spans[sLeng - 1].text.length
-      }
-    } else {
-      return
-    }
-    /**
-     * Selection is not a range (only caret)
-     */
-    if (this.isSel(start) && !this.isSel(end)) {
-      if (prop === 'fontSpacing' || prop === 'lineHeight') {
-        return config.paragraphs[start.pIndex].styles[prop]
-      } else if (prop === 'fontFamily' || prop === 'fontSize' || prop === 'color' || prop === 'bold' || prop === 'italic') {
-        return config.paragraphs[start.pIndex].spans[start.sIndex].styles[fontPropsMap[prop]]
-      }
-    }
-
-    let isMulti = false
-    let origin: string | number = ''
-    switch (prop) {
-      case 'fontSpacing':
-        origin = config.paragraphs[start.pIndex].styles.fontSpacing
-        break
-      case 'lineHeight':
-        origin = config.paragraphs[start.pIndex].styles.lineHeight
-        break
-      default:
-        if (Object.keys(fontPropsMap).includes(prop)) {
-          const i = Object.keys(fontPropsMap).indexOf(prop)
-          const v = Object.values(fontPropsMap)[i]
-          origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles[v] as string | number
-        }
-    }
-    for (let pidx = start.pIndex; pidx <= end.pIndex && config.paragraphs[pidx]; pidx++) {
-      const p = config.paragraphs[pidx]
-      if (prop === 'lineHeight' && origin !== p.styles.lineHeight) {
-        isMulti = true
-        break
-      } else if (prop === 'fontSpacing' && origin !== p.styles.fontSpacing) {
-        isMulti = true
-        break
-      } else if (prop === 'lineHeight' || prop === 'fontSpacing') continue
-
-      for (let sidx = 0; sidx < p.spans.length; sidx++) {
-        const span = p.spans[sidx]
-        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        if (Object.keys(fontPropsMap).includes(prop)) {
-          const i = Object.keys(fontPropsMap).indexOf(prop)
-          const v = Object.values(fontPropsMap)[i]
-          if (origin !== span.styles[v]) {
-            isMulti = true
-            break
-          }
-        }
-      }
-      if (isMulti) break
-    }
-    return isMulti ? undefined : origin
-  }
-
-  propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {
-    const prop: { [key: string]: string | number } = {}
-    const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
-
-    if (!this.isSel(end)) {
-      const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      switch (propName) {
-        case 'bold': {
-          prop.weight = styles.weight === 'normal' ? 'bold' : 'normal'
-          break
-        }
-        case 'underline': {
-          prop.decoration = styles.decoration === 'none' ? 'underline' : 'none'
-          break
-        }
-        case 'italic': {
-          prop.style = styles.style === 'italic' ? 'normal' : 'italic'
-          break
-        }
-        default:
-          break
-      }
-      return prop
-    }
-    let flag = false
-    for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-      const p = config.paragraphs[pidx]
-      for (let sidx = 0; sidx < p.spans.length; sidx++) {
-        const span = p.spans[sidx]
-        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        switch (propName) {
-          case 'bold': {
-            prop.weight = 'normal'
-            if (span.styles.weight === 'normal') {
-              prop.weight = 'bold'
-              flag = true
-            }
-            break
-          }
-          case 'underline': {
-            prop.decoration = 'none'
-            if (span.styles.decoration === 'none') {
-              prop.decoration = 'underline'
-              flag = true
-            }
-            break
-          }
-          case 'italic': {
-            prop.style = 'normal'
-            if (span.styles.style === 'normal') {
-              prop.style = 'italic'
-              flag = true
-            }
-            break
-          }
-          case 'fontFamily': {
-            if (typeof value === 'string') {
-              prop.font = value
-              flag = true
-            }
-            break
-          }
-          case 'fontSize': {
-            prop.size = value
-            flag = true
-            break
-          }
-          case 'color': {
-            prop.color = value
-            flag = true
-            break
-          }
-          default: { }
-        }
-        if (flag) break
-      }
-      if (flag) break
-    }
-    return prop
-  }
-
-  spanStylesTransformer(span: ISpan | undefined, prop: { [key: string]: string | number }): ISpanStyle {
-    const spanStyles = {
-      font: span ? span.styles.font : '',
-      weight: span ? span.styles.weight : '',
-      size: span ? span.styles.size : NaN,
-      decoration: span ? span.styles.decoration : '',
-      style: span ? span.styles.style : '',
-      color: span ? span.styles.color : '',
-      opacity: span ? span.styles.opacity : NaN
-    }
-    return Object.assign(spanStyles, prop)
-  }
-
-  isArrowKey(e: KeyboardEvent): boolean {
-    return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
-  }
-
-  updateLayerSize() {
-    const textHW = this.getTextHW(this.getCurrLayer)
-    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
-  }
-
-  getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
-    const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return
-
-    const range = sel?.getRangeAt(0)
-    if (range) {
-      let div = range.commonAncestorContainer
-      while (div?.parentNode && div?.nodeName !== 'DIV') {
-        div = div?.parentNode
-      }
-      const start = {
-        pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-        sIndex: parseInt(range.startContainer?.parentElement?.dataset.sindex as string),
-        offset: range.startOffset as number
-      }
-
-      if (!div || (div as HTMLElement).id.match('text') === null || !range || !range.startContainer || !range.endContainer) return undefined
-      const isRanged = window.getSelection()?.toString() !== ''
-      const end = {
-        pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
-        sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
-        offset: isRanged ? range?.endOffset as number : NaN
-      }
-
-      if (!this.isSel(start) && !this.isSel(end)) {
-        return undefined
-      }
-
-      return {
-        div,
-        start,
-        end
-      }
-    }
-  }
-
   textParser(text: HTMLElement, config: IText): IParagraph[] {
     const paragraphs: IParagraph[] = []
     const div = text
@@ -734,7 +121,7 @@ class TextUtils {
            * If the span is the same without changed, skip parse it
            */
           if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
-            if (this.isSameSpanStyles(config.paragraphs[pIndex].spans[sIndex].styles, spanStyleBuff)) {
+            if (TextPropUtils.isSameSpanStyles(config.paragraphs[pIndex].spans[sIndex].styles, spanStyleBuff)) {
               spans[spans.length - 1].text += text
             } else {
               spans.push(config.paragraphs[pIndex].spans[sIndex])
@@ -772,7 +159,7 @@ class TextUtils {
             opacity: parseInt(spanEl.style.opacity)
           } as ISpanStyle
 
-          if (this.isSameSpanStyles(spanStyle, spanStyleBuff)) {
+          if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
             spans[spans.length - 1].text += text
           } else {
             spans.push({ text: text, styles: spanStyle, id: uuidv4() })
@@ -784,7 +171,8 @@ class TextUtils {
       const floatNum = /[+-]?\d+(\.\d+)?/
       const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
       const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
-      const pStyle: IParagraphStyle = { lineHeight, fontSpacing, align: pEl.style.textAlign.replace('text-align-', '') }
+      const fontSize = parseInt(pEl.style.fontSize.split('px')[0])
+      const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
       paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
     })
     paragraphs.forEach(p => {
@@ -864,38 +252,38 @@ class TextUtils {
     return e.key.length !== 1
   }
 
-  isSameSpanStyles(span: ISpanStyle, preSpan: ISpanStyle): boolean {
-    let isSameSpanStyles = true
-    for (const k of Object.keys(span)) {
-      if (span[k] !== preSpan[k] && span[k] !== '' && !Number.isNaN(span[k])) {
-        isSameSpanStyles = false
-        break
-      }
-    }
-    return isSameSpanStyles
-  }
-
   isSel(sel?: { pIndex: number, sIndex: number, offset?: number }): boolean {
-    return typeof sel !== 'undefined' && (!Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset))
+    const isNotNull = (sel?.pIndex !== null) && (sel?.sIndex !== null)
+    return typeof sel !== 'undefined' && (!Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)) && isNotNull
   }
 
-  isBlockProperty(propName: string): boolean {
-    return propName.includes('text-align') || propName === 'font-vertical'
+  getNullSel(): ISelection {
+    return {
+      pIndex: NaN,
+      sIndex: NaN,
+      offset: NaN
+    }
   }
 
   getTextHW(content: IText, widthLimit = -1): { width: number, height: number } {
     const body = document.createElement('div')
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
+      let fontSize = 0
       pData.spans.forEach(spanData => {
         const span = document.createElement('span')
         span.textContent = spanData.text
         Object.assign(span.style, CssConveter.convertFontStyle(spanData.styles))
         span.style.whiteSpace = 'pre-wrap'
         p.appendChild(span)
+
+        if (spanData.styles.size > fontSize) {
+          fontSize = spanData.styles.size
+        }
       })
-      Object.assign(p.style, CssConveter.convertFontStyle(pData.styles))
-      p.style.margin = '0.5em'
+      Object.assign(p.style, CssConveter.convertFontStyle(pData.styles), { size: fontSize })
+      // p.style.margin = '0.5em'
+      p.style.margin = '0'
       p.style.overflowWrap = 'break-word'
       body.appendChild(p)
     })
@@ -958,6 +346,14 @@ class TextUtils {
     const format = GeneralUtils.deepCopy(json) as IText
     const page = this.getPage(this.lastSelectedPageIndex) as IPage
 
+    /**
+     * Add the response font-size for each paragraph
+     */
+    const paragraphSizes = this.getParagraphSize(format)
+    for (const i in format.paragraphs) {
+      format.paragraphs[i].styles.size = paragraphSizes[i]
+    }
+
     const size = {} as { [key: string]: number }
     if (format.styles && format.styles.height && format.styles.width) {
       Object.assign(size, { width: format.styles.width, height: format.styles.height })
@@ -982,114 +378,26 @@ class TextUtils {
     LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
   }
 
+  getParagraphSize(config: IText): Array<number> {
+    const sizeArr = []
+    for (const p of config.paragraphs) {
+      let fontSize = -1
+      for (const span of p.spans) {
+        if (span.styles.size > fontSize) {
+          fontSize = span.styles.size
+        }
+      }
+      sizeArr.push(fontSize)
+    }
+    return sizeArr
+  }
+
   addGroup (json: any) {
     const { layers, styles } = GeneralUtils.deepCopy(json)
     const position = this.getAddPosition(styles.width, styles.height)
     Object.assign(styles, position)
     const newGroupLayer = LayerFactary.newGroup(styles, layers)
     LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
-  }
-
-  updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {
-    if (typeof prop !== 'undefined') {
-      store.commit('text/UPDATE_props', prop)
-      return
-    }
-    const props = [
-      'textAlign',
-      'fontSize',
-      'fontSpacing',
-      'lineHeight',
-      'font',
-      'color',
-      'opacity',
-      'weight',
-      'style',
-      'decoration',
-      'isVertical'
-    ]
-    props.forEach(k => {
-      let value
-      switch (k) {
-        case 'textAlign': {
-          if (this.currSelectedInfo.layers.length === 1) {
-            value = this.getCurrLayer.styles.align
-          } else {
-            const tmpLayerGroup = this.getCurrLayer as ITmp
-            for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
-              if (tmpLayerGroup.layers[i].type === 'text') {
-                const tmpLayer = tmpLayerGroup.layers[i] as IText
-                if (!value) value = tmpLayer.styles.align
-                if (value !== tmpLayer.styles.align) {
-                  value = undefined
-                  break
-                }
-              }
-            }
-          }
-          break
-        }
-        case 'fontSize': {
-          const size = this.propReader('fontSize')
-          value = typeof size === 'number' ? size.toString() : '--'
-          break
-        }
-        case 'fontSpacing': {
-          const space = this.propReader('fontSpacing')
-          value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
-          break
-        }
-        case 'lineHeight': {
-          const height = this.propReader('lineHeight')
-          value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
-          break
-        }
-        case 'font': {
-          const font = this.getTextState.fontPreset.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : 'multi-fonts'
-          break
-        }
-        case 'color': {
-          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
-          break
-        }
-        case 'opacity': {
-          value = (this.getCurrLayer as IText).styles.opacity
-          break
-        }
-        case 'decoration': {
-          value = this.propReader('underline')
-          break
-        }
-        case 'weight': {
-          value = this.propReader('bold')
-          break
-        }
-        case 'style': {
-          value = this.propReader('italic')
-          break
-        }
-        case 'isVertical': {
-          if (this.currSelectedInfo.layers.length === 1) {
-            value = this.getCurrLayer.styles.writingMode.includes('vertical')
-          } else {
-            const tmpLayerGroup = this.getCurrLayer as ITmp
-            value = true
-            for (let i = 0; i < this.currSelectedInfo.layers.length && value; i++) {
-              if (tmpLayerGroup.layers[i].type === 'text') {
-                const tmpLayer = tmpLayerGroup.layers[i] as IText
-                value = tmpLayer.styles.writingMode.includes('vertical')
-              }
-            }
-          }
-          break
-        }
-      }
-
-      const prop: { [key: string]: string | number | boolean | undefined } = {}
-      prop[k] = value
-      store.commit('text/UPDATE_props', prop)
-    })
   }
 
   updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
@@ -1100,16 +408,27 @@ class TextUtils {
     })
   }
 
-  updateParagraphStyles(pageIndex: number, layerIndex: number, pIndex: number, styles: { [key: string]: string | number }) {
-    store.commit('UPDATE_paragraphStyles', {
-      pageIndex,
-      layerIndex,
-      pIndex,
-      styles
-    })
+  setTextInfo(textInfo: { [key: string]: Array<string> }) {
+    store.commit('SET_textInfo', textInfo)
+  }
+
+  textInfoUpdater(field: string, paragraphs: IParagraph[]) {
+    const textArr = []
+    for (const p of paragraphs) {
+      let text = ''
+      for (const span of p.spans) {
+        text += span.text
+      }
+      textArr.push(text)
+    }
+    this.setTextInfo({ [field]: textArr })
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+    const config = this.getLayer(pageIndex, layerIndex) as IText
+    if (config.isHeading) {
+      this.textInfoUpdater('heading', paragraphs)
+    }
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,
@@ -1121,20 +440,6 @@ class TextUtils {
     store.commit('UPDATE_selectedTextParagraphs', {
       tmpLayerIndex,
       paragraphs
-    })
-  }
-
-  updateSelectedLayersProps(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
-    store.commit('UPDATE_selectedLayersStyles', {
-      styles,
-      layerIndex
-    })
-  }
-
-  updateSelectedParaProps(tmpLayerIndex: number, props: { [key: string]: string | number }) {
-    store.commit('UPDATE_selectedTextParagraphsProp', {
-      tmpLayerIndex,
-      props
     })
   }
 

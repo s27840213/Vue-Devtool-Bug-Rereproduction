@@ -484,7 +484,7 @@ export default Vue.extend({
           }
         }
         const pEl = p as HTMLElement
-        const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, align: 'left' }
+        const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, size: 20, align: 'left' }
         pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
         pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
         pStyle.align = pEl.style.textAlign

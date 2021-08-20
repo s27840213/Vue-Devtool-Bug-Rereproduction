@@ -9,7 +9,7 @@
       property-bar(class="relative")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
-        button(@click="handleValueModal")
+        button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" v-model.lazy="props.fontSize")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
@@ -26,7 +26,7 @@
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10")
-          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @change="setColor")
+          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @click="handleColorModal")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"
         v-click-outside="handleColorModal"
@@ -107,7 +107,10 @@ import { IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
+import TextPropUtils from '@/utils/textPropUtils'
 import { parseInt, toNumber } from 'lodash'
+import { ISelection } from '@/interfaces/text'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -134,7 +137,7 @@ export default Vue.extend({
   mounted() {
     // if (!TextUtils.getCurrLayer.layers) {
     // this.$store.commit('text/SET_default')
-    TextUtils.updateTextPropsState()
+    TextPropUtils.updateTextPropsState()
     // }
   },
   computed: {
@@ -191,19 +194,19 @@ export default Vue.extend({
           return true
         })()
         window.requestAnimationFrame(() => {
-          TextUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
+          TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
         })
       } else {
         for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
           const layer = this.currSelectedInfo.layers[i]
           if (layer.type === 'text') {
             window.requestAnimationFrame(() => {
-              TextUtils.spanPropertyHandler('color', color, nan, nan, i)
+              TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
             })
           }
         }
       }
-      TextUtils.updateTextPropsState({ color })
+      TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -216,8 +219,8 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      TextUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
-      TextUtils.updateTextPropsState({ fontSize: value.toString() })
+      TextPropUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
+      TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
     },
     handleSliderModal(modalName = '') {
       this.openSliderBar = modalName
@@ -257,24 +260,100 @@ export default Vue.extend({
       return origin
     },
     onPropertyClick(iconName: string) {
-      TextUtils.onPropertyClick(iconName)
+      TextPropUtils.onPropertyClick(iconName)
       // Only select without range or none selection exist, the prop-panel update.
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
-        TextUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState()
       }
     },
     fontSizeStepping(step: number) {
       const sel = TextUtils.getSelection()
+      // if (sel) {
+      //   const start = {
+      //     pIndex: sel.start.pIndex,
+      //     sIndex: sel.start.sIndex
+      //   }
+      //   const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
+      //   const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
+      //   TextPropUtils.spanPropertyHandler('fontSize', fontSize + step)
+      //   TextPropUtils.updateTextPropsState()
+      // }
+      // let panelFontVal = this.sel.props.fontSize
       if (sel) {
-        const start = {
-          pIndex: sel.start.pIndex,
-          sIndex: sel.start.sIndex
+        const { start, end } = sel
+        console.log(start.sIndex)
+        const finalStart = {} as ISelection
+        const finalEnd = {} as ISelection
+        const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
+        console.log(end.sIndex)
+        for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+          const p = config.paragraphs[pidx]
+          for (let sidx = 0; sidx < p.spans.length; sidx++) {
+            const span = p.spans[sidx]
+            const currStart = {} as ISelection
+            const currEnd = {} as ISelection
+            if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
+              continue
+            }
+
+            // PIndex, sIndex both are at the start-selection
+            if (pidx === start.pIndex && sidx === start.sIndex) {
+              console.log('----------FIRST START------------')
+              // Start-selection and the end-selection are exactly at the same span
+              if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
+                Object.assign(currStart, start)
+                Object.assign(currEnd, end)
+              } else {
+                Object.assign(currStart, start)
+                Object.assign(currEnd, { pIndex: start.pIndex, sIndex: start.sIndex, offset: span.text.length })
+              }
+            } else if (pidx === end.pIndex && sidx === end.sIndex) {
+              console.log('----------END START------------')
+              console.log(pidx)
+              console.log(sidx)
+              console.log(start.sIndex)
+              const endSidx = start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
+              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
+            } else {
+              console.log('----------ELSE------------')
+              console.log(pidx)
+              console.log(sidx)
+              Object.assign(currStart, { pIndex: pidx, sIndex: sidx, offset: 0 })
+              Object.assign(currEnd, { pIndex: pidx, sIndex: sidx, offset: span.text.length })
+            }
+            TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
+
+            if (Object.keys(finalStart).length === 0) {
+              Object.assign(finalStart, this.sel.start)
+            }
+          }
         }
+        Object.assign(finalEnd, this.sel.end)
+        this.$nextTick(() => {
+          console.log(finalStart)
+          console.log(finalEnd)
+          TextUtils.focus(finalStart, finalEnd)
+        })
+      } else {
         const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
-        const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-        TextUtils.spanPropertyHandler('fontSize', fontSize + step)
-        TextUtils.updateTextPropsState()
+        for (const [pidx, p] of config.paragraphs.entries()) {
+          for (const [sidx, span] of p.spans.entries()) {
+            const currStart = {
+              pIndex: pidx,
+              sIndex: sidx,
+              offset: 0
+            }
+            const currEnd = {
+              pIndex: pidx,
+              sIndex: sidx,
+              offset: span.text.length
+            }
+            TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
+          }
+        }
       }
+      TextPropUtils.updateTextPropsState()
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
@@ -292,8 +371,9 @@ export default Vue.extend({
     },
     textRangeRecorder(e: MouseEvent) {
       const sel = TextUtils.getSelection()
-      if ((e.target as HTMLElement).classList.contains('record-selection') && sel) {
-        TextUtils.updateSelection(sel.start, sel.end)
+      if ((e.target as HTMLElement).classList.contains('record-selection')) {
+        TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
+        console.log(this.sel.start)
       }
     },
     setSize(e: Event) {
@@ -301,8 +381,8 @@ export default Vue.extend({
       if (this.isValidInt(value)) {
         value = this.boundValue(parseInt(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          TextUtils.spanPropertyHandler('fontSize', parseInt(value), this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ fontSize: value })
+          TextPropUtils.spanPropertyHandler('fontSize', parseInt(value), this.sel.start, this.sel.end)
+          TextPropUtils.updateTextPropsState({ fontSize: value })
         })
       }
     },
@@ -311,8 +391,8 @@ export default Vue.extend({
       if (this.isValidInt(value)) {
         value = this.boundValue(parseInt(value), this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max)
         window.requestAnimationFrame(() => {
-          TextUtils.paragraphPropsHandler('fontSpacing', parseInt(value) / 1000, this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ fontSpacing: value })
+          TextPropUtils.paragraphPropsHandler('fontSpacing', parseInt(value) / 1000, this.sel.start, this.sel.end)
+          TextPropUtils.updateTextPropsState({ fontSpacing: value })
         })
       }
     },
@@ -324,8 +404,8 @@ export default Vue.extend({
       if (this.isValidInt(value)) {
         value = this.boundValue(parseInt(value), this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max)
         window.requestAnimationFrame(() => {
-          TextUtils.paragraphPropsHandler('lineHeight', toNumber((parseInt(value) / 100).toFixed(2)), this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ lineHeight: toNumber((parseInt(value) / 100).toFixed(2)) })
+          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((parseInt(value) / 100).toFixed(2)), this.sel.start, this.sel.end)
+          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((parseInt(value) / 100).toFixed(2)) })
         })
       }
     },
@@ -333,8 +413,8 @@ export default Vue.extend({
       const { value } = e.target as HTMLInputElement
       if (this.isValidHexColor(value)) {
         window.requestAnimationFrame(() => {
-          TextUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
-          TextUtils.updateTextPropsState({ color: value })
+          TextPropUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
+          TextPropUtils.updateTextPropsState({ color: value })
         })
       }
     },
@@ -365,18 +445,13 @@ export default Vue.extend({
             }
           })
         }
-        TextUtils.updateTextPropsState({ opacity: parseInt(value) })
+        TextPropUtils.updateTextPropsState({ opacity: parseInt(value) })
       }
     },
     onBlur() {
-      const nan = {
-        pIndex: NaN,
-        sIndex: NaN,
-        offset: NaN
-      }
       console.log('onBlur')
-      TextUtils.updateSelection(nan, nan)
-      TextUtils.updateTextPropsState()
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+      TextPropUtils.updateTextPropsState()
     }
   }
 })

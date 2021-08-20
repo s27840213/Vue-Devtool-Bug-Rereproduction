@@ -43,6 +43,11 @@ export interface IEditorState {
     tags: string[]
   },
   jsonMap: any,
+  textInfo: {
+    heading: Array<string>,
+    subheading: Array<string>,
+    body: Array<string>
+  },
   isPopupOpen: boolean
 }
 

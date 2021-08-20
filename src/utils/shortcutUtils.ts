@@ -7,10 +7,7 @@ import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
-import { stat } from 'fs'
-import { start } from 'repl'
 import { ISelection } from '@/interfaces/text'
-import { profileEnd } from 'console'
 import text from '@/store/text'
 
 class ShortcutHandler {
@@ -101,13 +98,17 @@ class ShortcutHandler {
       const paragraphs = GeneralUtils.deepCopy((TextUtils.getCurrLayer as IText).paragraphs) as IParagraph[]
 
       if (TextUtils.isSel(selEnd)) {
-        // Used to delete the selected-text-range
+        /**
+         *  Used to delete the selected-text-range
+         *  */
         const textTrimming = () => {
           paragraphs[selPos.pIndex].spans[selPos.sIndex].text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text.substring(0, selPos.offset)
           paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text = paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text.substr(selEnd.offset)
         }
         if (selPos.pIndex === selEnd.pIndex) {
-          // The startSel and endSel is at the same paragraph and span
+          /**
+           *  The startSel and endSel is at the same paragraph and span
+           *  */
           if (selPos.sIndex === selEnd.sIndex) {
             const text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text
             const removedText = text.substring(selPos.offset, selEnd.offset)
@@ -136,7 +137,9 @@ class ShortcutHandler {
           let pastedText = textArr[i]
           const p = paragraphs[selPos.pIndex]
           if (i === 0) {
-            // store the rest spans of to the textBuffer
+            /**
+             * Store the rest spans of to the textBuffer
+             */
             for (let sidx = selPos.sIndex; sidx < p.spans.length; sidx++) {
               if (sidx === selPos.sIndex) {
                 if (textArr.length === 1) {
@@ -175,7 +178,6 @@ class ShortcutHandler {
           selFinalPos.pIndex++
         }
         if (spanBuff.length) {
-          console.log(spanBuff)
           paragraphs.splice(selPos.pIndex, 0, {
             styles: paraStyles,
             spans: spanBuff
@@ -191,6 +193,17 @@ class ShortcutHandler {
           TextUtils.focus()
         })
       })
+    }
+  }
+
+  textSelectAll() {
+    const text = document.getElementById(`text-${TextUtils.layerIndex}`) as HTMLElement
+    const sel = window.getSelection()
+    const range = new Range()
+    if (sel) {
+      range.selectNodeContents(text)
+      sel.removeAllRanges()
+      sel.addRange(range)
     }
   }
 

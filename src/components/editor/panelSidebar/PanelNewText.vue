@@ -6,18 +6,12 @@
       div(class="panel-text__buttons mb-10")
         btn(class="full-width mb-10"
           :type="'text-heading'"
-          draggable="true"
-          @dragstart="dragStart($event, 'heading')"
           @click.native="handleAddText('heading')") Heading
         btn(class="full-width mb-10"
           :type="'text-subheading'"
-          draggable="true"
-          @dragstart="dragStart($event, 'subheading')"
           @click.native="handleAddText('subheading')") Subheading
         btn(class="full-width"
           :type="'text-body'"
-          draggable="true"
-          @dragstart="dragStart($event, 'body')"
           @click.native="handleAddText('body')") Body
       div(v-for="category in content"
         :key="category.category_id"
@@ -47,7 +41,6 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListColumn from '@/components/category/CategoryListColumn.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import TextUtils from '@/utils/textUtils'
-
 export default Vue.extend({
   components: {
     SearchBar,
