@@ -9,7 +9,7 @@ const SET_MORE_CONTENT = 'SET_MORE_CONTENT' as const
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
-    content: [],
+    content: {},
     categories: [],
     keyword: '',
     page: 0,
@@ -38,7 +38,7 @@ export default function (this: any) {
     getContent: async ({ commit, state }, params = {}) => {
       const { locale } = state
       const { keyword } = params
-      commit(SET_STATE, { pending: true, keyword, content: [] })
+      commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
         const { data } = await this.api({ locale, keyword, listAll: 1 })
         commit(SET_CONTENT, data.data)
@@ -47,9 +47,10 @@ export default function (this: any) {
       }
     },
 
-    getMoreContent: async ({ commit, getters }) => {
+    getMoreContent: async ({ commit, getters, state }) => {
       const { nextParams, hasNextPage } = getters
-      if (!hasNextPage) { return }
+      const { pending } = state
+      if (!hasNextPage || pending) { return }
       commit(SET_STATE, { pending: true })
       try {
         const { data } = await this.api(nextParams)
@@ -67,6 +68,14 @@ export default function (this: any) {
       } catch (error) {
         console.log(error)
       }
+    },
+    resetContent ({ commit }) {
+      commit(SET_STATE, {
+        content: {},
+        keyword: '',
+        page: 0,
+        nextPage: 0
+      })
     }
   }
 
@@ -89,7 +98,7 @@ export default function (this: any) {
       state.pending = false
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
-      state.content = objects.content
+      state.content = objects.content[0] || {}
       state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
       state.data = objects.data
       state.preview = objects.preview
@@ -97,7 +106,12 @@ export default function (this: any) {
       state.nextPage = objects.next_page
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
-      state.content = state.content.concat(objects.content)
+      const { list = [] } = state.content
+      const { list: newList } = objects.content[0] || {}
+      state.content = {
+        ...state.content,
+        list: list.concat(newList)
+      }
       state.pending = false
       state.nextPage = objects.next_page
     }
@@ -110,7 +124,7 @@ export default function (this: any) {
         locale,
         keyword,
         listAll: 1,
-        page_index: nextPage
+        pageIndex: nextPage
       }
     },
     hasNextPage (state) {

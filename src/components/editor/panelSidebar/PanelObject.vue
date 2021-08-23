@@ -1,51 +1,51 @@
 <template lang="pug">
-  div(class="panel-object")
+  div(class="panel-objects")
     search-bar(class="mb-15"
-      placeholder="Search objects"
+      placeholder="Search from our objects"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
-    div(class="panel-object__content")
-      div(v-if="hasSearchResult")
-        div(v-for="category in content"
-          :key="category.category_id"
-          class="panel-object__items")
-          category-object-item(v-for="item in category.list"
-            class="panel-object__item"
-            :key="item"
-            :src="`${host}/${item}/${preview}`"
-            :objectId="item"
-            @init="fetchJson")
-      category-list(v-else
-        :contents="categories"
-        @action="handleAction")
-        template(v-slot:item="{ item }")
-          category-object-item(class="panel-object__item"
-            :src="`${host}/${item}/${preview}`"
-            :objectId="item"
-            @init="fetchJson")
-      div(class="text-center")
-        svg-icon(v-if="pending"
-          :iconName="'loading'"
-          :iconColor="'white'"
-          :iconWidth="'20px'")
-    //- observer-sentinel(v-if="hasNextPage"
-    //-   target=".panel-object"
-    //-   @callback="handleLoadMore")
+    category-list(:list="list"
+      @loadMore="handleLoadMore")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+      template(v-slot:category-list-rows="{ list, title }")
+        category-list-rows(
+          v-if="!keyword"
+          :list="list"
+          :title="title"
+          @action="handleSearch")
+          template(v-slot:preview="{ id }")
+            category-object-item(class="panel-objects__item"
+              :src="`${host}/${id}/${preview}`"
+              :objectId="id"
+              @init="getContentJson")
+      template(v-slot:category-object-item="{ list }")
+        div(class="panel-objects__items")
+          category-object-item(v-for="id in list"
+            class="panel-objects__item"
+            :key="id"
+            :src="`${host}/${id}/${preview}`"
+            :objectId="id"
+            @init="getContentJson")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import { IListServiceContentData } from '@/interfaces/api'
+import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
+    CategoryListRows,
     CategoryObjectItem
   },
   computed: {
@@ -60,72 +60,84 @@ export default Vue.extend({
         'keyword'
       ]
     ),
-    ...mapGetters('objects', ['hasNextPage']),
-    hasSearchResult () {
-      return this.keyword
+    listCategories(): any[] {
+      const { keyword, categories } = this
+      if (keyword) { return [] }
+      return (categories as any[])
+        .map(category => ({
+          size: 140,
+          id: `rows_${category.list.join('_')}`,
+          type: 'category-list-rows',
+          list: category.list,
+          title: category.title
+        }))
+    },
+    listResult(): any[] {
+      const { keyword } = this
+      const { list = [] } = this.content
+      const tmpList = [...list]
+      const result = []
+      if (!keyword) { return [] }
+      while (tmpList.length) {
+        const rowItems = tmpList.splice(0, 3)
+        result.push({
+          id: `result_${rowItems.join('_')}`,
+          size: 90,
+          type: 'category-object-item',
+          list: rowItems,
+          sentinel: !tmpList.length
+        })
+      }
+      return result
+    },
+    list(): any[] {
+      return this.listCategories.concat(this.listResult)
     }
   },
   mounted() {
-    this.$store.dispatch('objects/getCategories')
+    this.getCategories()
+  },
+  destroyed() {
+    this.resetContent()
   },
   methods: {
-    handleAction(data: IListServiceContentData) {
-      const { title: keyword } = data
-      this.$store.dispatch('objects/getContent', { keyword })
-    },
-    handleSearch(keyword = '') {
-      this.$store.dispatch('objects/getContent', { keyword })
-    },
-    fetchJson(id: string) {
-      this.$store.dispatch('objects/getContentJson', id)
+    ...mapActions('objects',
+      [
+        'resetContent',
+        'getContent',
+        'getCategories',
+        'getMoreContent',
+        'getContentJson'
+      ]
+    ),
+    handleSearch(keyword: string) {
+      keyword ? this.getContent({ keyword }) : this.resetContent()
     },
     handleLoadMore() {
-      console.log('handleLoadMore')
+      this.getMoreContent()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.panel-object {
+.search-bar {
+  flex: 0 0 auto;
+}
+.panel-objects {
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
-  &__content {
-    flex: 1;
-    margin-right: -10px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background-color: unset;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      visibility: hidden;
-      background-color: #d9dbe1;
-      border: 3px solid #2c2f43;
-    }
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        visibility: visible;
-      }
-    }
-  }
   &__item {
     width: 80px;
     height: 80px;
+    margin: 0 auto;
     object-fit: contain;
     vertical-align: middle;
-    margin: auto;
   }
   &__items {
     display: grid;
-    grid-auto-rows: auto;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
   }
 }
 </style>
