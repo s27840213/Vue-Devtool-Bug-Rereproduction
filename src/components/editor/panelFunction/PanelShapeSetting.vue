@@ -8,7 +8,7 @@
         @click="selectColor(index)")
     span(class="color-picker__title text-blue-1 label-lg") Color Palette
     div(class="color-picker__colors")
-      div(class="color-picker__color palette picker")
+      div(class="color-picker__color__palette")
       div(v-for="(color, index) in colorPresets"
         class="color-picker__color palette"
         :style="paletteColorStyle(color, index)"
@@ -155,9 +155,5 @@ export default Vue.extend({
   &:hover {
     box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
-}
-
-.picker {
-  background: url('~@/assets/icon/color/picker.svg');
 }
 </style>
