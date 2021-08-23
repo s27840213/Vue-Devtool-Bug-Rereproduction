@@ -69,78 +69,6 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  "/put-asset/{asset_id}/{category}":
-    post:
-      description: 上傳使用者個人檔案後呼叫，將檔案資訊儲存在資料庫
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: category
-          in: path
-          description: |-
-            Asset category (image, font, design...)
-            Allowed characters: a-z.
-          required: true
-          type: string
-        - name: asset_id
-          in: path
-          description: |-
-            Asset id.
-            Allowed characters: 0-9a-zA-Z.
-            Allowed length: 23.
-          required: true
-          type: string
-        - in: body
-          name: putAssetInput
-          required: true
-          schema:
-            $ref: "#/definitions/putAssetInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/putAssetOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
-  "/put-design/{design_id}/{type}":
-    post:
-      description: 上傳公開設計(template或文字...)
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: type
-          in: path
-          description: |-
-            Type (text, template...)
-            Allowed characters: a-z.
-          required: true
-          type: string
-        - name: design_id
-          in: path
-          description: |-
-            Design id.
-            Allowed characters: 0-9a-zA-Z.
-            Allowed length: 20.
-          required: true
-          type: string
-        - in: body
-          name: putDesignInput
-          required: true
-          schema:
-            $ref: "#/definitions/putDesignInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/putDesignOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /register:
     post:
       consumes:
@@ -159,6 +87,47 @@ paths:
           schema:
             $ref: "#/definitions/Empty"
 definitions:
+  loginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+               How to upload asset file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
+
+              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
+               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+            required:
+              - download_url
+              - upload_map
   uploadMap:
     type: object
     properties:
@@ -172,6 +141,9 @@ definitions:
       path:
         type: string
         description: Allowed path for upload.
+  Empty:
+    type: object
+    title: Empty Schema
   listDesignOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -244,20 +216,16 @@ definitions:
               - font
               - photo
               - video
-  putAssetInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - file_ext
-          - file_name
-        properties:
-          file_name:
-            type: string
-            description: Original file name (to be displayed in app)
-          file_ext:
-            type: string
-            description: Original file extension (without dot)
+  apiCommonInput:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
+        description: |-
+          User token.
+          Allowed characters: 0-9a-zA-Z.
   registerInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -268,6 +236,14 @@ definitions:
           meta:
             type: string
             description: meta data
+  apiCommonResponse:
+    type: object
+    required:
+      - flag
+    properties:
+      flag:
+        type: number
+        description: "0: success, 1: fail, 2: token invalid"
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -316,83 +292,6 @@ definitions:
               description: File extension for asset
     description: To access the original file of the asset, the url is
       ${dl_url}/${id}/original
-  loginOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
-
-              upload_map: Map for uploading files to path in private bucket
-
-              upload_admin_map: Map for uploading files to path in public bucket.
-               How to upload asset file:
-              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
-
-              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
-
-              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
-
-              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
-               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
-               How to upload temporary edit json file:
-              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
-
-              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
-
-              3. Append key with name as 'file' and value as the File Object of the json
-
-              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
-            properties:
-              download_url:
-                type: string
-              upload_map:
-                $ref: "#/definitions/uploadMap"
-              upload_admin_map:
-                $ref: "#/definitions/uploadMap"
-            required:
-              - download_url
-              - upload_map
-  Empty:
-    type: object
-    title: Empty Schema
-  apiCommonInput:
-    type: object
-    required:
-      - token
-    properties:
-      token:
-        type: string
-        description: |-
-          User token.
-          Allowed characters: 0-9a-zA-Z.
-  putAssetOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - {}
-  putDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        properties:
-          update:
-            type: number
-            description: 0 to insert new design, 1 to update existed design
-          meta:
-            type: string
-            description: json string for optional data
-  apiCommonResponse:
-    type: object
-    required:
-      - flag
-    properties:
-      flag:
-        type: number
-        description: "0: success, 1: fail, 2: token invalid"
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -404,10 +303,6 @@ definitions:
           password:
             type: string
             description: User password
-  putDesignOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - {}
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
