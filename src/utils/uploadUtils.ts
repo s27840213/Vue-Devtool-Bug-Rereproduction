@@ -226,7 +226,7 @@ class UploadUtils {
       const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       targetLayer.active = false
       pageJSON.layers = [targetLayer]
-      pageJSON.backgroundColor = '#ffffff'
+      pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.src = 'none'
 
       // console.log(pageJSON)

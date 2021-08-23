@@ -65,6 +65,7 @@ export default Vue.extend({
       grid-template-columns: auto;
       grid-auto-flow: column;
       scroll-behavior: smooth;
+      text-align: left;
       &::-webkit-scrollbar {
         display: none;
       }

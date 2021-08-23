@@ -1,222 +1,183 @@
 <template lang="pug">
   div(class="panel-text")
-    div(class="panel-text__title mb-15")
-      span(class="text-blue-1 label-lg") Text
-    div(class="panel-text__buttons")
-      btn(class="full-width mb-10" :type="'text-heading'" @click.native="addText('heading')") Heading
-      btn(class="full-width mb-10" :type="'text-subheading'" @click.native="addText('subheading')") Subheading
-      btn(class="full-width" :type="'text-body'" @click.native="addText('body')") Body
-    tmp-text
+    search-bar(class="mb-15"
+      placeholder="Search from our text"
+      clear
+      :defaultKeyword="keyword"
+      @search="handleSearch")
+    category-list(:list="list"
+      @loadMore="handleLoadMore")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+      template(v-slot:default-text="{ list }")
+        div
+          btn(v-for="type in list"
+            :key="type"
+            class="panel-text__text-button mb-10"
+            :type="`text-${type.toLowerCase()}`"
+            @click.native="handleAddText(type)") {{ type }}
+      template(v-slot:category-list-rows="{ list, title }")
+        category-list-rows(
+          v-if="!keyword"
+          :list="list"
+          :title="title"
+          @action="handleSearch")
+          template(v-slot:preview="{ id }")
+            category-text-item(class="panel-text__item"
+              :src="`${host}/${id}/${preview}`"
+              :objectId="id"
+              @init="getContentJson")
+      template(v-slot:category-text-item="{ list, title }")
+        div(class="panel-text__items")
+          div(v-if="title"
+            class="panel-text__header") {{ title }}
+          category-text-item(v-for="id in list"
+            class="panel-text__item"
+            :key="id"
+            :src="`${host}/${id}/${preview}`"
+            :objectId="id"
+            @init="getContentJson")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import LayerFactary from '@/utils/layerFactary'
-import LayerUtils from '@/utils/layerUtils'
-import GeneralUtils from '@/utils/generalUtils'
+import CategoryList from '@/components/category/CategoryList.vue'
+import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import TextUtils from '@/utils/textUtils'
-import { mapGetters, mapMutations } from 'vuex'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-
 export default Vue.extend({
   components: {
-    SearchBar
-  },
-  data() {
-    return {
-      headingFormat: {
-        styles: {
-          writingMode: 'normal',
-          textEffect: {},
-          textShape: {}
-        },
-        paragraphs: [
-          {
-            styles: {
-              align: 'center',
-              fontSpacing: 0,
-              lineHeight: -1
-            },
-            spans: [
-              {
-                text: 'New Text',
-                styles: {
-                  font: 'Lobster',
-                  weight: 'bold',
-                  color: '#000000',
-                  writingMode: 'initial',
-                  decoration: 'none',
-                  style: 'normal',
-                  opacity: 1,
-                  size: 50
-                }
-              }
-            ]
-          }
-        ]
-      },
-      subheadingFormat: {
-        styles: {
-          writingMode: 'normal',
-          textEffect: {},
-          textShape: {}
-        },
-        paragraphs: [
-          {
-            styles: {
-              align: 'center',
-              fontSpacing: 0,
-              lineHeight: -1
-            },
-            spans: [
-              {
-                text: 'New Text',
-                styles: {
-                  font: 'Lobster',
-                  weight: 'bold',
-                  color: '#000000',
-                  writingMode: 'initial',
-                  decoration: 'none',
-                  style: 'normal',
-                  opacity: 1,
-                  size: 18
-                }
-              }
-            ]
-          }
-        ]
-      },
-      bodyFormat: {
-        styles: {
-          writingMode: 'normal',
-          textEffect: {},
-          textShape: {}
-        },
-        paragraphs: [
-          {
-            styles: {
-              align: 'center',
-              fontSpacing: 0,
-              lineHeight: -1
-            },
-            spans: [
-              {
-                text: 'New Text',
-                styles: {
-                  font: 'Lobster',
-                  weight: 'bold',
-                  color: '#000000',
-                  writingMode: 'initial',
-                  decoration: 'none',
-                  style: 'normal',
-                  opacity: 1,
-                  size: 14
-                }
-              }
-            ]
-          }
-        ]
-      }
-    }
+    SearchBar,
+    CategoryList,
+    CategoryListRows,
+    CategoryTextItem
   },
   computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      pageSize: 'getPageSize',
-      getLayers: 'getLayers',
-      getPage: 'getPage'
-    })
+    ...mapGetters({ scaleRatio: 'getPageScaleRatio' }),
+    ...mapState(
+      'textStock',
+      [
+        'categories',
+        'content',
+        'pending',
+        'host',
+        'preview',
+        'keyword'
+      ]
+    ),
+    listDefaultText(): any[] {
+      const { keyword } = this
+      if (keyword) { return [] }
+      const key = 'default-text'
+      return [{
+        type: key,
+        id: key,
+        size: 174,
+        list: ['Heading', 'Subheading', 'Body']
+      }]
+    },
+    listCategories(): any[] {
+      const { keyword, categories } = this
+      if (keyword) { return [] }
+      return (categories as any[])
+        .map(category => ({
+          size: 201,
+          id: `rows_${category.list.join('_')}`,
+          type: 'category-list-rows',
+          list: category.list,
+          title: category.title
+        }))
+    },
+    listResult(): any[] {
+      const { keyword } = this
+      const { list = [] } = this.content
+      const tmpList = [...list]
+      const result = []
+      while (tmpList.length) {
+        const title: string = !keyword && !result.length ? '所有結果' : ''
+        const rowItems = tmpList.splice(0, 2)
+        result.push({
+          id: `result_${rowItems.join('_')}`,
+          size: title ? (155 + 46) : 155,
+          type: 'category-text-item',
+          list: rowItems,
+          title,
+          sentinel: !tmpList.length
+        })
+      }
+      return result
+    },
+    list(): any[] {
+      return this.listDefaultText
+        .concat(this.listCategories)
+        .concat(this.listResult)
+    }
+  },
+  mounted() {
+    this.getCategories()
+    this.getContent()
+  },
+  destroyed() {
+    this.resetContent()
   },
   methods: {
-    ...mapMutations({
-      updateLayerProps: 'UPDATE_layerProps'
-    }),
-    addText(type: string) {
-      const newTextLayer = LayerFactary.newText(this.generateFormat(type))
-      LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+    ...mapActions('textStock',
+      [
+        'resetContent',
+        'getContent',
+        'getCategories',
+        'getMoreContent',
+        'getContentJson'
+      ]
+    ),
+    handleSearch(keyword: string) {
+      this.resetContent()
+      this.getContent({ keyword })
     },
-    generateFormat(type: string) {
-      switch (type) {
-        case 'heading': {
-          const format = GeneralUtils.deepCopy(this.headingFormat)
-          const size = TextUtils.getTextHW(format)
-          const textLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-            return (layer.type === 'text') && (!layer.moved)
-          }) as Array<IImage>
-
-          const x = textLayers.length === 0 ? this.pageSize.width / 2 - size.width / 2 : textLayers[textLayers.length - 1].styles.x
-          let y = textLayers.length === 0 ? this.pageSize.height / 2 - size.height / 2 : textLayers[textLayers.length - 1].styles.y + textLayers[textLayers.length - 1].styles.height
-          if (y > this.pageSize.height) {
-            y = textLayers[0].styles.y
-          }
-          Object.assign(format.styles, { x: x, y: y }, size)
-
-          /**
-           * Check if there already exist an heading on the page. If not, set the new one as.
-           */
-          const page = this.getPage(this.lastSelectedPageIndex) as IPage
-          if (!page.layers.find(l => l.type === 'text' && (l as IText).isHeading)) {
-            Object.assign(format, { isHeading: true })
-          }
-          return format
-        }
-        case 'subheading': {
-          const format = GeneralUtils.deepCopy(this.subheadingFormat)
-          const size = TextUtils.getTextHW(format)
-          const textLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-            return (layer.type === 'text') && (!layer.moved)
-          }) as Array<IImage>
-
-          const x = textLayers.length === 0 ? this.pageSize.width / 2 - size.width / 2 : textLayers[textLayers.length - 1].styles.x
-          let y = textLayers.length === 0 ? this.pageSize.height / 2 - size.height / 2 : textLayers[textLayers.length - 1].styles.y + textLayers[textLayers.length - 1].styles.height
-          if (y > this.pageSize.height) {
-            y = textLayers[0].styles.y
-          }
-          Object.assign(format.styles, { x: x, y: y }, size)
-
-          const page = this.getPage(this.lastSelectedPageIndex) as IPage
-          if (!page.layers.find(l => l.type === 'text' && (l as IText).isSubheading)) {
-            Object.assign(format, { isSubheading: true })
-          }
-          return format
-        }
-        case 'body': {
-          const format = GeneralUtils.deepCopy(this.bodyFormat)
-          const size = TextUtils.getTextHW(format)
-          const textLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-            return (layer.type === 'text') && (!layer.moved)
-          }) as Array<IImage>
-
-          const x = textLayers.length === 0 ? this.pageSize.width / 2 - size.width / 2 : textLayers[textLayers.length - 1].styles.x
-          let y = textLayers.length === 0 ? this.pageSize.height / 2 - size.height / 2 : textLayers[textLayers.length - 1].styles.y + textLayers[textLayers.length - 1].styles.height
-          if (y > this.pageSize.height) {
-            y = textLayers[0].styles.y
-          }
-          Object.assign(format.styles, { x: x, y: y }, size)
-
-          const page = this.getPage(this.lastSelectedPageIndex) as IPage
-          if (!page.layers.find(l => l.type === 'text' && (l as IText).isBody)) {
-            Object.assign(format, { isBody: true })
-          }
-          return format
-        }
-      }
+    handleLoadMore() {
+      this.getMoreContent()
+    },
+    handleAddText (type: string) {
+      TextUtils.addStanardText(type.toLowerCase())
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.search-bar {
+  flex: 0 0 auto;
+}
 .panel-text {
   @include size(100%, 100%);
-  &__title {
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  &__item {
+    width: 145px;
+    height: 145px;
+    margin: 0 auto;
+    object-fit: contain;
+    vertical-align: middle;
   }
-  &__buttons {
-    display: flex;
-    flex-direction: column;
+  &__items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 10px;
+  }
+  &__header {
+    grid-column: 1 / 3;
+    line-height: 26px;
+    color: #ffffff;
+    padding: 10px 0;
+    text-align: left;
+  }
+  &__text-button {
+    width: 250px;
   }
 }
 </style>

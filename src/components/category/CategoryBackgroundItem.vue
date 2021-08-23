@@ -30,7 +30,7 @@ export default Vue.extend({
       const { src } = event.target as HTMLImageElement
       this.$store.commit(
         'SET_backgroundImageSrc',
-        { pageIndex: this.lastSelectedPageIndex, imageSrc: src }
+        { pageIndex: this.lastSelectedPageIndex, imageSrc: src.replace('prev', 'larg') }
       )
     }
   }

@@ -16,7 +16,7 @@ export interface IListAssetsState {
 }
 
 export interface IListModuleState {
-  content: IListServiceContentData[]
+  content: Partial<IListServiceContentData>
   categories: IListServiceContentData[]
   keyword: string
   page: number

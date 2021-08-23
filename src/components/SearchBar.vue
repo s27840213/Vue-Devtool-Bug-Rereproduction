@@ -1,7 +1,7 @@
 <template lang="pug">
   form(class="search-bar bg-gray-6"
     @submit="onSearch")
-    input(class="search-bar__input"
+    input(class="search-bar__input body-2"
       type="text"
       v-model="keyword"
       :placeholder="placeholder")
