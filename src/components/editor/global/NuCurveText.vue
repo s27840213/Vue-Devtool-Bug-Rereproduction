@@ -176,7 +176,7 @@ export default Vue.extend({
             textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
           }
-          console.log(textHeight)
+          console.log(textWidth)
           this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
