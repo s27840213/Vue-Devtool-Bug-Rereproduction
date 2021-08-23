@@ -234,5 +234,8 @@ export default Vue.extend({
     cursor: pointer;
     position: relative;
   }
+  &::v-deep .vue-recycle-scroller__item-view:first-child {
+    z-index: 1;
+  }
 }
 </style>
