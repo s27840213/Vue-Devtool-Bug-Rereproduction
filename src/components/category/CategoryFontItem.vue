@@ -2,6 +2,7 @@
   img(class="pointer"
     :src="src"
     style="object-fit: contain;"
+    draggable="false"
     @click="setFont()"
     @error="handleNotFound")
 </template>
@@ -10,7 +11,6 @@
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IText } from '@/interfaces/layer'
 import TextPropUtils from '@/utils/textPropUtils'
 import { IFont } from '@/interfaces/text'
 
@@ -23,8 +23,6 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      scaleRatio: 'getPageScaleRatio',
       getJson: 'getJson'
     })
   },
@@ -34,7 +32,6 @@ export default Vue.extend({
     },
     async setFont() {
       const fontStore = this.fontStore as Array<IFont>
-      console.log(this.objectId)
       if (!fontStore.some(font => font.face === this.objectId)) {
         const newFont = new FontFace(this.objectId, this.getFontUrl(this.objectId))
         await newFont.load().then(newFont => {
@@ -43,20 +40,7 @@ export default Vue.extend({
         })
       }
       TextPropUtils.onPropertyClick('fontFamily', this.objectId, this.sel.start, this.sel.end)
-      // TextPropUtils.updateTextPropsState({ font: font.name })
-    },
-    addText() {
-      const json = this.getJson(this.objectId) as IText
-      Object.assign(json.styles, { x: undefined, y: undefined })
-      Object.assign(json, { editing: false })
-      switch (json.type) {
-        case 'text':
-          return TextUtils.addText(json)
-        case 'group':
-          return TextUtils.addGroup(json)
-        default:
-          return null
-      }
+      TextPropUtils.updateTextPropsState({ font: this.objectId })
     },
     getFontUrl(fontID: string): string {
       return `url("https://template.vivipic.com/font/${fontID}/font")`

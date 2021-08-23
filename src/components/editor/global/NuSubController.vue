@@ -309,7 +309,9 @@ export default Vue.extend({
                 e.preventDefault()
                 return
               } else {
-                ControlUtils.textStopPropagation(e)
+                if (e.key === 'Backspace' || e.key === ' ') {
+                  e.stopPropagation()
+                }
               }
             }
           }

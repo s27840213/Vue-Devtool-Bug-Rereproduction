@@ -6,12 +6,24 @@
     div(v-for="category in content"
       :key="category.category_id"
       class="panel-fonts__items")
-      category-font-item(v-for="item in category.list"
-        class="panel-fonts__item"
-        :key="item"
-        :src="`${host}/${item}/${preview}`"
-        :objectId="item"
-        @init="fetchJson")
+      div(class="panel-fonts__items-wrapper" v-for="item in category.list")
+        div(class="panel-fonts__item-wrapper")
+          category-font-item(class="panel-fonts__item"
+            :key="item"
+            :src="`${host}/${item}/${preview}`"
+            :objectId="item"
+            @init="fetchJson")
+        //- div(class="panel-fonts__item-wrapper")
+        //-   category-font-item(class="panel-fonts__item"
+        //-     :key="item"
+        //-     :src="`${host}/${item}/${preview2}`"
+        //-     :objectId="item"
+        //-     @init="fetchJson")
+        //- div(v-if="props.font === item" class="panel-fonts__done-icon")
+        //-   svg-icon(:iconName="'done'"
+        //-     :iconColor="'gray-2'"
+        //-     :iconWidth="'25px'")
+
     div
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -52,7 +64,9 @@ export default Vue.extend({
     // }
     console.log('font panel mounted')
     await this.$store.dispatch('font/getContent')
+    console.log(this.pending)
     console.log(this.content)
+    console.log(this.preview)
   },
   computed: {
     ...mapState(
@@ -63,6 +77,7 @@ export default Vue.extend({
         'pending',
         'host',
         'preview',
+        'preview2',
         'keyword'
       ]
     ),
@@ -82,32 +97,26 @@ export default Vue.extend({
     closeFontsPanel() {
       this.$emit('closeFontsPanel')
     },
-    setFont(font: { name: string, face: string }) {
-      TextPropUTils.onPropertyClick('fontFamily', font.face, this.sel.start, this.sel.end)
-      TextPropUTils.updateTextPropsState({ font: font.name })
-    },
     fetchJson (id: string) {
       this.$store.dispatch('font/getContentJson', id)
     },
+    // TODO //
     updateFontPreset(e: any) {
-    //   const target = e.target.files[0]
-    //   const fontName: string = target.name.split('.')[0]
-    //   const objectUrl = window.URL.createObjectURL(target)
-    //   const style = document.createElement('style')
-    //   style.innerHTML = `
-    //   @font-face {
-    //     font-family: ${fontName};
-    //     src: url(${objectUrl});
-    //   }
-    // `
-    //   document.head.appendChild(style)
-    //   this.fontPreset.push({ name: fontName, face: fontName })
+      const target = e.target.files[0]
+      const fontName: string = target.name.split('.')[0]
+      const objectUrl = window.URL.createObjectURL(target)
+      const style = document.createElement('style')
+      style.innerHTML = `
+      @font-face {
+        font-family: ${fontName};
+        src: url(${objectUrl});
+      }
+    `
+      document.head.appendChild(style)
+      TextUtils.updateFontFace({ name: fontName, face: fontName })
     }
-    // styles(font: { name: string, face: string }) {
+    // styles(fontFace: string ) {
     //   return {
-    //     'font-family': font.face,
-    //     'background-color': this.currFont === font.name ? 'rgba(15, 40, 71, 0.14)' : '',
-    //     'border-radius': this.currFont === font.name ? '5px' : ''
     //   }
     // }
   }
@@ -147,10 +156,22 @@ export default Vue.extend({
     grid-gap: 10px;
     margin-left: auto;
   }
+  &__items-wrapper {
+    display: grid;
+    grid-template-columns: 6fr 5fr 1fr;
+    grid-gap: 10px;
+  }
+  &__item-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
   &__item {
-  // width:%;
-  height: 30px;
+  height: 25px;
   object-fit: contain;
+  }
+  &__done-icon {
+    position: absolute;
+    right: 0;
   }
 }
 </style>

@@ -8,6 +8,7 @@
         @click="selectColor(index)")
     span(class="color-picker__title text-blue-1 label-lg") Color Palette
     div(class="color-picker__colors")
+      div(class="color-picker__color__palette")
       div(v-for="(color, index) in colorPresets"
         class="color-picker__color palette"
         :style="paletteColorStyle(color, index)"
@@ -135,6 +136,9 @@ export default Vue.extend({
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+  }
+  &__color-palette {
+
   }
   &__color {
     @include size(clamp(30px, 2vw, 50px), clamp(30px, 2vw, 50px));

@@ -99,9 +99,6 @@ const mutations: MutationTree<ITextState> = {
   UPDATE_fontFace(state: ITextState, data: IFont) {
     state.fontStore.push(data)
   },
-  SET_fontPreset(state: ITextState, data: IFont) {
-    state.fontStore.push(data)
-  },
   SET_default (state: ITextState) {
     const defaultState = getDefaultState()
     Object.entries(defaultState.props).forEach(([k, v]) => {

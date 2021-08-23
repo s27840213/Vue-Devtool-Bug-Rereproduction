@@ -117,6 +117,7 @@ export interface IListServiceData {
   data: string
   host: string
   preview: string
+  preview2?: string
   next_page?: number
 }
 

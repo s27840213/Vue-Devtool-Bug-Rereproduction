@@ -132,12 +132,6 @@ class Controller {
     }
   }
 
-  textStopPropagation(e: KeyboardEvent) {
-    if (e.key === 'Backspace' || e.key === ' ') {
-      e.stopPropagation()
-    }
-  }
-
   getSpanLength(text: IText, pIndex: number): number {
     return text.paragraphs[pIndex].spans.length <= 0 ? 1 : text.paragraphs[pIndex].spans.length
   }

@@ -26,6 +26,7 @@ export interface IListModuleState {
   host: string
   data: string
   preview: string
+  preview2?: string
   locale: string
   error: string
 }

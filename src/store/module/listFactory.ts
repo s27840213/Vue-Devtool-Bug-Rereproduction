@@ -93,6 +93,7 @@ export default function (this: any) {
       state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
       state.data = objects.data
       state.preview = objects.preview
+      state.preview2 = objects.preview2
       state.pending = false
       state.nextPage = objects.next_page
     },

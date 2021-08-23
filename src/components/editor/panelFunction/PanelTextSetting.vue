@@ -2,7 +2,8 @@
   div(class="text-setting" @mousedown="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer record-selection" @click.native="openFontsPanel")
-      span(class="body-2 text-gray-2") {{ props.font }}
+      //- span(class="body-2 text-gray-2") {{ props.font }}
+      img(class="text-setting__text-preview" :src="getFontPrev")
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
@@ -165,6 +166,10 @@ export default Vue.extend({
           }
         })
       }
+    },
+    getFontPrev(): string {
+      console.log(this.props.font)
+      return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     }
   },
   methods: {
@@ -549,6 +554,9 @@ export default Vue.extend({
   &__font-stepper {
     display: flex;
     flex-direction: column;
+  }
+  &__text-preview {
+    height: 30px;
   }
 }
 .color-slip {
