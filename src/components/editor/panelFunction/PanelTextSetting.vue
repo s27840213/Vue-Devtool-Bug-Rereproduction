@@ -26,7 +26,7 @@
         div(class="color-slip record-selection"
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
-        div(class="full-width text-left ml-10")
+        div(class="full-width text-left ml-10 overflow-hidden ")
           input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @click="handleColorModal")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"

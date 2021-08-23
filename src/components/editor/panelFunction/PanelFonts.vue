@@ -3,10 +3,8 @@
     div(class="panel-fonts__title")
       span(class="text-blue-1 label-lg") Fonts
     search-bar(:placeholder="'Search font'")
-    div(v-for="category in content"
-      :key="category.category_id"
-      class="panel-fonts__items")
-      div(class="panel-fonts__items-wrapper" v-for="item in category.list")
+    div(class="panel-fonts__items")
+      div(class="panel-fonts__items-wrapper" v-for="item in content.list")
         div(class="panel-fonts__item-wrapper")
           category-font-item(class="panel-fonts__item"
             :key="item"
@@ -64,9 +62,7 @@ export default Vue.extend({
     // }
     console.log('font panel mounted')
     await this.$store.dispatch('font/getContent')
-    console.log(this.pending)
-    console.log(this.content)
-    console.log(this.preview)
+    console.log(this.content.list)
   },
   computed: {
     ...mapState(
