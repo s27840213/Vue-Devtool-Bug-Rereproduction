@@ -155,6 +155,7 @@ export default Vue.extend({
     styles(styles: any, idx: number) {
       const { transforms, bend, textHeight, minHeight } = this
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
+      console.log(`${styles.font} imported: `, document.fonts.check(`16px ${styles.font}`))
       return Object.assign(
         CssConveter.convertFontStyle(styles),
         { transform: transforms[idx] || 'none' },
@@ -175,6 +176,7 @@ export default Vue.extend({
             textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
           }
+          console.log(textWidth)
           this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)

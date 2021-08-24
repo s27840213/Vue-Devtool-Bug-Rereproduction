@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210818"
+  version: "20210823"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -27,27 +27,6 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  /list-background:
-    post:
-      description: 取得所有background設計列表
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: listBackgroundInput
-          required: true
-          schema:
-            $ref: "#/definitions/listBackgroundInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/listBackgroundOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /list-design:
     post:
       description: 取得各種設計(background/font/svg/template/text)列表
@@ -66,69 +45,6 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/listDesignOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
-  /list-svg:
-    post:
-      description: 取得所有svg設計列表
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: listSvgInput
-          required: true
-          schema:
-            $ref: "#/definitions/listSvgInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/listSvgOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
-  /list-template:
-    post:
-      description: 取得所有template設計列表
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: listTemplateInput
-          required: true
-          schema:
-            $ref: "#/definitions/listTemplateInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/listTemplateOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
-  /list-text:
-    post:
-      description: 列出所有文字設計列表
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: listTextInput
-          required: true
-          schema:
-            $ref: "#/definitions/listTextInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/listTextOutput"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -153,78 +69,6 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  "/put-asset/{asset_id}/{category}":
-    post:
-      description: 上傳使用者個人檔案後呼叫，將檔案資訊儲存在資料庫
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: category
-          in: path
-          description: |-
-            Asset category (image, font, design...)
-            Allowed characters: a-z.
-          required: true
-          type: string
-        - name: asset_id
-          in: path
-          description: |-
-            Asset id.
-            Allowed characters: 0-9a-zA-Z.
-            Allowed length: 23.
-          required: true
-          type: string
-        - in: body
-          name: putAssetInput
-          required: true
-          schema:
-            $ref: "#/definitions/putAssetInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/putAssetOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
-  "/put-design/{design_id}/{type}":
-    post:
-      description: 上傳公開設計(template或文字...)
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: type
-          in: path
-          description: |-
-            Type (text, template...)
-            Allowed characters: a-z.
-          required: true
-          type: string
-        - name: design_id
-          in: path
-          description: |-
-            Design id.
-            Allowed characters: 0-9a-zA-Z.
-            Allowed length: 20.
-          required: true
-          type: string
-        - in: body
-          name: putDesignInput
-          required: true
-          schema:
-            $ref: "#/definitions/putDesignInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/putDesignOutput"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /register:
     post:
       consumes:
@@ -242,235 +86,7 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/Empty"
-  /svg-parser:
-    post:
-      description: 解析svg檔並轉換成json（APP不需使用）
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: svgParserInput
-          required: true
-          schema:
-            $ref: "#/definitions/svgParserInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/svgParserOutput"
 definitions:
-  uploadMap:
-    type: object
-    properties:
-      url:
-        type: string
-        description: Root url for upload files.
-      fields:
-        type: object
-        description: Append all fields to upload form.
-        properties: {}
-      path:
-        type: string
-        description: Allowed path for upload.
-  listAssetOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            properties:
-              photo:
-                $ref: "#/definitions/assetMap"
-              video:
-                $ref: "#/definitions/assetMap"
-              font:
-                $ref: "#/definitions/assetMap"
-              design:
-                $ref: "#/definitions/assetMap"
-            required:
-              - design
-              - font
-              - photo
-              - video
-  listBackgroundInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-        properties:
-          category:
-            type: number
-            description: category id
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index
-  putAssetInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - file_ext
-          - file_name
-        properties:
-          file_name:
-            type: string
-            description: Original file name (to be displayed in app)
-          file_ext:
-            type: string
-            description: Original file extension (without dot)
-  listTemplateOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for template preview and json.
-
-              preview: File name for template preview.
-
-              json: File name for template json.
-
-              content: array of template category, with category_id as id of category (for query), title as categroy name, and list as array of template ids.
-
-              next_page: pagination index for next query, only for query with non-empty category param.
-
-              Url for template preview: `${host}/${template_id}/${preview}`. Url for template json: `${host}/${template_id}/${json}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              json:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
-            required:
-              - content
-              - host
-              - json
-              - preview
-  registerInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - meta
-        properties:
-          meta:
-            type: string
-            description: meta data
-  listBackgroundOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for background preview and json.
-
-              preview: File name for background preview.
-
-              json: File name for background json.
-
-              content: array of background category, with category_id as id of category (for query), title as categroy name, and list as array of background ids.
-
-              next_page: pagination index for next query, only for query with non-empty category param.
-
-              Url for background preview: `${host}/${background_id}/${preview}`. Url for background json: `${host}/${background_id}/${json}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              json:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
-            required:
-              - content
-              - host
-              - json
-              - preview
-  listTemplateInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-        properties:
-          category:
-            type: number
-            description: category id
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index
-  assetMap:
-    type: object
-    properties:
-      title:
-        type: string
-        description: Category title for assets
-      content:
-        type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Asset id
-            file_name:
-              type: string
-              description: File name for asset, for display purpose
-            file_ext:
-              type: string
-              description: File extension for asset
-    description: To access the original file of the asset, the url is
-      ${dl_url}/${id}/original
   loginOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -512,78 +128,22 @@ definitions:
             required:
               - download_url
               - upload_map
+  uploadMap:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Root url for upload files.
+      fields:
+        type: object
+        description: Append all fields to upload form.
+        properties: {}
+      path:
+        type: string
+        description: Allowed path for upload.
   Empty:
     type: object
     title: Empty Schema
-  apiCommonInput:
-    type: object
-    required:
-      - token
-    properties:
-      token:
-        type: string
-        description: |-
-          User token.
-          Allowed characters: 0-9a-zA-Z.
-  listTextInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-        properties:
-          category:
-            type: number
-            description: category id
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index
-  putAssetOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - {}
-  putDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        properties:
-          update:
-            type: number
-            description: 0 to insert new design, 1 to update existed design
-          meta:
-            type: string
-            description: json string for optional data
-  apiCommonResponse:
-    type: object
-    required:
-      - flag
-    properties:
-      flag:
-        type: number
-        description: "0: success, 1: fail, 2: token invalid"
-  listSvgInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-        properties:
-          category:
-            type: number
-            description: category id
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index
   listDesignOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -635,74 +195,55 @@ definitions:
               - data
               - host
               - preview
-  svgParserInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - category
-          - folder
-          - scale_type
-        properties:
-          folder:
-            type: string
-            description: svg folder name in S3 (no ending slash)
-          category:
-            type: string
-            description: svg category (A/B/C)
-          scale_type:
-            type: number
-            description: scale type (1/2/3)
-          duplicate:
-            type: number
-            description: create duplicate entry in database
-  listTextOutput:
+  listAssetOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
       - type: object
         properties:
           data:
             type: object
-            description: >-
-              
-              host: Host domain for text preview and json.
-
-              preview: File name for text preview.
-
-              json: File name for text json.
-
-              content: array of text category, with category_id as id of category (for query), title as categroy name, and list as array of text ids.
-
-              next_page: pagination index for next query, only for query with non-empty category param.
-
-              Url for text preview: `${host}/${text_id}/${preview}`. Url for text json: `${host}/${text_id}/${json}`.
             properties:
-              host:
-                type: string
-              preview:
-                type: string
-              json:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
+              photo:
+                $ref: "#/definitions/assetMap"
+              video:
+                $ref: "#/definitions/assetMap"
+              font:
+                $ref: "#/definitions/assetMap"
+              design:
+                $ref: "#/definitions/assetMap"
             required:
-              - content
-              - host
-              - json
-              - preview
+              - design
+              - font
+              - photo
+              - video
+  apiCommonInput:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
+        description: |-
+          User token.
+          Allowed characters: 0-9a-zA-Z.
+  registerInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - meta
+        properties:
+          meta:
+            type: string
+            description: meta data
+  apiCommonResponse:
+    type: object
+    required:
+      - flag
+    properties:
+      flag:
+        type: number
+        description: "0: success, 1: fail, 2: token invalid"
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -729,14 +270,28 @@ definitions:
           keyword:
             type: string
             description: keyword to search
-  svgParserOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          msg:
-            type: string
-            description: error message
+  assetMap:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Category title for assets
+      content:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Asset id
+            file_name:
+              type: string
+              description: File name for asset, for display purpose
+            file_ext:
+              type: string
+              description: File extension for asset
+    description: To access the original file of the asset, the url is
+      ${dl_url}/${id}/original
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -748,57 +303,6 @@ definitions:
           password:
             type: string
             description: User password
-  listSvgOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for svg preview and json.
-
-              preview: File name for svg preview.
-
-              json: File name for svg json.
-
-              content: array of svg category, with category_id as id of category (for query), title as categroy name, and list as array of svg ids.
-
-              next_page: pagination index for next query, only for query with non-empty category param.
-
-              Url for svg preview: `${host}/${svg_id}/${preview}`. Url for svg json: `${host}/${svg_id}/${json}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              json:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
-            required:
-              - content
-              - host
-              - json
-              - preview
-  putDesignOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - {}
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"

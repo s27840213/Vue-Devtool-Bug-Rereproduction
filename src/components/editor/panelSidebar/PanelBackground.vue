@@ -17,9 +17,9 @@
           div(class="text-left py-5 text-white") Color
           div(class="panel-bg__colors mb-15")
             color-picker(v-if="openColorPicker"
-              class="panel-bg__color-picker"
               v-click-outside="handleColorPicker"
-              currentColor="#ffffff"
+              class="panel-bg__color-picker"
+              :currentColor="currentPageColor"
               @update="setBgColor")
             div(class="panel-bg__color"
               @click="handleColorPicker")
@@ -93,6 +93,7 @@ export default Vue.extend({
       ]
     ),
     ...mapGetters({
+      getPage: 'getPage',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       defaultBgColor: 'color/getDefaultBgColor'
     }),
@@ -141,6 +142,9 @@ export default Vue.extend({
       return this.defaultBackgroundColors
         .concat(this.listCategories)
         .concat(this.listResult)
+    },
+    currentPageColor(): string {
+      return this.getPage(this.lastSelectedPageIndex).backgroundColor
     }
   },
   mounted() {
