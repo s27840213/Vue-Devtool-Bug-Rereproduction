@@ -74,7 +74,9 @@ class CssConveter {
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
-      if (prop === 'opacity') {
+      if (prop === 'size') {
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
+      } else if (prop === 'opacity') {
         result[styleMap[prop]] = `${sourceStyles[prop]}`
       } else if (prop === 'fontSpacing' || prop === 'lineHeight') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`

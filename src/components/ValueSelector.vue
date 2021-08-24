@@ -2,7 +2,7 @@
   div(class="value-selector")
     div(class="value-selector__wrapper")
       ul
-        li(v-for="i in 88" :key="i" :style="liStyles(i)")
+        li(v-for="i in valueArray" :key="i" :style="liStyles(i)")
           button(@click="setValue(i)")
             div(class="value-selector__value")
               span {{ i }}
@@ -15,6 +15,7 @@ import { mapState } from 'vuex'
 
 export default Vue.extend({
   props: {
+    valueArray: Array,
     value: String
   },
   data() {

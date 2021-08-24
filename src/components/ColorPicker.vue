@@ -70,8 +70,8 @@ export default Vue.extend({
   },
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
-    root.focus()
     const input = this.$refs.input as HTMLInputElement
+    root.focus()
     input.select()
   },
   computed: {

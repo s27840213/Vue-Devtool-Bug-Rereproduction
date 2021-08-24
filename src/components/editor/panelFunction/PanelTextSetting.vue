@@ -3,19 +3,21 @@
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer record-selection" @click.native="openFontsPanel")
       //- span(class="body-2 text-gray-2") {{ props.font }}
-      img(class="text-setting__text-preview" :src="getFontPrev")
+      img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")
+      span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     div(class="text-setting__row2")
       property-bar(class="relative")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-2)"
+        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-1)"
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" v-model.lazy="props.fontSize")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(2)"
+        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(1)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
+                    :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
@@ -108,7 +110,7 @@ import { IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import TextPropUtils from '@/utils/textPropUtils'
+import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import { parseInt, toNumber } from 'lodash'
 import { ISelection } from '@/interfaces/text'
 import GeneralUtils from '@/utils/generalUtils'
@@ -132,7 +134,8 @@ export default Vue.extend({
         lineHeight: { min: 0, max: 300 },
         fontSpacing: { min: -200, max: 800 },
         opacity: { min: 0, max: 100 }
-      }
+      },
+      fontSelectValue: fontSelectValue
     }
   },
   mounted() {
@@ -168,7 +171,6 @@ export default Vue.extend({
       }
     },
     getFontPrev(): string {
-      console.log(this.props.font)
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     }
   },
@@ -186,6 +188,8 @@ export default Vue.extend({
       }
     },
     handleColorUpdate (color: string) {
+      if (color === this.props.color) return
+
       const nan = {
         pIndex: NaN,
         sIndex: NaN,
@@ -383,10 +387,10 @@ export default Vue.extend({
     },
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
-      if (this.isValidInt(value)) {
-        value = this.boundValue(parseInt(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+      if (this.isValidFloat(value)) {
+        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          TextPropUtils.spanPropertyHandler('fontSize', parseInt(value), this.sel.start, this.sel.end)
+          TextPropUtils.spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
           TextPropUtils.updateTextPropsState({ fontSize: value })
         })
       }
@@ -557,6 +561,8 @@ export default Vue.extend({
   }
   &__text-preview {
     height: 30px;
+    display: inline-flex;
+    align-items: center;
   }
 }
 .color-slip {

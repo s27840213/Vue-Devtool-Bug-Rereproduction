@@ -11,17 +11,16 @@
             :src="`${host}/${item}/${preview}`"
             :objectId="item"
             @init="fetchJson")
-        //- div(class="panel-fonts__item-wrapper")
-        //-   category-font-item(class="panel-fonts__item"
-        //-     :key="item"
-        //-     :src="`${host}/${item}/${preview2}`"
-        //-     :objectId="item"
-        //-     @init="fetchJson")
-        //- div(v-if="props.font === item" class="panel-fonts__done-icon")
-        //-   svg-icon(:iconName="'done'"
-        //-     :iconColor="'gray-2'"
-        //-     :iconWidth="'25px'")
-
+        div(class="panel-fonts__item-wrapper")
+          category-font-item(class="panel-fonts__item"
+            :key="item"
+            :src="`${host}/${item}/${preview2}`"
+            :objectId="item"
+            @init="fetchJson")
+        div(v-if="props.font === item" class="panel-fonts__done-icon")
+          svg-icon(:iconName="'done'"
+            :iconColor="'gray-2'"
+            :iconWidth="'25px'")
     div
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -57,12 +56,7 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    // if (this.props.font) {
-    //   this.currFont = this.props.font
-    // }
-    console.log('font panel mounted')
     await this.$store.dispatch('font/getContent')
-    console.log(this.content.list)
   },
   computed: {
     ...mapState(
@@ -111,10 +105,6 @@ export default Vue.extend({
       document.head.appendChild(style)
       TextUtils.updateFontFace({ name: fontName, face: fontName })
     }
-    // styles(fontFace: string ) {
-    //   return {
-    //   }
-    // }
   }
 })
 </script>
@@ -154,7 +144,7 @@ export default Vue.extend({
   }
   &__items-wrapper {
     display: grid;
-    grid-template-columns: 6fr 5fr 1fr;
+    grid-template-columns: 7fr 4fr 1fr;
     grid-gap: 10px;
   }
   &__item-wrapper {

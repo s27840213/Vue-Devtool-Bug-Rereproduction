@@ -1,16 +1,22 @@
 <template lang="pug">
-  div(class="color-picker")
+  div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    div(class="color-picker__colors")
+    div(class="shape-setting__colors")
       div(v-for="(color, index) in getColors"
-        class="color-picker__color"
+        class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    span(class="color-picker__title text-blue-1 label-lg") Color Palette
-    div(class="color-picker__colors")
-      div(class="color-picker__color__palette")
+    span(class="shape-setting__title text-blue-1 label-lg") Color Palette
+    div(class="shape-setting__colors")
+      div(class="shape-setting__color rainbow" ref="rainbow"
+        :style="colorPickerStyles()" @click="handleColorModalOn")
+        color-picker(v-if="openColorPicker"
+          class="shape-setting__color-picker"
+          v-click-outside="handleColorModalOff"
+          :currentColor="getColors[currSelectedColorIndex]"
+          @update="handleColorUpdate")
       div(v-for="(color, index) in colorPresets"
-        class="color-picker__color palette"
+        class="shape-setting__color palette"
         :style="paletteColorStyle(color, index)"
         @click="setColor(color, index)")
 </template>
@@ -19,10 +25,16 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
+import ColorPicker from '@/components/ColorPicker.vue'
 
 export default Vue.extend({
   components: {
-    SearchBar
+    SearchBar,
+    ColorPicker
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   computed: {
     ...mapGetters({
@@ -50,7 +62,8 @@ export default Vue.extend({
         '#FF0000'
       ],
       currSelectedColorIndex: 0,
-      paletteRecord: [{ key: 0, value: -1 }]
+      openColorPicker: false,
+      paletteRecord: [{ key: 0, value: NaN }]
     }
   },
   watch: {
@@ -85,6 +98,28 @@ export default Vue.extend({
         }
       }
     },
+    colorPickerStyles() {
+      const isSelected = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)?.value === -1
+      return {
+        background: `url(${require('@/assets/img/png/picker.png')})`,
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover',
+        boxShadow: isSelected ? '0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff' : ''
+      }
+    },
+    handleColorModalOn(e: MouseEvent) {
+      this.openColorPicker = true
+    },
+    handleColorModalOff(e: MouseEvent) {
+      this.openColorPicker = false
+    },
+    handleColorUpdate(color: string) {
+      this.setColor(color, this.currSelectedColorIndex)
+      const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
+      if (record) {
+        record.value = -1
+      }
+    },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
     },
@@ -107,7 +142,7 @@ export default Vue.extend({
     initilizeRecord() {
       this.paletteRecord = []
       for (let i = 0; i < this.getColors.length; i++) {
-        const record = { key: i, value: -1 }
+        const record = { key: i, value: NaN }
         this.paletteRecord.push(record)
       }
     }
@@ -116,7 +151,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.color-picker {
+.shape-setting {
   @include size(100%, 100%);
   text-align: center;
   display: grid;
@@ -137,9 +172,6 @@ export default Vue.extend({
     display: flex;
     flex-wrap: wrap;
   }
-  &__color-palette {
-
-  }
   &__color {
     @include size(clamp(30px, 2vw, 50px), clamp(30px, 2vw, 50px));
     margin: 5px;
@@ -150,10 +182,18 @@ export default Vue.extend({
     }
     transition: box-shadow .2s ease-in-out;
   }
+  &__color-picker {
+    position: absolute;
+    z-index: 10;
+    left: -5px;
+    top: 35px;
+  }
 }
-.palette {
+.rainbow {
+  position: relative;
   &:hover {
     box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
 }
+
 </style>

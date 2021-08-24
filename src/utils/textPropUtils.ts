@@ -318,41 +318,30 @@ class TextPropUtils {
         p.styles.size = fontSize
       }
     }
-
-    if (!sel || typeof tmpLayerIndex !== 'undefined') return
+    // if (!sel || typeof tmpLayerIndex !== 'undefined') return
 
     if (TextUtils.isSel(end)) {
-      console.log((isStartContainerDivided))
       if (isStartContainerDivided) {
         if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
           start.sIndex++
+          start.offset = 0
           end.sIndex++
           end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
         } else {
           start.sIndex++
         }
       }
-      console.log('start')
-      console.log(start)
-      console.log('end')
-      console.log(end)
       TextUtils.updateSelection(start, end)
     }
+
+    if (!sel || typeof tmpLayerIndex !== 'undefined' || propName === 'color') return
 
     // Below is used to re-select the caret-range after the props are applied
     Vue.nextTick(() => {
       if (TextUtils.isSel(end)) {
-        if (isStartContainerDivided) {
-          if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-            start.sIndex++
-            end.sIndex++
-            end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-          } else {
-            start.sIndex++
-          }
-        }
         TextUtils.focus(start, end)
-        TextUtils.updateSelection(start, end)
+        // TextUtils.updateSelection(start, end)
+        this.updateTextPropsState()
       } else {
         const select = window.getSelection()
         if (select) {
@@ -808,3 +797,7 @@ class TextPropUtils {
 }
 
 export default new TextPropUtils()
+
+export const fontSelectValue = [
+  6, 8, 10, 12, 14, 16, 18, 20, 23, 26, 30, 34, 38, 44, 50, 58, 66, 74, 82, 90, 98, 114, 138, 162
+]
