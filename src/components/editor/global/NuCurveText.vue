@@ -64,11 +64,11 @@ export default Vue.extend({
       )
     },
     pStyle(): any {
-      const { minHeight, config } = this
+      const { area, config } = this
       return {
         margin: 0,
-        height: `${minHeight}px`,
-        minWidth: `${config.styles.width / config.styles.scale}px`
+        minHeight: `${area.height / config.styles.scale}px`,
+        minWidth: `${area.width / config.styles.scale}px`
       }
     },
     curveStyle(): any {
@@ -98,12 +98,6 @@ export default Vue.extend({
         width: `${size / styles.scale}px`,
         height: `${size / styles.scale}px`
       }
-    },
-    position(): any {
-      return {
-        x: this.x - (this.area.width / 2),
-        y: (this.y + this.minHeight) - this.area.height
-      }
     }
   },
   watch: {
@@ -116,11 +110,11 @@ export default Vue.extend({
       }
     },
     area (val) {
-      const { bend } = this
+      const { bend, config } = this
       let y = this.y
       const x = this.x - (val.width / 2)
       if (bend < 0) {
-        y = this.y + this.minHeight - val.height
+        y = this.y + (this.minHeight * config.styles.scale) - val.height
       }
       this.handleCurveTextUpdate({
         styles: { y, x }
@@ -242,7 +236,7 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
     letter-spacing: 0.1px;
-    line-height: 1.2;
+    line-height: 1;
     position: absolute;
   }
 }
