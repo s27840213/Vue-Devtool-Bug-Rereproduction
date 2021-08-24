@@ -49,7 +49,6 @@ export default Vue.extend({
           await newFont.load().then(newFont => {
             document.fonts.add(newFont)
             TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
-            this.$refs.curveText && (this.$refs.curveText as any).init()
           })
         }
       }

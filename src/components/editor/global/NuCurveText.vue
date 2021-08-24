@@ -37,7 +37,9 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.init()
+    document.fonts.ready.then(() => {
+      this.init()
+    })
   },
   computed: {
     ...mapGetters({

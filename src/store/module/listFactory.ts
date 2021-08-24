@@ -42,8 +42,6 @@ export default function (this: any) {
       try {
         const { data } = await this.api({ locale, keyword, listAll: 1 })
         commit(SET_CONTENT, data.data)
-        console.log(state.content)
-        console.log(data)
       } catch (error) {
         console.log(error)
       }
