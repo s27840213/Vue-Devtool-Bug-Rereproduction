@@ -1,11 +1,32 @@
 swagger: "2.0"
 info:
-  version: "20210823"
+  version: "20210824"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
   - https
 paths:
+  /delete-asset:
+    post:
+      description: 刪除使用者上傳之檔案
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: deleteAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/deleteAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/deleteAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /list-asset:
     post:
       description: 列出所有使用者上傳之檔案
@@ -87,47 +108,6 @@ paths:
           schema:
             $ref: "#/definitions/Empty"
 definitions:
-  loginOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
-
-              upload_map: Map for uploading files to path in private bucket
-
-              upload_admin_map: Map for uploading files to path in public bucket.
-               How to upload asset file:
-              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
-
-              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
-
-              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
-
-              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
-               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
-               How to upload temporary edit json file:
-              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
-
-              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
-
-              3. Append key with name as 'file' and value as the File Object of the json
-
-              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
-            properties:
-              download_url:
-                type: string
-              upload_map:
-                $ref: "#/definitions/uploadMap"
-              upload_admin_map:
-                $ref: "#/definitions/uploadMap"
-            required:
-              - download_url
-              - upload_map
   uploadMap:
     type: object
     properties:
@@ -141,9 +121,6 @@ definitions:
       path:
         type: string
         description: Allowed path for upload.
-  Empty:
-    type: object
-    title: Empty Schema
   listDesignOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -216,16 +193,6 @@ definitions:
               - font
               - photo
               - video
-  apiCommonInput:
-    type: object
-    required:
-      - token
-    properties:
-      token:
-        type: string
-        description: |-
-          User token.
-          Allowed characters: 0-9a-zA-Z.
   registerInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -236,14 +203,6 @@ definitions:
           meta:
             type: string
             description: meta data
-  apiCommonResponse:
-    type: object
-    required:
-      - flag
-    properties:
-      flag:
-        type: number
-        description: "0: success, 1: fail, 2: token invalid"
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -292,6 +251,85 @@ definitions:
               description: File extension for asset
     description: To access the original file of the asset, the url is
       ${dl_url}/${id}/original
+  loginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+               How to upload asset file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
+
+              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
+               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+            required:
+              - download_url
+              - upload_map
+  Empty:
+    type: object
+    title: Empty Schema
+  apiCommonInput:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
+        description: |-
+          User token.
+          Allowed characters: 0-9a-zA-Z.
+  deleteAssetInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - key_list
+        properties:
+          key_list:
+            type: string
+            description: key list of assets to be deleted, separated by comma ','
+  apiCommonResponse:
+    type: object
+    required:
+      - flag
+    properties:
+      flag:
+        type: number
+        description: "0: success, 1: fail, 2: token invalid"
+      msg:
+        type: string
+        description: error message
+  deleteAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
