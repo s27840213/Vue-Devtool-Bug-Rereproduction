@@ -28,13 +28,16 @@ export default Vue.extend({
       transforms: [] as string[],
       textHeight: [] as number[],
       minHeight: 0,
-      areaHeight: 0,
-      y: 0
+      area: {
+        width: 0,
+        height: 0
+      },
+      y: 0,
+      x: 0
     }
   },
   mounted () {
-    this.handleCurveSpan(this.spans)
-    this.y = this.config.styles.y
+    this.init()
   },
   computed: {
     ...mapGetters({
@@ -95,24 +98,33 @@ export default Vue.extend({
         width: `${size / styles.scale}px`,
         height: `${size / styles.scale}px`
       }
+    },
+    position(): any {
+      return {
+        x: this.x - (this.area.width / 2),
+        y: (this.y + this.minHeight) - this.area.height
+      }
     }
   },
   watch: {
     isLayerDragging (curr, prev) {
-      const { styles } = this.config
+      const { y, x, width } = this.config.styles
+      const { bend, area, minHeight } = this
       if (prev && !curr) {
-        this.y = styles.y
+        this.y = bend < 0 ? y + area.height - minHeight : y
+        this.x = x + width / 2
       }
     },
-    areaHeight (val) {
-      const { bend, config } = this
+    area (val) {
+      const { bend } = this
+      let y = this.y
+      const x = this.x - (val.width / 2)
       if (bend < 0) {
-        const y = this.y + (config.styles.height - val)
-        this.y = y
-        this.handleCurveTextUpdate({
-          styles: { y }
-        })
+        y = this.y + this.minHeight - val.height
       }
+      this.handleCurveTextUpdate({
+        styles: { y, x }
+      })
     },
     bend () {
       this.handleCurveSpan(this.spans)
@@ -142,7 +154,10 @@ export default Vue.extend({
         )
       const areaWidth = Math.abs(maxX + minX) * 1.3 * scale
       const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
-      this.areaHeight = areaHeight
+      this.area = {
+        width: areaWidth,
+        height: areaHeight
+      }
       window.requestAnimationFrame(() => {
         this.handleCurveTextUpdate({
           styles: { width: areaWidth, height: areaHeight },
@@ -152,10 +167,14 @@ export default Vue.extend({
     }
   },
   methods: {
+    init() {
+      this.handleCurveSpan(this.spans)
+      this.y = this.config.styles.y
+      this.x = this.config.styles.x + (this.config.styles.width / 2)
+    },
     styles(styles: any, idx: number) {
       const { transforms, bend, textHeight, minHeight } = this
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
-      console.log(`${styles.font} imported: `, document.fonts.check(`16px ${styles.font}`))
       return Object.assign(
         CssConveter.convertFontStyle(styles),
         { transform: transforms[idx] || 'none' },
@@ -176,7 +195,6 @@ export default Vue.extend({
             textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
           }
-          console.log(textWidth)
           this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
