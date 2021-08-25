@@ -25,13 +25,14 @@ export default Vue.extend({
     subLayerIndex: Number
   },
   data () {
+    const { width, height } = this.config.styles
     return {
       transforms: [] as string[],
       textHeight: [] as number[],
       minHeight: 0,
       area: {
-        width: 0,
-        height: 0
+        width,
+        height
       },
       y: 0,
       x: 0
