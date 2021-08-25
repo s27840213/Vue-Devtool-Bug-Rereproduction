@@ -40,11 +40,11 @@ export default Vue.extend({
   mounted () {
     this.init()
     const promises = [...this.fonts]
-      .map(font => (new FontFaceObserver(font)).load(null, 5000))
+      .map(font => (new FontFaceObserver(font)).load(null, 10000))
     Promise
       .all(promises)
       .then(() => {
-        [...this.fonts].forEach(font => console.log(document.fonts.check(`16px ${font}`)))
+        [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
         this.init()
       })
   },
@@ -71,6 +71,10 @@ export default Vue.extend({
             (span: any) => [...span.text].map(t => ({ text: t, styles: span.styles }))
           )
       )
+    },
+    fonts(): Set<string> {
+      const { spans } = this
+      return new Set(spans.map((span: any) => span.styles.font))
     },
     pStyle(): any {
       const { area, config } = this
@@ -107,10 +111,6 @@ export default Vue.extend({
         width: `${size / styles.scale}px`,
         height: `${size / styles.scale}px`
       }
-    },
-    fonts(): Set<string> {
-      const { spans } = this
-      return new Set(spans.map((span: any) => span.styles.font))
     }
   },
   watch: {
@@ -121,17 +121,6 @@ export default Vue.extend({
         this.y = bend < 0 ? y + area.height - minHeight : y
         this.x = x + width / 2
       }
-    },
-    area(val) {
-      const { bend, config } = this
-      let y = this.y
-      const x = this.x - (val.width / 2)
-      if (bend < 0) {
-        y = this.y + (this.minHeight * config.styles.scale) - val.height
-      }
-      this.handleCurveTextUpdate({
-        styles: { y, x }
-      })
     },
     bend() {
       this.handleCurveSpan(this.spans)
@@ -165,8 +154,15 @@ export default Vue.extend({
         width: areaWidth,
         height: areaHeight
       }
+
+      let y = this.y
+      const x = this.x - (areaWidth / 2)
+      if (this.bend < 0) {
+        y = this.y + (this.minHeight * scale) - areaHeight
+      }
+
       this.handleCurveTextUpdate({
-        styles: { width: areaWidth, height: areaHeight },
+        styles: { y, x, width: areaWidth, height: areaHeight },
         props: areaWidth > width ? { widthLimit: areaWidth } : {}
       })
     }
