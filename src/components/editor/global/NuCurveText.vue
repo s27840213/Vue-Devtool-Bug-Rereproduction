@@ -229,6 +229,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
   &__curve {
     border: 1px solid rgba(212, 9, 70, 0.5);
