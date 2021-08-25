@@ -12,6 +12,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import FontFaceObserver from 'fontfaceobserver'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -37,9 +38,15 @@ export default Vue.extend({
     }
   },
   mounted () {
-    document.fonts.ready.then(() => {
-      this.init()
-    })
+    this.init()
+    const promises = [...this.fonts]
+      .map(font => (new FontFaceObserver(font)).load(null, 5000))
+    Promise
+      .all(promises)
+      .then(() => {
+        [...this.fonts].forEach(font => console.log(document.fonts.check(`16px ${font}`)))
+        this.init()
+      })
   },
   computed: {
     ...mapGetters({
@@ -49,14 +56,14 @@ export default Vue.extend({
       const { textShape } = this.config.styles
       return textShape.focus
     },
-    isLayerDragging(): boolean {
+    dragging(): boolean {
       return this.config.dragging
     },
     bend(): number {
       const { textShape } = this.config.styles
       return +textShape.bend
     },
-    spans(): any {
+    spans(): any[] {
       const { paragraphs } = this.config
       return paragraphs.flatMap(
         (p: any) =>
@@ -100,10 +107,14 @@ export default Vue.extend({
         width: `${size / styles.scale}px`,
         height: `${size / styles.scale}px`
       }
+    },
+    fonts(): Set<string> {
+      const { spans } = this
+      return new Set(spans.map((span: any) => span.styles.font))
     }
   },
   watch: {
-    isLayerDragging (curr, prev) {
+    dragging(curr, prev) {
       const { y, x, width } = this.config.styles
       const { bend, area, minHeight } = this
       if (prev && !curr) {
@@ -111,7 +122,7 @@ export default Vue.extend({
         this.x = x + width / 2
       }
     },
-    area (val) {
+    area(val) {
       const { bend, config } = this
       let y = this.y
       const x = this.x - (val.width / 2)
@@ -122,13 +133,13 @@ export default Vue.extend({
         styles: { y, x }
       })
     },
-    bend () {
+    bend() {
       this.handleCurveSpan(this.spans)
     },
-    spans (newSpans) {
+    spans(newSpans) {
       this.handleCurveSpan(newSpans)
     },
-    transforms (data: string[]) {
+    transforms(data: string[]) {
       const { scale, width } = this.config.styles
       const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
       const midLeng = Math.floor(positionList.length / 2)
@@ -154,11 +165,9 @@ export default Vue.extend({
         width: areaWidth,
         height: areaHeight
       }
-      window.requestAnimationFrame(() => {
-        this.handleCurveTextUpdate({
-          styles: { width: areaWidth, height: areaHeight },
-          props: areaWidth > width ? { widthLimit: areaWidth } : {}
-        })
+      this.handleCurveTextUpdate({
+        styles: { width: areaWidth, height: areaHeight },
+        props: areaWidth > width ? { widthLimit: areaWidth } : {}
       })
     }
   },
