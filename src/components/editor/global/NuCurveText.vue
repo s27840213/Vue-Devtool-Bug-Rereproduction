@@ -1,8 +1,7 @@
 <template lang="pug">
   p(class="nu-text__p" ref="curveText" :style="pStyle")
-    template
-      div(v-show="focus"  class="nu-text__curve" :style="curveStyle")
-        svg-icon(iconName="curve-center" :style="curveIconStyle")
+    span(v-if="focus"  class="nu-text__curve" :style="curveStyle")
+      svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
       :key="sIndex",
@@ -187,12 +186,12 @@ export default Vue.extend({
       const { bend } = this
       if (spans.length) {
         this.$nextTick(() => {
-          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
+          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
           const textWidth = []
           const textHeight = []
           let minHeight = 0
           for (let idx = 0; idx < eleSpans.length; idx++) {
-            const { offsetWidth, offsetHeight } = eleSpans[idx]
+            const { offsetWidth, offsetHeight } = eleSpans[idx] as HTMLElement
             textWidth.push(offsetWidth)
             textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
