@@ -879,11 +879,6 @@ export default Vue.extend({
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
-            if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
-              console.log('NaN')
-              // e.preventDefault()
-              // return
-            }
             // TODO: deletion at the begining of the text cause bug.
             start.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
             start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
@@ -923,9 +918,6 @@ export default Vue.extend({
     },
     composingEnd() {
       this.isComposing = false
-      console.log(TextUtils.getSelection()?.start.pIndex)
-      console.log(TextUtils.getSelection()?.start.sIndex)
-      console.log(TextUtils.getSelection()?.start.offset)
       const start = TextUtils.getSelection()?.start
       if (start) {
         TextUtils.updateSelection(start, start)
@@ -954,7 +946,6 @@ export default Vue.extend({
           pIndex = sel.start.pIndex
           sIndex = sel.start.sIndex
           offset = sel.start.offset
-          console.log((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex)
           if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
             sIndex = 0
             offset = 0
@@ -963,12 +954,12 @@ export default Vue.extend({
           const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
           if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
             pIndex -= 1
+            sIndex = paragraphs[pIndex].spans.length - 1
+            offset = paragraphs[pIndex].spans[sIndex].text.length
             // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
             if (pIndex < 0) {
               [pIndex, sIndex, offset] = [0, 0, 0]
             }
-            sIndex = paragraphs[pIndex].spans.length - 1
-            offset = paragraphs[pIndex].spans[sIndex].text.length
           }
         }
         if (e.key === 'Enter') {
@@ -991,7 +982,7 @@ export default Vue.extend({
             if (sel) {
               const currPropsState = this.props
               const isSameSpanStyles = (() => {
-                if (e.key !== 'Enter' && e.key !== 'Backspace' && pIndex && sIndex) {
+                if (e.key !== 'Enter' && e.key !== 'Backspace' && !Number.isNaN(pIndex) && !Number.isNaN(sIndex)) {
                   const props = ['weight', 'style', 'decoration', 'color']
                   for (const k of props) {
                     if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
@@ -1015,13 +1006,12 @@ export default Vue.extend({
               }
 
               const range = new Range()
-              console.log(text.childNodes[pIndex])
+              // console.log(text.childNodes[pIndex])
               range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
               sel.removeAllRanges()
               sel.addRange(range)
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            console.log('sdsa')
             TextPropUtils.updateTextPropsState()
           })
         }
@@ -1065,8 +1055,8 @@ export default Vue.extend({
         layerY = trans.y
       }
 
-      console.log('textHW---')
-      console.log(textHW.height)
+      // console.log('textHW---')
+      // console.log(textHW.height)
       if (isVertical && textHW.width < 5) {
         textHW.width = this.getLayerWidth
       } else if (!isVertical && textHW.height < 5) {
@@ -1074,8 +1064,8 @@ export default Vue.extend({
         config.paragraphs[0].spans[0].text = '|'
         config.paragraphs.splice(1)
         textHW.height = TextUtils.getTextHW(config).height
-        console.log('textHW.height')
-        console.log(textHW.height)
+        // console.log('textHW.height')
+        // console.log(textHW.height)
       }
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)

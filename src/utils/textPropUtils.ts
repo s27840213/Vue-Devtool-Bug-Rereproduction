@@ -153,7 +153,6 @@ class TextPropUtils {
     Vue.nextTick(() => {
       const sel = window.getSelection()
       if (sel) {
-        console.log('remove all')
         sel.removeAllRanges()
       }
     })
@@ -259,7 +258,9 @@ class TextPropUtils {
           }
         }
       }
-      [start, end] = this.spanMerger(config.paragraphs, start, end)
+      if (propName !== 'fontSize') {
+        [start, end] = this.spanMerger(config.paragraphs, start, end)
+      }
       if (typeof tmpLayerIndex === 'undefined') {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       } else {
@@ -301,7 +302,9 @@ class TextPropUtils {
           }
         }
       }
-      [start, end] = this.spanMerger(config.paragraphs, start, end)
+      if (propName !== 'fontSize') {
+        [start, end] = this.spanMerger(config.paragraphs, start, end)
+      }
       if (typeof tmpLayerIndex === 'undefined') {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       } else {
@@ -431,6 +434,8 @@ class TextPropUtils {
     } else if (isStartMerged && !isEndMerged) {
       end.offset = paragraphs[end.pIndex].spans[end.sIndex].text.length
     }
+    console.log('isStartMerged: ' + isStartMerged)
+    console.log('isEndMerged: ' + isEndMerged)
     return [start, end]
   }
 

@@ -185,6 +185,7 @@ class TextUtils {
 
           if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
             spans[spans.length - 1].text += text
+            // spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           } else {
             spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           }
@@ -221,7 +222,7 @@ class TextUtils {
           }
           return true
         })()
-
+        console.log('isSameSpanStyles: ' + isSameSpanStyles)
         if (!isSameSpanStyles) {
           const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
           const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)

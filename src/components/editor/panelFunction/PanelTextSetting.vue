@@ -139,10 +139,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    // if (!TextUtils.getCurrLayer.layers) {
-    // this.$store.commit('text/SET_default')
     TextPropUtils.updateTextPropsState()
-    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -276,25 +273,31 @@ export default Vue.extend({
       }
     },
     fontSizeStepping(step: number) {
+      const timeInterval = 100
+      const startTime = new Date().getTime()
+      const interval = setInterval(() => {
+        const endTime = new Date().getTime()
+        if (endTime - startTime > 500) {
+          this.fontSizeSteppingHandler(step)
+        }
+      }, timeInterval)
+      const onmouseup = () => {
+        const endTime = new Date().getTime()
+        if (endTime - startTime < 500) {
+          this.fontSizeSteppingHandler(step)
+        }
+        clearInterval(interval)
+        window.removeEventListener('onmouseup', onmouseup)
+      }
+      window.addEventListener('mouseup', onmouseup)
+    },
+    fontSizeSteppingHandler(step: number) {
       const sel = TextUtils.getSelection()
-      // if (sel) {
-      //   const start = {
-      //     pIndex: sel.start.pIndex,
-      //     sIndex: sel.start.sIndex
-      //   }
-      //   const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
-      //   const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-      //   TextPropUtils.spanPropertyHandler('fontSize', fontSize + step)
-      //   TextPropUtils.updateTextPropsState()
-      // }
-      // let panelFontVal = this.sel.props.fontSize
       if (sel) {
         const { start, end } = sel
-        console.log(start.sIndex)
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
         const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
-        console.log(end.sIndex)
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           const p = config.paragraphs[pidx]
           for (let sidx = 0; sidx < p.spans.length; sidx++) {
@@ -307,7 +310,6 @@ export default Vue.extend({
 
             // PIndex, sIndex both are at the start-selection
             if (pidx === start.pIndex && sidx === start.sIndex) {
-              console.log('----------FIRST START------------')
               // Start-selection and the end-selection are exactly at the same span
               if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
                 Object.assign(currStart, start)
@@ -317,19 +319,13 @@ export default Vue.extend({
                 Object.assign(currEnd, { pIndex: start.pIndex, sIndex: start.sIndex, offset: span.text.length })
               }
             } else if (pidx === end.pIndex && sidx === end.sIndex) {
-              console.log('----------END START------------')
-              console.log(pidx)
-              console.log(sidx)
-              console.log(start.sIndex)
-              const endSidx = start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              const endSidx = start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
             } else {
-              console.log('----------ELSE------------')
-              console.log(pidx)
-              console.log(sidx)
-              Object.assign(currStart, { pIndex: pidx, sIndex: sidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: sidx, offset: span.text.length })
+              const endSidx = start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
+              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
             TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
 
@@ -339,10 +335,9 @@ export default Vue.extend({
           }
         }
         Object.assign(finalEnd, this.sel.end)
+        const finalSel = TextPropUtils.spanMerger(TextPropUtils.getCurrLayer.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
-          console.log(finalStart)
-          console.log(finalEnd)
-          TextUtils.focus(finalStart, finalEnd)
+          TextUtils.focus(finalSel[0], finalSel[1])
         })
       } else {
         const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
