@@ -130,7 +130,7 @@ export default Vue.extend({
       openValueSelector: false,
       openSliderBar: 'center',
       fieldRange: {
-        fontSize: { min: 6, max: 120 },
+        fontSize: { min: 6, max: 800 },
         lineHeight: { min: 0, max: 300 },
         fontSpacing: { min: -200, max: 800 },
         opacity: { min: 0, max: 100 }
@@ -338,6 +338,8 @@ export default Vue.extend({
         const finalSel = TextPropUtils.spanMerger(TextPropUtils.getCurrLayer.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
           TextUtils.focus(finalSel[0], finalSel[1])
+          TextUtils.updateSelection(finalSel[0], finalSel[1])
+          TextPropUtils.updateTextPropsState()
         })
       } else {
         const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
@@ -356,8 +358,8 @@ export default Vue.extend({
             TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
           }
         }
+        TextPropUtils.updateTextPropsState()
       }
-      TextPropUtils.updateTextPropsState()
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)

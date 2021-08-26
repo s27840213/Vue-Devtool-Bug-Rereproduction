@@ -502,6 +502,9 @@ class TextPropUtils {
 
   propReadOfLayer(prop: string, layer?: IText) {
     const sel = TextUtils.isSel(store.state.text?.sel.start) ? store.state.text?.sel : TextUtils.getSelection()
+    console.log('sel?.start')
+    console.log(sel?.start)
+    console.log(sel?.end)
     // If layer is assigned, means the current selected layer is a group/tmp layer
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     let start
