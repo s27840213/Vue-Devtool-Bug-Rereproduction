@@ -121,6 +121,7 @@ export default Vue.extend({
   mounted() {
     this.getCategories()
     this.getContent()
+    this.loadDefaultFonts()
   },
   destroyed() {
     this.resetContent()
@@ -144,6 +145,13 @@ export default Vue.extend({
     },
     handleAddText (type: string) {
       TextUtils.addStanardText(type.toLowerCase())
+    },
+    loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
+      const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
+      const newFont = new FontFace(objectId, getFontUrl(objectId))
+      newFont.load().then(() => {
+        console.log('Default font loaded!')
+      })
     }
   }
 })

@@ -206,8 +206,7 @@ export default Vue.extend({
     },
     sel: {
       handler(val) {
-        const text = this.$refs.text as HTMLElement
-        console.log('sel handler')
+        // const text = this.$refs.text as HTMLElement
         // TODO://
         // if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
         //   console.log('enter sel')
@@ -892,7 +891,8 @@ export default Vue.extend({
             TextUtils.updateSelection(start, start)
 
             if (e.key === 'Backspace') {
-              if (start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0) {
+              const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
+              if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
                 return
               } else {
@@ -916,9 +916,9 @@ export default Vue.extend({
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        TextPropUtils.updateTextPropsState()
         const sel = TextUtils.getSelection()
         TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
+        TextPropUtils.updateTextPropsState()
       }
     },
     composingEnd() {
@@ -936,6 +936,12 @@ export default Vue.extend({
     onTyping(e: KeyboardEvent, isComposing: boolean) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
+        /**
+         * All text is been deleted, the first node of the paragraph will be 'BR'
+         */
+        if ((this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR') return
+
+        const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
         if (e.key !== 'Enter' && e.key !== 'Backspace') {
           paragraphs = TextUtils.newPropsHandler(paragraphs)
@@ -943,14 +949,16 @@ export default Vue.extend({
 
         const sel = TextUtils.getSelection()
         let { pIndex, sIndex, offset } = this.sel.start
-        console.log(pIndex)
-        console.log(sIndex)
-        console.log(offset)
         // if below condition is false, means some paragraph (p-node) is removed
         if (sel && TextUtils.isSel(sel.start)) {
           pIndex = sel.start.pIndex
           sIndex = sel.start.sIndex
           offset = sel.start.offset
+          console.log((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex)
+          if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
+            sIndex = 0
+            offset = 0
+          }
           // Deleting the first span of the text, and moving the caret to the previous p
           const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
           if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
@@ -961,20 +969,11 @@ export default Vue.extend({
             }
             sIndex = paragraphs[pIndex].spans.length - 1
             offset = paragraphs[pIndex].spans[sIndex].text.length
-          } else if (e.key === 'Enter') {
-            [sIndex, offset] = [0, 0]
-            pIndex += 1
           }
-        // } else if (e.key === 'Enter') {
-        //   [sIndex, offset] = [0, 0]
-        //   pIndex += 1
-        //   console.log('sssdfsdjwoer023erj0')
-        // } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
-        //   // some paragraph is deleted
-        //   console.log('dddddddddddddd')
-        //   pIndex -= 1
-        //   sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
-        //   offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
+        }
+        if (e.key === 'Enter') {
+          [sIndex, offset] = [0, 0]
+          pIndex += 1
         }
         if (this.isComposing) {
           const config = GeneralUtils.deepCopy(this.config) as IText
@@ -983,7 +982,6 @@ export default Vue.extend({
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           this.textSizeRefresh(this.config)
-          const text = this.$refs.text as HTMLElement
           this.$nextTick(() => {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
@@ -993,7 +991,7 @@ export default Vue.extend({
             if (sel) {
               const currPropsState = this.props
               const isSameSpanStyles = (() => {
-                if (e.key !== 'Enter' && e.key !== 'Backspace') {
+                if (e.key !== 'Enter' && e.key !== 'Backspace' && pIndex && sIndex) {
                   const props = ['weight', 'style', 'decoration', 'color']
                   for (const k of props) {
                     if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
@@ -1012,14 +1010,18 @@ export default Vue.extend({
                 pIndex = this.sel.start.pIndex
                 sIndex = this.sel.start.sIndex
                 offset = this.sel.start.offset
+              } else if (TextUtils.isEmptyText(this.config)) {
+                [pIndex, sIndex, offset] = [0, 0, 0]
               }
 
               const range = new Range()
+              console.log(text.childNodes[pIndex])
               range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
               sel.removeAllRanges()
               sel.addRange(range)
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
+            console.log('sdsa')
             TextPropUtils.updateTextPropsState()
           })
         }
@@ -1061,6 +1063,19 @@ export default Vue.extend({
         const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
         layerX = trans.x
         layerY = trans.y
+      }
+
+      console.log('textHW---')
+      console.log(textHW.height)
+      if (isVertical && textHW.width < 5) {
+        textHW.width = this.getLayerWidth
+      } else if (!isVertical && textHW.height < 5) {
+        const config = GeneralUtils.deepCopy(text) as IText
+        config.paragraphs[0].spans[0].text = '|'
+        config.paragraphs.splice(1)
+        textHW.height = TextUtils.getTextHW(config).height
+        console.log('textHW.height')
+        console.log(textHW.height)
       }
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)

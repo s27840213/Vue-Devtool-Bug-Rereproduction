@@ -43,6 +43,7 @@ export default Vue.extend({
       TextPropUtils.updateTextPropsState({ font: this.objectId })
     },
     getFontUrl(fontID: string): string {
+      console.log(fontID)
       return `url("https://template.vivipic.com/font/${fontID}/font")`
     }
   }

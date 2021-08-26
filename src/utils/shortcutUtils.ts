@@ -8,7 +8,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import { ISelection } from '@/interfaces/text'
-import text from '@/store/text'
+import TextPropUtils from './textPropUtils'
 
 class ShortcutHandler {
   // target: HTMLElement
@@ -204,6 +204,14 @@ class ShortcutHandler {
       range.selectNodeContents(text)
       sel.removeAllRanges()
       sel.addRange(range)
+      const config = TextUtils.getCurrLayer as IText
+
+      const pIndex = config.paragraphs.length - 1
+      const sIndex = config.paragraphs[pIndex].spans.length - 1
+      const offset = config.paragraphs[pIndex].spans[sIndex].text.length
+
+      TextUtils.updateSelection({ pIndex: 0, sIndex: 0, offset: 0 }, { pIndex, sIndex, offset })
+      TextPropUtils.updateTextPropsState()
     }
   }
 

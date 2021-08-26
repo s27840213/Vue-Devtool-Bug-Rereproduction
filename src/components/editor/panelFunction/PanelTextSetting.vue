@@ -560,7 +560,7 @@ export default Vue.extend({
     flex-direction: column;
   }
   &__text-preview {
-    height: 30px;
+    height: 25px;
     display: inline-flex;
     align-items: center;
   }
