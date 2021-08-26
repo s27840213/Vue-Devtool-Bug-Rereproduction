@@ -114,6 +114,7 @@ div(style="position:relative;")
 <script lang="ts">
 import Vue from 'vue'
 import store from '@/store'
+import userApis from '@/apis/user'
 
 export default Vue.extend({
   name: 'Login',
@@ -248,8 +249,8 @@ export default Vue.extend({
       if (!this.mailValid) {
         return
       }
-      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
-      if (response.flag === 0) {
+      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
       }
@@ -261,8 +262,8 @@ export default Vue.extend({
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
-      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
-      if (response.flag === 0) {
+      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      if (data.flag === 0) {
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -273,6 +274,9 @@ export default Vue.extend({
             this.leftTime = 60
           }
         }, 1000)
+      } else {
+        // error
+        this.currentPageIndex = 0
       }
     },
     async onEnterCodeDoneClicked () {
@@ -285,14 +289,16 @@ export default Vue.extend({
         this.vcodeErrorMessage = 'Please enter the verification code.'
         return
       }
-      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
+      const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       this.vcode = ''
-      if (response.flag === 0) {
+      if (data.flag === 0) {
         this.currentPageIndex = 3
         this.isResetClicked = false
+        const token = data.token
+        store.dispatch('user/setToken', { token })
       } else {
-        this.vcodeErrorMessage = response.msg
-        console.log(response.msg)
+        this.vcodeErrorMessage = data.msg
+        console.log(data.msg)
       }
     },
     async onResetDoneClicked () {
@@ -308,16 +314,17 @@ export default Vue.extend({
         this.confirmErrorMessage = 'Your confirmation password does not match the new password.'
         return
       }
-      const response = await store.dispatch('user/resetPassword', { type: '3', account: this.email, upass: this.password })
-      if (response.flag === 0) {
+
+      const { data } = await userApis.resetPassword(store.getters['user/getToken'], this.email, this.password) // token, account, upass
+      if (data.flag === 0) {
         this.email = ''
-        this.password = ''
-        this.confirmPassword = ''
         this.currentPageIndex = 0
+        this.isLoginClicked = false
       } else {
-        this.password = ''
-        console.log(response.msg)
+        console.log(data.msg)
       }
+      this.password = ''
+      this.confirmPassword = ''
     }
   }
 })

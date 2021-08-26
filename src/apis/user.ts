@@ -27,5 +27,31 @@ export default {
       token,
       meta
     }
+  }),
+  /* eslint-disable camelcase */
+  sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string): AxiosPromise => axios('/send-vcode', {
+    method: 'POST',
+    data: {
+      uname,
+      account,
+      upass,
+      register,
+      vcode_only
+    }
+  }),
+  verifyVcode: (account: string, vcode: string): AxiosPromise => axios('/verify-vcode', {
+    method: 'POST',
+    data: {
+      account,
+      vcode
+    }
+  }),
+  resetPassword: (token: string, account: string, upass: string): AxiosPromise => axios('/reset-password', {
+    method: 'POST',
+    data: {
+      token,
+      account,
+      upass
+    }
   })
 }

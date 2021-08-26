@@ -76,6 +76,7 @@ div(style="position:relative;")
 <script lang="ts">
 import Vue from 'vue'
 import store from '@/store'
+import userApis from '@/apis/user'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -187,8 +188,9 @@ export default Vue.extend({
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
-      const response = await store.dispatch('user/register', { type: '1', uname: '', account: this.email, upass: '' })
-      if (response.flag === 0) {
+      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      console.log(data)
+      if (data.flag === 0) {
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -211,14 +213,15 @@ export default Vue.extend({
         this.vcodeErrorMessage = 'Please enter the verification code.'
         return
       }
-      const response = await store.dispatch('user/verifyVcode', { type: '2', account: this.email, vcode: this.vcode, getUserId: true })
-      if (response.flag === 0) {
-        console.log('success!')
+      const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
+      if (data.flag === 0) {
+        console.log('token', data.token)
+        console.log('token_expire', data.expire_time)
         // this.currentPageIndex = 2
       } else {
         this.vcode = ''
-        this.vcodeErrorMessage = response.msg
-        console.log(response.msg)
+        this.vcodeErrorMessage = data.msg
+        console.log(data.msg)
       }
     }
   }
