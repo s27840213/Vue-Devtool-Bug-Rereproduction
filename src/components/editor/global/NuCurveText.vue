@@ -1,8 +1,7 @@
 <template lang="pug">
   p(class="nu-text__p" ref="curveText" :style="pStyle")
-    template
-      div(v-show="focus"  class="nu-text__curve" :style="curveStyle")
-        svg-icon(iconName="curve-center" :style="curveIconStyle")
+    span(v-if="focus"  class="nu-text__curve" :style="curveStyle")
+      svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
       :key="sIndex",
@@ -12,6 +11,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import FontFaceObserver from 'fontfaceobserver'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -24,17 +24,29 @@ export default Vue.extend({
     subLayerIndex: Number
   },
   data () {
+    const { width, height } = this.config.styles
     return {
       transforms: [] as string[],
       textHeight: [] as number[],
       minHeight: 0,
-      areaHeight: 0,
-      y: 0
+      area: {
+        width,
+        height
+      },
+      y: 0,
+      x: 0
     }
   },
   mounted () {
-    this.handleCurveSpan(this.spans)
-    this.y = this.config.styles.y
+    this.init()
+    const promises = [...this.fonts]
+      .map(font => (new FontFaceObserver(font)).load(null, 10000))
+    Promise
+      .all(promises)
+      .then(() => {
+        [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
+        this.init()
+      })
   },
   computed: {
     ...mapGetters({
@@ -44,14 +56,14 @@ export default Vue.extend({
       const { textShape } = this.config.styles
       return textShape.focus
     },
-    isLayerDragging(): boolean {
+    dragging(): boolean {
       return this.config.dragging
     },
     bend(): number {
       const { textShape } = this.config.styles
       return +textShape.bend
     },
-    spans(): any {
+    spans(): any[] {
       const { paragraphs } = this.config
       return paragraphs.flatMap(
         (p: any) =>
@@ -60,12 +72,16 @@ export default Vue.extend({
           )
       )
     },
+    fonts(): Set<string> {
+      const { spans } = this
+      return new Set(spans.map((span: any) => span.styles.font))
+    },
     pStyle(): any {
-      const { minHeight, config } = this
+      const { area, config } = this
       return {
         margin: 0,
-        height: `${minHeight}px`,
-        minWidth: `${config.styles.width / config.styles.scale}px`
+        minHeight: `${area.height / config.styles.scale}px`,
+        minWidth: `${area.width / config.styles.scale}px`
       }
     },
     curveStyle(): any {
@@ -98,29 +114,21 @@ export default Vue.extend({
     }
   },
   watch: {
-    isLayerDragging (curr, prev) {
-      const { styles } = this.config
+    dragging(curr, prev) {
+      const { y, x, width } = this.config.styles
+      const { bend, area, minHeight } = this
       if (prev && !curr) {
-        this.y = styles.y
+        this.y = bend < 0 ? y + area.height - minHeight : y
+        this.x = x + width / 2
       }
     },
-    areaHeight (val) {
-      const { bend, config } = this
-      if (bend < 0) {
-        const y = this.y + (config.styles.height - val)
-        this.y = y
-        this.handleCurveTextUpdate({
-          styles: { y }
-        })
-      }
-    },
-    bend () {
+    bend() {
       this.handleCurveSpan(this.spans)
     },
-    spans (newSpans) {
+    spans(newSpans) {
       this.handleCurveSpan(newSpans)
     },
-    transforms (data: string[]) {
+    transforms(data: string[]) {
       const { scale, width } = this.config.styles
       const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
       const midLeng = Math.floor(positionList.length / 2)
@@ -142,20 +150,32 @@ export default Vue.extend({
         )
       const areaWidth = Math.abs(maxX + minX) * 1.3 * scale
       const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
-      this.areaHeight = areaHeight
-      window.requestAnimationFrame(() => {
-        this.handleCurveTextUpdate({
-          styles: { width: areaWidth, height: areaHeight },
-          props: areaWidth > width ? { widthLimit: areaWidth } : {}
-        })
+      this.area = {
+        width: areaWidth,
+        height: areaHeight
+      }
+
+      let y = this.y
+      const x = this.x - (areaWidth / 2)
+      if (this.bend < 0) {
+        y = this.y + (this.minHeight * scale) - areaHeight
+      }
+
+      this.handleCurveTextUpdate({
+        styles: { y, x, width: areaWidth, height: areaHeight },
+        props: areaWidth > width ? { widthLimit: areaWidth } : {}
       })
     }
   },
   methods: {
+    init() {
+      this.handleCurveSpan(this.spans)
+      this.y = this.config.styles.y
+      this.x = this.config.styles.x + (this.config.styles.width / 2)
+    },
     styles(styles: any, idx: number) {
       const { transforms, bend, textHeight, minHeight } = this
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
-      console.log(`${styles.font} imported: `, document.fonts.check(`16px ${styles.font}`))
       return Object.assign(
         CssConveter.convertFontStyle(styles),
         { transform: transforms[idx] || 'none' },
@@ -166,17 +186,16 @@ export default Vue.extend({
       const { bend } = this
       if (spans.length) {
         this.$nextTick(() => {
-          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span')
+          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
           const textWidth = []
           const textHeight = []
           let minHeight = 0
           for (let idx = 0; idx < eleSpans.length; idx++) {
-            const { offsetWidth, offsetHeight } = eleSpans[idx]
+            const { offsetWidth, offsetHeight } = eleSpans[idx] as HTMLElement
             textWidth.push(offsetWidth)
             textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
           }
-          console.log(textWidth)
           this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
@@ -209,6 +228,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
   &__curve {
     border: 1px solid rgba(212, 9, 70, 0.5);
@@ -224,7 +244,7 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
     letter-spacing: 0.1px;
-    line-height: 1.2;
+    line-height: 1;
     position: absolute;
   }
 }

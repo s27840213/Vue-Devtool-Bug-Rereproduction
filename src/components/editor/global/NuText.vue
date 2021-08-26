@@ -2,6 +2,7 @@
   div(class="nu-text" :style="wrapperStyles()")
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
         nu-curve-text(v-if="isCurveText"
+          ref="curveText"
           :config="config"
           :layerIndex="layerIndex"
           :pageIndex="pageIndex"

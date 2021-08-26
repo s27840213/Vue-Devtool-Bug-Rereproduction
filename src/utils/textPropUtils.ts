@@ -6,6 +6,7 @@ import Vue from 'vue'
 import LayerUtils from './layerUtils'
 import { ITextState } from '@/store/text'
 import TextUtils from '@/utils/textUtils'
+import TextShapeUtils from './textShapeUtils'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -139,6 +140,7 @@ class TextPropUtils {
         const { width, height } = config.styles
         if (typeof tmpLayerIndex === 'undefined') {
           console.log('dddddfsw')
+          writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
         }
         handler({ writingMode })
