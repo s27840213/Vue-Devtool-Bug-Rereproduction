@@ -9,6 +9,7 @@
         "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts"
     },
     "dependencies": {
+        "@sentry/browser": "^6.11.0",
         "@sentry/tracing": "^6.11.0",
         "@sentry/vue": "^6.11.0",
         "@types/css-font-loading-module": "0.0.6",

@@ -1,4 +1,5 @@
 import TextUtils from '@/utils/textUtils'
+import LayerUtils from '@/utils/layerUtils'
 import { IText } from '@/interfaces/layer'
 import CssConverter from './cssConverter'
 import store from '@/store'
@@ -216,7 +217,7 @@ class Controller {
       textEffect.color = textEffect.color || this.getLayerMainColor()
       textEffect.strokeColor = textEffect.strokeColor || this.getLayerMainColor()
       textEffect.fontSize = this.getLayerFontSize()
-      TextUtils.updateTextStyles(
+      LayerUtils.updateLayerStyles(
         TextUtils.pageIndex,
         TextUtils.layerIndex,
         { textEffect }
