@@ -433,14 +433,6 @@ class TextUtils {
     LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 
-  updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles
-    })
-  }
-
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
     const config = this.getLayer(pageIndex, layerIndex) as IText
     for (const field of TemplateUtils.fields) {

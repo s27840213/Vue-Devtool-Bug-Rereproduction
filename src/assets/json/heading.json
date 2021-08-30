@@ -3,13 +3,14 @@
     "styles": {
         "writingMode": "normal",
         "textEffect": {},
-        "textShape": {}
+        "textShape": {},
+        "opacity": 100
     },
     "paragraphs": [{
         "styles": {
             "align": "center",
             "fontSpacing": 0,
-            "lineHeight": -1
+            "lineHeight": 1.4
         },
         "spans": [{
             "text": "New Text",

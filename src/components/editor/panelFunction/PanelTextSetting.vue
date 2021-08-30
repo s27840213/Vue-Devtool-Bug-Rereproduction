@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="text-setting" @mousedown="textRangeRecorder($event)" ref='body')
+  div(class="text-setting" @mousedown.capture="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer record-selection" @click.native="openFontsPanel")
       //- span(class="body-2 text-gray-2") {{ props.font }}
@@ -37,7 +37,7 @@
         @update="handleColorUpdate")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="pointer"
+        class="pointer record-selection"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
@@ -47,7 +47,7 @@
         class="pointer"
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
     div(class="text-setting__row5")
       div(class="relative")
         property-bar
@@ -267,20 +267,27 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextPropUtils.onPropertyClick(iconName)
-      // Only select without range or none selection exist, the prop-panel update.
+      /**
+       *  Only select with range or none selection exist, the prop-panel update.
+       * */
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
         TextPropUtils.updateTextPropsState()
       }
     },
-    fontSizeStepping(step: number) {
-      const timeInterval = 100
+    onParaPropsClick(iconName: string) {
+      TextPropUtils.paragraphPropsHandler(iconName)
+      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
+        TextPropUtils.updateTextPropsState()
+      }
+    },
+    fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
       const interval = setInterval(() => {
         const endTime = new Date().getTime()
         if (endTime - startTime > 500) {
           this.fontSizeSteppingHandler(step)
         }
-      }, timeInterval)
+      }, tickInterval)
       const onmouseup = () => {
         const endTime = new Date().getTime()
         if (endTime - startTime < 500) {
@@ -376,10 +383,10 @@ export default Vue.extend({
       return value.toString()
     },
     textRangeRecorder(e: MouseEvent) {
+      console.log('text range!')
       const sel = TextUtils.getSelection()
       if ((e.target as HTMLElement).classList.contains('record-selection')) {
         TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
-        console.log(this.sel.start)
       }
     },
     setSize(e: Event) {

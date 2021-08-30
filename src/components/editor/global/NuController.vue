@@ -1012,7 +1012,9 @@ export default Vue.extend({
               sel.addRange(range)
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            TextPropUtils.updateTextPropsState()
+            if (e.key !== 'Enter') {
+              TextPropUtils.updateTextPropsState()
+            }
           })
         }
       }
