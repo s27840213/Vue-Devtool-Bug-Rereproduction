@@ -1,6 +1,7 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
+import { captureException } from '@sentry/browser'
 
 const SET_STATE = 'SET_STATE' as const
 const SET_CONTENT = 'SET_CONTENT' as const
@@ -31,7 +32,7 @@ export default function (this: any) {
         const { data } = await this.api({ locale, listAll: 0 })
         commit(SET_CATEGORIES, data.data)
       } catch (error) {
-        console.log(error)
+        captureException(error)
       }
     },
 
@@ -43,7 +44,7 @@ export default function (this: any) {
         const { data } = await this.api({ locale, keyword, listAll: 1 })
         commit(SET_CONTENT, data.data)
       } catch (error) {
-        console.log(error)
+        captureException(error)
       }
     },
 
@@ -56,7 +57,7 @@ export default function (this: any) {
         const { data } = await this.api(nextParams)
         commit(SET_MORE_CONTENT, data.data)
       } catch (error) {
-        console.log(error)
+        captureException(error)
       }
     },
     getContentJson: async ({ commit, state }, id: string) => {
@@ -66,7 +67,7 @@ export default function (this: any) {
         commit('SET_contentJson', { [id]: response }, { root: true })
         return response
       } catch (error) {
-        console.log(error)
+        captureException(error)
       }
     },
     resetContent ({ commit }) {

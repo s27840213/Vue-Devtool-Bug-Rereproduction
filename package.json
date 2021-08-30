@@ -9,6 +9,8 @@
         "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts"
     },
     "dependencies": {
+        "@sentry/tracing": "^6.11.0",
+        "@sentry/vue": "^6.11.0",
         "@types/css-font-loading-module": "0.0.6",
         "axios": "^0.21.1",
         "core-js": "^3.10.1",
@@ -28,6 +30,7 @@
         "vuex": "^3.4.0"
     },
     "devDependencies": {
+        "@sentry/webpack-plugin": "^1.17.1",
         "@types/lodash": "^4.14.170",
         "@types/node": "^15.12.5",
         "@types/uuid": "^8.3.0",

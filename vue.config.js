@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -29,6 +30,18 @@ module.exports = {
       .end()
       .use('file-loader')
       .loader('file-loader')
+
+    if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
+      config.plugin('sentry')
+        .use(SentryWebpackPlugin, [{
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          release: process.env.VUE_APP_VERSION,
+          org: 'nuphoto',
+          project: 'vivipic',
+          include: './dist',
+          ignore: ['node_modules', 'vue.config.js'],
+        }])
+    }
   },
   css: {
     loaderOptions: {
