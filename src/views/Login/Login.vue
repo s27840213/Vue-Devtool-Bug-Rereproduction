@@ -240,6 +240,8 @@ export default Vue.extend({
     },
     onForgotClicked () {
       this.currentPageIndex = 1
+      this.password = ''
+      this.isPeerPassword = false
     },
     onBackClicked () {
       this.currentPageIndex = 0
