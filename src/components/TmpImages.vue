@@ -46,7 +46,7 @@ export default Vue.extend({
     return {
       rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(300, 75, 5)
+      galleryUtils: new GalleryUtils(300, 95, 5)
     }
   },
   watch: {
