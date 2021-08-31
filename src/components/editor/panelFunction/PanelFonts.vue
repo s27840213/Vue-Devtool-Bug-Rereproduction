@@ -5,10 +5,10 @@
     search-bar(:placeholder="'Search font'")
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
+      template(#after)
         div(class="text-center")
           svg-icon(iconName="loading"
-            iconColor="white"
+            iconColor="gray-1"
             iconWidth="20px")
       template(v-slot:category-font-item="{ list }")
         div(class="panel-fonts__items")
@@ -29,14 +29,14 @@
               svg-icon(:iconName="'done'"
                 :iconColor="'gray-2'"
                 :iconWidth="'25px'")
-    div
-      svg-icon(class="panel-fonts__close pointer"
-        :iconName="'close'"
-        :iconWidth="'30px'"
-        :iconColor="'gray-2'"
-        @click.native="closeFontsPanel")
-              div(class="text-center")
-    btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
+    //- div
+    //-   svg-icon(class="panel-fonts__close pointer"
+    //-     :iconName="'close'"
+    //-     :iconWidth="'30px'"
+    //-     :iconColor="'gray-2'"
+    //-     @click.native="closeFontsPanel")
+    //-           div(class="text-center")
+    //- btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
 <script lang="ts">

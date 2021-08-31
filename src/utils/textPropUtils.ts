@@ -554,6 +554,14 @@ class TextPropUtils {
       case 'textAlign':
         origin = config.paragraphs[start.pIndex].styles.align
         break
+      // case 'fontSize':
+      //   for (const p of config.paragraphs) {
+      //     for (const span of p.spans) {
+      //       span.styles.size *= config.styles.scale
+      //     }
+      //   }
+      //   origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
+      //   break
       default:
         if (Object.keys(fontPropsMap).includes(prop)) {
           const i = Object.keys(fontPropsMap).indexOf(prop)
@@ -718,21 +726,6 @@ class TextPropUtils {
       let value
       switch (k) {
         case 'textAlign': {
-          // if (this.currSelectedInfo.layers.length === 1) {
-          //   value = this.getCurrLayer.styles.align
-          // } else {
-          //   const tmpLayerGroup = this.getCurrLayer as ITmp
-          //   for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
-          //     if (tmpLayerGroup.layers[i].type === 'text') {
-          //       const tmpLayer = tmpLayerGroup.layers[i] as IText
-          //       if (!value) value = tmpLayer.styles.align
-          //       if (value !== tmpLayer.styles.align) {
-          //         value = undefined
-          //         break
-          //       }
-          //     }
-          //   }
-          // }
           value = this.propReader('textAlign')
           break
         }

@@ -3,7 +3,7 @@
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent,
       @dragenter.prevent)
-    div(class='layer-scale'
+    div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
@@ -72,12 +72,21 @@ export default Vue.extend({
       return styles
     },
     scaleStyles() {
+      let { width, height } = this.config.styles
+      width /= this.config.styles.scale
+      height /= this.config.styles.scale
+
+      if (this.config.type === 'shape') {
+        const scaleLayer = this.$refs.scale as HTMLElement
+        if (scaleLayer) {
+          scaleLayer.classList.add('shape')
+        }
+      }
+
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
        * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
        */
-      const width = this.config.styles.width / this.config.styles.scale
-      const height = this.config.styles.height / this.config.styles.scale
       return {
         width: `${width}px`,
         height: `${height}px`,
@@ -127,12 +136,17 @@ export default Vue.extend({
   &:hover {
     cursor: pointer;
   }
+  &__layer-scale {
+  }
 }
-.layer-scale {
-  // position: absolute;
+
+.shape {
+  position: absolute;
+  transform-origin: top left;
   top: 0;
   left: 0;
 }
+
 .test-index {
   position: absolute;
   top: 0;

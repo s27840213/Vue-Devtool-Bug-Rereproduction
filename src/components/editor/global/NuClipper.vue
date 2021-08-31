@@ -18,8 +18,10 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        // width: `${this.config.styles.width / this.config.styles.scale}px`,
+        // height: `${this.config.styles.height / this.config.styles.scale}px`,
+        width: `${this.config.styles.initWidth}px`,
+        height: `${this.config.styles.initHeight}px`,
         transform: 'translate3d(0, 0, 0)',
         'clip-path': this.config.clipPath,
         'background-color': '#00000001'

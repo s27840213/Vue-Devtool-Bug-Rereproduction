@@ -618,7 +618,7 @@ export default Vue.extend({
           this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
         case 'shape': {
-          [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initImgSize, width, height)
+          [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
           break
         }
         case 'text':
