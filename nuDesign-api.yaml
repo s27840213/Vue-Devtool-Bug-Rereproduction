@@ -27,6 +27,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /fb-login:
+    post:
+      description: fb登入
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: fbLoginInput
+          required: true
+          schema:
+            $ref: "#/definitions/fbLoginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/fbLoginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /list-asset:
     post:
       description: 列出所有使用者上傳之檔案
@@ -432,6 +453,47 @@ definitions:
           expire_time:
             type: string
             description: expire time
+  fbLoginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+               How to upload asset file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
+
+              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
+               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+            required:
+              - download_url
+              - upload_map
   apiCommonInput:
     type: object
     required:
@@ -508,6 +570,14 @@ definitions:
           password:
             type: string
             description: User password
+  fbLoginInput:
+    type: object
+    required:
+      - code
+    properties:
+      code:
+        type: string
+        description: fb code
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
