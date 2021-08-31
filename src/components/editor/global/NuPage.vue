@@ -60,7 +60,7 @@
           :style="styles()")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
-            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+            nu-controller(v-if="!(layer.type === 'image' && layer.imgControl)"
               data-identifier="controller"
               :key="`controller-${index}`"
               :layerIndex="index"
@@ -80,8 +80,7 @@
           div(class="page-control dim-background" :style="Object.assign(styles('control'), { 'pointer-events': 'none' })")
               nu-img-controller(:layerIndex="currSelectedIndex"
                                 :pageIndex="pageIndex"
-                                :config="getCurrLayer"
-                                 @click.left.self="pageClickHandler()")
+                                :config="getCurrLayer")
 </template>
 
 <script lang="ts">

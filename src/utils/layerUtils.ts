@@ -1,4 +1,3 @@
-// import store from '@/store'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
