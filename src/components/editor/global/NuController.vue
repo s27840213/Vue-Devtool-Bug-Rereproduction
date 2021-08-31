@@ -526,9 +526,11 @@ export default Vue.extend({
           break
         }
         case 'text':
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            widthLimit: (this.config as IText).styles.writingMode.includes('vertical') ? height : width
-          })
+          if (this.config.widthLimit !== -1) {
+            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              widthLimit: (this.config as IText).styles.writingMode.includes('vertical') ? height : width
+            })
+          }
           break
       }
 

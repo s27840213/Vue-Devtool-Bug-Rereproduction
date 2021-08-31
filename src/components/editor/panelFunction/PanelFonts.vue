@@ -3,24 +3,32 @@
     div(class="panel-fonts__title")
       span(class="text-blue-1 label-lg") Fonts
     search-bar(:placeholder="'Search font'")
-    div(class="panel-fonts__items")
-      div(class="panel-fonts__items-wrapper" v-for="item in content.list")
-        div(class="panel-fonts__item-wrapper")
-          category-font-item(class="panel-fonts__item"
-            :key="item"
-            :src="`${host}/${item}/${preview}`"
-            :objectId="item"
-            @init="fetchJson")
-        div(class="panel-fonts__item-wrapper")
-          category-font-item(class="panel-fonts__item"
-            :key="item"
-            :src="`${host}/${item}/${preview2}`"
-            :objectId="item"
-            @init="fetchJson")
-        div(v-if="props.font === item" class="panel-fonts__done-icon")
-          svg-icon(:iconName="'done'"
-            :iconColor="'gray-2'"
-            :iconWidth="'25px'")
+    category-list(:list="list"
+      @loadMore="handleLoadMore")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+      template(v-slot:category-font-item="{ list }")
+        div(class="panel-fonts__items")
+          div(class="panel-fonts__items-wrapper" v-for="item in list")
+            div(class="panel-fonts__item-wrapper")
+              category-font-item(class="panel-fonts__item"
+                :key="item"
+                :src="`${host}/${item}/${preview}`"
+                :objectId="item"
+                @init="getContentJson")
+            div(class="panel-fonts__item-wrapper")
+              category-font-item(class="panel-fonts__item"
+                :key="item"
+                :src="`${host}/${item}/${preview2}`"
+                :objectId="item"
+                @init="getContentJson")
+            div(v-if="props.font === item" class="panel-fonts__done-icon")
+              svg-icon(:iconName="'done'"
+                :iconColor="'gray-2'"
+                :iconWidth="'25px'")
     div
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -28,10 +36,6 @@
         :iconColor="'gray-2'"
         @click.native="closeFontsPanel")
               div(class="text-center")
-    svg-icon(v-if="pending"
-      :iconName="'loading'"
-      :iconColor="'white'"
-      :iconWidth="'20px'")
     btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
@@ -39,15 +43,17 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUTils from '@/utils/textPropUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
+import CategoryList from '@/components/category/CategoryList.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
+    CategoryList,
     CategoryFontItem
   },
   data() {
@@ -55,8 +61,8 @@ export default Vue.extend({
       FileUtils
     }
   },
-  async mounted() {
-    await this.$store.dispatch('font/getContent')
+  mounted() {
+    this.getContent()
   },
   computed: {
     ...mapState(
@@ -78,17 +84,39 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
-    })
+    }),
+    list(): any[] {
+      const { list = [] } = this.content
+      const tmpList = [...list]
+      const result = []
+      while (tmpList.length) {
+        const rowItems = tmpList.splice(0, 1)
+        result.push({
+          id: `${rowItems.join('_')}`,
+          size: 35,
+          type: 'category-font-item',
+          list: rowItems,
+          sentinel: !tmpList.length
+        })
+      }
+      return result
+    }
   },
   methods: {
+    ...mapActions('font',
+      [
+        'resetContent',
+        'getContent',
+        'getCategories',
+        'getMoreContent',
+        'getContentJson'
+      ]
+    ),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
       this.$emit('closeFontsPanel')
-    },
-    fetchJson (id: string) {
-      this.$store.dispatch('font/getContentJson', id)
     },
     // TODO //
     updateFontPreset(e: any) {
@@ -104,6 +132,9 @@ export default Vue.extend({
     `
       document.head.appendChild(style)
       TextUtils.updateFontFace({ name: fontName, face: fontName })
+    },
+    handleLoadMore() {
+      this.getMoreContent()
     }
   }
 })
@@ -111,8 +142,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-fonts {
-  text-align: left;
-  position: relative;
+  @include size(100%, 100%);
+  display: flex;
+  flex-direction: column;
   &__title {
     text-align: center;
   }

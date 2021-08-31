@@ -101,7 +101,6 @@ export default Vue.extend({
       while (tmpList.length) {
         const title: string = !keyword && !result.length ? '所有結果' : ''
         const rowItems = tmpList.splice(0, 2)
-        console.log(rowItems)
         result.push({
           id: `result_${rowItems.join('_')}`,
           size: title ? (155 + 46) : 155,
