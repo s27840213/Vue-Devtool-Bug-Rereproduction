@@ -191,11 +191,6 @@ export default Vue.extend({
         sel.empty()
         sel.removeAllRanges()
       }
-      for (let i = 0; i < this.pages[this.pageIndex].layers.length; i++) {
-        if (this.getLayer(this.pageIndex, i).type === 'image') {
-          ControlUtils.updateImgControl(this.pageIndex, i, false)
-        }
-      }
     },
     setFocus(): void {
       this.$nextTick(() => {

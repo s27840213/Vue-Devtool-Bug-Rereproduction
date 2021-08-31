@@ -2,6 +2,11 @@
   div(class="panel-fonts")
     div(class="panel-fonts__title")
       span(class="text-blue-1 label-lg") Fonts
+      svg-icon(class="panel-fonts__close pointer"
+        :iconName="'close'"
+        :iconWidth="'30px'"
+        :iconColor="'gray-2'"
+        @click.native="closeFontsPanel")
     search-bar(:placeholder="'Search font'")
     category-list(:list="list"
       @loadMore="handleLoadMore")
@@ -29,14 +34,13 @@
               svg-icon(:iconName="'done'"
                 :iconColor="'gray-2'"
                 :iconWidth="'25px'")
-    //- div
-    //-   svg-icon(class="panel-fonts__close pointer"
-    //-     :iconName="'close'"
-    //-     :iconWidth="'30px'"
-    //-     :iconColor="'gray-2'"
-    //-     @click.native="closeFontsPanel")
-    //-           div(class="text-center")
-    //- btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
+    div
+      //- svg-icon(class="panel-fonts__close pointer"
+      //-   :iconName="'close'"
+      //-   :iconWidth="'30px'"
+      //-   :iconColor="'gray-2'"
+      //-   @click.native="closeFontsPanel")
+    btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
 <script lang="ts">
@@ -147,6 +151,8 @@ export default Vue.extend({
   flex-direction: column;
   &__title {
     text-align: center;
+    position: relative;
+    margin-bottom: 5px;
   }
   > div {
     margin-top: 15px;
@@ -164,7 +170,6 @@ export default Vue.extend({
   }
   &__close {
     position: absolute;
-    top: 0px;
     right: 0px;
   }
   &__items {

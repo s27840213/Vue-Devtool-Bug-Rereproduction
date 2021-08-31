@@ -149,8 +149,8 @@ export default Vue.extend({
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
       const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
       const newFont = new FontFace(objectId, getFontUrl(objectId))
-      newFont.load().then(() => {
-        console.log('Default font loaded!')
+      newFont.load().then((font) => {
+        document.fonts.add(font)
       })
     }
   }
