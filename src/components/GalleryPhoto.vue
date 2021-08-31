@@ -5,7 +5,7 @@
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
-    img(:src="inFilePanel ? photo.urls.full : photo.urls.thumb",
+    img(:src="inFilePanel ? photo.urls.full : photo.urls.small",
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event,photo)"

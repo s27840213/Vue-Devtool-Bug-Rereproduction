@@ -436,7 +436,7 @@ class TextPropUtils {
   }
 
   paragraphPropsHandler(propName: string, value: string | number = '', selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
-    if (this.currSelectedInfo.layers.length === 1) {
+    if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
       const sel = TextUtils.getSelection()
 
       if (sel && !TextUtils.isSel(selStart) && !TextUtils.isSel(selEnd)) {
@@ -491,7 +491,7 @@ class TextPropUtils {
    * @returns The desired props value accord to the current selection range.
    */
   propReader(propName: string): string | number | undefined {
-    if (this.currSelectedInfo.layers.length === 1) {
+    if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
       return this.propReadOfLayer(propName)
     } else {
       const tmpLayerGroup = this.getCurrLayer as ITmp
@@ -770,7 +770,7 @@ class TextPropUtils {
           break
         }
         case 'isVertical': {
-          if (this.currSelectedInfo.layers.length === 1) {
+          if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
             value = this.getCurrLayer.styles.writingMode.includes('vertical')
           } else {
             const tmpLayerGroup = this.getCurrLayer as ITmp
