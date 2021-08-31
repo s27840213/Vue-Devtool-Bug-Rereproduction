@@ -6,3 +6,8 @@
 @function setZindex($value) {
   @return index($zindex, $value);
 }
+
+@function setLinearGradient($gradient) {
+  @return map-get($linear-gradient, $gradient)
+}
+

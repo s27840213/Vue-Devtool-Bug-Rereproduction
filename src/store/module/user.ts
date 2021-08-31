@@ -9,12 +9,18 @@ const SET_IMAGES = 'SET_IMAGES' as const
 const ADD_PREVIEW = 'ADD_PREVIEW' as const
 const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
 const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
+const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
+const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
+const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
+const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
+
 export interface IUserModule {
   token: string,
   userAssets: IUserAssetsData,
   downloadUrl: string
   pending: boolean,
-  images: Array<IAssetPhoto>
+  images: Array<IAssetPhoto>,
+  checkedAssets: Array<string>
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -35,7 +41,8 @@ const getDefaultState = (): IUserModule => ({
   },
   downloadUrl: '',
   pending: false,
-  images: []
+  images: [],
+  checkedAssets: []
 })
 
 const state = getDefaultState()
@@ -55,6 +62,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getIsPending(state) {
     return state.pending
+  },
+  getCheckedAssets(state) {
+    return state.checkedAssets
   }
 }
 
@@ -69,6 +79,16 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       commit(SET_IMAGES)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async deleteAssets({ commit, dispatch }) {
+    try {
+      const keyList = state.checkedAssets.join(',')
+      const { data } = await userApis.deleteAssets(state.token, keyList)
+      dispatch('getAssets', { token: state.token })
+      commit('CLEAR_CHECKED_ASSETS')
     } catch (error) {
       console.log(error)
     }
@@ -202,6 +222,21 @@ const mutations: MutationTree<IUserModule> = {
     }
 
     images[targetIndex].urls = targetUrls
+  },
+  [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
+    state.checkedAssets = [...val]
+  },
+  [ADD_CHECKED_ASSETS](state: IUserModule, id) {
+    state.checkedAssets.push(id)
+  },
+  [DELETE_CHECKED_ASSETS](state: IUserModule, id: string) {
+    const targetIndex = state.checkedAssets.findIndex((assetId) => {
+      return assetId === id
+    })
+    state.checkedAssets.splice(targetIndex, 1)
+  },
+  [CLEAR_CHECKED_ASSETS](state: IUserModule) {
+    state.checkedAssets = []
   }
 }
 

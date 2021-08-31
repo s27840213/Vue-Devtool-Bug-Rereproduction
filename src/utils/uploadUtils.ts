@@ -25,8 +25,7 @@ class UploadUtils {
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    console.log(loginOutput)
-    // this.getTmpJSON()
+    this.getTmpJSON()
   }
 
   uploadAsset() {
@@ -34,7 +33,7 @@ class UploadUtils {
     // It will be remove by JS garbage collection system sooner or later
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', 'image/*,.heic')
+    inputNode.setAttribute('accept', '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic')
     inputNode.setAttribute('multiple', 'true')
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
@@ -48,7 +47,7 @@ class UploadUtils {
   uploadImageAsset(files: FileList) {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
-      const assetId = this.generateAssetId()
+      const assetId = generalUtils.generateAssetId()
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
@@ -118,7 +117,7 @@ class UploadUtils {
   }
 
   uploadText() {
-    const designId = this.generateRandomString(20)
+    const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
     LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
@@ -253,7 +252,7 @@ class UploadUtils {
   }
 
   uploadTemplate() {
-    const designId = this.generateRandomString(20)
+    const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const pageIndex = store.getters.getLastSelectedPageIndex
     store.commit('SET_pageDesignId', {
@@ -283,7 +282,7 @@ class UploadUtils {
     xhr.send(formData)
     xhr.onload = () => {
       console.log(designId)
-      // console.log(`https://template.vivipic.com/template/${designId}/config.json?ver=${this.generateRandomString(6)}`)
+      // console.log(`https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`)
       // console.log(xhr)
     }
   }
@@ -321,7 +320,7 @@ class UploadUtils {
   }
 
   uploadTmpJSON() {
-    const assetId = this.generateAssetId()
+    const assetId = generalUtils.generateAssetId()
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -345,15 +344,15 @@ class UploadUtils {
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
       xhr.onload = function () {
-        console.log(this)
+        // console.log(this)
       }
     }, 5000)
   }
 
   async getTmpJSON() {
     this.loginOutput.download_url = this.loginOutput.download_url.replace('*', 'edit/temp.json')
-    // console.log(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
-    const response = await fetch(`${this.loginOutput.download_url}&ver=${this.generateRandomString(6)}`)
+    // console.log(`${this.loginOutput.download_url}&ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch(`${this.loginOutput.download_url}&ver=${generalUtils.generateRandomString(6)}`)
     // const response = await fetch(this.loginOutput.download_url)
     response.json().then((json) => {
       store.commit('SET_pages', json)
@@ -362,44 +361,11 @@ class UploadUtils {
 
   async getDesign(type: string, designId: string) {
     const jsonName = type === 'template' ? 'config.json' : 'page.json'
-    const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${this.generateRandomString(6)}`)
+    const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`)
     response.json().then((json) => {
       console.log(json)
       store.commit('SET_pages', [json])
     })
-  }
-
-  private generateAssetId() {
-    const date = new Date()
-    const year = this.formatStr((date.getFullYear() - 2000).toString(), 2)
-    const month = this.formatStr((date.getMonth() + 1).toString(), 2)
-    const _date = this.formatStr((date.getDate()).toString(), 2)
-    const hours = this.formatStr((date.getHours()).toString(), 2)
-    const mins = this.formatStr((date.getMinutes()).toString(), 2)
-    const sec = this.formatStr((date.getSeconds()).toString(), 2)
-    const msec = this.formatStr((date.getMilliseconds()).toString(), 3)
-    return year + month + _date + hours + mins + sec + msec + this.generateRandomString(8)
-  }
-
-  private generateRandomString(length: number) {
-    let result = ''
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    const charactersLength = characters.length
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() *
-        charactersLength))
-    }
-    return result
-  }
-
-  private formatStr(str: string, len: number) {
-    if (str.length === len) {
-      return str
-    } else {
-      const diff = len - str.length
-      const complement = new Array(diff).fill(0).join('')
-      return complement + str
-    }
   }
 }
 

@@ -21,6 +21,13 @@ export default {
     data: {
     }
   }),
+  deleteAssets: (token: string, keyList: string): AxiosPromise => axios('/delete-asset', {
+    method: 'POST',
+    data: {
+      token,
+      key_list: keyList
+    }
+  }),
   register: (token: string, meta: string): AxiosPromise => axios('/register', {
     method: 'POST',
     data: {

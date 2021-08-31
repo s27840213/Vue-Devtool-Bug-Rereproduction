@@ -9,6 +9,20 @@
       @click.native="uploadImage()") Upload Image
     tmp-files(
       :inFilePanel="true")
+    transition(name="panel-up")
+      div(v-if="hasCheckedAssets"
+          class="panel-file__menu")
+        div
+          svg-icon(class="pointer"
+            :iconName="'folder'"
+            :iconColor="'white'"
+            :iconWidth="'24px'")
+          svg-icon(class="pointer ml-10"
+            :iconName="'trash'"
+            :iconColor="'white'"
+            :iconWidth="'24px'"
+            @click.native="deleteAssets()")
+        span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`消取所有選取(${checkedAssets.length})`}}
 </template>
 
 <script lang="ts">
@@ -17,6 +31,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
@@ -29,11 +44,23 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters({
+      checkedAssets: 'user/getCheckedAssets'
+    }),
     margin(): number {
       return this.galleryUtils.margin
+    },
+    hasCheckedAssets(): boolean {
+      return this.checkedAssets.length !== 0
     }
   },
   methods: {
+    ...mapActions({
+      deleteAssets: 'user/deleteAssets'
+    }),
+    ...mapMutations({
+      clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
+    }),
     uploadImage() {
       uploadUtils.uploadAsset()
     },
@@ -57,6 +84,19 @@ export default Vue.extend({
   text-align: center;
   &__title {
     margin-bottom: 20px;
+  }
+  &__menu {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 20px;
+    background: setColor(nav);
+    font-size: 14px;
   }
 }
 
