@@ -11,6 +11,9 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import PageUtils from '@/utils/pageUtils'
+import TemplateUtils from '@/utils/templateUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import { IParagraph, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -21,7 +24,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getJson: 'getJson'
+      getJson: 'getJson',
+      getTextInfo: 'getTextInfo'
     })
   },
   mounted () {
@@ -34,7 +38,7 @@ export default Vue.extend({
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
     dragStart(event: DragEvent) {
-      const json = this.getJson(this.objectId)
+      const json = TemplateUtils.updateTemplate(this.getJson(this.objectId))
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -46,7 +50,7 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(config))
     },
     addTemplate() {
-      const json = this.getJson(this.objectId)
+      const json = TemplateUtils.updateTemplate(this.getJson(this.objectId))
       PageUtils.updateSpecPage(this.lastSelectedPageIndex, json[0] || json)
     }
   }

@@ -1,14 +1,15 @@
 <template lang="pug">
   keep-alive
-    div
+    div(class="nu-image-controller__wrapper" ref="wrapper"
+        @mousedown.capture="cancelImgControl")
       div(class="nu-img-controller"
           ref="body"
           :style="styles()"
           @mousedown.left.stop="moveStart")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
-            :key="index * 2"
-            :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
+            :key="index"
+            :style="Object.assign(scaler, cursorStyles(index, getLayerRotate))"
             @mousedown.stop="scaleStart")
       div(class="nu-controller"
           :style="controllerStyles()")
@@ -16,17 +17,22 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
     pageIndex: Number
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -43,8 +49,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      getPage: 'getPage'
     }),
     getControlPoints(): any {
       return this.config.controlPoints
@@ -308,6 +314,16 @@ export default Vue.extend({
     currCursorStyling(e: MouseEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
+    },
+    cancelImgControl(e: MouseEvent) {
+      if (e.target === this.$refs.body) {
+      }
+      for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
+        if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
+          console.log('click outside')
+          // ControlUtils.updateImgControl(this.pageIndex, i, false)
+        }
+      }
     }
   }
 })
@@ -315,14 +331,18 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-img-controller {
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
   // z-index: setZindex("nu-controller");
-  position: absolute;
   box-sizing: border-box;
   &:hover {
     cursor: pointer;
+  }
+  &__wrapper {
+    width: max-content;
+    height: max-content;
   }
 }
 

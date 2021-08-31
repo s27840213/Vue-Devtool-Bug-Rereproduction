@@ -7,7 +7,7 @@
       @search="handleSearch")
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
+      template(#after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"

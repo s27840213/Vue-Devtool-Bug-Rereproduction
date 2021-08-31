@@ -59,29 +59,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('mounted!')
-    console.log(this.config)
-    // if (this.config.isHeading) {
-    //   if (this.getTextInfo.heading.length) {
-    //     const paraStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].styles)
-    //     const spanStyles = GeneralUtils.deepCopy(this.config.paragraphs[0].spans[0].styles)
-    //     const paragraphs = [] as Array<IParagraph>
-    //     for (const text of this.getTextInfo.heading) {
-    //       paragraphs.push({
-    //         styles: paraStyles,
-    //         spans: [{
-    //           styles: spanStyles,
-    //           text: text
-    //         }]
-    //       })
-    //     }
-    //     TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-    //   }
-    // } else if (this.config.isSubheading) {
-    //   // TODO
-    // } else if (this.config.isBody) {
-    //   // TODO
-    // }
+    this.updateLayerSize()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -117,22 +95,7 @@ export default Vue.extend({
          */
         if (this.config.isTyping) return
         this.$nextTick(() => {
-          const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-          if (typeof this.subLayerIndex === 'undefined') {
-            ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-          } else {
-            this.updateSelectedLayerStyles({
-              styles: {
-                width: textHW.width,
-                height: textHW.height
-              },
-              layerIndex: this.subLayerIndex
-            })
-            if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
-              const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
-              LayerUtils.updateLayerStyles(this.pageIndex, this.currSelectedInfo.index, { width, height })
-            }
-          }
+          this.updateLayerSize()
         })
       },
       deep: true
@@ -140,7 +103,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateSelectedLayerStyles: 'UPDATE_selectedLayersStyles'
+      updateSubLayerStyles: 'SET_subLayerStyles'
     }),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
@@ -160,6 +123,26 @@ export default Vue.extend({
       return {
         writingMode: this.config.styles.writingMode,
         opacity
+      }
+    },
+    updateLayerSize() {
+      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      if (typeof this.subLayerIndex === 'undefined') {
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      } else {
+        this.updateSubLayerStyles({
+          pageIndex: this.pageIndex,
+          primaryLayerIndex: this.layerIndex,
+          subLayerIndex: this.subLayerIndex,
+          styles: {
+            width: textHW.width,
+            height: textHW.height
+          }
+        })
+        if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
+          const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
+          LayerUtils.updateLayerStyles(this.pageIndex, this.currSelectedInfo.index, { width, height })
+        }
       }
     },
     getFontUrl(fontID: string): string {

@@ -10,6 +10,7 @@ import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
+import TemplateUtils from './templateUtils'
 
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
@@ -106,10 +107,33 @@ class TextUtils {
     }
   }
 
+  isEmptyText(config: IText): boolean {
+    return config.paragraphs.length === 1 && config.paragraphs[0].spans.length === 1 && config.paragraphs[0].spans[0].text === ''
+  }
+
   textParser(text: HTMLElement, config: IText): IParagraph[] {
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
+
+    /**
+     * If the user use cmd+A select the whole text and delete them,
+     * the default befaviour of the browse is not expected as we desired.
+     * Below will transform the default befaviour to our desired format.
+     */
+    if (ps[0].childNodes[0].nodeName === 'FONT') {
+      return [{
+        styles: Object.assign({}, config.paragraphs[0].styles),
+        spans: [{
+          styles: Object.assign({}, config.paragraphs[0].spans[0].styles),
+          text: (ps[0].childNodes[0].childNodes[0].childNodes[0].firstChild?.textContent ||
+            ps[0].childNodes[0].childNodes[0].firstChild?.textContent) ?? '',
+          id: uuidv4()
+        }],
+        id: uuidv4()
+      }]
+    }
+
     ps.forEach((p, pIndex) => {
       const spans: ISpan[] = []
       const spanStyleBuff = {} as ISpanStyle
@@ -161,6 +185,7 @@ class TextUtils {
 
           if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
             spans[spans.length - 1].text += text
+            // spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           } else {
             spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           }
@@ -197,7 +222,7 @@ class TextUtils {
           }
           return true
         })()
-
+        console.log('isSameSpanStyles: ' + isSameSpanStyles)
         if (!isSameSpanStyles) {
           const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
           const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)
@@ -371,9 +396,17 @@ class TextUtils {
     /**
      * Check if there already exist an heading on the page. If not, set the new one as.
      */
-    if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
-      Object.assign(format, { [field]: true })
+    // if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
+    //   Object.assign(format, { [field]: true })
+    // }
+    if (field) {
+      if (!page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
+        Object.assign(format, { [field]: true })
+      } else {
+        Object.assign(format, { [field]: false })
+      }
     }
+
     const newTextLayer = LayerFactary.newText(format)
     LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
   }
@@ -400,34 +433,13 @@ class TextUtils {
     LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 
-  updateTextStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles
-    })
-  }
-
-  setTextInfo(textInfo: { [key: string]: Array<string> }) {
-    store.commit('SET_textInfo', textInfo)
-  }
-
-  textInfoUpdater(field: string, paragraphs: IParagraph[]) {
-    const textArr = []
-    for (const p of paragraphs) {
-      let text = ''
-      for (const span of p.spans) {
-        text += span.text
-      }
-      textArr.push(text)
-    }
-    this.setTextInfo({ [field]: textArr })
-  }
-
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
     const config = this.getLayer(pageIndex, layerIndex) as IText
-    if (config.isHeading) {
-      this.textInfoUpdater('heading', paragraphs)
+    for (const field of TemplateUtils.fields) {
+      if (config[TemplateUtils.fieldsMap[field]]) {
+        TemplateUtils.textInfoUpdater(field, paragraphs)
+        break
+      }
     }
     store.commit('UPDATE_textProps', {
       pageIndex,

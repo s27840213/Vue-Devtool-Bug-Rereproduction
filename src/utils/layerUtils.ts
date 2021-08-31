@@ -6,6 +6,7 @@ import GroupUtils from '@/utils/groupUtils'
 import FocusUtils from './focusUtils'
 import { ISpecLayerData } from '@/store/types'
 import { IPage } from '@/interfaces/page'
+import TemplateUtils from './templateUtils'
 
 class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -36,6 +37,7 @@ class LayerUtils {
     console.log(this.currSelectedInfo.index)
     store.commit('SET_lastSelectedLayerIndex', -1)
     ZindexUtils.reassignZindex(store.getters.getCurrSelectedPageIndex)
+    TemplateUtils.updateTextInfoTarget()
   }
 
   deleteLayer(index: number) {

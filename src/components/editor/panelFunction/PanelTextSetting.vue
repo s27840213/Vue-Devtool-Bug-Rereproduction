@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="text-setting" @mousedown="textRangeRecorder($event)" ref='body')
+  div(class="text-setting" @mousedown.capture="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     property-bar(class="pointer record-selection" @click.native="openFontsPanel")
       //- span(class="body-2 text-gray-2") {{ props.font }}
@@ -37,7 +37,7 @@
         @update="handleColorUpdate")
     action-bar(class="flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="pointer"
+        class="pointer record-selection"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
@@ -47,7 +47,7 @@
         class="pointer"
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
     div(class="text-setting__row5")
       div(class="relative")
         property-bar
@@ -130,7 +130,7 @@ export default Vue.extend({
       openValueSelector: false,
       openSliderBar: 'center',
       fieldRange: {
-        fontSize: { min: 6, max: 120 },
+        fontSize: { min: 6, max: 800 },
         lineHeight: { min: 0, max: 300 },
         fontSpacing: { min: -200, max: 800 },
         opacity: { min: 0, max: 100 }
@@ -139,10 +139,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    // if (!TextUtils.getCurrLayer.layers) {
-    // this.$store.commit('text/SET_default')
     TextPropUtils.updateTextPropsState()
-    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -270,31 +267,44 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       TextPropUtils.onPropertyClick(iconName)
-      // Only select without range or none selection exist, the prop-panel update.
+      /**
+       *  Only select with range or none selection exist, the prop-panel update.
+       * */
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
         TextPropUtils.updateTextPropsState()
       }
     },
-    fontSizeStepping(step: number) {
+    onParaPropsClick(iconName: string) {
+      TextPropUtils.paragraphPropsHandler(iconName)
+      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
+        TextPropUtils.updateTextPropsState()
+      }
+    },
+    fontSizeStepping(step: number, tickInterval = 100) {
+      const startTime = new Date().getTime()
+      const interval = setInterval(() => {
+        const endTime = new Date().getTime()
+        if (endTime - startTime > 500) {
+          this.fontSizeSteppingHandler(step)
+        }
+      }, tickInterval)
+      const onmouseup = () => {
+        const endTime = new Date().getTime()
+        if (endTime - startTime < 500) {
+          this.fontSizeSteppingHandler(step)
+        }
+        clearInterval(interval)
+        window.removeEventListener('onmouseup', onmouseup)
+      }
+      window.addEventListener('mouseup', onmouseup)
+    },
+    fontSizeSteppingHandler(step: number) {
       const sel = TextUtils.getSelection()
-      // if (sel) {
-      //   const start = {
-      //     pIndex: sel.start.pIndex,
-      //     sIndex: sel.start.sIndex
-      //   }
-      //   const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
-      //   const fontSize = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-      //   TextPropUtils.spanPropertyHandler('fontSize', fontSize + step)
-      //   TextPropUtils.updateTextPropsState()
-      // }
-      // let panelFontVal = this.sel.props.fontSize
       if (sel) {
         const { start, end } = sel
-        console.log(start.sIndex)
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
         const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
-        console.log(end.sIndex)
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           const p = config.paragraphs[pidx]
           for (let sidx = 0; sidx < p.spans.length; sidx++) {
@@ -307,7 +317,6 @@ export default Vue.extend({
 
             // PIndex, sIndex both are at the start-selection
             if (pidx === start.pIndex && sidx === start.sIndex) {
-              console.log('----------FIRST START------------')
               // Start-selection and the end-selection are exactly at the same span
               if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
                 Object.assign(currStart, start)
@@ -317,19 +326,13 @@ export default Vue.extend({
                 Object.assign(currEnd, { pIndex: start.pIndex, sIndex: start.sIndex, offset: span.text.length })
               }
             } else if (pidx === end.pIndex && sidx === end.sIndex) {
-              console.log('----------END START------------')
-              console.log(pidx)
-              console.log(sidx)
-              console.log(start.sIndex)
-              const endSidx = start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              const endSidx = start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
             } else {
-              console.log('----------ELSE------------')
-              console.log(pidx)
-              console.log(sidx)
-              Object.assign(currStart, { pIndex: pidx, sIndex: sidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: sidx, offset: span.text.length })
+              const endSidx = start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
+              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
             TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
 
@@ -339,10 +342,11 @@ export default Vue.extend({
           }
         }
         Object.assign(finalEnd, this.sel.end)
+        const finalSel = TextPropUtils.spanMerger(TextPropUtils.getCurrLayer.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
-          console.log(finalStart)
-          console.log(finalEnd)
-          TextUtils.focus(finalStart, finalEnd)
+          TextUtils.focus(finalSel[0], finalSel[1])
+          TextUtils.updateSelection(finalSel[0], finalSel[1])
+          TextPropUtils.updateTextPropsState()
         })
       } else {
         const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
@@ -361,8 +365,8 @@ export default Vue.extend({
             TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
           }
         }
+        TextPropUtils.updateTextPropsState()
       }
-      TextPropUtils.updateTextPropsState()
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
@@ -379,10 +383,10 @@ export default Vue.extend({
       return value.toString()
     },
     textRangeRecorder(e: MouseEvent) {
+      console.log('text range!')
       const sel = TextUtils.getSelection()
       if ((e.target as HTMLElement).classList.contains('record-selection')) {
         TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
-        console.log(this.sel.start)
       }
     },
     setSize(e: Event) {
@@ -560,7 +564,7 @@ export default Vue.extend({
     flex-direction: column;
   }
   &__text-preview {
-    height: 30px;
+    height: 25px;
     display: inline-flex;
     align-items: center;
   }

@@ -55,12 +55,12 @@ export interface ISpan {
 }
 
 export interface ITextStyle extends IStyle {
-  writingMode: string,
-  align: string,
+  writingMode: string
 }
 
 export interface IParagraphStyle {
   [key: string]: number | string | undefined,
+  align: string,
   lineHeight: number,
   fontSpacing: number,
   size: number

@@ -26,7 +26,7 @@ function normalized (photos: Api.IPexelsPhoto[]): Api.IPhoto[] {
       full: photo.src.original,
       raw: photo.src.original,
       regular: photo.src.medium,
-      small: photo.src.small,
+      small: photo.src.medium,
       thumb: photo.src.small
     },
     tags: [],

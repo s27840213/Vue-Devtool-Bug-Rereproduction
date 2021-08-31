@@ -121,6 +121,9 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
+      if (this.openColorPicker) {
+        this.openColorPicker = false
+      }
       this.currSelectedColorIndex = index
     },
     setColor(newColor: string, index: number) {

@@ -172,6 +172,7 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode,
         outline: 'none',
         position: 'absolute',
+        userSelect: 'text',
         transform: 'translate(-50%, -50%)'
       }
     },

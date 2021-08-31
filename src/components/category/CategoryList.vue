@@ -3,7 +3,7 @@
     template(v-slot="{ item }")
       observer-sentinel(v-if="item.sentinel"
         :key="item.id"
-        target=".category-list"
+        :target="`.category-list_${item.type}`"
         @callback="onLoadMore")
       slot(:name="item.type"
         :list="item.list"

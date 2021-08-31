@@ -52,7 +52,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('xxxx')
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 
@@ -178,8 +177,10 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`
+        // width: `${this.config.styles.width / this.config.styles.scale}px`,
+        // height: `${this.config.styles.height / this.config.styles.scale}px`
+        width: `${this.config.styles.initWidth}px`,
+        height: `${this.config.styles.initHeight}px`
       }
     },
     getFilterTemplate(): string {

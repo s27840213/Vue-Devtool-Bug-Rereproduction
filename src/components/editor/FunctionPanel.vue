@@ -104,7 +104,7 @@ export default Vue.extend({
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
   overflow-y: scroll;
   > div {
-    margin-bottom: 25px;
+    // margin-bottom: 25px;
   }
 }
 </style>
