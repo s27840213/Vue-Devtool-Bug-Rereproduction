@@ -187,7 +187,7 @@ export default Vue.extend({
       }
       if (this.getLayerType === 'text' && !val) {
         const text = this.$refs.text as HTMLElement
-        if (text.childNodes[0].childNodes[0].nodeName !== 'SPAN') {
+        if (text && text.childNodes[0].childNodes[0].nodeName !== 'SPAN') {
           LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
           return
         }

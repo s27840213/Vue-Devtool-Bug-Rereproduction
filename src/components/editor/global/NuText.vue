@@ -103,7 +103,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateSelectedLayerStyles: 'UPDATE_selectedLayersStyles'
+      updateSubLayerStyles: 'SET_subLayerStyles'
     }),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
@@ -130,12 +130,14 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else {
-        this.updateSelectedLayerStyles({
+        this.updateSubLayerStyles({
+          pageIndex: this.pageIndex,
+          primaryLayerIndex: this.layerIndex,
+          subLayerIndex: this.subLayerIndex,
           styles: {
             width: textHW.width,
             height: textHW.height
-          },
-          layerIndex: this.subLayerIndex
+          }
         })
         if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
           const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
