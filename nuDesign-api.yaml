@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210824"
+  version: "20210831"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -107,6 +107,89 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /reprocess-design:
+    post:
+      description: 重新處理Cyberduck上傳之檔案
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: reprocessDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/reprocessDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/reprocessDesignOutput"
+  /reset-password:
+    post:
+      description: 重設密碼
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: resetPasswordInput
+          required: true
+          schema:
+            $ref: "#/definitions/resetPasswordInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/resetPasswordOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /send-vcode:
+    post:
+      description: 傳送驗證碼
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: sendVcodeInput
+          required: true
+          schema:
+            $ref: "#/definitions/sendVcodeInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/sendVcodeOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /verify-vcode:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: verifyVcodeInput
+          required: true
+          schema:
+            $ref: "#/definitions/verifyVcodeInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/verifyVcodeOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
 definitions:
   uploadMap:
     type: object
@@ -193,6 +276,24 @@ definitions:
               - font
               - photo
               - video
+  resetPasswordInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - account
+          - upass
+        properties:
+          account:
+            type: string
+            description: user account
+          upass:
+            type: string
+            description: user password
+  resetPasswordOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
   registerInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -229,6 +330,31 @@ definitions:
           keyword:
             type: string
             description: keyword to search
+          object_type:
+            type: string
+            description: object type, such as svg, mark ...
+  sendVcodeInput:
+    type: object
+    required:
+      - account
+      - register
+      - vcode_only
+    properties:
+      uname:
+        type: string
+        description: user name
+      account:
+        type: string
+        description: user account
+      upass:
+        type: string
+        description: user password
+      register:
+        type: string
+        description: register flag
+      vcode_only:
+        type: string
+        description: vcode only flag
   assetMap:
     type: object
     properties:
@@ -295,6 +421,17 @@ definitions:
   Empty:
     type: object
     title: Empty Schema
+  verifyVcodeOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          token:
+            type: string
+            description: token
+          expire_time:
+            type: string
+            description: expire time
   apiCommonInput:
     type: object
     required:
@@ -305,6 +442,36 @@ definitions:
         description: |-
           User token.
           Allowed characters: 0-9a-zA-Z.
+  verifyVcodeInput:
+    type: object
+    required:
+      - account
+      - vcode
+    properties:
+      account:
+        type: string
+        description: user account
+      vcode:
+        type: string
+        description: verification code
+  reprocessDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - path
+        properties:
+          path:
+            type: string
+            description: path of design files to be re-processed
+  reprocessDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
+  sendVcodeOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
   deleteAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
