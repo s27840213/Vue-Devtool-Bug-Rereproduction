@@ -17,6 +17,7 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
+import groupUtils from '@/utils/groupUtils'
 
 Vue.use(Vuex)
 
@@ -263,6 +264,7 @@ const getters: GetterTree<IEditorState, unknown> = {
 
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
+    groupUtils.reset()
     state.pages = newPages
   },
   ADD_page(state: IEditorState, newPages: IPage) {

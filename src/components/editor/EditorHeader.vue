@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-header")
     div
-      div(class="subtitle-2 text-gray-2 pointer" @click="addPage()") New Design
+      div(class="subtitle-2 text-gray-2 pointer" @click="setPages()") New Design
       div(class="subtitle-2 text-gray-2") File
       div(class="subtitle-2 text-gray-2") Resize
       svg-icon(:class="{'pointer': !isInFirstStep}"
@@ -59,7 +59,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page'
+      _setPages: 'SET_pages'
     }),
     exportJsonFile() {
       FileUtils.export()
@@ -67,8 +67,8 @@ export default Vue.extend({
     importJsonFile() {
       FileUtils.import()
     },
-    addPage() {
-      this._addPage({
+    setPages() {
+      this._setPages([{
         width: 1080,
         height: 1080,
         backgroundColor: '#ffffff',
@@ -113,7 +113,7 @@ export default Vue.extend({
         ],
         documentColor: [],
         designId: ''
-      })
+      }])
     }
   }
 })
