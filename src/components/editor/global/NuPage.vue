@@ -60,7 +60,7 @@
           :style="styles()")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
-            nu-controller(v-if="!(layer.type === 'image' && layer.imgControl)"
+            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
               :key="`controller-${index}`"
               :layerIndex="index"
@@ -70,7 +70,17 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-        div(v-if="(typeof getCurrLayer) !== 'undefined' && getCurrLayer.imgControl"
+            //- nu-controller(v-if="!(layer.type === 'image' && layer.imgControl)"
+            //-   data-identifier="controller"
+            //-   :key="`controller-${index}`"
+            //-   :layerIndex="index"
+            //-   :pageIndex="pageIndex"
+            //-   :config="layer"
+            //-   :snapUtils="snapUtils"
+            //-   @setFocus="setFocus()"
+            //-   @getClosestSnaplines="getClosestSnaplines"
+            //-   @clearSnap="clearSnap")
+        div(v-if="(typeof getCurrLayer) !== 'undefined' && getCurrLayer.active && getCurrLayer.imgControl"
             class="dim-background"
             :style="styles('control')"
             ref="page-content")
@@ -336,10 +346,13 @@ export default Vue.extend({
 }
 
 .dim-background {
-  display: flex;
-  position: fixed;
-  min-width: 100%;
-  min-height: 100%;
+  // display: flex;
+  // position: fixed;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  // min-width: 100%;
+  // min-height: 100%;
   background: rgba(0, 0, 0, 0.2);
   // background: rgba(53, 71, 90, 0.25);
   pointer-events: none;
