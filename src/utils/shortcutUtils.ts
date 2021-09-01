@@ -11,6 +11,17 @@ import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
 
 class ShortcutHandler {
+  get currSelectedPageIndex() {
+    return store.getters.getCurrSelectedPageIndex
+  }
+
+  get currSelectedLayerIndex() {
+    return store.getters.getCurrSelectedIndex
+  }
+
+  get currSelectedLayerStyles() {
+    return LayerUtils.getTmpLayer().styles
+  }
   // target: HTMLElement
   // constructor(target: HTMLElement) {
   //   this.target = target
@@ -36,6 +47,7 @@ class ShortcutHandler {
   //   inputNode.setAttribute('type', 'text')
   //   inputNode.focus()
   // }
+  get scaleRatio(): number { return store.getters.getPageScaleRatio }
 
   copy() {
     if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
@@ -244,6 +256,38 @@ class ShortcutHandler {
   redo() {
     console.log('redo')
     StepsUtils.redo()
+  }
+
+  zoomIn() {
+    store.commit('SET_pageScaleRatio', this.scaleRatio + 10)
+  }
+
+  zoomOut() {
+    store.commit('SET_pageScaleRatio', this.scaleRatio - 10)
+  }
+
+  up() {
+    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+      y: this.currSelectedLayerStyles.y - (1 * (100 / this.scaleRatio))
+    })
+  }
+
+  down() {
+    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+      y: this.currSelectedLayerStyles.y + (1 * (100 / this.scaleRatio))
+    })
+  }
+
+  left() {
+    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+      x: this.currSelectedLayerStyles.x - (1 * (100 / this.scaleRatio))
+    })
+  }
+
+  right() {
+    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+      x: this.currSelectedLayerStyles.x + (1 * (100 / this.scaleRatio))
+    })
   }
 }
 

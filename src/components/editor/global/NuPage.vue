@@ -19,6 +19,14 @@
       @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
       @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+      @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+      @keydown.cmd.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+      @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+      @keydown.cmd.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+      @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+      @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+      @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+      @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
       tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       div
@@ -26,7 +34,7 @@
       div(v-if="getCurrActivePageIndex===pageIndex")
         svg-icon(:iconName="'plus'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
-        svg-icon(:iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+        svg-icon(v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :style="wrapperStyles()")
@@ -156,6 +164,9 @@ export default Vue.extend({
     }),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
+    },
+    getPageCount(): number {
+      return this.pages.length
     }
   },
   methods: {
