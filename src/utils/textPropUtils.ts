@@ -116,6 +116,7 @@ class TextPropUtils {
 
   blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
+      console.log(this.layerIndex)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, styles)
     }
     const updateSelectedLayersProps = (styles: { [key: string]: string | number | boolean }) => {
@@ -123,24 +124,15 @@ class TextPropUtils {
     }
     const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersProps
     switch (propName) {
-      // case 'text-align-left':
-      //   handler({ align: 'left' })
-      //   break
-      // case 'text-align-center':
-      //   handler({ align: 'center' })
-      //   break
-      // case 'text-align-right':
-      //   handler({ align: 'right' })
-      //   break
       case 'font-vertical': {
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const updateToVertical = config.styles.writingMode === 'initial' || config.styles.writingMode.includes('horizontal')
-        const writingMode = updateToVertical ? 'vertical-lr' : 'initial'
+        const writingMode = !config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'normal'
         const { width, height } = config.styles
         if (typeof tmpLayerIndex === 'undefined') {
           writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
         }
+        console.log(writingMode)
         handler({ writingMode })
       }
     }

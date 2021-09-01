@@ -16,9 +16,10 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
+    const fields = [...this.fields]
     for (const layer of json.layers) {
       if (layer.type === 'text') {
-        for (const field of this.fields) {
+        for (const [i, field] of fields.entries()) {
           if (layer[this.fieldsMap[field]] && this.getTextInfo[field].length) {
             const paraStyles = GeneralUtils.deepCopy(layer.paragraphs[0].styles)
             const spanStyles = GeneralUtils.deepCopy(layer.paragraphs[0].spans[0].styles)
@@ -33,6 +34,7 @@ class TemplateUtils {
               })
             }
             layer.paragraphs = paragraphs
+            fields.splice(i, 1)
             break
           }
         }

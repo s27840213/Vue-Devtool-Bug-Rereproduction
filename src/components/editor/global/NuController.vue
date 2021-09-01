@@ -204,17 +204,6 @@ export default Vue.extend({
         TextPropUtils.updateTextPropsState()
       }
     },
-    sel: {
-      handler(val) {
-        // const text = this.$refs.text as HTMLElement
-        // TODO://
-        // if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-        //   console.log('enter sel')
-        //   TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
-        // }
-      },
-      deep: true
-    },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -225,7 +214,6 @@ export default Vue.extend({
   },
   updated() {
     console.log(this.lastSelectedLayerIndex)
-    // console.log('contorller updated!')
   },
   methods: {
     ...mapMutations({
@@ -273,6 +261,8 @@ export default Vue.extend({
       }
     },
     textWrapperStyle() {
+      console.log('this.config.styles.writingMode')
+      console.log(this.config.styles.writingMode)
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
