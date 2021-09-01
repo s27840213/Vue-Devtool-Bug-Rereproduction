@@ -1,7 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-image-controller__wrapper" ref="wrapper"
-        @mousedown.capture="cancelImgControl")
+    div
       div(class="nu-img-controller"
           ref="body"
           :style="styles()"
@@ -45,6 +44,13 @@ export default Vue.extend({
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
       isSnappedInVertical: false
+    }
+  },
+  destroyed() {
+    for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
+      if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
+        ControlUtils.updateImgControl(this.pageIndex, i, false)
+      }
     }
   },
   computed: {
@@ -314,16 +320,6 @@ export default Vue.extend({
     currCursorStyling(e: MouseEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
-    },
-    cancelImgControl(e: MouseEvent) {
-      if (e.target === this.$refs.body) {
-      }
-      for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
-        if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
-          console.log('click outside')
-          // ControlUtils.updateImgControl(this.pageIndex, i, false)
-        }
-      }
     }
   }
 })

@@ -13,13 +13,6 @@
           :isSelecting="isSelecting"
           @mousedown.native.left="setCurrPage(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea")
-    //- template(v-if="(typeof getLastLayer) !== 'undefined' && isImgControl")
-    //-   div(class="editor-background")
-      //- nu-layer(:data-index="`${getLastSelectedLayerIndex}`"
-      //-         :data-pindex="`${getLastSelectedPageIndex}`"
-      //-         :layerIndex="getLastSelectedLayerIndex"
-      //-         :pageIndex="getLastSelectedPageIndex"
-      //-         :config="getLastLayer")
 </template>
 
 <script lang="ts">
