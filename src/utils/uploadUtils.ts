@@ -9,7 +9,9 @@ class UploadUtils {
   get token(): string { return store.getters['user/getToken'] }
   get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
-
+  get supportTypes(): Array<string> {
+    return ['jpeg', 'gif', 'png', 'apng', 'svg', 'bmp', 'png', 'ico']
+  }
   // private handleEvent(e: any) {
   //   console.log(`${e.type}: ${e.loaded} bytes transferred, and total ${e.total}\n`)
   // }

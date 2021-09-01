@@ -19,6 +19,14 @@
       @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
       @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+      @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+      @keydown.cmd.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+      @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+      @keydown.cmd.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+      @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+      @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+      @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+      @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
       tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       div
