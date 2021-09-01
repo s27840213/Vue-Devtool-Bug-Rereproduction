@@ -197,4 +197,7 @@ export default Vue.extend({
     right: 0;
   }
 }
+.category-list::v-deep::-webkit-scrollbar-thumb {
+  border: 3px solid #ffffff;
+}
 </style>
