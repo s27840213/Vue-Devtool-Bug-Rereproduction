@@ -41,6 +41,14 @@ export default Vue.extend({
       LayerType
     }
   },
+  mounted() {
+    if (this.config.type === 'shape') {
+      const scaleLayer = this.$refs.scale as HTMLElement
+      if (scaleLayer) {
+        scaleLayer.classList.add('shape')
+      }
+    }
+  },
   computed: {
     getLayerPos(): { x: number, y: number } {
       return {
@@ -75,13 +83,6 @@ export default Vue.extend({
       let { width, height } = this.config.styles
       width /= this.config.styles.scale
       height /= this.config.styles.scale
-
-      if (this.config.type === 'shape') {
-        const scaleLayer = this.$refs.scale as HTMLElement
-        if (scaleLayer) {
-          scaleLayer.classList.add('shape')
-        }
-      }
 
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
