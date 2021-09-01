@@ -154,10 +154,10 @@ const getters: GetterTree<IEditorState, unknown> = {
       return state.pages[pageIndex]
     }
   },
-  getPages(state): Array<IPage> {
+  getPages(state: IEditorState): Array<IPage> {
     return state.pages
   },
-  getDesignId(state): string {
+  getDesignId(state: IEditorState): string {
     return state.designId
   },
   getPageSize(state: IEditorState) {
@@ -166,13 +166,13 @@ const getters: GetterTree<IEditorState, unknown> = {
       height: state.pages[0].height
     }
   },
-  getCurrSidebarPanelType(state): number {
+  getCurrSidebarPanelType(state: IEditorState): number {
     return state.currSidebarPanelType
   },
-  getCurrFunctionPanelType(state): number {
+  getCurrFunctionPanelType(state: IEditorState): number {
     return state.currFunctionPanelType
   },
-  getPageScaleRatio(state): number {
+  getPageScaleRatio(state: IEditorState): number {
     return state.pageScaleRatio
   },
   getLayer(state: IEditorState) {
@@ -256,7 +256,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getTextInfo(state: IEditorState) {
     return state.textInfo
   },
-  getIsPopupOpen(state) {
+  getIsPopupOpen(state: IEditorState) {
     return state.isPopupOpen
   }
 }
@@ -568,7 +568,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  SET_isPopupOpen(state: IEditorState, isOpen) {
+  SET_isPopupOpen(state: IEditorState, isOpen: boolean) {
     state.isPopupOpen = isOpen
   }
 }

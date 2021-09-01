@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-header")
     div
-      div(class="subtitle-2 text-gray-2") New Design
+      div(class="subtitle-2 text-gray-2 pointer" @click="addPage()") New Design
       div(class="subtitle-2 text-gray-2") File
       div(class="subtitle-2 text-gray-2") Resize
       svg-icon(:class="{'pointer': !isInFirstStep}"
@@ -40,6 +40,7 @@ import Vue from 'vue'
 import FileUtils from '@/utils/fileUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import { mapMutations } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -57,11 +58,62 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      _addPage: 'ADD_page'
+    }),
     exportJsonFile() {
       FileUtils.export()
     },
     importJsonFile() {
       FileUtils.import()
+    },
+    addPage() {
+      this._addPage({
+        width: 1080,
+        height: 1080,
+        backgroundColor: '#ffffff',
+        backgroundImage: {
+          src: 'none',
+          config: {
+            type: 'image',
+            src: 'none',
+            clipPath: '',
+            active: false,
+            shown: false,
+            locked: false,
+            moved: false,
+            imgControl: false,
+            isClipper: false,
+            dragging: false,
+            designId: '',
+            styles: {
+              x: 0,
+              y: 0,
+              scale: 1,
+              scaleX: 0,
+              scaleY: 0,
+              rotate: 0,
+              width: 0,
+              height: 0,
+              initWidth: 0,
+              initHeight: 0,
+              imgX: 0,
+              imgY: 0,
+              imgWidth: 0,
+              imgHeight: 0,
+              zindex: -1,
+              opacity: 100
+            }
+          },
+          posX: -1,
+          posY: -1
+        },
+        name: 'Default Page',
+        layers: [
+        ],
+        documentColor: [],
+        designId: ''
+      })
     }
   }
 })

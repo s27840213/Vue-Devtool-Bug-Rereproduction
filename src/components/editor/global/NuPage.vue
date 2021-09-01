@@ -26,7 +26,7 @@
       div(v-if="getCurrActivePageIndex===pageIndex")
         svg-icon(:iconName="'plus'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
-        svg-icon(:iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+        svg-icon(v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :style="wrapperStyles()")
@@ -147,6 +147,9 @@ export default Vue.extend({
     }),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
+    },
+    getPageCount(): number {
+      return this.pages.length
     }
   },
   methods: {
