@@ -2,6 +2,26 @@
   div(class="dropdowns dropdowns--layer bg-gray-6")
     template(v-if="getToekn!==''")
       div(class="dropdowns__item"
+          @click="pageUploadMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="pageUploadMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{pageUploadMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{pageUploadMenu.shortcutText}}
+    template(v-if="hasDesignId && getToekn!==''")
+      div(class="dropdowns__item"
+          @click="pageUpdateMenu.action")
+        svg-icon(
+          class="pointer"
+          :iconName="pageUpdateMenu.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{pageUpdateMenu.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
+    template(v-if="getToekn!==''")
+      div(class="dropdowns__item"
           @click="uploadMenu.action")
         svg-icon(
           class="pointer"
@@ -71,10 +91,27 @@ import uploadUtils from '@/utils/uploadUtils'
 export default Vue.extend({
   data() {
     return {
+      pageUploadMenu: {
+        icon: 'copy',
+        text: 'Upload single-page template',
+        shortcutText: '',
+        action: () => {
+          uploadUtils.uploadTemplate()
+        }
+      },
+      pageUpdateMenu: {
+        icon: 'copy',
+        text: 'Update single-page template',
+        shortcutText: '',
+        action: () => {
+          uploadUtils.updateTemplate()
+        }
+      }
     }
   },
   computed: {
     ...mapGetters({
+      getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getToekn: 'user/getToken',
@@ -85,6 +122,9 @@ export default Vue.extend({
     },
     getType(): Array<string> {
       return [...this.currSelectedInfo.types]
+    },
+    hasDesignId(): boolean {
+      return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
     uploadMenu(): any {
       return {

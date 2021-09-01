@@ -72,9 +72,10 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  height: 88px;
   background-color: #eaf1f6;
   border: 1px solid #e2e5e6;
+  box-sizing: border-box;
   > div {
     &:nth-child(1) {
       display: grid;

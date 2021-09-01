@@ -1,21 +1,25 @@
 <template lang="pug">
   div(class="gallery-photo")
+    circle-checkbox(v-if="inFilePanel"
+      class="gallery-photo__checkbox"
+      :class="{show: hasCheckedAssets}"
+      :value="photo.id"
+      :checkedValues="checkedAssets"
+      @update="handleCheck")
     svg-icon(class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
-    img(:src="inFilePanel ? photo.urls.full : photo.urls.small",
+    img(:src="inFilePanel ? photo.urls.prev : photo.urls.thumb",
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event,photo)"
-      @click="addImage(photo)")
+      @click="hasCheckedAssets ? modifyCheckedAssets(photo.id) :addImage(photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
       div(class="gallery-photo__progress-bar"
         :style="{'width': `${photo.progress}%`}")
-    //- div(v-if="photo.progress && photo.progress !== 100" class="gallery-photo__progress")
-    //-   span {{}}
 </template>
 
 <script lang="ts">
@@ -24,6 +28,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import CircleCheckbox from '@/components/CircleCheckbox.vue'
 
 export default Vue.extend({
   props: {
@@ -33,21 +38,30 @@ export default Vue.extend({
       default: false
     }
   },
-  components: {},
+  components: {
+    CircleCheckbox
+  },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
       pageSize: 'getPageSize',
-      getLayers: 'getLayers'
+      getLayers: 'getLayers',
+      checkedAssets: 'user/getCheckedAssets'
     }),
     isUploading(): boolean {
       return this.photo.progress && this.photo.progress !== 100
+    },
+    hasCheckedAssets(): boolean {
+      return this.checkedAssets.length !== 0
     }
   },
   methods: {
     ...mapMutations({
-      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
+      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo',
+      addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
+      deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
+      updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS'
     }),
     dragStart(e: DragEvent, photo: any) {
       const dataTransfer = e.dataTransfer as DataTransfer
@@ -113,6 +127,12 @@ export default Vue.extend({
         el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
         el.focus()
       })
+    },
+    handleCheck(value: Array<unknown>) {
+      this.updateCheckedAssets(value)
+    },
+    modifyCheckedAssets(id: string) {
+      this.checkedAssets.includes(id) ? this.deleteCheckedAssets(id) : this.addCheckedAssets(id)
     }
   }
 })
@@ -124,6 +144,13 @@ export default Vue.extend({
   position: relative;
   display: inline-flex;
   justify-content: center;
+  &__checkbox {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+  }
   &__more {
     position: absolute;
     top: 0px;
@@ -133,6 +160,7 @@ export default Vue.extend({
     z-index: -1;
     background-color: setColor(white, 0.7);
     border-radius: 2px;
+    transition: opacity 0.2s ease-out;
     &:hover {
       background-color: setColor(white, 1);
     }
@@ -151,15 +179,15 @@ export default Vue.extend({
     height: 10px;
     bottom: 4px;
     position: absolute;
-    background-color: white;
+    background-color: rgba(black, 0.5);
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid setColor(gray-4);
+    border: 1px solid setColor(white, 0.8);
     box-shadow: 2px 2px 5px setColor(blue-1);
     box-sizing: border-box;
     &-bar {
       height: 100%;
-      background-color: setColor(red);
+      background: setLinearGradient(progress-bar);
       transition: width 0.3s;
     }
   }
@@ -168,6 +196,14 @@ export default Vue.extend({
       opacity: 1;
       z-index: 1;
     }
+    #{$this}__checkbox {
+      opacity: 1;
+      z-index: 1;
+    }
   }
+}
+
+.show {
+  opacity: 1;
 }
 </style>

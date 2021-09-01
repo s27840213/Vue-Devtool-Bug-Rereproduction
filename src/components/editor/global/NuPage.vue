@@ -21,7 +21,13 @@
       @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
-      span {{config.name}}
+      div
+        span {{config.name}}
+      div(v-if="getCurrActivePageIndex===pageIndex")
+        svg-icon(:iconName="'plus'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="addPage()")
+        svg-icon(:iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="deletePage()")
     div(class='pages-wrapper'
         :style="wrapperStyles()")
       //- div(class="coordinate" ref="coordinate")
@@ -48,7 +54,7 @@
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
-            :key="`layer-${index}`"
+            :key="`layer-${GeneralUtils.generateRandomString(8)}`"
             :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"
@@ -102,6 +108,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
 import ControlUtils from '@/utils/controlUtils'
+import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 
 export default Vue.extend({
@@ -117,7 +124,8 @@ export default Vue.extend({
       closestSnaplines: {
         v: [] as Array<ISnapline>,
         h: [] as Array<ISnapline>
-      }
+      },
+      GeneralUtils
     }
   },
   props: {
@@ -143,7 +151,8 @@ export default Vue.extend({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       pages: 'getPages',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      getCurrActivePageIndex: 'getCurrActivePageIndex'
     }),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
@@ -154,7 +163,9 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened'
+      setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened',
+      _addPage: 'ADD_page',
+      _deletePage: 'DELETE_page'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -231,6 +242,57 @@ export default Vue.extend({
         el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
         el.focus()
       })
+    },
+    addPage() {
+      this._addPage({
+        width: 1080,
+        height: 1080,
+        backgroundColor: '#ffffff',
+        backgroundImage: {
+          src: 'none',
+          config: {
+            type: 'image',
+            src: 'none',
+            clipPath: '',
+            active: false,
+            shown: false,
+            locked: false,
+            moved: false,
+            imgControl: false,
+            isClipper: false,
+            dragging: false,
+            designId: '',
+            styles: {
+              x: 0,
+              y: 0,
+              scale: 1,
+              scaleX: 0,
+              scaleY: 0,
+              rotate: 0,
+              width: 0,
+              height: 0,
+              initWidth: 0,
+              initHeight: 0,
+              imgX: 0,
+              imgY: 0,
+              imgWidth: 0,
+              imgHeight: 0,
+              zindex: -1,
+              opacity: 100
+            }
+          },
+          posX: -1,
+          posY: -1
+        },
+        name: 'Default Page',
+        layers: [
+        ],
+        documentColor: [],
+        designId: ''
+      })
+    },
+    deletePage() {
+      this._deletePage(this.pageIndex)
     }
   }
 })
@@ -247,6 +309,8 @@ export default Vue.extend({
 }
 
 .page-title {
+  display: flex;
+  justify-content: space-between;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

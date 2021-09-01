@@ -268,6 +268,9 @@ const mutations: MutationTree<IEditorState> = {
   ADD_page(state: IEditorState, newPages: IPage) {
     state.pages.push(newPages)
   },
+  DELETE_page(state: IEditorState, pageIndex: number) {
+    state.pages.splice(pageIndex, 1)
+  },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
   },
