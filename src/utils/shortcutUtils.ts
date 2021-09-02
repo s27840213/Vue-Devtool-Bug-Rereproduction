@@ -266,27 +266,31 @@ class ShortcutHandler {
     store.commit('SET_pageScaleRatio', this.scaleRatio - 10)
   }
 
-  up() {
+  up(pressShift = false) {
+    const moveOffset = pressShift ? 10 : 1
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
-      y: this.currSelectedLayerStyles.y - (1 * (100 / this.scaleRatio))
+      y: this.currSelectedLayerStyles.y - (moveOffset * (100 / this.scaleRatio))
     })
   }
 
-  down() {
+  down(pressShift = false) {
+    const moveOffset = pressShift ? 10 : 1
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
-      y: this.currSelectedLayerStyles.y + (1 * (100 / this.scaleRatio))
+      y: this.currSelectedLayerStyles.y + (moveOffset * (100 / this.scaleRatio))
     })
   }
 
-  left() {
+  left(pressShift = false) {
+    const moveOffset = pressShift ? 10 : 1
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
-      x: this.currSelectedLayerStyles.x - (1 * (100 / this.scaleRatio))
+      x: this.currSelectedLayerStyles.x - (moveOffset * (100 / this.scaleRatio))
     })
   }
 
-  right() {
+  right(pressShift = false) {
+    const moveOffset = pressShift ? 10 : 1
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
-      x: this.currSelectedLayerStyles.x + (1 * (100 / this.scaleRatio))
+      x: this.currSelectedLayerStyles.x + (moveOffset * (100 / this.scaleRatio))
     })
   }
 }

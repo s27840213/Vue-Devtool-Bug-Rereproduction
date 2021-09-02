@@ -28,7 +28,6 @@ const getDefaultState = (): IEditorState => ({
       height: 1080,
       backgroundColor: '#ffffff',
       backgroundImage: {
-        src: 'none',
         config: {
           type: 'image',
           src: 'none',
@@ -74,7 +73,6 @@ const getDefaultState = (): IEditorState => ({
       height: 1080,
       backgroundColor: '#ffffff',
       backgroundImage: {
-        src: 'none',
         config: {
           type: 'image',
           src: 'none',
@@ -310,17 +308,16 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
-    state.pages[updateInfo.pageIndex].backgroundImage.src = ''
+    state.pages[updateInfo.pageIndex].backgroundImage.config.src = ''
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.config.src
     state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, imageSrc: string }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.src = updateInfo.imageSrc
+    state.pages[updateInfo.pageIndex].backgroundImage.config.src = updateInfo.imageSrc
   },
   SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
+    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
   },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x

@@ -10,6 +10,8 @@ import StepsUtils from '@/utils/stepsUtils'
 import TextUtils from './textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import PageUtils from './pageUtils'
+import groupUtils from './groupUtils'
+import zindexUtils from './zindexUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -36,10 +38,13 @@ class MouseUtils {
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, isClipper, clipperStyles)
       if (layer) {
+        groupUtils.deselect()
         store.commit('DELETE_layer', {
           pageIndex, layerIndex
         })
-        LayerUtils.addLayers(pageIndex, layer)
+        LayerUtils.addLayersToPos(pageIndex, [layer], layerIndex)
+        zindexUtils.reassignZindex(pageIndex)
+        groupUtils.select(pageIndex, [layerIndex])
         StepsUtils.record()
       }
     }
@@ -59,6 +64,7 @@ class MouseUtils {
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
     if (e.dataTransfer === null) return
     const data = JSON.parse(e.dataTransfer.getData('data'))
+    console.log(data)
     // @TODO Page type json
     if (data.type === 'page') {
       PageUtils.updateSpecPage(pageIndex, data.json)

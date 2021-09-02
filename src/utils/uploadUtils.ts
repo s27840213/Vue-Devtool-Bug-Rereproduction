@@ -162,7 +162,7 @@ class UploadUtils {
       console.log(targetLayer)
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.src = 'none'
+      pageJSON.backgroundImage.config.src = 'none'
 
       // console.log(pageJSON)
       const formData = new FormData()
@@ -228,7 +228,7 @@ class UploadUtils {
       targetLayer.active = false
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.src = 'none'
+      pageJSON.backgroundImage.config.src = 'none'
 
       // console.log(pageJSON)
       const formData = new FormData()

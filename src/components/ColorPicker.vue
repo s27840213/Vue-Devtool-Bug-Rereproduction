@@ -52,6 +52,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Chrome } from 'vue-color'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -63,9 +64,7 @@ export default Vue.extend({
   data() {
     return {
       color: this.currentColor || '#194d33',
-      brandColors: ['#2D9CDB'],
-      documentColors: ['#2D9CDB', '#56CCF2', '#9B51E0', '#BB6BD9', '#4F4F4F', '#828282', '#F2F2F2'],
-      defaultColors: ['#EB5757', '#F2994A', '#F2C94C', '#219653', '#27AE60', '#6FCF97', '#2F80ED', '#2D9CDB', '#56CCF2', '#9B51E0', '#BB6BD9', '#4F4F4F', '#828282', '#F2F2F2']
+      brandColors: ['#2D9CDB']
     }
   },
   mounted() {
@@ -75,6 +74,10 @@ export default Vue.extend({
     input.select()
   },
   computed: {
+    ...mapGetters({
+      documentColors: 'color/getDocumentColors',
+      defaultColors: 'color/getDefaultColors'
+    }),
     convertedHex(): string {
       let hex = this.color.slice(1).split('')
       let result = ''

@@ -32,7 +32,7 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     hr(class="dropdowns__hr")
-    div(v-if="_detachedBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
+    div(v-if="getBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
         class="dropdowns__item"
         @click="detachBackgroundImage")
       svg-icon(
@@ -104,7 +104,7 @@ export default Vue.extend({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      _detachedBackgroundImage: 'getBackgroundImage',
+      getBackgroundImage: 'getBackgroundImage',
       getToekn: 'user/getToken'
     }),
     hasDesignId(): boolean {
@@ -185,7 +185,7 @@ export default Vue.extend({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = this._detachedBackgroundImage(this.lastSelectedPageIndex)
+      const detachedBackgroundImage = this.getBackgroundImage(this.lastSelectedPageIndex)
       layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
       this._setBackgroundImage({
         pageIndex: this.lastSelectedPageIndex,
