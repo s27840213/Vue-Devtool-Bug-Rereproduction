@@ -53,7 +53,15 @@ class TemplateUtils {
           }
         }
       }
+      // } else if (layer.type === 'shape') {
+      //   const { initWidth, initHeight, scale } = layer.styles
+      //   layer.styles.width = initWidth * scale
+      //   layer.styles.height = initHeight * scale
+      //   console.log(layer.width)
+      //   console.log(layer.height)
+      // }
     }
+    console.log(json)
     return json
   }
 

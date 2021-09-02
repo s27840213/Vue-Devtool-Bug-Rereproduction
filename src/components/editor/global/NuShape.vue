@@ -52,7 +52,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('shape mounted')
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 
@@ -65,9 +64,6 @@ export default Vue.extend({
       this.transNode = shapeUtils.addStyleTag(transText)
       this.filterTemplate = this.getFilterTemplate()
     }
-  },
-  destroyed() {
-    console.log('shape destroy')
   },
   watch: {
     'config.color': {

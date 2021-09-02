@@ -60,7 +60,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('text mounted')
     this.updateLayerSize()
     TextPropUtils.updateTextPropsState()
   },
@@ -90,7 +89,7 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
-        console.log('updateTextSize')
+        // console.log('updateTextSize')
         /**
          * If below conditions is pass, means the text-properties changes,
          * the layer width/height needs to refresh

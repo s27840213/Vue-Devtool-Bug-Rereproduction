@@ -119,6 +119,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log('controller mounted')
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller

@@ -62,7 +62,7 @@
             @mouseover="togglePageHighlighter(true)"
             @mouseout="togglePageHighlighter(false)")
           nu-layer(v-for="(layer,index) in config.layers"
-            :key="`layer-${GeneralUtils.generateRandomString(8)}`"
+            :key="layer.id"
             :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
             :data-index="`${index}`"
             :data-pindex="`${pageIndex}`"

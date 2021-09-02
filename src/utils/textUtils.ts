@@ -1,6 +1,5 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
-import { v4 as uuidv4 } from 'uuid'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
@@ -128,9 +127,9 @@ class TextUtils {
           styles: Object.assign({}, config.paragraphs[0].spans[0].styles),
           text: (ps[0].childNodes[0].childNodes[0].childNodes[0].firstChild?.textContent ||
             ps[0].childNodes[0].childNodes[0].firstChild?.textContent) ?? '',
-          id: uuidv4()
+          id: GeneralUtils.generateRandomString(8)
         }],
-        id: uuidv4()
+        id: GeneralUtils.generateRandomString(8)
       }]
     }
 
@@ -187,7 +186,7 @@ class TextUtils {
             spans[spans.length - 1].text += text
             // spans.push({ text: text, styles: spanStyle, id: uuidv4() })
           } else {
-            spans.push({ text: text, styles: spanStyle, id: uuidv4() })
+            spans.push({ text: text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
           }
           Object.assign(spanStyleBuff, spanStyle)
         }
@@ -198,7 +197,7 @@ class TextUtils {
       const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
       const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
       const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
-      paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
+      paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
     })
     paragraphs.forEach(p => {
       if (p.spans.length === 1 && p.spans[0].text === '') {
