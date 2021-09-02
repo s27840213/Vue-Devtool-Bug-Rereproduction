@@ -12,6 +12,9 @@ export default Vue.extend({
   props: {
     config: Object
   },
+  mounted() {
+    console.log('img mounted')
+  },
   methods: {
     styles() {
       const styles = this.config.styles

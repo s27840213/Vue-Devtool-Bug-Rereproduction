@@ -1,12 +1,13 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
-
+import GeneralUtils from '@/utils/generalUtils'
 class LayerFactary {
   newImage(config: any): IImage {
-    const [width, height] = [config.styles.width, config.styles.height]
+    const { width, height } = config.styles
     const basicConfig = {
       type: 'image',
       src: 'none',
+      id: GeneralUtils.generateRandomString(8),
       clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
@@ -43,6 +44,7 @@ class LayerFactary {
   newText(config: any): IText {
     const basicConfig = {
       type: 'text',
+      id: GeneralUtils.generateRandomString(8),
       widthLimit: -1,
       isTyping: false,
       active: false,
@@ -98,6 +100,7 @@ class LayerFactary {
   newGroup(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     return {
       type: 'group',
+      id: GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: false,
@@ -125,6 +128,7 @@ class LayerFactary {
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
     return {
       type: 'tmp',
+      id: GeneralUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
@@ -152,6 +156,7 @@ class LayerFactary {
   newShape(config: any): IShape {
     const basicConfig = {
       type: 'shape',
+      id: GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       path: '',

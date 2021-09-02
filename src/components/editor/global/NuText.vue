@@ -27,7 +27,8 @@ import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
-import GeneralUtils from '@/utils/generalUtils'
+import TemplateUtils from '@/utils/templateUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -60,6 +61,7 @@ export default Vue.extend({
   },
   mounted() {
     this.updateLayerSize()
+    TextPropUtils.updateTextPropsState()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -87,16 +89,27 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
-        console.log('updateTextSize')
+        // console.log('updateTextSize')
         /**
          * If below conditions is pass, means the text-properties changes,
-         *
          * the layer width/height needs to refresh
          */
         if (this.config.isTyping) return
         this.$nextTick(() => {
           this.updateLayerSize()
         })
+      },
+      deep: true
+    },
+    'config.paragraphs': {
+      handler() {
+        const { config } = this
+        for (const field of TemplateUtils.fields) {
+          if (config[TemplateUtils.fieldsMap[field]]) {
+            TemplateUtils.textInfoUpdater(field, config.paragraphs)
+            break
+          }
+        }
       },
       deep: true
     }

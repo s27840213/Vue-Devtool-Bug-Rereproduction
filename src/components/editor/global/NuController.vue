@@ -119,6 +119,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log('controller mounted')
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -203,17 +204,6 @@ export default Vue.extend({
         this.$store.commit('text/SET_default')
         TextPropUtils.updateTextPropsState()
       }
-    },
-    sel: {
-      handler(val) {
-        // const text = this.$refs.text as HTMLElement
-        // TODO://
-        // if (text && !TextUtils.isSel(val.start) && !TextUtils.isSel(val.end)) {
-        //   console.log('enter sel')
-        //   TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, TextUtils.textParser(text, this.config as IText))
-        // }
-      },
-      deep: true
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
@@ -1012,7 +1002,6 @@ export default Vue.extend({
               }
 
               const range = new Range()
-              // console.log(text.childNodes[pIndex])
               range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
               sel.removeAllRanges()
               sel.addRange(range)

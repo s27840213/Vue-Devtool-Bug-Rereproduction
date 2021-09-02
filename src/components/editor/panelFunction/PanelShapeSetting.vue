@@ -6,19 +6,20 @@
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    span(class="shape-setting__title text-blue-1 label-lg") Color Palette
-    div(class="shape-setting__colors")
-      div(class="shape-setting__color rainbow" ref="rainbow"
-        :style="colorPickerStyles()" @click="handleColorModalOn")
-        color-picker(v-if="openColorPicker"
-          class="shape-setting__color-picker"
-          v-click-outside="handleColorModalOff"
-          :currentColor="getColors[currSelectedColorIndex]"
-          @update="handleColorUpdate")
-      div(v-for="(color, index) in colorPresets"
-        class="shape-setting__color palette"
-        :style="paletteColorStyle(color, index)"
-        @click="setColor(color, index)")
+    div(v-if="getColors.length" class="shape-setting__title")
+      span(class="shape-setting__title text-blue-1 label-lg") Color Palette
+      div(class="shape-setting__colors")
+        div(class="shape-setting__color rainbow" ref="rainbow"
+          :style="colorPickerStyles()" @click="handleColorModalOn")
+          color-picker(v-if="openColorPicker"
+            class="shape-setting__color-picker"
+            v-click-outside="handleColorModalOff"
+            :currentColor="getColors[currSelectedColorIndex]"
+            @update="handleColorUpdate")
+        div(v-for="(color, index) in colorPresets"
+          class="shape-setting__color palette"
+          :style="paletteColorStyle(color, index)"
+          @click="setColor(color, index)")
 </template>
 
 <script lang="ts">
@@ -63,7 +64,7 @@ export default Vue.extend({
       ],
       currSelectedColorIndex: 0,
       openColorPicker: false,
-      paletteRecord: [{ key: 0, value: NaN }]
+      paletteRecord: [{ key: 0, value: -1 }]
     }
   },
   watch: {
@@ -145,7 +146,7 @@ export default Vue.extend({
     initilizeRecord() {
       this.paletteRecord = []
       for (let i = 0; i < this.getColors.length; i++) {
-        const record = { key: i, value: NaN }
+        const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
         this.paletteRecord.push(record)
       }
     }
@@ -162,16 +163,15 @@ export default Vue.extend({
   grid-template-columns: 1fr;
   &__title {
     margin-bottom: 0px;
-    margin-top: 20px;
+    margin-top: 10px;
   }
   > div {
-    margin-top: 15px;
-    &:nth-child(1) {
-      margin-top: 0px;
-    }
+    margin-top: 10px;
   }
   &__colors {
     width: 100%;
+    margin-top: 10px;
+    padding: 5px;;
     display: flex;
     flex-wrap: wrap;
   }
