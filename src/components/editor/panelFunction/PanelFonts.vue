@@ -170,7 +170,7 @@ export default Vue.extend({
   }
   &__close {
     position: absolute;
-    right: 0px;
+    right: 5px;
   }
   &__items {
     display: grid;

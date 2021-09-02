@@ -1,7 +1,8 @@
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
-import { IParagraph, IText } from '@/interfaces/layer'
+import { ILayer, IParagraph, IText } from '@/interfaces/layer'
 import LayerUtils from './layerUtils'
+import layerFactary from './layerFactary'
 
 class TemplateUtils {
   public readonly fields = ['heading', 'subheading', 'body']
@@ -16,6 +17,19 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
+    const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
+    for (const field of this.fields) {
+      let isAssignField = false
+      for (const layer of layers) {
+        if (Object.prototype.hasOwnProperty.call(layer, this.fieldsMap[field])) {
+          layer[this.fieldsMap[field]] = !isAssignField
+          if (!isAssignField) {
+            isAssignField = true
+          }
+        }
+      }
+    }
+
     const fields = [...this.fields]
     for (const layer of json.layers) {
       if (layer.type === 'text') {

@@ -261,8 +261,6 @@ export default Vue.extend({
       }
     },
     textWrapperStyle() {
-      console.log('this.config.styles.writingMode')
-      console.log(this.config.styles.writingMode)
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
@@ -999,7 +997,6 @@ export default Vue.extend({
               }
 
               const range = new Range()
-              // console.log(text.childNodes[pIndex])
               range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
               sel.removeAllRanges()
               sel.addRange(range)

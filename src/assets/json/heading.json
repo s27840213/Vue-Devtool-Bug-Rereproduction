@@ -1,7 +1,7 @@
 {
     "type": "text",
     "styles": {
-        "writingMode": "normal",
+        "writingMode": "initial",
         "textEffect": {},
         "textShape": {},
         "opacity": 100
@@ -18,11 +18,10 @@
                 "font": "OOcHgnEpk9RHYBOiWllz",
                 "weight": "normal",
                 "color": "#000000",
-                "writingMode": "initial",
                 "decoration": "none",
                 "style": "normal",
                 "opacity": 1,
-                "size": 50
+                "size": 60
             }
         }]
     }]

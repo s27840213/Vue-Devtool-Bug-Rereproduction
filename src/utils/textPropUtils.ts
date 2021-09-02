@@ -116,8 +116,7 @@ class TextPropUtils {
 
   blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
-      console.log(this.layerIndex)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, styles)
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
     const updateSelectedLayersProps = (styles: { [key: string]: string | number | boolean }) => {
       this.updateSelectedLayersProps(styles, tmpLayerIndex ?? NaN)
@@ -126,13 +125,13 @@ class TextPropUtils {
     switch (propName) {
       case 'font-vertical': {
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = !config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'normal'
-        const { width, height } = config.styles
+        const writingMode = !config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
         if (typeof tmpLayerIndex === 'undefined') {
+          Object.assign(config.styles, writingMode)
+          const { width, height } = TextUtils.getTextHW(config)
           writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
         }
-        console.log(writingMode)
         handler({ writingMode })
       }
     }

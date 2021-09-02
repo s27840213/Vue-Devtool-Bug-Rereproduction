@@ -222,7 +222,6 @@ class TextUtils {
           }
           return true
         })()
-        console.log('isSameSpanStyles: ' + isSameSpanStyles)
         if (!isSameSpanStyles) {
           const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
           const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)
@@ -307,7 +306,6 @@ class TextUtils {
         }
       })
       Object.assign(p.style, CssConveter.convertFontStyle(pData.styles), { size: fontSize })
-      // p.style.margin = '0.5em'
       p.style.margin = '0'
       p.style.overflowWrap = 'break-word'
       body.appendChild(p)
@@ -434,13 +432,6 @@ class TextUtils {
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
-    const config = this.getLayer(pageIndex, layerIndex) as IText
-    for (const field of TemplateUtils.fields) {
-      if (config[TemplateUtils.fieldsMap[field]]) {
-        TemplateUtils.textInfoUpdater(field, paragraphs)
-        break
-      }
-    }
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,

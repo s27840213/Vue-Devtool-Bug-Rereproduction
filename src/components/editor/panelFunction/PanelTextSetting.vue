@@ -266,12 +266,11 @@ export default Vue.extend({
       return origin
     },
     onPropertyClick(iconName: string) {
-      console.log(iconName)
       TextPropUtils.onPropertyClick(iconName)
       /**
        *  Only select with range or none selection exist, the prop-panel update.
        * */
-      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
+      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
         TextPropUtils.updateTextPropsState()
       }
     },
