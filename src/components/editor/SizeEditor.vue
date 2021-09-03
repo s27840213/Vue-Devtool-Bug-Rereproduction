@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="size-editor")
-    input(type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
-      @input="setScaleRatio(Math.round(ratioInPercent*100))")
+    input(ref="size-editor" type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
+      @input="setScaleRatio(Math.round(ratioInPercent*100))"
+      @change="blurInput()")
     div(class="size-editor__percentage lead-2")
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
@@ -27,8 +28,16 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setScaleRatio: 'SET_pageScaleRatio'
-    })
+      _setScaleRatio: 'SET_pageScaleRatio'
+    }),
+    setScaleRatio (ratio: number) {
+      this._setScaleRatio(ratio)
+    },
+    blurInput () {
+      console.log('blur')
+      const el = (this.$refs['size-editor'] as HTMLElement)
+      el.blur()
+    }
   }
 })
 </script>

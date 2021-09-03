@@ -95,7 +95,7 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      defaultBgColor: 'color/getDefaultBgColor'
+      defaultBgColor: 'color/getDefaultBgColors'
     }),
     defaultBackgroundColors(): any[] {
       const { keyword } = this
