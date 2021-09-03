@@ -16,6 +16,21 @@ const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requir
 const req = require.context('@/assets/icon', true, /\.svg$/)
 requireAll(req)
 
+let token = localStorage.getItem('token') || ''
+
+// if token is contained in queryString, it would be used
+const urlParams = new URLSearchParams(window.location.search)
+if (urlParams.has('token')) {
+  const tokenGet = urlParams.get('token')
+  if (tokenGet) {
+    token = tokenGet
+  }
+}
+
+if (token.length > 0) {
+  store.dispatch('user/initializeToken', { token })
+}
+
 if (['production'].includes(process.env.NODE_ENV)) {
   const Sentry = require('@sentry/vue')
   const { Integrations } = require('@sentry/tracing')
