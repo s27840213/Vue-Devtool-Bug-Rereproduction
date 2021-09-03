@@ -17,7 +17,6 @@ const routes: Array<RouteConfig> = [
       try {
         next()
         const urlParams = new URLSearchParams(window.location.search)
-        /*
         if (urlParams.has('token')) {
           const token = urlParams.get('token')
 
@@ -28,16 +27,15 @@ const routes: Array<RouteConfig> = [
             uploadUtils.uploadTmpJSON()
           }
         } else {
-          */
-        if (urlParams.has('type') && urlParams.has('design_id')) {
-          const type = urlParams.get('type')
-          const designId = urlParams.get('design_id')
+          if (urlParams.has('type') && urlParams.has('design_id')) {
+            const type = urlParams.get('type')
+            const designId = urlParams.get('design_id')
 
-          if (type && designId) {
-            uploadUtils.getDesign(type, designId)
+            if (type && designId) {
+              uploadUtils.getDesign(type, designId)
+            }
           }
         }
-        // }
       } catch (error) {
         console.log(error)
       }

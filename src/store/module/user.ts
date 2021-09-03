@@ -4,7 +4,6 @@ import store from '..'
 import uploadUtils from '@/utils/uploadUtils'
 import { IAssetPhoto, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
 
-const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
 const SET_IMAGES = 'SET_IMAGES' as const
 const ADD_PREVIEW = 'ADD_PREVIEW' as const
@@ -17,7 +16,6 @@ const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
 
 export interface IUserModule {
   token: string,
-  isAuthenticated: boolean,
   userAssets: IUserAssetsData,
   downloadUrl: string
   pending: boolean,
@@ -27,7 +25,6 @@ export interface IUserModule {
 
 const getDefaultState = (): IUserModule => ({
   token: '',
-  isAuthenticated: false,
   userAssets: {
     design: {
       content: []
@@ -100,6 +97,9 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.login(token, account, password)
       if (data.flag === 0) {
+        commit('SET_STATE', {
+          downloadUrl: data.data.download_url
+        })
         uploadUtils.setLoginOutput(data.data)
       }
       return Promise.resolve(data)
@@ -120,26 +120,12 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async initializeToken({ commit }, { token }) {
-    const loginResponse = await store.dispatch('user/login', { token })
-    if (loginResponse.flag === 0) {
-      const newToken = loginResponse.data.token as string // token may be refreshed
-      commit('SET_TOKEN', newToken)
-      commit('SET_STATE', { downloadUrl: loginResponse.data.download_url })
-      uploadUtils.uploadTmpJSON()
-    } else {
-      console.log('login failed')
-      commit('SET_TOKEN', '')
-    }
+  setToken({ commit }, { token }) {
+    state.token = token
   }
 }
 
 const mutations: MutationTree<IUserModule> = {
-  [SET_TOKEN](state: IUserModule, token: string) {
-    state.isAuthenticated = token.length > 0
-    state.token = token
-    localStorage.setItem('token', token)
-  },
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
