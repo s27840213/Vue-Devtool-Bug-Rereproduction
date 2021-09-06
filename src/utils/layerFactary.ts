@@ -6,7 +6,11 @@ class LayerFactary {
     const { width, height } = config.styles
     const basicConfig = {
       type: 'image',
-      src: 'none',
+      srcObj: {
+        tpye: config.srcObj.type,
+        userId: config.srcObj.userId,
+        assetId: config.srcObj.assetId
+      },
       id: GeneralUtils.generateRandomString(8),
       clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,

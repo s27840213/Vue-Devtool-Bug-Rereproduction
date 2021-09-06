@@ -109,7 +109,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapGetters } from 'vuex'
+import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
@@ -162,6 +162,7 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getCurrActivePageIndex: 'getCurrActivePageIndex'
     }),
+    ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },

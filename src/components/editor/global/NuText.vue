@@ -56,19 +56,27 @@ export default Vue.extend({
     }
     if (isLoadedFont) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      if (typeof this.subLayerIndex === 'undefined') {
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+        this.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
     }
   },
   mounted() {
-    this.updateLayerSize()
-    TextPropUtils.updateTextPropsState()
+    // this.updateLayerSize()
+    if (this.currSelectedInfo.layers >= 1) {
+      TextPropUtils.updateTextPropsState()
+    }
   },
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'store.getters.getLayer',
+      getLayer: 'getLayer',
       getTextInfo: 'getTextInfo'
     }),
     updateTextSize(): any {
@@ -100,23 +108,11 @@ export default Vue.extend({
         })
       },
       deep: true
-    },
-    'config.paragraphs': {
-      handler() {
-        const { config } = this
-        for (const field of TemplateUtils.fields) {
-          if (config[TemplateUtils.fieldsMap[field]]) {
-            TemplateUtils.textInfoUpdater(field, config.paragraphs)
-            break
-          }
-        }
-      },
-      deep: true
     }
   },
   methods: {
     ...mapMutations({
-      updateSubLayerStyles: 'SET_subLayerStyles'
+      _updateSubLayerStyles: 'SET_subLayerStyles'
     }),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
@@ -143,20 +139,20 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else {
-        this.updateSubLayerStyles({
-          pageIndex: this.pageIndex,
-          primaryLayerIndex: this.layerIndex,
-          subLayerIndex: this.subLayerIndex,
-          styles: {
-            width: textHW.width,
-            height: textHW.height
-          }
-        })
-        if (this.subLayerIndex === this.currSelectedInfo.layers.length - 1) {
-          const { width, height } = calcTmpProps(this.currSelectedInfo.layers)
-          LayerUtils.updateLayerStyles(this.pageIndex, this.currSelectedInfo.index, { width, height })
+        this.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+          const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
         }
       }
+    },
+    updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+      this._updateSubLayerStyles({
+        pageIndex,
+        primaryLayerIndex,
+        subLayerIndex,
+        styles
+      })
     },
     getFontUrl(fontID: string): string {
       return `url("https://template.vivipic.com/font/${fontID}/font")`

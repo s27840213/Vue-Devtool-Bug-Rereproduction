@@ -30,7 +30,7 @@ function normalized (photos: Api.IPexelsPhoto[]): Api.IPhoto[] {
       thumb: photo.src.small
     },
     tags: [],
-    vendor: 'Pexels'
+    vendor: 'pexels'
   }))
 }
 

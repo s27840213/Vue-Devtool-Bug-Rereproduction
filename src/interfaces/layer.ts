@@ -92,7 +92,11 @@ export interface IShape extends ILayer<IStyle> {
   pDiff?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
-  src: string,
+  srcObj: {
+    type: string,
+    userId: string,
+    assetId: string
+  },
   clipPath: string,
   isClipper: boolean,
   imgControl: boolean

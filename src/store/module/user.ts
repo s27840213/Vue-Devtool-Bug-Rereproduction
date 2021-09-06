@@ -97,6 +97,7 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.login(token, account, password)
       if (data.flag === 0) {
+        console.log(data)
         commit('SET_STATE', {
           downloadUrl: data.data.download_url
         })

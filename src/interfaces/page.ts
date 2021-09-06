@@ -1,7 +1,11 @@
 import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 
 export interface IBackgroundImage {
-  src: string,
+  srcObj: {
+    type: string,
+    userId: string,
+    assetId: string
+  },
   config: IImage,
   posX: number,
   posY: number

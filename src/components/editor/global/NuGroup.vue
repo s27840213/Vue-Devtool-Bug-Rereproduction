@@ -19,6 +19,11 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
+  watch: {
+    'config.styles.width'(val) {
+      console.log('group width', val)
+    }
+  },
   computed: {
     ...mapGetters({
       getLayer: 'getLayer'

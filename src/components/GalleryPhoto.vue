@@ -29,6 +29,7 @@ import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
+import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
@@ -70,10 +71,16 @@ export default Vue.extend({
       const width = photo.width / 20
       const height = photo.height / 20
       const rect = (e.target as Element).getBoundingClientRect()
+      const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+      const type = ImageUtils.getSrcType(photo.urls.full)
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
-        src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
+        srcObj: {
+          type,
+          userId: ImageUtils.getUserId(src, type),
+          assetId: ImageUtils.getAssetId(src, type)
+        },
         styles: {
           x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
           y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
@@ -97,8 +104,14 @@ export default Vue.extend({
 
         const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
         const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
+        const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+        const type = photo.vendor
         const config = {
-          src: this.inFilePanel ? photo.urls.full : photo.urls.regular,
+          srcObj: {
+            type,
+            userId: ImageUtils.getUserId(src, type),
+            assetId: ImageUtils.getAssetId(src, type)
+          },
           styles: {
             x: x,
             y: y,

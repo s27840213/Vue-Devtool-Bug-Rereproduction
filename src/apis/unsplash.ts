@@ -25,7 +25,7 @@ function normalized (photos: Api.IUnsplashPhoto[]): Api.IPhoto[] {
     },
     tags: photo.tags?.map((tag: any) => tag.title) || [],
     urls: { ...photo.urls },
-    vendor: 'Unsplash'
+    vendor: 'unsplash'
   }))
 }
 

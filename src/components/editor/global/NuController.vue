@@ -90,6 +90,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import TemplateUtils from '@/utils/templateUtils'
 
 export default Vue.extend({
   props: {
@@ -119,7 +120,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('controller mounted')
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -183,7 +183,6 @@ export default Vue.extend({
     },
     isActive(val) {
       if (!val) {
-        // Not sure if below would lead to some problem.
         this.setLastSelectedLayerIndex(this.layerIndex)
       }
       if (this.getLayerType === 'text' && !val) {
@@ -212,9 +211,6 @@ export default Vue.extend({
         })
       }
     }
-  },
-  updated() {
-    console.log(this.lastSelectedLayerIndex)
   },
   methods: {
     ...mapMutations({
@@ -964,6 +960,7 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })

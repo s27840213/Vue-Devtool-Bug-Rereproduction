@@ -43,8 +43,16 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    getColors(): [string] {
-      return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
+    isGroup(): boolean {
+      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      return layer.type === 'tmp' || layer.type === 'group'
+    },
+    getColors(): string[] {
+      if (!this.isGroup) {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
+      } else {
+        return []
+      }
     }
   },
   data() {

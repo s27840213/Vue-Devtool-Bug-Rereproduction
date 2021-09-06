@@ -17,9 +17,9 @@ const routes: Array<RouteConfig> = [
       try {
         next()
         const urlParams = new URLSearchParams(window.location.search)
+        console.log(urlParams)
         if (urlParams.has('token')) {
           const token = urlParams.get('token')
-
           if (token) {
             store.commit('user/SET_STATE', { token })
             await store.dispatch('user/login', { token })

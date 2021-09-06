@@ -36,7 +36,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): I
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
   })
-
+  console.log('caculate group ')
   return {
     x: minX,
     y: minY,
