@@ -8,7 +8,7 @@ div(style="position:relative;")
         span(class="text-blue-1 h-5") LOG IN
       div
         img(:src="require('@/assets/img/png/facebook.png')")
-        btn(:type="'icon-mid-body'") Log in with Facebook
+        btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'") Log in with Facebook
       div
         img(:src="require('@/assets/img/png/google.png')")
         btn(:type="'icon-mid-body'") Log in with Google
@@ -115,6 +115,7 @@ div(style="position:relative;")
 import Vue from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
+import Facebook from '@/utils/facebook'
 
 export default Vue.extend({
   name: 'Login',
@@ -135,6 +136,12 @@ export default Vue.extend({
       confirmPassword: '' as string,
       confirmErrorMessage: '' as string,
       isResetClicked: false as boolean
+    }
+  },
+  created () {
+    const code = this.$route.query.code as string
+    if (code !== undefined && !this.$store.getters.isLogin) {
+      this.fbLogin(code)
     }
   },
   computed: {
@@ -217,9 +224,17 @@ export default Vue.extend({
         return false
       }
     }
-
   },
   methods: {
+    async fbLogin (code: string) {
+      try {
+        // code -> access_token
+        console.log('code', code)
+        const { data } = await userApis.fbLogin(code)
+        console.log('result', data)
+      } catch (error) {
+      }
+    },
     async onLogInClicked () {
       this.isLoginClicked = true
       if (this.password.length === 0) {
@@ -327,6 +342,19 @@ export default Vue.extend({
       }
       this.password = ''
       this.confirmPassword = ''
+    },
+    onFacebookClicked () {
+      if (this.$route.query.redirect) {
+        const redirectStr = JSON.stringify({
+          redirect: this.$route.query.redirect,
+          hostId: '1234abcd'
+        })
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
+      }
+      const redirectStr = JSON.stringify({
+        hostId: '1234abcd'
+      })
+      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
     }
   }
 })

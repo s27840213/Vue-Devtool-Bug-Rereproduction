@@ -20,13 +20,17 @@
       @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
       @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-      @keydown.cmd.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+      @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
       @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-      @keydown.cmd.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+      @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
       @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
       @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
       @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
       @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
+      @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
+      @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
+      @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
+      @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
       tabindex="0")
     div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       div
@@ -139,7 +143,6 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    isSelecting: Boolean,
     pageScaleRatio: Number
   },
   mounted() {
@@ -184,7 +187,7 @@ export default Vue.extend({
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${this.config.backgroundImage.src})`,
+        backgroundImage: `url(${this.config.backgroundImage.srcObj.assetId})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
       } : {
@@ -261,7 +264,6 @@ export default Vue.extend({
         height: 1080,
         backgroundColor: '#ffffff',
         backgroundImage: {
-          src: 'none',
           config: {
             type: 'image',
             src: 'none',

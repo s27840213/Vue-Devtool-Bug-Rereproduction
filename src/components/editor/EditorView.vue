@@ -10,7 +10,6 @@
           :key="`page-${index}`"
           :pageIndex="index"
           :config="page" :index="index"
-          :isSelecting="isSelecting"
           @mousedown.native.left="setCurrPage(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea")
 </template>
@@ -105,9 +104,14 @@ export default Vue.extend({
       document.documentElement.addEventListener('mousemove', this.selecting)
       document.documentElement.addEventListener('scroll', this.scrollUpdate)
       document.documentElement.addEventListener('mouseup', this.selectEnd)
-      this.isSelecting = true
     },
     selecting(e: MouseEvent) {
+      if (!this.isSelecting) {
+        if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
+          GroupUtils.deselect()
+        }
+        this.isSelecting = true
+      }
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
@@ -125,18 +129,22 @@ export default Vue.extend({
       // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
-      GroupUtils.deselect()
+      if (this.isSelecting) {
+        GroupUtils.deselect()
+      }
       this.setLastSelectedPageIndex(this.pageIndex)
       /**
        * Use nextTick to trigger the following function after DOM updatingP
        */
       this.$nextTick(() => {
-        this.isSelecting = false
         document.documentElement.removeEventListener('mousemove', this.selecting)
         document.documentElement.removeEventListener('scroll', this.scrollUpdate)
         document.documentElement.removeEventListener('mouseup', this.selectEnd)
-        const selectionArea = this.$refs.selectionArea as HTMLElement
-        this.handleSelectionData(selectionArea.getBoundingClientRect())
+        if (this.isSelecting) {
+          this.isSelecting = false
+          const selectionArea = this.$refs.selectionArea as HTMLElement
+          this.handleSelectionData(selectionArea.getBoundingClientRect())
+        }
       })
     },
     handleSelectionData(selectionData: DOMRect) {

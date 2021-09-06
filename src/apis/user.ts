@@ -60,5 +60,11 @@ export default {
       account,
       upass
     }
+  }),
+  fbLogin: (code: string): AxiosPromise => axios('/fb-login', {
+    method: 'POST',
+    data: {
+      code
+    }
   })
 }

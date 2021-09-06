@@ -17,23 +17,12 @@ const routes: Array<RouteConfig> = [
       try {
         next()
         const urlParams = new URLSearchParams(window.location.search)
-        console.log(urlParams)
-        if (urlParams.has('token')) {
-          const token = urlParams.get('token')
-          if (token) {
-            store.commit('user/SET_STATE', { token })
-            await store.dispatch('user/login', { token })
-            await store.dispatch('user/getAssets', { token })
-            uploadUtils.uploadTmpJSON()
-          }
-        } else {
-          if (urlParams.has('type') && urlParams.has('design_id')) {
-            const type = urlParams.get('type')
-            const designId = urlParams.get('design_id')
+        if (urlParams.has('type') && urlParams.has('design_id')) {
+          const type = urlParams.get('type')
+          const designId = urlParams.get('design_id')
 
-            if (type && designId) {
-              uploadUtils.getDesign(type, designId)
-            }
+          if (type && designId) {
+            uploadUtils.getDesign(type, designId)
           }
         }
       } catch (error) {

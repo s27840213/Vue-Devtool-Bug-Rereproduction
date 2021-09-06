@@ -1,14 +1,14 @@
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IColorState {
-  defaultColor: Array<string>,
-  brandColor: Array<string>,
-  documentColor: Array<string>,
-  defaultBgColor: Array<string>
+  defaultColors: Array<string>,
+  brandColors: Array<string>,
+  documentColors: Array<string>,
+  defaultBgColors: Array<string>
 }
 
 const getDefaultState = (): IColorState => ({
-  defaultColor: [
+  defaultColors: [
     '#EB5757',
     '#F2994A',
     '#F2C94C',
@@ -25,7 +25,7 @@ const getDefaultState = (): IColorState => ({
     '#F2F2F2',
     '#FFFFFF'
   ],
-  defaultBgColor: [
+  defaultBgColors: [
     '#F2994A',
     '#F2C94C',
     '#219653',
@@ -37,29 +37,36 @@ const getDefaultState = (): IColorState => ({
     '#56CCF2',
     '#FFFFFF'
   ],
-  brandColor: [],
-  documentColor: []
+  brandColors: [],
+  documentColors: [
+    '#2D9CDB',
+    '#56CCF2',
+    '#9B51E0',
+    '#BB6BD9',
+    '#4F4F4F',
+    '#828282',
+    '#F2F2F2']
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IColorState, unknown> = {
-  getDefaultColor(state): Array<string> {
-    return state.defaultColor
+  getDefaultColors(state): Array<string> {
+    return state.defaultColors
   },
-  getDefaultBgColor(state): Array<string> {
-    return state.defaultBgColor
+  getDefaultBgColors(state): Array<string> {
+    return state.defaultBgColors
   },
-  getBrandColor(state): Array<string> {
-    return state.brandColor
+  getBrandColors(state): Array<string> {
+    return state.brandColors
   },
-  getDocumentColor(state): Array<string> {
-    return state.documentColor
+  getDocumentColors(state): Array<string> {
+    return state.documentColors
   }
 }
 
 const mutations: MutationTree<IColorState> = {
   SET_defaultColor(state, updateInfo: { index: number, color: string }) {
-    state.defaultColor[updateInfo.index] = updateInfo.color
+    state.defaultColors[updateInfo.index] = updateInfo.color
   }
 }
 

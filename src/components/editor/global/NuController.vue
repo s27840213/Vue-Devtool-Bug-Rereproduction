@@ -10,7 +10,7 @@
           @dragenter.prevent
           @click.left="onClick"
           @click.right.stop="onRightClick"
-          @mousedown.left.stop="moveStart"
+          @mousedown.left="moveStart"
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
@@ -305,7 +305,7 @@ export default Vue.extend({
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        'pointer-events': (!this.isLocked) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -321,6 +321,9 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
+      if (!this.isLocked) {
+        e.stopPropagation()
+      }
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -824,6 +827,7 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
+      console.log('drop')
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {
@@ -1066,18 +1070,16 @@ export default Vue.extend({
       ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
     },
     onRightClick(event: MouseEvent) {
-      if (!this.isLocked) {
-        this.setIsLayerDropdownsOpened(true)
-        if (this.currSelectedInfo.index < 0) {
-          GroupUtils.select(this.pageIndex, [this.layerIndex])
-        }
-        this.$nextTick(() => {
-          const el = document.querySelector('.dropdowns--layer') as HTMLElement
-          const mousePos = MouseUtils.getMouseAbsPoint(event)
-          el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-          el.focus()
-        })
+      this.setIsLayerDropdownsOpened(true)
+      if (this.currSelectedInfo.index < 0) {
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
+      this.$nextTick(() => {
+        const el = document.querySelector('.dropdowns--layer') as HTMLElement
+        const mousePos = MouseUtils.getMouseAbsPoint(event)
+        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+        el.focus()
+      })
     },
     clickSubController(indexs: Array<number>) {
       indexs.unshift(this.layerIndex)

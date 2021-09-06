@@ -28,9 +28,15 @@ export default Vue.extend({
     },
     addBackground(event: Event) {
       const { src } = event.target as HTMLImageElement
+      const srcObj = {
+        type: 'background',
+        assetId: src,
+        userId: src
+      }
       this.$store.commit(
         'SET_backgroundImageSrc',
-        { pageIndex: this.lastSelectedPageIndex, imageSrc: src.replace('prev', 'larg') }
+        // { pageIndex: this.lastSelectedPageIndex, imageSrc: src.replace('prev', 'larg') }
+        { pageIndex: this.lastSelectedPageIndex, srcObj }
       )
     }
   }

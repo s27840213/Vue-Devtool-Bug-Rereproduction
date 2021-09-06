@@ -52,6 +52,16 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
+    div(v-if="(isGroup && currSelectedInfo.layers.length === 1) || (!isGroup && currSelectedInfo.layers.length > 1)"
+        class="dropdowns__item"
+        @click="groupOption.action")
+      svg-icon(
+        class="pointer"
+        :iconName="groupOption.icon"
+        :iconWidth="'16px'"
+        :iconColor="'gray-1'")
+      span(class="ml-10 body-2") {{groupOption.text}}
+      span(class="shortcut ml-10 body-2 text-gray-3") {{groupOption.shortcutText}}
     hr(class="dropdowns__hr")
     div(v-if="layerNum > 1")
       div(v-for="(data,index) in orderMenu()"
@@ -87,6 +97,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import { IImage } from '@/interfaces/layer'
 import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import groupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   data() {
@@ -117,6 +128,12 @@ export default Vue.extend({
       getToekn: 'user/getToken',
       _layerNum: 'getLayersNum'
     }),
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    hasMultipleSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 1
+    },
     layerNum(): number {
       return this.currSelectedInfo.pageIndex === -1 ? 0 : this._layerNum(this.currSelectedInfo.pageIndex)
     },
@@ -143,6 +160,16 @@ export default Vue.extend({
         shortcutText: '',
         action: () => {
           uploadUtils.updateText()
+        }
+      }
+    },
+    groupOption(): any {
+      return {
+        icon: 'copy',
+        text: this.isGroup ? 'Ungroup' : 'Group',
+        shortcutText: this.isGroup ? 'Cmd+Shift+G' : 'Cmd+G',
+        action: () => {
+          this.isGroup ? groupUtils.ungroup() : groupUtils.group()
         }
       }
     }
