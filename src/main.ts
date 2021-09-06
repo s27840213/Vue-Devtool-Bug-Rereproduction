@@ -12,6 +12,21 @@ import { RecycleScroller } from 'vue-virtual-scroller'
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.component('RecycleScroller', RecycleScroller)
+
+Vue.directive('ratio-change', {
+  // When the bound element is inserted into the DOM...
+  bind: (el, binding, vnode) => {
+    el.addEventListener('change', function () {
+      el.blur()
+    })
+  },
+  unbind: (el) => {
+    el.addEventListener('change', function () {
+      el.blur()
+    })
+  }
+})
+
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 requireAll(req)
@@ -47,7 +62,7 @@ if (['production'].includes(process.env.NODE_ENV)) {
         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
       })
     ],
-    beforeBreadcrumb (breadcrumb: any, hint: any) {
+    beforeBreadcrumb(breadcrumb: any, hint: any) {
       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
         const { __sentry_xhr__: request, response } = hint.xhr
         Object.assign(breadcrumb.data, { response, requestBody: request.body })
