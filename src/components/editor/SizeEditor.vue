@@ -2,7 +2,7 @@
   div(class="size-editor")
     input(ref="size-editor" type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
-      @change="blurInput()")
+      v-ratio-change)
     div(class="size-editor__percentage lead-2")
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
@@ -32,11 +32,6 @@ export default Vue.extend({
     }),
     setScaleRatio (ratio: number) {
       this._setScaleRatio(ratio)
-    },
-    blurInput () {
-      console.log('blur')
-      const el = (this.$refs['size-editor'] as HTMLElement)
-      el.blur()
     }
   }
 })

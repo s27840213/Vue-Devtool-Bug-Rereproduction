@@ -23,6 +23,7 @@
             :min="fieldRange[field].min"
             :name="field"
             @input="handleEffectUpdate"
+            v-ratio-change
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textEffect[field]"
@@ -61,6 +62,7 @@
             :min="fieldRange[field].min"
             :name="field"
             @input="handleEffectUpdate"
+            v-ratio-change
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textEffect[field]"
@@ -101,6 +103,7 @@
             @input="handleShapeUpdate"
             @mousedown="handleShapeStatus(true)"
             @mouseup="handleShapeStatus(false)"
+            v-ratio-change
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textShape[field]"
@@ -253,7 +256,7 @@ export default Vue.extend({
     border: 2px solid transparent;
     &:hover,
     &--selected {
-      border-color: #3C64B1;
+      border-color: #3c64b1;
     }
   }
   &__field {
@@ -265,7 +268,7 @@ export default Vue.extend({
   }
   &__field-name {
     flex: 1;
-    color: #18191F;
+    color: #18191f;
     text-align: left;
     text-transform: capitalize;
   }
@@ -276,7 +279,7 @@ export default Vue.extend({
     background: none;
     &::-webkit-slider-runnable-track {
       height: 2px;
-      background-color: #D9DBE1;
+      background-color: #d9dbe1;
     }
     &::-webkit-slider-thumb {
       appearance: none;
@@ -284,14 +287,14 @@ export default Vue.extend({
       height: 12px;
       border-radius: 50%;
       background-color: #ffffff;
-      border: 2px solid #3C64B1;
-      transition: .2s;
+      border: 2px solid #3c64b1;
+      transition: 0.2s;
       margin-top: -5px;
       position: relative;
     }
   }
   &__value-input {
-    border: 1px solid #D9DBE1;
+    border: 1px solid #d9dbe1;
     width: 32px;
     height: 24px;
     box-sizing: border-box;

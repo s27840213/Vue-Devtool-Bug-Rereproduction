@@ -63,6 +63,7 @@
             :value="props.lineHeight * 100"
             :max="fieldRange.lineHeight.max"
             :min="fieldRange.lineHeight.min"
+            v-ratio-change
             type="range"
             @input="setHeight")
       div(class="relative")
@@ -79,6 +80,7 @@
             :value="props.fontSpacing"
             :max="fieldRange.fontSpacing.max"
             :min="fieldRange.fontSpacing.min"
+            v-ratio-change
             type="range"
             @input="setSpacing")
       div(class="relative")
@@ -95,6 +97,7 @@
             :value="props.opacity"
             :max="fieldRange.opacity.max"
             :min="fieldRange.opacity.min"
+            v-ratio-change
             type="range"
             @input="setOpacity")
 
@@ -542,7 +545,7 @@ export default Vue.extend({
     background: none;
     &::-webkit-slider-runnable-track {
       height: 2px;
-      background-color: #D9DBE1;
+      background-color: #d9dbe1;
     }
     &::-webkit-slider-thumb {
       appearance: none;
@@ -550,8 +553,8 @@ export default Vue.extend({
       height: 15px;
       border-radius: 50%;
       background-color: #ffffff;
-      border: 2px solid #3C64B1;
-      transition: .2s;
+      border: 2px solid #3c64b1;
+      transition: 0.2s;
       margin-top: -6.5px;
       position: relative;
     }
@@ -586,5 +589,4 @@ export default Vue.extend({
 .relative {
   position: relative;
 }
-
 </style>
