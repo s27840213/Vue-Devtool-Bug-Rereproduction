@@ -17,16 +17,18 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
-    const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
+    // const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
+    const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
       let isAssignField = false
       for (const layer of layers) {
-        if (Object.prototype.hasOwnProperty.call(layer, this.fieldsMap[field])) {
+        if (layer.type === 'text' && Object.prototype.hasOwnProperty.call(layer, this.fieldsMap[field])) {
           layer[this.fieldsMap[field]] = !isAssignField
           if (!isAssignField) {
             isAssignField = true
           }
         }
+        layer.id = GeneralUtils.generateRandomString(8)
       }
     }
 

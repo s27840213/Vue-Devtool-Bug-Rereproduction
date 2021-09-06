@@ -261,7 +261,7 @@ class UploadUtils {
       pageIndex: pageIndex,
       designId: designId
     })
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex))
+    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -294,7 +294,8 @@ class UploadUtils {
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex))
+    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
+    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -319,6 +320,24 @@ class UploadUtils {
       console.log(designId)
       // console.log(xhr)
     }
+  }
+
+  default(page: any) {
+    const basicDefault = (layer: any) => {
+      layer.moved = false
+      layer.shown = false
+      layer.dragging = false
+      layer.active = false
+    }
+
+    for (const layer of page.layers) {
+      switch (layer.type) {
+        case 'image':
+          layer.imgControl = false
+      }
+      basicDefault(layer)
+    }
+    return page
   }
 
   uploadTmpJSON() {

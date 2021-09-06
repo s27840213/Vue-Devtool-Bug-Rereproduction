@@ -2,7 +2,7 @@ import { IImage } from '@/interfaces/layer'
 
 class ImageUtils {
   getSrc(config: IImage) {
-    const { type, userId, assetId } = config.srcObj
+    const { type, userId, assetId } = config.srcObj || config.src_obj
     const size = this.getSrcSize(type, config.styles.imgWidth)
     switch (type) {
       case 'public':

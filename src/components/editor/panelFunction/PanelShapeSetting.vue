@@ -59,10 +59,10 @@ export default Vue.extend({
     return {
       colorPresets: [
         '#000000',
+        '#FFFFFF',
         '#F2994A',
         '#F2C94C',
         '#219653',
-        '#9B51E0',
         '#BB6BD9',
         '#EB5757',
         '#2F80ED',
@@ -186,7 +186,7 @@ export default Vue.extend({
   &__color {
     @include size(clamp(30px, 2vw, 50px), clamp(30px, 2vw, 50px));
     margin: 5px;
-    border: 1px solid setColor(gray-4);
+    border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
     &:hover {
       box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff

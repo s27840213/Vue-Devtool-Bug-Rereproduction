@@ -55,7 +55,7 @@
           div(v-for="line in closestSnaplines.h"
             class="snap-area__line snap-area__line--hr"
             :style="snapLineStyles('h', line.pos)")
-        div(class="page-content"
+        div(:class="['page-content', `.nu-page-${pageIndex}`]"
             :style="styles('content')"
             ref="page-content"
             @drop="onDrop"
@@ -187,7 +187,7 @@ export default Vue.extend({
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${this.config.backgroundImage.srcObj.assetId})`,
+        backgroundImage: `url(${this.config.backgroundImage.srcObj ? this.config.backgroundImage.srcObj.assetId : this.config.backgroundImage.src})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
       } : {
