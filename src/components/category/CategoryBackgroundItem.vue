@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import ImageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -30,8 +31,8 @@ export default Vue.extend({
       const { src } = event.target as HTMLImageElement
       const srcObj = {
         type: 'background',
-        assetId: src,
-        userId: src
+        assetId: ImageUtils.getAssetId(src, 'background'),
+        userId: ImageUtils.getUserId(src, 'background')
       }
       this.$store.commit(
         'SET_backgroundImageSrc',

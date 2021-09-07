@@ -184,7 +184,6 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     styles(type: string) {
-      // console.log(ImageUtils.getSrc(this.config.backgroundImage.config))
       return type === 'content' ? {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,

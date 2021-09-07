@@ -14,9 +14,10 @@ class ImageUtils {
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&w=${size}`
+      case 'background':
+        return `https://template.vivipic.com/background/${assetId}/full`
       default:
-        // TODO: for background
-        return assetId.replace('prev', 'full')
+        return ''
     }
   }
 
@@ -66,6 +67,8 @@ class ImageUtils {
         return src.substring(src.indexOf('com/') + 4, src.indexOf('?'))
       case 'pexels':
         return src.substring(src.indexOf('photos/') + 7, src.indexOf('/pexels'))
+      case 'background':
+        return src.substring(src.indexOf('background/') + 11, src.indexOf('/prev'))
       default:
         return ''
     }
