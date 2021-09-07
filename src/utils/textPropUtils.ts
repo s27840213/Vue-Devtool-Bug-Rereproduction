@@ -487,7 +487,7 @@ class TextPropUtils {
     } else {
       const tmpLayerGroup = this.getCurrLayer as ITmp
       let propBuff: number | string | undefined
-      for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
+      for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
         if (tmpLayerGroup.layers[i].type === 'text') {
           const tmpLayer = tmpLayerGroup.layers[i] as IText
           if (typeof propBuff === 'undefined') {
