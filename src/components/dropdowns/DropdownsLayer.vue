@@ -253,6 +253,7 @@ export default Vue.extend({
       ]
     },
     setBackgroundImage() {
+      console.log(this.currSelectedInfo.layers[0])
       this._setBackgroundImage({
         pageIndex: this.currSelectedInfo.pageIndex,
         config: (this.currSelectedInfo.layers[0] as IImage)

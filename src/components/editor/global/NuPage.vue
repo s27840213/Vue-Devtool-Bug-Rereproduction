@@ -122,6 +122,7 @@ import SnapUtils from '@/utils/snapUtils'
 import ControlUtils from '@/utils/controlUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
+import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   data() {
@@ -183,11 +184,13 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     styles(type: string) {
+      // console.log(this.config.backgroundImage.config)
+      // console.log(ImageUtils.getSrc(this.config.backgroundImage.config))
       return type === 'content' ? {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${this.config.backgroundImage.srcObj ? this.config.backgroundImage.srcObj.assetId : this.config.backgroundImage.src})`,
+        backgroundImage: `url(${this.config.backgroundImage.config.srcObj ? ImageUtils.getSrc(this.config.backgroundImage.config) : this.config.backgroundImage.src})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
       } : {

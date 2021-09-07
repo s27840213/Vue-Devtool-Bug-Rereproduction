@@ -4,6 +4,8 @@ import store from '@/store'
 import text from '@/store/text'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
+import ImageUtils from '@/utils/imageUtils'
+
 class UploadUtils {
   loginOutput: any
   get token(): string { return store.getters['user/getToken'] }
@@ -162,7 +164,7 @@ class UploadUtils {
       console.log(targetLayer)
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.srcObj = { type: '', userId: '', assetId: '' }
+      pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
 
       // console.log(pageJSON)
       const formData = new FormData()
@@ -228,7 +230,7 @@ class UploadUtils {
       targetLayer.active = false
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.srcObj = { type: '', userId: '', assetId: '' }
+      pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
 
       // console.log(pageJSON)
       const formData = new FormData()
@@ -328,6 +330,17 @@ class UploadUtils {
       layer.shown = false
       layer.dragging = false
       layer.active = false
+    }
+
+    if (page.backgroundImage.config.src) {
+      const src = page.backgroundImage.config.src
+      const type = ImageUtils.getSrcType(page.backgroundImage.config.src)
+      page.backgroundImage.config.srcObj = {
+        type,
+        userId: ImageUtils.getUserId(src, type),
+        assetId: ImageUtils.getAssetId(src, type)
+      }
+      delete page.backgroundImage.config.src
     }
 
     for (const layer of page.layers) {
