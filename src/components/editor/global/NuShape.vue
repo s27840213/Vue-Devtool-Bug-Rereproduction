@@ -68,6 +68,8 @@ export default Vue.extend({
   watch: {
     'config.color': {
       handler: function(newVal) {
+        console.log(this.layerIndex)
+        console.log(newVal)
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size)
         this.styleNode.textContent = styleText
       },

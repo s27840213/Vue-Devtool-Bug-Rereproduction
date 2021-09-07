@@ -69,7 +69,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean | string[] }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,

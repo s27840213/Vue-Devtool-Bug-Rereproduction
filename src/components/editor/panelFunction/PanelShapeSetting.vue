@@ -28,6 +28,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
+import LayerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -136,20 +137,13 @@ export default Vue.extend({
       this.currSelectedColorIndex = index
     },
     setColor(newColor: string, index: number) {
-      const colors = Object.assign([], this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color)
-      colors[this.currSelectedColorIndex] = newColor
+      const color = [...this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color]
+      color[this.currSelectedColorIndex] = newColor
       const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
       if (record) {
         record.value = index
       }
-      this.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, colors)
-    },
-    updateLayerProps(pageIndex: number, layerIndex: number, color: [string]) {
-      this._updateLayerProps({
-        pageIndex,
-        layerIndex,
-        props: { color: color }
-      })
+      LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
     },
     initilizeRecord() {
       this.paletteRecord = []
