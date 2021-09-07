@@ -59,7 +59,7 @@ class ImageUtils {
     switch (type) {
       case 'public': {
         const substr = src.substring(src.indexOf('image/'))
-        return substr.substring(6, src.indexOf('/'))
+        return substr.substring(6, substr.indexOf('/full'))
       }
       case 'unsplash':
         return src.substring(src.indexOf('com/') + 4, src.indexOf('?'))
