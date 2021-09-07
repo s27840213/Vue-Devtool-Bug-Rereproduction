@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -6,6 +6,7 @@ import FocusUtils from './focusUtils'
 import { ISpecLayerData } from '@/store/types'
 import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
+import TextUtils from './textUtils'
 
 class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -112,6 +113,63 @@ class LayerUtils {
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
       console.log('Is out of bound!')
     }
+  }
+
+  initialLayerScale(pageIndex: number, layerIndex: number) {
+    const layer = this.getLayer(pageIndex, layerIndex)
+    const { styles: { scale }, type: primaryType } = layer
+    const applyLayers = layer.layers ? (layer.layers as ILayer[]) : [layer]
+    const isMultipleLayer = ['tmp', 'group'].includes(primaryType)
+    for (const idx in applyLayers) {
+      const { styles: subStyles, type, paragraphs } = applyLayers[idx] as IText
+      const fixScale = isMultipleLayer ? scale * subStyles.scale : scale
+      const props = {}
+      const styles = {}
+      switch (type) {
+        case 'text':
+          Object.assign(props, { paragraphs: TextUtils.initialParagraphsScale({ scale: fixScale }, paragraphs) })
+          if (isMultipleLayer) {
+            Object.assign(styles, { scale: 1 })
+          }
+          break
+        default:
+          if (isMultipleLayer) {
+            const [newLayer] = GroupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
+            Object.assign(styles, newLayer.styles)
+            Object.assign(
+              props,
+              { clipPath: newLayer.clipPath }
+            )
+          }
+      }
+      if (isMultipleLayer) {
+        Object.assign(styles, {
+          x: subStyles.x * scale,
+          y: subStyles.y * scale
+        })
+      }
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        props,
+        styles
+      })
+    }
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: { scale: 1, initWidth: layer.styles.width }
+    })
+  }
+
+  resetLayerWidth(pageIndex: number, layerIndex: number) {
+    const layer = this.getLayer(pageIndex, layerIndex)
+    store.commit('UPDATE_layerStyles', {
+      pageIndex,
+      layerIndex,
+      styles: { initWidth: layer.styles.width }
+    })
   }
 }
 
