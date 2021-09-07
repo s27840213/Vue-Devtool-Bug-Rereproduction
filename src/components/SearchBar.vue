@@ -11,7 +11,12 @@
       iconColor="gray-3"
       iconWidth="20px"
       @click.native="onClear")
-    svg-icon(class="pointer" :iconName="'search'" :iconColor="'gray-3'" :iconWidth="'20px'")
+    svg-icon(class="pointer"
+      iconName="search"
+      iconColor="gray-3"
+      iconWidth="20px"
+      @click.native="onSearch"
+    )
 </template>
 
 <script lang="ts">

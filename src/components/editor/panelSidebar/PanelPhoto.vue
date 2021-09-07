@@ -3,7 +3,8 @@
     search-bar(class="mb-15"
       placeholder="input keywords..."
       @search="handleSearch")
-    div(v-if="!pending && !list.length") Sorry, we couldn't find any photos for "{{ query }}".
+    div(v-if="!pending && !list.length"
+      class="text-white") Sorry, we couldn't find any photos for "{{ query }}".
     tmp-images(v-else
       @loadMore="handleLoadMore")
 </template>
