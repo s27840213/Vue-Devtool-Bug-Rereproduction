@@ -15,7 +15,8 @@ class ImageUtils {
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&w=${size}`
       default:
-        return ''
+        // TODO: for background
+        return assetId.replace('prev', 'full')
     }
   }
 
