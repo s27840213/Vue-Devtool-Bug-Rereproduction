@@ -7,6 +7,7 @@ import LayerUtils from './layerUtils'
 import { ITextState } from '@/store/text'
 import TextUtils from '@/utils/textUtils'
 import TextShapeUtils from './textShapeUtils'
+import TextEffectUtils from './textEffectUtils'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -327,7 +328,8 @@ class TextPropUtils {
       }
       TextUtils.updateSelection(start, end)
     }
-
+    // sync updating text effect if the color changed
+    TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     if (!sel || typeof tmpLayerIndex !== 'undefined' || propName === 'color') return
 
     // Below is used to re-select the caret-range after the props are applied

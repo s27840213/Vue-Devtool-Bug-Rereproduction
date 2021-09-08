@@ -227,9 +227,7 @@ export default Vue.extend({
     },
     handleColorUpdate (color: string): void {
       const { currentEffect } = this
-      window.requestAnimationFrame(() => {
-        TextEffectUtils.setTextEffect(currentEffect, { color })
-      })
+      TextEffectUtils.setTextEffect(currentEffect, { color })
     }
   }
 })
