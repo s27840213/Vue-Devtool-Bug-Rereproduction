@@ -68,8 +68,6 @@ export default Vue.extend({
   watch: {
     'config.color': {
       handler: function(newVal) {
-        console.log(this.layerIndex)
-        console.log(newVal)
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size)
         this.styleNode.textContent = styleText
       },
@@ -77,7 +75,6 @@ export default Vue.extend({
     },
     'config.pDiff': {
       handler: function(newVal) {
-        console.log(this.config)
         const styleText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
           cSize: this.config.cSize,
           pSize: this.config.pSize,

@@ -3,6 +3,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import { ILayer, IParagraph, IText } from '@/interfaces/layer'
 import LayerUtils from './layerUtils'
 import layerFactary from './layerFactary'
+import imageUtils from './imageUtils'
 
 class TemplateUtils {
   public readonly fields = ['heading', 'subheading', 'body']
@@ -59,6 +60,15 @@ class TemplateUtils {
       //   const { initWidth, initHeight, scale, scaleX, scaleY } = layer.styles
       //   layer.styles.width = initWidth * scale * scaleX
       //   layer.styles.height = initHeight * scale * scaleY
+      // }
+      // const srcObj = json.backgroundImage.config.srcObj
+      // console.log(srcObj)
+      // if (json.backgroundImage.src || srcObj.userId) {
+      //   Object.assign(srcObj, {
+      //     type: 'background',
+      //     assetId: imageUtils.getAssetId(json.backgroundImage.src || srcObj.userId, 'background'),
+      //     userId: ''
+      //   })
       // }
     }
     console.log(json)

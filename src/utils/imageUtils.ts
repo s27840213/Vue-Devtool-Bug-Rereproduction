@@ -68,7 +68,7 @@ class ImageUtils {
       case 'pexels':
         return src.substring(src.indexOf('photos/') + 7, src.indexOf('/pexels'))
       case 'background':
-        return src.substring(src.indexOf('background/') + 11, src.indexOf('/prev'))
+        return src.substring(src.indexOf('background/') + 11, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
       default:
         return ''
     }
