@@ -91,6 +91,7 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio'
     }),
     outerClick(e: MouseEvent) {
+      GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
       PageUtils.activeMostCentralPage()
     },
