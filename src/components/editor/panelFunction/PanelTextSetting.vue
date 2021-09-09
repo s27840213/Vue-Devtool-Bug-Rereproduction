@@ -13,7 +13,7 @@
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-                @change="setSize" v-model.lazy="props.fontSize")
+                @change="setSize" :value="fontSize")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(1)"
           :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         value-selector(v-if="openValueSelector"
@@ -109,7 +109,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IText } from '@/interfaces/layer'
+import { ILayer, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -117,6 +117,8 @@ import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import { parseInt, toNumber } from 'lodash'
 import { ISelection } from '@/interfaces/text'
 import GeneralUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   components: {
@@ -172,6 +174,27 @@ export default Vue.extend({
     },
     getFontPrev(): string {
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
+    },
+    scale(): number {
+      const layer = this.getLayer(this.pageIndex, this.layerIndex)
+      if (layer && layer.layers) {
+        const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
+          if (c.type === 'text') { p.add(c.styles.scale) }
+          return p
+        }, new Set())
+        if (scaleSet.size === 1) {
+          const [scale] = scaleSet
+          return scale * layer.styles.scale
+        }
+        return NaN
+      }
+      return layer ? layer.styles.scale : 1
+    },
+    fontSize (): number | string {
+      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
+        return '--'
+      }
+      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
     }
   },
   methods: {
@@ -228,7 +251,16 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      TextPropUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
+      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+      if (Number.isNaN(this.sel.start.offset)) {
+        TextUtils.updateLayerTextSize({ size: value })
+        setTimeout(() => {
+          // reset layer width for getting the right position of image element
+          LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
+        }, 0)
+      } else {
+        TextPropUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
+      }
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
     },
     handleSliderModal(modalName = '') {
@@ -303,6 +335,7 @@ export default Vue.extend({
     },
     fontSizeSteppingHandler(step: number) {
       const sel = TextUtils.getSelection()
+      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
       if (sel) {
         const { start, end } = sel
         const finalStart = {} as ISelection
@@ -352,22 +385,7 @@ export default Vue.extend({
           TextPropUtils.updateTextPropsState()
         })
       } else {
-        const config = this.getLayer(this.pageIndex, this.layerIndex) as IText
-        for (const [pidx, p] of config.paragraphs.entries()) {
-          for (const [sidx, span] of p.spans.entries()) {
-            const currStart = {
-              pIndex: pidx,
-              sIndex: sidx,
-              offset: 0
-            }
-            const currEnd = {
-              pIndex: pidx,
-              sIndex: sidx,
-              offset: span.text.length
-            }
-            TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
-          }
-        }
+        TextUtils.updateLayerTextSize({ diff: step })
         TextPropUtils.updateTextPropsState()
       }
     },
@@ -395,9 +413,18 @@ export default Vue.extend({
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
+        LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          TextPropUtils.spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
+          if (Number.isNaN(this.sel.start.offset)) {
+            TextUtils.updateLayerTextSize({ size: parseFloat(value) })
+            setTimeout(() => {
+              // reset layer width for getting the right position of image element
+              LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
+            }, 0)
+          } else {
+            TextPropUtils.spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
+          }
           TextPropUtils.updateTextPropsState({ fontSize: value })
         })
       }

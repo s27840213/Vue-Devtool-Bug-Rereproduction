@@ -61,7 +61,8 @@ export default Vue.extend({
           index: idx,
           size: row[0].preview.height + this.margin
         }))
-      this.prevLastRow = (rows.splice(-1)[0].list || []) as any
+      const lastRow = rows.splice(-1)[0]
+      this.prevLastRow = (lastRow ? lastRow.list : []) as any
       this.rows = this.rows.concat(rows as any)
     }
   },

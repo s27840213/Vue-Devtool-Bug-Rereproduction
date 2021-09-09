@@ -93,7 +93,6 @@ export default Vue.extend({
         }
       }
       Object.assign(config, json)
-      console.log(config)
       layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newShape(config))
     }
   }

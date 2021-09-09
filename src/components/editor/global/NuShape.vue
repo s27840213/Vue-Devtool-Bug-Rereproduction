@@ -75,7 +75,6 @@ export default Vue.extend({
     },
     'config.pDiff': {
       handler: function(newVal) {
-        console.log(this.config)
         const styleText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
           cSize: this.config.cSize,
           pSize: this.config.pSize,

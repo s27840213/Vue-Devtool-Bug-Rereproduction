@@ -38,6 +38,11 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number
   },
+  data() {
+    return {
+      isDestroyed: false
+    }
+  },
   async created() {
     const fontStore = this.fontStore as Array<IFont>
     let isLoadedFont = false
@@ -54,7 +59,7 @@ export default Vue.extend({
         }
       }
     }
-    if (isLoadedFont) {
+    if (isLoadedFont && !this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
@@ -65,8 +70,10 @@ export default Vue.extend({
       }
     }
   },
+  destroyed() {
+    this.isDestroyed = true
+  },
   mounted() {
-    // this.updateLayerSize()
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }
@@ -97,7 +104,6 @@ export default Vue.extend({
   watch: {
     updateTextSize: {
       handler: function() {
-        // console.log('updateTextSize')
         /**
          * If below conditions is pass, means the text-properties changes,
          * the layer width/height needs to refresh
@@ -172,7 +178,6 @@ export default Vue.extend({
     position: relative;
   }
   &__p {
-    // margin: 0.5em;
     margin: 0;
   }
   &__span {

@@ -19,14 +19,6 @@ class Controller {
     }
   }
 
-  getCurrentLayer (): IText {
-    return TextEffectUtils.getCurrentLayer() || {}
-  }
-
-  getSubTextLayerIndexs (): number[] {
-    return TextEffectUtils.getSubTextLayerIndexs()
-  }
-
   getSpecSubTextLayer (index: number): IText {
     return TextEffectUtils.getSpecSubTextLayer(index)
   }
@@ -68,34 +60,25 @@ class Controller {
   }
 
   setTextShape (shape: string, attrs?: any): void {
-    const subLayerIndexs = this.getSubTextLayerIndexs()
-    if (subLayerIndexs.length) {
-      subLayerIndexs.forEach(index => {
+    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
+    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    for (const idx in layers) {
+      const { type } = layers[idx] as IText
+      if (type === 'text') {
         const { styles, props } = this.getTextShapeStyles(
-          this.getSpecSubTextLayer(index),
+          layers[idx],
           shape,
           attrs
         )
         store.commit('UPDATE_specLayerData', {
-          pageIndex: TextUtils.pageIndex,
-          layerIndex: TextUtils.layerIndex,
-          subLayerIndex: index,
+          pageIndex,
+          layerIndex,
+          subLayerIndex: +idx,
           styles,
           props
         })
-      })
-    } else {
-      const { styles, props } = this.getTextShapeStyles(
-        this.getCurrentLayer(),
-        shape,
-        attrs
-      )
-      store.commit('UPDATE_specLayerData', {
-        pageIndex: TextUtils.pageIndex,
-        layerIndex: TextUtils.layerIndex,
-        styles,
-        props
-      })
+      }
     }
   }
 

@@ -13,6 +13,9 @@ export default Vue.extend({
   props: {
     config: Object
   },
+  mounted() {
+    console.log(this.config)
+  },
   computed: {
     src(): string {
       if (this.config.src) {

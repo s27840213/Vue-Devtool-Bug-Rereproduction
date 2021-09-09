@@ -5,9 +5,10 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
+    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(#after)
+      template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
@@ -145,6 +146,9 @@ export default Vue.extend({
     },
     currentPageColor(): string {
       return this.getPage(this.lastSelectedPageIndex).backgroundColor
+    },
+    emptyResultMessage(): string {
+      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any background for "${this.keyword}".` : ''
     }
   },
   mounted() {

@@ -467,6 +467,38 @@ class TextUtils {
   updateFontFace(font: IFont) {
     store.commit('text/UPDATE_fontFace', font)
   }
+
+  initialParagraphsScale(data: { [key: string]: number }, paragraphs: any[]): any[] {
+    const { scale = 1, diff = 0, size = 0 } = data
+    return paragraphs
+      .map(paragraph => {
+        const result = {
+          styles: {
+            ...paragraph.styles,
+            size: size || (diff + Math.round(paragraph.styles.size * scale * 10) / 10)
+          }
+        }
+        paragraph.spans && Object.assign(result, { spans: this.initialParagraphsScale({ diff, scale, size }, paragraph.spans || []) })
+        paragraph.text && Object.assign(result, { text: paragraph.text })
+        return result
+      })
+  }
+
+  updateLayerTextSize({ size = 0, diff = 0 }) {
+    const layers = this.getCurrLayer.layers || [this.getCurrLayer]
+    for (const idx in layers) {
+      const { type, paragraphs } = GeneralUtils.deepCopy(layers[idx]) as IText
+      if (type !== 'text') { continue }
+      store.commit('UPDATE_specLayerData', {
+        pageIndex: this.pageIndex,
+        layerIndex: this.layerIndex,
+        subLayerIndex: +idx,
+        props: {
+          paragraphs: this.initialParagraphsScale({ size, diff }, paragraphs)
+        }
+      })
+    }
+  }
 }
 
 export default new TextUtils()

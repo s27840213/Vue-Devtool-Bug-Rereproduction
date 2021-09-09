@@ -272,7 +272,7 @@ export default Vue.extend({
       return {
         width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
         height: isVertical ? '' : 'auto',
-        userSelect: 'text',
+        userSelect: this.contentEditable ? 'text' : 'none',
         opacity: this.isTextEditing ? 1 : 0
       }
     },

@@ -5,10 +5,11 @@ import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
+import ShapeUtils from './shapeUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -65,8 +66,17 @@ class ShortcutHandler {
       layer.styles.y += 10
       layer.id = GeneralUtils.generateRandomString(8)
       layer.shown = false
+
+      switch (layer.type) {
+        case 'image':
+          (layer as IImage).imgControl = false
+          break
+        case 'shape':
+          (layer as IShape).className = ShapeUtils.classGenerator()
+      }
       return layer
     })
+
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
     if (store.getters.getCurrSelectedIndex >= 0 && lastSelectedPageIndex === store.getters.getCurrSelectedPageIndex) {

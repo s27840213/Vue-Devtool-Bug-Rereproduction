@@ -5,6 +5,7 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
+    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -116,6 +117,9 @@ export default Vue.extend({
       return this.listDefaultText
         .concat(this.listCategories)
         .concat(this.listResult)
+    },
+    emptyResultMessage(): string {
+      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any text for "${this.keyword}".` : ''
     }
   },
   mounted() {

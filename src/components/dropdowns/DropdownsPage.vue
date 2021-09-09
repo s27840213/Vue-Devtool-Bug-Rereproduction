@@ -56,7 +56,11 @@ export default Vue.extend({
     return {
       baseBgImgConfig: {
         type: 'image',
-        src: 'none',
+        srcObj: {
+          type: '',
+          userId: '',
+          assetId: ''
+        },
         clipPath: '',
         active: false,
         shown: false,

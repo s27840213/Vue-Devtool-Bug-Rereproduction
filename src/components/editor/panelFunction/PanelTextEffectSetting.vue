@@ -174,7 +174,7 @@ export default Vue.extend({
     },
     currentStyle (): any {
       const { styles } = TextEffectUtils.getCurrentLayer()
-      return styles
+      return styles || {}
     },
     currentEffect (): string {
       const { textEffect = {} } = this.currentStyle
@@ -227,9 +227,7 @@ export default Vue.extend({
     },
     handleColorUpdate (color: string): void {
       const { currentEffect } = this
-      window.requestAnimationFrame(() => {
-        TextEffectUtils.setTextEffect(currentEffect, { color })
-      })
+      TextEffectUtils.setTextEffect(currentEffect, { color })
     }
   }
 })

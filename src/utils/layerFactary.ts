@@ -71,7 +71,7 @@ class LayerFactary {
         initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
         writingMode: 'initial',
-        align: 'left'
+        align: 'center'
       },
       paragraphs: [
         {

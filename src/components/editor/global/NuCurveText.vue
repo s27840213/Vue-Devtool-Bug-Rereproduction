@@ -68,7 +68,8 @@ export default Vue.extend({
       return paragraphs.flatMap(
         (p: any) =>
           p.spans.flatMap(
-            (span: any) => [...span.text].map(t => ({ text: t, styles: span.styles }))
+            (span: any) => [...span.text]
+              .map(t => ({ text: t, styles: { ...p.styles, ...span.styles } }))
           )
       )
     },
@@ -176,8 +177,10 @@ export default Vue.extend({
     styles(styles: any, idx: number) {
       const { transforms, bend, textHeight, minHeight } = this
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
+      const fontStyles = CssConveter.convertFontStyle(styles)
       return Object.assign(
-        CssConveter.convertFontStyle(styles),
+        fontStyles,
+        { textIndent: fontStyles['letter-spacing'] || 'initial' },
         { transform: transforms[idx] || 'none' },
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
