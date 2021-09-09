@@ -325,8 +325,8 @@ class TextUtils {
 
     const scale = content.styles.scale ?? 1
     const textHW = {
-      width: body.style.width !== 'max-content' ? widthLimit : Math.ceil(body.getBoundingClientRect().width * scale),
-      height: body.style.height !== 'max-content' ? widthLimit : Math.ceil(body.getBoundingClientRect().height * scale)
+      width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
+      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale)
     }
     document.body.removeChild(body)
     return textHW
