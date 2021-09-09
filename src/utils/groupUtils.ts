@@ -259,6 +259,7 @@ class GroupUtils {
   }
 
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
+    console.log(pageIndex, styles)
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles

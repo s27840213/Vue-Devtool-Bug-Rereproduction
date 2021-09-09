@@ -5,6 +5,8 @@ import text from '@/store/text'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ImageUtils from '@/utils/imageUtils'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import groupUtils from './groupUtils'
 
 class UploadUtils {
   loginOutput: any
@@ -386,10 +388,21 @@ class UploadUtils {
   async getTmpJSON() {
     this.loginOutput.download_url = this.loginOutput.download_url.replace('*', 'edit/temp.json')
     // console.log(`${this.loginOutput.download_url}&ver=${generalUtils.generateRandomString(6)}`)
-    const response = await fetch(`${this.loginOutput.download_url}&ver=${generalUtils.generateRandomString(6)}`)
+    const querySign = this.loginOutput.download_url.indexOf('?') !== -1 ? '&' : '?'
+    const response = await fetch(`${this.loginOutput.download_url}${querySign}ver=${generalUtils.generateRandomString(6)}`)
     // const response = await fetch(this.loginOutput.download_url)
-    response.json().then((json) => {
+    response.json().then((json: Array<IPage>) => {
       store.commit('SET_pages', json)
+      const hasTmp = json.some((page: IPage, pageIndex: number) => {
+        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp, layerIndex: number) => {
+          if (layer.active) {
+            console.log(pageIndex, layerIndex)
+            layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
+            return true
+          }
+          return false
+        })
+      })
     })
   }
 

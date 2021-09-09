@@ -249,6 +249,9 @@ export default Vue.extend({
         case 'tmp':
           resizers = []
           break
+        case 'group':
+          resizers = []
+          break
       }
       return resizers
     },
