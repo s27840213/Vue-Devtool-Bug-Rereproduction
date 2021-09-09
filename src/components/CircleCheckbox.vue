@@ -27,9 +27,7 @@ export default Vue.extend({
       },
       set(value: Array<any> | boolean): void {
         if (!this.checkedValues) {
-          console.log(value)
         } else {
-          console.log(value)
           this.$emit('update', value)
         }
       }

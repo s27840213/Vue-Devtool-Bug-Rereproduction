@@ -37,7 +37,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): I
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
   })
-  console.log('caculate group ')
+
   return {
     x: minX,
     y: minY,
@@ -86,7 +86,6 @@ class GroupUtils {
     }
 
     if (this.currSelectedInfo.types.has('group')) {
-      console.log('has group, ungroup all group layer')
       this.ungroupInnerGroup()
     }
 
@@ -259,7 +258,6 @@ class GroupUtils {
   }
 
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
-    console.log(pageIndex, styles)
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles
