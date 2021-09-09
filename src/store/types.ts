@@ -1,5 +1,6 @@
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
 
 /**
@@ -21,12 +22,7 @@ export interface IEditorState {
   currActivePageIndex: number,
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
-  currSelectedInfo: {
-    pageIndex: number,
-    index: number,
-    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-    types: Set<string>
-  },
+  currSelectedInfo: ICurrSelectedInfo,
   currSubSelectedInfo: {
     indexs: Array<number>,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,

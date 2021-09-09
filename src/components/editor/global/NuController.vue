@@ -305,7 +305,7 @@ export default Vue.extend({
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
-        'pointer-events': (!this.isLocked) ? 'initial' : 'initial',
+        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },

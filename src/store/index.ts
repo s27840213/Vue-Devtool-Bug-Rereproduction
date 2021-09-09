@@ -359,7 +359,7 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<IShape | IText | IImage | IGroup> } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */

@@ -15,22 +15,26 @@ import { mapGetters, mapMutations } from 'vuex'
 export default Vue.extend({
   data() {
     return {
-      ratioInPercent: 0
     }
-  },
-  created() {
-    this.ratioInPercent = this.pageScaleRatio / 100
   },
   computed: {
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio'
-    })
+    }),
+    ratioInPercent: {
+      get(): number {
+        return this.pageScaleRatio / 100
+      },
+      set(val: number): void {
+        this.setScaleRatio(Math.round(val * 100))
+      }
+    }
   },
   methods: {
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio'
     }),
-    setScaleRatio (ratio: number) {
+    setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
     }
   }

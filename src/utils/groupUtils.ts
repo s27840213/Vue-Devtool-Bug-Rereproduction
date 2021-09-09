@@ -7,6 +7,7 @@ import MathUtils from '@/utils/mathUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -69,12 +70,26 @@ function getTmpLayer() {
   return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
 }
 class GroupUtils {
+  get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
+  get layerIndex(): number { return store.getters.getCurrSelectedIndex }
+  get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get getLayer() { return store.getters.getLayer }
+  get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
+  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get getPage() { return store.getters.getPage }
+
   group() {
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
     if (currSelectedInfo.layers.length < 2) {
       console.log('You need to select at least 2 layers!')
       return
     }
+
+    if (this.currSelectedInfo.types.has('group')) {
+      console.log('has group, ungroup all group layer')
+      this.ungroupInnerGroup()
+    }
+
     const tmpPageIndex = currSelectedInfo.pageIndex
     const tmpIndex = currSelectedInfo.index
     LayerUtils.updateLayerProps(tmpPageIndex, tmpIndex, {
@@ -89,31 +104,41 @@ class GroupUtils {
   }
 
   ungroup() {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
+    const targetLayer = store.getters.getLayer(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index)
     if (targetLayer.type === 'group') {
       targetLayer.layers.forEach((layer: IGroup, index: number) => {
         layer.styles.zindex = targetLayer.styles.zindex + index
       })
       const tmpLayer = GeneralUtils.deepCopy(targetLayer)
-      LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
         type: 'tmp',
         active: true
       })
-      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
         zindex: -1
       })
-      const tmpPageIndex = currSelectedInfo.pageIndex
-      const tmpIndex = currSelectedInfo.index
+      const tmpPageIndex = this.currSelectedInfo.pageIndex
+      const tmpIndex = this.currSelectedInfo.index
       this.reset()
       this.set(tmpPageIndex, tmpIndex, tmpLayer.layers)
     }
   }
 
+  private ungroupInnerGroup() {
+    while (this.currSelectedInfo.types.has('group')) {
+      const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer: IText | IImage | IShape | IGroup) => layer.type === 'group')
+      const selectedLayers = GeneralUtils.deepCopy(this.currSelectedInfo.layers)
+      selectedLayers.splice(groupLayerIndex, 1, ...this.mapGroupLayersToTmp(this.currSelectedInfo.layers[groupLayerIndex] as IGroup))
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        layers: selectedLayers
+      })
+      this.set(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, selectedLayers)
+    }
+  }
+
   select(pageIndex: number, layerIndexs: Array<number>) {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
     // currSelectedIndex is smaller than 0 means there isn't any selected layer
-    if (currSelectedInfo.index < 0) {
+    if (this.currSelectedInfo.index < 0) {
       // When we only select one layer
       if (layerIndexs.length === 1) {
         LayerUtils.updateLayerProps(pageIndex, layerIndexs[0], {
@@ -142,7 +167,7 @@ class GroupUtils {
       }
     } else { // when we already have selected layers
       if (store.getters.getCurrSelectedLayers.length === 1) {
-        const indexs = [currSelectedInfo.index, ...layerIndexs]
+        const indexs = [this.currSelectedInfo.index, ...layerIndexs]
         this.deselect()
         const layers = MappingUtils.mappingLayers(pageIndex, indexs)
         const tmpStyles = calcTmpProps(layers)
@@ -165,9 +190,9 @@ class GroupUtils {
         const tmpLayer = getTmpLayer()
         const tmpStyles = calcTmpProps([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, getTmpLayer()), ...layers])
         const currSelectedLayers = this.mapLayersToTmp([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer), ...layers], tmpStyles)
-        const topIndex = Math.max(currSelectedInfo.index, ...layerIndexs)
+        const topIndex = Math.max(this.currSelectedInfo.index, ...layerIndexs)
         const newLayersNum = 1 + layerIndexs.length
-        const indexs = [currSelectedInfo.index, ...layerIndexs]
+        const indexs = [this.currSelectedInfo.index, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
         this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
@@ -189,18 +214,17 @@ class GroupUtils {
   }
 
   deselect() {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const tmpPageIndex = currSelectedInfo.pageIndex
-    if (currSelectedInfo.index !== -1) {
+    const tmpPageIndex = this.currSelectedInfo.pageIndex
+    if (this.currSelectedInfo.index !== -1) {
       if (store.getters.getCurrSelectedLayers.length === 1) {
-        LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
+        LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           active: false
         })
       } else {
         const tmpLayer = getTmpLayer()
         LayerUtils.deleteSelectedLayer()
-        LayerUtils.addLayersToPos(currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
-        LayerUtils.updateLayersOrder(currSelectedInfo.pageIndex)
+        LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
+        LayerUtils.updateLayersOrder(this.currSelectedInfo.pageIndex)
       }
       this.reset()
       ZindexUtils.reassignZindex(tmpPageIndex)
@@ -208,11 +232,10 @@ class GroupUtils {
   }
 
   reselect() {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const selectedIndexs = currSelectedInfo.layers.map((layer: IShape | IText | IImage | IGroup, index: number) => {
+    const selectedIndexs = this.currSelectedInfo.layers.map((layer: IShape | IText | IImage | IGroup, index: number) => {
       return layer.styles.zindex - 1
     })
-    const tmpPageIndex = currSelectedInfo.pageIndex
+    const tmpPageIndex = this.currSelectedInfo.pageIndex
     this.deselect()
     this.select(tmpPageIndex, [...selectedIndexs])
   }
@@ -307,6 +330,60 @@ class GroupUtils {
       layer.shown = false
       layer.locked = tmpLayer.locked
       layer.moved = tmpLayer.moved
+    })
+
+    return layers
+  }
+
+  mapGroupLayersToTmp(groupLayer: IGroup): Array<IShape | IText | IImage | IGroup> {
+    const layers = JSON.parse(JSON.stringify(groupLayer.layers))
+    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      // calculate scale offset
+      if (layer.type === 'image') {
+        layer = layer as IImage
+        const width = layer.styles.width as number * groupLayer.styles.scale
+        const height = layer.styles.height as number * groupLayer.styles.scale
+
+        layer.styles.width = width
+        layer.styles.height = height
+        layer.styles.imgHeight *= groupLayer.styles.scale
+        layer.styles.imgWidth *= groupLayer.styles.scale
+        layer.styles.imgX *= groupLayer.styles.scale
+        layer.styles.imgY *= groupLayer.styles.scale
+
+        layer.clipPath = `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`
+        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        layer.styles.x = shiftX
+        layer.styles.y = shiftY
+      } else {
+        layer.styles.width = layer.styles.width as number * groupLayer.styles.scale
+        layer.styles.height = layer.styles.height as number * groupLayer.styles.scale
+        layer.styles.scale *= groupLayer.styles.scale
+      }
+
+      // calculate the center shift of scaled image
+      if (layer.styles.scale !== 1) {
+        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        layer.styles.x = shiftX
+        layer.styles.y = shiftY
+      }
+
+      // map to original coordinate system
+      layer.styles.x += groupLayer.styles.x
+      layer.styles.y += groupLayer.styles.y
+
+      // calculate rotation offset
+      const centerOffset = MathUtils.getRotatedPoint(groupLayer.styles.rotate, MathUtils.getCenter(groupLayer.styles), MathUtils.getCenter(layer.styles))
+      layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
+      layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
+      layer.styles.rotate = (layer.styles.rotate + groupLayer.styles.rotate) % 360
+      layer.shown = false
+      layer.locked = groupLayer.locked
+      layer.moved = groupLayer.moved
     })
 
     return layers
