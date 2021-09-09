@@ -7,9 +7,12 @@
 </template>
 
 <script lang="ts">
-import ImageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import { IImage } from '@/interfaces/layer'
+import ImageUtils from '@/utils/imageUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import LayerFactary from '@/utils/layerFactary'
 
 export default Vue.extend({
   props: {
@@ -34,11 +37,29 @@ export default Vue.extend({
         assetId: ImageUtils.getAssetId(src, 'background'),
         userId: ImageUtils.getUserId(src, 'background')
       }
-      this.$store.commit(
-        'SET_backgroundImageSrc',
-        // { pageIndex: this.lastSelectedPageIndex, imageSrc: src.replace('prev', 'larg') }
-        { pageIndex: this.lastSelectedPageIndex, srcObj }
-      )
+
+      const el = document.createElement('img')
+      el.src = ImageUtils.getSrc({ srcObj } as IImage)
+      el.onload = () => {
+        document.body.appendChild(el)
+        let { width, height } = el.getBoundingClientRect()
+        width /= 2
+        height /= 2
+        document.body.removeChild(el)
+        const img: IImage = LayerFactary.newImage({
+          styles: {
+            width,
+            height,
+            x: 200,
+            y: 200
+          },
+          srcObj
+        })
+        this.$store.commit('SET_backgroundImage', {
+          pageIndex: this.lastSelectedPageIndex,
+          config: img
+        })
+      }
     }
   }
 })

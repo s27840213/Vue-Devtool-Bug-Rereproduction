@@ -47,6 +47,8 @@
 import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import ImageUtils from '@/utils/imageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -189,7 +191,8 @@ export default Vue.extend({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = this.getBackgroundImage(this.lastSelectedPageIndex)
+      const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(this.lastSelectedPageIndex))
+
       layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
       this._setBackgroundImage({
         pageIndex: this.lastSelectedPageIndex,

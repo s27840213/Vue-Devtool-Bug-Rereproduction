@@ -10,6 +10,7 @@ import { IPage } from '@/interfaces/page'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import TemplateUtils from './templateUtils'
+import { Span } from '@sentry/tracing'
 
 class TextUtils {
   public readonly MARGIN_FONTSIZE = 16
@@ -324,8 +325,8 @@ class TextUtils {
 
     const scale = content.styles.scale ?? 1
     const textHW = {
-      width: body.style.width !== 'max-content' ? widthLimit : Math.ceil(body.getBoundingClientRect().width * scale),
-      height: body.style.height !== 'max-content' ? widthLimit : Math.ceil(body.getBoundingClientRect().height * scale)
+      width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
+      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale)
     }
     document.body.removeChild(body)
     return textHW
@@ -390,12 +391,6 @@ class TextUtils {
     }
     Object.assign(format.styles, position, size)
 
-    /**
-     * Check if there already exist an heading on the page. If not, set the new one as.
-     */
-    // if (field && !page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
-    //   Object.assign(format, { [field]: true })
-    // }
     if (field) {
       if (!page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
         Object.assign(format, { [field]: true })
@@ -407,6 +402,12 @@ class TextUtils {
     const newTextLayer = LayerFactary.newText(format)
     LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
   }
+
+  // isBoldType (font: IFont): boolean {
+  //   const el = document.createElement('span')
+  //   el.textContent = 'AB CD'
+  //   const width = c
+  // }
 
   getParagraphSize(config: IText): Array<number> {
     const sizeArr = []

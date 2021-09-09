@@ -3,7 +3,7 @@ import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height } = config.styles
+    const { width, height, initWidth, initHeight } = config.styles
     const basicConfig = {
       type: 'image',
       srcObj: {
@@ -28,14 +28,14 @@ class LayerFactary {
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: 0,
-        height: 0,
+        width: width,
+        height: height,
         initWidth: 0,
         initHeight: 0,
         imgX: 0,
         imgY: 0,
-        imgWidth: config.styles.initWidth,
-        imgHeight: config.styles.initHeight,
+        imgWidth: initWidth ?? width,
+        imgHeight: initHeight ?? height,
         zindex: -1,
         opacity: 100
       }
