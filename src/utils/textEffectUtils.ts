@@ -44,11 +44,14 @@ class Controller {
   }
 
   getCurrentLayer (): IText {
-    const currLayer = TextUtils.getCurrLayer
+    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const currLayer = store.getters.getLayer(pageIndex, layerIndex)
     const multiLayers = currLayer.layers as any[]
-    for (const index in multiLayers) {
-      if (multiLayers[index].type === 'text') {
-        return multiLayers[index]
+    if (multiLayers) {
+      for (const index in multiLayers) {
+        if (multiLayers[index].type === 'text') {
+          return multiLayers[index]
+        }
       }
     }
     return currLayer
@@ -206,7 +209,7 @@ class Controller {
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
-      const { type, styles: { layerTextEffect }, paragraphs } = layers[idx] as IText
+      const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
       if (type === 'text') {
         const textEffect = {} as any
         if (layerTextEffect && (layerTextEffect as any).name === effect) {

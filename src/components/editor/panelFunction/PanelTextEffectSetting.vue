@@ -174,7 +174,7 @@ export default Vue.extend({
     },
     currentStyle (): any {
       const { styles } = TextEffectUtils.getCurrentLayer()
-      return styles
+      return styles || {}
     },
     currentEffect (): string {
       const { textEffect = {} } = this.currentStyle

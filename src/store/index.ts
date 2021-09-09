@@ -354,7 +354,9 @@ const mutations: MutationTree<IEditorState> = {
      * This Mutation is used to update the layer's properties excluding styles
      */
     Object.entries(updateInfo.props).forEach(([k, v]) => {
-      state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
+      if (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex]) {
+        state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
+      }
     })
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, indexs: Array<number>, props: { [key: string]: string | number | boolean | IParagraph } }) {

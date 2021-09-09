@@ -19,10 +19,6 @@ class Controller {
     }
   }
 
-  getCurrentLayer (): IText {
-    return TextEffectUtils.getCurrentLayer() || {}
-  }
-
   getSpecSubTextLayer (index: number): IText {
     return TextEffectUtils.getSpecSubTextLayer(index)
   }
