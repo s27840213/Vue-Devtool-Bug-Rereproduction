@@ -3,7 +3,7 @@ import { IImage } from '@/interfaces/layer'
 class ImageUtils {
   getSrc(config: IImage) {
     const { type, userId, assetId } = config.srcObj || config.src_obj
-    const size = this.getSrcSize(type, config.styles.imgWidth)
+    const size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`

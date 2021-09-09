@@ -28,7 +28,7 @@ export default Vue.extend({
       getTextInfo: 'getTextInfo'
     })
   },
-  mounted () {
+  created () {
     if (!this.getJson(this.objectId)) {
       this.$emit('init', this.objectId)
     }

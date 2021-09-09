@@ -2,6 +2,9 @@
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     div(class="shape-setting__colors")
+      div(v-if="isGrouped"
+        class="shape-setting__color"
+        :style="groupColorStyles()")
       div(v-for="(color, index) in getColors"
         class="shape-setting__color"
         :style="colorStyles(color, index)"
@@ -29,6 +32,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import LayerUtils from '@/utils/layerUtils'
+import { IShape } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -44,12 +48,13 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    isGroup(): boolean {
+    isGrouped(): boolean {
       const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
-      return layer.type === 'tmp' || layer.type === 'group'
+      return (layer.type === 'tmp' || layer.type === 'group') && layer.layers.every((l: IShape) => l.color.length === 1)
     },
     getColors(): string[] {
-      if (!this.isGroup) {
+      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      if (!(layer.type === 'tmp' || layer.type === 'group')) {
         return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
       } else {
         return []
@@ -93,6 +98,14 @@ export default Vue.extend({
         backgroundColor: color,
         boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
         // boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #7d2ae8, inset 0 0 0 2px #fff' : ''
+      }
+    },
+    groupColorStyles() {
+      console.log('qwdqfpk')
+      return {
+        background: `url(${require('@/assets/img/png/multi-color.png')})`,
+        // 'background-image': 'url(/assets/icon/color/multi-color.svg)',
+        boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
       }
     },
     paletteColorStyle(color: string, index: number) {

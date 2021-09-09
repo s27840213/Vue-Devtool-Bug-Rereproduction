@@ -29,6 +29,8 @@ import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import font from '@/store/module/font'
+import FontFaceObserver from 'fontfaceobserver'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -46,6 +48,7 @@ export default Vue.extend({
   async created() {
     const fontStore = this.fontStore as Array<IFont>
     let isLoadedFont = false
+    const fontArr: string[] = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
         const spanFont = span.styles.font
@@ -54,11 +57,17 @@ export default Vue.extend({
           const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
           await newFont.load().then(newFont => {
             document.fonts.add(newFont)
+            fontArr.push(spanFont)
             TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
           })
         }
       }
     }
+    const promises = [...fontArr]
+      .map(font => (new FontFaceObserver(font)).load(null, 10000))
+    await Promise
+      .all(promises)
+
     if (isLoadedFont && !this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
