@@ -4,7 +4,7 @@
     div(class="editor-canvas")
       div(class="page-container"
           ref="container"
-          @click.left.self="outerClick($event)")
+          @mousedown.left.self="outerClick($event)")
         nu-page(v-for="(page,index) in pages"
           :ref="`page-${index}`"
           :key="`page-${index}`"
@@ -91,6 +91,7 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio'
     }),
     outerClick(e: MouseEvent) {
+      console.log('outer click')
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
       PageUtils.activeMostCentralPage()
@@ -130,12 +131,13 @@ export default Vue.extend({
       // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
+      console.log('select end')
       if (this.isSelecting) {
         GroupUtils.deselect()
       }
       this.setLastSelectedPageIndex(this.pageIndex)
       /**
-       * Use nextTick to trigger the following function after DOM updatingP
+       * Use nextTick to trigger the following function after DOM updating
        */
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.selecting)

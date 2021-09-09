@@ -361,14 +361,16 @@ export default Vue.extend({
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
         if (!this.isActive) {
-          // 沒按 shift/crtl/cmd 其中一個按鍵， 且目前已有選擇某 Layer
+          // already have selected layer
           if (this.currSelectedInfo.index >= 0) {
+            // Did not press shift/cmd/ctrl key -> deselect selected layers first
             if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
             }
+            // this if statement is used to prevent select the layer in another page
             if (this.pageIndex === this.lastSelectedPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
             }
