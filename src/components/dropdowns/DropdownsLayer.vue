@@ -20,7 +20,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
-    template(v-if="getToekn!==''")
+    template(v-if="getToekn!=='' && isText")
       div(class="dropdowns__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -30,7 +30,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!==''")
+    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && isText")
       div(class="dropdowns__item"
           @click="updateMenu.action")
         svg-icon(
@@ -139,6 +139,9 @@ export default Vue.extend({
     },
     getType(): Array<string> {
       return [...this.currSelectedInfo.types]
+    },
+    isText(): boolean {
+      return this.getType.includes('text')
     },
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''

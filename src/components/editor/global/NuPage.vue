@@ -1,52 +1,48 @@
 <template lang="pug">
   div(class="nu-page"
-      :class="`nu-page-${pageIndex}`"
-      ref="page"
-      @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
-      @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-      @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-      @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-      @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-      @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-      @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-      @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-      @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-      @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-      @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-      @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-      @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-      @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-      @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-      @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-      @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-      @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-      @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-      @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-      @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-      @keydown.37.exact.stop.self="ShortcutUtils.left()"
-      @keydown.38.exact.stop.self="ShortcutUtils.up()"
-      @keydown.39.exact.stop.self="ShortcutUtils.right()"
-      @keydown.40.exact.stop.self="ShortcutUtils.down()"
-      @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
-      @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
-      @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
-      @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
-      tabindex="0")
-    div(class="page-title text-left text-gray-3 mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
-      div
-        span {{config.name}}
+      ref="page")
+    div(class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+      input(class="text-gray-3"
+        type="text"
+        v-model="pageName")
       div(v-if="getCurrActivePageIndex===pageIndex")
-        svg-icon(:iconName="'plus'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+        svg-icon(:iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
-        svg-icon(v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+        svg-icon(v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
-        :style="wrapperStyles()")
-      //- div(class="coordinate" ref="coordinate")
-      //-   div(class="coordinate__val coordinate__width")
-      //-     span {{coordinateWidth* (100/scaleRatio)}}px
-      //-   div(class="coordinate__val coordinate__height")
-      //-     span {{coordinateHeight*(100/scaleRatio)}}px
+        :class="`nu-page-${pageIndex}`"
+        :style="wrapperStyles()"
+        @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
+        @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+        @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+        @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+        @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+        @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+        @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+        @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
+        @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
+        @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+        @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+        @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+        @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+        @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+        @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+        @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+        @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+        @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+        @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+        @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+        @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+        @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+        @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+        @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+        @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
+        @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
+        @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
+        @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
+        @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
+        tabindex="0")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="snap-area")
           div(v-for="line in closestSnaplines.v"
@@ -172,6 +168,19 @@ export default Vue.extend({
     },
     getPageCount(): number {
       return this.pages.length
+    },
+    pageName: {
+      get(): string {
+        return this.config.name
+      },
+      set(value: string): void {
+        this.$store.commit('UPDATE_pageProps', {
+          pageIndex: this.pageIndex,
+          props: {
+            name: value
+          }
+        })
+      }
     }
   },
   methods: {
@@ -318,9 +327,6 @@ export default Vue.extend({
   position: relative;
   margin: 15px auto;
   transform-style: preserve-3d;
-  &:focus {
-    outline: 1px solid setColor(blue-2);
-  }
 }
 
 .page-title {
@@ -329,10 +335,19 @@ export default Vue.extend({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  > input {
+    background-color: transparent;
+  }
+  > div {
+    height: 18px;
+  }
 }
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
+  &:focus {
+    outline: 1px solid setColor(blue-2);
+  }
 }
 .scale-container {
   width: 0px;

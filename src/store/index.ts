@@ -349,12 +349,14 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | string[] } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | string[] | Array<IShape | IText | IImage | IGroup> } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
     Object.entries(updateInfo.props).forEach(([k, v]) => {
-      state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
+      if (state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex]) {
+        state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex][k] = v
+      }
     })
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, indexs: Array<number>, props: { [key: string]: string | number | boolean | IParagraph } }) {
@@ -466,11 +468,19 @@ const mutations: MutationTree<IEditorState> = {
         })
       }
     })
-    state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    if ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).type === 'group') {
+      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp]
+    } else {
+      state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    }
   },
   UPDATE_selectedTextParagraphs(state: IEditorState, updateInfo: { tmpLayerIndex: number, paragraphs: [IParagraph] }) {
     ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
-    state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    if ((state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).type === 'group') {
+      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp]
+    } else {
+      state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
+    }
   },
   UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
     const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
