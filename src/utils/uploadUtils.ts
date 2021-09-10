@@ -288,8 +288,6 @@ class UploadUtils {
     xhr.send(formData)
     xhr.onload = () => {
       console.log(designId)
-      // console.log(`https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`)
-      // console.log(xhr)
     }
   }
 
