@@ -9,7 +9,7 @@
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    div(v-if="getColors.length" class="shape-setting__title")
+    div(v-if="getColors.length || isGrouped" class="shape-setting__title")
       span(class="shape-setting__title text-blue-1 label-lg") Color Palette
       div(class="shape-setting__colors")
         div(class="shape-setting__color rainbow" ref="rainbow"
@@ -32,7 +32,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import LayerUtils from '@/utils/layerUtils'
-import { IShape } from '@/interfaces/layer'
+import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import color from '@/store/module/color'
 
 export default Vue.extend({
   components: {
@@ -41,25 +42,6 @@ export default Vue.extend({
   },
   directives: {
     clickOutside: vClickOutside.directive
-  },
-  computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
-    }),
-    isGrouped(): boolean {
-      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
-      return (layer.type === 'tmp' || layer.type === 'group') && layer.layers.every((l: IShape) => l.color.length === 1)
-    },
-    getColors(): string[] {
-      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
-      if (!(layer.type === 'tmp' || layer.type === 'group')) {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
-      } else {
-        return []
-      }
-    }
   },
   data() {
     return {
@@ -81,13 +63,46 @@ export default Vue.extend({
       paletteRecord: [{ key: 0, value: -1 }]
     }
   },
+  mounted() {
+    this.initilizeRecord()
+  },
+  computed: {
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      currSelectedIndex: 'getCurrSelectedIndex',
+      getLayer: 'getLayer'
+    }),
+    /**
+     * This parameter means if current layer is a group/tmp and contains at least 2 of more
+     * IShape that the color-list of them only has one entry.
+     */
+    isGrouped(): boolean {
+      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      let oneColorObjNum = 0
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        for (const layer of currLayer.layers) {
+          if (layer.type === 'shape' && layer.color.length === 1) {
+            oneColorObjNum++
+          }
+        }
+      }
+      return (currLayer.type === 'tmp' || currLayer.type === 'group') && oneColorObjNum >= 2
+    },
+    getColors(): string[] {
+      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      if (!(layer.type === 'tmp' || layer.type === 'group')) {
+        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
+      } else if (!this.isGrouped) {
+        return layer.layers.filter((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1)[0].color
+      } else {
+        return []
+      }
+    }
+  },
   watch: {
     currSelectedIndex: function() {
       this.initilizeRecord()
     }
-  },
-  mounted() {
-    this.initilizeRecord()
   },
   methods: {
     ...mapMutations({
@@ -97,15 +112,27 @@ export default Vue.extend({
       return {
         backgroundColor: color,
         boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-        // boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #7d2ae8, inset 0 0 0 2px #fff' : ''
       }
     },
     groupColorStyles() {
-      console.log('qwdqfpk')
-      return {
-        background: `url(${require('@/assets/img/png/multi-color.png')})`,
-        // 'background-image': 'url(/assets/icon/color/multi-color.svg)',
-        boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
+      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        const origin = currLayer.layers.find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
+        const isGroupSameColor = (() => {
+          for (const layer of currLayer.layers) {
+            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
+              return false
+            }
+          }
+          return true
+        })()
+        return isGroupSameColor ? {
+          backgroundColor: origin,
+          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
+        } : {
+          background: `url(${require('@/assets/img/png/multi-color.png')})`,
+          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
+        }
       }
     },
     paletteColorStyle(color: string, index: number) {
@@ -150,19 +177,32 @@ export default Vue.extend({
       this.currSelectedColorIndex = index
     },
     setColor(newColor: string, index: number) {
-      const color = [...this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color]
-      color[this.currSelectedColorIndex] = newColor
-      const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
-      if (record) {
-        record.value = index
+      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
+          if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+            const color = [newColor]
+            LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, i, { color })
+          }
+        }
+      } else {
+        const color = [...this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color]
+        color[this.currSelectedColorIndex] = newColor
+        const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
+        if (record) {
+          record.value = index
+        }
+        LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
       }
-      LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
     },
     initilizeRecord() {
       this.paletteRecord = []
       for (let i = 0; i < this.getColors.length; i++) {
         const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
         this.paletteRecord.push(record)
+      }
+      while (this.currSelectedColorIndex > this.paletteRecord.length - 1) {
+        this.currSelectedColorIndex--
       }
     }
   }

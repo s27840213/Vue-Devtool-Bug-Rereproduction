@@ -119,7 +119,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _setBackgroundImage: 'SET_backgroundImage'
+      _setBackgroundImage: 'SET_backgroundImage',
+      _setBackgroundColor: 'SET_backgroundColor'
     }),
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
@@ -192,12 +193,18 @@ export default Vue.extend({
     },
     detachBackgroundImage() {
       const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(this.lastSelectedPageIndex))
-
-      layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
-      this._setBackgroundImage({
-        pageIndex: this.lastSelectedPageIndex,
-        config: this.baseBgImgConfig
-      })
+      if (detachedBackgroundImage.config.srcObj.assetId) {
+        layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
+        this._setBackgroundImage({
+          pageIndex: this.lastSelectedPageIndex,
+          config: this.baseBgImgConfig
+        })
+      } else {
+        this._setBackgroundColor({
+          pageIndex: this.lastSelectedPageIndex,
+          color: '#ffffff'
+        })
+      }
     }
   }
 })

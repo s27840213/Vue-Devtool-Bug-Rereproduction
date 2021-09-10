@@ -78,7 +78,7 @@ class LayerUtils {
   }
 
   updateSubLayerStyles(pageIndex: number, indexs: Array<number>, styles: { [index: string]: number | string | boolean }) {
-    store.commit('UPDATE_subLayerStyles', {
+    store.commit('UPDATE_selectedLayersStyles', {
       pageIndex,
       indexs,
       styles
@@ -89,6 +89,14 @@ class LayerUtils {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       indexs,
+      props
+    })
+  }
+
+  updateSelectedLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | boolean | number | Array<string> }) {
+    store.commit('UPDATE_selectedLayerProps', {
+      pageIndex,
+      layerIndex,
       props
     })
   }
