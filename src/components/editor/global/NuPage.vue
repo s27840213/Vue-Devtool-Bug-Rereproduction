@@ -5,10 +5,12 @@
       input(class="text-gray-3"
         type="text"
         v-model="pageName")
-      div(v-if="getCurrActivePageIndex===pageIndex")
-        svg-icon(:iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
+      div(v-if="getLastSelectedPageIndex===pageIndex")
+        svg-icon(class="pointer"
+          :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
-        svg-icon(v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
+        svg-icon(class="pointer"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -156,6 +158,7 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
+      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       pages: 'getPages',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -335,6 +338,7 @@ export default Vue.extend({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transform: translate3d(0, 0, 10000px);
   > input {
     background-color: transparent;
   }

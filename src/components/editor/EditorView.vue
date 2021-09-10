@@ -97,7 +97,7 @@ export default Vue.extend({
     },
     selectStart(e: MouseEvent) {
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
-        ControlUtils.updateImgControl(this.pageIndex, this.lastSelectedLayerIndex, false)
+        ControlUtils.updateImgControl(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, false)
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
@@ -133,7 +133,6 @@ export default Vue.extend({
       if (this.isSelecting) {
         GroupUtils.deselect()
       }
-      this.setLastSelectedPageIndex(this.pageIndex)
       /**
        * Use nextTick to trigger the following function after DOM updating
        */
@@ -149,7 +148,7 @@ export default Vue.extend({
       })
     },
     handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${this.pageIndex}`)]
+      const layers = [...document.querySelectorAll(`.nu-layer--p${this.getLastSelectedPageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
@@ -161,7 +160,7 @@ export default Vue.extend({
       if (layerIndexs.length > 0) {
         console.log(`Overlap num: ${layerIndexs.length}`)
         // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(this.pageIndex, layerIndexs)
+        GroupUtils.select(this.getLastSelectedPageIndex, layerIndexs)
       }
     },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {

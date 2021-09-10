@@ -18,6 +18,8 @@ class PageUtils {
 
     pages.forEach((page: { top: number, bottom: number }, index: number) => {
       const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
+      console.log(`dist: ${dist} ${index}`)
+      console.log(minDistance > dist)
       if (minDistance > dist) {
         targetIndex = index
         minDistance = dist
