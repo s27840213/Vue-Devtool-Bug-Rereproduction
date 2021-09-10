@@ -109,11 +109,7 @@ export interface IGroup extends ILayer<IStyle> {
 export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
-// export interface IFrame extends ILayer<IFrameStyle> {
-//   layers: Array<IShape | IText | IImage>
-//   path: Array<string>
-//   position: Array<[ICoordinate, ICoordinate]>
-// }
-// export interface IFrameStyle extends IStyle {
 
-// }
+export interface IFrame extends ILayer<IStyle> {
+  layers: Array<IShape | IText | IImage>
+}

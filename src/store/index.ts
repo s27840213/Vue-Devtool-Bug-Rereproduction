@@ -193,7 +193,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     }
   },
   getLayersNum(state: IEditorState) {
-    return (pageIndex: number): number => {
+    return (pageIndex = state.lastSelectedPageIndex): number => {
       return state.pages[pageIndex].layers.length
     }
   },

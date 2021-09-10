@@ -3,6 +3,8 @@ import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { IStep } from '@/interfaces/steps'
+import TextPropUtils from './textPropUtils'
+import Vue from 'vue'
 
 const MAX_STORAGE_COUNT = 20
 class StepsUtils {
@@ -44,6 +46,11 @@ class StepsUtils {
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    if (this.currStep > 0) {
+      Vue.nextTick(() => {
+        TextPropUtils.updateTextPropsState()
+      })
+    }
   }
 
   redo() {
@@ -55,6 +62,9 @@ class StepsUtils {
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    Vue.nextTick(() => {
+      TextPropUtils.updateTextPropsState()
+    })
   }
 
   reset() {

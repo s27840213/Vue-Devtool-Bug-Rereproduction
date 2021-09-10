@@ -12,6 +12,7 @@ import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import { IFont } from '@/interfaces/text'
 
 export default Vue.extend({
@@ -34,10 +35,17 @@ export default Vue.extend({
       const fontStore = this.fontStore as Array<IFont>
       if (!fontStore.some(font => font.face === this.objectId)) {
         const newFont = new FontFace(this.objectId, this.getFontUrl(this.objectId))
-        await newFont.load().then(newFont => {
-          document.fonts.add(newFont)
-          TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
-        })
+        const promise = () => {
+          return new Promise<void>((resolve) => {
+            newFont.load().then(newFont => {
+              document.fonts.add(newFont)
+              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+              StepsUtils.record()
+              resolve()
+            })
+          })
+        }
+        await promise()
       }
       TextPropUtils.onPropertyClick('fontFamily', this.objectId, this.sel.start, this.sel.end)
       TextPropUtils.updateTextPropsState({ font: this.objectId })
