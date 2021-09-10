@@ -13,8 +13,6 @@ import TemplateUtils from './templateUtils'
 import { Span } from '@sentry/tracing'
 
 class TextUtils {
-  public readonly MARGIN_FONTSIZE = 16
-
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -258,10 +256,10 @@ class TextUtils {
       const transform = text.style.transform
       text.style.transform = `rotate(${-config.styles.rotate}deg)`
       if (config.styles.writingMode.includes('vertical')) {
-        width = text.getBoundingClientRect().width / (scaleRatio / 100) + this.MARGIN_FONTSIZE
+        width = text.getBoundingClientRect().width / (scaleRatio / 100)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: height })
       } else {
-        height = text.getBoundingClientRect().height / (scaleRatio / 100) + this.MARGIN_FONTSIZE
+        height = text.getBoundingClientRect().height / (scaleRatio / 100)
         ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: width })
       }
       text.style.transform = transform

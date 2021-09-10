@@ -578,6 +578,8 @@ export default Vue.extend({
         this.control.imgX = this.config.styles.imgX
         this.control.imgY = this.config.styles.imgY
       }
+      // console.log(this.getLayerPos.x)
+      // console.log(this.getLayerPos.y)
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
@@ -639,6 +641,8 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      // console.log(trans.x)
+      // console.log(trans.y)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
