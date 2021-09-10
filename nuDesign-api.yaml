@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210831"
+  version: "20210910"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -581,4 +581,8 @@ definitions:
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
-      - {}
+      - type: object
+        properties:
+          page_index:
+            type: number
+            description: pagination index
