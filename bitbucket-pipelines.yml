@@ -36,7 +36,7 @@ pipelines:
               USERNAME: 'nuphoto.mail@gmail.com'
               PASSWORD: $EMAIL_NOTIFY_PASSWORD
               FROM: 'nuphoto.mail@gmail.com'
-              TO: 'nuphoto.mingchi@gmail.com, nuphoto.bruce@gmail.com'
+              TO: 'nuphoto.bruce.486idj@zapiermail.com'
               HOST: 'smtp.gmail.com'
               SUBJECT: 'NEW TEST DEPLOYED'
     - step:
