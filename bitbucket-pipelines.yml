@@ -31,6 +31,14 @@ pipelines:
               LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
               EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
           #no cache for test environment (since free cloudflare can not remove cache by host)
+          - pipe: atlassian/email-notify:0.4.5
+            variables:
+              USERNAME: 'nuphoto.mail@gmail.com'
+              PASSWORD: $EMAIL_NOTIFY_PASSWORD
+              FROM: 'nuphoto.mail@gmail.com'
+              TO: 'nuphoto.mingchi@gmail.com, nuphoto.bruce@gmail.com'
+              HOST: 'smtp.gmail.com'
+              SUBJECT: 'NEW TEST DEPLOYED'
     - step:
         name: 'Deploy to S3 edit environment'
         deployment: production
