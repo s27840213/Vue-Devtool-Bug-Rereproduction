@@ -43,10 +43,10 @@
               @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
               @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
               @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-              @keydown.37.exact.stop
-              @keydown.38.exact.stop
-              @keydown.39.exact.stop
-              @keydown.40.exact.stop
+              @keydown.37.stop
+              @keydown.38.stop
+              @keydown.39.stop
+              @keydown.40.stop
               @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
