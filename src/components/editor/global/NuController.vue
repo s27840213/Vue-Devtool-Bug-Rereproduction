@@ -145,7 +145,8 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
-    if (this.config.type === 'text') {
+    // this if block is used to prevent the selection area being generated when adding text layer with the text panel
+    if (this.config.type === 'text' && this.config.active) {
       this.setIsMoving(true)
     }
   },
