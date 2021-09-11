@@ -5,9 +5,10 @@ import GeneralUtils from './generalUtils'
 import Vue from 'vue'
 import LayerUtils from './layerUtils'
 import { ITextState } from '@/store/text'
-import TextUtils from '@/utils/textUtils'
+import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
+import StepsUtils from './stepsUtils'
 
 const fontPropsMap = {
   fontSize: 'size',

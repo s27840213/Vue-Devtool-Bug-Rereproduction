@@ -10,6 +10,7 @@ import { IPage } from '@/interfaces/page'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import TemplateUtils from './templateUtils'
+import StepsUtils from './stepsUtils'
 import { Span } from '@sentry/tracing'
 
 class TextUtils {
@@ -348,7 +349,7 @@ class TextUtils {
   }
 
   addStanardText(type: string) {
-    import(`@/assets/json/${type}.json`)
+    return import(`@/assets/json/${type}.json`)
       .then(json => {
         const fieldMap = {
           heading: 'isHeading',
@@ -399,6 +400,7 @@ class TextUtils {
 
     const newTextLayer = LayerFactary.newText(format)
     LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
+    StepsUtils.record()
   }
 
   // isBoldType (font: IFont): boolean {

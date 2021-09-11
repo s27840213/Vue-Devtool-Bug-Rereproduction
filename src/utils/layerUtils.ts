@@ -34,7 +34,6 @@ class LayerUtils {
 
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
-    console.log(this.currSelectedInfo.index)
     store.commit('SET_lastSelectedLayerIndex', -1)
     ZindexUtils.reassignZindex(store.getters.getCurrSelectedPageIndex)
     TemplateUtils.updateTextInfoTarget()
@@ -74,6 +73,14 @@ class LayerUtils {
       pageIndex,
       layerIndex,
       props
+    })
+  }
+
+  updateAllGroupStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
+    store.commit('UPDATE_groupLayerStyles', {
+      pageIndex,
+      layerIndex,
+      styles
     })
   }
 

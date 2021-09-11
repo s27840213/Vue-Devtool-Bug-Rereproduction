@@ -219,8 +219,8 @@ class ShortcutHandler {
     }
   }
 
-  textSelectAll() {
-    const text = document.getElementById(`text-${TextUtils.layerIndex}`) as HTMLElement
+  textSelectAll(layerIndex?: number) {
+    const text = document.getElementById(`text-${layerIndex ?? TextUtils.layerIndex}`) as HTMLElement
     const sel = window.getSelection()
     const range = new Range()
     if (sel) {

@@ -51,6 +51,8 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import TextUtils from '@/utils/textUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+
 export default Vue.extend({
   components: {
     SearchBar,
@@ -59,7 +61,10 @@ export default Vue.extend({
     CategoryTextItem
   },
   computed: {
-    ...mapGetters({ scaleRatio: 'getPageScaleRatio' }),
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      getLayersNum: 'getLayersNum'
+    }),
     ...mapState(
       'textStock',
       [
@@ -147,8 +152,9 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    handleAddText (type: string) {
-      TextUtils.addStanardText(type.toLowerCase())
+    async handleAddText (type: string) {
+      await TextUtils.addStanardText(type.toLowerCase())
+      ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
       const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`

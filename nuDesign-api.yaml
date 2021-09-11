@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210831"
+  version: "20210911"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -45,6 +45,27 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/fbLoginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /google-login:
+    post:
+      description: google登入
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: googleLoginInput
+          required: true
+          schema:
+            $ref: "#/definitions/googleLoginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/googleLoginOutput"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -225,57 +246,6 @@ definitions:
       path:
         type: string
         description: Allowed path for upload.
-  listDesignOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for design preview and data.
-
-              preview: File name for design preview.
-
-              preview2: File name for font sample text preview, only present for font.
-
-              data: File name for design data (json for non-font, woff2 for font).
-
-              content: array of design category, with category_id as id of category, title as categroy name, and list as array of design ids. category_id will be -1 and title '' for list_all = 1.
-
-              next_page: pagination index for next query, only for query with list_all = 1.
-
-              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              preview2:
-                type: string
-              data:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: string
-              next_page:
-                type: number
-            required:
-              - content
-              - data
-              - host
-              - preview
   listAssetOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -315,6 +285,47 @@ definitions:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
       - {}
+  googleLoginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+               How to upload asset file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. Bypass this step for design file (for which the original should be json file, not for download purpose).
+
+              4. Append key with name as 'file' and value as the File Object of the selected file or Blob
+               5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+            required:
+              - download_url
+              - upload_map
   registerInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -325,35 +336,6 @@ definitions:
           meta:
             type: string
             description: meta data
-  listDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-          - type
-        properties:
-          type:
-            type: string
-            description: "design type: background, font, svg, template, or text"
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          list_all:
-            type: number
-            description: 0 (default) for list first 10 elements in each category except
-              category 0. 1 for list all elements including category 0.
-          page_index:
-            type: number
-            description: pagination index
-          keyword:
-            type: string
-            description: keyword to search
-          object_type:
-            type: string
-            description: object type, such as svg, mark ...
   sendVcodeInput:
     type: object
     required:
@@ -504,18 +486,6 @@ definitions:
         description: |-
           User token.
           Allowed characters: 0-9a-zA-Z.
-  verifyVcodeInput:
-    type: object
-    required:
-      - account
-      - vcode
-    properties:
-      account:
-        type: string
-        description: user account
-      vcode:
-        type: string
-        description: verification code
   reprocessDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -527,10 +497,6 @@ definitions:
             type: string
             description: path of design files to be re-processed
   reprocessDesignOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - {}
-  sendVcodeOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
       - {}
@@ -555,6 +521,110 @@ definitions:
       msg:
         type: string
         description: error message
+  listDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for design preview and data.
+
+              preview: File name for design preview.
+
+              preview2: File name for font sample text preview, only present for font.
+
+              data: File name for design data (json for non-font, woff2 for font).
+
+              content: array of design category, with category_id as id of category, title as categroy name, and list as array of design ids. category_id will be -1 and title '' for list_all = 1.
+
+              next_page: pagination index for next query, only for query with list_all = 1.
+
+              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              preview2:
+                type: string
+              data:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: string
+              next_page:
+                type: number
+            required:
+              - content
+              - data
+              - host
+              - preview
+  googleLoginInput:
+    type: object
+    required:
+      - id_token
+    properties:
+      id_token:
+        type: string
+        description: google id token
+  listDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, template, or text"
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          list_all:
+            type: number
+            description: 0 (default) for list first 10 elements in each category except
+              category 0. 1 for list all elements including category 0.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+          object_type:
+            type: string
+            description: object type, such as svg, mark ...
+  verifyVcodeInput:
+    type: object
+    required:
+      - account
+      - vcode
+    properties:
+      account:
+        type: string
+        description: user account
+      vcode:
+        type: string
+        description: verification code
+  sendVcodeOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - {}
   deleteAssetOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -581,4 +651,8 @@ definitions:
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
-      - {}
+      - type: object
+        properties:
+          page_index:
+            type: number
+            description: pagination index

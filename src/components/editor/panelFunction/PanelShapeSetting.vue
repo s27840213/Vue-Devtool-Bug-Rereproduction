@@ -1,6 +1,23 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
+    div(class="relative")
+      property-bar(class="shape-setting__property-bar")
+        button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
+          input(class="body-2 text-gray-2 record-selection" ref="input-opacity" type="text"
+                :value="opacity" @change="setOpacity")
+        svg-icon(class="pointer"
+          :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
+      div(v-if="openSliderBar === 'opacity'"
+          class="shape-setting__range-input-wrapper right"
+          v-click-outside="handleSliderModal")
+        input(class="shape-setting__range-input"
+          :value="opacity"
+          :max="fieldRange.opacity.max"
+          :min="fieldRange.opacity.min"
+          v-ratio-change
+          type="range"
+          @input="setOpacity")
     div(class="shape-setting__colors")
       div(v-if="isGrouped"
         class="shape-setting__color"
@@ -33,7 +50,9 @@ import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import GeneralUtils from '@/utils/generalUtils'
 import color from '@/store/module/color'
+import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   components: {
@@ -58,7 +77,11 @@ export default Vue.extend({
         '#56CCF2',
         '#FF0000'
       ],
+      fieldRange: {
+        opacity: { min: 0, max: 100 }
+      },
       currSelectedColorIndex: 0,
+      openSliderBar: '',
       openColorPicker: false,
       paletteRecord: [{ key: 0, value: -1 }]
     }
@@ -72,10 +95,22 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
+    opacity(): string | number {
+      const { currLayer } = this
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        const layers = [...(currLayer as IGroup).layers]
+        return new Set(layers.map((l: ILayer) => l.styles.opacity)).size === 1 ? layers[0].styles.opacity : '--'
+      } else {
+        return currLayer.styles.opacity
+      }
+    },
     /**
      * This parameter means if current layer is a group/tmp and contains at least 2 of more
      * IShape that the color-list of them only has one entry.
      */
+    currLayer(): ILayer {
+      return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
+    },
     isGrouped(): boolean {
       const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
       let oneColorObjNum = 0
@@ -113,6 +148,11 @@ export default Vue.extend({
         backgroundColor: color,
         boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
       }
+    },
+    boundValue(value: number, min: number, max: number): string {
+      if (value < min) return min.toString()
+      else if (value > max) return max.toString()
+      return value.toString()
     },
     groupColorStyles() {
       const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
@@ -176,6 +216,14 @@ export default Vue.extend({
       }
       this.currSelectedColorIndex = index
     },
+    handleSliderModal(modalName = '') {
+      this.openSliderBar = modalName
+      if (modalName === 'opacity') {
+        const input = this.$refs[`input-${modalName}`] as HTMLInputElement
+        input.focus()
+        input.select()
+      }
+    },
     setColor(newColor: string, index: number) {
       const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
@@ -193,6 +241,26 @@ export default Vue.extend({
           record.value = index
         }
         LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
+      }
+    },
+    setOpacity(e: Event) {
+      let { value } = e.target as HTMLInputElement
+      if (GeneralUtils.isValidInt(value)) {
+        value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
+        const { currLayer } = this
+        if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+          // LayerUtils.updateAllGroupStyles(
+          //   this.lastSelectedPageIndex,
+          //   this.currSelectedIndex,
+          //   { opacity: value }
+          // )
+        } else {
+          LayerUtils.updateLayerStyles(
+            this.lastSelectedPageIndex,
+            this.currSelectedIndex,
+            { opacity: value }
+          )
+        }
       }
     },
     initilizeRecord() {
@@ -245,6 +313,54 @@ export default Vue.extend({
     z-index: 10;
     left: -5px;
     top: 35px;
+  }
+  &__property-bar{
+    width: 50%;
+    box-sizing: border-box;
+    position: relative;
+  }
+  &__range-input-wrapper {
+    position: absolute;
+    z-index: 9;
+    // top: -20px;
+    // left: auto;
+    right: auto;
+    padding: auto;
+    margin-top: -12px;
+    width: 135px;
+    height: 35px;
+    background-color: #ffffff;
+    background-color: white;
+    box-shadow: 0 0 0 1px rgb(64 87 109 / 7%), 0 2px 12px rgb(53 71 90 / 20%);
+    border: 1px solid #d9dbe1;
+    border-radius: 3px;
+  }
+  &__range-input {
+    display: block;
+    margin: auto;
+    width: 120px;
+    height: 35px;
+    appearance: none;
+    outline: none;
+    background: none;
+    &::-webkit-slider-runnable-track {
+      height: 2px;
+      background-color: #d9dbe1;
+    }
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #3c64b1;
+      transition: 0.2s;
+      margin-top: -6.5px;
+      position: relative;
+    }
+  }
+  &__range-input-button {
+    width: fit-content;
   }
 }
 .rainbow {

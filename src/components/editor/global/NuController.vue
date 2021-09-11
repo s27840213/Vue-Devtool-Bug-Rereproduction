@@ -39,6 +39,14 @@
               @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
               @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
               @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+              @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+              @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+              @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+              @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+              @keydown.37.exact.stop
+              @keydown.38.exact.stop
+              @keydown.39.exact.stop
+              @keydown.40.exact.stop
               @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -124,7 +132,7 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: false,
+      contentEditable: true,
       subControlerIndexs: []
     }
   },
@@ -137,6 +145,9 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
+    if (this.config.type === 'text') {
+      this.setIsMoving(true)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -216,6 +227,7 @@ export default Vue.extend({
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
+        this.setIsMoving(editing)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
@@ -658,8 +670,6 @@ export default Vue.extend({
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
-      // console.log(trans.x)
-      // console.log(trans.y)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
@@ -886,6 +896,7 @@ export default Vue.extend({
     },
     onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text' && !e.ctrlKey && !e.metaKey) {
+        console.log(e.key)
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         const start = {
@@ -994,6 +1005,7 @@ export default Vue.extend({
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+            StepsUtils.record()
             if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
               text.removeChild(text.lastChild)
             }

@@ -38,10 +38,14 @@
         @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
         @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
         @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.37.exact.stop.self="ShortcutUtils.left()"
-        @keydown.38.exact.stop.self="ShortcutUtils.up()"
-        @keydown.39.exact.stop.self="ShortcutUtils.right()"
-        @keydown.40.exact.stop.self="ShortcutUtils.down()"
+        @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+        @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+        @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+        @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
+        @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
+        @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
+        @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
+        @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
         tabindex="0")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="snap-area")

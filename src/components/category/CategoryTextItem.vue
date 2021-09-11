@@ -13,6 +13,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import { IText } from '@/interfaces/layer'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {

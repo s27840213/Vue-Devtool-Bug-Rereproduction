@@ -55,11 +55,17 @@ export default Vue.extend({
         if (!fontStore.some(font => font.face === spanFont)) {
           isLoadedFont = true
           const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
-          await newFont.load().then(newFont => {
-            document.fonts.add(newFont)
-            fontArr.push(spanFont)
-            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
-          })
+          const promise = () => {
+            return new Promise<void>((resolve) => {
+              newFont.load().then(newFont => {
+                document.fonts.add(newFont)
+                fontArr.push(spanFont)
+                TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+                resolve()
+              })
+            })
+          }
+          await promise()
         }
       }
     }

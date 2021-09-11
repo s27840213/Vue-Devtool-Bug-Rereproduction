@@ -41,6 +41,18 @@ class GeneralUtils {
       return complement + str
     }
   }
+
+  isValidInt(value: string) {
+    return value.match(/^-?\d+$/)
+  }
+
+  isValidFloat(value: string) {
+    return value.match(/[+-]?\d+(\.\d+)?/)
+  }
+
+  isValidHexColor(value: string) {
+    return value.match(/^#[0-9A-F]{6}$/)
+  }
 }
 
 const generalUtils = new GeneralUtils()

@@ -86,7 +86,7 @@
       div(class="relative")
         property-bar
           button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
-            input(class="body-2 text-gray-2 record-selection" type="number" ref="input-opacity"
+            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-opacity"
                   :value="props.opacity" @change="setOpacity")
           svg-icon(class="pointer"
             :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
@@ -118,6 +118,7 @@ import { parseInt, toNumber } from 'lodash'
 import { ISelection } from '@/interfaces/text'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
@@ -158,20 +159,6 @@ export default Vue.extend({
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
-    opacity: {
-      get(): number {
-        return this.getLayer(this.pageIndex, this.layerIndex).styles.opacity
-      },
-      set(value) {
-        this.$store.commit('UPDATE_layerStyles', {
-          pageIndex: this.pageIndex,
-          layerIndex: this.layerIndex,
-          styles: {
-            opacity: value
-          }
-        })
-      }
-    },
     getFontPrev(): string {
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
@@ -190,7 +177,7 @@ export default Vue.extend({
       }
       return layer ? layer.styles.scale : 1
     },
-    fontSize (): number | string {
+    fontSize(): number | string {
       if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
         return '--'
       }
@@ -209,6 +196,7 @@ export default Vue.extend({
       if (!this.openColorPicker) {
         TextUtils.focus(this.sel.start, this.sel.end)
       }
+      StepsUtils.record()
     },
     handleColorUpdate (color: string) {
       if (color === this.props.color) return
@@ -308,12 +296,14 @@ export default Vue.extend({
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
         TextPropUtils.updateTextPropsState()
       }
+      StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
       TextPropUtils.paragraphPropsHandler(iconName)
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
         TextPropUtils.updateTextPropsState()
       }
+      StepsUtils.record()
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
@@ -329,6 +319,7 @@ export default Vue.extend({
           this.fontSizeSteppingHandler(step)
         }
         clearInterval(interval)
+        StepsUtils.record()
         window.removeEventListener('onmouseup', onmouseup)
       }
       window.addEventListener('mouseup', onmouseup)

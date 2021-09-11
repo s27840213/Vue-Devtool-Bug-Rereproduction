@@ -194,7 +194,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     }
   },
   getLayersNum(state: IEditorState) {
-    return (pageIndex: number): number => {
+    return (pageIndex = state.lastSelectedPageIndex): number => {
       return state.pages[pageIndex].layers.length
     }
   },
@@ -404,7 +404,9 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
+    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
+    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
   },
   UPDATE_layerOrder(state: IEditorState, updateInfo: { type: string }): void {
     const layerIndex = state.currSelectedInfo.index
