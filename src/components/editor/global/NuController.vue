@@ -14,6 +14,15 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
+        //- template(v-if="config.type==='group'")
+        //-   nu-sub-controller(
+        //-     v-for="layer in config.layers"
+        //-     data-identifier="controller"
+        //-     :key="`group-controller-${index}`"
+        //-     :layerIndex="index"
+        //-     :pageIndex="pageIndex"
+        //-     :config="layer"
+        //-     :color="'#EB5757'")
         template(v-if="config.type === 'text' && config.active")
           //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
@@ -135,7 +144,8 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      isMoving: 'getIsMoving'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -216,7 +226,8 @@ export default Vue.extend({
     ...mapMutations({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
+      setIsMoving: 'SET_isMoving'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -324,9 +335,9 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
-      if (!this.isLocked) {
-        e.stopPropagation()
-      }
+      // if (!this.isLocked) {
+      //   e.stopPropagation()
+      // }
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -387,6 +398,9 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
+      if (!this.isMoving) {
+        this.setIsMoving(true)
+      }
       if (this.isActive) {
         e.preventDefault()
         this.setCursorStyle('move')
@@ -416,6 +430,9 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd() {
+      if (this.isMoving) {
+        this.setIsMoving(false)
+      }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),

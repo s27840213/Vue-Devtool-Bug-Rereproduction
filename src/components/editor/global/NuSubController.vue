@@ -24,17 +24,18 @@
                   :data-sindex="sIndex"
                   :key="span.id",
                   :style="textStyles(span.styles)") {{ span.text }}
-        template(v-if="config.type==='group'")
-          div(:style="groupControllerStyle()")
-            nu-sub-controller(
-              v-for="(layer, index) in config.layers"
-              data-identifier="controller"
-              :key="`group-controller-${index}`"
-              :layerIndex="index"
-              :pageIndex="pageIndex"
-              :config="layer"
-              :color="'#EB5757'"
-              @clickSubController="clickSubController")
+        //- Plase don't remove the code below, it may be used in the future
+        //- template(v-if="config.type==='group'")
+        //-   div(:style="groupControllerStyle()")
+        //-     nu-sub-controller(
+        //-       v-for="(layer, index) in config.layers"
+        //-       data-identifier="controller"
+        //-       :key="`group-controller-${index}`"
+        //-       :layerIndex="index"
+        //-       :pageIndex="pageIndex"
+        //-       :config="layer"
+        //-       :color="'#EB5757'"
+        //-       @clickSubController="clickSubController")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-sub-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")

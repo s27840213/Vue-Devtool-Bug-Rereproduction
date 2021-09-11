@@ -7,6 +7,7 @@ import LayerUtils from './layerUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
+import modalUtils from './modalUtils'
 
 class UploadUtils {
   loginOutput: any
@@ -153,6 +154,7 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
+
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
@@ -286,8 +288,13 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
+
+    modalUtils.setIsModalOpen(true)
+    modalUtils.setIsPending(true)
+    modalUtils.setModalInfo('上傳中')
     xhr.onload = () => {
-      console.log(designId)
+      modalUtils.setIsPending(false)
+      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
     }
   }
 
@@ -318,9 +325,12 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
+    modalUtils.setIsModalOpen(true)
+    modalUtils.setIsPending(true)
+    modalUtils.setModalInfo('更新模板中')
     xhr.onload = () => {
-      console.log(designId)
-      // console.log(xhr)
+      modalUtils.setIsPending(false)
+      modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
     }
   }
 

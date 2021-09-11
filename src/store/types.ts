@@ -44,7 +44,7 @@ export interface IEditorState {
     subheading: Array<string>,
     body: Array<string>
   },
-  isPopupOpen: boolean
+  isMoving: boolean
 }
 
 export enum SidebarPanelType {

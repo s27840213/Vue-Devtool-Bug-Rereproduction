@@ -81,12 +81,7 @@ export default Vue.extend({
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: 1fr;
   }
-  // &__blank {
-  //   @include size(100%, 50px);
-  //   @include flexCenter;
-  //   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
-  //   z-index: setZindex("default-1");
-  // }
+
   &__editor {
     position: relative;
     height: 100%;

@@ -18,6 +18,8 @@
         @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
         @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
         @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+        @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
+        @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
         @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
         @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
         @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
@@ -40,10 +42,6 @@
         @keydown.38.exact.stop.self="ShortcutUtils.up()"
         @keydown.39.exact.stop.self="ShortcutUtils.right()"
         @keydown.40.exact.stop.self="ShortcutUtils.down()"
-        @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
-        @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
-        @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
-        @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
         tabindex="0")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
         div(class="snap-area")
@@ -405,35 +403,6 @@ export default Vue.extend({
     &--hr {
       height: 1px;
     }
-  }
-}
-.coordinate {
-  border-right: 1px solid blue;
-  border-bottom: 1px solid blue;
-  opacity: 0.5;
-  box-sizing: border-box;
-  z-index: setZindex("coordinate");
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  font-size: 12px;
-  &__val {
-    position: absolute;
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 5px blue;
-  }
-
-  &__width {
-    bottom: 5px;
-    left: 50%;
-    transform: translate(0, -50%);
-  }
-  &__height {
-    top: 50%;
-    right: 5px;
-    transform: translate(-50%, 0);
   }
 }
 
