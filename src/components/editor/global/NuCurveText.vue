@@ -24,7 +24,7 @@ export default Vue.extend({
     subLayerIndex: Number
   },
   data () {
-    const { width, height } = this.config.styles
+    const { width, height, y, x } = this.config.styles
     return {
       transforms: [] as string[],
       textHeight: [] as number[],
@@ -33,19 +33,19 @@ export default Vue.extend({
         width,
         height
       },
-      y: 0,
-      x: 0
+      y,
+      x: x + (width / 2)
     }
   },
   mounted () {
-    this.init()
+    this.handleCurveSpan(this.spans, true)
     const promises = [...this.fonts]
       .map(font => (new FontFaceObserver(font)).load(null, 10000))
     Promise
       .all(promises)
       .then(() => {
         [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
-        this.init()
+        this.handleCurveSpan(this.spans)
       })
   },
   computed: {
@@ -128,10 +128,13 @@ export default Vue.extend({
     },
     spans(newSpans) {
       this.handleCurveSpan(newSpans)
-    },
-    transforms(data: string[]) {
+    }
+  },
+  methods: {
+    calcArea() {
+      const { transforms } = this
       const { scale, width } = this.config.styles
-      const positionList = data.map(transform => transform.match(/[.\d]+/g) || []) as any
+      const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
       const midLeng = Math.floor(positionList.length / 2)
       const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
       const maxY = Math.max.apply(null, positionList.map((position: string[]) => position[1]))
@@ -155,7 +158,14 @@ export default Vue.extend({
         width: areaWidth,
         height: areaHeight
       }
-
+      this.handleCurveTextUpdate({
+        styles: { width: areaWidth, height: areaHeight },
+        props: areaWidth > width ? { widthLimit: areaWidth } : {}
+      })
+    },
+    rePosition() {
+      const { scale } = this.config.styles
+      const { width: areaWidth, height: areaHeight } = this.area
       let y = this.y
       const x = this.x - (areaWidth / 2)
       if (this.bend < 0) {
@@ -163,16 +173,8 @@ export default Vue.extend({
       }
 
       this.handleCurveTextUpdate({
-        styles: { y, x, width: areaWidth, height: areaHeight },
-        props: areaWidth > width ? { widthLimit: areaWidth } : {}
+        styles: { y, x }
       })
-    }
-  },
-  methods: {
-    init() {
-      this.handleCurveSpan(this.spans)
-      this.y = this.config.styles.y
-      this.x = this.config.styles.x + (this.config.styles.width / 2)
     },
     styles(styles: any, idx: number) {
       const { transforms, bend, textHeight, minHeight } = this
@@ -185,7 +187,7 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    handleCurveSpan (spans: any[]) {
+    handleCurveSpan (spans: any[], firstInit = false) {
       const { bend } = this
       if (spans.length) {
         this.$nextTick(() => {
@@ -202,6 +204,12 @@ export default Vue.extend({
           this.textHeight = textHeight
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
+          this.calcArea()
+          if (firstInit) {
+            this.y = +bend < 0 ? this.y + this.area.height - minHeight : this.y
+          } else {
+            this.rePosition()
+          }
         })
       } else {
         this.transforms = []
