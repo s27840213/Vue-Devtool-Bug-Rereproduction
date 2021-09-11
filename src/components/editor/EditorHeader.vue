@@ -2,7 +2,7 @@
   div(class="editor-header")
     div
       div(class="subtitle-2 text-gray-2 pointer" @click="setPages()") New Design
-      div(class="subtitle-2 text-gray-2") File
+      div(class="subtitle-2 text-gray-2" @click="setModalOpen(true)") File
       div(class="subtitle-2 text-gray-2") Resize
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
@@ -18,16 +18,16 @@
       svg-icon(:iconName="'share-alt'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'")
-      //- btn(:hasIcon="true"
-      //-   :iconName="'download'"
-      //-   :iconWidth="'15px'"
-      //-   :type="'primary-mid'"
-      //-   @click.native="importJsonFile()") Import JSON
-      //- btn(:hasIcon="true"
-      //-   :iconName="'download'"
-      //-   :iconWidth="'15px'"
-      //-   :type="'primary-mid'"
-      //-   @click.native="exportJsonFile()") Export JSON
+      btn(:hasIcon="true"
+        :iconName="'download'"
+        :iconWidth="'15px'"
+        :type="'primary-mid'"
+        @click.native="importJsonFile()") Import JSON
+      btn(:hasIcon="true"
+        :iconName="'download'"
+        :iconWidth="'15px'"
+        :type="'primary-mid'"
+        @click.native="exportJsonFile()") Export JSON
       btn(:hasIcon="true"
         :iconName="'download'"
         :iconWidth="'15px'"
@@ -40,6 +40,7 @@ import Vue from 'vue'
 import FileUtils from '@/utils/fileUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import ModalUtils from '@/utils/modalUtils'
 import { mapMutations } from 'vuex'
 
 export default Vue.extend({
@@ -59,7 +60,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _setPages: 'SET_pages'
+      _setPages: 'SET_pages',
+      _setModalInfo: 'modal/SET_MODAL_INFO',
+      _setModalOpen: 'modal/SET_MODAL_OPEN'
     }),
     exportJsonFile() {
       FileUtils.export()
@@ -114,6 +117,20 @@ export default Vue.extend({
         documentColor: [],
         designId: ''
       }])
+    },
+    setModalOpen(open: boolean) {
+      ModalUtils.setModalInfo('測試', ['1', '2', '3'], {
+        msg: '確認',
+        action: () => {
+          console.log('確認')
+        }
+      }, {
+        msg: '消取',
+        action: () => {
+          console.log('消取')
+        }
+      })
+      this._setModalOpen(open)
     }
   }
 })

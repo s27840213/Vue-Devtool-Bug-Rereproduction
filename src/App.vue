@@ -23,8 +23,9 @@
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
         tabindex="0")
-    div(v-if="isPopupOpen"
-        class="popup-container")
+    div(class="modal-container"
+        v-if="isModalOpen")
+      modal-card
 </template>
 
 <script lang="ts">
@@ -35,8 +36,8 @@ import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
 import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
 import { Chrome } from 'vue-color'
 import ColorPicker from '@/components/ColorPicker.vue'
-import PopupSuccess from '@/components/PopupSuccess.vue'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
+import ModalCard from '@/components/modal/ModalCard.vue'
 
 export default Vue.extend({
   components: {
@@ -46,7 +47,7 @@ export default Vue.extend({
     'chrome-picker': Chrome,
     ColorPicker,
     PhotoInfo,
-    PopupSuccess
+    ModalCard
   },
   data() {
     return {
@@ -66,7 +67,7 @@ export default Vue.extend({
       isPageDropdownsOpened: 'getIsPageDropdownsOpened',
       isColorPickerOpened: 'getIsColorPickerOpened',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
-      isPopupOpen: 'getIsPopupOpen'
+      isModalOpen: 'modal/getModalOpen'
     })
   },
   methods: {
@@ -164,7 +165,7 @@ export default Vue.extend({
   }
 }
 
-.popup-container {
+.modal-container {
   position: fixed;
   display: flex;
   justify-content: center;

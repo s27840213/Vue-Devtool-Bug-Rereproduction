@@ -17,6 +17,7 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
+import modal from '@/store/module/modal'
 import groupUtils from '@/utils/groupUtils'
 
 Vue.use(Vuex)
@@ -608,6 +609,7 @@ export default new Vuex.Store({
     objects,
     templates,
     textStock,
-    background
+    background,
+    modal
   }
 })
