@@ -77,15 +77,13 @@ class LayerUtils {
     })
   }
 
-  updateAllGroupStyles(pageIndex: number, layerIndex: number, styles: { [key: string]: string | number | boolean }) {
+  updateAllGroupStyles(styles: { [key: string]: string | number | boolean }) {
     store.commit('UPDATE_groupLayerStyles', {
-      pageIndex,
-      layerIndex,
       styles
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, indexs: Array<number>, styles: { [index: string]: number | string | boolean }) {
+  updateSubLayerStyles(pageIndex: number, indexs: Array<number> = [], styles: { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_selectedLayersStyles', {
       pageIndex,
       indexs,

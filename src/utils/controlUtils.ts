@@ -1,5 +1,4 @@
 import store from '@/store'
-import { v4 as uuidv4 } from 'uuid'
 import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { stringToArray } from 'konva/types/shapes/Text'
@@ -130,14 +129,6 @@ class Controller {
       y: -sizeOffset.height / 2 + initData.xSign * (sizeOffset.width / 2) * Math.sin(initData.angle) +
         initData.ySign * (sizeOffset.height / 2) * Math.cos(initData.angle) + initData.y
     }
-  }
-
-  getSpanLength(text: IText, pIndex: number): number {
-    return text.paragraphs[pIndex].spans.length <= 0 ? 1 : text.paragraphs[pIndex].spans.length
-  }
-
-  getLayer(pageIndex: number, layerIndex: number): ILayer | IText {
-    return store.getters.getLayer(pageIndex, layerIndex)
   }
 
   shapeCategorySorter(resizers: any, category: string, scaleType: number) {

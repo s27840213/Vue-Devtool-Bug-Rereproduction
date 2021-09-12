@@ -1,5 +1,5 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 class LayerFactary {
   newImage(config: any): IImage {
@@ -43,6 +43,35 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)
+  }
+
+  newFrame(config: IFrame): IFrame {
+    return {
+      type: 'frame',
+      id: GeneralUtils.generateRandomString(8),
+      active: false,
+      shown: false,
+      locked: false,
+      moved: false,
+      dragging: false,
+      designId: '',
+      styles: {
+        x: 0,
+        y: 0,
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
+        rotate: 0,
+        width: 0,
+        height: 0,
+        initWidth: config.styles.width ?? 0,
+        initHeight: config.styles.height ?? 0,
+        zindex: -1,
+        opacity: 100
+      },
+      clips: config.clips,
+      layers: config.layers
+    }
   }
 
   newText(config: any): IText {

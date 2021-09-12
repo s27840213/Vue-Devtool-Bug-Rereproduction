@@ -64,7 +64,6 @@ class MouseUtils {
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
     if (e.dataTransfer === null) return
     const data = JSON.parse(e.dataTransfer.getData('data'))
-    console.log(data)
     // @TODO Page type json
     if (data.type === 'page') {
       PageUtils.updateSpecPage(pageIndex, data.json)
@@ -112,7 +111,7 @@ class MouseUtils {
           imgHeight: layerConfig.styles.initHeight
         }
         Object.assign(layerConfig.styles, imgStyles)
-        Object.assign(layerConfig, { src: data.src, imgControl: false })
+        Object.assign(layerConfig, { srcObj: data.srcObj, imgControl: false })
         if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
           this.backgroundHandler(pageIndex, layerConfig)
           return

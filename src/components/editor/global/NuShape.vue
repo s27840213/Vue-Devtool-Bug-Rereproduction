@@ -52,6 +52,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 

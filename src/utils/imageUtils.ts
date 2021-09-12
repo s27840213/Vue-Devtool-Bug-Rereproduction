@@ -16,6 +16,8 @@ class ImageUtils {
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&w=${size}`
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/full`
+      case 'frame':
+        return require('@/assets/img/svg/image-preview.svg')
       default:
         return ''
     }

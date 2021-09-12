@@ -52,6 +52,8 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import clipTest from '@/assets/json/Img_clip.json'
+import { IImage } from '@/interfaces/layer'
 
 export default Vue.extend({
   data() {
@@ -152,6 +154,14 @@ export default Vue.extend({
           shortcutText: 'DEL',
           action: () => {
             this.deleteBackgroundImage()
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append clipper',
+          shortcutText: 'Used for test',
+          action: () => {
+            layerUtils.addLayers(this.lastSelectedPageIndex, GeneralUtils.deepCopy(clipTest) as IImage)
           }
         }
       ]

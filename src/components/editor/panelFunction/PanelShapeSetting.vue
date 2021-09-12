@@ -112,7 +112,7 @@ export default Vue.extend({
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
     },
     isGrouped(): boolean {
-      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      const { currLayer } = this as any
       let oneColorObjNum = 0
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         for (const layer of currLayer.layers) {
@@ -225,7 +225,7 @@ export default Vue.extend({
       }
     },
     setColor(newColor: string, index: number) {
-      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
+      const { currLayer } = this
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
           if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
@@ -249,11 +249,7 @@ export default Vue.extend({
         value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
         const { currLayer } = this
         if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-          // LayerUtils.updateAllGroupStyles(
-          //   this.lastSelectedPageIndex,
-          //   this.currSelectedIndex,
-          //   { opacity: value }
-          // )
+          LayerUtils.updateAllGroupStyles({ opacity: value })
         } else {
           LayerUtils.updateLayerStyles(
             this.lastSelectedPageIndex,

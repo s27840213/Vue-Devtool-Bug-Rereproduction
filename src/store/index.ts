@@ -462,7 +462,7 @@ const mutations: MutationTree<IEditorState> = {
         layer.styles[k] = v
       })
     })
-    state.currSelectedInfo.layers[0].layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
+    // state.currSelectedInfo.layers[0].layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
   },
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number }, layerIndex?: number }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {

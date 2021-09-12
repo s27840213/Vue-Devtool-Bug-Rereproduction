@@ -13,6 +13,9 @@ export default Vue.extend({
   props: {
     config: Object
   },
+  mounted() {
+    console.log(this.config)
+  },
   computed: {
     src(): string {
       if (this.config.src) {
@@ -41,7 +44,8 @@ export default Vue.extend({
   top: 0px;
   left: 0px;
   &__picture {
-    object-fit: fill;
+    object-fit: cover;
+    // object-fit: fill;
     width: 100%;
     height: 100%;
   }

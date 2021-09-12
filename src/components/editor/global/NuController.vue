@@ -5,7 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @drop="config.path !== '' || config.isClipped ? onDropClipper($event) : onDrop($event)"
+          @drop="config.path !== '' || config.isClipper ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
           @click.left="onClick"
@@ -514,13 +514,14 @@ export default Vue.extend({
       let scale = Math.max(ratio.width, ratio.height)
       switch (this.getLayerType) {
         case 'image': {
-          const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-          const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-
-          ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-          ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-          ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-          scale = this.getLayerScale
+          if (!this.config.isClipper) {
+            const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
+            const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
+            ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
+            ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
+            ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
+            scale = this.getLayerScale
+          }
           break
         }
         case 'text':
@@ -838,7 +839,6 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      console.log('drop')
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
     },
     onDropClipper(e: DragEvent) {

@@ -281,6 +281,7 @@ class GroupUtils {
    * @returns calculated layers in tmp layer
    */
   mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
+    console.log(layers)
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset

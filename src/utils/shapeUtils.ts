@@ -78,6 +78,7 @@ class ShapeUtils {
       const reg = new RegExp('\\$trans\\[' + i + '\\]', 'g')
       svgOut = svgOut.replace(reg, `${className}T${i}`)
     }
+    console.log(svgOut)
     return svgOut
   }
 }
