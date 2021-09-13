@@ -204,6 +204,7 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      this.setIsMoving(false)
       if (!val) {
         this.setLastSelectedLayerIndex(this.layerIndex)
       }
