@@ -103,7 +103,8 @@ export default Vue.extend({
     const code = this.$route.query.code as string
     // Facebook login status
     if (code !== undefined && !store.getters.isLogin) {
-      this.fbLogin(code)
+      const redirectUri = window.location.href
+      this.fbLogin(code, redirectUri)
     }
     // Google login status
     if (this.isRollbackByGoogleSignIn && !store.getters.isLogin) {
@@ -194,18 +195,25 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fbLogin (code: string) {
+    async fbLogin (code: string, redirectUri: string) {
       try {
         // code -> access_token
-        console.log('code', code)
-        const { data } = await userApis.fbLogin(code)
-        console.log('result', data)
+        const { data } = await userApis.fbLogin(code, redirectUri)
+        const token = data.data.token
+        if (token.length > 0) {
+          store.commit('SET_STATE', {
+            downloadUrl: data.data.download_url
+          })
+          store.commit('user/SET_TOKEN', token)
+          store.dispatch('user/getAssets', { token: token })
+          uploadUtils.uploadTmpJSON()
+        }
       } catch (error) {
       }
     },
     async googleLogin (idToken: string) {
       try {
-        // code -> access_token
+        // idToken -> token
         const { data } = await userApis.googleLogin(idToken)
         const token = data.data.token
         if (token.length > 0) {
@@ -280,12 +288,12 @@ export default Vue.extend({
           redirect: this.$route.query.redirect,
           hostId: '1234abcd'
         })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
         hostId: '1234abcd'
       })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
+      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked () {
       if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
