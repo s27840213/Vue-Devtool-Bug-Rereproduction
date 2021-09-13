@@ -51,6 +51,9 @@ const getDefaultState = (): IUserModule => ({
 const state = getDefaultState()
 
 const getters: GetterTree<IUserModule, any> = {
+  isLogin: state => {
+    return state.isAuthenticated
+  },
   getToken(state) {
     return state.token
   },

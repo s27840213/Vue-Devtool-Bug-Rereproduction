@@ -66,5 +66,11 @@ export default {
     data: {
       code
     }
+  }),
+  googleLogin: (id_token: string): AxiosPromise => axios('/google-login', {
+    method: 'POST',
+    data: {
+      id_token
+    }
   })
 }
