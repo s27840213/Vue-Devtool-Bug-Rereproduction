@@ -3,11 +3,13 @@ import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IModalState {
   modalInfo: IModalInfo,
-  modalOpen: boolean
+  modalOpen: boolean,
+  pending: boolean
 }
 
 const SET_MODAL_INFO = 'SET_MODAL_INFO' as const
 const SET_MODAL_OPEN = 'SET_MODAL_OPEN' as const
+const SET_IS_PENDING = 'SET_IS_PENDING' as const
 
 const getDefaultState = (): IModalState => ({
   modalInfo: {
@@ -26,7 +28,8 @@ const getDefaultState = (): IModalState => ({
       }
     }
   },
-  modalOpen: false
+  modalOpen: false,
+  pending: false
 })
 
 const state = getDefaultState()
@@ -36,6 +39,9 @@ const getters: GetterTree<IModalState, unknown> = {
   },
   getModalOpen(state): boolean {
     return state.modalOpen
+  },
+  getIsPending(state): boolean {
+    return state.pending
   }
 }
 
@@ -47,6 +53,9 @@ const mutations: MutationTree<IModalState> = {
   },
   [SET_MODAL_OPEN](state: IModalState, open: boolean) {
     state.modalOpen = open
+  },
+  [SET_IS_PENDING](state: IModalState, pending: boolean) {
+    state.pending = pending
   }
 }
 

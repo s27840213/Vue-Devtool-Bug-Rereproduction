@@ -61,10 +61,17 @@ export default {
       upass
     }
   }),
-  fbLogin: (code: string): AxiosPromise => axios('/fb-login', {
+  fbLogin: (code: string, redirect_uri: string): AxiosPromise => axios('/fb-login', {
     method: 'POST',
     data: {
-      code
+      code,
+      redirect_uri
+    }
+  }),
+  googleLogin: (id_token: string): AxiosPromise => axios('/google-login', {
+    method: 'POST',
+    data: {
+      id_token
     }
   })
 }

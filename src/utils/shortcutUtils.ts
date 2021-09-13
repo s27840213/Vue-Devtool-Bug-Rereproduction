@@ -251,6 +251,10 @@ class ShortcutHandler {
     GroupUtils.selectAll()
   }
 
+  deselect() {
+    GroupUtils.deselect()
+  }
+
   group() {
     GroupUtils.group()
   }

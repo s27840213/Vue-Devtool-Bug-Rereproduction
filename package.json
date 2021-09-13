@@ -25,6 +25,7 @@
         "v-click-outside": "^3.1.2",
         "vue": "^2.6.11",
         "vue-color": "git+https://github.com/s27840213/CustomColorPicker.git",
+        "vue-google-oauth2": "^1.5.8",
         "vue-recyclerview": "^0.4.1",
         "vue-router": "^3.5.1",
         "vue-virtual-scroller": "^1.0.10",

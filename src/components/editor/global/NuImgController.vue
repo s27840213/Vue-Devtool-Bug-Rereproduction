@@ -330,7 +330,6 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
-  // z-index: setZindex("nu-controller");
   box-sizing: border-box;
   &:hover {
     cursor: pointer;
@@ -355,7 +354,6 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
-  // z-index: setZindex("nu-controller");
   position: absolute;
   box-sizing: border-box;
 }

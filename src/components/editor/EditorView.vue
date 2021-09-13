@@ -9,8 +9,7 @@
           :ref="`page-${index}`"
           :key="`page-${index}`"
           :pageIndex="index"
-          :config="page" :index="index"
-          @mousedown.native.left="setCurrPage(index)")
+          :config="page" :index="index")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea")
 </template>
 
@@ -56,7 +55,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageSize: 'getPageSize',
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      isMoving: 'getIsMoving'
     })
     // getLastLayer(): ILayer {
     //   const page = this.$refs[`page-${this.getLastSelectedPageIndex}`] as [Vue]
@@ -83,6 +83,13 @@ export default Vue.extend({
     //   return this.getLastLayer.imgControl as boolean
     // }
   },
+  watch: {
+    isMoving(newVal) {
+      if (newVal === true) {
+        this.isSelecting = false
+      }
+    }
+  },
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
@@ -94,6 +101,10 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
       PageUtils.activeMostCentralPage()
+      console.log('Outer click')
+    },
+    outerClickThroughLayer(e: MouseEvent) {
+      console.log('capture')
     },
     selectStart(e: MouseEvent) {
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
@@ -101,21 +112,26 @@ export default Vue.extend({
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
-      this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
       document.documentElement.addEventListener('mousemove', this.selecting)
       document.documentElement.addEventListener('scroll', this.scrollUpdate)
       document.documentElement.addEventListener('mouseup', this.selectEnd)
+      console.log('select start')
     },
     selecting(e: MouseEvent) {
-      if (!this.isSelecting) {
-        if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-          GroupUtils.deselect()
+      console.log(`Is moving:${this.isMoving}`)
+      if (!this.isMoving) {
+        if (!this.isSelecting) {
+          if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
+            GroupUtils.deselect()
+          }
+          this.isSelecting = true
+          this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
+          return
         }
-        this.isSelecting = true
+        this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+        this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
+        this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
       }
-      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
-      this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
       const event = new MouseEvent('mousemove', {
@@ -130,6 +146,7 @@ export default Vue.extend({
       // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
+      console.log('select end')
       if (this.isSelecting) {
         GroupUtils.deselect()
       }
@@ -172,9 +189,6 @@ export default Vue.extend({
       selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
       selectionArea.style.width = `${Math.round((maxX - minX))}px`
       selectionArea.style.height = `${Math.round((maxY - minY))}px`
-    },
-    setCurrPage(index: number) {
-      this.pageIndex = index
     },
     addSelectedLayer(layerIndexs: Array<number>) {
       this.addLayer({

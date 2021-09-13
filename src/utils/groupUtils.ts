@@ -221,7 +221,10 @@ class GroupUtils {
         })
       } else {
         const tmpLayer = getTmpLayer()
-        LayerUtils.deleteSelectedLayer()
+        store.commit('DELETE_selectedLayer')
+        store.commit('SET_lastSelectedLayerIndex', -1)
+        console.log(store.getters.getCurrSelectedLayers.map((layer: IShape | IText | IImage | IGroup) => layer.styles.zindex))
+        console.log(store.getters.getLayers(this.pageIndex).map((layer: IShape | IText | IImage | IGroup) => layer.styles.zindex))
         LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
         LayerUtils.updateLayersOrder(this.currSelectedInfo.pageIndex)
       }

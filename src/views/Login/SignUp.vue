@@ -11,7 +11,7 @@ div(style="position:relative;")
         btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'") Sign up with Facebook
       div
         img(:src="require('@/assets/img/png/google.png')")
-        btn(:type="'icon-mid-body'") Sign up with Google
+        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'") Sign up with Google
       div
         span or
       div
@@ -78,6 +78,7 @@ import Vue from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -94,13 +95,31 @@ export default Vue.extend({
       isSignUpClicked: false as boolean,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
-      isPeerPassword: false as boolean
+      isPeerPassword: false as boolean,
+      isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean
     }
   },
   created () {
     const code = this.$route.query.code as string
-    if (code !== undefined && !this.$store.getters.isLogin) {
-      this.fbLogin(code)
+    // Facebook login status
+    if (code !== undefined && !store.getters.isLogin) {
+      const redirectUri = window.location.href
+      this.fbLogin(code, redirectUri)
+    }
+    // Google login status
+    if (this.isRollbackByGoogleSignIn && !store.getters.isLogin) {
+      window.gapi.load('auth2', () => {
+        window.gapi.auth2.init({
+          client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
+          scope: 'https://www.googleapis.com/auth/userinfo.profile',
+          prompt: 'select_account',
+          ux_mode: 'redirect'
+        }).then(() => {
+          const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
+          const idToken = currentUser.getAuthResponse().id_token
+          this.googleLogin(idToken)
+        })
+      })
     }
   },
   computed: {
@@ -176,12 +195,35 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fbLogin (code: string) {
+    async fbLogin (code: string, redirectUri: string) {
       try {
         // code -> access_token
-        console.log('code', code)
-        const { data } = await userApis.fbLogin(code)
-        console.log('result', data)
+        const { data } = await userApis.fbLogin(code, redirectUri)
+        const token = data.data.token
+        if (token.length > 0) {
+          store.commit('SET_STATE', {
+            downloadUrl: data.data.download_url
+          })
+          store.commit('user/SET_TOKEN', token)
+          store.dispatch('user/getAssets', { token: token })
+          uploadUtils.uploadTmpJSON()
+        }
+      } catch (error) {
+      }
+    },
+    async googleLogin (idToken: string) {
+      try {
+        // idToken -> token
+        const { data } = await userApis.googleLogin(idToken)
+        const token = data.data.token
+        if (token.length > 0) {
+          store.commit('SET_STATE', {
+            downloadUrl: data.data.download_url
+          })
+          store.commit('user/SET_TOKEN', token)
+          store.dispatch('user/getAssets', { token: token })
+          uploadUtils.uploadTmpJSON()
+        }
       } catch (error) {
       }
     },
@@ -246,12 +288,28 @@ export default Vue.extend({
           redirect: this.$route.query.redirect,
           hostId: '1234abcd'
         })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
         hostId: '1234abcd'
       })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, this.$route.path)
+      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
+    },
+    onGoogleClicked () {
+      if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
+        window.gapi.auth2.getAuthInstance().signIn()
+      } else {
+        window.gapi.load('auth2', () => {
+          window.gapi.auth2.init({
+            client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/userinfo.profile',
+            prompt: 'select_account',
+            ux_mode: 'redirect'
+          }).then(() => {
+            window.gapi.auth2.getAuthInstance().signIn()
+          })
+        })
+      }
     }
   }
 })

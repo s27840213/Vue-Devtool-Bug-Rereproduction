@@ -14,6 +14,15 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
+        //- template(v-if="config.type==='group'")
+        //-   nu-sub-controller(
+        //-     v-for="layer in config.layers"
+        //-     data-identifier="controller"
+        //-     :key="`group-controller-${index}`"
+        //-     :layerIndex="index"
+        //-     :pageIndex="pageIndex"
+        //-     :config="layer"
+        //-     :color="'#EB5757'")
         template(v-if="config.type === 'text' && config.active")
           //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
@@ -34,6 +43,10 @@
               @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
               @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
               @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+              @keydown.37.stop
+              @keydown.38.stop
+              @keydown.39.stop
+              @keydown.40.stop
               @keyup="onKeyUp")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
@@ -132,6 +145,10 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
+    // this if block is used to prevent the selection area being generated when adding text layer with the text panel
+    if (this.config.type === 'text' && this.config.active) {
+      this.setIsMoving(true)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -139,7 +156,8 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      isMoving: 'getIsMoving'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -186,6 +204,7 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      this.setIsMoving(false)
       if (!val) {
         this.setLastSelectedLayerIndex(this.layerIndex)
       }
@@ -210,6 +229,7 @@ export default Vue.extend({
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
+        this.setIsMoving(editing)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
@@ -220,7 +240,8 @@ export default Vue.extend({
     ...mapMutations({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
+      setIsMoving: 'SET_isMoving'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -328,9 +349,9 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
-      if (!this.isLocked) {
-        e.stopPropagation()
-      }
+      // if (!this.isLocked) {
+      //   e.stopPropagation()
+      // }
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -391,6 +412,9 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
+      if (!this.isMoving) {
+        this.setIsMoving(true)
+      }
       if (this.isActive) {
         e.preventDefault()
         this.setCursorStyle('move')
@@ -420,6 +444,9 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd() {
+      if (this.isMoving) {
+        this.setIsMoving(false)
+      }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),

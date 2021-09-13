@@ -3,15 +3,18 @@
     div(class="h-5 text-gray-1 mb-12")
       span {{modalInfo.title}}
     div(class="modal-card__content f-h5 text-gray-1 mb-20")
-      span(v-for="text  in modalInfo.content") {{text}}
-      svg-icon(:iconName="'loading'"
+      template(v-if="!pending")
+        span(v-for="text  in modalInfo.content") {{text}}
+      svg-icon(v-if="pending"
+        :iconName="'loading'"
         :iconColor="'gray-2'"
         :iconWidth="'60px'")
-    div(class="modal-card__button")
-      button(class="btn-primary-mid full-width" @click="confirmAction()") 確認
-      button(class="ml-10 btn-primary-mid full-width" @click="cancelAction()") 關閉
-    div(class="modal-card__close")
-      svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")
+    template(v-if='!pending')
+      div(class="modal-card__button")
+        button(class="btn-primary-mid full-width" @click="confirmAction()") 確認
+        button(class="ml-10 btn-primary-mid full-width" @click="cancelAction()") 關閉
+      div(class="modal-card__close")
+        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")
 </template>
 
 <script lang="ts">
@@ -24,18 +27,16 @@ export default Vue.extend({
   name: 'ModalCard',
   computed: {
     ...mapGetters({
-      _modalInfo: 'modal/getModalInfo'
+      _modalInfo: 'modal/getModalInfo',
+      pending: 'modal/getIsPending'
     }),
     modalInfo(): IModalInfo {
       return this._modalInfo
     }
   },
   methods: {
-    ...mapMutations({
-      setModalOpen: 'modal/SET_MODAL_OPEN'
-    }),
     closePopup(): void {
-      this.setModalOpen(false)
+      modalUtils.setIsModalOpen(false)
       modalUtils.clearModalInfo()
     },
     confirmAction() {
@@ -71,9 +72,11 @@ export default Vue.extend({
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     // align-items: flex-start;
     > span:nth-child(n + 1) {
       margin-bottom: 4px;
+      user-select: text;
     }
   }
 

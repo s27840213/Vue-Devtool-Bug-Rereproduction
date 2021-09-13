@@ -8,6 +8,7 @@ import vueColor from 'vue-color'
 import { Store } from 'vuex'
 import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
+import 'vue-google-oauth2'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
