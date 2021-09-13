@@ -10,7 +10,8 @@ import TextUtils from './textUtils'
 
 class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get pageIndex() { return store.getters.getLastSelectedPageIndex }
+  get layerIndex() { return store.getters.getCurrSelectedIndex }
 
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
     store.commit('ADD_newLayers', {
@@ -42,7 +43,7 @@ class LayerUtils {
 
   deleteLayer(index: number) {
     store.commit('DELETE_layer', {
-      pageIndex: this.lastSelectedPageIndex,
+      pageIndex: this.pageIndex,
       layerIndex: index
     })
   }
@@ -83,7 +84,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, indexs: Array<number> = [], styles: { [index: string]: number | string | boolean }) {
+  updateSubLayerStyles(pageIndex: number, indexs: Array<number>, styles: { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_selectedLayersStyles', {
       pageIndex,
       indexs,

@@ -40,6 +40,16 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
+    template(v-if="isImage")
+      div(class="dropdowns__item"
+          @click="updateImageAsClipper.action")
+        svg-icon(
+          class="pointer"
+          :iconName="updateImageAsClipper.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{updateImageAsClipper.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     hr(class="dropdowns__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`dropdowns__shortcut-${index}`"
@@ -98,6 +108,7 @@ import { IImage } from '@/interfaces/layer'
 import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   data() {
@@ -143,6 +154,9 @@ export default Vue.extend({
     isText(): boolean {
       return this.getType.includes('text')
     },
+    isImage(): boolean {
+      return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
+    },
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
@@ -173,6 +187,17 @@ export default Vue.extend({
         shortcutText: this.isGroup ? 'Cmd+Shift+G' : 'Cmd+G',
         action: () => {
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
+        }
+      }
+    },
+    updateImageAsClipper(): any {
+      return {
+        icon: 'copy',
+        text: 'Update image as Clipped-Image',
+        shortcutText: '',
+        action: () => {
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isClipper: true })
+          uploadUtils.updateTemplate()
         }
       }
     }

@@ -70,7 +70,7 @@ class LayerFactary {
         opacity: 100
       },
       clips: config.clips,
-      layers: config.layers
+      decoration: config.decoration
     }
   }
 

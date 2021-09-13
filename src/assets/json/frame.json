@@ -40,5 +40,39 @@
             "zindex": -1,
             "opacity": 100
         }
-    }]
+    }],
+    "decoration": {
+        "type": "shape",
+        "id": "abcdefgh",
+        "active": false,
+        "shown": false,
+        "color": [],
+        "size": [],
+        "svg": "",
+        "vSize": [0, 0],
+        "cSize": [0, 0],
+        "pSize": [0, 0],
+        "pDiff": [0, 0],
+        "ratio": 1,
+        "category": "",
+        "className": "",
+        "locked": false,
+        "moved": false,
+        "dragging": false,
+        "designId": "",
+        "styles": {
+            "x": 0,
+            "y": 0,
+            "scale": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "rotate": 0,
+            "width": 0,
+            "height": 0,
+            "initWidth": 0,
+            "initHeight": 0,
+            "zindex": -1,
+            "opacity": 100
+        }
+    }
 }

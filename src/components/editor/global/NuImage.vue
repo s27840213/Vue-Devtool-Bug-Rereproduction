@@ -14,7 +14,7 @@ export default Vue.extend({
     config: Object
   },
   mounted() {
-    console.log(this.config)
+    // console.log(this.config)
   },
   computed: {
     src(): string {

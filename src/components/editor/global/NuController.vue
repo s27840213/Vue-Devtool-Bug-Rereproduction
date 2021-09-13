@@ -5,7 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @drop="config.path !== '' || config.isClipper ? onDropClipper($event) : onDrop($event)"
+          @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @dragenter.prevent
           @click.left="onClick"
@@ -976,6 +976,7 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          console.log('ddddd1234')
           TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {

@@ -357,7 +357,7 @@ class TextUtils {
           body: 'isBody'
         } as { [key: string]: string }
         const field = fieldMap[type]
-        this.addText(json, field)
+        this.addText(Object.assign(json, { editing: true }), field)
       })
       .catch(() => {
         console.log('Cannot find the file')
