@@ -6,7 +6,6 @@ import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import GeneralUtils from '@/utils/generalUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -147,7 +146,7 @@ const getDefaultState = (): IEditorState => ({
   isPageDropdownsOpened: false,
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
-  jsonMap: {},
+  asset: {},
   textInfo: {
     heading: [],
     subheading: [],
@@ -257,9 +256,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getCurrSelectedPhotoInfo(state: IEditorState) {
     return state.currSelectedPhotoInfo
   },
-  getJson(state: IEditorState) {
-    // return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
-    return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
+  getAsset(state: IEditorState) {
+    return (id: string) => state.asset[id]
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
@@ -572,8 +570,11 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText)[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_contentJson(state: IEditorState, json: { [key: string]: any }) {
-    Object.assign(state.jsonMap, json)
+  SET_assetJson(state: IEditorState, json: { [key: string]: any }) {
+    Object.keys(json)
+      .forEach(id => {
+        Object.assign(state.asset, { [id]: json[id] })
+      })
   },
   UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
     const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data
