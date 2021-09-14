@@ -22,10 +22,7 @@ export default Vue.extend({
   },
   components: {},
   computed: {
-    ...mapState('text', ['sel', 'props', 'fontStore']),
-    ...mapGetters({
-      getJson: 'getJson'
-    })
+    ...mapState('text', ['sel', 'props', 'fontStore'])
   },
   methods: {
     handleNotFound(event: Event) {

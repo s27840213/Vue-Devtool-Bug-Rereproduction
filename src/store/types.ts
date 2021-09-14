@@ -2,6 +2,7 @@ import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
+import { IAsset } from '@/interfaces/module'
 
 /**
  * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
@@ -38,7 +39,9 @@ export interface IEditorState {
     vendor: string,
     tags: string[]
   },
-  jsonMap: any,
+  asset: {
+    [key: string]: IAsset
+  },
   textInfo: {
     heading: Array<string>,
     subheading: Array<string>,

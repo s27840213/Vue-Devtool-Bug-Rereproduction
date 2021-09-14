@@ -22,14 +22,12 @@
               category-font-item(class="panel-fonts__item"
                 :key="item"
                 :src="`${host}/${item}/${preview}`"
-                :objectId="item"
-                @init="getContentJson")
+                :objectId="item")
             div(class="panel-fonts__item-wrapper")
               category-font-item(class="panel-fonts__item"
                 :key="item"
                 :src="`${host}/${item}/${preview2}`"
-                :objectId="item"
-                @init="getContentJson")
+                :objectId="item")
             div(v-if="props.font === item" class="panel-fonts__done-icon")
               svg-icon(:iconName="'done'"
                 :iconColor="'gray-2'"
@@ -112,8 +110,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent',
-        'getContentJson'
+        'getMoreContent'
       ]
     ),
     mappingIcons(type: string) {

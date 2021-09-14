@@ -9,49 +9,30 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import PageUtils from '@/utils/pageUtils'
-import TemplateUtils from '@/utils/templateUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import { IParagraph, IText } from '@/interfaces/layer'
+import AssetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   props: {
     src: String,
     objectId: String
   },
-  components: {},
-  computed: {
-    ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getJson: 'getJson',
-      getTextInfo: 'getTextInfo'
-    })
-  },
-  created () {
-    if (!this.getJson(this.objectId)) {
-      this.$emit('init', this.objectId)
-    }
-  },
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
     dragStart(event: DragEvent) {
-      const json = TemplateUtils.updateTemplate(this.getJson(this.objectId))
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
       dataTransfer.setDragImage((event.target as HTMLImageElement), 0, 0)
       const config = {
-        type: 'page',
-        json
+        type: 'template',
+        id: this.objectId
       }
       dataTransfer.setData('data', JSON.stringify(config))
     },
     addTemplate() {
-      const json = TemplateUtils.updateTemplate(this.getJson(this.objectId))
-      PageUtils.updateSpecPage(this.lastSelectedPageIndex, json[0] || json)
+      AssetUtils.addTemplate(this.objectId)
     }
   }
 })

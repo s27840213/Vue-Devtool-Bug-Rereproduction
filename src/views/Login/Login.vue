@@ -140,15 +140,15 @@ export default Vue.extend({
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean
     }
   },
-  created () {
+  created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters.isLogin) {
+    if (code !== undefined && !store.getters['user/isLogin']) {
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters.isLogin) {
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
       window.gapi.load('auth2', () => {
         window.gapi.auth2.init({
           client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
@@ -164,7 +164,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    mailValid (): boolean {
+    mailValid(): boolean {
       if (!this.isLoginClicked) {
         return true
       } else if (this.email.length > 0) {
@@ -173,14 +173,14 @@ export default Vue.extend({
         return false
       }
     },
-    mailErrorMessage (): string {
+    mailErrorMessage(): string {
       if (this.email.length === 0) {
         return 'Please enter your email.'
       } else {
         return 'Invalid email address format.'
       }
     },
-    passwordValid (): boolean {
+    passwordValid(): boolean {
       if (!this.isLoginClicked) {
         return true
       } else if (this.password.length > 0) {
@@ -189,13 +189,13 @@ export default Vue.extend({
         return false
       }
     },
-    togglePeerPasswordIcon (): string {
+    togglePeerPasswordIcon(): string {
       return `eye${this.isPeerPassword ? '-slash' : ''}`
     },
-    togglePeerPasswordInput (): string {
+    togglePeerPasswordInput(): string {
       return `${this.isPeerPassword ? 'text' : 'password'}`
     },
-    vcodeValid (): boolean {
+    vcodeValid(): boolean {
       if (!this.isVcodeClicked) {
         return true
       } else if (this.vcode.length > 0) {
@@ -204,28 +204,28 @@ export default Vue.extend({
         return false
       }
     },
-    passwordLengthValid (): boolean {
+    passwordLengthValid(): boolean {
       if (this.password.length >= 8 && this.password.length <= 18) {
         return true
       } else {
         return false
       }
     },
-    passwordContainEng (): boolean {
+    passwordContainEng(): boolean {
       if (this.password.match(/.*[a-zA-Z]+.*/)) {
         return true
       } else {
         return false
       }
     },
-    passwordContainNum (): boolean {
+    passwordContainNum(): boolean {
       if (this.password.match(/.*[0-9]+.*/)) {
         return true
       } else {
         return false
       }
     },
-    resetPasswordValid (): boolean {
+    resetPasswordValid(): boolean {
       if (!this.isResetClicked) {
         return true
       } else if (this.passwordLengthValid && this.passwordContainEng && this.passwordContainNum) {
@@ -234,7 +234,7 @@ export default Vue.extend({
         return false
       }
     },
-    confirmPasswordValid (): boolean {
+    confirmPasswordValid(): boolean {
       if (!this.isResetClicked) {
         return true
       } else if (this.password === this.confirmPassword && this.password.length !== 0) {
@@ -245,39 +245,45 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fbLogin (code: string, redirectUri: string) {
+    async fbLogin(code: string, redirectUri: string) {
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
-            downloadUrl: data.data.download_url
+          store.commit('user/SET_STATE', {
+            downloadUrl: data.data.download_url,
+            userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
     },
-    async googleLogin (idToken: string) {
+    async googleLogin(idToken: string) {
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(idToken)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
-            downloadUrl: data.data.download_url
+          store.commit('user/SET_STATE', {
+            downloadUrl: data.data.download_url,
+            userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
     },
-    async onLogInClicked () {
+    async onLogInClicked() {
       this.isLoginClicked = true
       if (this.password.length === 0) {
         this.passwordErrorMessage = 'Please enter your password.'
@@ -286,24 +292,35 @@ export default Vue.extend({
       if (!this.mailValid || !this.passwordValid) {
         return
       }
-      const response = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
-      if (response.flag === 0) {
-        console.log('success!', response)
+      const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
+      if (data.flag === 0) {
+        const token = data.data.token
+        if (token.length > 0) {
+          store.commit('user/SET_STATE', {
+            downloadUrl: data.data.download_url,
+            userId: data.data.userId
+          })
+          store.commit('user/SET_TOKEN', token)
+          store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
+          uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
+        }
       } else {
         this.password = ''
-        this.passwordErrorMessage = response.msg
-        console.log('failed', response)
+        this.passwordErrorMessage = data.msg
+        console.log('failed', data)
       }
     },
-    onForgotClicked () {
+    onForgotClicked() {
       this.currentPageIndex = 1
       this.password = ''
       this.isPeerPassword = false
     },
-    onBackClicked () {
+    onBackClicked() {
       this.currentPageIndex = 0
     },
-    async onSendEmailClicked () {
+    async onSendEmailClicked() {
       this.isLoginClicked = true
       if (!this.mailValid) {
         return
@@ -314,7 +331,7 @@ export default Vue.extend({
         this.currentPageIndex = 2
       }
     },
-    async onResendClicked () {
+    async onResendClicked() {
       if (this.email.length === 0) {
         this.currentPageIndex = 0
         return
@@ -338,7 +355,7 @@ export default Vue.extend({
         this.currentPageIndex = 0
       }
     },
-    async onEnterCodeDoneClicked () {
+    async onEnterCodeDoneClicked() {
       this.isVcodeClicked = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
@@ -360,7 +377,7 @@ export default Vue.extend({
         console.log(data.msg)
       }
     },
-    async onResetDoneClicked () {
+    async onResetDoneClicked() {
       this.isResetClicked = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
@@ -385,7 +402,7 @@ export default Vue.extend({
       this.password = ''
       this.confirmPassword = ''
     },
-    onFacebookClicked () {
+    onFacebookClicked() {
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
@@ -398,7 +415,7 @@ export default Vue.extend({
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
-    onGoogleClicked () {
+    onGoogleClicked() {
       if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
         window.gapi.auth2.getAuthInstance().signIn()
       } else {
@@ -454,14 +471,16 @@ export default Vue.extend({
       justify-content: center;
       margin-bottom: 1vh;
     }
-    &:nth-child(3), &:nth-child(4) { // Facebook and Google
+    &:nth-child(3),
+    &:nth-child(4) {
+      // Facebook and Google
       margin: 0 auto;
       display: flex;
       align-items: center;
       height: 40px;
       width: 80%;
-      background: linear-gradient(180deg, #FFFFFF 29.69%, #F9F9F9 100%);
-      border: 1px solid #D9DBE1;
+      background: linear-gradient(180deg, #ffffff 29.69%, #f9f9f9 100%);
+      border: 1px solid #d9dbe1;
       border-radius: 3px;
       margin-bottom: 2vh;
       &:hover {
@@ -488,7 +507,8 @@ export default Vue.extend({
         position: relative;
         display: inline-block;
       }
-      > span:before, > span:after {
+      > span:before,
+      > span:after {
         content: "";
         position: absolute;
         top: 50%;
@@ -506,7 +526,8 @@ export default Vue.extend({
       }
       margin-bottom: 2vh;
     }
-    &:nth-child(6) { // input fields
+    &:nth-child(6) {
+      // input fields
       > div {
         margin-bottom: 1.5vh;
         .forgot-pwd {
@@ -517,7 +538,8 @@ export default Vue.extend({
         }
       }
     }
-    &:nth-child(7) { // login button
+    &:nth-child(7) {
+      // login button
       display: flex;
       justify-content: center;
       margin-bottom: 0;
@@ -549,5 +571,4 @@ export default Vue.extend({
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
 }
-
 </style>

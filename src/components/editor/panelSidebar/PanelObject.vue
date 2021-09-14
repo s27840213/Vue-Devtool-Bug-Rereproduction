@@ -22,16 +22,14 @@
           template(v-slot:preview="{ id }")
             category-object-item(class="panel-objects__item"
               :src="`${host}/${id}/${preview}`"
-              :objectId="id"
-              @init="getContentJson")
+              :objectId="id")
       template(v-slot:category-object-item="{ list }")
         div(class="panel-objects__items")
           category-object-item(v-for="id in list"
             class="panel-objects__item"
             :key="id"
             :src="`${host}/${id}/${preview}`"
-            :objectId="id"
-            @init="getContentJson")
+            :objectId="id")
 </template>
 
 <script lang="ts">
@@ -110,8 +108,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent',
-        'getContentJson'
+        'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {

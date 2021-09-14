@@ -29,8 +29,7 @@
           template(v-slot:preview="{ id }")
             category-text-item(class="panel-text__item"
               :src="`${host}/${id}/${preview}`"
-              :objectId="id"
-              @init="getContentJson")
+              :objectId="id")
       template(v-slot:category-text-item="{ list, title }")
         div(class="panel-text__items")
           div(v-if="title"
@@ -39,8 +38,7 @@
             class="panel-text__item"
             :key="id"
             :src="`${host}/${id}/${preview}`"
-            :objectId="id"
-            @init="getContentJson")
+            :objectId="id")
 </template>
 
 <script lang="ts">
@@ -50,7 +48,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import TextUtils from '@/utils/textUtils'
+import AssetUtils from '@/utils/assetUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 
 export default Vue.extend({
@@ -141,8 +139,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent',
-        'getContentJson'
+        'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {
@@ -153,7 +150,7 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async handleAddText (type: string) {
-      await TextUtils.addStanardText(type.toLowerCase())
+      await AssetUtils.addStanardText(type.toLowerCase())
       ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
