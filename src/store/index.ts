@@ -153,7 +153,7 @@ const getDefaultState = (): IEditorState => ({
     subheading: [],
     body: []
   },
-  isMoving: false
+  isPopupOpen: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -264,8 +264,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getTextInfo(state: IEditorState) {
     return state.textInfo
   },
-  getIsMoving(state: IEditorState) {
-    return state.isMoving
+  getIsPopupOpen(state: IEditorState) {
+    return state.isPopupOpen
   }
 }
 
@@ -404,9 +404,7 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
-    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
-    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
   },
   UPDATE_layerOrder(state: IEditorState, updateInfo: { type: string }): void {
     const layerIndex = state.currSelectedInfo.index
@@ -593,8 +591,8 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  SET_isMoving(state: IEditorState, isMoving: boolean) {
-    state.isMoving = isMoving
+  SET_isPopupOpen(state: IEditorState, isOpen: boolean) {
+    state.isPopupOpen = isOpen
   }
 }
 
