@@ -156,7 +156,7 @@ class TextUtils {
            *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
            *  below detecting the situation and use the style of the last span of previous p to replace it.
            */
-          if (spanEl.style.fontFamily === '') {
+          if (spanEl.style.fontFamily === '' && pIndex > 0) {
             const leng = div.childNodes[pIndex - 1].childNodes.length
             spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
           }
@@ -175,7 +175,8 @@ class TextUtils {
           const spanStyle = {
             font: spanEl.style.fontFamily,
             weight: spanEl.style.fontWeight,
-            size: spanEl.style.fontSize ? Math.round(parseFloat(span.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100 : '',
+            size: spanEl.style.fontSize ? Math.round(parseFloat(span.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+              : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (this.getCurrLayer as IText).styles.scale),
             decoration: spanEl.style.textDecorationLine,
             style: spanEl.style.fontStyle,
             color: isValidHexColor(spanEl.style.color) ? spanEl.style.color : rgbToHex(spanEl.style.color),

@@ -11,6 +11,8 @@
 </template>
 
 <script lang="ts">
+import { ILayer, ITmp } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -19,6 +21,13 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number
+  },
+  created() {
+    for (const [idx, layer] of (this.config as ITmp).layers.entries()) {
+      if (layer.type === 'text') {
+        layerUtils.updateSelectedLayerProps(this.pageIndex, idx, { editing: false })
+      }
+    }
   },
   computed: {
     ...mapGetters({

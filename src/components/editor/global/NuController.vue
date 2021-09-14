@@ -519,7 +519,7 @@ export default Vue.extend({
         width = height * initWidth / initHeight
       }
       // The minimum size of the layer
-      if (width <= 40 || height <= 40) return
+      if (width <= 20 || height <= 20) return
 
       const offsetSize = {
         width: width - initWidth,
@@ -1003,7 +1003,6 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          console.log('ddddd1234')
           TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
@@ -1039,13 +1038,15 @@ export default Vue.extend({
                 [pIndex, sIndex, offset] = [0, 0, 0]
               }
 
-              const range = new Range()
-              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-              sel.removeAllRanges()
-              sel.addRange(range)
+              if (!Number.isNaN(pIndex)) {
+                const range = new Range()
+                range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+                sel.removeAllRanges()
+                sel.addRange(range)
+              }
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            if (e.key !== 'Enter') {
+            if (e.key !== 'Enter' && (e.key === 'Backspace' && paragraphs[pIndex].spans[sIndex].text === '')) {
               TextPropUtils.updateTextPropsState()
             }
           })

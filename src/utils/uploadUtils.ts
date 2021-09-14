@@ -305,6 +305,7 @@ class UploadUtils {
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
     console.log(pageJSON)
+    console.log(designId)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
