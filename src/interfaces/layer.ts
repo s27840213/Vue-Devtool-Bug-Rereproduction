@@ -42,6 +42,7 @@ export interface IText extends ILayer<ITextStyle> {
   isHeading?: boolean,
   isSubheading?: boolean,
   isBody?: boolean,
+  isEdited: boolean
 }
 
 export interface IParagraph {

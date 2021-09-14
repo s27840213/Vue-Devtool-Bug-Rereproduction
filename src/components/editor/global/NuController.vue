@@ -108,6 +108,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
+import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   props: {
@@ -233,6 +234,9 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
+        if (editing && !this.config.isEdited) {
+          ShortcutUtils.textSelectAll(this.layerIndex)
+        }
       }
     }
   },
@@ -1003,6 +1007,7 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {

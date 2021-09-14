@@ -84,9 +84,10 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      editing: false,
       dragging: false,
       designId: '',
-      editing: false,
+      isEdited: false,
       styles: {
         x: 0,
         y: 0,

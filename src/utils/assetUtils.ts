@@ -177,7 +177,7 @@ class AssetUtils {
         const field = fieldMap[type]
         const textLayer = GeneralUtils.deepCopy(jsonData)
         TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, LayerFactary.newText(textLayer))
+        LayerUtils.addLayers(targePageIndex, LayerFactary.newText(Object.assign(textLayer, { editing: true })))
       })
       .catch(() => {
         console.log('Cannot find the file')
