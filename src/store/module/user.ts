@@ -17,6 +17,7 @@ const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
 
 export interface IUserModule {
   token: string,
+  userId: string,
   isAuthenticated: boolean,
   userAssets: IUserAssetsData,
   downloadUrl: string
@@ -27,6 +28,7 @@ export interface IUserModule {
 
 const getDefaultState = (): IUserModule => ({
   token: '',
+  userId: '',
   isAuthenticated: false,
   userAssets: {
     design: {
@@ -54,6 +56,9 @@ const getters: GetterTree<IUserModule, any> = {
   isLogin: state => {
     return state.isAuthenticated
   },
+  getUserId: state => {
+    return state.userId
+  },
   getToken(state) {
     return state.token
   },
@@ -71,73 +76,6 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getCheckedAssets(state) {
     return state.checkedAssets
-  }
-}
-
-const actions: ActionTree<IUserModule, unknown> = {
-  async getAssets({ commit }, { token }) {
-    try {
-      const { data } = await userApis.getAssets(token)
-      commit(SET_STATE, {
-        pending: true,
-        contents: [],
-        userAssets: data.data
-      })
-
-      commit(SET_IMAGES)
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  async deleteAssets({ commit, dispatch }) {
-    try {
-      const keyList = state.checkedAssets.join(',')
-      const { data } = await userApis.deleteAssets(state.token, keyList)
-      dispatch('getAssets', { token: state.token })
-      commit('CLEAR_CHECKED_ASSETS')
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  async login({ commit }, { token, account, password }) {
-    try {
-      const { data } = await userApis.login(token, account, password)
-      if (data.flag === 0) {
-        console.log(data)
-        commit('SET_STATE', {
-          downloadUrl: data.data.download_url
-        })
-        uploadUtils.setLoginOutput(data.data)
-      }
-      return Promise.resolve(data)
-    } catch (error) {
-      console.log(error)
-      return Promise.reject(error)
-    }
-  },
-  async register({ commit }, { type = '0', uname, account, upass }) {
-    try {
-      const meta = { type: type, uname: uname, account: account, upass: upass }
-      console.log(JSON.stringify(meta))
-      const { data } = await userApis.register('token', JSON.stringify(meta))
-      console.log('register', data)
-      return Promise.resolve(data)
-    } catch (error) {
-      console.log(error)
-      return Promise.reject(error)
-    }
-  },
-  async initializeToken({ commit, dispatch }, { token }) {
-    const loginResponse = await dispatch('login', { token })
-    if (loginResponse.flag === 0) {
-      const newToken = loginResponse.data.token as string // token may be refreshed
-      commit('SET_TOKEN', newToken)
-      dispatch('getAssets', { token: newToken })
-      uploadUtils.uploadTmpJSON()
-    } else {
-      console.log('login failed')
-      commit('SET_TOKEN', '')
-    }
   }
 }
 
@@ -237,6 +175,74 @@ const mutations: MutationTree<IUserModule> = {
   },
   [CLEAR_CHECKED_ASSETS](state: IUserModule) {
     state.checkedAssets = []
+  }
+}
+
+const actions: ActionTree<IUserModule, unknown> = {
+  async getAssets({ commit }, { token }) {
+    try {
+      const { data } = await userApis.getAssets(token)
+      commit(SET_STATE, {
+        pending: true,
+        contents: [],
+        userAssets: data.data
+      })
+
+      commit(SET_IMAGES)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async deleteAssets({ commit, dispatch }) {
+    try {
+      const keyList = state.checkedAssets.join(',')
+      const { data } = await userApis.deleteAssets(state.token, keyList)
+      dispatch('getAssets', { token: state.token })
+      commit('CLEAR_CHECKED_ASSETS')
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async login({ commit }, { token, account, password }) {
+    try {
+      const { data } = await userApis.login(token, account, password)
+      if (data.flag === 0) {
+        console.log(data)
+        commit('SET_STATE', {
+          downloadUrl: data.data.download_url,
+          userId: data.data.user_id
+        })
+        uploadUtils.setLoginOutput(data.data)
+      }
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  async register({ commit }, { type = '0', uname, account, upass }) {
+    try {
+      const meta = { type: type, uname: uname, account: account, upass: upass }
+      console.log(JSON.stringify(meta))
+      const { data } = await userApis.register('token', JSON.stringify(meta))
+      console.log('register', data)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  async initializeToken({ commit, dispatch }, { token }) {
+    const loginResponse = await dispatch('login', { token })
+    if (loginResponse.flag === 0) {
+      const newToken = loginResponse.data.token as string // token may be refreshed
+      commit('SET_TOKEN', newToken)
+      dispatch('getAssets', { token: newToken })
+      uploadUtils.uploadTmpJSON()
+    } else {
+      console.log('login failed')
+      commit('SET_TOKEN', '')
+    }
   }
 }
 

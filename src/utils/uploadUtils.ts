@@ -13,6 +13,7 @@ class UploadUtils {
   loginOutput: any
   get token(): string { return store.getters['user/getToken'] }
   get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
+  get userId(): string { return store.getters['user/getUserId'] }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get supportTypes(): Array<string> {
     return ['jpeg', 'gif', 'png', 'apng', 'svg', 'bmp', 'png', 'ico']
@@ -62,6 +63,8 @@ class UploadUtils {
       formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
+      console.log(this.userId)
+      formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
 
       if (formData.has('file')) {
@@ -139,6 +142,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
     const textInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
@@ -179,6 +183,7 @@ class UploadUtils {
       formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/page.json`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      formData.append('x-amz-meta-tn', this.userId)
       const xhrReq = new XMLHttpRequest()
 
       const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
@@ -205,6 +210,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
     const textInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
@@ -245,6 +251,7 @@ class UploadUtils {
       formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/page.json`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      formData.append('x-amz-meta-tn', this.userId)
       const xhrReq = new XMLHttpRequest()
 
       const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
@@ -277,6 +284,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
@@ -314,6 +322,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
@@ -374,6 +383,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_map.path}edit/temp.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
     // console.log(this.loginOutput)
     setInterval(() => {

@@ -13,7 +13,8 @@ export default {
     data: {
       token,
       account,
-      password
+      password,
+      ver: '2'
     }
   }),
   putAssets: (assetId: string, categoryId: string): AxiosPromise => axios(`/put-asset/${assetId}/${categoryId}`, {
