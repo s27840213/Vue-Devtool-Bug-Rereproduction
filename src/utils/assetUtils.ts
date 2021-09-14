@@ -70,6 +70,7 @@ class AssetUtils {
       const json = TemplateUtils.updateTemplate(jsonData)
       PageUtils.updateSpecPage(targePageIndex, json)
     } catch (error) {
+      console.log(id)
       captureException(error)
     }
   }
@@ -80,10 +81,11 @@ class AssetUtils {
     try {
       const { jsonData } = await this.get(id, 'svg')
       if (!jsonData) { throw new Error('jsonData: undefined') }
+      const { vSize = [] } = jsonData
       const currentPage = this.getPage(targePageIndex)
       const resizeRatio = 0.55
       const pageAspectRatio = currentPage.width / currentPage.height
-      const svgAspectRatio = (jsonData.vSize as number[])[0] / (jsonData.vSize as number[])[1]
+      const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
       const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
       const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
       jsonData.ratio = 1
@@ -96,11 +98,11 @@ class AssetUtils {
           y: currentPage.height / 2 - svgHeight / 2,
           width: svgWidth,
           height: svgHeight,
-          initWidth: (jsonData.vSize as number[])[0],
-          initHeight: (jsonData.vSize as number[])[1],
-          scale: svgWidth / (jsonData.vSize as number[])[0],
+          initWidth: (vSize as number[])[0],
+          initHeight: (vSize as number[])[1],
+          scale: svgWidth / (vSize as number[])[0],
           color: jsonData.color,
-          vSize: jsonData.vSize,
+          vSize,
           ...styles
         }
       }

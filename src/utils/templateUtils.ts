@@ -19,6 +19,7 @@ class TemplateUtils {
 
   updateTemplate(json: any): any {
     // const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
+    if (!json) { return }
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
       let isAssignField = false
@@ -71,7 +72,6 @@ class TemplateUtils {
       //   })
       // }
     }
-    console.log(json)
     return json
   }
 

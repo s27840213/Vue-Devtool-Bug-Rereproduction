@@ -189,7 +189,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayers(state: IEditorState) {
     return (pageIndex: number): Array<IShape | IText | IImage | IGroup> => {
-      return state.pages[pageIndex].layers
+      return state.pages[pageIndex] ? state.pages[pageIndex].layers : []
     }
   },
   getLayersNum(state: IEditorState) {
@@ -448,13 +448,16 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   UPDATE_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
-    Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      if (typeof v === 'number') {
-        (state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] as number) += v
-      } else {
-        state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] = v
-      }
-    })
+    const layer = state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index]
+    if (layer) {
+      Object.entries(updateInfo.styles).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          (layer.styles[k] as number) += v
+        } else {
+          layer.styles[k] = v
+        }
+      })
+    }
   },
   UPDATE_groupLayerStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
