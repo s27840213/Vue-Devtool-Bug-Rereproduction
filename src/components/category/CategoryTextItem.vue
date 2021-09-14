@@ -11,9 +11,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import { IText } from '@/interfaces/layer'
-import StepsUtils from '@/utils/stepsUtils'
+import AssetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   props: {
@@ -23,24 +21,14 @@ export default Vue.extend({
   components: {},
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      scaleRatio: 'getPageScaleRatio',
-      getJson: 'getJson'
+      scaleRatio: 'getPageScaleRatio'
     })
-  },
-  mounted () {
-    if (!this.getJson(this.objectId)) {
-      this.$emit('init', this.objectId)
-    }
   },
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
     dragStart(event: DragEvent) {
-      const json = this.getJson(this.objectId)
-      Object.assign(json.styles, { x: undefined, y: undefined })
-      Object.assign(json, { editing: false })
       const dataTransfer = event.dataTransfer as DataTransfer
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
@@ -52,20 +40,14 @@ export default Vue.extend({
       const y = ((event.clientY - rect.y) / rect.height * image.height) * (this.scaleRatio / 100)
 
       dataTransfer.setDragImage(image, x, y)
-      dataTransfer.setData('data', JSON.stringify(json))
+      const config = {
+        type: 'text',
+        id: this.objectId
+      }
+      dataTransfer.setData('data', JSON.stringify(config))
     },
     addText() {
-      const json = this.getJson(this.objectId) as IText
-      Object.assign(json.styles, { x: undefined, y: undefined })
-      Object.assign(json, { editing: false })
-      switch (json.type) {
-        case 'text':
-          return TextUtils.addText(json)
-        case 'group':
-          return TextUtils.addGroup(json)
-        default:
-          return null
-      }
+      AssetUtils.addText(this.objectId)
     }
   }
 })

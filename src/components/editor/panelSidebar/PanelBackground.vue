@@ -41,8 +41,7 @@
           template(v-slot:preview="{ id }")
             category-background-item(class="panel-bg__item"
               :src="`${host}/${id}/${preview}`"
-              :objectId="id"
-              @init="getContentJson")
+              :objectId="id")
       template(v-slot:category-background-item="{ list, title }")
         div(class="panel-bg__items")
           div(v-if="title"
@@ -51,8 +50,7 @@
             class="panel-bg__item"
             :key="id"
             :src="`${host}/${id}/${preview}`"
-            :objectId="id"
-            @init="getContentJson")
+            :objectId="id")
 </template>
 
 <script lang="ts">
@@ -164,8 +162,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent',
-        'getContentJson'
+        'getMoreContent'
       ]
     ),
     ...mapMutations({

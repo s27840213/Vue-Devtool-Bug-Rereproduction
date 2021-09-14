@@ -4,7 +4,6 @@ import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IG
 import { IFont, ISelection } from '@/interfaces/text'
 import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
-import Vue from 'vue'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 import LayerFactary from '@/utils/layerFactary'
@@ -331,76 +330,57 @@ class TextUtils {
     return textHW
   }
 
-  getAddPosition (width: number, height: number) {
-    const { pageIndex, index } = this.currSelectedInfo
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
+  getAddPosition(width: number, height: number, pageIndex?: number) {
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const page = this.getPage(targePageIndex)
     const x = (page.width - width) / 2
     const y = (page.height - height) / 2
 
-    if (pageIndex === this.lastSelectedPageIndex) {
-      const currLayer = this.getLayer(pageIndex, index) as IShape | IText | IImage | IGroup | ITmp
-      const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
-      const specy = currLayer.styles.y + currLayer.styles.height
-      if ((specy + height) < page.height) {
-        return { x: specx, y: specy }
+    if (targePageIndex === this.lastSelectedPageIndex) {
+      const currLayer = this.getLayer(pageIndex, this.layerIndex)
+      if (currLayer) {
+        const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
+        const specy = currLayer.styles.y + currLayer.styles.height
+        if ((specy + height) < page.height) {
+          return { x: specx, y: specy }
+        }
       }
     }
     return { x, y }
   }
 
-  addStanardText(type: string) {
-    return import(`@/assets/json/${type}.json`)
-      .then(json => {
-        const fieldMap = {
-          heading: 'isHeading',
-          subheading: 'isSubheading',
-          body: 'isBody'
-        } as { [key: string]: string }
-        const field = fieldMap[type]
-        this.addText(Object.assign(json, { editing: true }), field)
-      })
-      .catch(() => {
-        console.log('Cannot find the file')
-      })
-  }
-
-  addText (json: any, field?: string) {
-    const format = GeneralUtils.deepCopy(json) as IText
-    const page = this.getPage(this.lastSelectedPageIndex) as IPage
-
+  resetTextField (textLayer: IText, pageIndex: number, field?: string) {
+    const page = this.getPage(pageIndex) as IPage
     /**
      * Add the response font-size for each paragraph
      */
-    const paragraphSizes = this.getParagraphSize(format)
-    for (const i in format.paragraphs) {
-      format.paragraphs[i].styles.size = paragraphSizes[i]
+    const paragraphSizes = this.getParagraphSize(textLayer)
+    for (const i in textLayer.paragraphs) {
+      textLayer.paragraphs[i].styles.size = paragraphSizes[i]
     }
 
     const size = {} as { [key: string]: number }
-    if (format.styles && format.styles.height && format.styles.width) {
-      Object.assign(size, { width: format.styles.width, height: format.styles.height })
+    if (textLayer.styles && textLayer.styles.height && textLayer.styles.width) {
+      Object.assign(size, { width: textLayer.styles.width, height: textLayer.styles.height })
     } else {
-      Object.assign(size, this.getTextHW(format))
+      Object.assign(size, this.getTextHW(textLayer))
     }
     const position = {} as { [key: string]: number }
-    if (format.styles && typeof format.styles.x !== 'undefined' && typeof format.styles.y !== 'undefined') {
-      Object.assign(position, { x: format.styles.x, y: format.styles.y })
+
+    if (textLayer.styles && typeof textLayer.styles.x !== 'undefined' && typeof textLayer.styles.y !== 'undefined') {
+      Object.assign(position, { x: textLayer.styles.x, y: textLayer.styles.y })
     } else {
-      Object.assign(position, this.getAddPosition(size.width, size.height))
+      Object.assign(position, this.getAddPosition(size.width, size.height, pageIndex))
     }
-    Object.assign(format.styles, position, size)
+    Object.assign(textLayer.styles, position, size)
 
     if (field) {
       if (!page.layers.find(l => l.type === 'text' && (l as IText)[field])) {
-        Object.assign(format, { [field]: true })
+        Object.assign(textLayer, { [field]: true })
       } else {
-        Object.assign(format, { [field]: false })
+        Object.assign(textLayer, { [field]: false })
       }
     }
-
-    const newTextLayer = LayerFactary.newText(format)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newTextLayer)
-    StepsUtils.record()
   }
 
   // isBoldType (font: IFont): boolean {
@@ -421,14 +401,6 @@ class TextUtils {
       sizeArr.push(fontSize)
     }
     return sizeArr
-  }
-
-  addGroup (json: any) {
-    const { layers, styles } = GeneralUtils.deepCopy(json)
-    const position = this.getAddPosition(styles.width, styles.height)
-    Object.assign(styles, position)
-    const newGroupLayer = LayerFactary.newGroup(styles, layers)
-    LayerUtils.addLayers(this.lastSelectedPageIndex, newGroupLayer)
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
