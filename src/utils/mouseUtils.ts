@@ -69,35 +69,34 @@ class MouseUtils {
     }
     const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
-    console.log(data.srcObj)
-    const layerConfig: ILayer = {
-      type: data.type,
-      pageIndex: pageIndex,
-      active: false,
-      shown: false,
-      locked: false,
-      moved: false,
-      dragging: false,
-      designId: '',
-      styles: {
-        x: x,
-        y: y,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
-        rotate: 0,
-        width: data.styles.width,
-        height: data.styles.height,
-        initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
-        initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
-        zindex: -1,
-        opacity: 100
-      }
-    }
 
     let layer
     switch (data.type) {
       case 'image': {
+        const layerConfig: ILayer = {
+          type: data.type,
+          pageIndex: pageIndex,
+          active: false,
+          shown: false,
+          locked: false,
+          moved: false,
+          dragging: false,
+          designId: '',
+          styles: {
+            x: x,
+            y: y,
+            scale: 1,
+            scaleX: 1,
+            scaleY: 1,
+            rotate: 0,
+            width: data.styles.width,
+            height: data.styles.height,
+            initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
+            initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
+            zindex: -1,
+            opacity: 100
+          }
+        }
         const imgStyles = {
           imgX: 0,
           imgY: 0,
