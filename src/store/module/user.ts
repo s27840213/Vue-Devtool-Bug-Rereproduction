@@ -233,6 +233,7 @@ const actions: ActionTree<IUserModule, unknown> = {
     }
   },
   async initializeToken({ commit, dispatch }, { token }) {
+    state.isAuthenticated = token.length > 0
     const loginResponse = await dispatch('login', { token })
     if (loginResponse.flag === 0) {
       const newToken = loginResponse.data.token as string // token may be refreshed
