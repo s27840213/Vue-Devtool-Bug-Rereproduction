@@ -234,12 +234,11 @@ export default Vue.extend({
       }
     },
     async onSignUpClicked() {
-      console.log('onSignUpClicked')
       this.isSignUpClicked = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         return
       }
-      const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
+      const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
         this.isVcodeClicked = false
