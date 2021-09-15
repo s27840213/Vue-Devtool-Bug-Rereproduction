@@ -60,8 +60,9 @@ class MouseUtils {
   }
 
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
-    if (e.dataTransfer === null) return
-    const data = JSON.parse(e.dataTransfer.getData('data'))
+    const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
+    if (dropData === null || typeof dropData !== 'string') return
+    const data = JSON.parse(dropData)
     const target = e.target as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
