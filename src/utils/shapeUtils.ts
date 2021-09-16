@@ -37,6 +37,7 @@ class ShapeUtils {
 
   transFormatter(className: string, transArray: string[], param: any): string {
     let style = ''
+    console.log(transArray)
     for (let i = 0; i < transArray.length; i++) {
       const tmpStyle = `.${className}T${i}{${transArray[i]}}`
       style += `${tmpStyle} `

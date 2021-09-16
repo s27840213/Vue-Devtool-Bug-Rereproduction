@@ -36,6 +36,9 @@ class TemplateUtils {
     const fields = [...this.fields]
     for (const layer of json.layers) {
       if (layer.type === 'text') {
+        if (typeof (layer as IText).isEdited === 'undefined') {
+          layer.isEdited = false
+        }
         for (const [i, field] of fields.entries()) {
           if (layer[this.fieldsMap[field]] && this.getTextInfo[field].length) {
             const paraStyles = GeneralUtils.deepCopy(layer.paragraphs[0].styles)

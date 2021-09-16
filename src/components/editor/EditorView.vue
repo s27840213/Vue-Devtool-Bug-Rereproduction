@@ -118,7 +118,7 @@ export default Vue.extend({
       console.log('select start')
     },
     selecting(e: MouseEvent) {
-      console.log(`Is moving:${this.isMoving}`)
+      // console.log(`Is moving:${this.isMoving}`)
       if (!this.isMoving) {
         if (!this.isSelecting) {
           if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {

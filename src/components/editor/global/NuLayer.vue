@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="nu-layer" :style="styles()"
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
-      @dragover.prevent,
+      @dragover.prevent
+      @dragleave.prevent
       @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")

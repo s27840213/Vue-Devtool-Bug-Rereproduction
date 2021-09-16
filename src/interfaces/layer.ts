@@ -102,6 +102,7 @@ export interface IImage extends ILayer<IImageStyle> {
   },
   clipPath: string,
   isClipper: boolean,
+  isFrame?: boolean,
   imgControl: boolean
 }
 export interface IGroup extends ILayer<IStyle> {

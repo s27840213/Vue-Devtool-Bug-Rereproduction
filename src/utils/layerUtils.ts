@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, ITmp, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -13,7 +13,7 @@ class LayerUtils {
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
 
-  addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp) {
+  addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp | IFrame) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,
       layers: [layer]
