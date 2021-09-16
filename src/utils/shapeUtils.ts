@@ -110,8 +110,8 @@ class ShapeUtils {
 
     const quadrant = this.getLineQuadrant(point)
 
-    const { width, height } = this.lineDimension(point)
-    const baseDegree = Math.atan2(height, width) / Math.PI * 180
+    const { width, height, baseDegree } = this.lineDimension(point)
+    const baseDegreeDeg = baseDegree / Math.PI * 180
     let roms = 0
     let rome = 0
     let txms = 0
@@ -121,19 +121,19 @@ class ShapeUtils {
     switch (quadrant) {
       case 1:
         [txms, tyms, txme, tyme] = [0, height, width, 0]
-        rome = -baseDegree
+        rome = -baseDegreeDeg
         break
       case 2:
         [txms, tyms, txme, tyme] = [width, height, 0, 0]
-        rome = baseDegree + 180
+        rome = baseDegreeDeg + 180
         break
       case 3:
         [txms, tyms, txme, tyme] = [width, 0, 0, height]
-        rome = 180 - baseDegree
+        rome = 180 - baseDegreeDeg
         break
       case 4:
         [txms, tyms, txme, tyme] = [0, 0, width, height]
-        rome = baseDegree
+        rome = baseDegreeDeg
         break
     }
     roms = rome + 180
@@ -163,10 +163,9 @@ class ShapeUtils {
   }
 
   lineViewBoxFormatter(point: number[]): string {
-    const { width, height } = this.lineDimension(point)
-    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-    const dx = 2 * height / hypotenuse
-    const dy = 2 * width / hypotenuse
+    const { width, height, baseDegree } = this.lineDimension(point)
+    const dx = 2 * Math.sin(baseDegree)
+    const dy = 2 * Math.cos(baseDegree)
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
@@ -195,12 +194,11 @@ class ShapeUtils {
   }
 
   pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[]): number[] {
-    const { width, height } = this.lineDimension(point)
-    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-    const trimxs = markerWidth[0] * width / hypotenuse
-    const trimys = markerWidth[0] * height / hypotenuse
-    const trimxe = markerWidth[1] * width / hypotenuse
-    const trimye = markerWidth[1] * height / hypotenuse
+    const { width, height, baseDegree } = this.lineDimension(point)
+    const trimxs = markerWidth[0] * Math.cos(baseDegree)
+    const trimys = markerWidth[0] * Math.sin(baseDegree)
+    const trimxe = markerWidth[1] * Math.cos(baseDegree)
+    const trimye = markerWidth[1] * Math.sin(baseDegree)
     const quadrant = this.getLineQuadrant(point)
     let startPoint: number[]
     let endPoint: number[]
@@ -245,12 +243,13 @@ class ShapeUtils {
     return [...startPoint, ...endPoint]
   }
 
-  lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number} {
+  lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number, baseDegree: number} {
     const xDiff = point[2] - point[0]
     const yDiff = point[3] - point[1]
     const width = Math.abs(xDiff)
     const height = Math.abs(yDiff)
-    return { xDiff, yDiff, width, height }
+    const baseDegree = Math.atan2(height, width)
+    return { xDiff, yDiff, width, height, baseDegree }
   }
 }
 
