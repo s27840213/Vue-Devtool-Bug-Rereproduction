@@ -36,7 +36,7 @@ export default Vue.extend({
       svg.setAttribute('viewBox', `0 0 ${this.contents[i].vSize[0]} ${this.contents[i].vSize[1]}`)
 
       const className = shapeUtils.classGenerator()
-      const styleText = shapeUtils.styleFormatter(className, this.contents[i].styleArray, this.contents[i].color, this.contents[i].size ?? [])
+      const styleText = shapeUtils.styleFormatter(className, this.contents[i].styleArray, this.contents[i].color, this.contents[i].size ?? [], this.contents[i].point)
       shapeUtils.addStyleTag(styleText)
 
       if (this.contents[i].category === 'C') {
@@ -47,8 +47,11 @@ export default Vue.extend({
           pOfst: 10
         })
         shapeUtils.addStyleTag(transText)
+      } else if (this.contents[i].category === 'D') {
+        const transText = shapeUtils.markerTransFormatter(className, this.contents[i].markerTransArray ?? [], this.contents[i].size ?? [], this.contents[i].point ?? [], this.contents[i].markerWidth ?? [4, 4])
+        shapeUtils.addStyleTag(transText)
       }
-      svg.innerHTML = shapeUtils.svgFormatter(this.contents[i].svg, className, this.contents[i].styleArray.length, this.contents[i].transArray?.length ?? 0)
+      svg.innerHTML = shapeUtils.svgFormatter(this.contents[i].svg, className, this.contents[i].styleArray.length, this.contents[i].transArray?.length ?? 0, this.contents[i].markerTransArray?.length ?? 0, this.contents[i].point)
       body[i].appendChild(svg)
     }
   },

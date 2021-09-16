@@ -53,7 +53,7 @@ export default Vue.extend({
   },
   mounted() {
     console.log(this.config)
-    const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size)
+    const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 
     if (this.config.category === 'C') {
@@ -62,6 +62,10 @@ export default Vue.extend({
         pSize: this.config.pSize,
         pDiff: this.config.pDiff
       })
+      this.transNode = shapeUtils.addStyleTag(transText)
+      this.filterTemplate = this.getFilterTemplate()
+    } else if (this.config.category === 'D') {
+      const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
       this.transNode = shapeUtils.addStyleTag(transText)
       this.filterTemplate = this.getFilterTemplate()
     }
@@ -94,10 +98,14 @@ export default Vue.extend({
       return 'none'
     },
     viewBoxFormatter(): string {
+      if (this.config.category === 'D') {
+        return shapeUtils.lineViewBoxFormatter(this.config.point)
+      }
       return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {
-      return shapeUtils.svgFormatter(this.config.svg, this.config.className, this.config.styleArray.length, this.config.transArray ? this.config.transArray.length : 0)
+      const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point) : this.config.point
+      return shapeUtils.svgFormatter(this.config.svg, this.config.className, this.config.styleArray.length, this.config.transArray?.length ?? 0, this.config.markerTransArray?.length ?? 0, point)
     },
     filterFormatter(): string {
       let estFilterRad = Math.ceil((4 * 100 * this.config.ratio / (this.$store.getters.getPageScaleRatio * this.config.styles.scale) - 1) / 2)
