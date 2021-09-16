@@ -31,7 +31,9 @@ class Controller {
     const {
       textShape: styleTextShape,
       width,
-      height
+      height,
+      x,
+      y
     } = layer.styles
     const props = {} as { [key: string]: any }
     const defaultAttrs = this.shapes[shape]
@@ -51,9 +53,14 @@ class Controller {
       }
     }
     if (shape === 'none') {
-      styles.height = (styleTextShape as any).initHeight
-      styles.width = (styleTextShape as any).initWidth
-      styles.textShape = {}
+      const { initHeight, initWidth, bend } = styleTextShape as any
+      Object.assign(styles, {
+        height: initHeight,
+        width: initWidth,
+        textShape: {},
+        x: x + ((width - initWidth) / 2),
+        y: +bend < 0 ? y + height - initHeight : y
+      })
       props.widthLimit = -1
     }
     return { styles, props }

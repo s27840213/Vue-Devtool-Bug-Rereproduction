@@ -131,6 +131,7 @@ class LayerUtils {
 
   initialLayerScale(pageIndex: number, layerIndex: number) {
     const layer = this.getLayer(pageIndex, layerIndex)
+    if (!layer) return
     const { styles: { scale }, type: primaryType } = layer
     const applyLayers = layer.layers ? (layer.layers as ILayer[]) : [layer]
     const isMultipleLayer = ['tmp', 'group'].includes(primaryType)

@@ -1,6 +1,6 @@
 class GeneralUtils {
   deepCopy(el: unknown) {
-    return JSON.parse(JSON.stringify(el))
+    return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
   }
 
   exact(conditions: Array<boolean>): boolean {

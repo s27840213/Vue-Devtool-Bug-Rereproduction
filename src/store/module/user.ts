@@ -220,12 +220,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async register({ commit }, { type = '0', uname, account, upass }) {
+  async register({ commit }, { uname, account, upass }) {
     try {
-      const meta = { type: type, uname: uname, account: account, upass: upass }
-      console.log(JSON.stringify(meta))
+      const meta = { uname: uname, account: account, upass: upass }
       const { data } = await userApis.register('token', JSON.stringify(meta))
-      console.log('register', data)
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)

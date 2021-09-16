@@ -127,10 +127,10 @@ export default Vue.extend({
       }
     },
     showPhotoInfo(evt: Event) {
-      const { user, tags, vendor } = this.photo
+      const { user = {}, tags, vendor } = this.photo
       this._setCurrSelectedPhotoInfo({
-        userName: user.name,
-        userLink: user.link,
+        userName: user.name || '',
+        userLink: user.link || '',
         vendor,
         tags
       })
