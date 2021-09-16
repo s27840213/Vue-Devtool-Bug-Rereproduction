@@ -12,11 +12,14 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
-          @mouseenter="onMouseEnter"
-          @mouseleave="onMouseLeave"
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
+        svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+          g(v-for="(clip, index) in config.clips"
+            v-html="ShapeUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
+            @mouseover="onMouseEnter(index)"
+            @mouseleave="onMouseLeave")
         //- template(v-if="config.type==='group'")
         //-   nu-sub-controller(
         //-     v-for="layer in config.layers"
@@ -66,7 +69,7 @@
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
-          :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
+          :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
           div(v-for="(scaler, index) in controlPoints.scalers"
               class="control-point"
               :key="index"
@@ -111,6 +114,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
+import ShapeUtils from '@/utils/shapeUtils'
 import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
@@ -124,6 +128,7 @@ export default Vue.extend({
     return {
       MappingUtils,
       ShortcutUtils,
+      ShapeUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -137,6 +142,7 @@ export default Vue.extend({
       isComposing: false,
       isSnapping: false,
       contentEditable: true,
+      clipIndex: NaN,
       subControlerIndexs: []
     }
   },
@@ -250,11 +256,13 @@ export default Vue.extend({
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setIsMoving: 'SET_isMoving'
     }),
-    onMouseEnter() {
-      console.log('mouse Enter', this.layerIndex)
+    onMouseEnter(clipIndex: number) {
+      this.clipIndex = clipIndex
+      console.log('mouse Enter', this.clipIndex)
     },
     onMouseLeave() {
-      console.log('mouse Leave', this.layerIndex)
+      this.clipIndex = NaN
+      console.log('mouse Leave', this.clipIndex)
     },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -278,9 +286,9 @@ export default Vue.extend({
               : controlPoints.resizers.slice(0, 2)
           }
           break
-        case 'image':
-          resizers = this.config.isClipper ? [] : resizers
-          break
+        // case 'image':
+        //   resizers = this.config.isClipper ? [] : resizers
+        //   break
         case 'shape':
           resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
           break
@@ -290,6 +298,8 @@ export default Vue.extend({
         case 'group':
           resizers = []
           break
+        case 'frame':
+          resizers = []
       }
       return resizers
     },
@@ -343,26 +353,36 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
-      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
+        outline: this.outlineStyles(),
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
-    outlineStyles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+    outlineStyles() {
+      if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
+        return 'none'
+      }
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      if (this.isShown || this.isActive) {
+        if (this.config.type === 'tmp' || this.isControlling) {
+          return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
+        } else {
+          return `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`
+        }
+      } else {
+        return 'none'
+      }
+    },
+    frameClipStyles(clip: any, index: number) {
       return {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none'
+        transform: `translate(${clip.x}px, ${clip.y}px)`,
+        fill: '#00000000',
+        stroke: this.clipIndex === index ? '#7190CC' : 'none',
+        strokeWidth: '5.5px'
       }
     },
     moveStart(e: MouseEvent) {

@@ -82,6 +82,10 @@ class ShapeUtils {
     console.log(svgOut)
     return svgOut
   }
+
+  frameClipFormatter(path: string) {
+    return "<path d='" + path + "'></path>"
+  }
 }
 
 const shapeUtils = new ShapeUtils()

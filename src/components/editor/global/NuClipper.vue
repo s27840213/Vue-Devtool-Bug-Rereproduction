@@ -31,7 +31,9 @@ export default Vue.extend({
         width,
         height,
         transform: 'translate3d(0, 0, 0)',
-        'clip-path': this.config.clipPath,
+        'clip-path': this.config.clipPath
+          ? (this.config.clipPath as string).includes('path')
+            ? this.config.clipPath : "path('" + this.config.clipPath + "')" : '',
         'background-color': '#00000001'
       }
     }
