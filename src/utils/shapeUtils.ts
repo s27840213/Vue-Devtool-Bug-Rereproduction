@@ -188,14 +188,61 @@ class ShapeUtils {
     return quadrantMapping[towardBottom][towardRight]
   }
 
-  pointPreprocess(point: number[]): number[] {
-    const { width, height } = this.lineDimension(point)
-    const quadrant = this.getLineQuadrant(point)
-    if (quadrant % 2 === 0) {
-      return [0, 0, width, height]
-    } else {
-      return [0, height, width, 0]
+  vectorAdd(point: number[], diff: number[]) {
+    for (let i = 0; i < point.length; i++) {
+      point[i] += diff[i]
     }
+  }
+
+  pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[]): number[] {
+    const { width, height } = this.lineDimension(point)
+    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+    const trimxs = markerWidth[0] * width / hypotenuse
+    const trimys = markerWidth[0] * height / hypotenuse
+    const trimxe = markerWidth[1] * width / hypotenuse
+    const trimye = markerWidth[1] * height / hypotenuse
+    const quadrant = this.getLineQuadrant(point)
+    let startPoint: number[]
+    let endPoint: number[]
+    let startDiff: number[]
+    let endDiff: number[]
+    switch (quadrant) {
+      case 1:
+        startPoint = [0, height]
+        endPoint = [width, 0]
+        startDiff = [trimxs, -trimys]
+        endDiff = [-trimxe, trimye]
+        break
+      case 2:
+        startPoint = [width, height]
+        endPoint = [0, 0]
+        startDiff = [-trimxs, -trimys]
+        endDiff = [trimxe, trimye]
+        break
+      case 3:
+        startPoint = [width, 0]
+        endPoint = [0, height]
+        startDiff = [-trimxs, trimys]
+        endDiff = [trimxe, -trimye]
+        break
+      case 4:
+        startPoint = [0, 0]
+        endPoint = [width, height]
+        startDiff = [trimxs, trimys]
+        endDiff = [-trimxe, -trimye]
+        break
+      default:
+        startPoint = [0, 0]
+        endPoint = [width, height]
+        startDiff = [trimxs, trimys]
+        endDiff = [-trimxe, -trimye]
+        break
+    }
+
+    if (trimWidth[0]) this.vectorAdd(startPoint, startDiff)
+    if (trimWidth[1]) this.vectorAdd(endPoint, endDiff)
+
+    return [...startPoint, ...endPoint]
   }
 
   lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number} {
