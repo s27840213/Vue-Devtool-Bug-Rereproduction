@@ -142,6 +142,7 @@ class ShapeUtils {
       const reg = new RegExp('\\$size\\[' + j + '\\]', 'g')
       style = style.replace(reg, sizeArray[j].toString())
     }
+    const scale = sizeArray[0]
     const regRoms = new RegExp('\\$roms', 'g')
     style = style.replace(regRoms, roms.toString())
     const regRome = new RegExp('\\$rome', 'g')
@@ -155,17 +156,17 @@ class ShapeUtils {
     const regTransYE = new RegExp('\\$tyme', 'g')
     style = style.replace(regTransYE, tyme.toString())
     const regFineTuneS = new RegExp('\\$finetunes', 'g')
-    style = style.replace(regFineTuneS, `translate(-${markerWidth[0]}px, -2px)`)
+    style = style.replace(regFineTuneS, `translate(-${markerWidth[0] * scale}px, -${2 * scale}px)`)
     const regFineTuneE = new RegExp('\\$finetunee', 'g')
-    style = style.replace(regFineTuneE, `translate(-${markerWidth[1]}px, -2px)`)
+    style = style.replace(regFineTuneE, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
 
     return style
   }
 
-  lineViewBoxFormatter(point: number[]): string {
+  lineViewBoxFormatter(point: number[], scale: number): string {
     const { width, height, baseDegree } = this.lineDimension(point)
-    const dx = 2 * Math.sin(baseDegree)
-    const dy = 2 * Math.cos(baseDegree)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
@@ -193,12 +194,12 @@ class ShapeUtils {
     }
   }
 
-  pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[]): number[] {
+  pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[], scale: number): number[] {
     const { width, height, baseDegree } = this.lineDimension(point)
-    const trimxs = markerWidth[0] * Math.cos(baseDegree)
-    const trimys = markerWidth[0] * Math.sin(baseDegree)
-    const trimxe = markerWidth[1] * Math.cos(baseDegree)
-    const trimye = markerWidth[1] * Math.sin(baseDegree)
+    const trimxs = scale * markerWidth[0] * Math.cos(baseDegree)
+    const trimys = scale * markerWidth[0] * Math.sin(baseDegree)
+    const trimxe = scale * markerWidth[1] * Math.cos(baseDegree)
+    const trimye = scale * markerWidth[1] * Math.sin(baseDegree)
     const quadrant = this.getLineQuadrant(point)
     let startPoint: number[]
     let endPoint: number[]
