@@ -10,15 +10,25 @@
     panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
     panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked")
   div(v-else class="function-panel p-20")
-    panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-    panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
-      @openFontsPanel="openFontsPanel()")
-    panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
-    panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked")
-    //- panel-background-setting(v-if="selectedLayerNum===0")
-    panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-    panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-    panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked")
+    template(v-if="!hasSubSelectedLayer")
+      panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+      panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
+        @openFontsPanel="openFontsPanel()")
+      panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
+      panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked")
+      //- panel-background-setting(v-if="selectedLayerNum===0")
+      panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
+      panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+      panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked")
+    template(v-else)
+      panel-group
+      template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
+        panel-text-setting(
+          @openFontsPanel="openFontsPanel()")
+        panel-text-effect-setting
+      panel-photo-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'image' && !isLocked")
+      panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked")
+      panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 
 <script lang="ts">
@@ -58,7 +68,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo'
     }),
     selectedLayerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -75,6 +86,12 @@ export default Vue.extend({
         return layer.type
       })
       return new Set(types)
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
     }
   },
   watch: {

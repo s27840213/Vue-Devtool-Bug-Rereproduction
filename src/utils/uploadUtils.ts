@@ -411,10 +411,12 @@ class UploadUtils {
     // const response = await fetch(this.loginOutput.download_url)
     response.json().then((json: Array<IPage>) => {
       store.commit('SET_pages', json)
+      /**
+       * @todo need to disable sub controller if we have
+       */
       const hasTmp = json.some((page: IPage, pageIndex: number) => {
         return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp, layerIndex: number) => {
           if (layer.active) {
-            console.log(pageIndex, layerIndex)
             layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
             return true
           }

@@ -14,15 +14,18 @@
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        //- template(v-if="config.type==='group'")
-        //-   nu-sub-controller(
-        //-     v-for="layer in config.layers"
-        //-     data-identifier="controller"
-        //-     :key="`group-controller-${index}`"
-        //-     :layerIndex="index"
-        //-     :pageIndex="pageIndex"
-        //-     :config="layer"
-        //-     :color="'#EB5757'")
+        template(v-if="config.type==='group' && isActive")
+          div(class="sub-controller")
+            nu-sub-controller(
+              v-for="(layer,index) in config.layers"
+              data-identifier="controller"
+              :style="subControllerStyles()"
+              :key="`group-controller-${index}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer"
+              :color="'#EB5757'"
+              @clickSubController="clickSubController")
         template(v-if="config.type === 'text' && config.active")
           //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
@@ -132,8 +135,7 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: true,
-      subControlerIndexs: []
+      contentEditable: true
     }
   },
   mounted() {
@@ -157,7 +159,8 @@ export default Vue.extend({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      isMoving: 'getIsMoving'
+      isMoving: 'getIsMoving',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -197,6 +200,9 @@ export default Vue.extend({
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.contentEditable
+    },
+    isDragging(): boolean {
+      return this.config.dragging
     }
   },
   watch: {
@@ -241,7 +247,8 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setIsMoving: 'SET_isMoving'
+      setIsMoving: 'SET_isMoving',
+      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -335,6 +342,11 @@ export default Vue.extend({
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      }
+    },
+    subControllerStyles() {
+      return {
+        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
       }
     },
     outlineStyles(type: string) {
@@ -1122,10 +1134,15 @@ export default Vue.extend({
         el.focus()
       })
     },
-    clickSubController(indexs: Array<number>) {
-      indexs.unshift(this.layerIndex)
-      this.subControlerIndexs = GeneralUtils.deepCopy(indexs)
-      LayerUtils.updateSubLayerProps(this.pageIndex, indexs, { active: true })
+    clickSubController(targetIndex: number, type: string) {
+      if (this.currSubSelectedInfo.index !== -1) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
+      }
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+      this.setCurrSubSelectedInfo({
+        index: targetIndex,
+        type
+      })
     }
   }
 })
@@ -1227,6 +1244,12 @@ export default Vue.extend({
     padding: 0;
     position: relative;
   }
+}
+
+.sub-controller {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .text-content {

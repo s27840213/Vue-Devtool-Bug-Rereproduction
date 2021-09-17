@@ -19,6 +19,7 @@ import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import groupUtils from '@/utils/groupUtils'
+import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
 Vue.use(Vuex)
 
@@ -138,9 +139,8 @@ const getDefaultState = (): IEditorState => ({
     types: new Set<string>()
   },
   currSubSelectedInfo: {
-    indexs: [],
-    layers: [],
-    types: new Set<string>()
+    index: -1,
+    type: ''
   },
   isOrderDropdownsOpened: false,
   isLayerDropdownsOpened: false,
@@ -223,11 +223,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   } {
     return state.currSelectedInfo
   },
-  getCurrSubSelectedInfo(state: IEditorState): {
-    indexs: Array<number>,
-    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-    types: Set<string>
-  } {
+  getCurrSubSelectedInfo(state: IEditorState): ICurrSubSelectedInfo {
     return state.currSubSelectedInfo
   },
   getCurrSelectedPageIndex(state: IEditorState) {
@@ -360,23 +356,14 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, indexs: Array<number>, props: { [key: string]: string | number | boolean | IParagraph } }) {
-    const indexs = updateInfo.indexs
-    const outestIndex = indexs.shift() as number
-    const outestLayer = state.pages[updateInfo.pageIndex].layers[outestIndex] as IGroup
-    const getTargetSubLayer = (indexs: Array<number>, currLayer: IGroup): IShape | IText | IImage | IGroup => {
-      if (indexs.length === 0) {
-        return currLayer
-      } else {
-        const tmp = currLayer.layers[indexs.shift() as number] as IGroup
-        return getTargetSubLayer(indexs, tmp)
-      }
-    }
-
-    const target = getTargetSubLayer(indexs, outestLayer)
-
+  UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
+    const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
+    console.log(groupLayer)
+    console.log(updateInfo.targetIndex)
+    const targetLayer = groupLayer.layers[updateInfo.targetIndex]
+    console.log(targetLayer)
     Object.entries(updateInfo.props).forEach(([k, v]) => {
-      target[k] = v
+      targetLayer[k] = v
     })
   },
   UPDATE_selectedLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | Array<string> } }) {
@@ -548,8 +535,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
   },
-  SET_currSubSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
-    Object.assign(state.currSelectedInfo, data)
+  SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
+    Object.assign(state.currSubSelectedInfo, data)
   },
   SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {
     state.isOrderDropdownsOpened = isOpened
@@ -569,7 +556,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_subLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
-    const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText)[]
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText | IImage)[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
   SET_contentJson(state: IEditorState, json: { [key: string]: any }) {

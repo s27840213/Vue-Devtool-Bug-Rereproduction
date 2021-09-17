@@ -34,10 +34,17 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo'
     }),
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
     },
     opacity: {
       get(): string | number {
@@ -47,9 +54,14 @@ export default Vue.extend({
               return layer.styles.opacity
             }))].length === 1 ? this.currSelectedInfo.layers[0].styles.opacity : 'mix'
         } else {
-          return [...new Set(this.currSelectedInfo.layers[0].layers.map((layer: ITmp | IShape | IText | IImage | IGroup) => {
-            return layer.styles.opacity
-          }))].length === 1 ? this.currSelectedInfo.layers[0].layers[0].styles.opacity : 'mix'
+          const groupLayer = this.currSelectedInfo.layers[0]
+          if (this.hasSubSelectedLayer) {
+            return groupLayer.layers[this.currSubSelectedInfo.index].styles.opacity
+          } else {
+            return [...new Set(groupLayer.layers.map((layer: ITmp | IShape | IText | IImage | IGroup) => {
+              return layer.styles.opacity
+            }))].length === 1 ? groupLayer.layers[0].styles.opacity : 'mix'
+          }
         }
       },
       set(value: number) {
@@ -73,11 +85,22 @@ export default Vue.extend({
             })
           }
         } else {
-          this.$store.commit('UPDATE_groupLayerStyles', {
-            styles: {
-              opacity: value
-            }
-          })
+          if (this.hasSubSelectedLayer) {
+            this.$store.commit('SET_subLayerStyles', {
+              pageIndex: this.currSelectedInfo.pageIndex,
+              primaryLayerIndex: this.currSelectedInfo.index,
+              subLayerIndex: this.currSubSelectedInfo.index,
+              styles: {
+                opacity: value
+              }
+            })
+          } else {
+            this.$store.commit('UPDATE_groupLayerStyles', {
+              styles: {
+                opacity: value
+              }
+            })
+          }
         }
       }
     }

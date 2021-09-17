@@ -1,6 +1,6 @@
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
 
 /**
@@ -23,11 +23,7 @@ export interface IEditorState {
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
   currSelectedInfo: ICurrSelectedInfo,
-  currSubSelectedInfo: {
-    indexs: Array<number>,
-    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-    types: Set<string>
-  },
+  currSubSelectedInfo: ICurrSubSelectedInfo,
   isOrderDropdownsOpened: boolean,
   isLayerDropdownsOpened: boolean
   isPageDropdownsOpened: boolean,

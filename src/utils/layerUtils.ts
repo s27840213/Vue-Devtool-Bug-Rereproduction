@@ -91,10 +91,11 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, indexs: Array<number>, props: { [index: string]: number | string | boolean }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
-      indexs,
+      layerIndex,
+      targetIndex,
       props
     })
   }

@@ -101,10 +101,6 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
       PageUtils.activeMostCentralPage()
-      console.log('Outer click')
-    },
-    outerClickThroughLayer(e: MouseEvent) {
-      console.log('capture')
     },
     selectStart(e: MouseEvent) {
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
@@ -115,10 +111,8 @@ export default Vue.extend({
       document.documentElement.addEventListener('mousemove', this.selecting)
       document.documentElement.addEventListener('scroll', this.scrollUpdate)
       document.documentElement.addEventListener('mouseup', this.selectEnd)
-      console.log('select start')
     },
     selecting(e: MouseEvent) {
-      console.log(`Is moving:${this.isMoving}`)
       if (!this.isMoving) {
         if (!this.isSelecting) {
           if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
@@ -146,7 +140,6 @@ export default Vue.extend({
       // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
-      console.log('select end')
       if (this.isSelecting) {
         GroupUtils.deselect()
       }
