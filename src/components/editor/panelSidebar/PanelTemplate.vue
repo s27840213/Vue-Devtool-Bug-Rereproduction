@@ -22,8 +22,7 @@
           template(v-slot:preview="{ id }")
             category-template-item(class="panel-template__item"
               :src="`${host}/${id}/${preview}`"
-              :objectId="id"
-              @init="getContentJson")
+              :objectId="id")
       template(v-slot:category-template-item="{ list, title }")
         div(class="panel-template__items")
           div(v-if="title"
@@ -32,8 +31,7 @@
             class="panel-template__item"
             :key="id"
             :src="`${host}/${id}/${preview}`"
-            :objectId="id"
-            @init="getContentJson")
+            :objectId="id")
 </template>
 
 <script lang="ts">
@@ -114,8 +112,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent',
-        'getContentJson'
+        'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {

@@ -1,18 +1,16 @@
 <template lang="pug">
-  div(class="nu-tmp"
+  div(class="nu-frame"
       :style="styles()")
     nu-layer(v-for="(layer,index) in config.layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
-      :config="layer"
-      :style="{'outline': '2px solid #7190CC'}")
+      :config="layer")
 </template>
 
 <script lang="ts">
-import { ILayer, ITmp } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
+import { IFrame } from '@/interfaces/layer'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -23,11 +21,7 @@ export default Vue.extend({
     layerIndex: Number
   },
   created() {
-    for (const [idx, layer] of (this.config as ITmp).layers.entries()) {
-      if (layer.type === 'text') {
-        layerUtils.updateSelectedLayerProps(this.pageIndex, idx, { editing: false })
-      }
-    }
+    this.config.layers = [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
   },
   computed: {
     ...mapGetters({
@@ -46,7 +40,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.nu-tmp {
+.nu-frame {
   position: absolute;
+  transform-style: flat;
 }
 </style>

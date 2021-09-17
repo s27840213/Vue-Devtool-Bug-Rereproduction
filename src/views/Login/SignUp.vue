@@ -102,12 +102,12 @@ export default Vue.extend({
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters.isLogin) {
+    if (code !== undefined && !store.getters['user/isLogin']) {
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters.isLogin) {
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
       window.gapi.load('auth2', () => {
         window.gapi.auth2.init({
           client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
@@ -201,13 +201,15 @@ export default Vue.extend({
         const { data } = await userApis.fbLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
+          store.commit('user/SET_STATE', {
             downloadUrl: data.data.download_url,
             userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
@@ -218,24 +220,25 @@ export default Vue.extend({
         const { data } = await userApis.googleLogin(idToken)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
+          store.commit('user/SET_STATE', {
             downloadUrl: data.data.download_url,
             userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
     },
     async onSignUpClicked() {
-      console.log('onSignUpClicked')
       this.isSignUpClicked = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         return
       }
-      const response = await store.dispatch('user/register', { type: '0', uname: this.name, account: this.email, upass: this.password })
+      const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 1
         this.isVcodeClicked = false

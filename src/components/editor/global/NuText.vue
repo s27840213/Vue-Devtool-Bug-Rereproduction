@@ -149,7 +149,8 @@ export default Vue.extend({
     wrapperStyles() {
       const { editing } = this.config
       const { isCurveText } = this
-      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
+      console.log(editing)
+      const opacity = this.config.editing ? (isCurveText ? 0.2 : 0) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity

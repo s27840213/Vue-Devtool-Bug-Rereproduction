@@ -1,18 +1,21 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller")
+    div(class="nu-controller" draggable="true" ref="self")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
           @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
-          @dragenter.prevent
+          @dragenter="onDragEnter($event)"
+          @dragleave="onDragLeave($event)"
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
-          @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-          @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
+          @mouseenter="onMouseEnter"
+          @mouseleave="onMouseLeave"
+          @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
+          @mouseover="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         template(v-if="config.type==='group' && isActive")
           div(class="sub-controller")
@@ -111,6 +114,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
+import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   props: {
@@ -239,6 +243,9 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
+        if (editing && !this.config.isEdited) {
+          ShortcutUtils.textSelectAll(this.layerIndex)
+        }
       }
     }
   },
@@ -250,6 +257,12 @@ export default Vue.extend({
       setIsMoving: 'SET_isMoving',
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
+    onMouseEnter() {
+      console.log('mouse Enter', this.layerIndex)
+    },
+    onMouseLeave() {
+      console.log('mouse Leave', this.layerIndex)
+    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles('')
@@ -327,6 +340,10 @@ export default Vue.extend({
       return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      // console.log('mouse over !:', this.layerIndex)
+      if (this.getLayerType === 'image' && LayerUtils.layerIndex !== this.layerIndex) {
+        console.log('clipper is target')
+      }
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -425,6 +442,7 @@ export default Vue.extend({
     },
     moving(e: MouseEvent) {
       if (!this.isMoving) {
+        (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
         this.setIsMoving(true)
       }
       if (this.isActive) {
@@ -467,10 +485,12 @@ export default Vue.extend({
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
         }
+        (this.$refs.body as HTMLElement).style.pointerEvents = 'auto'
         this.isControlling = false
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
+
         StepsUtils.record()
         LayerUtils.isOutOfBoundary()
       }
@@ -531,7 +551,7 @@ export default Vue.extend({
         width = height * initWidth / initHeight
       }
       // The minimum size of the layer
-      if (width <= 40 || height <= 40) return
+      if (width <= 20 || height <= 20) return
 
       const offsetSize = {
         width: width - initWidth,
@@ -1015,7 +1035,7 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          console.log('ddddd1234')
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
@@ -1051,13 +1071,15 @@ export default Vue.extend({
                 [pIndex, sIndex, offset] = [0, 0, 0]
               }
 
-              const range = new Range()
-              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-              sel.removeAllRanges()
-              sel.addRange(range)
+              if (!Number.isNaN(pIndex)) {
+                const range = new Range()
+                range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+                sel.removeAllRanges()
+                sel.addRange(range)
+              }
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            if (e.key !== 'Enter') {
+            if (e.key !== 'Enter' && (e.key === 'Backspace' && paragraphs[pIndex].spans[sIndex].text === '')) {
               TextPropUtils.updateTextPropsState()
             }
           })
@@ -1143,6 +1165,12 @@ export default Vue.extend({
         index: targetIndex,
         type
       })
+    },
+    onDragEnter() {
+      console.log('dragEnter')
+    },
+    onDragLeave() {
+      console.log('dragLeave')
     }
   }
 })

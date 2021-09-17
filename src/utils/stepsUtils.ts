@@ -5,6 +5,7 @@ import GroupUtils from '@/utils/groupUtils'
 import { IStep } from '@/interfaces/steps'
 import TextPropUtils from './textPropUtils'
 import Vue from 'vue'
+import { FunctionPanelType } from '@/store/types'
 
 const MAX_STORAGE_COUNT = 20
 class StepsUtils {
@@ -48,7 +49,9 @@ class StepsUtils {
     GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
     if (this.currStep > 0) {
       Vue.nextTick(() => {
-        TextPropUtils.updateTextPropsState()
+        if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
+          TextPropUtils.updateTextPropsState()
+        }
       })
     }
   }
@@ -63,7 +66,9 @@ class StepsUtils {
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
     Vue.nextTick(() => {
-      TextPropUtils.updateTextPropsState()
+      if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
+        TextPropUtils.updateTextPropsState()
+      }
     })
   }
 

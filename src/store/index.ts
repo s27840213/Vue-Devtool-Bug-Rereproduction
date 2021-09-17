@@ -6,7 +6,6 @@ import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import GeneralUtils from '@/utils/generalUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -147,7 +146,7 @@ const getDefaultState = (): IEditorState => ({
   isPageDropdownsOpened: false,
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
-  jsonMap: {},
+  asset: {},
   textInfo: {
     heading: [],
     subheading: [],
@@ -190,7 +189,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayers(state: IEditorState) {
     return (pageIndex: number): Array<IShape | IText | IImage | IGroup> => {
-      return state.pages[pageIndex].layers
+      return state.pages[pageIndex] ? state.pages[pageIndex].layers : []
     }
   },
   getLayersNum(state: IEditorState) {
@@ -253,9 +252,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getCurrSelectedPhotoInfo(state: IEditorState) {
     return state.currSelectedPhotoInfo
   },
-  getJson(state: IEditorState) {
-    // return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
-    return (id: string) => state.jsonMap[id] && GeneralUtils.deepCopy(state.jsonMap[id])
+  getAsset(state: IEditorState) {
+    return (id: string) => state.asset[id]
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
@@ -437,13 +435,16 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   UPDATE_tmpLayerStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: { [key: string]: string | number } }) {
-    Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      if (typeof v === 'number') {
-        (state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] as number) += v
-      } else {
-        state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index].styles[k] = v
-      }
-    })
+    const layer = state.pages[updateInfo.pageIndex].layers[state.currSelectedInfo.index]
+    if (layer) {
+      Object.entries(updateInfo.styles).forEach(([k, v]) => {
+        if (typeof v === 'number') {
+          (layer.styles[k] as number) += v
+        } else {
+          layer.styles[k] = v
+        }
+      })
+    }
   },
   UPDATE_groupLayerStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
@@ -559,8 +560,11 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText | IImage)[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_contentJson(state: IEditorState, json: { [key: string]: any }) {
-    Object.assign(state.jsonMap, json)
+  SET_assetJson(state: IEditorState, json: { [key: string]: any }) {
+    Object.keys(json)
+      .forEach(id => {
+        Object.assign(state.asset, { [id]: json[id] })
+      })
   },
   UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
     const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data

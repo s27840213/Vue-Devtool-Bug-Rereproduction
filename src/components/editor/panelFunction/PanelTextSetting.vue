@@ -107,7 +107,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import { ILayer, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
@@ -120,6 +120,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import GroupUtils from '@/utils/groupUtils'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -145,7 +146,11 @@ export default Vue.extend({
     }
   },
   mounted() {
+    this.setCurrFunctionPanel(FunctionPanelType.textSetting)
     TextPropUtils.updateTextPropsState()
+  },
+  destroyed() {
+    this.setCurrFunctionPanel(FunctionPanelType.none)
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -185,6 +190,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },

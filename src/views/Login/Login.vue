@@ -143,12 +143,12 @@ export default Vue.extend({
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters.isLogin) {
+    if (code !== undefined && !store.getters['user/isLogin']) {
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters.isLogin) {
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
       window.gapi.load('auth2', () => {
         window.gapi.auth2.init({
           client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
@@ -251,13 +251,15 @@ export default Vue.extend({
         const { data } = await userApis.fbLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
+          store.commit('user/SET_STATE', {
             downloadUrl: data.data.download_url,
             userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
@@ -268,13 +270,15 @@ export default Vue.extend({
         const { data } = await userApis.googleLogin(idToken)
         const token = data.data.token
         if (token.length > 0) {
-          store.commit('SET_STATE', {
+          store.commit('user/SET_STATE', {
             downloadUrl: data.data.download_url,
             userId: data.data.userId
           })
           store.commit('user/SET_TOKEN', token)
           store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
           uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
         }
       } catch (error) {
       }
@@ -288,13 +292,24 @@ export default Vue.extend({
       if (!this.mailValid || !this.passwordValid) {
         return
       }
-      const response = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
-      if (response.flag === 0) {
-        console.log('success!', response)
+      const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
+      if (data.flag === 0) {
+        const token = data.data.token
+        if (token.length > 0) {
+          store.commit('user/SET_STATE', {
+            downloadUrl: data.data.download_url,
+            userId: data.data.userId
+          })
+          store.commit('user/SET_TOKEN', token)
+          store.dispatch('user/getAssets', { token: token })
+          uploadUtils.setLoginOutput(data.data)
+          uploadUtils.uploadTmpJSON()
+          this.$router.push({ name: 'Editor' })
+        }
       } else {
         this.password = ''
-        this.passwordErrorMessage = response.msg
-        console.log('failed', response)
+        this.passwordErrorMessage = data.msg
+        console.log('failed', data)
       }
     },
     onForgotClicked() {

@@ -53,7 +53,9 @@ import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
-import { IImage } from '@/interfaces/layer'
+import frameTest from '@/assets/json/fram_test.json'
+import { IFrame, IImage } from '@/interfaces/layer'
+import layerFactary from '@/utils/layerFactary'
 
 export default Vue.extend({
   data() {
@@ -158,10 +160,19 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'Append clipper',
+          text: 'Append test clipper',
           shortcutText: 'Used for test',
           action: () => {
             layerUtils.addLayers(this.lastSelectedPageIndex, GeneralUtils.deepCopy(clipTest) as IImage)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test frame',
+          shortcutText: 'Used for test',
+          action: () => {
+            console.log(layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)))
+            layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)) as IFrame)
           }
         }
       ]

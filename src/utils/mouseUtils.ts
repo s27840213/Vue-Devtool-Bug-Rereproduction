@@ -7,11 +7,9 @@ import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import TextUtils from './textUtils'
-import TextPropUtils from '@/utils/textPropUtils'
-import PageUtils from './pageUtils'
 import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
+import AssetUtils from './assetUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -62,48 +60,44 @@ class MouseUtils {
   }
 
   onDropHandler(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }): IShape | IText | IImage | ITmp | undefined {
-    if (e.dataTransfer === null) return
-    const data = JSON.parse(e.dataTransfer.getData('data'))
-    // @TODO Page type json
-    if (data.type === 'page') {
-      PageUtils.updateSpecPage(pageIndex, data.json)
-      return
-    }
+    const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
+    if (dropData === null || typeof dropData !== 'string') return
+    const data = JSON.parse(dropData)
     const target = e.target as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y
     }
-    const x = (e.clientX - targetPos.x + targetOffset.x - data.styles.x) * (100 / store.state.pageScaleRatio)
-    const y = (e.clientY - targetPos.y + targetOffset.y - data.styles.y) * (100 / store.state.pageScaleRatio)
-    const layerConfig: ILayer = {
-      type: data.type,
-      pageIndex: pageIndex,
-      active: false,
-      shown: false,
-      locked: false,
-      moved: false,
-      dragging: false,
-      designId: '',
-      styles: {
-        x: x,
-        y: y,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
-        rotate: 0,
-        width: data.styles.width,
-        height: data.styles.height,
-        initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
-        initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
-        zindex: -1,
-        opacity: 100
-      }
-    }
+    const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
+    const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
 
     let layer
     switch (data.type) {
       case 'image': {
+        const layerConfig: ILayer = {
+          type: data.type,
+          pageIndex: pageIndex,
+          active: false,
+          shown: false,
+          locked: false,
+          moved: false,
+          dragging: false,
+          designId: '',
+          styles: {
+            x: x,
+            y: y,
+            scale: 1,
+            scaleX: 1,
+            scaleY: 1,
+            rotate: 0,
+            width: data.styles.width,
+            height: data.styles.height,
+            initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
+            initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
+            zindex: -1,
+            opacity: 100
+          }
+        }
         const imgStyles = {
           imgX: 0,
           imgY: 0,
@@ -120,40 +114,17 @@ class MouseUtils {
         }
         break
       }
-      case 'text': {
-        const tmpPos = {
-          x: e.offsetX,
-          y: e.offsetY
-        }
-        Object.assign(layerConfig.styles, data.styles)
-        layerConfig.styles.x = tmpPos.x
-        layerConfig.styles.y = tmpPos.y
-        layerConfig.paragraphs = data.paragraphs
-        // layer = LayerFactary.newText(layerConfig)
-        TextUtils.addText(layerConfig, data.field)
-        TextPropUtils.updateTextPropsState()
+      case 'group':
+      case 'text':
+        AssetUtils.addText(data.id, { pageIndex, styles: { x, y } })
         break
+      case 'svg': {
+        AssetUtils.addSvg(data.id, { pageIndex, styles: { x, y } })
+        return
       }
-      case 'shape': {
-        const tmpPos = { x: layerConfig.styles.x, y: layerConfig.styles.y }
-        Object.assign(layerConfig.styles, data.styles)
-        layerConfig.styles.x = tmpPos.x
-        layerConfig.styles.y = tmpPos.y
-        delete data.styles
-        layer = LayerFactary.newShape(Object.assign(layerConfig, data))
-        break
-      }
-      case 'group': {
-        const tmpPos = {
-          x: e.offsetX,
-          y: e.offsetY
-        }
-        Object.assign(data.styles, tmpPos)
-        layer = LayerFactary.newGroup(
-          data.styles,
-          data.layers
-        )
-        break
+      case 'template': {
+        AssetUtils.addTemplate(data.id, { pageIndex })
+        return
       }
     }
     return layer

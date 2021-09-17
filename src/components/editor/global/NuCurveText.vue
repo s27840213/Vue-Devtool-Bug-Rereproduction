@@ -191,6 +191,7 @@ export default Vue.extend({
       const { bend } = this
       if (spans.length) {
         this.$nextTick(() => {
+          if (!this.$refs.curveText) return
           const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
           const textWidth = []
           const textHeight = []

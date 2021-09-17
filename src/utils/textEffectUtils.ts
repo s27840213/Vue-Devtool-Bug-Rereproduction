@@ -46,7 +46,7 @@ class Controller {
   getCurrentLayer (): IText {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const currLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const multiLayers = currLayer.layers as any[]
+    const multiLayers = currLayer && currLayer.layers as any[]
     if (multiLayers) {
       for (const index in multiLayers) {
         if (multiLayers[index].type === 'text') {
@@ -54,12 +54,12 @@ class Controller {
         }
       }
     }
-    return currLayer
+    return currLayer || {}
   }
 
   getSpecSubTextLayer (index: number): IText {
     const currLayer = TextUtils.getCurrLayer
-    const multiLayers = currLayer.layers as any[]
+    const multiLayers = currLayer && currLayer.layers as any[]
     return multiLayers && multiLayers[index]
   }
 
@@ -86,9 +86,7 @@ class Controller {
     }
     return Object
       .keys(colors)
-      .reduce((prev, curr) =>
-        colors[prev] > colors[curr] ? prev : curr
-      )
+      .reduce((prev, curr) => colors[prev] > colors[curr] ? prev : curr, '#000000')
   }
 
   convertColor2rgba (colorStr: string, alpha?: number) {

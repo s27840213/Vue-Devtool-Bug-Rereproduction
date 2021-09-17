@@ -1,6 +1,8 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
+import ShapeUtils from '@/utils/shapeUtils'
+
 class LayerFactary {
   newImage(config: any): IImage {
     const { width, height, initWidth, initHeight } = config.styles
@@ -12,13 +14,13 @@ class LayerFactary {
         assetId: config.srcObj.assetId
       },
       id: GeneralUtils.generateRandomString(8),
-      clipPath: `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
+      clipPath: config.clipPath ? config.clipPath : `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
       locked: false,
       moved: false,
       imgControl: false,
-      isClipper: false,
+      isClipper: true,
       dragging: false,
       designId: '',
       styles: {
@@ -46,6 +48,29 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
+    console.log(config)
+    const { clips, decoration, width, height } = config
+    clips.forEach(img => {
+      const imgConfig = {
+        isFrame: true,
+        clipPath: img.clipPath,
+        styles: img.styles,
+        srcObj: {
+          type: 'frame',
+          assetId: '',
+          userId: ''
+        }
+      }
+      Object.assign(img, this.newImage(imgConfig))
+    })
+
+    decoration.styles = {
+      width: decoration.vSize[0],
+      height: decoration.vSize[1],
+      initWidth: decoration.vSize[0],
+      initHeight: decoration.vSize[1]
+    } as any
+
     return {
       type: 'frame',
       id: GeneralUtils.generateRandomString(8),
@@ -62,15 +87,15 @@ class LayerFactary {
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: 0,
-        height: 0,
-        initWidth: config.styles.width ?? 0,
-        initHeight: config.styles.height ?? 0,
+        width: width as number,
+        height: height as number,
+        initWidth: width as number,
+        initHeight: height as number,
         zindex: -1,
         opacity: 100
       },
-      clips: config.clips,
-      decoration: config.decoration
+      clips,
+      decoration: this.newShape(decoration)
     }
   }
 
@@ -84,9 +109,10 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      editing: false,
       dragging: false,
       designId: '',
-      editing: false,
+      isEdited: false,
       styles: {
         x: 0,
         y: 0,
@@ -202,7 +228,7 @@ class LayerFactary {
       pDiff: [0, 0],
       ratio: 1,
       category: '',
-      className: '',
+      className: ShapeUtils.classGenerator(),
       locked: false,
       moved: false,
       dragging: false,
@@ -214,10 +240,10 @@ class LayerFactary {
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: 0,
-        height: 0,
-        initWidth: 0,
-        initHeight: 0,
+        width: config.width,
+        height: config.height,
+        initWidth: config.width,
+        initHeight: config.height,
         zindex: -1,
         opacity: 100
       }

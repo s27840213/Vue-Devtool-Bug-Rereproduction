@@ -37,7 +37,11 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        next()
+        if (store.getters['user/isLogin']) {
+          next({ path: from.query.redirect as string || '/' })
+        } else {
+          next()
+        }
       } catch (error) {
         console.log(error)
       }
@@ -50,7 +54,11 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        next()
+        if (store.getters['user/isLogin']) {
+          next({ path: from.query.redirect as string || '/' })
+        } else {
+          next()
+        }
       } catch (error) {
         console.log(error)
       }

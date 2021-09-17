@@ -60,16 +60,6 @@ export default function (this: any) {
         captureException(error)
       }
     },
-    getContentJson: async ({ commit, state }, id: string) => {
-      const { data, host } = state
-      try {
-        const response = await fetch(`${host}/${id}/${data}`).then(response => response.json())
-        commit('SET_contentJson', { [id]: response }, { root: true })
-        return response
-      } catch (error) {
-        captureException(error)
-      }
-    },
     resetContent ({ commit }) {
       commit(SET_STATE, {
         content: {},
