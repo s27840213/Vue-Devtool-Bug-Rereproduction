@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import userApis from '@/apis/user'
@@ -546,10 +546,10 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []
   },
-  SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
+  SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
   },
-  SET_currSubSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, types: Set<string> }) {
+  SET_currSubSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, types: Set<string> }) {
     Object.assign(state.currSelectedInfo, data)
   },
   SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {

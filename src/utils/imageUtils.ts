@@ -17,7 +17,7 @@ class ImageUtils {
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/full`
       case 'frame':
-        return require('@/assets/img/svg/image-preview.svg')
+        return require('@/assets/img/svg/frame.svg')
       default:
         return ''
     }

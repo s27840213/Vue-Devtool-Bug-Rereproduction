@@ -37,9 +37,7 @@ class MouseUtils {
       layer = this.clipperHandler(layer, clipPath, isClipper, clipperStyles)
       if (layer) {
         groupUtils.deselect()
-        store.commit('DELETE_layer', {
-          pageIndex, layerIndex
-        })
+        LayerUtils.deleteLayer(layerIndex)
         LayerUtils.addLayersToPos(pageIndex, [layer], layerIndex)
         zindexUtils.reassignZindex(pageIndex)
         groupUtils.select(pageIndex, [layerIndex])

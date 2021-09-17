@@ -18,8 +18,9 @@
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
             v-html="ShapeUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
-            @mouseover="onMouseEnter(index)"
-            @mouseleave="onMouseLeave")
+            @mouseover="onFrameMouseEnter(index)"
+            @mouseleave="onFrameMouseLeave"
+            @mouseup="onFrameMouseUp")
         //- template(v-if="config.type==='group'")
         //-   nu-sub-controller(
         //-     v-for="layer in config.layers"
@@ -97,7 +98,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IImage, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -143,6 +144,7 @@ export default Vue.extend({
       isSnapping: false,
       contentEditable: true,
       clipIndex: NaN,
+      clipedImgBuff: { type: 'frame', assetId: '', userId: '' },
       subControlerIndexs: []
     }
   },
@@ -249,6 +251,19 @@ export default Vue.extend({
       }
     }
   },
+  destroyed() {
+    /**
+     * While image is setted to frame, these event-listener should be removed
+     */
+    window.removeEventListener('mouseup', this.moveEnd)
+    window.removeEventListener('mousemove', this.moving)
+    this.isControlling = false
+    this.setCursorStyle('default')
+    StepsUtils.record()
+    if (this.isMoving) {
+      this.setIsMoving(false)
+    }
+  },
   methods: {
     ...mapMutations({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
@@ -256,13 +271,34 @@ export default Vue.extend({
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setIsMoving: 'SET_isMoving'
     }),
-    onMouseEnter(clipIndex: number) {
+    onFrameMouseEnter(clipIndex: number) {
       this.clipIndex = clipIndex
-      console.log('mouse Enter', this.clipIndex)
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
+        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
+        // TODO: image width/ height should be changed accordingly
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+      }
     },
-    onMouseLeave() {
+    onFrameMouseLeave() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        const { clips } = GeneralUtils.deepCopy(this.config)
+        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      }
       this.clipIndex = NaN
-      console.log('mouse Leave', this.clipIndex)
+    },
+    onFrameMouseUp() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
+      }
     },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -382,7 +418,7 @@ export default Vue.extend({
         transform: `translate(${clip.x}px, ${clip.y}px)`,
         fill: '#00000000',
         stroke: this.clipIndex === index ? '#7190CC' : 'none',
-        strokeWidth: '5.5px'
+        strokeWidth: `${5 * (100 / this.scaleRatio)}px`
       }
     },
     moveStart(e: MouseEvent) {

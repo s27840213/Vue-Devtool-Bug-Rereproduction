@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -12,6 +12,8 @@ class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
+  get getLayer() { return store.getters.getLayer }
+  get getCurrLayer() { return this.getLayer(this.pageIndex, this.layerIndex) }
 
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp | IFrame) {
     store.commit('ADD_newLayers', {
@@ -47,11 +49,8 @@ class LayerUtils {
     })
   }
 
-  getLayer(pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | ITmp {
-    return store.getters.getLayer(pageIndex, layerIndex)
-  }
-
   getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
+    console.log(store.getters.getCurrSelectedIndex)
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -69,7 +68,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean | string[] }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
