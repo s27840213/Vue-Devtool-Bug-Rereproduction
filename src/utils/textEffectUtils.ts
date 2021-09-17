@@ -86,10 +86,7 @@ class Controller {
     }
     return Object
       .keys(colors)
-      .reduce((prev, curr) =>
-        colors[prev] > colors[curr] ? prev : curr,
-        '#000000'
-      )
+      .reduce((prev, curr) => colors[prev] > colors[curr] ? prev : curr, '#000000')
   }
 
   convertColor2rgba (colorStr: string, alpha?: number) {
