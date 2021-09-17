@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210915"
+  version: "20210917"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -263,7 +263,7 @@ definitions:
 
               data: File name for design data (json for non-font, woff2 for font).
 
-              content: array of design category, with category_id as id of category, title as categroy name, and list as array of design ids. category_id will be -1 and title '' for list_all = 1.
+              content: array of design category, with category_id as id of category, title as categroy name, and list as array of objects with design id and design type. category_id will be -1 and title '' for list_all = 1.
 
               next_page: pagination index for next query, only for query with list_all = 1.
 
@@ -289,7 +289,12 @@ definitions:
                     list:
                       type: array
                       items:
-                        type: string
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          type:
+                            type: number
               next_page:
                 type: number
             required:
@@ -376,9 +381,9 @@ definitions:
           keyword:
             type: string
             description: keyword to search
-          object_type:
-            type: string
-            description: object type, such as svg, mark ...
+          return_obj:
+            type: number
+            description: 0 (default) for return key id string array, 1 for return obj array
   sendVcodeInput:
     type: object
     required:
@@ -438,6 +443,8 @@ definitions:
 
               token: token (will be refreshed if about to expire)
 
+              design_type_map: key as design type id, value as design type string
+
               download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
 
               upload_map: Map for uploading files to path in private bucket
@@ -474,6 +481,9 @@ definitions:
                 type: string
               token:
                 type: string
+              design_type_map:
+                type: object
+                properties: {}
               download_url:
                 type: string
               upload_map:
@@ -564,9 +574,6 @@ definitions:
           password:
             type: string
             description: User password
-          ver:
-            type: string
-            description: version
   fbLoginInput:
     type: object
     required:
