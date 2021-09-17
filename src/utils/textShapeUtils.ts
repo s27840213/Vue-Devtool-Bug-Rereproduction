@@ -44,22 +44,16 @@ class Controller {
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)
     } else {
-      styles.textShape = {
-        ...defaultAttrs,
-        ...attrs,
-        name: shape,
-        initWidth: width,
-        initHeight: height
-      }
+      Object.assign(styles.textShape, defaultAttrs, attrs, { name: shape })
     }
     if (shape === 'none') {
-      const { initHeight, initWidth, bend } = styleTextShape as any
+      const { bend } = styleTextShape as any
+      const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
-        height: initHeight,
-        width: initWidth,
+        ...textHW,
         textShape: {},
-        x: x + ((width - initWidth) / 2),
-        y: +bend < 0 ? y + height - initHeight : y
+        x: x + ((width - textHW.width) / 2),
+        y: +bend < 0 ? y + height - textHW.height : y
       })
       props.widthLimit = -1
     }
