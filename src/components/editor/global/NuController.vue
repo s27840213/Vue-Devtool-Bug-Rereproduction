@@ -17,18 +17,18 @@
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        template(v-if="config.type==='group' && isActive")
-          div(class="sub-controller")
-            nu-sub-controller(
-              v-for="(layer,index) in config.layers"
-              data-identifier="controller"
-              :style="subControllerStyles()"
-              :key="`group-controller-${index}`"
-              :layerIndex="index"
-              :pageIndex="pageIndex"
-              :config="layer"
-              :color="'#EB5757'"
-              @clickSubController="clickSubController")
+        //- template(v-if="config.type==='group' && isActive")
+        //-   div(class="sub-controller")
+        //-     nu-sub-controller(
+        //-       v-for="(layer,index) in config.layers"
+        //-       data-identifier="controller"
+        //-       :style="subControllerStyles()"
+        //-       :key="`group-controller-${index}`"
+        //-       :layerIndex="index"
+        //-       :pageIndex="pageIndex"
+        //-       :config="layer"
+        //-       :color="'#EB5757'"
+        //-       @clickSubController="clickSubController")
         template(v-if="config.type === 'text' && config.active")
           //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
