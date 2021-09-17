@@ -188,10 +188,20 @@ class ShapeUtils {
     return quadrantMapping[towardBottom][towardRight]
   }
 
-  vectorAdd(point: number[], diff: number[]) {
+  vectorAdd(point: number[], diff: number[]): number[] {
+    const result: number[] = []
     for (let i = 0; i < point.length; i++) {
-      point[i] += diff[i]
+      result[i] = point[i] + diff[i]
     }
+    return result
+  }
+
+  vectorScale(point: number[], scale: number): number[] {
+    const result: number[] = []
+    for (let i = 0; i < point.length; i++) {
+      result[i] = point[i] * scale
+    }
+    return result
   }
 
   pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[], scale: number): number[] {
@@ -200,46 +210,64 @@ class ShapeUtils {
     const trimys = scale * markerWidth[0] * Math.sin(baseDegree)
     const trimxe = scale * markerWidth[1] * Math.cos(baseDegree)
     const trimye = scale * markerWidth[1] * Math.sin(baseDegree)
+    const trimedgex = (scale / 2) * Math.cos(baseDegree)
+    const trimedgey = (scale / 2) * Math.sin(baseDegree)
     const quadrant = this.getLineQuadrant(point)
     let startPoint: number[]
     let endPoint: number[]
     let startDiff: number[]
     let endDiff: number[]
+    let edgeDiff: number[]
     switch (quadrant) {
       case 1:
         startPoint = [0, height]
         endPoint = [width, 0]
         startDiff = [trimxs, -trimys]
         endDiff = [-trimxe, trimye]
+        edgeDiff = [trimedgex, -trimedgey]
         break
       case 2:
         startPoint = [width, height]
         endPoint = [0, 0]
         startDiff = [-trimxs, -trimys]
         endDiff = [trimxe, trimye]
+        edgeDiff = [-trimedgex, -trimedgey]
         break
       case 3:
         startPoint = [width, 0]
         endPoint = [0, height]
         startDiff = [-trimxs, trimys]
         endDiff = [trimxe, -trimye]
+        edgeDiff = [-trimedgex, trimedgey]
         break
       case 4:
         startPoint = [0, 0]
         endPoint = [width, height]
         startDiff = [trimxs, trimys]
         endDiff = [-trimxe, -trimye]
+        edgeDiff = [trimedgex, trimedgey]
         break
       default:
         startPoint = [0, 0]
         endPoint = [width, height]
         startDiff = [trimxs, trimys]
         endDiff = [-trimxe, -trimye]
+        edgeDiff = [trimedgex, trimedgey]
         break
     }
 
-    if (trimWidth[0]) this.vectorAdd(startPoint, startDiff)
-    if (trimWidth[1]) this.vectorAdd(endPoint, endDiff)
+    if (trimWidth[0]) {
+      startPoint = this.vectorAdd(startPoint, startDiff)
+      startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, -1))
+    } else {
+      startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, 2))
+    }
+    if (trimWidth[1]) {
+      endPoint = this.vectorAdd(endPoint, endDiff)
+      endPoint = this.vectorAdd(endPoint, edgeDiff)
+    } else {
+      endPoint = this.vectorAdd(endPoint, this.vectorScale(edgeDiff, -2))
+    }
 
     return [...startPoint, ...endPoint]
   }
