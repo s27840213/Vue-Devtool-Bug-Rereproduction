@@ -98,7 +98,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -287,7 +287,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
-        const { clips } = GeneralUtils.deepCopy(this.config)
+        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
         Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
       }

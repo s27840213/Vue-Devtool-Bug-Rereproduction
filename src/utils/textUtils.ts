@@ -321,7 +321,6 @@ class TextUtils {
     body.style.textAlign = 'center'
     body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
-
     const scale = content.styles.scale ?? 1
     const textHW = {
       width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
