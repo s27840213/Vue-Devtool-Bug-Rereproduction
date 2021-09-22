@@ -17,6 +17,7 @@ import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
+import dropdown from '@/store/module/dropdown'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
@@ -141,9 +142,6 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     type: ''
   },
-  isOrderDropdownsOpened: false,
-  isLayerDropdownsOpened: false,
-  isPageDropdownsOpened: false,
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
   asset: {},
@@ -236,15 +234,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
-  },
-  getIsOrderDropdownsOpened(state: IEditorState) {
-    return state.isOrderDropdownsOpened
-  },
-  getIsLayerDropdownsOpened(state: IEditorState) {
-    return state.isLayerDropdownsOpened
-  },
-  getIsPageDropdownsOpened(state: IEditorState) {
-    return state.isPageDropdownsOpened
   },
   getIsColorPickerOpened(state: IEditorState) {
     return state.isColorPickerOpened
@@ -543,15 +532,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
   },
-  SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isOrderDropdownsOpened = isOpened
-  },
-  SET_isLayerDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isLayerDropdownsOpened = isOpened
-  },
-  SET_isPageDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isPageDropdownsOpened = isOpened
-  },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
     console.log(state.isColorPickerOpened)
@@ -612,6 +592,7 @@ export default new Vuex.Store({
     templates,
     textStock,
     background,
-    modal
+    modal,
+    dropdown
   }
 })

@@ -119,6 +119,8 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
+import { Layer } from 'konva/types/Layer'
+import dropdownUtils from '@/utils/dropdownUtils'
 
 export default Vue.extend({
   props: {
@@ -307,7 +309,8 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setIsMoving: 'SET_isMoving'
+      setIsMoving: 'SET_isMoving',
+      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
     onFrameMouseEnter(clipIndex: number) {
       if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
@@ -1247,16 +1250,10 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
-      this.setIsLayerDropdownsOpened(true)
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
-      this.$nextTick(() => {
-        const el = document.querySelector('.dropdowns--layer') as HTMLElement
-        const mousePos = MouseUtils.getMouseAbsPoint(event)
-        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-        el.focus()
-      })
+      dropdownUtils.openLayerDropdown(event)
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any

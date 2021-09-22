@@ -1,7 +1,8 @@
 <template lang="pug">
-  div(class="dropdowns dropdowns--layer bg-gray-6")
+  div(class="dropdown dropdown__layer bg-gray-6"
+      @click.stop="closeDropdown")
     template(v-if="getToekn!==''")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="pageUploadMenu.action")
         svg-icon(
           class="pointer"
@@ -11,7 +12,7 @@
         span(class="ml-10 body-2") {{pageUploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUploadMenu.shortcutText}}
     template(v-if="hasDesignId && getToekn!==''")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="pageUpdateMenu.action")
         svg-icon(
           class="pointer"
@@ -21,7 +22,7 @@
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
     template(v-if="getToekn!=='' && isText")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="uploadMenu.action")
         svg-icon(
           class="pointer"
@@ -31,7 +32,7 @@
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && isText")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="updateMenu.action")
         svg-icon(
           class="pointer"
@@ -41,7 +42,7 @@
         span(class="ml-10 body-2") {{updateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     template(v-if="isImage")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="updateImageAsClipper.action")
         svg-icon(
           class="pointer"
@@ -50,10 +51,10 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateImageAsClipper.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    hr(class="dropdowns__hr")
+    hr(class="dropdown__hr")
     div(v-for="(data,index) in shortcutMenu()"
-        :key="`dropdowns__shortcut-${index}`"
-        class="dropdowns__item"
+        :key="`dropdown__shortcut-${index}`"
+        class="dropdown__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -63,7 +64,7 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     div(v-if="(isGroup && currSelectedInfo.layers.length === 1) || (!isGroup && currSelectedInfo.layers.length > 1)"
-        class="dropdowns__item"
+        class="dropdown__item"
         @click="groupOption.action")
       svg-icon(
         class="pointer"
@@ -72,11 +73,11 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{groupOption.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{groupOption.shortcutText}}
-    hr(class="dropdowns__hr")
+    hr(class="dropdown__hr")
     div(v-if="layerNum > 1")
       div(v-for="(data,index) in orderMenu()"
-          :key="`dropdowns__order-${index}`"
-          class="dropdowns__item"
+          :key="`dropdown__order-${index}`"
+          class="dropdown__item"
           @click="data.action")
         svg-icon(
           class="pointer"
@@ -86,9 +87,9 @@
         span(class="ml-10 body-2") {{data.text}}
         div(class="shortcut")
           span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="dropdowns__hr")
+    hr(class="dropdown__hr")
     div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
-        class="dropdowns__item"
+        class="dropdown__item"
         @click="setBackgroundImage")
       svg-icon(
         class="pointer"
@@ -109,6 +110,7 @@ import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
+import dropdownUtils from '@/utils/dropdownUtils'
 
 export default Vue.extend({
   data() {
@@ -286,43 +288,13 @@ export default Vue.extend({
         config: (this.currSelectedInfo.layers[0] as IImage)
       })
       ShortcutUtils.del()
+    },
+    closeDropdown() {
+      dropdownUtils.closeDropdown()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.dropdowns {
-  width: initial;
-  height: initial;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: setZindex("dropdowns");
-  justify-content: center;
-  border: 1px solid setColor(gray-4);
-  &:focus {
-    outline: none;
-  }
-  &__item {
-    display: flex;
-    align-items: center;
-    padding: 5px;
-    padding: 5px 10px;
-    &:active {
-      background-color: setColor(blue-3);
-    }
-  }
-  &__hr {
-    margin: 0px;
-    border: none;
-    border-bottom: 1px solid setColor(gray-4);
-  }
-}
-
-.shortcut {
-}
 </style>

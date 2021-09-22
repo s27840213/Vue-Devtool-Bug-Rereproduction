@@ -5,7 +5,7 @@ $buttons: (
 	primary: setColor(blue-1),
 	secondary: setColor(blue-2),
 	tertiary: setColor(blue-3),
-	white: setColor(white),
+	gray: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none
 );
@@ -14,8 +14,17 @@ $textColor: (
 	primary: setColor(white),
 	secondary: setColor(blue-1),
 	tertiary: setColor(white),
-	whites: setColor(blue-1),
-	inactive: setColor(gray-2),
+	gray: setColor(gray-2),
+	inactive: setColor(white),
+	icon: none
+);
+
+$borderColor: (
+	primary: none,
+	secondary: none,
+	tertiary: none,
+	gray: none,
+	inactive: setColor(white),
 	icon: none
 );
 

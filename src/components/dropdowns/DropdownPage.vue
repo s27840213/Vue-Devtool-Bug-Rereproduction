@@ -1,7 +1,8 @@
 <template lang="pug">
-  div(class="dropdowns dropdowns--page bg-gray-6")
+  div(class="dropdown dropdown__page bg-gray-6"
+      @click.stop="closeDropdown")
     template(v-if="getToekn!==''")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="uploadMenu.action")
         svg-icon(
           class="pointer"
@@ -11,7 +12,7 @@
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     template(v-if="hasDesignId && getToekn!==''")
-      div(class="dropdowns__item"
+      div(class="dropdown__item"
           @click="updateMenu.action")
         svg-icon(
           class="pointer"
@@ -21,8 +22,8 @@
         span(class="ml-10 body-2") {{updateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     div(v-for="(data,index) in shortcutMenu()"
-        :key="`dropdowns__shortcut-${index}`"
-        class="dropdowns__item"
+        :key="`dropdown__shortcut-${index}`"
+        class="dropdown__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -31,9 +32,9 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="dropdowns__hr")
+    hr(class="dropdown__hr")
     div(v-if="getBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
-        class="dropdowns__item"
+        class="dropdown__item"
         @click="detachBackgroundImage")
       svg-icon(
         class="pointer"
@@ -56,6 +57,7 @@ import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
 import { IFrame, IImage } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
+import dropdownUtils from '@/utils/dropdownUtils'
 
 export default Vue.extend({
   data() {
@@ -226,44 +228,13 @@ export default Vue.extend({
           color: '#ffffff'
         })
       }
+    },
+    closeDropdown() {
+      dropdownUtils.closeDropdown()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.dropdowns {
-  width: initial;
-  height: initial;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: setZindex("dropdowns");
-  justify-content: center;
-  border: 1px solid setColor(gray-4);
-  &:focus {
-    outline: none;
-  }
-  &__item {
-    display: flex;
-    align-items: center;
-    padding: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    &:active {
-      background-color: setColor(blue-3);
-    }
-  }
-  &__hr {
-    margin: 0px;
-    border: none;
-    border-bottom: 1px solid setColor(gray-4);
-  }
-}
-
-.shortcut {
-}
 </style>

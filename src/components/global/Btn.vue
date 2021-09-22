@@ -1,5 +1,5 @@
 <template lang="pug">
-  button(class="btn" :class="`btn-${type}`")
+  button(class="btn" :class="`btn-${buttonType}`" :disabled="disabled")
     svg-icon(v-if="hasIcon"
       class="btn__icon"
       :iconName="iconName"
@@ -35,6 +35,16 @@ export default Vue.extend({
     hasIcon: {
       type: Boolean,
       default: false
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    buttonType(): string {
+      const size = this.type.split('-')[1]
+      return this.disabled ? `inactive-${size}` : this.type
     }
   }
 })
@@ -42,5 +52,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .btn {
+  transition: background-color 0.2s ease-out;
 }
 </style>

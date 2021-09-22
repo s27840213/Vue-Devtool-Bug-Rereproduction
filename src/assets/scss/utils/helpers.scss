@@ -32,8 +32,14 @@
 
 // padding and margin
 $spacer: 5;
-@for $i from 1 through 12 {
+@for $i from 1 through 24 {
     $space: ($spacer * $i);
+    .w-#{$space} {
+        width: $space*1px;
+    }
+    .h-#{$space} {
+        width: $space*1px;
+    }
     .mt-#{$space} {
         margin-top: $space*1px;
     }
@@ -81,6 +87,22 @@ $spacer: 5;
     .p-#{$space} {
         padding: $space*1px;
     }
+}
+
+.rounded-none	{
+    border-radius: 0px;
+}
+.rounded-sm {	
+    border-radius: 0.125rem;
+}
+.rounded {
+    border-radius: 0.25rem;
+}
+.rounded-md {	
+    border-radius: 0.375rem;
+}
+.rounded-lg {
+    border-radius: 0.5rem;
 }
 
 .text-left {
