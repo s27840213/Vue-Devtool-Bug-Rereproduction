@@ -77,7 +77,7 @@ class GroupUtils {
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
   get getPage() { return store.getters.getPage }
-
+  get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   group() {
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
     if (currSelectedInfo.layers.length < 2) {
@@ -107,6 +107,7 @@ class GroupUtils {
     if (targetLayer.type === 'group') {
       targetLayer.layers.forEach((layer: IGroup, index: number) => {
         layer.styles.zindex = targetLayer.styles.zindex + index
+        layer.active = false
       })
       const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
@@ -215,6 +216,10 @@ class GroupUtils {
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
+      // if (this.currSubSelectedIndex !== -1) {
+      //   LayerUtils.updateSubLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, this.currSubSelectedIndex, { active: false })
+      //   store.commit('SET_currSubSelectedIndex', -1)
+      // }
       if (store.getters.getCurrSelectedLayers.length === 1) {
         LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           active: false
@@ -223,8 +228,6 @@ class GroupUtils {
         const tmpLayer = getTmpLayer()
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
-        console.log(store.getters.getCurrSelectedLayers.map((layer: IShape | IText | IImage | IGroup) => layer.styles.zindex))
-        console.log(store.getters.getLayers(this.pageIndex).map((layer: IShape | IText | IImage | IGroup) => layer.styles.zindex))
         LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
         LayerUtils.updateLayersOrder(this.currSelectedInfo.pageIndex)
       }

@@ -108,7 +108,7 @@ div(style="position:relative;")
             span {{ confirmErrorMessage }}
         div(class="mt-20 disp-flex" style="justify-content: center;")
           btn(:type="'primary-mid'" class="btn-shadow w-50" @click.native="onResetDoneClicked()") Done
-
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -137,13 +137,15 @@ export default Vue.extend({
       confirmPassword: '' as string,
       confirmErrorMessage: '' as string,
       isResetClicked: false as boolean,
-      isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean
+      isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      isLoading: false
     }
   },
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
     if (code !== undefined && !store.getters['user/isLogin']) {
+      this.isLoading = true
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
     }
@@ -156,6 +158,7 @@ export default Vue.extend({
           prompt: 'select_account',
           ux_mode: 'redirect'
         }).then(() => {
+          this.isLoading = true
           const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
           const idToken = currentUser.getAuthResponse().id_token
           this.googleLogin(idToken)
@@ -285,11 +288,14 @@ export default Vue.extend({
     },
     async onLogInClicked() {
       this.isLoginClicked = true
+      this.isLoading = true
       if (this.password.length === 0) {
         this.passwordErrorMessage = 'Please enter your password.'
+        this.isLoading = false
         return
       }
       if (!this.mailValid || !this.passwordValid) {
+        this.isLoading = false
         return
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
@@ -309,8 +315,8 @@ export default Vue.extend({
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg
-        console.log('failed', data)
       }
+      this.isLoading = false
     },
     onForgotClicked() {
       this.currentPageIndex = 1
@@ -322,7 +328,9 @@ export default Vue.extend({
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
+      this.isLoading = true
       if (!this.mailValid) {
+        this.isLoading = false
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
@@ -330,6 +338,7 @@ export default Vue.extend({
         this.isVcodeClicked = false
         this.currentPageIndex = 2
       }
+      this.isLoading = false
     },
     async onResendClicked() {
       if (this.email.length === 0) {
@@ -357,12 +366,15 @@ export default Vue.extend({
     },
     async onEnterCodeDoneClicked() {
       this.isVcodeClicked = true
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       if (!this.vcodeValid) {
         this.vcodeErrorMessage = 'Please enter the verification code.'
+        this.isLoading = false
         return
       }
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
@@ -376,18 +388,23 @@ export default Vue.extend({
         this.vcodeErrorMessage = data.msg
         console.log(data.msg)
       }
+      this.isLoading = false
     },
     async onResetDoneClicked() {
       this.isResetClicked = true
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       if (this.password.length === 0) {
         this.confirmErrorMessage = 'Please enter the new password.'
+        this.isLoading = false
         return
       } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
         this.confirmErrorMessage = 'Your confirmation password does not match the new password.'
+        this.isLoading = false
         return
       }
 
@@ -396,11 +413,10 @@ export default Vue.extend({
         this.email = ''
         this.currentPageIndex = 0
         this.isLoginClicked = false
-      } else {
-        console.log(data.msg)
       }
       this.password = ''
       this.confirmPassword = ''
+      this.isLoading = false
     },
     onFacebookClicked() {
       if (this.$route.query.redirect) {

@@ -20,6 +20,7 @@ import NuSubController from '@/components/editor/global/NuSubController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
 import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
+import Spinner from '@/components/global/Spinner.vue'
 
 Vue.component('svg-icon', SvgIcon)
 Vue.component('tmp-images', TmpImages)
@@ -41,3 +42,4 @@ Vue.component('nu-sub-controller', NuSubController)
 Vue.component('nu-shape', NuShape)
 Vue.component('nu-img-controller', NuImgController)
 Vue.component('nu-frame', NuFrame)
+Vue.component('spinner', Spinner)

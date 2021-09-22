@@ -50,7 +50,6 @@ class LayerUtils {
   }
 
   getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
-    console.log(store.getters.getCurrSelectedIndex)
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -90,10 +89,11 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, indexs: Array<number>, props: { [index: string]: number | string | boolean }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
-      indexs,
+      layerIndex,
+      targetIndex,
       props
     })
   }

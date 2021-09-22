@@ -24,18 +24,6 @@
                   :data-sindex="sIndex"
                   :key="span.id",
                   :style="textStyles(span.styles)") {{ span.text }}
-        //- Plase don't remove the code below, it may be used in the future
-        //- template(v-if="config.type==='group'")
-        //-   div(:style="groupControllerStyle()")
-        //-     nu-sub-controller(
-        //-       v-for="(layer, index) in config.layers"
-        //-       data-identifier="controller"
-        //-       :key="`group-controller-${index}`"
-        //-       :layerIndex="index"
-        //-       :pageIndex="pageIndex"
-        //-       :config="layer"
-        //-       :color="'#EB5757'"
-        //-       @clickSubController="clickSubController")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-sub-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -47,7 +35,6 @@ import Vue from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
-import GroupUtils from '@/utils/groupUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
@@ -201,13 +188,12 @@ export default Vue.extend({
       // })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 10)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        backgroundColor: this.hexToRGB(this.color, '0.2'),
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
@@ -537,13 +523,7 @@ export default Vue.extend({
       }
     },
     onClickEvent() {
-      console.log('emit!')
-      this.$emit('clickSubController', [this.layerIndex])
-    },
-    clickSubController(indexs: Array<number>) {
-      console.log(indexs)
-      indexs.unshift(this.layerIndex)
-      this.$emit('clickSubController', indexs)
+      this.$emit('clickSubController', this.layerIndex, this.config.type)
     }
   }
 })

@@ -71,6 +71,7 @@ div(style="position:relative;")
       div(v-else class="disp-flex align-center text-gray-3"
       style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -96,13 +97,15 @@ export default Vue.extend({
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
-      isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean
+      isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      isLoading: false
     }
   },
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
     if (code !== undefined && !store.getters['user/isLogin']) {
+      this.isLoading = true
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
     }
@@ -115,6 +118,7 @@ export default Vue.extend({
           prompt: 'select_account',
           ux_mode: 'redirect'
         }).then(() => {
+          this.isLoading = true
           const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
           const idToken = currentUser.getAuthResponse().id_token
           this.googleLogin(idToken)
@@ -235,7 +239,9 @@ export default Vue.extend({
     },
     async onSignUpClicked() {
       this.isSignUpClicked = true
+      this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
+        this.isLoading = false
         return
       }
       const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
@@ -243,6 +249,7 @@ export default Vue.extend({
         this.currentPageIndex = 1
         this.isVcodeClicked = false
       }
+      this.isLoading = false
     },
     async onResendClicked() {
       if (this.email.length === 0) {
@@ -252,7 +259,6 @@ export default Vue.extend({
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
-      console.log(data)
       if (data.flag === 0) {
         const clock = window.setInterval(() => {
           this.leftTime--
@@ -268,24 +274,27 @@ export default Vue.extend({
     },
     async onEnterCodeDoneClicked() {
       this.isVcodeClicked = true
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       if (!this.vcodeValid) {
         this.vcodeErrorMessage = 'Please enter the verification code.'
+        this.isLoading = false
         return
       }
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
-        console.log('token', data.token)
-        console.log('token_expire', data.expire_time)
-        // this.currentPageIndex = 2
+        this.$router.push({ name: 'Login' })
+        this.currentPageIndex = 0
       } else {
         this.vcode = ''
         this.vcodeErrorMessage = data.msg
         console.log(data.msg)
       }
+      this.isLoading = false
     },
     onFacebookClicked() {
       if (this.$route.query.redirect) {

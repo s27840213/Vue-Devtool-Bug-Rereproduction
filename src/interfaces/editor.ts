@@ -1,4 +1,4 @@
-import { IGroup, IImage, IShape, IText, ITmp } from "./layer";
+import { IGroup, IImage, IShape, IText, ITmp } from './layer'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,
@@ -7,3 +7,7 @@ export interface ICurrSelectedInfo {
   types: Set<string>
 }
 
+export interface ICurrSubSelectedInfo {
+  index: number
+  type: string
+}
