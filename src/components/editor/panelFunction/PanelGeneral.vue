@@ -8,12 +8,12 @@
       div(class="border-gray-4 p-10")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'")
-    div(class="action-bar flex-between")
-      svg-icon(v-for="(icon,index) in mappingIcons('align')"
-        :key="`align-icon-${index}`"
-        :class="{'pointer': !isLocked}"
-        :iconName="icon" :iconWidth="'24px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="iconAction(icon)")
+    //- div(class="action-bar flex-between")
+    //-   svg-icon(v-for="(icon,index) in mappingIcons('align')"
+    //-     :key="`align-icon-${index}`"
+    //-     :class="{'pointer': !isLocked}"
+    //-     :iconName="icon" :iconWidth="'24px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+    //-     @click.native="iconAction(icon)")
     div(class="action-bar flex-between")
       svg-icon(class="layers-alt"
         :class="{'pointer': !isLocked}"

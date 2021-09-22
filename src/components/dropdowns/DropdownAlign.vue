@@ -7,7 +7,7 @@
         div(v-for="(data,index) in alignDatas()"
             :key="`dropdown-${index}`"
             class="dropdown__item"
-            @click="data.action")
+            @click="MappingUtils.mappingIconAction(data.icon)")
           svg-icon(
             class="pointer"
             :iconName="data.icon"
@@ -22,7 +22,7 @@
         div(v-for="(data,index) in distributeDatas()"
             :key="`dropdown-${index}`"
             class="dropdown__item"
-            @click="data.action")
+            @click="MappingUtils.mappingIconAction(data.icon)")
           svg-icon(
             class="pointer"
             :iconName="data.icon"
@@ -52,6 +52,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      MappingUtils
     }
   },
   computed: {
@@ -72,8 +73,7 @@ export default Vue.extend({
       return icons.map((icon: string, index: number) => {
         return {
           icon: icon,
-          text: texts[index],
-          action: MappingUtils.mappingIconAction(icon)
+          text: texts[index]
         }
       })
     },
@@ -83,8 +83,7 @@ export default Vue.extend({
       return icons.map((icon: string, index: number) => {
         return {
           icon: icon,
-          text: texts[index],
-          action: MappingUtils.mappingIconAction(icon)
+          text: texts[index]
         }
       })
     }
