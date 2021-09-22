@@ -79,7 +79,7 @@ export default Vue.extend({
     },
     'config.pDiff': {
       handler: function(newVal) {
-        const styleText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
+        const styleText = shapeUtils.transFormatter(this.config.className, this.config.transArray ?? [], {
           cSize: this.config.cSize,
           pSize: this.config.pSize,
           pDiff: newVal
@@ -90,7 +90,7 @@ export default Vue.extend({
     },
     'config.point': {
       handler: function(newVal) {
-        const styleText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, newVal, this.config.markerWidth)
+        const styleText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray ?? [], this.config.size, newVal, this.config.markerWidth)
         this.transNode.textContent = styleText
 
         Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, this.config.size[0], this.config.styles))
