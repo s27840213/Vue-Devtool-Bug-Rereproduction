@@ -67,7 +67,6 @@ export default Vue.extend({
     } else if (this.config.category === 'D') {
       const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
       this.transNode = shapeUtils.addStyleTag(transText)
-      this.filterTemplate = this.getFilterTemplate()
     }
   },
   watch: {
@@ -86,6 +85,15 @@ export default Vue.extend({
           pDiff: newVal
         })
         this.transNode.textContent = styleText
+      },
+      deep: true
+    },
+    'config.point': {
+      handler: function(newVal) {
+        const styleText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, newVal, this.config.markerWidth)
+        this.transNode.textContent = styleText
+
+        Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, this.config.size[0], this.config.styles))
       },
       deep: true
     }

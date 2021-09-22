@@ -1,3 +1,5 @@
+import { ICoordinate } from '@/interfaces/frame'
+
 class ShapeUtils {
   addStyleTag(styleText: string): Text {
     const style = document.createElement('style') as HTMLStyleElement
@@ -279,6 +281,26 @@ class ShapeUtils {
     const height = Math.abs(yDiff)
     const baseDegree = Math.atan2(height, width)
     return { xDiff, yDiff, width, height, baseDegree }
+  }
+
+  updatedDimensions(point: number[], scale: number, styles: {width: number, height: number, initWidth: number, initHeight: number}):
+  {width: number, height: number, initWidth: number, initHeight: number} {
+    const ratio = styles.width / styles.initWidth
+    const { width, height, baseDegree } = this.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+
+    const res = {
+      initWidth: width + 2 * dx + 2,
+      initHeight: height + 2 * dy + 2,
+      width: 0,
+      height: 0
+    }
+
+    res.width = res.initWidth * ratio
+    res.height = res.initHeight * ratio
+
+    return res
   }
 }
 

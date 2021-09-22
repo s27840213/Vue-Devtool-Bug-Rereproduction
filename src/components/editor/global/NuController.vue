@@ -70,7 +70,12 @@
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
           :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
-          div(v-for="(scaler, index) in controlPoints.scalers"
+          div(v-for="(end, index) in (config.category === 'D') ? lineEnds(controlPoints.scalers, config.point) : []"
+              class="control-point"
+              :key="index"
+              :style="Object.assign(end, {'cursor': 'pointer'})"
+              @mousedown.left.stop="lineEndMoveStart")
+          div(v-for="(scaler, index) in (config.category !== 'D') ? controlPoints.scalers : []"
               class="control-point"
               :key="index"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
@@ -88,6 +93,7 @@
                 :key="index"
                 :style="resizerBarStyles(resizer)")
           div(class="control-point__rotater-wrapper"
+              v-if="config.category !== 'D'"
               :style="`transform: scale(${100/scaleRatio})`")
             img(class="control-point__rotater"
               :src="require('@/assets/img/svg/rotate.svg')"
@@ -114,6 +120,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
@@ -133,6 +140,9 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
       initImgSize: { width: 0, height: 0 },
+      initCoordinate: { x: 0, y: 0 },
+      initReferencePoint: { x: 0, y: 0 },
+      initQuadrant: 4,
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
@@ -300,6 +310,14 @@ export default Vue.extend({
       }
       return resizers
     },
+    lineEnds(scalers: any, point: number[]) {
+      const quadrant = shapeUtils.getLineQuadrant(point)
+      if (quadrant % 2 === 0) {
+        return [scalers[0], scalers[2]]
+      } else {
+        return [scalers[1], scalers[3]]
+      }
+    },
     textScaleStyle() {
       return {
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
@@ -351,10 +369,11 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const { x, y, width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.config.category, this.config.size?.[0])
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
+        transform: `translate3d(${x}px, ${y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        width: `${width}px`,
+        height: `${height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
@@ -602,6 +621,65 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      this.$emit('setFocus')
+      this.$emit('clearSnap')
+    },
+    lineEndMoveStart(event: MouseEvent) {
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.isControlling = true
+
+      const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
+      this.center = ControlUtils.getRectCenter(rect)
+      const vect = MouseUtils.getMouseRelPoint(event, this.center)
+
+      // Get client point as no rotation
+      const clientP = ControlUtils.getNoRotationPos(vect, this.center, 0)
+
+      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+
+      const quadrant = shapeUtils.getLineQuadrant(this.config.point)
+
+      const markerIndex = ControlUtils.getMarkerIndex(this.control, quadrant)
+
+      this.initCoordinate = { x: this.config.point[markerIndex * 2], y: this.config.point[markerIndex * 2 + 1] }
+      this.initQuadrant = quadrant
+
+      const quadrantByMarkerIndex = (markerIndex === 0) ? (quadrant - 1 + 2) % 4 + 1 : quadrant
+      this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
+
+      this.currCursorStyling(event)
+      document.documentElement.addEventListener('mousemove', this.lineEndMoving, false)
+      document.documentElement.addEventListener('mouseup', this.lineEndMoveEnd, false)
+    },
+    lineEndMoving(event: MouseEvent) {
+      event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
+      const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const [dx, dy] = [diff.offsetX, diff.offsetY]
+
+      const markerIndex = ControlUtils.getMarkerIndex(this.control, this.initQuadrant)
+
+      const newPoint: number[] = Array.from(this.config.point)
+      newPoint[markerIndex * 2] = this.initCoordinate.x + dx
+      newPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
+
+      const trans = ControlUtils.getTranslateCompensationForLine(markerIndex, this.initReferencePoint, this.config.styles, (this.config.size ?? [1])[0], newPoint)
+
+      ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, newPoint)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+    },
+    lineEndMoveEnd() {
+      this.isControlling = false
+      StepsUtils.record()
+
+      this.setCursorStyle('default')
+      document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
+      document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },

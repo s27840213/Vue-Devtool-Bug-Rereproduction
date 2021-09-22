@@ -3,6 +3,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { stringToArray } from 'konva/types/shapes/Text'
 import { SidebarPanelType } from '@/store/types'
+import shapeUtils from '@/utils/shapeUtils'
 
 class Controller {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
@@ -128,6 +129,83 @@ class Controller {
         initData.ySign * (sizeOffset.height / 2) * Math.sin(initData.angle) + initData.x,
       y: -sizeOffset.height / 2 + initData.xSign * (sizeOffset.width / 2) * Math.sin(initData.angle) +
         initData.ySign * (sizeOffset.height / 2) * Math.cos(initData.angle) + initData.y
+    }
+  }
+
+  getAbsPointByQuadrant(point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+    const { width, height, baseDegree } = shapeUtils.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    const ratio = styles.width / styles.initWidth
+    switch (quadrant) {
+      case 1:
+        return { x: styles.x + dx * ratio, y: styles.y + (dy + height) * ratio }
+      case 2:
+        return { x: styles.x + (dx + width) * ratio, y: styles.y + (dy + height) * ratio }
+      case 3:
+        return { x: styles.x + (dx + width) * ratio, y: styles.y + dy * ratio }
+      case 4:
+        return { x: styles.x + dx * ratio, y: styles.y + dy * ratio }
+      default:
+        return { x: styles.x + dx * ratio, y: styles.y + dy * ratio }
+    }
+  }
+
+  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: {width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+    const { width, height, baseDegree } = shapeUtils.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    const ratio = styles.width / styles.initWidth
+    switch (quadrant) {
+      case 1:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - (dy + height) * ratio }
+      case 2:
+        return { x: referencePoint.x - (dx + width) * ratio, y: referencePoint.y - (dy + height) * ratio }
+      case 3:
+        return { x: referencePoint.x - (dx + width) * ratio, y: referencePoint.y - dy * ratio }
+      case 4:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - dy * ratio }
+      default:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - dy * ratio }
+    }
+  }
+
+  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: {width: number, initWidth: number}, scale: number, newPoint: number[]): ICoordinate {
+    const newNormalQuadrant = shapeUtils.getLineQuadrant(newPoint)
+    const newQuadrantByMarkerIndex = (markerIndex === 0) ? (newNormalQuadrant - 1 + 2) % 4 + 1 : newNormalQuadrant
+    // If the startMarker is dragged, take the symmetric version (w.r.t. the origin) of the quadrant
+    return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
+  }
+
+  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number}, category: string, scale: number):
+  {x: number, y: number, width: number, height: number} {
+    if (category === 'D') {
+      scale = scale ?? 1
+      const { width, height, baseDegree } = shapeUtils.lineDimension(point)
+      const dx = 2 * scale * Math.sin(baseDegree)
+      const dy = 2 * scale * Math.cos(baseDegree)
+      const ratio = styles.width / styles.initWidth
+      return {
+        x: styles.x + (dx + 1) * ratio,
+        y: styles.y + (dy + 1) * ratio,
+        width: width * ratio,
+        height: height * ratio
+      }
+    } else {
+      return {
+        x: styles.x,
+        y: styles.y,
+        width: styles.width,
+        height: styles.height
+      }
+    }
+  }
+
+  getMarkerIndex(control: {xSign: number, ySign: number}, quadrant: number) {
+    if ([2, 3].includes(quadrant)) {
+      return (1 - control.xSign) / 2 // -1 => 1, 1 => 0
+    } else {
+      return (control.xSign + 1) / 2 // -1 => 0, 1 => 1
     }
   }
 
@@ -312,6 +390,16 @@ class Controller {
       layerIndex,
       props: {
         pDiff
+      }
+    })
+  }
+
+  updateShapeLinePoint(pageIndex: number, layerIndex: number, point: number[]) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        point
       }
     })
   }
