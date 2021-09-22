@@ -35,14 +35,14 @@
         v-click-outside="handleColorModal"
         :currentColor="props.color"
         @update="handleColorUpdate")
-    action-bar(class="flex-evenly")
+    div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="pointer record-selection"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
-    action-bar(class="flex-evenly")
+    div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer"
         :key="`gp-action-icon-${index}`"
@@ -206,7 +206,7 @@ export default Vue.extend({
       }
       StepsUtils.record()
     },
-    handleColorUpdate (color: string) {
+    handleColorUpdate(color: string) {
       if (color === this.props.color) return
 
       const nan = {
