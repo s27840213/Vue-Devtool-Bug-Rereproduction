@@ -11,7 +11,7 @@
           @dragleave="onDragLeave($event)"
           @click.left="onClick"
           @click.right.stop="onRightClick"
-          @mousedown.left="moveStart"
+          @mousedown.left="(config.type === 'shape' && config.category === 'D')? '' : moveStart"
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave"
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
@@ -98,6 +98,10 @@
             img(class="control-point__rotater"
               :src="require('@/assets/img/svg/rotate.svg')"
               @mousedown.left.stop="rotateStart")
+      div(v-if="!isLocked && config.type === 'shape' && config.category === 'D'"
+          class="nu-controller__line-mover"
+          :style="lineMoverStyles()"
+          @mousedown.left="moveStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -149,6 +153,7 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
+      isHover: false,
       contentEditable: true
     }
   },
@@ -359,6 +364,8 @@ export default Vue.extend({
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       // console.log('mouse over !:', this.layerIndex)
+      if (this.getLayerType === 'shape' && this.config.category === 'D') return
+      this.isHover = shown
       if (this.getLayerType === 'image' && LayerUtils.layerIndex !== this.layerIndex) {
         console.log('clipper is target')
       }
@@ -377,6 +384,7 @@ export default Vue.extend({
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        cursor: (this.isHover && (this.config.type !== 'shape' || this.config.category !== 'D')) ? 'pointer' : 'default',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -395,6 +403,16 @@ export default Vue.extend({
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none'
       }
+    },
+    lineMoverStyles() {
+      const zindex = (this.layerIndex + 1) * 100
+      const { x, y, width, height } = this.config.styles
+      const ratio = this.config.styles.height / this.config.styles.initHeight
+      const moverHeight = Math.max(this.config.size[0], 8) * ratio
+      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
+      const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
+      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      return `width: ${moverWidth}px; height: ${moverHeight}px; transform: translate3d(${x + (width - moverWidth) / 2}px, ${y + (height - moverHeight) / 2}px, ${zindex}px) rotate(${degree}deg)`
     },
     moveStart(e: MouseEvent) {
       // if (!this.isLocked) {
@@ -1262,9 +1280,6 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    &:hover {
-      cursor: pointer;
-    }
   }
   &__ctrl-points {
     display: flex;
@@ -1272,10 +1287,14 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    &:hover {
-      cursor: pointer;
-    }
     pointer-events: "none";
+  }
+
+  &__line-mover {
+    cursor: pointer;
+    background-color: transparent;
+    opacity: 0.5;
+    pointer-events: initial;
   }
 
   &__lock-icon {
