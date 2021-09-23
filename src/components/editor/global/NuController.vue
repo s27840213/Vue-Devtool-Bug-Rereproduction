@@ -93,8 +93,14 @@
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
+          div(class="control-point__mover-wrapper"
+              v-if="isLine"
+              :style="`transform: scale(${100/scaleRatio})`")
+            img(class="control-point__mover"
+              :src="require('@/assets/img/svg/rotate.svg')"
+              @mousedown.left.stop="moveStart")
           div(class="control-point__rotater-wrapper"
-              v-if="config.category !== 'D'"
+              v-else
               :style="`transform: scale(${100/scaleRatio})`")
             img(class="control-point__rotater"
               :src="require('@/assets/img/svg/rotate.svg')"
@@ -1283,6 +1289,23 @@ export default Vue.extend({
   }
 }
 
+@mixin widget-point-wrapper {
+  position: absolute;
+  top: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  transform-origin: top;
+}
+
+@mixin widget-point {
+  @include size(20px, 20px);
+  position: relative;
+  left: 0;
+  top: 0;
+  pointer-events: auto;
+  cursor: move;
+}
+
 .control-point {
   pointer-events: auto;
   position: absolute;
@@ -1297,19 +1320,16 @@ export default Vue.extend({
     color: "#00000000";
   }
   &__rotater-wrapper {
-    position: absolute;
-    top: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    transform-origin: top;
+    @include widget-point-wrapper;
   }
   &__rotater {
-    @include size(20px, 20px);
-    position: relative;
-    left: 0;
-    top: 0;
-    pointer-events: auto;
-    cursor: move;
+    @include widget-point;
+  }
+  &__mover-wrapper {
+    @include widget-point-wrapper;
+  }
+  &__mover {
+    @include widget-point;
   }
   &__move-bar {
     cursor: move;
