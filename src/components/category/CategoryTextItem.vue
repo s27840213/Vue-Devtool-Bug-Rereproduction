@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src"
+    :src="src || `https://template.vivipic.com/text/${item.id}/prev`"
     draggable="true"
     style="object-fit: contain;"
     @dragstart="dragStart($event)"
@@ -16,7 +16,7 @@ import AssetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   props: {
     src: String,
-    objectId: String
+    item: Object
   },
   components: {},
   computed: {
@@ -40,14 +40,10 @@ export default Vue.extend({
       const y = ((event.clientY - rect.y) / rect.height * image.height) * (this.scaleRatio / 100)
 
       dataTransfer.setDragImage(image, x, y)
-      const config = {
-        type: 'text',
-        id: this.objectId
-      }
-      dataTransfer.setData('data', JSON.stringify(config))
+      dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addText() {
-      AssetUtils.addText(this.objectId)
+      AssetUtils.addAsset(this.item)
     }
   }
 })

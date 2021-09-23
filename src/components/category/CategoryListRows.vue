@@ -6,8 +6,8 @@
         @click="onAction(title)")
         slot(name="action") 更多
     category-list-row
-      div(v-for="id in list" :key="id")
-        slot(name="preview" :id="id")
+      div(v-for="item in list" :key="item.id")
+        slot(name="preview" :item="item")
           img(:src="require('@/assets/img/svg/image-preview.svg')")
 </template>
 

@@ -19,19 +19,17 @@
           :list="list"
           :title="title"
           @action="handleSearch")
-          template(v-slot:preview="{ id }")
+          template(v-slot:preview="{ item }")
             category-template-item(class="panel-template__item"
-              :src="`${host}/${id}/${preview}`"
-              :objectId="id")
+              :item="item")
       template(v-slot:category-template-item="{ list, title }")
         div(class="panel-template__items")
           div(v-if="title"
             class="panel-template__header") {{ title }}
-          category-template-item(v-for="id in list"
+          category-template-item(v-for="item in list"
             class="panel-template__item"
-            :key="id"
-            :src="`${host}/${id}/${preview}`"
-            :objectId="id")
+            :key="item.id"
+            :item="item")
 </template>
 
 <script lang="ts">
@@ -41,6 +39,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {
@@ -64,10 +63,10 @@ export default Vue.extend({
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
-      return (categories as any[])
+      return (categories as IListServiceContentData[])
         .map(category => ({
           size: 201,
-          id: `rows_${category.list.join('_')}`,
+          id: `rows_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
           title: category.title
@@ -75,21 +74,21 @@ export default Vue.extend({
     },
     listResult(): any[] {
       const { keyword } = this
-      const { list = [] } = this.content
-      const tmpList = [...list]
-      const result = []
-      while (tmpList.length) {
-        const title: string = !keyword && !result.length ? '所有模板' : ''
-        const rowItems = tmpList.splice(0, 2)
-        result.push({
-          id: `result_${rowItems.join('_')}`,
-          size: title ? (155 + 46) : 155,
-          type: 'category-template-item',
-          list: rowItems,
-          title,
-          sentinel: !tmpList.length
+      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
+      const result = new Array(Math.ceil(list.length / 2))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+          const title = !keyword && !idx ? '所有模板' : ''
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-template-item',
+            list: rowItems,
+            title,
+            size: title ? (155 + 46) : 155,
+            sentinel: !idx
+          }
         })
-      }
       return result
     },
     list(): any[] {

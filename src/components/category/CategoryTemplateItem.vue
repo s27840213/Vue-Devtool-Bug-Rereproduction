@@ -1,7 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     draggable="true"
-    :src="src"
+    :src="src || `https://template.vivipic.com/template/${item.id}/prev`"
     @error="handleNotFound"
     @dragstart="dragStart($event)"
     @click="addTemplate")
@@ -14,7 +14,7 @@ import AssetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   props: {
     src: String,
-    objectId: String
+    item: Object
   },
   methods: {
     handleNotFound(event: Event) {
@@ -25,14 +25,10 @@ export default Vue.extend({
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
       dataTransfer.setDragImage((event.target as HTMLImageElement), 0, 0)
-      const config = {
-        type: 'template',
-        id: this.objectId
-      }
-      dataTransfer.setData('data', JSON.stringify(config))
+      dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addTemplate() {
-      AssetUtils.addTemplate(this.objectId)
+      AssetUtils.addAsset(this.item)
     }
   }
 })

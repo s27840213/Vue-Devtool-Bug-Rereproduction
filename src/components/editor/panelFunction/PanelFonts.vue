@@ -51,6 +51,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUTils from '@/utils/textPropUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {
@@ -88,8 +89,8 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     list(): any[] {
-      const { list = [] } = this.content
-      const tmpList = [...list]
+      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
+      const tmpList = list.map(item => item.id)
       const result = []
       while (tmpList.length) {
         const rowItems = tmpList.splice(0, 1)
