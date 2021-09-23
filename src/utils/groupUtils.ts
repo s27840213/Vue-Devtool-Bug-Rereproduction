@@ -293,17 +293,14 @@ class GroupUtils {
       // calculate scale offset
       if (layer.type === 'image') {
         layer = layer as IImage
-        const width = layer.styles.width as number * tmpLayer.styles.scale
-        const height = layer.styles.height as number * tmpLayer.styles.scale
 
-        layer.styles.width = width
-        layer.styles.height = height
+        layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+        layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
         layer.styles.imgHeight *= tmpLayer.styles.scale
         layer.styles.imgWidth *= tmpLayer.styles.scale
         layer.styles.imgX *= tmpLayer.styles.scale
         layer.styles.imgY *= tmpLayer.styles.scale
 
-        layer.clipPath = `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`
         const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]

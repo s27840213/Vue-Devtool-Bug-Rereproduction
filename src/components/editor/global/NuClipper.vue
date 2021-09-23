@@ -17,23 +17,27 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      let width, height
-      switch (this.config.type) {
+      const { type } = this.config
+      let { width, height, initWidth, initHeight, scale } = this.config.styles
+      const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
+
+      switch (type) {
         case 'shape':
-          width = `${this.config.styles.initWidth}px`
-          height = `${this.config.styles.initHeight}px`
+          width = `${initWidth}px`
+          height = `${initHeight}px`
           break
         default:
-          width = `${this.config.styles.width / this.config.styles.scale}px`
-          height = `${this.config.styles.height / this.config.styles.scale}px`
+          width = `${width / scale}px`
+          height = `${height / scale}px`
       }
       return {
         width,
         height,
         transform: 'translate3d(0, 0, 0)',
-        'clip-path': this.config.clipPath
-          ? (this.config.clipPath as string).includes('path')
-            ? this.config.clipPath : "path('" + this.config.clipPath + "')" : '',
+        clipPath,
+        // 'clip-path': this.config.clipPath
+        //   ? (this.config.clipPath as string).includes('path')
+        //     ?  : "path('" + this.config.clipPath + "')" : '',
         'background-color': '#00000001'
       }
     }

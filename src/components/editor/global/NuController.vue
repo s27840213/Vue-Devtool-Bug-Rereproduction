@@ -1,6 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller" draggable="true" ref="self")
+    div(class="nu-controller" ref="self")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -17,24 +17,23 @@
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
-            v-html="ShapeUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
+            v-html="FrameUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
             @mouseover="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave"
             @mouseup="onFrameMouseUp")
-        //- template(v-if="config.type==='group' && isActive")
-        //-   div(class="sub-controller")
-        //-     nu-sub-controller(
-        //-       v-for="(layer,index) in config.layers"
-        //-       data-identifier="controller"
-        //-       :style="subControllerStyles()"
-        //-       :key="`group-controller-${index}`"
-        //-       :layerIndex="index"
-        //-       :pageIndex="pageIndex"
-        //-       :config="layer"
-        //-       :color="'#EB5757'"
-        //-       @clickSubController="clickSubController")
+        template(v-if="config.type==='group' && isActive")
+          div(class="sub-controller")
+            nu-sub-controller(
+              v-for="(layer,index) in config.layers"
+              data-identifier="controller"
+              :style="subControllerStyles()"
+              :key="`group-controller-${index}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer"
+              :color="'#EB5757'"
+              @clickSubController="clickSubController")
         template(v-if="config.type === 'text' && config.active")
-          //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
@@ -118,7 +117,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
-import ShapeUtils from '@/utils/shapeUtils'
+import FrameUtils from '@/utils/frameUtils'
 import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
@@ -131,8 +130,8 @@ export default Vue.extend({
   data() {
     return {
       MappingUtils,
+      FrameUtils,
       ShortcutUtils,
-      ShapeUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -627,14 +626,10 @@ export default Vue.extend({
       let scale = Math.max(ratio.width, ratio.height)
       switch (this.getLayerType) {
         case 'image': {
-          if (!this.config.isClipper) {
-            const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-            const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-            ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-            ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-            ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-            scale = this.getLayerScale
-          }
+          const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
+          ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
+          ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
+          scale = this.getLayerScale
           break
         }
         case 'text':
@@ -645,7 +640,6 @@ export default Vue.extend({
           }
           break
       }
-
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
@@ -683,21 +677,23 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
       this.currCursorStyling(event)
 
-      if (this.getLayerType === 'shape' && this.config.category === 'B') {
-        this.scale = {
-          scaleX: this.config.styles.scaleX,
-          scaleY: this.config.styles.scaleY
-        }
-      } else if (this.getLayerType === 'image') {
-        this.initImgSize = {
-          width: this.config.styles.imgWidth,
-          height: this.config.styles.imgHeight
-        }
-        this.control.imgX = this.config.styles.imgX
-        this.control.imgY = this.config.styles.imgY
+      switch (this.getLayerType) {
+        case 'shape':
+          if (this.config.category === 'B') {
+            this.scale = {
+              scaleX: this.config.styles.scaleX,
+              scaleY: this.config.styles.scaleY
+            }
+          }
+          break
+        case 'image':
+          this.initImgSize = {
+            width: this.config.styles.imgWidth,
+            height: this.config.styles.imgHeight
+          }
+          this.control.imgX = this.config.styles.imgX
+          this.control.imgY = this.config.styles.imgY
       }
-      // console.log(this.getLayerPos.x)
-      // console.log(this.getLayerPos.y)
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
@@ -854,7 +850,7 @@ export default Vue.extend({
         this.imgBuffer.y = -(imgHeight - this.initImgSize.height) / 2
       }
 
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth, imgHeight)
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
