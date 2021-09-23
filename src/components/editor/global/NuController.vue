@@ -1,6 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller" ref="self")
+    div(v-if="isShown || isActive" class="nu-controller" ref="self")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -13,7 +13,6 @@
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
-          @mouseover="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
@@ -434,6 +433,7 @@ export default Vue.extend({
       // if (!this.isLocked) {
       //   e.stopPropagation()
       // }
+
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -526,7 +526,7 @@ export default Vue.extend({
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
-    moveEnd() {
+    moveEnd(e: MouseEvent) {
       if (this.isMoving) {
         this.setIsMoving(false)
       }
@@ -534,6 +534,12 @@ export default Vue.extend({
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+        if (posDiff.x === 0 && posDiff.y === 0) {
+          if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
+            GroupUtils.deselect()
+            this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
+          }
         }
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false

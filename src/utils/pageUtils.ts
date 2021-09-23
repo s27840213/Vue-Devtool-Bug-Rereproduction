@@ -11,6 +11,9 @@ class PageUtils {
       }
     })
     const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
+    if (container === undefined) {
+      return -1
+    }
     const centerLinePos = (container.getBoundingClientRect().bottom - container.getBoundingClientRect().top) / 2
 
     let targetIndex = -1

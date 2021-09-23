@@ -3,7 +3,8 @@
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
-      @dragenter.prevent)
+      @dragenter.prevent
+      @mouseover="toggleHighlighter(pageIndex,layerIndex,true)")
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
@@ -29,6 +30,7 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -116,6 +118,11 @@ export default Vue.extend({
     onDropClipper(e: DragEvent) {
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
+    },
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
     }
   }
 })
