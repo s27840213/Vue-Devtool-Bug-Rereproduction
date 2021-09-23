@@ -7,12 +7,16 @@ import { ISpecLayerData } from '@/store/types'
 import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
+import mouseUtils from './mouseUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 class LayerUtils {
-  get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
+  get scaleRatio() { return store.getters.getPageScaleRatio }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get getLayer() { return store.getters.getLayer }
+  get getPage() { return store.getters.getPage }
   get getCurrLayer() { return this.getLayer(this.pageIndex, this.layerIndex) }
 
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp | IFrame) {
@@ -125,6 +129,24 @@ class LayerUtils {
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
       console.log('Is out of bound!')
+    }
+  }
+
+  isClickOutOfPagePart(event: MouseEvent, targetLayer: HTMLElement, config: ILayer): boolean {
+    let { x, y } = mouseUtils.getMouseRelPoint(event, targetLayer)
+    const page = this.getPage(this.currSelectedInfo.pageIndex) as IPage
+    const boundaryX = page.width
+    const boundaryY = page.height
+
+    // click pos corresponding to page
+    x = x * (100 / this.scaleRatio) + config.styles.x
+    y = y * (100 / this.scaleRatio) + config.styles.y
+
+    // check is clicking out of page or not
+    if (x < 0 || y < 0 || x > boundaryX || y > boundaryY) {
+      return true
+    } else {
+      return false
     }
   }
 
