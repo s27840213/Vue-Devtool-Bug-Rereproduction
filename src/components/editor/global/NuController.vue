@@ -11,7 +11,7 @@
           @dragleave="onDragLeave($event)"
           @click.left="onClick"
           @click.right.stop="onRightClick"
-          @mousedown.left="(config.type === 'shape' && config.category === 'D')? '' : moveStart"
+          @mousedown.left="moveStart"
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave"
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
@@ -101,7 +101,7 @@
       div(v-if="!isLocked && config.type === 'shape' && config.category === 'D'"
           class="nu-controller__line-mover"
           :style="lineMoverStyles()"
-          @mousedown.left="moveStart")
+          @mousedown.left="lineMoveStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -418,6 +418,7 @@ export default Vue.extend({
       // if (!this.isLocked) {
       //   e.stopPropagation()
       // }
+      if (this.getLayerType === 'shape' && this.config.category === 'D') return
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -474,6 +475,37 @@ export default Vue.extend({
             this.setLastSelectedLayerIndex(this.layerIndex)
             GroupUtils.select(this.pageIndex, [targetIndex])
           }
+        }
+      }
+    },
+    lineMoveStart(e: MouseEvent) {
+      this.initTranslate = this.getLayerPos
+      if (!this.config.locked) {
+        this.isControlling = true
+        this.initialPos = MouseUtils.getMouseAbsPoint(e)
+        window.addEventListener('mouseup', this.moveEnd)
+        window.addEventListener('mousemove', this.moving)
+      }
+      let targetIndex = this.layerIndex
+      if (!this.isActive) {
+        // already have selected layer
+        if (this.currSelectedInfo.index >= 0) {
+          // Did not press shift/cmd/ctrl key -> deselect selected layers first
+          if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+            GroupUtils.deselect()
+            targetIndex = this.config.styles.zindex - 1
+            this.setLastSelectedPageIndex(this.pageIndex)
+            this.setLastSelectedLayerIndex(this.layerIndex)
+          }
+          // this if statement is used to prevent select the layer in another page
+          if (this.pageIndex === this.lastSelectedPageIndex) {
+            GroupUtils.select(this.pageIndex, [targetIndex])
+          }
+        } else {
+          targetIndex = this.config.styles.zindex - 1
+          this.setLastSelectedPageIndex(this.pageIndex)
+          this.setLastSelectedLayerIndex(this.layerIndex)
+          GroupUtils.select(this.pageIndex, [targetIndex])
         }
       }
     },
