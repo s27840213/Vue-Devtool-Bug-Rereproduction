@@ -1,39 +1,39 @@
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IDropdownState {
-  isOrderDropdownsOpened: boolean,
-  isAlignDropdownsOpened: boolean,
-  isLayerDropdownsOpened: boolean,
-  isFlipDropdownsOpened: boolean,
-  isPageDropdownsOpened: boolean
+  isOrderDropdownOpened: boolean,
+  isAlignDropdownOpened: boolean,
+  isLayerDropdownOpened: boolean,
+  isFlipDropdownOpened: boolean,
+  isPageDropdownOpened: boolean
 }
 
 const SET_STATE = 'SET_STATE' as const
 
 const getDefaultState = (): IDropdownState => ({
-  isOrderDropdownsOpened: false,
-  isAlignDropdownsOpened: false,
-  isFlipDropdownsOpened: false,
-  isLayerDropdownsOpened: false,
-  isPageDropdownsOpened: false
+  isOrderDropdownOpened: false,
+  isAlignDropdownOpened: false,
+  isFlipDropdownOpened: false,
+  isLayerDropdownOpened: false,
+  isPageDropdownOpened: false
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IDropdownState, unknown> = {
-  getIsOrderDropdownsOpened(state: IDropdownState) {
-    return state.isOrderDropdownsOpened
+  getIsOrderDropdownOpened(state: IDropdownState) {
+    return state.isOrderDropdownOpened
   },
-  getIsAlignDropdownsOpened(state: IDropdownState) {
-    return state.isAlignDropdownsOpened
+  getIsAlignDropdownOpened(state: IDropdownState) {
+    return state.isAlignDropdownOpened
   },
-  getIsFlipDropdownsOpened(state: IDropdownState) {
-    return state.isFlipDropdownsOpened
+  getIsFlipDropdownOpened(state: IDropdownState) {
+    return state.isFlipDropdownOpened
   },
-  getIsLayerDropdownsOpened(state: IDropdownState) {
-    return state.isLayerDropdownsOpened
+  getIsLayerDropdownOpened(state: IDropdownState) {
+    return state.isLayerDropdownOpened
   },
-  getIsPageDropdownsOpened(state: IDropdownState) {
-    return state.isPageDropdownsOpened
+  getIsPageDropdownOpened(state: IDropdownState) {
+    return state.isPageDropdownOpened
   }
 }
 

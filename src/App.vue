@@ -7,16 +7,16 @@
     //-     span {{coordinateHeight}}px
     router-view
     div(class="popup-area")
-      dropdown-order(v-if="isOrderDropdownsOpened"
-        v-click-outside="vcoConfig")
-      dropdown-align(v-if="isAlignDropdownsOpened"
-        v-click-outside="vcoConfig")
-      dropdown-flip(v-if="isFlipDropdownsOpened"
-        v-click-outside="vcoConfig")
-      dropdown-layer(v-if="isLayerDropdownsOpened"
-        v-click-outside="vcoConfig")
-      dropdown-page(v-if="isPageDropdownsOpened"
-        v-click-outside="vcoConfig")
+      dropdown-order(v-if="isOrderDropdownOpened"
+        v-click-outside="vcoConfig('order')")
+      dropdown-align(v-if="isAlignDropdownOpened"
+        v-click-outside="vcoConfig('align')")
+      dropdown-flip(v-if="isFlipDropdownOpened"
+        v-click-outside="vcoConfig('flip')")
+      dropdown-layer(v-if="isLayerDropdownOpened"
+        v-click-outside="vcoConfig('layer')")
+      dropdown-page(v-if="isPageDropdownOpened"
+        v-click-outside="vcoConfig('page')")
       photo-info(v-show="currSelectedPhotoInfo.userName"
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
@@ -66,28 +66,20 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0,
-      vcoConfig: {
-        handler: () => {
-          // do nothing
-        },
-        events: ['dblclick', 'click', 'contextmenu']
-        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
-      }
+      coordinateHeight: 0
     }
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
-    this.vcoConfig.handler = this.closeDropdown
   },
   computed: {
     ...mapGetters({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isLayerDropdownsOpened: 'dropdown/getIsLayerDropdownsOpened',
-      isPageDropdownsOpened: 'dropdown/getIsPageDropdownsOpened',
-      isOrderDropdownsOpened: 'dropdown/getIsOrderDropdownsOpened',
-      isAlignDropdownsOpened: 'dropdown/getIsAlignDropdownsOpened',
-      isFlipDropdownsOpened: 'dropdown/getIsFlipDropdownsOpened',
+      isLayerDropdownOpened: 'dropdown/getIsLayerDropdownOpened',
+      isPageDropdownOpened: 'dropdown/getIsPageDropdownOpened',
+      isOrderDropdownOpened: 'dropdown/getIsOrderDropdownOpened',
+      isAlignDropdownOpened: 'dropdown/getIsAlignDropdownOpened',
+      isFlipDropdownOpened: 'dropdown/getIsFlipDropdownOpened',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
       isModalOpen: 'modal/getModalOpen'
     })
@@ -103,27 +95,22 @@ export default Vue.extend({
       this.coordinate.style.width = `${this.coordinateWidth}px`
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
-    closeDropdown() {
-      dropdownUtils.closeDropdown()
-    },
-    setIsLayerDropdownsOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this.setDropdown({
-          isLayerDropdownsOpened: true
-        })
-      })
-    },
-    setIsPageDropdownsOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this.setDropdown({
-          isPageDropdownsOpened: isOpened
-        })
-      })
+    closeDropdown(type: string) {
+      dropdownUtils.closeDropdown(type)
     },
     setCurrSelectedPhotoInfo() {
       this.$nextTick(() => {
         this._setCurrSelectedPhotoInfo({})
       })
+    },
+    vcoConfig(type: string) {
+      return {
+        handler: () => {
+          this.closeDropdown(type)
+        },
+        events: ['dblclick', 'click', 'contextmenu']
+        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+      }
     }
   }
 })

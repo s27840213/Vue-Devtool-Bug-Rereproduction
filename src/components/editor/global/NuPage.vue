@@ -350,6 +350,7 @@ export default Vue.extend({
   position: relative;
   margin: 15px auto;
   transform-style: preserve-3d;
+  user-select: none;
 }
 
 .page-title {

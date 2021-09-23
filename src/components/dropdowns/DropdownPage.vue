@@ -230,7 +230,7 @@ export default Vue.extend({
       }
     },
     closeDropdown() {
-      dropdownUtils.closeDropdown()
+      dropdownUtils.closeDropdown('page')
     }
   }
 })

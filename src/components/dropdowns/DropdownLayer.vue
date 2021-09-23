@@ -290,7 +290,7 @@ export default Vue.extend({
       ShortcutUtils.del()
     },
     closeDropdown() {
-      dropdownUtils.closeDropdown()
+      dropdownUtils.closeDropdown('layer')
     }
   }
 })

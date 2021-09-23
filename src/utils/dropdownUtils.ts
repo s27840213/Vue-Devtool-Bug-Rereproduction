@@ -12,62 +12,90 @@ class DropdownUtils {
   openDropdownUnderTarget(dropdown: string, target: string) {
     Vue.nextTick(() => {
       const el = document.querySelector(dropdown) as HTMLElement
-      const targetEl = document.querySelector(target)?.getBoundingClientRect()
-      el.style.transform = `translate3d(${targetEl?.left}px, ${targetEl?.bottom}px,0)`
+      const [width, height] = [el.offsetWidth, el.offsetHeight]
+      const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+      const { left, bottom } = document.querySelector(target)?.getBoundingClientRect() as DOMRect
+      let xDiff = 0
+      let yDiff = 0
+      if ((left + width) > vw) {
+        xDiff = (left + width) - vw
+      }
+      if ((bottom + height) > vh) {
+        yDiff = (bottom + height) - vh
+      }
+
+      el.style.transform = `translate3d(${left - xDiff}px, ${bottom - yDiff}px,0)`
     })
   }
 
   openDropdownOnMousePos(dropdown: string, event: MouseEvent) {
     Vue.nextTick(() => {
       const el = document.querySelector(dropdown) as HTMLElement
+      const [width, height] = [el.offsetWidth, el.offsetHeight]
+      const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
       const mousePos = MouseUtils.getMouseAbsPoint(event)
-      el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
+      let xDiff = 0
+      let yDiff = 0
+      if ((mousePos.x + width) > vw) {
+        xDiff = (mousePos.x + width) - vw
+      }
+      if ((mousePos.y + height) > vh) {
+        yDiff = (mousePos.y + height) - vh
+      }
+      el.style.transform = `translate3d(${mousePos.x - xDiff}px, ${mousePos.y - yDiff}px,0)`
     })
   }
 
   openOrderDropdown() {
     store.commit('dropdown/SET_STATE', {
-      isOrderDropdownsOpened: true
+      isOrderDropdownOpened: true
     })
     this.openDropdownUnderTarget(DROPDOWN_ORDER, '.layers-alt')
   }
 
   openAlignDropdown() {
     store.commit('dropdown/SET_STATE', {
-      isAlignDropdownsOpened: true
+      isAlignDropdownOpened: true
     })
     this.openDropdownUnderTarget(DROPDOWN_ALIGN, '.btn-align')
   }
 
   openFlipDropdown() {
     store.commit('dropdown/SET_STATE', {
-      isFlipDropdownsOpened: true
+      isFlipDropdownOpened: true
     })
     this.openDropdownUnderTarget(DROPDOWN_FLIP, '.btn-flip')
   }
 
   openLayerDropdown(event: MouseEvent) {
     store.commit('dropdown/SET_STATE', {
-      isLayerDropdownsOpened: true
+      isLayerDropdownOpened: true
     })
     this.openDropdownOnMousePos(DROPDOWN_LAYER, event)
   }
 
   openPageDropdown(event: MouseEvent) {
     store.commit('dropdown/SET_STATE', {
-      isPageDropdownsOpened: true
+      isPageDropdownOpened: true
     })
     this.openDropdownOnMousePos(DROPDOWN_PAGE, event)
   }
 
-  closeDropdown() {
-    store.commit('dropdown/SET_STATE', {
-      isOrderDropdownsOpened: false,
-      isLayerDropdownsOpened: false,
-      isPageDropdownsOpened: false,
-      isFlipDropdownsOpened: false,
-      isAlignDropdownsOpened: false
-    })
+  closeDropdown(type: string) {
+    type = type.charAt(0).toUpperCase() + type.slice(1)
+    const key = `is${type}DropdownOpened`
+    const result = {} as { [index: string]: boolean }
+    result[key] = false
+    if (type === 'layer' || type === 'page') {
+      Object.assign(result, {
+        isOrderDropdownOpened: false,
+        isLayerDropdownOpened: false,
+        isPageDropdownOpened: false,
+        isFlipDropdownOpened: false,
+        isAlignDropdownOpened: false
+      })
+    }
+    store.commit('dropdown/SET_STATE', result)
   }
 }
 

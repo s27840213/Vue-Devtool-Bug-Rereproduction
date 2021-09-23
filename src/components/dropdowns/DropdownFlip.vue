@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="dropdown dropdown__flip bg-white")
-    div(v-for="(data,index) in dropdownDatas('order')"
+    div(v-for="(data,index) in dropdownDatas()"
         :key="`dropdown-${index}`"
         class="dropdown__item"
         @click="data.action")
@@ -35,7 +35,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    dropdownDatas(type: string) {
+    dropdownDatas() {
       const icons = ['flip-h', 'flip-v']
       const texts = ['水平翻轉', '垂直翻轉']
       return icons.map((icon: string, index: number) => {

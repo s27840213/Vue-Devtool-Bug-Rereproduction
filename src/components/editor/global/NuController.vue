@@ -92,9 +92,10 @@
                 :style="resizerBarStyles(resizer)")
           div(class="control-point__rotater-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
-            img(class="control-point__rotater"
+            svg-icon(class="control-point__rotater"
+              :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
-              @mousedown.left.stop="rotateStart")
+              @mousedown.native.left.stop="rotateStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
