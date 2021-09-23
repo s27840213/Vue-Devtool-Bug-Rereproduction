@@ -35,6 +35,9 @@ div(style="position:relative;")
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
         @click.native="onLogInClicked()") Log in
+      div
+        span New to Here?
+        btn(:type="'icon'" class="h-link" @click.native="onSignupClicked()") Sign up
     div(v-if="currentPageIndex === 1" class="login")
       div(class="text-center")
         span(class="text-blue-1 h-5") Forgot you password?
@@ -151,6 +154,7 @@ export default Vue.extend({
     }
     // Google login status
     if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
+      this.isLoading = true
       window.gapi.load('auth2', () => {
         window.gapi.auth2.init({
           client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
@@ -158,7 +162,6 @@ export default Vue.extend({
           prompt: 'select_account',
           ux_mode: 'redirect'
         }).then(() => {
-          this.isLoading = true
           const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
           const idToken = currentUser.getAuthResponse().id_token
           this.googleLogin(idToken)
@@ -285,6 +288,9 @@ export default Vue.extend({
         }
       } catch (error) {
       }
+    },
+    onSignupClicked () {
+      this.$router.push({ name: 'SignUp' })
     },
     async onLogInClicked() {
       this.isLoginClicked = true
@@ -419,6 +425,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
+      this.isLoading = true
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
@@ -432,6 +439,7 @@ export default Vue.extend({
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
+      this.isLoading = true
       if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
         window.gapi.auth2.getAuthInstance().signIn()
       } else {
@@ -558,11 +566,15 @@ export default Vue.extend({
       // login button
       display: flex;
       justify-content: center;
-      margin-bottom: 0;
+      margin-bottom: 2vh;
       button {
         width: 60%;
         height: 40px;
       }
+    }
+    &:nth-child(8) {
+      // signup hint
+      font-size: 14px;
     }
   }
 }
@@ -572,6 +584,13 @@ export default Vue.extend({
 }
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+.h-link {
+  color: setColor(blue-1);
+  text-decoration: underline;
+  font-size: 16px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 .invalid-message {
   display: flex;
