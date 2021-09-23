@@ -1,7 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     draggable="true"
-    :src="src"
+    :src="src || `https://template.vivipic.com/svg/${item.id}/prev`"
     @dragstart="dragStart($event)"
     @click="addSvg")
 </template>
@@ -13,7 +13,7 @@ import AssetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   props: {
     src: String,
-    objectId: String
+    item: Object
   },
   methods: {
     dragStart(event: DragEvent) {
@@ -23,14 +23,10 @@ export default Vue.extend({
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
       dataTransfer.setDragImage(image, -10, -10)
-      const config = {
-        type: 'svg',
-        id: this.objectId
-      }
-      dataTransfer.setData('data', JSON.stringify(config))
+      dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addSvg() {
-      AssetUtils.addSvg(this.objectId)
+      AssetUtils.addAsset(this.item)
     }
   }
 })

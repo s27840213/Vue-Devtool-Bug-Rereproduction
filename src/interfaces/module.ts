@@ -19,12 +19,17 @@ export interface IListModuleState {
 
 export interface IAsset {
   id: string
-  fullUrl?: string
-  previewUrl?: string
-  jsonUrl?: string
+  type: number
   jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup
   width?: number
   height?: number
+  urls: {
+    prev: string
+    full: string
+    larg: string
+    original: string
+    json: string
+  }
 }
 
 export interface IAssetProps {

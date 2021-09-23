@@ -1,5 +1,6 @@
 import { captureException } from '@sentry/browser'
 import store from '@/store'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
 import PageUtils from './pageUtils'
@@ -23,38 +24,46 @@ class AssetUtils {
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
 
-  get(id: string, type: string): IAsset {
-    const asset = this.getAsset(id)
-    return asset ? GeneralUtils.deepCopy(asset) : this.fetch(id, type)
+  get(item: IListServiceContentDataItem): IAsset {
+    const asset = this.getAsset(item.id)
+    return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 
-  fetch(id: string, type: string): Promise<IAsset> {
-    const asset = { id } as IAsset
+  getTypeStr(type: number): string | undefined {
+    const typeStrMap = {
+      1: 'background',
+      5: 'svg',
+      6: 'template',
+      7: 'text',
+      8: 'svg'
+    } as { [key: number]: string }
+    return typeStrMap[type]
+  }
+
+  fetch(item: IListServiceContentDataItem): Promise<IAsset> {
+    const { id, type, ...attrs } = item
+    const typeStr = this.getTypeStr(type)
+    const asset = {
+      id,
+      type,
+      urls: {
+        prev: [this.host, typeStr, id, this.preview].join('/'),
+        json: [this.host, typeStr, id, this.data].join('/')
+      },
+      ...attrs
+    } as IAsset
     switch (type) {
-      case 'background': {
-        return new Promise((resolve) => {
-          const srcObj = { type, assetId: id, userId: '' }
-          const fullUrl = ImageUtils.getSrc({ srcObj } as IImage)
-          const image = new Image()
-          image.onload = () => {
-            Object.assign(asset, {
-              fullUrl,
-              width: image.width,
-              height: image.height
-            })
-            store.commit('SET_assetJson', { [id]: asset })
-            resolve(asset)
-          }
-          image.src = fullUrl
-        })
+      case 1: {
+        const srcObj = { type: typeStr, assetId: id, userId: '' }
+        asset.urls.full = ImageUtils.getSrc({ srcObj } as IImage)
+        store.commit('SET_assetJson', { [id]: asset })
+        return Promise.resolve(asset)
       }
       default: {
-        const path = [this.host, type, id, this.data].join('/')
-        return fetch(path)
+        return fetch(asset.urls.json)
           .then(response => response.json())
           .then(jsonData => {
-            const { width, height } = jsonData.styles || {}
-            const asset = { jsonData, id, width, height } as IAsset
+            asset.jsonData = jsonData
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })
@@ -62,109 +71,87 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(id: string, attrs: IAssetProps = {}) {
+  addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    try {
-      const { jsonData } = await this.get(id, 'template')
-      const json = TemplateUtils.updateTemplate(jsonData)
-      PageUtils.updateSpecPage(targePageIndex, json)
-    } catch (error) {
-      console.log(id)
-      captureException(error)
-    }
+    PageUtils.updateSpecPage(targePageIndex, TemplateUtils.updateTemplate(json))
   }
 
-  async addSvg(id: string, attrs: IAssetProps = {}) {
+  addSvg(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    try {
-      const { jsonData } = await this.get(id, 'svg')
-      if (!jsonData) { throw new Error('jsonData: undefined') }
-      const { vSize = [] } = jsonData
-      const currentPage = this.getPage(targePageIndex)
-      const resizeRatio = 0.55
-      const pageAspectRatio = currentPage.width / currentPage.height
-      const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
-      const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
-      const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
-      jsonData.ratio = 1
-      jsonData.className = ShapeUtils.classGenerator()
+    const { vSize = [] } = json
+    const currentPage = this.getPage(targePageIndex)
+    const resizeRatio = 0.55
+    const pageAspectRatio = currentPage.width / currentPage.height
+    const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
+    const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
+    const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
+    json.ratio = 1
+    json.className = ShapeUtils.classGenerator()
 
-      const config = {
-        ...jsonData,
-        styles: {
-          x: currentPage.width / 2 - svgWidth / 2,
-          y: currentPage.height / 2 - svgHeight / 2,
-          width: svgWidth,
-          height: svgHeight,
-          initWidth: (vSize as number[])[0],
-          initHeight: (vSize as number[])[1],
-          scale: svgWidth / (vSize as number[])[0],
-          color: jsonData.color,
-          vSize,
-          ...styles
-        }
+    const config = {
+      ...json,
+      styles: {
+        x: currentPage.width / 2 - svgWidth / 2,
+        y: currentPage.height / 2 - svgHeight / 2,
+        width: svgWidth,
+        height: svgHeight,
+        initWidth: (vSize as number[])[0],
+        initHeight: (vSize as number[])[1],
+        scale: svgWidth / (vSize as number[])[0],
+        color: json.color,
+        vSize,
+        ...styles
       }
-      LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
-    } catch (error) {
-      captureException(error)
     }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
   }
 
-  async addBackground(id: string, attrs: IAssetProps = {}) {
+  addBackground(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
+    const { id, width = 0, height = 0 } = item
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    try {
-      const { width = 0, height = 0 } = await this.get(id, 'background')
-      const config = LayerFactary.newImage({
-        styles: {
-          width: width / 2,
-          height: height / 2,
-          x: 200,
-          y: 200
-        },
-        srcObj: {
-          type: 'background',
-          assetId: id,
-          userId: ''
-        }
-      })
-      store.commit('SET_backgroundImage', {
-        pageIndex: targePageIndex,
-        config
-      })
-    } catch (error) {
-      captureException(error)
-    }
+    const config = LayerFactary.newImage({
+      styles: {
+        width: width / 2,
+        height: height / 2,
+        x: 200,
+        y: 200
+      },
+      srcObj: {
+        type: 'background',
+        assetId: id,
+        userId: ''
+      }
+    })
+    store.commit('SET_backgroundImage', {
+      pageIndex: targePageIndex,
+      config
+    })
   }
 
-  async addText (id: string, attrs: IAssetProps = {}) {
+  addText (json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
+    const { width, height } = json.styles
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    try {
-      const { jsonData, width = 0, height = 0 } = await this.get(id, 'text')
-      if (!jsonData) { throw new Error('jsonData: undefined') }
-      const config = {
-        ...jsonData,
-        styles: {
-          ...jsonData.styles
-        }
+    const config = {
+      ...json,
+      styles: {
+        ...json.styles
       }
-      Object.assign(
-        config.styles,
-        typeof y === 'undefined' || typeof x === 'undefined'
-          ? TextUtils.getAddPosition(width, height, targePageIndex)
-          : { x, y }
-      )
-      const newLayer = config.type === 'group'
-        ? LayerFactary.newGroup((config.styles as ICalculatedGroupStyle), (config as IGroup).layers)
-        : LayerFactary.newText(config)
-      LayerUtils.addLayers(targePageIndex, newLayer)
-    } catch (error) {
-      captureException(error)
     }
+    Object.assign(
+      config.styles,
+      typeof y === 'undefined' || typeof x === 'undefined'
+        ? TextUtils.getAddPosition(width, height, targePageIndex)
+        : { x, y }
+    )
+    const newLayer = config.type === 'group'
+      ? LayerFactary.newGroup((config.styles as ICalculatedGroupStyle), (config as IGroup).layers)
+      : LayerFactary.newText(config)
+    LayerUtils.addLayers(targePageIndex, newLayer)
   }
 
   addStanardText(type: string, pageIndex?: number) {
@@ -184,6 +171,31 @@ class AssetUtils {
       .catch(() => {
         console.log('Cannot find the file')
       })
+  }
+
+  async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
+    try {
+      const asset = await this.get(item) as IAsset
+      switch (asset.type) {
+        case 7:
+          this.addText(asset.jsonData, attrs)
+          break
+        case 6:
+          this.addTemplate(asset.jsonData, attrs)
+          break
+        case 5:
+          this.addSvg(asset.jsonData, attrs)
+          break
+        case 1:
+          this.addBackground(asset, attrs)
+          break
+        default:
+          throw new Error(`"${asset.type}" is not a type of asset`)
+      }
+    } catch (error) {
+      console.log(error)
+      captureException(error)
+    }
   }
 }
 

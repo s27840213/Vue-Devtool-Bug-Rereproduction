@@ -13,7 +13,8 @@ class ListService {
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
       list_all: params.listAll,
-      keyword: params.keyword
+      keyword: params.keyword,
+      return_obj: 1
     }
 
     return axios.request<IListServiceResponse>({

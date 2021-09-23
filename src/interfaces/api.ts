@@ -105,10 +105,16 @@ export interface IListServiceParams {
   pageIndex?: number
   listAll?: 0 | 1
 }
+export interface IListServiceContentDataItem {
+  id: string
+  type: number
+  width?: number
+  height?: number
+}
 
 export interface IListServiceContentData {
   category_id: number
-  list: string[]
+  list: IListServiceContentDataItem[]
   title: string
 }
 
