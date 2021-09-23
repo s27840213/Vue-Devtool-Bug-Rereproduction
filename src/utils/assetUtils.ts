@@ -108,9 +108,9 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
   }
 
-  addBackground(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
-    const { pageIndex } = attrs
-    const { id, width = 0, height = 0 } = item
+  addBackground(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const { width = 0, height = 0 } = styles
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const config = LayerFactary.newImage({
       styles: {
@@ -121,7 +121,7 @@ class AssetUtils {
       },
       srcObj: {
         type: 'background',
-        assetId: id,
+        assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
       }
     })
@@ -131,7 +131,7 @@ class AssetUtils {
     })
   }
 
-  addText (json: any, attrs: IAssetProps = {}) {
+  addText(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
@@ -142,6 +142,7 @@ class AssetUtils {
         ...json.styles
       }
     }
+    console.log(width, height, config)
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
@@ -173,6 +174,31 @@ class AssetUtils {
       })
   }
 
+  addImage(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const { width, height, x, y } = styles
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const type = ImageUtils.getSrcType(url)
+    const config = {
+      srcObj: {
+        type,
+        userId: ImageUtils.getUserId(url, type),
+        assetId: ImageUtils.getAssetId(url, type)
+      },
+      styles: {
+        x,
+        y,
+        width,
+        height,
+        initWidth: width,
+        initHeight: height,
+        imgWidth: width,
+        imgHeight: height
+      }
+    }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newImage(config))
+  }
+
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       const asset = await this.get(item) as IAsset
@@ -187,7 +213,10 @@ class AssetUtils {
           this.addSvg(asset.jsonData, attrs)
           break
         case 1:
-          this.addBackground(asset, attrs)
+          this.addBackground(
+            asset.urls.full,
+            { ...attrs, styles: { width: asset.width, height: asset.height } }
+          )
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
