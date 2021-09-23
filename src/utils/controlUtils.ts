@@ -67,6 +67,24 @@ class Controller {
           borderRadius: '50%'
         }
       ],
+      lineEnds: [
+        {
+          width: '8px',
+          height: '8px',
+          left: '0',
+          top: '50%',
+          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
+          borderRadius: '50%'
+        },
+        {
+          width: '8px',
+          height: '8px',
+          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
+          right: '0',
+          top: '50%',
+          borderRadius: '50%'
+        }
+      ],
       resizers: [
         {
           height: `${resizerLong}px`,
@@ -177,27 +195,25 @@ class Controller {
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number}, category: string, scale: number):
-  {x: number, y: number, width: number, height: number} {
-    if (category === 'D') {
+  getControllerStyleParameters(type: string, point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
+  {x: number, y: number, width: number, height: number, rotate: number} {
+    if (isLine) {
       scale = scale ?? 1
-      const { width, height, baseDegree } = shapeUtils.lineDimension(point)
-      const dx = 2 * scale * Math.sin(baseDegree)
-      const dy = 2 * scale * Math.cos(baseDegree)
+      const { x, y, width, height } = styles
       const ratio = styles.width / styles.initWidth
+      const moverHeight = Math.max(scale, 8) * ratio
+      const { xDiff, yDiff } = shapeUtils.lineDimension(point)
+      const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
+      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
       return {
-        x: styles.x + (dx + 1) * ratio,
-        y: styles.y + (dy + 1) * ratio,
-        width: width * ratio,
-        height: height * ratio
+        x: x + (width - moverWidth) / 2,
+        y: y + (height - moverHeight) / 2,
+        width: moverWidth,
+        height: moverHeight,
+        rotate: degree
       }
     } else {
-      return {
-        x: styles.x,
-        y: styles.y,
-        width: styles.width,
-        height: styles.height
-      }
+      return styles
     }
   }
 

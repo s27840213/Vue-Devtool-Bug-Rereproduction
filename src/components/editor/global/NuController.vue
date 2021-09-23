@@ -70,12 +70,13 @@
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
           :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
-          div(v-for="(end, index) in (config.category === 'D') ? lineEnds(controlPoints.scalers, config.point) : []"
+          div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
               class="control-point"
               :key="index"
+              :marker-index="index"
               :style="Object.assign(end, {'cursor': 'pointer'})"
               @mousedown.left.stop="lineEndMoveStart")
-          div(v-for="(scaler, index) in (config.category !== 'D') ? controlPoints.scalers : []"
+          div(v-for="(scaler, index) in (!isLine) ? controlPoints.scalers : []"
               class="control-point"
               :key="index"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
@@ -98,10 +99,6 @@
             img(class="control-point__rotater"
               :src="require('@/assets/img/svg/rotate.svg')"
               @mousedown.left.stop="rotateStart")
-      div(v-if="!isLocked && config.type === 'shape' && config.category === 'D'"
-          class="nu-controller__line-mover"
-          :style="lineMoverStyles()"
-          @mousedown.left="lineMoveStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -146,14 +143,13 @@ export default Vue.extend({
       initImgSize: { width: 0, height: 0 },
       initCoordinate: { x: 0, y: 0 },
       initReferencePoint: { x: 0, y: 0 },
-      initQuadrant: 4,
+      initMarkerIndex: 0,
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      isHover: false,
       contentEditable: true
     }
   },
@@ -201,6 +197,9 @@ export default Vue.extend({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    isLine(): boolean {
+      return this.config.type === 'shape' && this.config.category === 'D'
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -364,8 +363,7 @@ export default Vue.extend({
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       // console.log('mouse over !:', this.layerIndex)
-      if (this.getLayerType === 'shape' && this.config.category === 'D') return
-      this.isHover = shown
+      if (this.isLine) return
       if (this.getLayerType === 'image' && LayerUtils.layerIndex !== this.layerIndex) {
         console.log('clipper is target')
       }
@@ -376,15 +374,14 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const { x, y, width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.config.category, this.config.size?.[0])
+      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(type, this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
-        transform: `translate3d(${x}px, ${y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
         height: `${height}px`,
-        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
+        outline: !this.isLine && (this.isShown || this.isActive) ? ((this.config.type === 'tmp' || this.isControlling)
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
-        cursor: (this.isHover && (this.config.type !== 'shape' || this.config.category !== 'D')) ? 'pointer' : 'default',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -404,21 +401,10 @@ export default Vue.extend({
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none'
       }
     },
-    lineMoverStyles() {
-      const zindex = (this.layerIndex + 1) * 100
-      const { x, y, width, height } = this.config.styles
-      const ratio = this.config.styles.height / this.config.styles.initHeight
-      const moverHeight = Math.max(this.config.size[0], 8) * ratio
-      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
-      const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
-      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
-      return `width: ${moverWidth}px; height: ${moverHeight}px; transform: translate3d(${x + (width - moverWidth) / 2}px, ${y + (height - moverHeight) / 2}px, ${zindex}px) rotate(${degree}deg)`
-    },
     moveStart(e: MouseEvent) {
       // if (!this.isLocked) {
       //   e.stopPropagation()
       // }
-      if (this.getLayerType === 'shape' && this.config.category === 'D') return
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -475,37 +461,6 @@ export default Vue.extend({
             this.setLastSelectedLayerIndex(this.layerIndex)
             GroupUtils.select(this.pageIndex, [targetIndex])
           }
-        }
-      }
-    },
-    lineMoveStart(e: MouseEvent) {
-      this.initTranslate = this.getLayerPos
-      if (!this.config.locked) {
-        this.isControlling = true
-        this.initialPos = MouseUtils.getMouseAbsPoint(e)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
-      }
-      let targetIndex = this.layerIndex
-      if (!this.isActive) {
-        // already have selected layer
-        if (this.currSelectedInfo.index >= 0) {
-          // Did not press shift/cmd/ctrl key -> deselect selected layers first
-          if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
-            GroupUtils.deselect()
-            targetIndex = this.config.styles.zindex - 1
-            this.setLastSelectedPageIndex(this.pageIndex)
-            this.setLastSelectedLayerIndex(this.layerIndex)
-          }
-          // this if statement is used to prevent select the layer in another page
-          if (this.pageIndex === this.lastSelectedPageIndex) {
-            GroupUtils.select(this.pageIndex, [targetIndex])
-          }
-        } else {
-          targetIndex = this.config.styles.zindex - 1
-          this.setLastSelectedPageIndex(this.pageIndex)
-          this.setLastSelectedLayerIndex(this.layerIndex)
-          GroupUtils.select(this.pageIndex, [targetIndex])
         }
       }
     },
@@ -678,22 +633,11 @@ export default Vue.extend({
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
 
-      const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
-      this.center = ControlUtils.getRectCenter(rect)
-      const vect = MouseUtils.getMouseRelPoint(event, this.center)
-
-      // Get client point as no rotation
-      const clientP = ControlUtils.getNoRotationPos(vect, this.center, 0)
-
-      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
-      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
-
       const quadrant = shapeUtils.getLineQuadrant(this.config.point)
+      const markerIndex = Number((event.target as HTMLElement).getAttribute('marker-index'))
 
-      const markerIndex = ControlUtils.getMarkerIndex(this.control, quadrant)
-
+      this.initMarkerIndex = markerIndex
       this.initCoordinate = { x: this.config.point[markerIndex * 2], y: this.config.point[markerIndex * 2 + 1] }
-      this.initQuadrant = quadrant
 
       const quadrantByMarkerIndex = (markerIndex === 0) ? (quadrant - 1 + 2) % 4 + 1 : quadrant
       this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
@@ -711,8 +655,7 @@ export default Vue.extend({
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
-
-      const markerIndex = ControlUtils.getMarkerIndex(this.control, this.initQuadrant)
+      const markerIndex = this.initMarkerIndex
 
       const newPoint: number[] = Array.from(this.config.point)
       newPoint[markerIndex * 2] = this.initCoordinate.x + dx
@@ -1312,6 +1255,9 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
   }
   &__ctrl-points {
     display: flex;
@@ -1319,14 +1265,10 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
     pointer-events: "none";
-  }
-
-  &__line-mover {
-    cursor: pointer;
-    background-color: transparent;
-    opacity: 0.5;
-    pointer-events: initial;
   }
 
   &__lock-icon {
