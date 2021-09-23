@@ -262,13 +262,13 @@ class ShapeUtils {
       startPoint = this.vectorAdd(startPoint, startDiff)
       startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, -1))
     } else {
-      startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, 2))
+      startPoint = this.vectorAdd(startPoint, edgeDiff)
     }
     if (trimWidth[1]) {
       endPoint = this.vectorAdd(endPoint, endDiff)
       endPoint = this.vectorAdd(endPoint, edgeDiff)
     } else {
-      endPoint = this.vectorAdd(endPoint, this.vectorScale(edgeDiff, -2))
+      endPoint = this.vectorAdd(endPoint, this.vectorScale(edgeDiff, -1))
     }
 
     return [...startPoint, ...endPoint]
