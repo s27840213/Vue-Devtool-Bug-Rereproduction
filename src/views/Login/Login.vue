@@ -153,20 +153,11 @@ export default Vue.extend({
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
       this.isLoading = true
-      window.gapi.load('auth2', () => {
-        window.gapi.auth2.init({
-          client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-          scope: 'https://www.googleapis.com/auth/userinfo.profile',
-          prompt: 'select_account',
-          ux_mode: 'redirect'
-        }).then(() => {
-          const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
-          const idToken = currentUser.getAuthResponse().id_token
-          this.googleLogin(idToken)
-        })
-      })
+      const code = this.$route.query.code as string
+      const redirectUri = window.location.href.split('?')[0]
+      this.googleLogin(code, redirectUri)
     }
   },
   computed: {
@@ -270,10 +261,10 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    async googleLogin(idToken: string) {
+    async googleLogin(code: string, redirectUri: string) {
       try {
         // idToken -> token
-        const { data } = await userApis.googleLogin(idToken)
+        const { data } = await userApis.googleLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
           store.commit('user/SET_STATE', {
@@ -328,9 +319,11 @@ export default Vue.extend({
       this.currentPageIndex = 1
       this.password = ''
       this.isPeerPassword = false
+      this.isLoginClicked = false
     },
     onBackClicked() {
       this.currentPageIndex = 0
+      this.isLoginClicked = false
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
@@ -440,20 +433,14 @@ export default Vue.extend({
     },
     onGoogleClicked() {
       this.isLoading = true
-      if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
-        window.gapi.auth2.getAuthInstance().signIn()
-      } else {
-        window.gapi.load('auth2', () => {
-          window.gapi.auth2.init({
-            client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/userinfo.profile',
-            prompt: 'select_account',
-            ux_mode: 'redirect'
-          }).then(() => {
-            window.gapi.auth2.getAuthInstance().signIn()
-          })
-        })
-      }
+      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'include_granted_scopes=true&' +
+      'response_type=code&' +
+      'prompt=select_account&' +
+      'state=state_parameter_vivipic&' +
+      `redirect_uri=${window.location.href}&` +
+      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })

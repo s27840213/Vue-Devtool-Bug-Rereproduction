@@ -68,10 +68,11 @@ export default {
       redirect_uri
     }
   }),
-  googleLogin: (id_token: string): AxiosPromise => axios('/google-login', {
+  googleLogin: (code: string, redirect_uri: string): AxiosPromise => axios('/google-login', {
     method: 'POST',
     data: {
-      id_token
+      code,
+      redirect_uri
     }
   })
 }

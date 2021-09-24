@@ -49,8 +49,8 @@ div(style="position:relative;")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(v-if="emptyPassword" class="password-hint")
-            span a mix of letters, numbers and symbols with at least 8 characters.
+          div(v-if="emptyPassword" class="password-hint" :style="`${passwordValid ? '' : 'color: #EB5757;'}`")
+            span {{ passwordHint }}
           div(v-else class="invalid-message")
             div(class="disp-flex align-center")
               svg-icon(class="pointer"
@@ -119,6 +119,7 @@ export default Vue.extend({
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
+      passwordHint: 'a mix of letters, numbers and symbols with at least 8 characters.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
@@ -135,20 +136,11 @@ export default Vue.extend({
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
       this.isLoading = true
-      window.gapi.load('auth2', () => {
-        window.gapi.auth2.init({
-          client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-          scope: 'https://www.googleapis.com/auth/userinfo.profile',
-          prompt: 'select_account',
-          ux_mode: 'redirect'
-        }).then(() => {
-          const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
-          const idToken = currentUser.getAuthResponse().id_token
-          this.googleLogin(idToken)
-        })
-      })
+      const code = this.$route.query.code as string
+      const redirectUri = window.location.href.split('?')[0]
+      this.googleLogin(code, redirectUri)
     }
   },
   computed: {
@@ -246,10 +238,10 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    async googleLogin(idToken: string) {
+    async googleLogin(code: string, redirectUri: string) {
       try {
         // idToken -> token
-        const { data } = await userApis.googleLogin(idToken)
+        const { data } = await userApis.googleLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
           store.commit('user/SET_STATE', {
@@ -283,12 +275,16 @@ export default Vue.extend({
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         this.isLoading = false
+        this.passwordHint = 'a mix of letters, numbers and symbols with at least 8 characters.'
         return
       }
       const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
         this.currentPageIndex = 2
         this.isVcodeClicked = false
+      } else {
+        this.password = ''
+        this.passwordHint = response.msg
       }
       this.isLoading = false
     },
@@ -353,20 +349,14 @@ export default Vue.extend({
     },
     onGoogleClicked() {
       this.isLoading = true
-      if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
-        window.gapi.auth2.getAuthInstance().signIn()
-      } else {
-        window.gapi.load('auth2', () => {
-          window.gapi.auth2.init({
-            client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/userinfo.profile',
-            prompt: 'select_account',
-            ux_mode: 'redirect'
-          }).then(() => {
-            window.gapi.auth2.getAuthInstance().signIn()
-          })
-        })
-      }
+      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'include_granted_scopes=true&' +
+      'response_type=code&' +
+      'prompt=select_account&' +
+      'state=state_parameter_vivipic&' +
+      `redirect_uri=${window.location.href}&` +
+      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })
