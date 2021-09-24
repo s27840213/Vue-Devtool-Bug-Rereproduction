@@ -344,7 +344,7 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
@@ -362,6 +362,13 @@ const mutations: MutationTree<IEditorState> = {
     console.log(targetLayer)
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
+    })
+  },
+  UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
+    Object.entries(updateInfo.props).forEach(([k, v]) => {
+      (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+        layer[k] = v
+      })
     })
   },
   UPDATE_selectedLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | Array<string> } }) {

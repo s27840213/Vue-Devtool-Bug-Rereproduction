@@ -1,6 +1,33 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
+    div(class="relative"
+        v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
+      action-bar(class="flex-between")
+        svg-icon(class="layers-alt pointer"
+          iconName="layers-alt" iconWidth="20px" iconColor="gray-2"
+          @click.native="handleSliderModal('line-width')")
+        svg-icon(class="pointer"
+          iconName="copy" iconWidth="20px" iconColor="gray-2"
+          @click.native="handleValueModal('line-dash')")
+        div(class="vertical-rule")
+        svg-icon(class="pointer"
+          iconName="lock" iconWidth="20px" iconColor="gray-2"
+          @click.native="handleValueModal('start-marker')")
+        svg-icon(class="pointer"
+          iconName="trash" iconWidth="20px" iconColor="gray-2"
+          @click.native="handleValueModal('end-marker')")
+      div(v-if="openSliderBar === 'line-width'"
+          class="shape-setting__range-input-wrapper-line-width right"
+          v-click-outside="handleSliderModal")
+        input(class="shape-setting__range-input shape-setting__range-input-line-width"
+          :value="lineWidth"
+          :max="fieldRange.lineWidth.max"
+          :min="fieldRange.lineWidth.min"
+          v-ratio-change
+          type="range"
+          @input="setLineWidth")
+        div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -9,7 +36,7 @@
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
       div(v-if="openSliderBar === 'opacity'"
-          class="shape-setting__range-input-wrapper right"
+          class="shape-setting__range-input-wrapper-opacity right"
           v-click-outside="handleSliderModal")
         input(class="shape-setting__range-input"
           :value="opacity"
@@ -78,10 +105,12 @@ export default Vue.extend({
         '#FF0000'
       ],
       fieldRange: {
-        opacity: { min: 0, max: 100 }
+        opacity: { min: 0, max: 100 },
+        lineWidth: { min: 1, max: 100 }
       },
       currSelectedColorIndex: 0,
       openSliderBar: '',
+      openValueSelector: '',
       openColorPicker: false,
       paletteRecord: [{ key: 0, value: -1 }]
     }
@@ -108,6 +137,18 @@ export default Vue.extend({
      * This parameter means if current layer is a group/tmp and contains at least 2 of more
      * IShape that the color-list of them only has one entry.
      */
+    lineWidth(): string | number {
+      const { currLayer } = this
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        const layers = [...(currLayer as IGroup).layers]
+        return new Set(layers.map((l: ILayer) => {
+          return (l.type === 'shape' && l.category === 'D') ? ((l as IShape).size?.[0] ?? '--') : '--'
+        })).size === 1 ? ((layers[0] as IShape).size?.[0] ?? '--') : '--'
+      } else {
+        console.log((currLayer as IShape).size?.[0] ?? '--')
+        return (currLayer as IShape).size?.[0] ?? '--'
+      }
+    },
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
     },
@@ -224,6 +265,10 @@ export default Vue.extend({
         input.select()
       }
     },
+    handleValueModal(modalName = '') {
+      this.openValueSelector = modalName
+      console.log(this.openValueSelector)
+    },
     setColor(newColor: string, index: number) {
       const { currLayer } = this
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
@@ -255,6 +300,22 @@ export default Vue.extend({
             this.lastSelectedPageIndex,
             this.currSelectedIndex,
             { opacity: value }
+          )
+        }
+      }
+    },
+    setLineWidth(e: Event) {
+      const { value } = e.target as HTMLInputElement
+      if (GeneralUtils.isValidInt(value)) {
+        const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
+        const { currLayer } = this
+        if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+          LayerUtils.updateAllGroupProps({ size: [lineWidth] })
+        } else {
+          LayerUtils.updateLayerProps(
+            this.lastSelectedPageIndex,
+            this.currSelectedIndex,
+            { size: [lineWidth] }
           )
         }
       }
@@ -322,7 +383,6 @@ export default Vue.extend({
     // left: auto;
     right: auto;
     padding: auto;
-    margin-top: -12px;
     width: 135px;
     height: 35px;
     background-color: #ffffff;
@@ -330,6 +390,18 @@ export default Vue.extend({
     box-shadow: 0 0 0 1px rgb(64 87 109 / 7%), 0 2px 12px rgb(53 71 90 / 20%);
     border: 1px solid #d9dbe1;
     border-radius: 3px;
+    display: flex;
+    align-items: center;
+
+    &-line-width {
+      @extend .shape-setting__range-input-wrapper;
+      width: 155px;
+    }
+
+    &-opacity {
+      @extend .shape-setting__range-input-wrapper;
+      margin-top: -12px;
+    }
   }
   &__range-input {
     display: block;
@@ -354,6 +426,16 @@ export default Vue.extend({
       margin-top: -6.5px;
       position: relative;
     }
+    &-line-width {
+      width: 95px;
+
+      &-value {
+        @extend .shape-setting__range-input-line-width;
+        width: 40px;
+        margin: auto;
+        border: 1px solid #d9dbe1;
+      }
+    }
   }
   &__range-input-button {
     width: fit-content;
@@ -364,6 +446,14 @@ export default Vue.extend({
   &:hover {
     box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
+}
+.vertical-rule {
+  @extend .bg-gray-4;
+  width: 1px;
+  height: 20px;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
 }
 
 </style>

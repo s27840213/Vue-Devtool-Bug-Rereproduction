@@ -69,7 +69,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean | string[] }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [index: string]: number | string | boolean | string[] | number[] }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
@@ -80,6 +80,12 @@ class LayerUtils {
   updateAllGroupStyles(styles: { [key: string]: string | number | boolean }) {
     store.commit('UPDATE_groupLayerStyles', {
       styles
+    })
+  }
+
+  updateAllGroupProps(props: { [key: string]: string | number | boolean | number[] }) {
+    store.commit('UPDATE_groupLayerProps', {
+      props
     })
   }
 

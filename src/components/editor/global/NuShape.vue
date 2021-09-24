@@ -96,6 +96,18 @@ export default Vue.extend({
         Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, this.config.size[0], this.config.styles))
       },
       deep: true
+    },
+    'config.size': {
+      handler: function(newVal) {
+        const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray ?? [], newVal, this.config.point, this.config.markerWidth)
+        this.transNode.textContent = transText
+
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap)
+        this.styleNode.textContent = styleText
+
+        Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
+      },
+      deep: true
     }
   },
   computed: {
