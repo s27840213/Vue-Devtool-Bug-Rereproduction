@@ -89,6 +89,7 @@ import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import color from '@/store/module/color'
 import { Layer } from 'konva/types/Layer'
+import shapeUtils from '@/utils/shapeUtils'
 
 export default Vue.extend({
   components: {
@@ -149,15 +150,15 @@ export default Vue.extend({
      */
     lineWidth(): string | number {
       const { currLayer } = this
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const layers = [...(currLayer as IGroup).layers]
-        return new Set(layers.map((l: ILayer) => {
-          return (l.type === 'shape' && l.category === 'D') ? ((l as IShape).size?.[0] ?? '--') : '--'
-        })).size === 1 ? ((layers[0] as IShape).size?.[0] ?? '--') : '--'
-      } else {
-        console.log((currLayer as IShape).size?.[0] ?? '--')
-        return (currLayer as IShape).size?.[0] ?? '--'
-      }
+      // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+      //   const layers = [...(currLayer as IGroup).layers]
+      //   return new Set(layers.map((l: ILayer) => {
+      //     return (l.type === 'shape' && l.category === 'D') ? ((l as IShape).size?.[0] ?? '--') : '--'
+      //   })).size === 1 ? ((layers[0] as IShape).size?.[0] ?? '--') : '--'
+      // } else {
+      //   return (currLayer as IShape).size?.[0] ?? '--'
+      // }
+      return (currLayer as IShape).size?.[0] ?? '--'
     },
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
@@ -319,15 +320,30 @@ export default Vue.extend({
       if (GeneralUtils.isValidInt(value)) {
         const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
         const { currLayer } = this
-        if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-          LayerUtils.updateAllGroupProps({ size: [lineWidth] })
-        } else {
-          LayerUtils.updateLayerProps(
-            this.lastSelectedPageIndex,
-            this.currSelectedIndex,
-            { size: [lineWidth] }
-          )
-        }
+        // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        //   LayerUtils.updateAllGroupProps({ size: [lineWidth] })
+        // } else {
+        //   LayerUtils.updateLayerProps(
+        //     this.lastSelectedPageIndex,
+        //     this.currSelectedIndex,
+        //     { size: [lineWidth] }
+        //   )
+        // }
+        const { point, styles, size } = (currLayer as IShape)
+        LayerUtils.updateLayerProps(
+          this.lastSelectedPageIndex,
+          this.currSelectedIndex,
+          { size: [lineWidth] }
+        )
+        const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, size?.[0] ?? 1, lineWidth)
+        LayerUtils.updateLayerStyles(
+          this.lastSelectedPageIndex,
+          this.currSelectedIndex,
+          {
+            x: trans.x,
+            y: trans.y
+          }
+        )
       }
     },
     handleLineDashUpdate(e: Event) {
