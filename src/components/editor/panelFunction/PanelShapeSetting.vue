@@ -3,9 +3,9 @@
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     action-bar(class="flex-between"
               v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
-      div(class="relative")
-        svg-icon(class="layers-alt pointer"
-                iconName="layers-alt" iconWidth="20px" iconColor="gray-2"
+      div(class="shape-setting__line-action-wrapper")
+        svg-icon(class="pointer"
+                iconName="line-width" iconWidth="20px" iconColor="gray-2"
                 @click.native="handleSliderModal('line-width')")
         div(v-if="openSliderBar === 'line-width'"
             class="shape-setting__range-input-wrapper-line-width right"
@@ -18,23 +18,24 @@
             type="range"
             @input="setLineWidth")
           div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
-      div(class="relative")
+      div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
-                iconName="copy" iconWidth="20px" iconColor="gray-2"
+                iconName="line-dash" iconWidth="20px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
-        //- value-selector(v-if="openValueSelector === 'line-dash'"
-        //-               :valueArray="[1, 2, 3]"
+        //- general-value-selector(v-if="openValueSelector === 'line-dash'"
+        //-               :valueArray="[1, 2, 3, 4]"
+        //-               :dividers="[2]"
         //-               class="shape-setting__value-selector"
         //-               v-click-outside="handleValueModal"
         //-               @update="handleLineDashUpdate")
       div(class="vertical-rule")
-      div(class="relative")
+      div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
-                iconName="lock" iconWidth="20px" iconColor="gray-2"
+                iconName="start-marker" iconWidth="20px" iconColor="gray-2"
                 @click.native="handleValueModal('start-marker')")
-      div(class="relative")
+      div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
-                iconName="trash" iconWidth="20px" iconColor="gray-2"
+                iconName="end-marker" iconWidth="20px" iconColor="gray-2"
                 @click.native="handleValueModal('end-marker')")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
@@ -83,7 +84,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
-import ValueSelector from '@/components/ValueSelector.vue'
+// import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
@@ -94,9 +95,8 @@ import shapeUtils from '@/utils/shapeUtils'
 export default Vue.extend({
   components: {
     SearchBar,
-    ColorPicker,
-    ValueSelector
-  },
+    ColorPicker
+  }, // GeneralValueSelector
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -398,6 +398,8 @@ export default Vue.extend({
     position: absolute;
     z-index: 9;
     left: -10px;
+    top: 35px;
+    margin: 0;
   }
   &__color-picker {
     position: absolute;
@@ -432,6 +434,7 @@ export default Vue.extend({
       width: 155px;
       left: -15px;
       right: unset;
+      top: 35px;
     }
 
     &-opacity {
@@ -480,15 +483,16 @@ export default Vue.extend({
   &__range-input-button {
     width: fit-content;
   }
+  &__line-action-wrapper {
+    position: relative;
+    height: 20px;
+  }
 }
 .rainbow {
   position: relative;
   &:hover {
     box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
-}
-.relative {
-  position: relative;
 }
 .vertical-rule {
   @extend .bg-gray-4;
