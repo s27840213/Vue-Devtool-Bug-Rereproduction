@@ -1,11 +1,32 @@
 swagger: "2.0"
 info:
-  version: "20210917"
+  version: "20210924"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
   - https
 paths:
+  /add-design:
+    post:
+      description: 記錄使用者選用的設計
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: addDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/addDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /delete-asset:
     post:
       description: 刪除使用者上傳之檔案
@@ -350,11 +371,15 @@ definitions:
   googleLoginInput:
     type: object
     required:
-      - id_token
+      - code
+      - redirect_uri
     properties:
-      id_token:
+      code:
         type: string
-        description: google id token
+        description: google code
+      redirect_uri:
+        type: string
+        description: google redirect url
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -365,7 +390,7 @@ definitions:
         properties:
           type:
             type: string
-            description: "design type: background, font, svg, template, or text"
+            description: "design type: background, font, svg, marker, template, or text"
           locale:
             type: string
             description: |-
@@ -381,9 +406,10 @@ definitions:
           keyword:
             type: string
             description: keyword to search
-          return_obj:
+          font_list:
             type: number
-            description: 0 (default) for return key id string array, 1 for return obj array
+            description: 0 (default) for return all font key id in single array, 1 for
+              return key id in various arrays according to title
   sendVcodeInput:
     type: object
     required:
@@ -510,6 +536,20 @@ definitions:
           expire_time:
             type: string
             description: expire time
+  addDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - design_id
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, template, or text"
+          design_id:
+            type: string
+            description: design id selected by user
   apiCommonInput:
     type: object
     required:
