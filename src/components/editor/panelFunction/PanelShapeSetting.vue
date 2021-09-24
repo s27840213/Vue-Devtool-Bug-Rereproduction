@@ -1,33 +1,41 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    div(class="relative"
-        v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
-      action-bar(class="flex-between")
+    action-bar(class="flex-between"
+              v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
+      div(class="relative")
         svg-icon(class="layers-alt pointer"
-          iconName="layers-alt" iconWidth="20px" iconColor="gray-2"
-          @click.native="handleSliderModal('line-width')")
+                iconName="layers-alt" iconWidth="20px" iconColor="gray-2"
+                @click.native="handleSliderModal('line-width')")
+        div(v-if="openSliderBar === 'line-width'"
+            class="shape-setting__range-input-wrapper-line-width right"
+            v-click-outside="handleSliderModal")
+          input(class="shape-setting__range-input shape-setting__range-input-line-width"
+            :value="lineWidth"
+            :max="fieldRange.lineWidth.max"
+            :min="fieldRange.lineWidth.min"
+            v-ratio-change
+            type="range"
+            @input="setLineWidth")
+          div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
+      div(class="relative")
         svg-icon(class="pointer"
-          iconName="copy" iconWidth="20px" iconColor="gray-2"
-          @click.native="handleValueModal('line-dash')")
-        div(class="vertical-rule")
+                iconName="copy" iconWidth="20px" iconColor="gray-2"
+                @click.native="handleValueModal('line-dash')")
+        //- value-selector(v-if="openValueSelector === 'line-dash'"
+        //-               :valueArray="[1, 2, 3]"
+        //-               class="shape-setting__value-selector"
+        //-               v-click-outside="handleValueModal"
+        //-               @update="handleLineDashUpdate")
+      div(class="vertical-rule")
+      div(class="relative")
         svg-icon(class="pointer"
-          iconName="lock" iconWidth="20px" iconColor="gray-2"
-          @click.native="handleValueModal('start-marker')")
+                iconName="lock" iconWidth="20px" iconColor="gray-2"
+                @click.native="handleValueModal('start-marker')")
+      div(class="relative")
         svg-icon(class="pointer"
-          iconName="trash" iconWidth="20px" iconColor="gray-2"
-          @click.native="handleValueModal('end-marker')")
-      div(v-if="openSliderBar === 'line-width'"
-          class="shape-setting__range-input-wrapper-line-width right"
-          v-click-outside="handleSliderModal")
-        input(class="shape-setting__range-input shape-setting__range-input-line-width"
-          :value="lineWidth"
-          :max="fieldRange.lineWidth.max"
-          :min="fieldRange.lineWidth.min"
-          v-ratio-change
-          type="range"
-          @input="setLineWidth")
-        div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
+                iconName="trash" iconWidth="20px" iconColor="gray-2"
+                @click.native="handleValueModal('end-marker')")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -75,6 +83,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ValueSelector from '@/components/ValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
@@ -84,7 +93,8 @@ import { Layer } from 'konva/types/Layer'
 export default Vue.extend({
   components: {
     SearchBar,
-    ColorPicker
+    ColorPicker,
+    ValueSelector
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -320,6 +330,9 @@ export default Vue.extend({
         }
       }
     },
+    handleLineDashUpdate(e: Event) {
+      console.log(e)
+    },
     initilizeRecord() {
       this.paletteRecord = []
       for (let i = 0; i < this.getColors.length; i++) {
@@ -365,6 +378,11 @@ export default Vue.extend({
     }
     transition: box-shadow .2s ease-in-out;
   }
+  &__value-selector {
+    position: absolute;
+    z-index: 9;
+    left: -10px;
+  }
   &__color-picker {
     position: absolute;
     z-index: 10;
@@ -396,6 +414,8 @@ export default Vue.extend({
     &-line-width {
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
+      left: -15px;
+      right: unset;
     }
 
     &-opacity {
@@ -427,13 +447,17 @@ export default Vue.extend({
       position: relative;
     }
     &-line-width {
-      width: 95px;
+      width: 80px;
 
       &-value {
         @extend .shape-setting__range-input-line-width;
-        width: 40px;
+        width: 30px;
         margin: auto;
-        border: 1px solid #d9dbe1;
+        height: 23px;
+        line-height: 23px;
+        font-size: 10px;
+        border: 1px solid map-get($colors, gray-4);
+        border-radius: 5px;
       }
     }
   }
@@ -446,6 +470,9 @@ export default Vue.extend({
   &:hover {
     box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
   }
+}
+.relative {
+  position: relative;
 }
 .vertical-rule {
   @extend .bg-gray-4;
