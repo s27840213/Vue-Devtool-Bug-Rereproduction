@@ -12,8 +12,10 @@ class LayerUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
-  get getLayer() { return store.getters.getLayer }
-  get getCurrLayer() { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): ILayer { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getLayer(): (pageIndex: number, layerIndex: number) => ILayer {
+    return store.getters.getLayer
+  }
 
   addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp | IFrame) {
     store.commit('ADD_newLayers', {
@@ -81,10 +83,11 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, indexs: Array<number>, styles: { [index: string]: number | string | boolean }) {
-    store.commit('UPDATE_selectedLayersStyles', {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+    store.commit('SET_subLayerStyles', {
       pageIndex,
-      indexs,
+      primaryLayerIndex,
+      subLayerIndex,
       styles
     })
   }
@@ -95,6 +98,13 @@ class LayerUtils {
       layerIndex,
       targetIndex,
       props
+    })
+  }
+
+  setCurrSubSelectedInfo(subIndex: number, type: string) {
+    store.commit('SET_currSubSelectedInfo', {
+      index: subIndex,
+      type
     })
   }
 

@@ -114,6 +114,7 @@ export default Vue.extend({
       keyword ? this.getContent({ keyword }) : this.resetContent()
     },
     handleLoadMore() {
+      console.log('object load more')
       this.getMoreContent()
     }
   }

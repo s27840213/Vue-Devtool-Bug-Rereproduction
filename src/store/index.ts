@@ -356,10 +356,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
-    console.log(groupLayer)
-    console.log(updateInfo.targetIndex)
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
-    console.log(targetLayer)
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
     })

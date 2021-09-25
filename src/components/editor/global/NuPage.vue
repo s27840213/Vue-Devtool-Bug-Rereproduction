@@ -98,23 +98,32 @@
             //-   @setFocus="setFocus()"
             //-   @getClosestSnaplines="getClosestSnaplines"
             //-   @clearSnap="clearSnap")
-        div(v-if="(typeof getCurrLayer) !== 'undefined' && getCurrLayer.active && getCurrLayer.imgControl"
+        div(v-if="isImgControl"
             class="dim-background"
             :style="styles('control')"
             ref="page-content")
-          nu-layer(:layerIndex="currSelectedIndex"
-            :pageIndex="pageIndex"
-            :config="getCurrLayer")
-          div(class="page-control dim-background" :style="Object.assign(styles('control'), { 'pointer-events': 'none' })")
-              nu-img-controller(:layerIndex="currSelectedIndex"
-                                :pageIndex="pageIndex"
-                                :config="getCurrLayer")
+          template(v-if="getCurrLayer.type === 'group'")
+            nu-layer(:layerIndex="currSubSelectedInfo.index"
+              :pageIndex="pageIndex"
+              :config="getCurrSubSelectedLayer")
+            div(class="page-control" :style="Object.assign(styles('control'))")
+                nu-img-controller(:layerIndex="currSubSelectedInfo.index"
+                                  :pageIndex="pageIndex"
+                                  :config="Object.assign(getCurrSubSelectedLayer, { pointerEvents: 'none' })")
+          template(v-else)
+            nu-layer(:layerIndex="currSelectedIndex"
+              :pageIndex="pageIndex"
+              :config="getCurrLayer")
+            div(class="page-control" :style="Object.assign(styles('control'))")
+                nu-img-controller(:layerIndex="currSelectedIndex"
+                                  :pageIndex="pageIndex"
+                                  :config="getCurrLayer")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
-import { IShape, IText, IImage, IGroup, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -162,14 +171,19 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
-      pages: 'getPages',
+      getCurrActivePageIndex: 'getCurrActivePageIndex',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer',
-      getCurrActivePageIndex: 'getCurrActivePageIndex'
+      pages: 'getPages',
+      getLayer: 'getLayer'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
+    },
+    getCurrSubSelectedLayer(): ILayer {
+      return GroupUtils.mapLayersToPage(
+        [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
     },
     getPageCount(): number {
       return this.pages.length
@@ -186,6 +200,21 @@ export default Vue.extend({
           }
         })
       }
+    },
+    isImgControl(): boolean {
+      const layer = this.getCurrLayer
+      if (layer) {
+        switch (layer.type) {
+          case 'image':
+            return (layer as IImage).imgControl
+          case 'group':
+            return (layer as IGroup).layers
+              .some(l => {
+                return l.type === 'image' && l.imgControl
+              })
+        }
+      }
+      return false
     }
   },
   methods: {
@@ -424,7 +453,7 @@ export default Vue.extend({
   left: 0px;
   // min-width: 100%;
   // min-height: 100%;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   // background: rgba(53, 71, 90, 0.25);
   pointer-events: none;
 }

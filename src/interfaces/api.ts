@@ -102,7 +102,7 @@ export interface IListServiceParams {
   locale?: string
   type?: 'template' | 'text' | 'svg' | 'background' | 'font'
   keyword?: string
-  pageIndex?: number
+  pageIndex?: number,
   listAll?: 0 | 1
 }
 export interface IListServiceContentDataItem {

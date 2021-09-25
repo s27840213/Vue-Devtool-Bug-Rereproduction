@@ -7,6 +7,7 @@
           :style="styles('')"
           @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
+          @dblclick="onDblClick()"
           @click.left.stop="onClickEvent()")
         template(v-if="config.type === 'text' && config.active")
           div(:style="textScaleStyle()")
@@ -32,8 +33,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { v4 as uuidv4 } from 'uuid'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
@@ -42,13 +42,19 @@ import { IImage, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText }
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
+import TemplateUtils from '@/utils/templateUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import LayerUtils from '@/utils/layerUtils'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
+    primaryLayerIndex: Number,
     snapUtils: Object,
     color: {
       type: String,
@@ -85,6 +91,7 @@ export default Vue.extend({
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   computed: {
+    ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -304,7 +311,7 @@ export default Vue.extend({
             }
           }
         }
-        const observer = new MutationObserver(this.onTyping(e, start))
+        const observer = new MutationObserver(this.onTyping(e, this.isComposing))
         observer.observe(text, {
           characterData: true,
           childList: true,
@@ -315,187 +322,162 @@ export default Vue.extend({
         })
       }
     },
-    onTyping(e: KeyboardEvent, start: { pIndex: number, sIndex: number, offset: number }) {
+    composingEnd() {
+      this.isComposing = false
+      const start = TextUtils.getSelection()?.start
+      if (start) {
+        TextUtils.updateSelection(start, start)
+      }
+      const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+    },
+    onTyping(e: KeyboardEvent, isComposing: boolean) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-        const text = this.$refs.text as HTMLElement
-        text.style.width = this.config.widthLimit === -1 ? 'max-content' : `${this.config.widthLimit / this.getLayerScale}px`
-        text.style.height = 'max-content'
-        const textHW = {
-          width: Math.ceil(text.offsetWidth + 1),
-          height: Math.ceil(text.offsetHeight + 1)
-        }
-
-        let layerX = this.getLayerPos.x
-        let layerY = this.getLayerPos.y
-
-        if (this.config.widthLimit === -1) {
-          const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
-          const currTextWidth = textHW.width
-          layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
-          if (layerX <= 0) {
-            layerX = 0
-            textHW.width = this.getLayerWidth
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          } else if (layerX + currTextWidth >= pageWidth) {
-            layerX = pageWidth - this.getLayerWidth
-            textHW.width = this.getLayerWidth
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-          }
-        } else {
-          const initData = {
-            xSign: 1,
-            ySign: 1,
-            x: this.getLayerPos.x,
-            y: this.getLayerPos.y,
-            angle: this.getLayerRotate * Math.PI / 180
-          }
-          const offsetSize = {
-            width: textHW.width - this.getLayerWidth,
-            height: textHW.height - this.getLayerHeight
-          }
-          const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-          layerX = trans.x
-          layerY = trans.y
-        }
-        text.style.width = `${textHW.width / this.getLayerScale}px`
-
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
-
-        if (this.isComposing) {
-          return
-        }
-
         observer.disconnect()
-        const paragraphs: IParagraph[] = this.textParser()
-        if (window.getSelection()) {
-          const sel = window.getSelection()
-          const startContainer = sel?.getRangeAt(0).startContainer
-          let [pIndex, sIndex, offset] = [start.pIndex, start.sIndex, start.offset]
-          // if the below condition is false, means some paragraph (p-node) is removed
-          if (startContainer?.parentElement?.dataset.sindex) {
-            offset = sel?.getRangeAt(0).startOffset as number
-            sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            // used for deleting the first span of the text, and moving the caret to the previous p
-            const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
-            if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
-              pIndex -= 1
-              // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-              if (pIndex < 0) {
-                [pIndex, sIndex, offset] = [0, 0, 0]
-              }
-              sIndex = paragraphs[pIndex].spans.length - 1
-              offset = paragraphs[pIndex].spans[sIndex].text.length
-            } else if (e.key === 'Enter') {
-              [sIndex, offset] = [0, 0]
-              pIndex += 1
-            }
-          } else if (e.key === 'Enter') {
-            // console.log('inNewLine and some node gone')
-            // console.log(startContainer?.parentElement)
-            // console.log(startContainer)
-            [sIndex, offset] = [0, 0]
-            pIndex += 1
-          } else if (TextUtils.isArrowKey(e)) {
-            /**
-             *  If the input key is ArrowKey, the startContainer will be different as the other key pressed
-             */
-            if (typeof startContainer?.parentElement !== 'undefined' && typeof startContainer?.parentElement !== 'undefined') {
-              offset = sel?.getRangeAt(0).startOffset as number
-              sIndex = parseInt((startContainer as HTMLElement).dataset.sindex as string)
-              pIndex = parseInt(startContainer?.parentElement?.dataset.pindex as string)
-            }
-          } else if (paragraphs.length < (this.config as IText).paragraphs.length) {
-            /**
-             * some paragraph is deleted
-             */
-            pIndex -= 1
-            sIndex = paragraphs[pIndex].spans.length - 1 >= 0 ? paragraphs[pIndex].spans.length - 1 : 0
-            offset = paragraphs[pIndex].spans[sIndex] ? paragraphs[pIndex].spans[sIndex].text.length : 0
+        /**
+         * All text is been deleted, the first node of the paragraph will be 'BR'
+         */
+        if ((this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR') return
+
+        const text = this.$refs.text as HTMLElement
+        let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        if (e.key !== 'Enter' && e.key !== 'Backspace') {
+          paragraphs = TextUtils.newPropsHandler(paragraphs)
+        }
+
+        const sel = TextUtils.getSelection()
+        let { pIndex, sIndex, offset } = this.sel.start
+        // if below condition is false, means some paragraph (p-node) is removed
+        if (sel && TextUtils.isSel(sel.start)) {
+          pIndex = sel.start.pIndex
+          sIndex = sel.start.sIndex
+          offset = sel.start.offset
+          if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
+            sIndex = 0
+            offset = 0
           }
-          const text = this.$refs.text as HTMLElement
+          // Deleting the first span of the text, and moving the caret to the previous p
+          const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
+          if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
+            pIndex -= 1
+            sIndex = paragraphs[pIndex].spans.length - 1
+            offset = paragraphs[pIndex].spans[sIndex].text.length
+            // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
+            if (pIndex < 0) {
+              [pIndex, sIndex, offset] = [0, 0, 0]
+            }
+          }
+        }
+        if (e.key === 'Enter') {
+          [sIndex, offset] = [0, 0]
+          pIndex += 1
+        }
+        if (this.isComposing) {
+          const config = GeneralUtils.deepCopy(this.config) as IText
+          Object.assign(config.paragraphs, paragraphs)
+          this.textSizeRefresh(config)
+        } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
+          TemplateUtils.updateTextInfo(this.config)
+          this.textSizeRefresh(this.config)
           this.$nextTick(() => {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+            StepsUtils.record()
             if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
               text.removeChild(text.lastChild)
             }
             const sel = window.getSelection()
             if (sel) {
-              const range = new Range()
-              range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-              sel.removeAllRanges()
-              sel.addRange(range)
+              const currPropsState = this.props
+              const isSameSpanStyles = (() => {
+                if (e.key !== 'Enter' && e.key !== 'Backspace' && !Number.isNaN(pIndex) && !Number.isNaN(sIndex)) {
+                  const props = ['weight', 'style', 'decoration', 'color']
+                  for (const k of props) {
+                    if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
+                      return false
+                    }
+                  }
+                }
+                return true
+              })()
+              if (!isSameSpanStyles) {
+                sIndex += 1
+                offset = 1
+              }
+
+              if (isComposing) {
+                pIndex = this.sel.start.pIndex
+                sIndex = this.sel.start.sIndex
+                offset = this.sel.start.offset
+              } else if (TextUtils.isEmptyText(this.config)) {
+                [pIndex, sIndex, offset] = [0, 0, 0]
+              }
+
+              if (!Number.isNaN(pIndex)) {
+                const range = new Range()
+                range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+                sel.removeAllRanges()
+                sel.addRange(range)
+              }
+            }
+            TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
+            if (e.key !== 'Enter' && (e.key === 'Backspace' && paragraphs[pIndex].spans[sIndex].text === '')) {
+              TextPropUtils.updateTextPropsState()
             }
           })
         }
       }
     },
-    textParser(): IParagraph[] {
-      const paragraphs: IParagraph[] = []
-      const div = this.$refs.text as HTMLElement
-      const ps = div.childNodes
-      const config = (this.config as IText)
-      ps.forEach((p, pIndex) => {
-        const spans: ISpan[] = []
-        for (const [sIndex, span] of p.childNodes.entries()) {
-          if (span instanceof HTMLElement) {
-            let spanEl = span as HTMLElement
-            const text = spanEl.innerText as string
-            /**
-             * If the span is the same without changed, skip parse it
-             */
-            if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
-              spans.push((this.config as IText).paragraphs[pIndex].spans[sIndex])
-              continue
-            }
-            /**
-             *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
-             *  below detecting the situation and use the style of the last span of previous p to replace it.
-             */
-            if (spanEl.style.fontFamily === '') {
-              const leng = div.childNodes[pIndex - 1].childNodes.length
-              spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-            }
-            const spanStyle = {
-              font: spanEl.style.fontFamily,
-              weight: spanEl.style.fontWeight,
-              size: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-              initSize: spanEl.style.fontSize ? parseInt(spanEl.style.fontSize.replace(/px/, '')) : '',
-              decoration: spanEl.style.textDecorationLine,
-              style: spanEl.style.fontStyle,
-              color: spanEl.style.color,
-              opacity: parseInt(spanEl.style.opacity)
-            } as ISpanStyle
-            spanEl = span as HTMLElement
-            spans.push({ text: text, styles: spanStyle, id: uuidv4() })
-          }
+    textSizeRefresh(text: IText) {
+      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+      const isVertical = this.config.styles.writingMode.includes('vertical')
+
+      let layerX = this.getLayerPos.x
+      let layerY = this.getLayerPos.y
+      const textHW = TextUtils.getTextHW(text, this.config.widthLimit)
+
+      if (this.config.widthLimit === -1) {
+        const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
+        const currTextWidth = textHW.width
+        layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
+        if (layerX <= 0) {
+          layerX = 0
+          textHW.width = this.getLayerWidth
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+        } else if (layerX + currTextWidth >= pageWidth) {
+          layerX = pageWidth - this.getLayerWidth
+          textHW.width = this.getLayerWidth
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
         }
-        const pEl = p as HTMLElement
-        const pStyle: IParagraphStyle = { lineHeight: 0, fontSpacing: 0, size: 20, align: 'left' }
-        pStyle.lineHeight = parseInt(pEl.style.lineHeight.replace(/px/, ''))
-        pStyle.fontSpacing = parseInt(pEl.style.letterSpacing)
-        pStyle.align = pEl.style.textAlign
-        paragraphs.push({ styles: pStyle, spans: spans, id: uuidv4() })
-      })
-      paragraphs.forEach(p => {
-        if (p.spans.length === 1 && p.spans[0].text === '') {
-          p.spans[0].text = '\n'
+      } else {
+        const initData = {
+          xSign: 1,
+          ySign: 1,
+          x: this.getLayerPos.x,
+          y: this.getLayerPos.y,
+          angle: this.getLayerRotate * Math.PI / 180
         }
-      })
-      return paragraphs
-    },
-    isNoCharactor(e: KeyboardEvent): boolean {
-      if (e.key === 'Backspace') {
-        return false
+        const offsetSize = {
+          width: isVertical ? textHW.width - this.getLayerWidth : 0,
+          height: isVertical ? 0 : textHW.height - this.getLayerHeight
+        }
+        const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
+        layerX = trans.x
+        layerY = trans.y
       }
-      return e.key.length !== 1
-    },
-    onDblClick() {
-      if (this.getLayerType !== 'image' || this.isLocked) return
-      ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
+
+      if (isVertical && textHW.width < 5) {
+        textHW.width = this.getLayerWidth
+      } else if (!isVertical && textHW.height < 5) {
+        const config = GeneralUtils.deepCopy(text) as IText
+        config.paragraphs[0].spans[0].text = '|'
+        config.paragraphs.splice(1)
+        textHW.height = TextUtils.getTextHW(config).height
+      }
+
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
     },
     onRightClick(event: MouseEvent) {
       if (!this.isLocked) {
@@ -524,6 +506,9 @@ export default Vue.extend({
     },
     onClickEvent() {
       this.$emit('clickSubController', this.layerIndex, this.config.type)
+    },
+    onDblClick() {
+      this.$emit('dblSubController', this.layerIndex)
     }
   }
 })

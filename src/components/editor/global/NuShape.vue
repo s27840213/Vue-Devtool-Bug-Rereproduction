@@ -71,6 +71,7 @@ export default Vue.extend({
       handler: function(newVal) {
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size)
         this.styleNode.textContent = styleText
+        // console.log(this.styleNode.textContent)
       },
       deep: true
     },

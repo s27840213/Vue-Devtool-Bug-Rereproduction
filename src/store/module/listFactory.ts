@@ -89,7 +89,8 @@ export default function (this: any) {
       state.pending = false
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
-      state.content = objects.content[0] || {}
+      state.content = objects.content.find(content => content.list.length) || {}
+      // state.content = objects.content[0] || {}
       state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
       state.data = objects.data
       state.preview = objects.preview
@@ -99,7 +100,7 @@ export default function (this: any) {
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
-      const { list: newList } = objects.content[0] || {}
+      const { list: newList = [] } = objects.content.find(content => content.list.length) || {}
       state.content = {
         ...state.content,
         list: list.concat(newList)

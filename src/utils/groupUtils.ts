@@ -8,6 +8,7 @@ import ZindexUtils from '@/utils/zindexUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { Layer } from 'konva/types/Layer'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -221,9 +222,23 @@ class GroupUtils {
       //   store.commit('SET_currSubSelectedIndex', -1)
       // }
       if (store.getters.getCurrSelectedLayers.length === 1) {
-        LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
+        const { pageIndex, index: layerIndex } = this.currSelectedInfo
+        LayerUtils.updateLayerProps(pageIndex, layerIndex, {
           active: false
         })
+        if (LayerUtils.getCurrLayer.type === 'group' || LayerUtils.getCurrLayer.type === 'tmp') {
+          const primaryLayer = LayerUtils.getCurrLayer as IGroup
+          for (let i = 0; i < primaryLayer.layers.length; i++) {
+            const props = {
+              active: false
+            } as { [key: string]: boolean | string | number }
+
+            if (primaryLayer.layers[i].type === 'image') {
+              props.imgControl = false
+            }
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+          }
+        }
       } else {
         const tmpLayer = getTmpLayer()
         store.commit('DELETE_selectedLayer')
@@ -287,7 +302,6 @@ class GroupUtils {
    * @returns calculated layers in tmp layer
    */
   mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
-    console.log(layers)
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       // calculate scale offset

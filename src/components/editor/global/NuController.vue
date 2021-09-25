@@ -7,8 +7,6 @@
           :style="styles('')"
           @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
-          @dragenter="onDragEnter($event)"
-          @dragleave="onDragLeave($event)"
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
@@ -23,16 +21,18 @@
             @mouseup="onFrameMouseUp")
         template(v-if="config.type==='group' && isActive")
           div(class="sub-controller")
-            nu-sub-controller(
-              v-for="(layer,index) in config.layers"
-              data-identifier="controller"
-              :style="subControllerStyles()"
-              :key="`group-controller-${index}`"
-              :layerIndex="index"
-              :pageIndex="pageIndex"
-              :config="layer"
-              :color="'#EB5757'"
-              @clickSubController="clickSubController")
+            template(v-for="(layer,index) in config.layers")
+              component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+                data-identifier="controller"
+                :style="subControllerStyles()"
+                :key="`group-controller-${index}`"
+                :pageIndex="pageIndex"
+                :layerIndex="index"
+                :primaryLayerIndex="layerIndex"
+                :config="layer"
+                :color="'#EB5757'"
+                @clickSubController="clickSubController"
+                @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && config.active")
           div(class="text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -100,7 +100,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -118,6 +118,7 @@ import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import FrameUtils from '@/utils/frameUtils'
+import vClickOutside from 'v-click-outside'
 import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
@@ -126,6 +127,9 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     snapUtils: Object
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -215,6 +219,17 @@ export default Vue.extend({
     },
     isDragging(): boolean {
       return this.config.dragging
+    },
+    isImgControl(): boolean {
+      if (this.getLayerType === 'image') {
+        return this.config.imgControl
+      } else if (this.getLayerType === 'group' || this.getLayerType === 'tmp') {
+        return (this.config as IGroup).layers
+          .some(layer => {
+            return layer.type === 'image' && layer.imgControl
+          })
+      }
+      return false
     }
   },
   watch: {
@@ -275,8 +290,7 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setIsMoving: 'SET_isMoving',
-      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
+      setIsMoving: 'SET_isMoving'
     }),
     onFrameMouseEnter(clipIndex: number) {
       this.clipIndex = clipIndex
@@ -400,13 +414,15 @@ export default Vue.extend({
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.outlineStyles(type),
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        opacity: this.isImgControl ? 0 : 1,
+        'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
     subControllerStyles() {
       return {
-        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
+        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
+        position: 'relative'
       }
     },
     outlineStyles(type: string) {
@@ -431,9 +447,6 @@ export default Vue.extend({
       }
     },
     moveStart(e: MouseEvent) {
-      // if (!this.isLocked) {
-      //   e.stopPropagation()
-      // }
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -494,6 +507,9 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
+      if (this.isImgControl) {
+        return
+      }
       if (!this.isMoving) {
         (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
         this.setIsMoving(true)
@@ -965,6 +981,7 @@ export default Vue.extend({
       }
     },
     onClick(e: MouseEvent) {
+      console.log('cccccccccccc')
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
@@ -1173,8 +1190,6 @@ export default Vue.extend({
         layerY = trans.y
       }
 
-      // console.log('textHW---')
-      // console.log(textHW.height)
       if (isVertical && textHW.width < 5) {
         textHW.width = this.getLayerWidth
       } else if (!isVertical && textHW.height < 5) {
@@ -1182,8 +1197,6 @@ export default Vue.extend({
         config.paragraphs[0].spans[0].text = '|'
         config.paragraphs.splice(1)
         textHW.height = TextUtils.getTextHW(config).height
-        // console.log('textHW.height')
-        // console.log(textHW.height)
       }
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
@@ -1191,7 +1204,7 @@ export default Vue.extend({
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return
-      ControlUtils.updateImgControl(this.pageIndex, this.layerIndex, true)
+      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
       this.setIsLayerDropdownsOpened(true)
@@ -1208,18 +1221,24 @@ export default Vue.extend({
     clickSubController(targetIndex: number, type: string) {
       if (this.currSubSelectedInfo.index !== -1) {
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
+        if (this.currSubSelectedInfo.type === 'image') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
+        }
       }
       LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
-      this.setCurrSubSelectedInfo({
-        index: targetIndex,
-        type
-      })
+      LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
-    onDragEnter() {
-      console.log('dragEnter')
+    dblSubController(targetIndex: number) {
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      console.log(this.currSubSelectedInfo)
     },
-    onDragLeave() {
-      console.log('dragLeave')
+    clickSubControllerOutside() {
+      const { index } = this.currSubSelectedInfo
+      const layer = (this.config as IGroup).layers[index]
+      console.log(layer)
+      if (layer.type === 'image' && layer.imgControl) {
+        console.log('click outside')
+      }
     }
   }
 })
