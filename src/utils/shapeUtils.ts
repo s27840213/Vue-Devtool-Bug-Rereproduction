@@ -36,7 +36,7 @@ class ShapeUtils {
     }
     if (dashArray) {
       const reg = new RegExp('\\$dash', 'g')
-      style = style.replace(reg, dashArray.join(' '))
+      style = style.replace(reg, dashArray.join(' ').replace('1', ((sizeArray?.[0] ?? 1) * 2.5).toString()))
     }
     if (linecap) {
       const reg = new RegExp('\\$cap', 'g')

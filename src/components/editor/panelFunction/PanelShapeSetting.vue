@@ -374,7 +374,7 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(
         this.lastSelectedPageIndex,
         this.currSelectedIndex,
-        { dasharray: (dash === 1) ? [] : [10] }
+        { dasharray: (dash === 1) ? [] : [1] }
       )
     },
     handleLineEdge(edge: number) {
