@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    action-bar(class="flex-between"
+    action-bar(class="flex-around"
               v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
@@ -22,12 +22,26 @@
         svg-icon(class="pointer"
                 iconName="line-dash" iconWidth="20px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
-        //- general-value-selector(v-if="openValueSelector === 'line-dash'"
-        //-               :valueArray="[1, 2, 3, 4]"
-        //-               :dividers="[2]"
-        //-               class="shape-setting__value-selector"
-        //-               v-click-outside="handleValueModal"
-        //-               @update="handleLineDashUpdate")
+        general-value-selector(v-if="openValueSelector === 'line-dash'"
+                      :valueArray="[[1, 2], [3, 4]]"
+                      class="shape-setting__value-selector"
+                      v-click-outside="handleValueModal"
+                      :values="dashAndEdge"
+                      @update="handleLineDashEdgeUpdate"
+                      itemMinWidth="70",
+                      buttonHeight="20")
+          template(v-slot:g0i0)
+            svg-icon(class="pointer"
+                  iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(v-slot:g0i1)
+            svg-icon(class="pointer"
+                  iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(v-slot:g1i0)
+            svg-icon(class="pointer"
+                  iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(v-slot:g1i1)
+            svg-icon(class="pointer"
+                  iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
       div(class="vertical-rule")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
@@ -84,7 +98,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
-// import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
+import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
@@ -95,8 +109,9 @@ import shapeUtils from '@/utils/shapeUtils'
 export default Vue.extend({
   components: {
     SearchBar,
-    ColorPicker
-  }, // GeneralValueSelector
+    ColorPicker,
+    GeneralValueSelector
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -123,7 +138,8 @@ export default Vue.extend({
       openSliderBar: '',
       openValueSelector: '',
       openColorPicker: false,
-      paletteRecord: [{ key: 0, value: -1 }]
+      paletteRecord: [{ key: 0, value: -1 }],
+      dashAndEdge: [1, 3]
     }
   },
   mounted() {
@@ -346,8 +362,23 @@ export default Vue.extend({
         )
       }
     },
-    handleLineDashUpdate(e: Event) {
-      console.log(e)
+    handleLineDashEdgeUpdate(index: number, value: number) {
+      if (index === 0) {
+        this.handleLineDash(value)
+      } else {
+        this.handleLineEdge(value)
+      }
+      this.$set(this.dashAndEdge, index, value)
+    },
+    handleLineDash(dash: number) {
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        { dasharray: (dash === 1) ? [] : [10] }
+      )
+    },
+    handleLineEdge(edge: number) {
+      console.log(edge)
     },
     initilizeRecord() {
       this.paletteRecord = []
@@ -397,7 +428,7 @@ export default Vue.extend({
   &__value-selector {
     position: absolute;
     z-index: 9;
-    left: -10px;
+    left: -25px;
     top: 35px;
     margin: 0;
   }

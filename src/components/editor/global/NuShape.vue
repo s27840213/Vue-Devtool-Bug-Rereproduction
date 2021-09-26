@@ -108,6 +108,13 @@ export default Vue.extend({
         Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
       },
       deep: true
+    },
+    'config.dasharray': {
+      handler: function(newVal) {
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, newVal, this.config.linecap)
+        this.styleNode.textContent = styleText
+      },
+      deep: true
     }
   },
   computed: {
