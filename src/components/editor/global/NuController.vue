@@ -19,9 +19,9 @@
             @mouseover="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave"
             @mouseup="onFrameMouseUp")
-        template(v-if="config.type==='group' && isActive")
+        template(v-if="(config.type === 'group' || config.type === 'frame') && isActive")
           div(class="sub-controller")
-            template(v-for="(layer,index) in config.layers")
+            template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
                 data-identifier="controller"
                 :style="subControllerStyles()"
@@ -120,6 +120,7 @@ import TemplateUtils from '@/utils/templateUtils'
 import FrameUtils from '@/utils/frameUtils'
 import vClickOutside from 'v-click-outside'
 import { Layer } from 'konva/types/Layer'
+import { update } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -156,6 +157,7 @@ export default Vue.extend({
   },
   mounted() {
     const body = this.$refs.body as HTMLElement
+    console.log(this.config)
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
      */
@@ -190,6 +192,11 @@ export default Vue.extend({
     getControlPoints(): IControlPoints {
       return this.config.controlPoints
     },
+    getLayers(): Array<ILayer> {
+      const type = this.getLayerType
+      return type === 'group'
+        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
+    },
     isActive(): boolean {
       return this.config.active
     },
@@ -221,13 +228,19 @@ export default Vue.extend({
       return this.config.dragging
     },
     isImgControl(): boolean {
-      if (this.getLayerType === 'image') {
-        return this.config.imgControl
-      } else if (this.getLayerType === 'group' || this.getLayerType === 'tmp') {
-        return (this.config as IGroup).layers
-          .some(layer => {
-            return layer.type === 'image' && layer.imgControl
-          })
+      switch (this.getLayerType) {
+        case 'image':
+          return this.config.imgControl
+        case 'group':
+          return (this.config as IGroup).layers
+            .some(layer => {
+              return layer.type === 'image' && layer.imgControl
+            })
+        case 'frame':
+          return (this.config as IFrame).clips
+            .some(layer => {
+              return layer.imgControl
+            })
       }
       return false
     }
@@ -294,14 +307,30 @@ export default Vue.extend({
     }),
     onFrameMouseEnter(clipIndex: number) {
       this.clipIndex = clipIndex
+      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
         Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
-        // TODO: image width/ height should be changed accordingly
+
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+
+        const clip = clips[this.clipIndex]
+        const {
+          initWidth, initHeight,
+          imgWidth, imgHeight,
+          imgX, imgY
+        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.clipIndex, {
+          initWidth,
+          initHeight,
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
       }
     },
     onFrameMouseLeave() {
@@ -981,7 +1010,6 @@ export default Vue.extend({
       }
     },
     onClick(e: MouseEvent) {
-      console.log('cccccccccccc')
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
@@ -1219,18 +1247,37 @@ export default Vue.extend({
       })
     },
     clickSubController(targetIndex: number, type: string) {
+      let updateSubLayerProps = null as any
+      switch (this.getLayerType) {
+        case 'group':
+          updateSubLayerProps = LayerUtils.updateSubLayerProps
+          break
+        case 'frame':
+          updateSubLayerProps = FrameUtils.updateFrameLayerProps
+      }
+
       if (this.currSubSelectedInfo.index !== -1) {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
+        updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
         if (this.currSubSelectedInfo.type === 'image') {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
+          updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
         }
       }
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+      updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
     dblSubController(targetIndex: number) {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
-      console.log(this.currSubSelectedInfo)
+      let updateSubLayerProps = null as any
+      switch (this.getLayerType) {
+        case 'group':
+          updateSubLayerProps = LayerUtils.updateSubLayerProps
+          break
+        case 'frame':
+          updateSubLayerProps = FrameUtils.updateFrameLayerProps
+      }
+      if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
+        return
+      }
+      updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },
     clickSubControllerOutside() {
       const { index } = this.currSubSelectedInfo

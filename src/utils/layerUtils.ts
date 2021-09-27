@@ -9,7 +9,15 @@ import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
 
 class LayerUtils {
-  get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get currSelectedInfo(): {
+    index: number,
+    layers: Array<ILayer>,
+    pageIndex: number,
+    types: Set<string>
+    } {
+    return store.getters.getCurrSelectedInfo
+  }
+
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): ILayer { return this.getLayer(this.pageIndex, this.layerIndex) }

@@ -8,7 +8,7 @@ import ZindexUtils from '@/utils/zindexUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { Layer } from 'konva/types/Layer'
+import FrameUtils from './frameUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -226,7 +226,8 @@ class GroupUtils {
         LayerUtils.updateLayerProps(pageIndex, layerIndex, {
           active: false
         })
-        if (LayerUtils.getCurrLayer.type === 'group' || LayerUtils.getCurrLayer.type === 'tmp') {
+        const { type } = LayerUtils.getCurrLayer
+        if (type === 'group') {
           const primaryLayer = LayerUtils.getCurrLayer as IGroup
           for (let i = 0; i < primaryLayer.layers.length; i++) {
             const props = {
@@ -237,6 +238,11 @@ class GroupUtils {
               props.imgControl = false
             }
             LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+          }
+        } else if (type === 'frame') {
+          const primaryLayer = LayerUtils.getCurrLayer as IFrame
+          for (let i = 0; i < primaryLayer.clips.length; i++) {
+            FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
           }
         }
       } else {

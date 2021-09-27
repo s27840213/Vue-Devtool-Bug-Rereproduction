@@ -22,6 +22,7 @@ import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
+import FrameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   props: {
@@ -182,7 +183,15 @@ export default Vue.extend({
       if (typeof this.primaryLayerIndex === 'undefined') {
         ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
       } else {
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        let updateSubLayerStyles = null as any
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'group':
+            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
+            break
+          case 'frame':
+            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
+        }
+        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           imgX: imgPos.x,
           imgY: imgPos.y
         })
@@ -201,7 +210,6 @@ export default Vue.extend({
       window.removeEventListener('mousemove', this.moving)
     },
     scaleStart(event: MouseEvent) {
-      console.log(this.config.pointerEvents)
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -268,7 +276,6 @@ export default Vue.extend({
 
       const ratio = width / height
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        console.log('exceed width limit')
         if (this.control.xSign < 0) {
           imgPos.x = 0
           offsetSize.width = this.initImgPos.imgX
@@ -292,7 +299,6 @@ export default Vue.extend({
         translateLimit.height = (height - this.config.styles.height / this.getLayerScale) / 2
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        console.log('exceed height limit')
         if (this.control.ySign < 0) {
           imgPos.y = 0
           offsetSize.height = this.initImgPos.imgY
@@ -304,13 +310,19 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      console.log('imgPos.y')
-      console.log(imgPos.y)
       if (typeof this.primaryLayerIndex === 'undefined') {
         ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
         ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
       } else {
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        let updateSubLayerStyles = null as any
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'group':
+            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
+            break
+          case 'frame':
+            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
+        }
+        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           imgWidth: width,
           imgHeight: height,
           imgX: imgPos.x,

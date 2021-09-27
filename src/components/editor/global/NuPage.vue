@@ -102,7 +102,7 @@
             class="dim-background"
             :style="styles('control')"
             ref="page-content")
-          template(v-if="getCurrLayer.type === 'group'")
+          template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
             nu-layer(:layerIndex="currSubSelectedInfo.index"
               :pageIndex="pageIndex"
               :config="getCurrSubSelectedLayer")
@@ -123,7 +123,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
-import { IShape, IText, IImage, IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame } from '@/interfaces/layer'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -181,9 +181,17 @@ export default Vue.extend({
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },
-    getCurrSubSelectedLayer(): ILayer {
-      return GroupUtils.mapLayersToPage(
-        [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+    getCurrSubSelectedLayer(): ILayer | undefined {
+      const layer = this.getCurrLayer
+      if (layer.type === 'group') {
+        return GroupUtils.mapLayersToPage(
+          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+      } else if (layer.type === 'frame') {
+        console.log(this.currSubSelectedInfo.index)
+        return GroupUtils.mapLayersToPage(
+          [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+      }
+      return undefined
     },
     getPageCount(): number {
       return this.pages.length
@@ -209,8 +217,13 @@ export default Vue.extend({
             return (layer as IImage).imgControl
           case 'group':
             return (layer as IGroup).layers
-              .some(l => {
-                return l.type === 'image' && l.imgControl
+              .some(layer => {
+                return layer.type === 'image' && layer.imgControl
+              })
+          case 'frame':
+            return (layer as IFrame).clips
+              .some(layer => {
+                return layer.imgControl
               })
         }
       }
@@ -396,6 +409,7 @@ export default Vue.extend({
 .page-content {
   overflow: hidden;
   position: absolute;
+  transform: tanslateZ(1px);
   // border: 5px solid green;
   box-sizing: border-box;
   background-size: cover;
@@ -411,6 +425,7 @@ export default Vue.extend({
 }
 .page-control {
   position: absolute;
+  transform: translateZ(2px);
   top: 0px;
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
@@ -446,15 +461,11 @@ export default Vue.extend({
 }
 
 .dim-background {
-  // display: flex;
-  // position: fixed;
   position: absolute;
+  transform: translateZ(3px);
   top: 0px;
   left: 0px;
-  // min-width: 100%;
-  // min-height: 100%;
   background: rgba(0, 0, 0, 0.4);
-  // background: rgba(53, 71, 90, 0.25);
   pointer-events: none;
 }
 </style>

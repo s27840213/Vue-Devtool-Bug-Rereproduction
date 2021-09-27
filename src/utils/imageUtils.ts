@@ -13,7 +13,7 @@ class ImageUtils {
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&w=${size}`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}`
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/full`
       case 'frame':
@@ -56,6 +56,9 @@ class ImageUtils {
         const keyStart = 'admin/'
         const keyEnd = '/asset'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+      }
+      case 'pexels': {
+        return src.includes('jpeg') ? 'jpeg' : 'png'
       }
       default:
         return ''
