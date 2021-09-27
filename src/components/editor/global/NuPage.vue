@@ -187,7 +187,6 @@ export default Vue.extend({
         return GroupUtils.mapLayersToPage(
           [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
       } else if (layer.type === 'frame') {
-        console.log(this.currSubSelectedInfo.index)
         return GroupUtils.mapLayersToPage(
           [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
       }

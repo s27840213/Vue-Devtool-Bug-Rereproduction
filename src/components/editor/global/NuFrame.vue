@@ -26,7 +26,7 @@ export default Vue.extend({
     }),
     layers() {
       if ((this.config as IFrame).decoration.svg) {
-        return [(this.config as IFrame).decoration.svg, ...(this.config as IFrame).clips]
+        return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
       } else {
         return [...(this.config as IFrame).clips]
       }

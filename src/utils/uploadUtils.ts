@@ -5,7 +5,7 @@ import text from '@/store/text'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 
@@ -416,7 +416,7 @@ class UploadUtils {
        * @todo need to disable sub controller if we have
        */
       const hasTmp = json.some((page: IPage, pageIndex: number) => {
-        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp, layerIndex: number) => {
+        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp | IFrame, layerIndex: number) => {
           if (layer.active) {
             layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
             return true
