@@ -34,7 +34,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    setValue(index: number, i: number) {
+    setValue(index: number, i: number | string) {
       this.$emit('update', index, i)
     },
     notLastSubArray(index: number): boolean {

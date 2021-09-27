@@ -2,7 +2,7 @@
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     action-bar(class="flex-around" style="padding: 2px 0"
-              v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
+              v-if="isLine")
       div(class="shape-setting__line-action-wrapper-dashAndEdge")
         svg-icon(class="pointer"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
@@ -24,7 +24,7 @@
                 @click.native="handleValueModal('line-dash')")
         general-value-selector(v-if="openValueSelector === 'line-dash'"
                       :valueArray="[[1, 2], [3, 4]]"
-                      class="shape-setting__value-selector"
+                      class="shape-setting__value-selector-dash-and-edge"
                       v-click-outside="handleValueModal"
                       :values="dashAndEdge"
                       @update="handleLineDashEdgeUpdate"
@@ -45,10 +45,39 @@
         svg-icon(class="pointer"
                 iconName="start-marker" iconWidth="37px" iconColor="gray-2"
                 @click.native="handleValueModal('start-marker')")
+        general-value-selector(v-if="openValueSelector === 'start-marker'"
+                      :valueArray="[markerIds]"
+                      class="shape-setting__value-selector-start-marker"
+                      v-click-outside="handleValueModal"
+                      :values="[startMarker]"
+                      @update="handleStartMarkerUpdate"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+              :svg="markerContentMap[markerslot.marker].svg"
+              :trimWidth="markerContentMap[markerslot.marker].trimWidth",
+              :markerWidth="markerContentMap[markerslot.marker].vSize[0]")
       div(class="shape-setting__line-action-wrapper-marker")
         svg-icon(class="pointer"
                 iconName="end-marker" iconWidth="37px" iconColor="gray-2"
                 @click.native="handleValueModal('end-marker')")
+        general-value-selector(v-if="openValueSelector === 'end-marker'"
+                      :valueArray="[markerIds]"
+                      class="shape-setting__value-selector-end-marker"
+                      v-click-outside="handleValueModal"
+                      :values="[endMarker]"
+                      @update="handleEndMarkerUpdate"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+              :svg="markerContentMap[markerslot.marker].svg"
+              :trimWidth="markerContentMap[markerslot.marker].trimWidth",
+              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+              style="transform: rotate(180deg)")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -93,7 +122,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
@@ -103,12 +132,17 @@ import GeneralUtils from '@/utils/generalUtils'
 import color from '@/store/module/color'
 import { Layer } from 'konva/types/Layer'
 import shapeUtils from '@/utils/shapeUtils'
+import { IListServiceContentData } from '@/interfaces/api'
+import AssetUtils from '@/utils/assetUtils'
+import { IMarker } from '@/interfaces/shape'
+import MarkerIcon from '@/components/global/MarkerIcon.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     ColorPicker,
-    GeneralValueSelector
+    GeneralValueSelector,
+    MarkerIcon
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -137,13 +171,40 @@ export default Vue.extend({
       openValueSelector: '',
       openColorPicker: false,
       paletteRecord: [{ key: 0, value: -1 }],
-      dashAndEdge: [1, 3]
+      markerIds: ['none'],
+      dashAndEdge: [1, 3],
+      startMarker: 'none',
+      endMarker: 'none',
+      markerContentMap: ({} as {[key: string]: IMarker})
     }
   },
   mounted() {
     this.initilizeRecord()
-    this.dashAndEdge[0] = ((this.currLayer as IShape).dasharray ?? []).length === 0 ? 1 : 2
-    this.dashAndEdge[1] = ((this.currLayer as IShape).linecap ?? 'butt') === 'butt' ? 3 : 4
+    this.markerContentMap.none = {
+      styleArray: [''],
+      svg: '',
+      trimWidth: undefined,
+      vSize: [0, 4]
+    }
+    this.getCategories().then(async () => {
+      const markerList = (this.categories[0] as IListServiceContentData).list
+      this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
+      for (const marker of markerList) {
+        const markerContent = (await AssetUtils.fetch(marker)).jsonData as IMarker
+        this.markerContentMap[marker.id] = {
+          styleArray: markerContent.styleArray,
+          svg: markerContent.svg,
+          trimWidth: markerContent.trimWidth,
+          vSize: markerContent.vSize
+        }
+      }
+      console.log(this.markerContentMap)
+    })
+    const currLayer = this.currLayer as IShape
+    this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
+    this.endMarker = (currLayer.markerId ?? ['none', 'none'])[1]
+    this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
+    this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
   },
   computed: {
     ...mapGetters({
@@ -151,6 +212,13 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
+    ...mapState(
+      'markers',
+      [
+        'categories',
+        'pending'
+      ]
+    ),
     opacity(): string | number {
       const { currLayer } = this
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
@@ -200,6 +268,9 @@ export default Vue.extend({
       } else {
         return []
       }
+    },
+    isLine(): boolean {
+      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
     }
   },
   watch: {
@@ -211,6 +282,11 @@ export default Vue.extend({
     ...mapMutations({
       _updateLayerProps: 'UPDATE_layerProps'
     }),
+    ...mapActions('markers',
+      [
+        'getCategories'
+      ]
+    ),
     colorStyles(color: string, index: number) {
       return {
         backgroundColor: color,
@@ -384,6 +460,17 @@ export default Vue.extend({
         { linecap: (edge === 3) ? 'butt' : 'round' }
       )
     },
+    handleStartMarkerUpdate(index: number, value: string) {
+      console.log(value)
+      this.startMarker = value
+    },
+    handleEndMarkerUpdate(index: number, value: string) {
+      console.log(value)
+      this.endMarker = value
+    },
+    makeSlots(markerIds: string[]): {marker: string, name: string}[] {
+      return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
+    },
     initilizeRecord() {
       this.paletteRecord = []
       for (let i = 0; i < this.getColors.length; i++) {
@@ -432,12 +519,26 @@ export default Vue.extend({
   &__value-selector {
     position: absolute;
     z-index: 9;
-    left: -22.5px;
     top: 35px;
     margin: 0;
 
     &__button-text {
       font-size: 12px;
+    }
+
+    &-dash-and-edge {
+      @extend .shape-setting__value-selector;
+      left: -22.5px;
+    }
+
+    &-start-marker {
+      @extend .shape-setting__value-selector;
+      left: -19px;
+    }
+
+    &-end-marker {
+      @extend .shape-setting__value-selector;
+      left: -21px;
     }
   }
   &__color-picker {

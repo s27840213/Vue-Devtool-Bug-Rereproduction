@@ -1,5 +1,6 @@
 import { IListServiceContentData } from '@/interfaces/api'
 import { IImage, IStyle, IShape, IText, ITmp, IGroup, ILayer } from '@/interfaces/layer'
+import { IMarker } from '@/interfaces/shape'
 
 export interface IListModuleState {
   content: Partial<IListServiceContentData>
@@ -20,7 +21,7 @@ export interface IListModuleState {
 export interface IAsset {
   id: string
   type: number
-  jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup
+  jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup | IMarker
   width?: number
   height?: number
   urls: {

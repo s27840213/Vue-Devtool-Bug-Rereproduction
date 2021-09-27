@@ -14,6 +14,14 @@ export interface ISvg {
     path?: string;
     dasharray?: number[],
     linecap?: "butt" | "round"
-    markerId?: number[];
+    markerId?: string[];
     markerWidth?: number[];
+    trimWidth?: boolean[];
+}
+
+export interface IMarker {
+    styleArray: string[];
+    svg: string;
+    trimWidth?: boolean;
+    vSize: number[];
 }

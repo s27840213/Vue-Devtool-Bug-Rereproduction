@@ -97,7 +97,7 @@ export interface IShape extends ILayer<IStyle> {
   size?: number[],
   dasharray?: number[],
   linecap?: "butt" | "round",
-  markerId?: number[],
+  markerId?: string[],
   markerWidth?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {

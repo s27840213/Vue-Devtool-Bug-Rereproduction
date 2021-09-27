@@ -12,6 +12,7 @@ import user from '@/store/module/user'
 import color from '@/store/module/color'
 import text from '@/store/text'
 import objects from '@/store/module/objects'
+import markers from '@/store/module/markers'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
@@ -607,6 +608,7 @@ export default new Vuex.Store({
     font,
     color,
     objects,
+    markers,
     templates,
     textStock,
     background,
