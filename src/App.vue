@@ -26,6 +26,14 @@
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
+    notifications(group="copy"
+      position="top center"
+      width="300px"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="copy-notification"
+          v-html="item.text")
 </template>
 
 <script lang="ts">
@@ -176,6 +184,15 @@ export default Vue.extend({
   height: 100vh;
   background-color: setColor(gray-2, 0.6);
   z-index: 999;
+}
+
+.copy-notification {
+  padding: 5px;
+  text-align: center;
+  color: setColor(white);
+  background-color: setColor(blue-2);
+  margin: 5px 5px 0 0;
+  border-radius: 5px;
 }
 
 // .vc-chrome-toggle-btn {

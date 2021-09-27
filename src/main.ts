@@ -8,9 +8,11 @@ import vueColor from 'vue-color'
 import { Store } from 'vuex'
 import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
+import Notifications from 'vue-notification'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
+Vue.use(Notifications)
 Vue.component('RecycleScroller', RecycleScroller)
 
 Vue.directive('ratio-change', {
