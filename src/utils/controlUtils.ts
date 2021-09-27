@@ -195,7 +195,7 @@ class Controller {
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(type: string, point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
+  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
   {x: number, y: number, width: number, height: number, rotate: number} {
     if (isLine) {
       scale = scale ?? 1

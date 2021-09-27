@@ -97,7 +97,8 @@
               v-if="isLine"
               :style="`transform: scale(${100/scaleRatio})`")
             img(class="control-point__mover"
-              :src="require('@/assets/img/svg/rotate.svg')"
+              :src="require('@/assets/img/svg/move.svg')"
+              :style='moverStyles()'
               @mousedown.left.stop="moveStart")
           div(class="control-point__rotater-wrapper"
               v-else
@@ -380,7 +381,7 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(type, this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
@@ -389,6 +390,13 @@ export default Vue.extend({
           ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      }
+    },
+    moverStyles() {
+      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
+      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      return {
+        transform: `rotate(${-degree}deg)`
       }
     },
     subControllerStyles() {
