@@ -144,6 +144,8 @@ export default Vue.extend({
   },
   mounted() {
     this.initilizeRecord()
+    this.dashAndEdge[0] = ((this.currLayer as IShape).dasharray ?? []).length === 0 ? 1 : 2
+    // this.dashAndEdge[1] = ((this.currLayer as IShape).linecap ?? 'butt') === 'butt' ? 3 : 4
   },
   computed: {
     ...mapGetters({
