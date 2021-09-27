@@ -1,11 +1,11 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    action-bar(class="flex-around"
+    action-bar(class="flex-around" style="padding: 2px 0"
               v-if="currLayer.type === 'shape' && currLayer.category === 'D'")
-      div(class="shape-setting__line-action-wrapper")
+      div(class="shape-setting__line-action-wrapper-dashAndEdge")
         svg-icon(class="pointer"
-                iconName="line-width" iconWidth="20px" iconColor="gray-2"
+                iconName="line-width" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleSliderModal('line-width')")
         div(v-if="openSliderBar === 'line-width'"
             class="shape-setting__range-input-wrapper-line-width right"
@@ -18,9 +18,9 @@
             type="range"
             @input="setLineWidth")
           div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
-      div(class="shape-setting__line-action-wrapper")
+      div(class="shape-setting__line-action-wrapper-dashAndEdge")
         svg-icon(class="pointer"
-                iconName="line-dash" iconWidth="20px" iconColor="gray-2"
+                iconName="line-dash" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
         general-value-selector(v-if="openValueSelector === 'line-dash'"
                       :valueArray="[[1, 2], [3, 4]]"
@@ -41,13 +41,13 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper")
+      div(class="shape-setting__line-action-wrapper-marker")
         svg-icon(class="pointer"
-                iconName="start-marker" iconWidth="20px" iconColor="gray-2"
+                iconName="start-marker" iconWidth="37px" iconColor="gray-2"
                 @click.native="handleValueModal('start-marker')")
-      div(class="shape-setting__line-action-wrapper")
+      div(class="shape-setting__line-action-wrapper-marker")
         svg-icon(class="pointer"
-                iconName="end-marker" iconWidth="20px" iconColor="gray-2"
+                iconName="end-marker" iconWidth="37px" iconColor="gray-2"
                 @click.native="handleValueModal('end-marker')")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
@@ -432,7 +432,7 @@ export default Vue.extend({
   &__value-selector {
     position: absolute;
     z-index: 9;
-    left: -25px;
+    left: -22.5px;
     top: 35px;
     margin: 0;
 
@@ -471,7 +471,7 @@ export default Vue.extend({
     &-line-width {
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
-      left: -30px;
+      left: -16px;
       right: unset;
       top: 35px;
     }
@@ -524,7 +524,16 @@ export default Vue.extend({
   }
   &__line-action-wrapper {
     position: relative;
-    height: 20px;
+
+    &-dashAndEdge {
+      @extend .shape-setting__line-action-wrapper;
+      height: 24px;
+    }
+
+    &-marker {
+      @extend .shape-setting__line-action-wrapper;
+      height: 37px;
+    }
   }
 }
 .rainbow {
