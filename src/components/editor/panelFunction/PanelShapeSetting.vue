@@ -465,7 +465,7 @@ export default Vue.extend({
     &-line-width {
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
-      left: -15px;
+      left: -30px;
       right: unset;
       top: 35px;
     }
