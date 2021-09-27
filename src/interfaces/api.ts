@@ -105,6 +105,7 @@ export interface IListServiceParams {
   pageIndex?: number
   listAll?: 0 | 1
 }
+
 export interface IListServiceContentDataItem {
   id: string
   type: number
