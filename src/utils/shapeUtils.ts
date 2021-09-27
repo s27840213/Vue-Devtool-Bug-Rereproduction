@@ -206,7 +206,7 @@ class ShapeUtils {
     return result
   }
 
-  pointPreprocess(point: number[], markerWidth: number[], trimWidth: number[], scale: number): number[] {
+  pointPreprocess(point: number[], markerWidth: number[], trimWidth: boolean[], scale: number, linecap: string): number[] {
     const { width, height, baseDegree } = this.lineDimension(point)
     const trimxs = scale * markerWidth[0] * Math.cos(baseDegree)
     const trimys = scale * markerWidth[0] * Math.sin(baseDegree)
@@ -261,13 +261,13 @@ class ShapeUtils {
     if (trimWidth[0]) {
       startPoint = this.vectorAdd(startPoint, startDiff)
       startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, -1))
-    } else {
+    } else if (trimWidth[0] === false || linecap === 'round') { // false or null && round cap
       startPoint = this.vectorAdd(startPoint, edgeDiff)
     }
     if (trimWidth[1]) {
       endPoint = this.vectorAdd(endPoint, endDiff)
       endPoint = this.vectorAdd(endPoint, edgeDiff)
-    } else {
+    } else if (trimWidth[1] === false || linecap === 'round') { // false or null && round cap
       endPoint = this.vectorAdd(endPoint, this.vectorScale(edgeDiff, -1))
     }
 

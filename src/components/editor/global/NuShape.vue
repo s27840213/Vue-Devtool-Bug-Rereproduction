@@ -115,6 +115,12 @@ export default Vue.extend({
         this.styleNode.textContent = styleText
       },
       deep: true
+    },
+    'config.linecap': {
+      handler: function(newVal) {
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, newVal)
+        this.styleNode.textContent = styleText
+      }
     }
   },
   computed: {
@@ -131,7 +137,7 @@ export default Vue.extend({
       return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {
-      const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0]) : this.config.point
+      const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap) : this.config.point
       return shapeUtils.svgFormatter(this.config.svg, this.config.className, this.config.styleArray.length, this.config.transArray?.length ?? 0, this.config.markerTransArray?.length ?? 0, point)
     },
     filterFormatter(): string {

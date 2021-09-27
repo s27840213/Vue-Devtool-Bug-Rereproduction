@@ -30,18 +30,16 @@
                       @update="handleLineDashEdgeUpdate"
                       itemMinWidth="70",
                       buttonHeight="20")
-          template(v-slot:g0i0)
-            svg-icon(class="pointer"
-                  iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-          template(v-slot:g0i1)
-            svg-icon(class="pointer"
-                  iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-          template(v-slot:g1i0)
-            svg-icon(class="pointer"
-                  iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-          template(v-slot:g1i1)
-            svg-icon(class="pointer"
-                  iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(class="pointer" v-slot:g0i0)
+            svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(class="pointer" v-slot:g0i1)
+            svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          template(class="pointer" v-slot:g1i0)
+            svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") 方形
+          template(class="pointer" v-slot:g1i1)
+            svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
@@ -145,7 +143,7 @@ export default Vue.extend({
   mounted() {
     this.initilizeRecord()
     this.dashAndEdge[0] = ((this.currLayer as IShape).dasharray ?? []).length === 0 ? 1 : 2
-    // this.dashAndEdge[1] = ((this.currLayer as IShape).linecap ?? 'butt') === 'butt' ? 3 : 4
+    this.dashAndEdge[1] = ((this.currLayer as IShape).linecap ?? 'butt') === 'butt' ? 3 : 4
   },
   computed: {
     ...mapGetters({
@@ -380,7 +378,11 @@ export default Vue.extend({
       )
     },
     handleLineEdge(edge: number) {
-      console.log(edge)
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        { linecap: (edge === 3) ? 'butt' : 'round' }
+      )
     },
     initilizeRecord() {
       this.paletteRecord = []
@@ -433,6 +435,10 @@ export default Vue.extend({
     left: -25px;
     top: 35px;
     margin: 0;
+
+    &__button-text {
+      font-size: 12px;
+    }
   }
   &__color-picker {
     position: absolute;
