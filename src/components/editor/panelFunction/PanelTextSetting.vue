@@ -403,9 +403,9 @@ export default Vue.extend({
       return value.toString()
     },
     textRangeRecorder(e: MouseEvent) {
-      console.log('text range!')
-      const sel = TextUtils.getSelection()
       if ((e.target as HTMLElement).classList.contains('record-selection')) {
+        console.log('text range recorded!')
+        const sel = TextUtils.getSelection()
         TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
       }
     },

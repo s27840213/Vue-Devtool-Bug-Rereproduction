@@ -1,6 +1,6 @@
 <template lang="pug">
   keep-alive
-    div(class="nu-controller" draggable="true" ref="self")
+    div(v-if="isShown || isActive" class="nu-controller" ref="self")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -12,25 +12,27 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
-          @mouseenter="onMouseEnter"
-          @mouseleave="onMouseLeave"
           @mouseout="toggleHighlighter(pageIndex,layerIndex,false)"
-          @mouseover="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick")
-        //- template(v-if="config.type==='group' && isActive")
-        //-   div(class="sub-controller")
-        //-     nu-sub-controller(
-        //-       v-for="(layer,index) in config.layers"
-        //-       data-identifier="controller"
-        //-       :style="subControllerStyles()"
-        //-       :key="`group-controller-${index}`"
-        //-       :layerIndex="index"
-        //-       :pageIndex="pageIndex"
-        //-       :config="layer"
-        //-       :color="'#EB5757'"
-        //-       @clickSubController="clickSubController")
+        svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+          g(v-for="(clip, index) in config.clips"
+            v-html="FrameUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
+            @mouseover="onFrameMouseEnter(index)"
+            @mouseleave="onFrameMouseLeave"
+            @mouseup="onFrameMouseUp")
+        template(v-if="config.type==='group' && isActive")
+          div(class="sub-controller")
+            nu-sub-controller(
+              v-for="(layer,index) in config.layers"
+              data-identifier="controller"
+              :style="subControllerStyles()"
+              :key="`group-controller-${index}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer"
+              :color="'#EB5757'"
+              @clickSubController="clickSubController")
         template(v-if="config.type === 'text' && config.active")
-          //- div(class="text__scale" :style="textScaleStyle()")
           div(class="text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
@@ -69,7 +71,7 @@
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked"
           class="nu-controller__ctrl-points"
-          :style="Object.assign(styles('control-point'), {'pointer-events': 'none'})")
+          :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
           div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
               class="control-point"
               :key="index"
@@ -111,7 +113,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IImage, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -129,6 +131,7 @@ import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import FrameUtils from '@/utils/frameUtils'
 import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
@@ -141,6 +144,7 @@ export default Vue.extend({
   data() {
     return {
       MappingUtils,
+      FrameUtils,
       ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
@@ -157,7 +161,10 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: true
+      contentEditable: true,
+      clipIndex: NaN,
+      clipedImgBuff: { type: 'frame', assetId: '', userId: '' },
+      subControlerIndexs: []
     }
   },
   mounted() {
@@ -270,6 +277,19 @@ export default Vue.extend({
       }
     }
   },
+  destroyed() {
+    /**
+     * While image is setted to frame, these event-listener should be removed
+     */
+    window.removeEventListener('mouseup', this.moveEnd)
+    window.removeEventListener('mousemove', this.moving)
+    this.isControlling = false
+    this.setCursorStyle('default')
+    StepsUtils.record()
+    if (this.isMoving) {
+      this.setIsMoving(false)
+    }
+  },
   methods: {
     ...mapMutations({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
@@ -278,11 +298,34 @@ export default Vue.extend({
       setIsMoving: 'SET_isMoving',
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
-    onMouseEnter() {
-      console.log('mouse Enter', this.layerIndex)
+    onFrameMouseEnter(clipIndex: number) {
+      this.clipIndex = clipIndex
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
+        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
+        // TODO: image width/ height should be changed accordingly
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+      }
     },
-    onMouseLeave() {
-      console.log('mouse Leave', this.layerIndex)
+    onFrameMouseLeave() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
+        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      }
+      this.clipIndex = NaN
+    },
+    onFrameMouseUp() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
+      }
     },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -306,9 +349,9 @@ export default Vue.extend({
               : controlPoints.resizers.slice(0, 2)
           }
           break
-        case 'image':
-          resizers = this.config.isClipper ? [] : resizers
-          break
+        // case 'image':
+        //   resizers = this.config.isClipper ? [] : resizers
+        //   break
         case 'shape':
           resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
           break
@@ -318,6 +361,8 @@ export default Vue.extend({
         case 'group':
           resizers = []
           break
+        case 'frame':
+          resizers = []
       }
       return resizers
     },
@@ -371,9 +416,9 @@ export default Vue.extend({
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       // console.log('mouse over !:', this.layerIndex)
       if (this.isLine) return
-      if (this.getLayerType === 'image' && LayerUtils.layerIndex !== this.layerIndex) {
-        console.log('clipper is target')
-      }
+      // if (this.getLayerType === 'image' && LayerUtils.layerIndex !== this.layerIndex) {
+      //   console.log('clipper is target')
+      // }
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -386,8 +431,7 @@ export default Vue.extend({
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
         height: `${height}px`,
-        outline: !this.isLine && (this.isShown || this.isActive) ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
+        outline: this.isLine ? 'none' : this.outlineStyles(type),
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
@@ -407,18 +451,29 @@ export default Vue.extend({
     outlineStyles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      if (this.isShown || this.isActive) {
+        if (this.config.type === 'tmp' || this.isControlling) {
+          return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
+        } else {
+          return `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`
+        }
+      } else {
+        return 'none'
+      }
+    },
+    frameClipStyles(clip: any, index: number) {
       return {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none'
+        transform: `translate(${clip.x}px, ${clip.y}px)`,
+        fill: '#00000000',
+        stroke: this.clipIndex === index ? '#7190CC' : 'none',
+        strokeWidth: `${5 * (100 / this.scaleRatio)}px`
       }
     },
     moveStart(e: MouseEvent) {
       // if (!this.isLocked) {
       //   e.stopPropagation()
       // }
+
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -511,7 +566,7 @@ export default Vue.extend({
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
-    moveEnd() {
+    moveEnd(e: MouseEvent) {
       if (this.isMoving) {
         this.setIsMoving(false)
       }
@@ -519,6 +574,12 @@ export default Vue.extend({
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+        if (posDiff.x === 0 && posDiff.y === 0) {
+          if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
+            GroupUtils.deselect()
+            this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
+          }
         }
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
@@ -611,14 +672,10 @@ export default Vue.extend({
       let scale = Math.max(ratio.width, ratio.height)
       switch (this.getLayerType) {
         case 'image': {
-          if (!this.config.isClipper) {
-            const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-            const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-            ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-            ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-            ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-            scale = this.getLayerScale
-          }
+          const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
+          ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
+          ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
+          scale = this.getLayerScale
           break
         }
         case 'text':
@@ -629,7 +686,6 @@ export default Vue.extend({
           }
           break
       }
-
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
@@ -714,21 +770,23 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
       this.currCursorStyling(event)
 
-      if (this.getLayerType === 'shape' && this.config.category === 'B') {
-        this.scale = {
-          scaleX: this.config.styles.scaleX,
-          scaleY: this.config.styles.scaleY
-        }
-      } else if (this.getLayerType === 'image') {
-        this.initImgSize = {
-          width: this.config.styles.imgWidth,
-          height: this.config.styles.imgHeight
-        }
-        this.control.imgX = this.config.styles.imgX
-        this.control.imgY = this.config.styles.imgY
+      switch (this.getLayerType) {
+        case 'shape':
+          if (this.config.category === 'B') {
+            this.scale = {
+              scaleX: this.config.styles.scaleX,
+              scaleY: this.config.styles.scaleY
+            }
+          }
+          break
+        case 'image':
+          this.initImgSize = {
+            width: this.config.styles.imgWidth,
+            height: this.config.styles.imgHeight
+          }
+          this.control.imgX = this.config.styles.imgX
+          this.control.imgY = this.config.styles.imgY
       }
-      // console.log(this.getLayerPos.x)
-      // console.log(this.getLayerPos.y)
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
@@ -885,7 +943,7 @@ export default Vue.extend({
         this.imgBuffer.y = -(imgHeight - this.initImgSize.height) / 2
       }
 
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
       ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth, imgHeight)
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
@@ -1015,7 +1073,6 @@ export default Vue.extend({
     },
     onKeyDown(e: KeyboardEvent) {
       if (this.config.type === 'text' && !e.ctrlKey && !e.metaKey) {
-        console.log(e.key)
         const text = this.$refs.text as HTMLElement
         const sel = window.getSelection()
         const start = {

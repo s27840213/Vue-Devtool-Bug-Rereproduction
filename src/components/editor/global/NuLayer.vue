@@ -3,7 +3,8 @@
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
-      @dragenter.prevent)
+      @dragenter.prevent
+      @mouseover="toggleHighlighter(pageIndex,layerIndex,true)")
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
@@ -29,6 +30,7 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -81,8 +83,10 @@ export default Vue.extend({
     },
     scaleStyles() {
       let { width, height } = this.config.styles
-      width /= this.config.styles.scale
-      height /= this.config.styles.scale
+      const { scale, scaleX, scaleY, zindex } = this.config.styles
+      const { type } = this.config
+      width /= scale
+      height /= scale
 
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
@@ -91,8 +95,8 @@ export default Vue.extend({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
-        'transform-style': this.config.type === 'group' ? 'flat' : (this.config.type === 'tmp' && this.config.styles.zindex > 0) ? 'flat' : 'preserve-3d'
+        transform: type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
     backImageStyle() {
@@ -114,6 +118,11 @@ export default Vue.extend({
     onDropClipper(e: DragEvent) {
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
+    },
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
     }
   }
 })

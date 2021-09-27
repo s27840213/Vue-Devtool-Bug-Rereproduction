@@ -40,9 +40,9 @@ export default Vue.extend({
       const { vendor } = this.info as any
       const { VUE_APP_UNSPLASH_APP_NAME: unsplashAppName } = process.env
       switch (vendor) {
-        case 'Unsplash':
+        case 'unsplash':
           return `https://unsplash.com/?utm_source=${unsplashAppName}&utm_medium=referral`
-        case 'Pexels':
+        case 'pexels':
           return 'https://www.pexels.com/'
         default:
           return ''

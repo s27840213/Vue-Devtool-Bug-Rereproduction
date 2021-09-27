@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-frame"
       :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
+    nu-layer(v-for="(layer,index) in layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
@@ -20,13 +20,13 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
-  created() {
-    this.config.layers = [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
-  },
   computed: {
     ...mapGetters({
       getLayer: 'getLayer'
-    })
+    }),
+    layers() {
+      return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
+    }
   },
   methods: {
     styles() {

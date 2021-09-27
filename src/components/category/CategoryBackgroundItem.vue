@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src"
+    :src="src || `https://template.vivipic.com/background/${item.id}/prev`"
     draggable="false"
     @click="addBackground"
     @error="handleNotFound")
@@ -13,14 +13,14 @@ import AssetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   props: {
     src: String,
-    objectId: String
+    item: Object
   },
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
     addBackground() {
-      AssetUtils.addBackground(this.objectId)
+      AssetUtils.addAsset(this.item)
     }
   }
 })

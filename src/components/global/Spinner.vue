@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="spinner")
     div
-      img(:src="require('@/assets/img/gif/loading.gif')")
+      img(:src="require('@/assets/img/gif/rocket-loading.gif')")
       span Loading...
 </template>
 
@@ -24,7 +24,7 @@ export default Vue.extend({
   height: 100vh;
   left:0;
   top:0;
-  background-color: #e5e5e590;
+  background-color: #000000a1;
 
   div {
     display: flex;
@@ -33,13 +33,6 @@ export default Vue.extend({
     flex-direction: column;
     width: 20vh;
     height: 23vh;
-    font-family: Arial;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 22px;
-    line-height: 22px;
-    background-color: #bbbbbb;
-    border-radius: 20px;
 
     img {
       width: 15vh;
@@ -48,8 +41,10 @@ export default Vue.extend({
     }
     span {
       color: #fff;
-      font-size: 20px;
-      padding-top: 1vh;
+      font-size: 22px;
+      font-family: Mulish;
+      font-weight: 700;
+      padding-top: 2vh;
     }
   }
 }

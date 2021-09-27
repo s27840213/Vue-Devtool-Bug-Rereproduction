@@ -133,10 +133,10 @@ export default Vue.extend({
     },
     isActive() {
       if (this.getLayerType === 'text' && !this.isActive) {
-        this.contentEditable = false
-        const paragraphs: IParagraph[] = this.textParser()
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-        ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+        // this.contentEditable = false
+        // const paragraphs: IParagraph[] = this.textParser()
+        // TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
       }
     }
   },

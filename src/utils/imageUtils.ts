@@ -17,7 +17,7 @@ class ImageUtils {
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/full`
       case 'frame':
-        return require('@/assets/img/svg/image-preview.svg')
+        return require('@/assets/img/svg/frame.svg')
       default:
         return ''
     }
@@ -52,8 +52,11 @@ class ImageUtils {
 
   getUserId(src: string, type: string) {
     switch (type) {
-      case 'public':
-        return src.substring(src.indexOf('admin/') + 6, src.indexOf('/asset'))
+      case 'public': {
+        const keyStart = 'admin/'
+        const keyEnd = '/asset'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+      }
       default:
         return ''
     }
@@ -62,15 +65,24 @@ class ImageUtils {
   getAssetId(src: string, type: string) {
     switch (type) {
       case 'public': {
-        const substr = src.substring(src.indexOf('image/'))
-        return substr.substring(6, substr.indexOf('/full'))
+        const keyStart = 'image/'
+        const keyEnd = '/full'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
       }
-      case 'unsplash':
-        return src.substring(src.indexOf('com/') + 4, src.indexOf('?'))
-      case 'pexels':
-        return src.substring(src.indexOf('photos/') + 7, src.indexOf('/pexels'))
-      case 'background':
-        return src.substring(src.indexOf('background/') + 11, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+      case 'unsplash': {
+        const keyStart = 'com/'
+        const keyEnd = '?'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+      }
+      case 'pexels': {
+        const keyStart = 'photos/'
+        const keyEnd = '/pexels'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+      }
+      case 'background': {
+        const keyStart = 'background/'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+      }
       default:
         return ''
     }

@@ -37,9 +37,7 @@ class MouseUtils {
       layer = this.clipperHandler(layer, clipPath, isClipper, clipperStyles)
       if (layer) {
         groupUtils.deselect()
-        store.commit('DELETE_layer', {
-          pageIndex, layerIndex
-        })
+        LayerUtils.deleteLayer(layerIndex)
         LayerUtils.addLayersToPos(pageIndex, [layer], layerIndex)
         zindexUtils.reassignZindex(pageIndex)
         groupUtils.select(pageIndex, [layerIndex])
@@ -70,7 +68,6 @@ class MouseUtils {
     }
     const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
-
     let layer
     switch (data.type) {
       case 'image': {
@@ -114,16 +111,8 @@ class MouseUtils {
         }
         break
       }
-      case 'group':
-      case 'text':
-        AssetUtils.addText(data.id, { pageIndex, styles: { x, y } })
-        break
-      case 'svg': {
-        AssetUtils.addSvg(data.id, { pageIndex, styles: { x, y } })
-        return
-      }
-      case 'template': {
-        AssetUtils.addTemplate(data.id, { pageIndex })
+      default: {
+        AssetUtils.addAsset(data, { pageIndex, styles: { x, y } })
         return
       }
     }

@@ -14,7 +14,7 @@ class LayerFactary {
         assetId: config.srcObj.assetId
       },
       id: GeneralUtils.generateRandomString(8),
-      clipPath: config.clipPath ? config.clipPath : `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
+      clipPath: config.clipPath ?? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
       active: false,
       shown: false,
       locked: false,
@@ -51,6 +51,7 @@ class LayerFactary {
     console.log(config)
     const { clips, decoration, width, height } = config
     clips.forEach(img => {
+      console.log(img.clipPath)
       const imgConfig = {
         isFrame: true,
         clipPath: img.clipPath,

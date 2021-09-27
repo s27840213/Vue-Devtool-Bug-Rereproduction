@@ -63,6 +63,7 @@ export default Vue.extend({
       display: grid;
       column-gap: 10px;
       grid-template-columns: auto;
+      justify-content: start;
       grid-auto-flow: column;
       scroll-behavior: smooth;
       text-align: left;

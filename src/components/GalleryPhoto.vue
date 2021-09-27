@@ -25,10 +25,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import layerFactary from '@/utils/layerFactary'
-import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
+import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
@@ -105,25 +104,13 @@ export default Vue.extend({
         const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
         const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
         const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
-        const type = photo.vendor || (this.inFilePanel ? 'public' : '')
-        const config = {
-          srcObj: {
-            type,
-            userId: ImageUtils.getUserId(src, type),
-            assetId: ImageUtils.getAssetId(src, type)
-          },
-          styles: {
-            x: x,
-            y: y,
-            width: photoWidth,
-            height: photoHeight,
-            initWidth: photoWidth,
-            initHeight: photoHeight,
-            imgWidth: photoWidth,
-            imgHeight: photoHeight
+        AssetUtils.addImage(
+          src,
+          {
+            pageIndex: this.lastSelectedPageIndex,
+            styles: { x, y, width: photoWidth, height: photoHeight }
           }
-        }
-        layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newImage(config))
+        )
       }
     },
     showPhotoInfo(evt: Event) {

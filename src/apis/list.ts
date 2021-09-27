@@ -13,7 +13,8 @@ class ListService {
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
       list_all: params.listAll,
-      keyword: params.keyword
+      keyword: params.keyword,
+      return_obj: 1
     }
 
     return axios.request<IListServiceResponse>({
@@ -46,6 +47,20 @@ class ListService {
   getFont (params: IListServiceParams) {
     params.type = 'font'
     return this.getList(params)
+  }
+
+  addDesign (id: string, type: string) {
+    const data = {
+      token: authToken().token,
+      type,
+      design_id: id
+    }
+
+    return axios.request<IListServiceResponse>({
+      url: '/add-design',
+      method: 'POST',
+      data
+    })
   }
 }
 

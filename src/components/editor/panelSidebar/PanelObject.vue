@@ -19,17 +19,15 @@
           :list="list"
           :title="title"
           @action="handleSearch")
-          template(v-slot:preview="{ id }")
+          template(v-slot:preview="{ item }")
             category-object-item(class="panel-objects__item"
-              :src="`${host}/${id}/${preview}`"
-              :objectId="id")
+              :item="item")
       template(v-slot:category-object-item="{ list }")
         div(class="panel-objects__items")
-          category-object-item(v-for="id in list"
+          category-object-item(v-for="item in list"
             class="panel-objects__item"
-            :key="id"
-            :src="`${host}/${id}/${preview}`"
-            :objectId="id")
+            :key="item.id"
+            :item="item")
 </template>
 
 <script lang="ts">
@@ -39,6 +37,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {
@@ -62,10 +61,10 @@ export default Vue.extend({
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
-      return (categories as any[])
+      return (categories as IListServiceContentData[])
         .map(category => ({
           size: 140,
-          id: `rows_${category.list.join('_')}`,
+          id: `rows_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
           title: category.title
@@ -73,20 +72,20 @@ export default Vue.extend({
     },
     listResult(): any[] {
       const { keyword } = this
-      const { list = [] } = this.content
-      const tmpList = [...list]
-      const result = []
       if (!keyword) { return [] }
-      while (tmpList.length) {
-        const rowItems = tmpList.splice(0, 3)
-        result.push({
-          id: `result_${rowItems.join('_')}`,
-          size: 90,
-          type: 'category-object-item',
-          list: rowItems,
-          sentinel: !tmpList.length
+      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-object-item',
+            list: rowItems,
+            size: 90,
+            sentinel: !idx
+          }
         })
-      }
       return result
     },
     list(): any[] {

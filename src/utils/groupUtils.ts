@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IFrame } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -48,7 +48,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): I
   } as ICalculatedGroupStyle
 }
 
-function calcType(layers: Array<IShape | IText | IImage | IGroup>): Set<string> {
+function calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
   const typeSet = new Set<string>()
   if (layers.length === 0) {
     return typeSet
@@ -57,7 +57,7 @@ function calcType(layers: Array<IShape | IText | IImage | IGroup>): Set<string> 
     typeSet.add(layers[0].type)
     return typeSet
   } else {
-    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       if (!typeSet.has(layer.type)) {
         typeSet.add(layer.type)
       }
@@ -254,7 +254,7 @@ class GroupUtils {
     })
   }
 
-  set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup>) {
+  set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     store.commit('SET_currSelectedInfo', {
       pageIndex: currSelectedPageIndex,
       index: currSelectedIndex,
@@ -293,17 +293,14 @@ class GroupUtils {
       // calculate scale offset
       if (layer.type === 'image') {
         layer = layer as IImage
-        const width = layer.styles.width as number * tmpLayer.styles.scale
-        const height = layer.styles.height as number * tmpLayer.styles.scale
 
-        layer.styles.width = width
-        layer.styles.height = height
+        layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+        layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
         layer.styles.imgHeight *= tmpLayer.styles.scale
         layer.styles.imgWidth *= tmpLayer.styles.scale
         layer.styles.imgX *= tmpLayer.styles.scale
         layer.styles.imgY *= tmpLayer.styles.scale
 
-        layer.clipPath = `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`
         const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]

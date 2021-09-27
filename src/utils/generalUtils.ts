@@ -53,6 +53,21 @@ class GeneralUtils {
   isValidHexColor(value: string) {
     return value.match(/^#[0-9A-F]{6}$/)
   }
+
+  copyText(text: string) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text)
+    }
+    const el = document.createElement('textarea')
+    el.value = text
+    el.style.display = 'none'
+    document.body.appendChild(el)
+    el.focus()
+    el.select()
+    document.execCommand('copy')
+    el.remove()
+    return Promise.resolve()
+  }
 }
 
 const generalUtils = new GeneralUtils()

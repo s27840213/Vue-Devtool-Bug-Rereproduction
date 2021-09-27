@@ -132,7 +132,7 @@ export default Vue.extend({
       border-radius: 5px;
       visibility: hidden;
       background-color: #d9dbe1;
-      border: 3px solid #ffffff;
+      border: 3px solid #2c2f43;
     }
     &:hover {
       &::-webkit-scrollbar-thumb {
