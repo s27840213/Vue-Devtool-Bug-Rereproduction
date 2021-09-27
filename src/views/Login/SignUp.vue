@@ -5,7 +5,10 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
       div(class="text-center")
-        span(class="text-blue-1 h-5") SIGH UP
+        span(class="text-blue-1 h-5") Start with Vivipic
+      div
+        div Let Vivipic be your good design assistant in the E-commerce world!
+        div Sign up now, enjoy unlimited templates for free!
       div
         img(:src="require('@/assets/img/png/facebook.png')")
         btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'") Sign up with Facebook
@@ -13,7 +16,19 @@ div(style="position:relative;")
         img(:src="require('@/assets/img/png/google.png')")
         btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'") Sign up with Google
       div
-        span or
+        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") Sign up with Email
+      div
+        span Already sign up?
+        btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
+    div(v-if="currentPageIndex === 1" class="signup signup-p1")
+      div
+        button(@click="onBackClicked")
+              svg-icon(class="pointer"
+              iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-2'")
+        span(class="text-blue-1 h-5") Create your account
+        button
+              svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'0px'" :iconColor="'gray-2'")
       div
         div
           span(class="label-mid") Name
@@ -34,12 +49,14 @@ div(style="position:relative;")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(class="invalid-message")
+          div(v-if="emptyPassword" class="password-hint" :style="`${passwordValid ? '' : 'color: #EB5757;'}`")
+            span {{ passwordHint }}
+          div(v-else class="invalid-message")
             div(class="disp-flex align-center")
               svg-icon(class="pointer"
               :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of at least 8 characters.
             div(class="disp-flex align-center")
               svg-icon(class="pointer"
               :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
@@ -52,7 +69,15 @@ div(style="position:relative;")
               span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
       div
         btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
-    div(v-if="currentPageIndex === 1" class="signup")
+      div
+        span By clicking signup, you're agreeing to our
+        a(class="h-link") terms of service
+        span  and
+        a(class="h-link") privacy policy.
+      div
+        span Already sign up?
+        btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
+    div(v-if="currentPageIndex === 2" class="signup")
       div(class="text-center")
         span(class="text-blue-1 h-5") Verification code is sent
       div
@@ -94,6 +119,7 @@ export default Vue.extend({
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
+      passwordHint: 'a mix of letters, numbers and symbols with at least 8 characters.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
@@ -110,20 +136,11 @@ export default Vue.extend({
       this.fbLogin(code, redirectUri)
     }
     // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin']) {
-      window.gapi.load('auth2', () => {
-        window.gapi.auth2.init({
-          client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-          scope: 'https://www.googleapis.com/auth/userinfo.profile',
-          prompt: 'select_account',
-          ux_mode: 'redirect'
-        }).then(() => {
-          this.isLoading = true
-          const currentUser = window.gapi.auth2.getAuthInstance().currentUser.get()
-          const idToken = currentUser.getAuthResponse().id_token
-          this.googleLogin(idToken)
-        })
-      })
+    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
+      this.isLoading = true
+      const code = this.$route.query.code as string
+      const redirectUri = window.location.href.split('?')[0]
+      this.googleLogin(code, redirectUri)
     }
   },
   computed: {
@@ -173,6 +190,9 @@ export default Vue.extend({
         return false
       }
     },
+    emptyPassword(): boolean {
+      return this.password.length === 0
+    },
     passwordValid(): boolean {
       if (!this.isSignUpClicked) {
         return true
@@ -218,10 +238,10 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    async googleLogin(idToken: string) {
+    async googleLogin(code: string, redirectUri: string) {
       try {
         // idToken -> token
-        const { data } = await userApis.googleLogin(idToken)
+        const { data } = await userApis.googleLogin(code, redirectUri)
         const token = data.data.token
         if (token.length > 0) {
           store.commit('user/SET_STATE', {
@@ -237,17 +257,34 @@ export default Vue.extend({
       } catch (error) {
       }
     },
+    onEmailClicked() {
+      this.isLoading = true
+      this.currentPageIndex = 1
+      this.isLoading = false
+    },
+    onLoginClicked() {
+      this.$router.push({ name: 'Login' })
+    },
+    onBackClicked() {
+      this.isLoading = true
+      this.currentPageIndex = 0
+      this.isLoading = false
+    },
     async onSignUpClicked() {
       this.isSignUpClicked = true
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         this.isLoading = false
+        this.passwordHint = 'a mix of letters, numbers and symbols with at least 8 characters.'
         return
       }
       const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
       if (response.flag === 0) {
-        this.currentPageIndex = 1
+        this.currentPageIndex = 2
         this.isVcodeClicked = false
+      } else {
+        this.password = ''
+        this.passwordHint = response.msg
       }
       this.isLoading = false
     },
@@ -297,6 +334,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
+      this.isLoading = true
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
@@ -310,20 +348,15 @@ export default Vue.extend({
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
-      if (window.gapi.auth2 !== null && window.gapi.auth2 !== undefined) {
-        window.gapi.auth2.getAuthInstance().signIn()
-      } else {
-        window.gapi.load('auth2', () => {
-          window.gapi.auth2.init({
-            client_id: '466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/userinfo.profile',
-            prompt: 'select_account',
-            ux_mode: 'redirect'
-          }).then(() => {
-            window.gapi.auth2.getAuthInstance().signIn()
-          })
-        })
-      }
+      this.isLoading = true
+      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'include_granted_scopes=true&' +
+      'response_type=code&' +
+      'prompt=select_account&' +
+      'state=state_parameter_vivipic&' +
+      `redirect_uri=${window.location.href}&` +
+      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })
@@ -356,16 +389,24 @@ export default Vue.extend({
   }
 }
 .signup-p0 {
-  padding: 0 32px 20px 32px;
+  padding: 0 32px 32px 32px;
   > div {
-    &:nth-child(1) {
+    &:nth-child(1) { // img
       display: flex;
       justify-content: center;
       margin-bottom: 1vh;
     }
-    &:nth-child(3),
-    &:nth-child(4) {
-      // Facebook and Google
+    &:nth-child(3) { // intro text
+      margin: 0 auto;
+      width: 85%;
+      font-size: 14px;
+      margin-bottom: 3vh;
+      > div {
+        margin-bottom: 0.5vh;
+      }
+    }
+    &:nth-child(4),
+    &:nth-child(5) { // fb/google buttons
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -390,50 +431,66 @@ export default Vue.extend({
         padding-left: 15%;
       }
     }
-    &:nth-child(5) {
-      // -or-
-      display: block;
-      text-align: center;
-      overflow: hidden;
-      white-space: nowrap;
-      > span {
-        position: relative;
-        display: inline-block;
+    &:nth-child(6) { //email button
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      width: 80%;
+      border-radius: 3px;
+      background: linear-gradient(180deg, rgba(78, 171, 230, 0.817708) 0%, #3EA1E0 100%);
+      margin-bottom: 2vh;
+      &:hover {
+        cursor: pointer;
+        background: #4aa2da;
       }
-      > span:before,
-      > span:after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 9999px;
-        height: 1px;
-        background: black;
+      &:active {
+        background: #4395c7;
       }
-      > span:before {
-        right: 100%;
-        margin-right: 30px;
-      }
-      > span:after {
-        left: 100%;
-        margin-left: 30px;
-      }
-      margin-bottom: 0;
     }
-    &:nth-child(6) {
-      // input fields
+
+    &:nth-child(7) {
+      // login hint
+      margin: 0 auto;
+      width: 80%;
+      font-size: 14px;
+      margin-bottom: 2vh;
+    }
+  }
+}
+
+.signup-p1 {
+  padding: 32px;
+
+  > div {
+    &:nth-child(1) { // title
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5vh;
+      > button {
+        padding-top: 7px;
+      }
+    }
+    &:nth-child(2) { // input fields
+      margin-bottom: 3vh;
       > div {
         margin-bottom: 1vh;
       }
     }
-    &:nth-child(7) {
+    &:nth-child(3) {
       // sign up button
       display: flex;
       justify-content: center;
-      margin-bottom: 0;
+      margin-bottom: 2vh;
       button {
         width: 60%;
         height: 40px;
       }
+    }
+    &:nth-child(4),
+    &:nth-child(5) {
+      // terms of service & login hint
+      font-size: 14px;
+      margin-bottom: 1vh;
     }
   }
 }
@@ -443,6 +500,17 @@ export default Vue.extend({
 }
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+.h-link {
+  color: setColor(blue-1);
+  text-decoration: underline;
+  font-size: 16px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.password-hint {
+  padding-top: 10px;
+  font-size: 14px;
 }
 .invalid-message {
   display: flex;

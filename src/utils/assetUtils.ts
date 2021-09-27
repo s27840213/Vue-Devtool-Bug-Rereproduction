@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/browser'
 import store from '@/store'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
 import PageUtils from './pageUtils'
@@ -12,6 +12,7 @@ import ImageUtils from './imageUtils'
 import { IGroup, IImage } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import TextUtils from './textUtils'
+import listApi from '@/apis/list'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -31,32 +32,49 @@ class AssetUtils {
     return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 
-  getTypeStr(type: number): string | undefined {
+  getTypeCategory(type: number): string | undefined {
+    // @TODO 暫時
     const typeStrMap = {
+      0: 'font',
       1: 'background',
-      5: 'svg',
       6: 'template',
       7: 'text',
-      8: 'svg'
+      5: 'svg',
+      8: 'svg',
+      9: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
 
+  getTypeModule(type: number): string | undefined {
+    // @TODO 暫時
+    const typeModuleMap = {
+      0: 'font',
+      1: 'background',
+      6: 'templates',
+      7: 'textStock',
+      5: 'objects',
+      8: 'objects',
+      9: 'objects'
+    } as { [key: number]: string }
+    return typeModuleMap[type]
+  }
+
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
     const { id, type, ...attrs } = item
-    const typeStr = this.getTypeStr(type)
+    const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
       urls: {
-        prev: [this.host, typeStr, id, this.preview].join('/'),
-        json: [this.host, typeStr, id, this.data].join('/')
+        prev: [this.host, typeCategory, id, this.preview].join('/'),
+        json: [this.host, typeCategory, id, this.data].join('/')
       },
       ...attrs
     } as IAsset
     switch (type) {
       case 1: {
-        const srcObj = { type: typeStr, assetId: id, userId: '' }
+        const srcObj = { type: typeCategory, assetId: id, userId: '' }
         asset.urls.full = ImageUtils.getSrc({ srcObj } as IImage)
         store.commit('SET_assetJson', { [id]: asset })
         return Promise.resolve(asset)
@@ -114,7 +132,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.55
+    const resizeRatio = 0.4
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
@@ -137,9 +155,9 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, LayerFactary.newFrame(config))
   }
 
-  addBackground(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
-    const { pageIndex } = attrs
-    const { id, width = 0, height = 0 } = item
+  addBackground(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const { width = 0, height = 0 } = styles
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const config = LayerFactary.newImage({
       styles: {
@@ -150,17 +168,18 @@ class AssetUtils {
       },
       srcObj: {
         type: 'background',
-        assetId: id,
+        assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
       }
     })
+    console.log(config)
     store.commit('SET_backgroundImage', {
       pageIndex: targePageIndex,
       config
     })
   }
 
-  addText (json: any, attrs: IAssetProps = {}) {
+  addText(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
@@ -202,6 +221,31 @@ class AssetUtils {
       })
   }
 
+  addImage(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const { width, height, x, y } = styles
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const type = ImageUtils.getSrcType(url)
+    const config = {
+      srcObj: {
+        type,
+        userId: ImageUtils.getUserId(url, type),
+        assetId: ImageUtils.getAssetId(url, type)
+      },
+      styles: {
+        x,
+        y,
+        width,
+        height,
+        initWidth: width,
+        initHeight: height,
+        imgWidth: width,
+        imgHeight: height
+      }
+    }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newImage(config))
+  }
+
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       const asset = await this.get(item) as IAsset
@@ -213,10 +257,14 @@ class AssetUtils {
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:
+        case 9:
           this.addSvg(asset.jsonData, attrs)
           break
         case 1:
-          this.addBackground(asset, attrs)
+          this.addBackground(
+            asset.urls.prev,
+            { ...attrs, styles: { width: asset.width, height: asset.height } }
+          )
           break
         case 8:
           this.addFrame(asset.jsonData, attrs)
@@ -224,9 +272,30 @@ class AssetUtils {
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
+      this.addAssetToRecentlyUsed(asset)
     } catch (error) {
       console.log(error)
       captureException(error)
+    }
+  }
+
+  addAssetToRecentlyUsed(asset: IAsset) {
+    const { id, type, width, height } = asset
+    const typeCategory = this.getTypeCategory(type)
+    const typeModule = this.getTypeModule(type)
+    if (typeCategory && typeModule) {
+      // @TODO 手動加入最近使用
+      const categories = GeneralUtils.deepCopy((store.state as any)[typeModule].categories)
+      const recentlyUsed = categories.find((category: IListServiceContentData) => category.title.includes('最近使用的項目'))
+      if (recentlyUsed) {
+        const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)
+        if (assetIndex >= 0) {
+          recentlyUsed.list.splice(assetIndex, 1)
+        }
+        recentlyUsed.list.unshift({ id, type, width, height })
+        store.commit(`${typeModule}/SET_STATE`, { categories })
+      }
+      listApi.addDesign(id, typeCategory)
     }
   }
 }

@@ -35,8 +35,10 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`
+        // width: `${this.config.styles.width}px`,
+        // height: `${this.config.styles.height}px`
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`
       }
     }
   }

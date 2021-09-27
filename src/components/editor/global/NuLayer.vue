@@ -1,9 +1,10 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles()"
+  div(class="nu-layer" :style="styles()" ref="body"
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
-      @dragenter.prevent)
+      @dragenter.prevent
+      @mouseenter="toggleHighlighter($event, pageIndex,layerIndex,true)")
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
@@ -30,6 +31,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import { IGroup } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -132,6 +134,18 @@ export default Vue.extend({
     onDropClipper(e: DragEvent) {
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
+    },
+    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
+      /**
+       * Only detect the outest layer (e.g. the primary-layer of frame)
+       */
+      if (typeof (evt.target as HTMLElement).dataset.index !== 'undefined') {
+        // console.log(evt.target)
+        // console.log('toggle..', shown)
+        layerUtils.updateLayerProps(pageIndex, layerIndex, {
+          shown
+        })
+      }
     }
   }
 })

@@ -4,7 +4,8 @@
     div(class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       input(class="text-gray-3"
         type="text"
-        v-model="pageName")
+        v-model="pageName"
+        @focus="ShortcutUtils.deselect()")
       div(v-if="getLastSelectedPageIndex===pageIndex")
         svg-icon(class="pointer"
           :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"

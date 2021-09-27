@@ -8,7 +8,7 @@ import {
 class ListService {
   getList (params: IListServiceParams) {
     const data = {
-      token: authToken().token,
+      token: authToken().token || '',
       type: params.type,
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
@@ -48,6 +48,20 @@ class ListService {
   getFont (params: IListServiceParams) {
     params.type = 'font'
     return this.getList(params)
+  }
+
+  addDesign (id: string, type: string) {
+    const data = {
+      token: authToken().token,
+      type,
+      design_id: id
+    }
+    if (!data.token) return
+    return axios.request<IListServiceResponse>({
+      url: '/add-design',
+      method: 'POST',
+      data
+    })
   }
 }
 
