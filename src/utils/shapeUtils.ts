@@ -99,7 +99,7 @@ class ShapeUtils {
         svgOut = svgOut.replace(reg, point[i].toString())
       }
     }
-    console.log(svgOut)
+    // console.log(svgOut)
     return svgOut
   }
 

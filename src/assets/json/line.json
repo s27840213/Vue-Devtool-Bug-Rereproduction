@@ -1,0 +1,83 @@
+{
+    "type": "shape",
+    "category": "D",
+    "scaleType": 0,
+    "ratio": 1,
+    "active": false,
+    "shown": false,
+    "cSize": [
+        0,
+        0
+    ],
+    "pSize": [
+        0,
+        0
+    ],
+    "pDiff": [
+        0,
+        0
+    ],
+    "vSize": [
+        0,
+        0
+    ],
+    "styleArray": [
+        "stroke:$color[0];stroke-width:$size[0];stroke-dasharray:$dash;stroke-linecap:$cap",
+        "",
+        ""
+    ],
+    "markerTransArray": [
+        "transform: translate($txmspx, $tymspx) rotate($romsdeg) $finetunes scale($size[0]);",
+        "transform: translate($txmepx, $tymepx) rotate($romedeg) $finetunee scale($size[0]);"
+    ],
+    "markerId": [
+        "none",
+        "none"
+    ],
+    "color": [
+        "#1FF2BA"
+    ],
+    "dasharray": [],
+    "linecap": "butt",
+    "point": [
+        0,
+        0,
+        100,
+        -150
+    ],
+    "svg": "<g class=\"$mtrans[0] $style[1]\"></g><line class=\"$style[0]\" x1=\"$point[0]\" y1=\"$point[1]\" x2=\"$point[2]\" y2=\"$point[3]\"/><g class=\"$mtrans[1] $style[2]\"></g>",
+    "markerWidth": [
+        0,
+        0
+    ],
+    "trimWidth": [
+        null,
+        null
+    ],
+    "className": "_PXXmVkdD",
+    "locked": false,
+    "moved": false,
+    "dragging": false,
+    "designId": "",
+    "size": [
+        4
+    ],
+    "path": "",
+    "styles": {
+        "x": 243,
+        "y": 446.1588835116167,
+        "scale": 1,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotate": 0,
+        "width": 115.3128047094055,
+        "height": 160.87520313960366,
+        "initWidth": 115.3128047094055,
+        "initHeight": 160.87520313960366,
+        "zindex": 1,
+        "opacity": 100,
+        "color": [
+            "#1FF2BA"
+        ]
+    }
+}

@@ -182,17 +182,18 @@ export default Vue.extend({
       dashAndEdge: [1, 3],
       startMarker: 'none',
       endMarker: 'none',
-      markerContentMap: ({} as {[key: string]: IMarker})
+      markerContentMap: ({
+        none: {
+          styleArray: [''],
+          svg: '',
+          trimWidth: undefined,
+          vSize: [0, 4]
+        }
+      } as {[key: string]: IMarker})
     }
   },
   mounted() {
     this.initilizeRecord()
-    this.markerContentMap.none = {
-      styleArray: [''],
-      svg: '',
-      trimWidth: undefined,
-      vSize: [0, 4]
-    }
     const currLayer = this.currLayer as IShape
     this.getCategories().then(async () => {
       const markerList = (this.categories[0] as IListServiceContentData).list

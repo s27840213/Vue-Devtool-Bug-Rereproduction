@@ -54,7 +54,8 @@ import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
-import { IFrame, IImage } from '@/interfaces/layer'
+import lineTest from '@/assets/json/line.json'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
 
 export default Vue.extend({
@@ -173,6 +174,14 @@ export default Vue.extend({
           action: () => {
             console.log(layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)))
             layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)) as IFrame)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test line',
+          shortcutText: 'Used for test',
+          action: () => {
+            layerUtils.addLayers(this.lastSelectedPageIndex, GeneralUtils.deepCopy(lineTest) as IShape)
           }
         }
       ]
