@@ -205,12 +205,17 @@ class ShapeUtils {
     return result
   }
 
-  pointPreprocess(point: number[], markerWidth: number[], trimWidth: boolean[], scale: number, linecap: string): number[] {
+  pointPreprocess(point: number[], markerWidth: number[], trimWidth: boolean[], scale: number, linecap: string, trimOffset: number[]): number[] {
     const { width, height, baseDegree } = this.lineDimension(point)
+    const [startTrimOffset, endTrimOffset] = trimOffset
     const trimxs = scale * markerWidth[0] * Math.cos(baseDegree)
     const trimys = scale * markerWidth[0] * Math.sin(baseDegree)
     const trimxe = scale * markerWidth[1] * Math.cos(baseDegree)
     const trimye = scale * markerWidth[1] * Math.sin(baseDegree)
+    const trimxoffsets = scale * startTrimOffset * Math.cos(baseDegree)
+    const trimyoffsets = scale * startTrimOffset * Math.sin(baseDegree)
+    const trimxoffsete = scale * endTrimOffset * Math.cos(baseDegree)
+    const trimyoffsete = scale * endTrimOffset * Math.sin(baseDegree)
     const trimedgex = (scale / 2) * Math.cos(baseDegree)
     const trimedgey = (scale / 2) * Math.sin(baseDegree)
     const quadrant = this.getLineQuadrant(point)
@@ -219,12 +224,16 @@ class ShapeUtils {
     let startDiff: number[]
     let endDiff: number[]
     let edgeDiff: number[]
+    let startOffset: number[]
+    let endOffset: number[]
     switch (quadrant) {
       case 1:
         startPoint = [0, height]
         endPoint = [width, 0]
         startDiff = [trimxs, -trimys]
         endDiff = [-trimxe, trimye]
+        startOffset = [trimxoffsets, -trimyoffsets]
+        endOffset = [-trimxoffsete, trimyoffsete]
         edgeDiff = [trimedgex, -trimedgey]
         break
       case 2:
@@ -232,6 +241,8 @@ class ShapeUtils {
         endPoint = [0, 0]
         startDiff = [-trimxs, -trimys]
         endDiff = [trimxe, trimye]
+        startOffset = [-trimxoffsets, -trimyoffsets]
+        endOffset = [trimxoffsete, trimyoffsete]
         edgeDiff = [-trimedgex, -trimedgey]
         break
       case 3:
@@ -239,6 +250,8 @@ class ShapeUtils {
         endPoint = [0, height]
         startDiff = [-trimxs, trimys]
         endDiff = [trimxe, -trimye]
+        startOffset = [-trimxoffsets, trimyoffsets]
+        endOffset = [trimxoffsete, -trimyoffsete]
         edgeDiff = [-trimedgex, trimedgey]
         break
       case 4:
@@ -246,6 +259,8 @@ class ShapeUtils {
         endPoint = [width, height]
         startDiff = [trimxs, trimys]
         endDiff = [-trimxe, -trimye]
+        startOffset = [trimxoffsets, trimyoffsets]
+        endOffset = [-trimxoffsete, -trimyoffsete]
         edgeDiff = [trimedgex, trimedgey]
         break
       default:
@@ -253,17 +268,23 @@ class ShapeUtils {
         endPoint = [width, height]
         startDiff = [trimxs, trimys]
         endDiff = [-trimxe, -trimye]
+        startOffset = [trimxoffsets, trimyoffsets]
+        endOffset = [-trimxoffsete, -trimyoffsete]
         edgeDiff = [trimedgex, trimedgey]
         break
     }
 
-    if (trimWidth[0]) {
+    if (startTrimOffset > 0) {
+      startPoint = this.vectorAdd(startPoint, startOffset)
+    } else if (trimWidth[0]) {
       startPoint = this.vectorAdd(startPoint, startDiff)
       startPoint = this.vectorAdd(startPoint, this.vectorScale(edgeDiff, -1))
     } else if (trimWidth[0] === false || linecap === 'round') { // false or null && round cap
       startPoint = this.vectorAdd(startPoint, edgeDiff)
     }
-    if (trimWidth[1]) {
+    if (endTrimOffset > 0) {
+      endPoint = this.vectorAdd(endPoint, endOffset)
+    } else if (trimWidth[1]) {
       endPoint = this.vectorAdd(endPoint, endDiff)
       endPoint = this.vectorAdd(endPoint, edgeDiff)
     } else if (trimWidth[1] === false || linecap === 'round') { // false or null && round cap

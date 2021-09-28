@@ -47,6 +47,7 @@
           :svg="markerContentMap[startMarker].svg"
           :trimWidth="markerContentMap[startMarker].trimWidth"
           :markerWidth="markerContentMap[startMarker].vSize[0]"
+          :trimOffset="markerContentMap[startMarker].trimOffset"
           @click.native="handleValueModal('start-marker')")
         general-value-selector(v-if="openValueSelector === 'start-marker'"
                       :valueArray="[markerIds]"
@@ -61,13 +62,15 @@
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
               :trimWidth="markerContentMap[markerslot.marker].trimWidth"
-              :markerWidth="markerContentMap[markerslot.marker].vSize[0]")
+              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+              :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       div(class="shape-setting__line-action-wrapper-marker")
         marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
           :svg="markerContentMap[endMarker].svg"
           :trimWidth="markerContentMap[endMarker].trimWidth"
           :markerWidth="markerContentMap[endMarker].vSize[0]"
+          :trimOffset="markerContentMap[endMarker].trimOffset"
           style="transform: rotate(180deg)"
           @click.native="handleValueModal('end-marker')")
         general-value-selector(v-if="openValueSelector === 'end-marker'"
@@ -84,6 +87,7 @@
               :svg="markerContentMap[markerslot.marker].svg"
               :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+              :trimOffset="markerContentMap[markerslot.marker].trimOffset"
               style="transform: rotate(180deg)")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
@@ -187,7 +191,8 @@ export default Vue.extend({
           styleArray: [''],
           svg: '',
           trimWidth: undefined,
-          vSize: [0, 4]
+          vSize: [0, 4],
+          trimOffset: -1
         }
       } as {[key: string]: IMarker})
     }
@@ -204,7 +209,8 @@ export default Vue.extend({
           styleArray: markerContent.styleArray,
           svg: markerContent.svg,
           trimWidth: markerContent.trimWidth,
-          vSize: markerContent.vSize
+          vSize: markerContent.vSize,
+          trimOffset: markerContent.trimOffset ?? -1
         }
       }
       this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
@@ -469,7 +475,7 @@ export default Vue.extend({
     },
     handleStartMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
-      const { styleArray, svg, trimWidth, vSize } = this.markerContentMap[value]
+      const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
         this.lastSelectedPageIndex,
         this.currSelectedIndex,
@@ -477,7 +483,8 @@ export default Vue.extend({
           styleArray: [currLayer.styleArray[0], styleArray[0], currLayer.styleArray[2]],
           svg: shapeUtils.genLineSvgTemplate(svg, this.markerContentMap[this.endMarker].svg),
           trimWidth: [trimWidth, (currLayer.trimWidth ?? [undefined, undefined])[1]],
-          markerWidth: [vSize[0], (currLayer.markerWidth ?? [0, 0])[1]]
+          markerWidth: [vSize[0], (currLayer.markerWidth ?? [0, 0])[1]],
+          trimOffset: [trimOffset, (currLayer.trimOffset ?? [-1, -1])[1]]
         }
       )
       LayerUtils.updateLayerProps(
@@ -491,7 +498,7 @@ export default Vue.extend({
     },
     handleEndMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
-      const { styleArray, svg, trimWidth, vSize } = this.markerContentMap[value]
+      const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
         this.lastSelectedPageIndex,
         this.currSelectedIndex,
@@ -499,7 +506,8 @@ export default Vue.extend({
           styleArray: [currLayer.styleArray[0], currLayer.styleArray[1], styleArray[0]],
           svg: shapeUtils.genLineSvgTemplate(this.markerContentMap[this.startMarker].svg, svg),
           trimWidth: [(currLayer.trimWidth ?? [undefined, undefined])[0], trimWidth],
-          markerWidth: [(currLayer.markerWidth ?? [0, 0])[0], vSize[0]]
+          markerWidth: [(currLayer.markerWidth ?? [0, 0])[0], vSize[0]],
+          trimOffset: [(currLayer.trimOffset ?? [-1, -1])[0], trimOffset]
         }
       )
       LayerUtils.updateLayerProps(

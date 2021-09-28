@@ -20,6 +20,7 @@ export default Vue.extend({
     svg: String,
     trimWidth: Boolean,
     markerWidth: Number,
+    trimOffset: Number,
     iconHeight: String
   },
   data() {
@@ -36,6 +37,9 @@ export default Vue.extend({
   },
   computed: {
     x1(): number {
+      if (this.trimOffset > 0) {
+        return this.trimOffset
+      }
       const diff = 1.25
       if (this.trimWidth) {
         return this.markerWidth * 2.5 - diff

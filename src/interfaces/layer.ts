@@ -100,6 +100,7 @@ export interface IShape extends ILayer<IStyle> {
   markerId?: string[],
   markerWidth?: number[],
   trimWidth?: (boolean | undefined)[],
+  trimOffset?: number[],
   styleArray: string[]
 }
 export interface IImage extends ILayer<IImageStyle> {

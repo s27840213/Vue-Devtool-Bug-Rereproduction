@@ -17,6 +17,7 @@ export interface ISvg {
     markerId?: string[];
     markerWidth?: number[];
     trimWidth?: boolean[];
+    trimOffset?: number[];
 }
 
 export interface IMarker {
@@ -24,4 +25,5 @@ export interface IMarker {
     svg: string;
     trimWidth?: boolean;
     vSize: number[];
+    trimOffset: number;
 }
