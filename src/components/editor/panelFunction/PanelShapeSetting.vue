@@ -467,11 +467,47 @@ export default Vue.extend({
       )
     },
     handleStartMarkerUpdate(index: number, value: string) {
-      console.log(value)
+      const currLayer = (this.currLayer as IShape)
+      const { styleArray, svg, trimWidth, vSize } = this.markerContentMap[value]
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        {
+          styleArray: [currLayer.styleArray[0], styleArray[0], currLayer.styleArray[2]],
+          svg: shapeUtils.genLineSvgTemplate(svg, this.markerContentMap[this.endMarker].svg),
+          trimWidth: [trimWidth, (currLayer.trimWidth ?? [undefined, undefined])[1]],
+          markerWidth: [vSize[0], (currLayer.markerWidth ?? [0, 0])[1]]
+        }
+      )
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        {
+          markerId: [value, (currLayer.markerId ?? ['none', 'none'])[1]]
+        }
+      )
       this.startMarker = value
     },
     handleEndMarkerUpdate(index: number, value: string) {
-      console.log(value)
+      const currLayer = (this.currLayer as IShape)
+      const { styleArray, svg, trimWidth, vSize } = this.markerContentMap[value]
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        {
+          styleArray: [currLayer.styleArray[0], currLayer.styleArray[1], styleArray[0]],
+          svg: shapeUtils.genLineSvgTemplate(this.markerContentMap[this.startMarker].svg, svg),
+          trimWidth: [(currLayer.trimWidth ?? [undefined, undefined])[0], trimWidth],
+          markerWidth: [(currLayer.markerWidth ?? [0, 0])[0], vSize[0]]
+        }
+      )
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        {
+          markerId: [(currLayer.markerId ?? ['none', 'none'])[0], value]
+        }
+      )
       this.endMarker = value
     },
     makeSlots(markerIds: string[]): {marker: string, name: string}[] {

@@ -72,7 +72,7 @@ export default Vue.extend({
   watch: {
     'config.color': {
       handler: function(newVal) {
-        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size)
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray ?? [], this.config.linecap ?? 'butt')
         this.styleNode.textContent = styleText
       },
       deep: true
@@ -121,6 +121,16 @@ export default Vue.extend({
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, newVal)
         this.styleNode.textContent = styleText
       }
+    },
+    'config.markerId': {
+      handler: function(newVal) {
+        const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray ?? [], this.config.size, this.config.point, this.config.markerWidth)
+        this.transNode.textContent = transText
+
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap)
+        this.styleNode.textContent = styleText
+      },
+      deep: true
     }
   },
   computed: {

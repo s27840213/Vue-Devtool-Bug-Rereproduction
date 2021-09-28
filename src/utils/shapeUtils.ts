@@ -315,6 +315,10 @@ class ShapeUtils {
       y: styles.y + dy
     }
   }
+
+  genLineSvgTemplate(startSvg: string, endSvg: string): string {
+    return `<g class="$mtrans[0] $style[1]">${startSvg}</g><line class="$style[0]" x1="$point[0]" y1="$point[1]" x2="$point[2]" y2="$point[3]"/><g class="$mtrans[1] $style[2]">${endSvg}</g>`
+  }
 }
 
 const shapeUtils = new ShapeUtils()

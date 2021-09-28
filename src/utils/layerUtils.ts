@@ -71,7 +71,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
