@@ -57,6 +57,7 @@ import frameTest from '@/assets/json/fram_test.json'
 import lineTest from '@/assets/json/line.json'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
+import shapeUtils from '@/utils/shapeUtils'
 
 export default Vue.extend({
   data() {
@@ -181,7 +182,9 @@ export default Vue.extend({
           text: 'Append test line',
           shortcutText: 'Used for test',
           action: () => {
-            layerUtils.addLayers(this.lastSelectedPageIndex, GeneralUtils.deepCopy(lineTest) as IShape)
+            const newLineTest: IShape = GeneralUtils.deepCopy(lineTest)
+            newLineTest.className = shapeUtils.classGenerator()
+            layerUtils.addLayers(this.lastSelectedPageIndex, newLineTest)
           }
         }
       ]
