@@ -79,7 +79,7 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
-        this.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
@@ -132,9 +132,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      _updateSubLayerStyles: 'SET_subLayerStyles'
-    }),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
     },
@@ -160,20 +157,12 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else {
-        this.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
           const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
         }
       }
-    },
-    updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
-      this._updateSubLayerStyles({
-        pageIndex,
-        primaryLayerIndex,
-        subLayerIndex,
-        styles
-      })
     },
     getFontUrl(fontID: string): string {
       return `url("https://template.vivipic.com/font/${fontID}/font")`

@@ -316,16 +316,6 @@ class Controller {
     })
   }
 
-  updateImgControl(pageIndex: number, layerIndex: number, imgControl: boolean) {
-    store.commit('UPDATE_layerProps', {
-      pageIndex,
-      layerIndex,
-      props: {
-        imgControl
-      }
-    })
-  }
-
   updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: number | string | boolean }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,

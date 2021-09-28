@@ -184,12 +184,12 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.pageScaleRatio
   },
   getLayer(state: IEditorState) {
-    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup => {
+    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame => {
       return state.pages[pageIndex].layers[layerIndex]
     }
   },
   getLayers(state: IEditorState) {
-    return (pageIndex: number): Array<IShape | IText | IImage | IGroup> => {
+    return (pageIndex: number): Array<IShape | IText | IImage | IGroup | IFrame> => {
       return state.pages[pageIndex] ? state.pages[pageIndex].layers : []
     }
   },
@@ -357,10 +357,14 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
-    console.log(groupLayer)
-    console.log(updateInfo.targetIndex)
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
-    console.log(targetLayer)
+    Object.entries(updateInfo.props).forEach(([k, v]) => {
+      targetLayer[k] = v
+    })
+  },
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
+    const frame = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IFrame
+    const targetLayer = frame.clips[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
     })
@@ -566,6 +570,11 @@ const mutations: MutationTree<IEditorState> = {
   SET_subLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].layers as (IShape | IText | IImage)[]
+    Object.assign(layers[subLayerIndex].styles, styles)
+  },
+  SET_frameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
   SET_assetJson(state: IEditorState, json: { [key: string]: any }) {

@@ -19,8 +19,9 @@ export default Vue.extend({
     styles() {
       const { type } = this.config
       let { width, height, initWidth, initHeight, scale } = this.config.styles
-      const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
-
+      // const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
+      const clipPath = type === 'image'
+        ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`) : 'none'
       switch (type) {
         case 'shape':
           width = `${initWidth}px`

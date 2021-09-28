@@ -1,14 +1,14 @@
 <template lang="pug">
   keep-alive
-    div
-      div(class="nu-img-controller"
+    div(class="nu-img-controller")
+      div(class="nu-controller__body"
           ref="body"
           :style="styles()"
           @mousedown.left.stop="moveStart")
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index"
-            :style="Object.assign(scaler, cursorStyles(index, getLayerRotate))"
+            :style="Object.assign(scaler, cursorStyles(index, getLayerRotate), pointerEvents())"
             @mousedown.stop="scaleStart")
       div(class="nu-controller"
           :style="controllerStyles()")
@@ -16,22 +16,20 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
+import FrameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
-    pageIndex: Number
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
+    pageIndex: Number,
+    primaryLayerIndex: Number
   },
   data() {
     return {
@@ -49,7 +47,7 @@ export default Vue.extend({
   destroyed() {
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
-        ControlUtils.updateImgControl(this.pageIndex, i, false)
+        ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
   },
@@ -99,10 +97,10 @@ export default Vue.extend({
       const pos = this.imgControllerPosHandler()
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth * this.config.styles.scale}px`,
-        height: `${this.config.styles.imgHeight * this.config.styles.scale}px`,
+        width: `${this.config.styles.imgWidth}px`,
+        height: `${this.config.styles.imgHeight}px`,
         outline: `${3 * (100 / this.scaleRatio)}px solid red`,
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial'
+        'pointer-events': this.config.pointerEvents ?? 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -151,7 +149,7 @@ export default Vue.extend({
       this.initImgControllerPos = this.getImgController
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
-      document.documentElement.addEventListener('mouseup', this.moveEnd)
+      window.addEventListener('mouseup', this.moveEnd)
       window.addEventListener('mousemove', this.moving)
 
       this.setCursorStyle('move')
@@ -161,7 +159,6 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       this.setCursorStyle('move')
       event.preventDefault()
-
       const baseLine = {
         x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
@@ -182,7 +179,23 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
       }
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+
+      if (typeof this.primaryLayerIndex === 'undefined') {
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      } else {
+        let updateSubLayerStyles = null as any
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'group':
+            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
+            break
+          case 'frame':
+            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
+        }
+        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          imgX: imgPos.x,
+          imgY: imgPos.y
+        })
+      }
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -193,7 +206,7 @@ export default Vue.extend({
     },
     moveEnd() {
       this.setCursorStyle('default')
-      document.documentElement.removeEventListener('mouseup', this.moveEnd)
+      window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
     },
     scaleStart(event: MouseEvent) {
@@ -215,8 +228,8 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
       this.currCursorStyling(event)
-      document.documentElement.addEventListener('mousemove', this.scaling, false)
-      document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
+      window.addEventListener('mousemove', this.scaling, false)
+      window.addEventListener('mouseup', this.scaleEnd, false)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
@@ -297,19 +310,41 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      if (typeof this.primaryLayerIndex === 'undefined') {
+        ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
+        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
+      } else {
+        let updateSubLayerStyles = null as any
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'group':
+            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
+            break
+          case 'frame':
+            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
+        }
+        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          imgWidth: width,
+          imgHeight: height,
+          imgX: imgPos.x,
+          imgY: imgPos.y
+        })
+      }
     },
     scaleEnd() {
       this.isControlling = false
       this.setCursorStyle('default')
-      document.documentElement.removeEventListener('mousemove', this.scaling, false)
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      window.removeEventListener('mousemove', this.scaling, false)
+      window.removeEventListener('mouseup', this.scaleEnd, false)
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
+    },
+    pointerEvents() {
+      return {
+        'pointer-events': this.config.pointerEvents ?? 'initial'
+      }
     },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
@@ -326,18 +361,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-img-controller {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  &:hover {
-    cursor: pointer;
-  }
-  &__wrapper {
-    width: max-content;
-    height: max-content;
-  }
+  z-index: 1000;
 }
 
 .controller-point {
@@ -356,5 +380,19 @@ export default Vue.extend({
   align-items: center;
   position: absolute;
   box-sizing: border-box;
+  &__body {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    &:hover {
+      cursor: pointer;
+    }
+    &__wrapper {
+      width: max-content;
+      height: max-content;
+    }
+  }
 }
 </style>

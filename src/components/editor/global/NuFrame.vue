@@ -25,14 +25,20 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     layers() {
-      return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
+      if ((this.config as IFrame).decoration.svg) {
+        return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
+      } else {
+        return [...(this.config as IFrame).clips]
+      }
     }
   },
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`
+        // width: `${this.config.styles.width}px`,
+        // height: `${this.config.styles.height}px`
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`
       }
     }
   }

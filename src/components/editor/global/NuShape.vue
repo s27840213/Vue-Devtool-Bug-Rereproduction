@@ -74,6 +74,7 @@ export default Vue.extend({
       handler: function(newVal) {
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray ?? [], this.config.linecap ?? 'butt')
         this.styleNode.textContent = styleText
+        // console.log(this.styleNode.textContent)
       },
       deep: true
     },

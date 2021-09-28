@@ -27,6 +27,8 @@ class AssetUtils {
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
+    console.log(asset)
+    console.log(this.fetch(item))
     return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 
@@ -124,6 +126,33 @@ class AssetUtils {
       }
     }
     LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+  }
+
+  addFrame(json: any, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const currentPage = this.getPage(targePageIndex)
+    const resizeRatio = 0.4
+    const width = json.width * resizeRatio
+    const height = json.height * resizeRatio
+
+    const config = {
+      decoration: Object.assign(json.decoration, {
+        vSize: [json.width, json.height]
+      }),
+      styles: {
+        x: currentPage.width / 2 - width / 2,
+        y: currentPage.height / 2 - height / 2,
+        width,
+        height,
+        initWidth: width,
+        initHeight: height,
+        scale: 1,
+        ...styles
+      },
+      ...json
+    }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newFrame(config))
   }
 
   addBackground(url: string, attrs: IAssetProps = {}) {
@@ -228,7 +257,6 @@ class AssetUtils {
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:
-        case 8:
         case 9:
           this.addSvg(asset.jsonData, attrs)
           break
@@ -237,6 +265,9 @@ class AssetUtils {
             asset.urls.prev,
             { ...attrs, styles: { width: asset.width, height: asset.height } }
           )
+          break
+        case 8:
+          this.addFrame(asset.jsonData, attrs)
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)

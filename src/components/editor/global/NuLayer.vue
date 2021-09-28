@@ -1,10 +1,9 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles()"
+  div(class="nu-layer" :style="styles()" ref="body"
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
-      @dragenter.prevent
-      @mouseover="toggleHighlighter(pageIndex,layerIndex,true)")
+      @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
@@ -30,6 +29,7 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import { IGroup } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
@@ -67,16 +67,31 @@ export default Vue.extend({
     },
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
+    },
+    isImgControl(): boolean {
+      const { type } = this.config
+      if (type === 'image') {
+        return this.config.imgControl
+      } else if (type === 'group' || type === 'tmp') {
+        return (this.config as IGroup).layers
+          .some(layer => {
+            return layer.type === 'image' && layer.imgControl
+          })
+      }
+      return false
     }
   },
   methods: {
     styles() {
-      const styles = this.config.type === 'text' ? Object.assign(CssConveter.convertDefaultStyle(this.config.styles),
-        { background: 'rgba(0, 0, 255, 0)' }) : CssConveter.convertDefaultStyle(this.config.styles)
+      const styles = Object.assign(
+        CssConveter.convertDefaultStyle(this.config.styles),
+        { 'pointer-events': this.isImgControl ? 'none' : 'initial' }
+      )
       if (this.config.type === 'text') {
         Object.assign(
           styles,
-          TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+          TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {}),
+          { background: 'rgba(0, 0, 255, 0)' }
         )
       }
       return styles
@@ -119,7 +134,7 @@ export default Vue.extend({
       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
       e.stopPropagation()
     },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })

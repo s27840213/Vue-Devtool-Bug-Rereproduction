@@ -10,6 +10,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
 import AssetUtils from './assetUtils'
+import generalUtils from './generalUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -34,7 +35,7 @@ class MouseUtils {
     clipPath = '', isClipper: boolean, clipperStyles: IStyle | null = null) {
     let layer = this.onDropHandler(e, pageIndex, targetOffset) as IImage
     if (layer && clipperStyles && layer.type === 'image') {
-      layer = this.clipperHandler(layer, clipPath, isClipper, clipperStyles)
+      layer = this.clipperHandler(layer, clipPath, clipperStyles)
       if (layer) {
         groupUtils.deselect()
         LayerUtils.deleteLayer(layerIndex)
@@ -126,10 +127,11 @@ class MouseUtils {
     })
   }
 
-  clipperHandler(layer: IImage, clipPath: string, isClipper: boolean, clipperStyles: IStyle): IImage {
+  clipperHandler(l: IImage, clipPath: string, clipperStyles: IStyle): IImage {
     /**
      * If the clipper is already clipped an image, setting the initial size as the layer size.
      */
+    const layer = generalUtils.deepCopy(l) as IImage
     if (typeof clipperStyles.imgX !== 'undefined') {
       clipperStyles.initWidth = clipperStyles.width / clipperStyles.scale
       clipperStyles.initHeight = clipperStyles.height / clipperStyles.scale
@@ -180,7 +182,6 @@ class MouseUtils {
     }
     Object.assign(layer.styles, newStyles)
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
-    layer.isClipper = isClipper
     return layer
   }
 }

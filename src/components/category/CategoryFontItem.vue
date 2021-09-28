@@ -1,10 +1,17 @@
 <template lang="pug">
-  img(class="pointer"
-    :src="src"
-    style="object-fit: contain;"
-    draggable="false"
-    @click="setFont()"
-    @error="handleNotFound")
+  div(class="category-fonts" draggable="false" @click="setFont()")
+    div(class="category-fonts__item-wrapper")
+      img(class="category-fonts__item pointer"
+        :src="`${host}/${objectId}/${preview}`"
+        @error="handleNotFound")
+    div(class="category-fonts__item-wrapper")
+      img(class="category-fonts__item pointer"
+        :src="`${host}/${objectId}/${preview2}`"
+        @error="handleNotFound")
+    div(v-if="props.font === objectId" class="category-fonts__done-icon")
+      svg-icon(:iconName="'done'"
+        :iconColor="'gray-2'"
+        :iconWidth="'25px'")
 </template>
 
 <script lang="ts">
@@ -17,10 +24,11 @@ import { IFont } from '@/interfaces/text'
 
 export default Vue.extend({
   props: {
-    src: String,
-    objectId: String
+    host: String,
+    objectId: String,
+    preview: String,
+    preview2: String
   },
-  components: {},
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore'])
   },
@@ -56,4 +64,21 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+  .category-fonts {
+    display: grid;
+    grid-template-columns: 7fr 4fr 1fr;
+    grid-gap: 10px;
+    &__item-wrapper {
+      overflow: hidden;
+      position: relative;
+    }
+    &__item {
+    height: 25px;
+    object-fit: contain;
+    }
+    &__done-icon {
+      position: absolute;
+      right: 0;
+    }
+  }
 </style>

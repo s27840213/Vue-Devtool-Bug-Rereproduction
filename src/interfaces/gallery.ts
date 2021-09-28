@@ -19,3 +19,9 @@ export interface RowData {
   imgs: GalleryImage[],
   sumOfWidth: number
 }
+
+export interface SrcObj {
+  type: string,
+  userId: string,
+  assetId: string
+}

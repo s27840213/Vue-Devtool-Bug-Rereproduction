@@ -1,4 +1,4 @@
 export default function authToken () {
-  const token = localStorage.getItem('token') || 'eZB1CqRl52WQFAzFV3VGdfBSs8HLu9WqYHcHYnCOeU'
+  const token = localStorage.getItem('token') || ''
   return token ? { token } : {}
 }

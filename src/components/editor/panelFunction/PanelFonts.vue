@@ -10,34 +10,33 @@
     search-bar(:placeholder="'Search font'")
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(#after)
+      template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="gray-1"
             iconWidth="20px")
       template(v-slot:category-font-item="{ list }")
-        div(class="panel-fonts__items")
-          div(class="panel-fonts__items-wrapper" v-for="item in list")
-            div(class="panel-fonts__item-wrapper")
-              category-font-item(class="panel-fonts__item"
-                :key="item"
-                :src="`${host}/${item}/${preview}`"
-                :objectId="item")
-            div(class="panel-fonts__item-wrapper")
-              category-font-item(class="panel-fonts__item"
-                :key="item"
-                :src="`${host}/${item}/${preview2}`"
-                :objectId="item")
-            div(v-if="props.font === item" class="panel-fonts__done-icon")
-              svg-icon(:iconName="'done'"
-                :iconColor="'gray-2'"
-                :iconWidth="'25px'")
-    div
-      //- svg-icon(class="panel-fonts__close pointer"
-      //-   :iconName="'close'"
-      //-   :iconWidth="'30px'"
-      //-   :iconColor="'gray-2'"
-      //-   @click.native="closeFontsPanel")
+        category-font-item(v-for="item in list"
+          :host="host"
+          :preview="preview"
+          :preview2="preview2"
+          :objectId="item.id")
+      //- template(v-slot:category-list-font="{ list, title }")
+      //-   category-list-font(:list="list" :title="title")
+      //-     template(v-slot="{ item }")
+      //-       category-font-item(
+      //-         :host="host"
+      //-         :preview="preview"
+      //-         :preview2="preview2"
+      //-         :objectId="item.id")
+      //- template(v-slot:category-font-item="{ list }")
+      //-   div(class="panel-fonts__items")
+      //-     category-font-item(v-for="item in list"
+      //-       :key="item"
+      //-       :host="host"
+      //-       :preview="preview"
+      //-       :preview2="preview2"
+      //-       :objectId="item")
     btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
@@ -48,16 +47,17 @@ import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
-import TextPropUTils from '@/utils/textPropUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
+import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
-    CategoryFontItem
+    CategoryFontItem,
+    CategoryListFont
   },
   data() {
     return {
@@ -66,6 +66,7 @@ export default Vue.extend({
   },
   mounted() {
     this.getContent()
+    // this.getCategories()
   },
   computed: {
     ...mapState(
@@ -89,13 +90,13 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     list(): any[] {
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const tmpList = list.map(item => item.id)
+      const { list = [] } = this.content as { list: IListServiceContentDataItem }
+      const tmpList = list as any[]
       const result = []
       while (tmpList.length) {
         const rowItems = tmpList.splice(0, 1)
         result.push({
-          id: `${rowItems.join('_')}`,
+          id: `${rowItems.map(item => item.id).join('_')}`,
           size: 35,
           type: 'category-font-item',
           list: rowItems,
@@ -104,6 +105,17 @@ export default Vue.extend({
       }
       return result
     }
+    // listCategories(): any[] {
+    //   const { categories } = this
+    //   return (categories as IListServiceContentData[])
+    //     .map((category, idx) => ({
+    //       id: `list_${category.list.map(list => list.id).join('_')}`,
+    //       type: 'category-list-font',
+    //       list: category.list,
+    //       title: category.title,
+    //       sentinel: !idx
+    //     }))
+    // }
   },
   methods: {
     ...mapActions('font',
@@ -136,6 +148,7 @@ export default Vue.extend({
       TextUtils.updateFontFace({ name: fontName, face: fontName })
     },
     handleLoadMore() {
+      console.log('loadmore')
       this.getMoreContent()
     }
   }
@@ -158,14 +171,6 @@ export default Vue.extend({
       margin-top: 0px;
     }
   }
-  &__font {
-    transition: background-color .1s linear;
-    font-size: 18px;
-    padding: 5px;
-    > span {
-      display: inline-block;
-    }
-  }
   &__close {
     position: absolute;
     right: 5px;
@@ -176,23 +181,6 @@ export default Vue.extend({
     grid-template-columns: auto;
     grid-gap: 10px;
     margin-left: auto;
-  }
-  &__items-wrapper {
-    display: grid;
-    grid-template-columns: 7fr 4fr 1fr;
-    grid-gap: 10px;
-  }
-  &__item-wrapper {
-    overflow: hidden;
-    position: relative;
-  }
-  &__item {
-  height: 25px;
-  object-fit: contain;
-  }
-  &__done-icon {
-    position: absolute;
-    right: 0;
   }
 }
 .category-list::v-deep::-webkit-scrollbar-thumb {
