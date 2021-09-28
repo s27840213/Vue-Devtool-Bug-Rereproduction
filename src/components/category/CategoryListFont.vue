@@ -2,7 +2,7 @@
   div(class="list-font")
     div {{title}}
     div(class="list-font-items" v-for="item in list" :key="item.id")
-      slot(name="a" :item="item")
+      slot(:item="item")
 </template>
 
 <script lang="ts">

@@ -1,6 +1,28 @@
-import { IImage } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import LayerUtils from './layerUtils'
 
 class ImageUtils {
+  get isImgControl(): boolean {
+    const currLayer = LayerUtils.getCurrLayer
+    if (currLayer) {
+      switch (currLayer.type) {
+        case 'image':
+          return (currLayer as IImage).imgControl
+        case 'group':
+          return (currLayer as IGroup).layers
+            .some(layer => {
+              return layer.type === 'image' && layer.imgControl
+            })
+        case 'frame':
+          return (currLayer as IFrame).clips
+            .some(layer => {
+              return layer.type === 'image' && layer.imgControl
+            })
+      }
+    }
+    return false
+  }
+
   getSrc(config: IImage) {
     const { type, userId, assetId } = config.srcObj || config.src_obj
     const size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)

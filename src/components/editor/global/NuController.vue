@@ -1,7 +1,6 @@
 <template lang="pug">
   keep-alive
-    //- div(class="nu-controller" ref="self")
-    div(v-show="this.isShown || this.isActive || this.isImgActive" class="nu-controller" ref="self")
+    div(class="nu-controller" ref="self")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -11,7 +10,8 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @mousedown.left="moveStart"
-          @mouseleave="toggleHighlighter($event, pageIndex,layerIndex,false)"
+          @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
+          @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
@@ -118,9 +118,7 @@ import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import FrameUtils from '@/utils/frameUtils'
-import vClickOutside from 'v-click-outside'
-import { Layer } from 'konva/types/Layer'
-import { update } from 'lodash'
+import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
@@ -128,9 +126,6 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     snapUtils: Object
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -315,14 +310,11 @@ export default Vue.extend({
       setIsMoving: 'SET_isMoving'
     }),
     onFrameMouseEnter(clipIndex: number) {
-      console.log(this.layerIndex)
-      console.log(LayerUtils.currSelectedInfo.index)
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && currLayer.imgControl) {
+      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
         return
       }
+      const currLayer = LayerUtils.getCurrLayer as IImage
       this.clipIndex = clipIndex
-      console.log('in frame')
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
@@ -349,7 +341,6 @@ export default Vue.extend({
       }
     },
     onFrameMouseLeave() {
-      console.log('out frame')
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
@@ -444,13 +435,10 @@ export default Vue.extend({
       })
       return textStyles
     },
-    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
-      if (evt.target === this.$refs.body as HTMLElement) {
-        console.log('controller toggle out')
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-          shown
-        })
-      }
+    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
     },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
@@ -557,7 +545,6 @@ export default Vue.extend({
       }
       if (!this.isMoving) {
         (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
-        console.log(this.isActive)
         this.setIsMoving(true)
       }
       if (this.isActive) {
@@ -600,10 +587,7 @@ export default Vue.extend({
         if (posDiff.x === 0 && posDiff.y === 0) {
           if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
             GroupUtils.deselect()
-            // this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-              shown: false
-            })
+            this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
           }
         }
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
@@ -1285,7 +1269,6 @@ export default Vue.extend({
       }
 
       if (this.currSubSelectedInfo.index !== -1) {
-        console.log(this.currSelectedInfo.index)
         updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
         if (this.currSubSelectedInfo.type === 'image') {
           updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
@@ -1307,14 +1290,6 @@ export default Vue.extend({
         return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
-    },
-    clickSubControllerOutside() {
-      const { index } = this.currSubSelectedInfo
-      const layer = (this.config as IGroup).layers[index]
-      console.log(layer)
-      if (layer.type === 'image' && layer.imgControl) {
-        console.log('click outside')
-      }
     }
   }
 })

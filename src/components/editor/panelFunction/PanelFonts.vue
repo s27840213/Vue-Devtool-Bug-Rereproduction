@@ -23,7 +23,7 @@
           :objectId="item.id")
       //- template(v-slot:category-list-font="{ list, title }")
       //-   category-list-font(:list="list" :title="title")
-      //-     template(v-slot:a="{ item }")
+      //-     template(v-slot="{ item }")
       //-       category-font-item(
       //-         :host="host"
       //-         :preview="preview"

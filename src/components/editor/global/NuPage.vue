@@ -99,7 +99,7 @@
             //-   @setFocus="setFocus()"
             //-   @getClosestSnaplines="getClosestSnaplines"
             //-   @clearSnap="clearSnap")
-        div(v-if="isImgControl"
+        div(v-if="ImageUtils.isImgControl"
             class="dim-background"
             :style="styles('control')"
             ref="page-content")
@@ -138,6 +138,7 @@ export default Vue.extend({
   data() {
     return {
       pageIsHover: false,
+      ImageUtils,
       ShortcutUtils,
       // for test used
       coordinate: null as unknown as HTMLElement,
@@ -208,26 +209,6 @@ export default Vue.extend({
           }
         })
       }
-    },
-    isImgControl(): boolean {
-      const layer = this.getCurrLayer
-      if (layer) {
-        switch (layer.type) {
-          case 'image':
-            return (layer as IImage).imgControl
-          case 'group':
-            return (layer as IGroup).layers
-              .some(layer => {
-                return layer.type === 'image' && layer.imgControl
-              })
-          case 'frame':
-            return (layer as IFrame).clips
-              .some(layer => {
-                return layer.imgControl
-              })
-        }
-      }
-      return false
     }
   },
   methods: {

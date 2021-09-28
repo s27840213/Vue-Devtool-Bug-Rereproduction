@@ -3,8 +3,7 @@
       @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
-      @dragenter.prevent
-      @mouseenter="toggleHighlighter($event, pageIndex,layerIndex,true)")
+      @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       div(v-if="config.imgControl" :style="backImageStyle()")
@@ -136,16 +135,9 @@ export default Vue.extend({
       e.stopPropagation()
     },
     toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
-      /**
-       * Only detect the outest layer (e.g. the primary-layer of frame)
-       */
-      if (typeof (evt.target as HTMLElement).dataset.index !== 'undefined') {
-        // console.log(evt.target)
-        // console.log('toggle..', shown)
-        layerUtils.updateLayerProps(pageIndex, layerIndex, {
-          shown
-        })
-      }
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
     }
   }
 })
