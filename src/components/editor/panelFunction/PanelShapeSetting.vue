@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    action-bar(class="flex-around" style="padding: 2px 0"
+    action-bar(class="flex-around" style="padding: 8px 0"
               v-if="isLine")
       div(class="shape-setting__line-action-wrapper-dashAndEdge")
         svg-icon(class="pointer"
@@ -42,12 +42,15 @@
             div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
       div(class="shape-setting__line-action-wrapper-marker")
-        svg-icon(class="pointer"
-                iconName="start-marker" iconWidth="37px" iconColor="gray-2"
-                @click.native="handleValueModal('start-marker')")
+        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+          :styleFormat="markerContentMap[startMarker].styleArray[0]"
+          :svg="markerContentMap[startMarker].svg"
+          :trimWidth="markerContentMap[startMarker].trimWidth"
+          :markerWidth="markerContentMap[startMarker].vSize[0]"
+          @click.native="handleValueModal('start-marker')")
         general-value-selector(v-if="openValueSelector === 'start-marker'"
                       :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-start-marker"
+                      class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
                       :values="[startMarker]"
                       @update="handleStartMarkerUpdate"
@@ -57,15 +60,19 @@
             marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth",
+              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]")
       div(class="shape-setting__line-action-wrapper-marker")
-        svg-icon(class="pointer"
-                iconName="end-marker" iconWidth="37px" iconColor="gray-2"
-                @click.native="handleValueModal('end-marker')")
+        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+          :styleFormat="markerContentMap[endMarker].styleArray[0]"
+          :svg="markerContentMap[endMarker].svg"
+          :trimWidth="markerContentMap[endMarker].trimWidth"
+          :markerWidth="markerContentMap[endMarker].vSize[0]"
+          style="transform: rotate(180deg)"
+          @click.native="handleValueModal('end-marker')")
         general-value-selector(v-if="openValueSelector === 'end-marker'"
                       :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-end-marker"
+                      class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
                       :values="[endMarker]"
                       @update="handleEndMarkerUpdate"
@@ -75,7 +82,7 @@
             marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth",
+              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               style="transform: rotate(180deg)")
     div(class="relative")
@@ -186,6 +193,7 @@ export default Vue.extend({
       trimWidth: undefined,
       vSize: [0, 4]
     }
+    const currLayer = this.currLayer as IShape
     this.getCategories().then(async () => {
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
@@ -198,11 +206,9 @@ export default Vue.extend({
           vSize: markerContent.vSize
         }
       }
-      console.log(this.markerContentMap)
+      this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
+      this.endMarker = (currLayer.markerId ?? ['none', 'none'])[1]
     })
-    const currLayer = this.currLayer as IShape
-    this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
-    this.endMarker = (currLayer.markerId ?? ['none', 'none'])[1]
     this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
     this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
   },
@@ -531,14 +537,9 @@ export default Vue.extend({
       left: -22.5px;
     }
 
-    &-start-marker {
+    &-marker {
       @extend .shape-setting__value-selector;
-      left: -19px;
-    }
-
-    &-end-marker {
-      @extend .shape-setting__value-selector;
-      left: -21px;
+      left: -100%;
     }
   }
   &__color-picker {
@@ -572,7 +573,7 @@ export default Vue.extend({
     &-line-width {
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
-      left: -16px;
+      left: -18px;
       right: unset;
       top: 35px;
     }
@@ -633,7 +634,6 @@ export default Vue.extend({
 
     &-marker {
       @extend .shape-setting__line-action-wrapper;
-      height: 37px;
     }
   }
 }
