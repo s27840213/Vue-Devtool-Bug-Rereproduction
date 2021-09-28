@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-layer" :style="styles()" ref="body"
-      @drop="!config.clipper ? onDrop($event) : onDropClipper($event)"
+      @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)

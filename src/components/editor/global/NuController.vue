@@ -1011,12 +1011,12 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.isClipper, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
         case 'shape': {
           const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, true, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
           break
         }
       }

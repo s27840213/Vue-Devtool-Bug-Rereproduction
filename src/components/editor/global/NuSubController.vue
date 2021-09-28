@@ -9,22 +9,22 @@
           @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
           @dblclick="onDblClick()"
           @click.left.stop="onClickEvent()")
-        template(v-if="config.type === 'text' && config.active")
-          div(:style="textScaleStyle()")
-            div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-              :style="textBodyStyle()"
-              :contenteditable="config.type === 'tmp' ? false : contentEditable"
-              @compositionstart="isComposing = true"
-              @compositionend="isComposing = false"
-              @keydown="onKeyDown($event)")
-              p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-                :data-pindex="pIndex"
-                :key="p.id",
-                :style="textStyles(p.styles)")
-                span(v-for="(span, sIndex) in p.spans" class="text__span"
-                  :data-sindex="sIndex"
-                  :key="span.id",
-                  :style="textStyles(span.styles)") {{ span.text }}
+        //- template(v-if="config.type === 'text' && config.active")
+        //-   div(:style="textScaleStyle()")
+        //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+        //-       :style="textBodyStyle()"
+        //-       :contenteditable="config.type === 'tmp' ? false : contentEditable"
+        //-       @compositionstart="isComposing = true"
+        //-       @compositionend="isComposing = false"
+        //-       @keydown="onKeyDown($event)")
+        //-       p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+        //-         :data-pindex="pIndex"
+        //-         :key="p.id",
+        //-         :style="textStyles(p.styles)")
+        //-         span(v-for="(span, sIndex) in p.spans" class="text__span"
+        //-           :data-sindex="sIndex"
+        //-           :key="span.id",
+        //-           :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-sub-controller__lock-icon"
             :style="`transform: scale(${100/scaleRatio})`")
@@ -255,12 +255,12 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.isClipper, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
         case 'shape': {
           const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, true, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
           break
         }
       }
