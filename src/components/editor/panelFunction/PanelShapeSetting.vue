@@ -41,14 +41,14 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper-marker")
-        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+      div(class="shape-setting__line-action-wrapper-marker pointer"
+          @click="handleValueModal('start-marker')")
+        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[startMarker].styleArray[0]"
           :svg="markerContentMap[startMarker].svg"
           :trimWidth="markerContentMap[startMarker].trimWidth"
           :markerWidth="markerContentMap[startMarker].vSize[0]"
-          :trimOffset="markerContentMap[startMarker].trimOffset"
-          @click.native="handleValueModal('start-marker')")
+          :trimOffset="markerContentMap[startMarker].trimOffset")
         general-value-selector(v-if="openValueSelector === 'start-marker'"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
@@ -64,15 +64,15 @@
               :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset")
-      div(class="shape-setting__line-action-wrapper-marker")
-        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+      div(class="shape-setting__line-action-wrapper-marker pointer"
+          @click="handleValueModal('end-marker')")
+        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
           :svg="markerContentMap[endMarker].svg"
           :trimWidth="markerContentMap[endMarker].trimWidth"
           :markerWidth="markerContentMap[endMarker].vSize[0]"
           :trimOffset="markerContentMap[endMarker].trimOffset"
-          style="transform: rotate(180deg)"
-          @click.native="handleValueModal('end-marker')")
+          style="transform: rotate(180deg)")
         general-value-selector(v-if="openValueSelector === 'end-marker'"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
@@ -415,15 +415,6 @@ export default Vue.extend({
       if (GeneralUtils.isValidInt(value)) {
         const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
         const { currLayer } = this
-        // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        //   LayerUtils.updateAllGroupProps({ size: [lineWidth] })
-        // } else {
-        //   LayerUtils.updateLayerProps(
-        //     this.lastSelectedPageIndex,
-        //     this.currSelectedIndex,
-        //     { size: [lineWidth] }
-        //   )
-        // }
         const { point, styles, size } = (currLayer as IShape)
         LayerUtils.updateLayerProps(
           this.lastSelectedPageIndex,
