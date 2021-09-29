@@ -1,7 +1,6 @@
 <template lang="pug">
-  div(class="text-effect-setting")
-    div(class="w-full text-left mb-10 text-blue-1 label-lg") Text Effect
-    action-bar
+  div(class="text-effect-setting mt-25")
+    div(class="action-bar")
       div(class="flex-between text-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
           :key="`shadow-${icon}`"
@@ -154,45 +153,45 @@ export default Vue.extend({
     }
   },
   computed: {
-    shadowOption (): string[] {
+    shadowOption(): string[] {
       return Object.keys(this.effects)
     },
-    shapeOption (): string[] {
+    shapeOption(): string[] {
       return Object.keys(this.shapes)
     },
-    shadowFields (): string[] {
+    shadowFields(): string[] {
       const { effects, currentEffect } = this
       return effects[currentEffect].filter(field => field !== 'color')
     },
-    shapeFields (): string[] {
+    shapeFields(): string[] {
       const { shapes, currentShape } = this
       return shapes[currentShape]
     },
-    canChangeColor (): boolean {
+    canChangeColor(): boolean {
       const { effects, currentEffect } = this
       return effects[currentEffect].includes('color')
     },
-    currentStyle (): any {
+    currentStyle(): any {
       const { styles } = TextEffectUtils.getCurrentLayer()
       return styles || {}
     },
-    currentEffect (): string {
+    currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
       return textEffect.name || 'none'
     },
-    currentShape (): string {
+    currentShape(): string {
       const { textShape = {} } = this.currentStyle
       return textShape.name || 'none'
     }
   },
   methods: {
-    optionStyle (idx: number) {
+    optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
     },
-    handleStyleModal () {
+    handleStyleModal() {
       this.openModal = !this.openModal
     },
-    handleColorModal () {
+    handleColorModal() {
       this.openColorPicker = !this.openColorPicker
     },
     onEffectClick(effectName: string): void {
@@ -201,7 +200,7 @@ export default Vue.extend({
     onShapeClick(shapeName: string): void {
       TextShapeUtils.setTextShape(shapeName)
     },
-    handleEffectUpdate (event: Event): void {
+    handleEffectUpdate(event: Event): void {
       const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
@@ -211,7 +210,7 @@ export default Vue.extend({
         })
       })
     },
-    handleShapeUpdate (event: Event): void {
+    handleShapeUpdate(event: Event): void {
       const { currentShape, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
@@ -221,11 +220,11 @@ export default Vue.extend({
         })
       })
     },
-    handleShapeStatus (focus: boolean): void {
+    handleShapeStatus(focus: boolean): void {
       const { currentShape } = this
       TextShapeUtils.setTextShape(currentShape, { focus })
     },
-    handleColorUpdate (color: string): void {
+    handleColorUpdate(color: string): void {
       const { currentEffect } = this
       TextEffectUtils.setTextEffect(currentEffect, { color })
     }

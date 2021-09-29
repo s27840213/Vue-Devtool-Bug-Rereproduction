@@ -78,7 +78,6 @@ export default Vue.extend({
   position: relative;
   box-sizing: border-box;
   z-index: setZindex("function-panel");
-  box-shadow: 2px 0 4px setColor(blue-1, 0.2);
   background-color: setColor(sidebar-panel);
 }
 
@@ -88,7 +87,6 @@ export default Vue.extend({
   top: 50%;
   right: 0;
   transform: translate3d(100%, -70%, 0);
-  filter: drop-shadow(3px 0 1px setColor(blue-1, 0.1));
   cursor: pointer;
 }
 </style>

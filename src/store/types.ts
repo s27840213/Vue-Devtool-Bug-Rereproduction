@@ -25,9 +25,6 @@ export interface IEditorState {
   clipboard: Array<ITmp>,
   currSelectedInfo: ICurrSelectedInfo,
   currSubSelectedInfo: ICurrSubSelectedInfo,
-  isOrderDropdownsOpened: boolean,
-  isLayerDropdownsOpened: boolean
-  isPageDropdownsOpened: boolean,
   isColorPickerOpened: boolean,
   currSelectedPhotoInfo: Record<string, never> | {
     userName: string,

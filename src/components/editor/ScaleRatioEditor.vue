@@ -1,9 +1,9 @@
 <template lang="pug">
-  div(class="size-editor")
-    input(ref="size-editor" type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
+  div(class="scale-ratio-editor")
+    input(ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
       v-ratio-change)
-    div(class="size-editor__percentage lead-2")
+    div(class="scale-ratio-editor__percentage lead-2")
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
@@ -42,7 +42,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.size-editor {
+.scale-ratio-editor {
   display: grid;
   grid-template-rows: auto;
   grid-template-columns: auto auto auto;

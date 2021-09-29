@@ -7,18 +7,17 @@
     //-     span {{coordinateHeight}}px
     router-view
     div(class="popup-area")
-      dropdowns-order(v-show="isOrderDropdownsOpened"
-        :type="'order'"
-        @blur.native="setIsOrderDropdownsOpened(false)"
-        tabindex="0")
-      dropdowns-layer(v-show="isLayerDropdownsOpened"
-        @blur.native="setIsLayerDropdownsOpened(false)"
-        @click.native="setIsLayerDropdownsOpened(false)"
-        tabindex="0")
-      dropdowns-page(v-show="isPageDropdownsOpened"
-        @blur.native="setIsPageDropdownsOpened(false)"
-        @click.native="setIsPageDropdownsOpened(false)"
-        tabindex="0")
+      popup
+      //- dropdown-order(v-if="isOrderDropdownOpened"
+      //-   v-click-outside="vcoConfig('order')")
+      //- dropdown-align(v-if="isAlignDropdownOpened"
+      //-   v-click-outside="vcoConfig('align')")
+      //- dropdown-flip(v-if="isFlipDropdownOpened"
+      //-   v-click-outside="vcoConfig('flip')")
+      //- dropdown-layer(v-if="isLayerDropdownOpened"
+      //-   v-click-outside="vcoConfig('layer')")
+      //- dropdown-page(v-if="isPageDropdownOpened"
+      //-   v-click-outside="vcoConfig('page')")
       photo-info(v-show="currSelectedPhotoInfo.userName"
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
@@ -39,23 +38,22 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import DropdownsOrder from '@/components//dropdowns/DropdownsOrder.vue'
-import DropdownsLayer from '@/components/dropdowns/DropdownsLayer.vue'
-import DropdownsPage from '@/components/dropdowns/DropdownsPage.vue'
+import vClickOutside from 'v-click-outside'
+import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
-import ColorPicker from '@/components/ColorPicker.vue'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
+import popupUtils from './utils/popupUtils'
 
 export default Vue.extend({
   components: {
-    DropdownsOrder,
-    DropdownsLayer,
-    DropdownsPage,
+    Popup,
     'chrome-picker': Chrome,
-    ColorPicker,
     PhotoInfo,
     ModalCard
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -70,20 +68,13 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isOrderDropdownsOpened: 'getIsOrderDropdownsOpened',
-      isLayerDropdownsOpened: 'getIsLayerDropdownsOpened',
-      isPageDropdownsOpened: 'getIsPageDropdownsOpened',
-      isColorPickerOpened: 'getIsColorPickerOpened',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
       isModalOpen: 'modal/getModalOpen'
     })
   },
   methods: {
     ...mapMutations({
-      _setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened',
-      _setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      _setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened',
-      _setIsColorPickerOpened: 'SET_isColorPickerOpened',
+      setDropdown: 'popup/SET_STATE',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
     }),
     coordinateHandler(e: MouseEvent) {
@@ -92,30 +83,22 @@ export default Vue.extend({
       this.coordinate.style.width = `${this.coordinateWidth}px`
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
-    setIsOrderDropdownsOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this._setIsOrderDropdownsOpened(isOpened)
-      })
-    },
-    setIsLayerDropdownsOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this._setIsLayerDropdownsOpened(isOpened)
-      })
-    },
-    setIsPageDropdownsOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this._setIsPageDropdownsOpened(isOpened)
-      })
-    },
-    setIsColorPickerOpened(isOpened: boolean) {
-      this.$nextTick(() => {
-        this._setIsColorPickerOpened(isOpened)
-      })
+    closeDropdown(type: string) {
+      popupUtils.closePopup()
     },
     setCurrSelectedPhotoInfo() {
       this.$nextTick(() => {
         this._setCurrSelectedPhotoInfo({})
       })
+    },
+    vcoConfig(type: string) {
+      return {
+        handler: () => {
+          this.closeDropdown(type)
+        },
+        events: ['dblclick', 'click', 'contextmenu']
+        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+      }
     }
   }
 })
@@ -166,7 +149,7 @@ export default Vue.extend({
   left: 0;
   top: 0;
   overflow: hidden;
-  z-index: setZindex(dropdowns);
+  z-index: setZindex(popup);
   pointer-events: none;
   > div {
     pointer-events: initial;
