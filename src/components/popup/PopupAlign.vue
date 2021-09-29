@@ -1,27 +1,27 @@
 <template lang="pug">
-  div(class="dropdown dropdown__align bg-white")
-    div(class="dropdown__group")
+  div(class="popup-align bg-white")
+    div(class="popup-align__group")
       div
         span 元件對齊
       div
         div(v-for="(data,index) in alignDatas()"
-            :key="`dropdown-${index}`"
-            class="dropdown__item"
+            :key="`popup-${index}`"
+            class="popup-align__item"
             @click="MappingUtils.mappingIconAction(data.icon)")
           svg-icon(
             class="pointer"
             :iconName="data.icon"
-            :iconWidth="'16px'"
+            :iconWidth="'18px'"
             :iconColor="'gray-1'")
           span(class="ml-5 body-2") {{data.text}}
-    hr(v-if="layerNum >=3" class="dropdown__hr")
-    div(v-if="layerNum >=3" class="dropdown__group")
+    hr(v-if="layerNum >=3" class="popup-align__hr")
+    div(v-if="layerNum >=3" class="popup-align__group")
       div
         span 平均分配間距
       div
         div(v-for="(data,index) in distributeDatas()"
-            :key="`dropdown-${index}`"
-            class="dropdown__item"
+            :key="`popup-${index}`"
+            class="popup-align__item"
             @click="MappingUtils.mappingIconAction(data.icon)")
           svg-icon(
             class="pointer"
@@ -35,21 +35,9 @@
 import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 export default Vue.extend({
-  props: {
-    hasImage: {
-      type: Boolean,
-      default: true
-    },
-    type: String,
-    datas: Array
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
-  },
   data() {
     return {
       MappingUtils
@@ -92,7 +80,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.dropdown {
+.popup-align {
+  padding: 0.375rem 0.625rem;
   &__group {
     // heading
     > div:nth-child(1) {
@@ -113,6 +102,23 @@ export default Vue.extend({
         display: flex;
         flex-direction: column;
       }
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
     }
   }
 }

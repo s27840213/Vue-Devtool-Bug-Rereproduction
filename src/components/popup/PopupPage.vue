@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="dropdown dropdown__page bg-gray-6"
-      @click.stop="closeDropdown")
+  div(class="popup-page bg-gray-6"
+      @click.stop="closePopup")
     template(v-if="getToekn!==''")
-      div(class="dropdown__item"
+      div(class="popup-page__item"
           @click="uploadMenu.action")
         svg-icon(
           class="pointer"
@@ -12,7 +12,7 @@
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     template(v-if="hasDesignId && getToekn!==''")
-      div(class="dropdown__item"
+      div(class="popup-page__item"
           @click="updateMenu.action")
         svg-icon(
           class="pointer"
@@ -22,8 +22,8 @@
         span(class="ml-10 body-2") {{updateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     div(v-for="(data,index) in shortcutMenu()"
-        :key="`dropdown__shortcut-${index}`"
-        class="dropdown__item"
+        :key="`popup-page__shortcut-${index}`"
+        class="popup-page__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -32,9 +32,9 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="dropdown__hr")
+    hr(v-if="getBackgroundImage(lastSelectedPageIndex).config.src !=='none'" class="popup-page__hr")
     div(v-if="getBackgroundImage(lastSelectedPageIndex).config.src !=='none'"
-        class="dropdown__item"
+        class="popup-page__item"
         @click="detachBackgroundImage")
       svg-icon(
         class="pointer"
@@ -49,7 +49,6 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import ImageUtils from '@/utils/imageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -57,7 +56,7 @@ import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
 import { IFrame, IImage } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
-import dropdownUtils from '@/utils/dropdownUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -229,12 +228,44 @@ export default Vue.extend({
         })
       }
     },
-    closeDropdown() {
-      dropdownUtils.closeDropdown('page')
+    closePopup() {
+      popupUtils.closePopup()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.popup-page {
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.375rem 0.625rem;
+  z-index: setZindex("dropdowns");
+  border: 1px solid setColor(gray-4);
+  box-shadow: 0px 0px 7px setColor(gray-1, 0.25);
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__hr {
+    margin: 0.375rem 0;
+    border: none;
+    border-bottom: 1px solid setColor(gray-4);
+  }
+}
 </style>

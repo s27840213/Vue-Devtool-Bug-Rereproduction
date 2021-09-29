@@ -152,3 +152,11 @@ $spacer: 5;
 .overflow-hidden {
     overflow: hidden;
 }
+
+.cover {
+    background-size: cover;
+}
+
+.contain {
+    background-size: contain;
+}

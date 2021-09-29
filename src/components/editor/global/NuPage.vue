@@ -133,7 +133,7 @@ import ControlUtils from '@/utils/controlUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
-import dropdownUtils from '@/utils/dropdownUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -217,7 +217,7 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setDropdown: 'dropdown/SET_STATE',
+      setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page'
     }),
@@ -289,7 +289,7 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     onRightClick(event: MouseEvent) {
-      dropdownUtils.openPageDropdown(event)
+      popupUtils.openPopup('page', { event })
     },
     addPage() {
       this._addPage({

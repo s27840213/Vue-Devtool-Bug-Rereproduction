@@ -3,9 +3,7 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
-import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
-import uploadUtils from '@/utils/uploadUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -17,7 +15,7 @@ import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
-import dropdown from '@/store/module/dropdown'
+import popup from '@/store/module/popup'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
@@ -593,6 +591,6 @@ export default new Vuex.Store({
     textStock,
     background,
     modal,
-    dropdown
+    popup
   }
 })

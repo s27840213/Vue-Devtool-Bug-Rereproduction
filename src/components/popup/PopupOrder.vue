@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="dropdown dropdown__order bg-white")
-    div(v-for="(data,index) in dropdownDatas('order')"
-        :key="`dropdown-${index}`"
-        class="dropdown__item"
+  div(class="popup-order")
+    div(v-for="(data,index) in popupDatas('order')"
+        :key="`popup-order-${index}`"
+        class="popup-order__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -60,7 +60,7 @@ export default Vue.extend({
         }
       }
     },
-    dropdownDatas(type: string) {
+    popupDatas(type: string) {
       const icons = this.mappingIcons(type)
       const texts = this.mappingText(type)
       return icons.map((icon: string, index: number) => {
@@ -76,10 +76,27 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.dropdown__order {
+.popup-order {
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: auto auto;
   column-gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
+    }
+  }
 }
 </style>

@@ -5,20 +5,15 @@
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'消取群組':'群組'}}
-      div(class="border-gray-4 p-10")
+      div(class="border-gray-4 p-10  btn-opacity")
         svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'")
-    //- div(class="action-bar flex-between")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('align')"
-    //-     :key="`align-icon-${index}`"
-    //-     :class="{'pointer': !isLocked}"
-    //-     :iconName="icon" :iconWidth="'24px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-    //-     @click.native="iconAction(icon)")
+          :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'"
+          @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
       svg-icon(class="layers-alt"
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="openOrderDropdown()")
+        @click.native="openOrderPopup()")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')")
@@ -34,9 +29,9 @@
     div(class="panel-group__adjust")
       btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
-        @click.native="openAlignDropdown") 位置對齊
+        @click.native="openAlignPopup") 位置對齊
       btn(class="btn-flip full-width" :type="'gray-mid'"
-        @click.native="openFlipDropdown") 翻轉
+        @click.native="openFlipPopup") 翻轉
 </template>
 
 <script lang="ts">
@@ -46,7 +41,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
-import dropdownUtils from '@/utils/dropdownUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -79,14 +74,20 @@ export default Vue.extend({
     iconAction(icon: string) {
       MappingUtils.mappingIconAction(icon)
     },
-    openOrderDropdown() {
-      dropdownUtils.openOrderDropdown()
+    openOrderPopup() {
+      popupUtils.openPopup('order')
     },
-    openAlignDropdown() {
-      dropdownUtils.openAlignDropdown()
+    openAlignPopup() {
+      popupUtils.openPopup('align')
     },
-    openFlipDropdown() {
-      dropdownUtils.openFlipDropdown()
+    openFlipPopup() {
+      popupUtils.openPopup('flip')
+    },
+    openSliderPopup() {
+      popupUtils.openPopup('slider', {
+        posX: 'right',
+        target: '.btn-opacity'
+      })
     }
   }
 })

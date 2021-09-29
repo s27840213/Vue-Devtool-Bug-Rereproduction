@@ -2,10 +2,8 @@ import store from '@/store'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import AlignUtils from '@/utils/alignUtils'
 import OrderUtils from './orderUtils'
-import Vue from 'vue'
-import groupUtils from './groupUtils'
 import layerUtils from './layerUtils'
-import dropdownUtils from './dropdownUtils'
+import popupUtils from './popupUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-vertically', 'distribute-horizontally']
@@ -79,7 +77,7 @@ class MappingUtils {
         return AlignUtils.distribueHr
       }
       case 'layers-alt': {
-        dropdownUtils.openOrderDropdown()
+        popupUtils.openPopup('order')
         break
       }
       case 'copy': {

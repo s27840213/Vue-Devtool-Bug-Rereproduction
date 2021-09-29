@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="dropdown dropdown__layer bg-gray-6"
-      @click.stop="closeDropdown")
+  div(class=" popup-layer bg-gray-6"
+      @click.stop="closePopup")
     template(v-if="getToekn!==''")
-      div(class="dropdown__item"
+      div(class="popup-layer__item"
           @click="pageUploadMenu.action")
         svg-icon(
           class="pointer"
@@ -12,7 +12,7 @@
         span(class="ml-10 body-2") {{pageUploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUploadMenu.shortcutText}}
     template(v-if="hasDesignId && getToekn!==''")
-      div(class="dropdown__item"
+      div(class="popup-layer__item"
           @click="pageUpdateMenu.action")
         svg-icon(
           class="pointer"
@@ -22,7 +22,7 @@
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
     template(v-if="getToekn!=='' && isText")
-      div(class="dropdown__item"
+      div(class="popup-layer__item"
           @click="uploadMenu.action")
         svg-icon(
           class="pointer"
@@ -32,7 +32,7 @@
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && isText")
-      div(class="dropdown__item"
+      div(class="popup-layer__item"
           @click="updateMenu.action")
         svg-icon(
           class="pointer"
@@ -42,7 +42,7 @@
         span(class="ml-10 body-2") {{updateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     template(v-if="isImage")
-      div(class="dropdown__item"
+      div(class="popup-layer__item"
           @click="updateImageAsClipper.action")
         svg-icon(
           class="pointer"
@@ -51,10 +51,10 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateImageAsClipper.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    hr(class="dropdown__hr")
+    hr(class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
-        :key="`dropdown__shortcut-${index}`"
-        class="dropdown__item"
+        :key="`popup-layer__shortcut-${index}`"
+        class="popup-layer__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -64,7 +64,7 @@
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
     div(v-if="(isGroup && currSelectedInfo.layers.length === 1) || (!isGroup && currSelectedInfo.layers.length > 1)"
-        class="dropdown__item"
+        class="popup-layer__item"
         @click="groupOption.action")
       svg-icon(
         class="pointer"
@@ -73,11 +73,11 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{groupOption.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{groupOption.shortcutText}}
-    hr(class="dropdown__hr")
+    hr(v-if="layerNum > 1" class="popup-layer__hr")
     div(v-if="layerNum > 1")
       div(v-for="(data,index) in orderMenu()"
-          :key="`dropdown__order-${index}`"
-          class="dropdown__item"
+          :key="`popup-layer__order-${index}`"
+          class="popup-layer__item"
           @click="data.action")
         svg-icon(
           class="pointer"
@@ -87,9 +87,9 @@
         span(class="ml-10 body-2") {{data.text}}
         div(class="shortcut")
           span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="dropdown__hr")
+    hr(class="popup-layer__hr")
     div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
-        class="dropdown__item"
+        class="popup-layer__item"
         @click="setBackgroundImage")
       svg-icon(
         class="pointer"
@@ -110,7 +110,7 @@ import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
-import dropdownUtils from '@/utils/dropdownUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -125,7 +125,7 @@ export default Vue.extend({
       },
       pageUpdateMenu: {
         icon: 'copy',
-        text: 'Update single-page template',
+        text: 'Modify single-page template',
         shortcutText: '',
         action: () => {
           uploadUtils.updateTemplate()
@@ -175,7 +175,7 @@ export default Vue.extend({
     updateMenu(): any {
       return {
         icon: 'copy',
-        text: `Update ${this.getType[0]}`,
+        text: `Modify ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
           uploadUtils.updateText()
@@ -289,12 +289,44 @@ export default Vue.extend({
       })
       ShortcutUtils.del()
     },
-    closeDropdown() {
-      dropdownUtils.closeDropdown('layer')
+    closePopup() {
+      popupUtils.closePopup()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.popup-layer {
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.375rem 0.625rem;
+  z-index: setZindex("dropdowns");
+  border: 1px solid setColor(gray-4);
+  box-shadow: 0px 0px 7px setColor(gray-1, 0.25);
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__hr {
+    margin: 0.375rem 0;
+    border: none;
+    border-bottom: 1px solid setColor(gray-4);
+  }
+}
 </style>

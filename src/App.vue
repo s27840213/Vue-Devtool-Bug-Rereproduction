@@ -7,16 +7,17 @@
     //-     span {{coordinateHeight}}px
     router-view
     div(class="popup-area")
-      dropdown-order(v-if="isOrderDropdownOpened"
-        v-click-outside="vcoConfig('order')")
-      dropdown-align(v-if="isAlignDropdownOpened"
-        v-click-outside="vcoConfig('align')")
-      dropdown-flip(v-if="isFlipDropdownOpened"
-        v-click-outside="vcoConfig('flip')")
-      dropdown-layer(v-if="isLayerDropdownOpened"
-        v-click-outside="vcoConfig('layer')")
-      dropdown-page(v-if="isPageDropdownOpened"
-        v-click-outside="vcoConfig('page')")
+      popup
+      //- dropdown-order(v-if="isOrderDropdownOpened"
+      //-   v-click-outside="vcoConfig('order')")
+      //- dropdown-align(v-if="isAlignDropdownOpened"
+      //-   v-click-outside="vcoConfig('align')")
+      //- dropdown-flip(v-if="isFlipDropdownOpened"
+      //-   v-click-outside="vcoConfig('flip')")
+      //- dropdown-layer(v-if="isLayerDropdownOpened"
+      //-   v-click-outside="vcoConfig('layer')")
+      //- dropdown-page(v-if="isPageDropdownOpened"
+      //-   v-click-outside="vcoConfig('page')")
       photo-info(v-show="currSelectedPhotoInfo.userName"
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
@@ -38,23 +39,15 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import DropdownOrder from '@/components/dropdowns/DropdownOrder.vue'
-import DropdownAlign from '@/components/dropdowns/DropdownAlign.vue'
-import DropdownLayer from '@/components/dropdowns/DropdownLayer.vue'
-import DropdownPage from '@/components/dropdowns/DropdownPage.vue'
-import DropdownFlip from '@/components/dropdowns/DropdownFlip.vue'
+import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import dropdownUtils from './utils/dropdownUtils'
+import popupUtils from './utils/popupUtils'
 
 export default Vue.extend({
   components: {
-    DropdownOrder,
-    DropdownAlign,
-    DropdownLayer,
-    DropdownPage,
-    DropdownFlip,
+    Popup,
     'chrome-picker': Chrome,
     PhotoInfo,
     ModalCard
@@ -75,18 +68,13 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isLayerDropdownOpened: 'dropdown/getIsLayerDropdownOpened',
-      isPageDropdownOpened: 'dropdown/getIsPageDropdownOpened',
-      isOrderDropdownOpened: 'dropdown/getIsOrderDropdownOpened',
-      isAlignDropdownOpened: 'dropdown/getIsAlignDropdownOpened',
-      isFlipDropdownOpened: 'dropdown/getIsFlipDropdownOpened',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
       isModalOpen: 'modal/getModalOpen'
     })
   },
   methods: {
     ...mapMutations({
-      setDropdown: 'dropdown/SET_STATE',
+      setDropdown: 'popup/SET_STATE',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
     }),
     coordinateHandler(e: MouseEvent) {
@@ -96,7 +84,7 @@ export default Vue.extend({
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
     closeDropdown(type: string) {
-      dropdownUtils.closeDropdown(type)
+      popupUtils.closePopup()
     },
     setCurrSelectedPhotoInfo() {
       this.$nextTick(() => {
@@ -161,7 +149,7 @@ export default Vue.extend({
   left: 0;
   top: 0;
   overflow: hidden;
-  z-index: setZindex(dropdowns);
+  z-index: setZindex(popup);
   pointer-events: none;
   > div {
     pointer-events: initial;

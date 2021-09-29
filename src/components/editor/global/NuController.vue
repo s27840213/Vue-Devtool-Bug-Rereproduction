@@ -121,7 +121,7 @@ import TemplateUtils from '@/utils/templateUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { Layer } from 'konva/types/Layer'
-import dropdownUtils from '@/utils/dropdownUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   props: {
@@ -1254,7 +1254,7 @@ export default Vue.extend({
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
-      dropdownUtils.openLayerDropdown(event)
+      popupUtils.openPopup('layer', { event })
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any

@@ -1,14 +1,14 @@
 <template lang="pug">
   div(class="text-setting" @mousedown.capture="textRangeRecorder($event)" ref='body')
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
-    property-bar(class="pointer record-selection" @click.native="openFontsPanel")
-      //- span(class="body-2 text-gray-2") {{ props.font }}
-      img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")
-      span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
-      svg-icon(class="pointer"
-        :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-    div(class="text-setting__row2")
-      property-bar(class="relative")
+    div(class="text-setting__row1")
+      div(class="property-bar pointer record-selection" @click="openFontsPanel")
+        //- span(class="body-2 text-gray-2") {{ props.font }}
+        img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")
+        span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
+        svg-icon(class="pointer"
+          :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+      div(class="property-bar relative")
         svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-1)"
           :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
         button(class="text-setting__range-input-button" @click="handleValueModal")
@@ -21,20 +21,23 @@
                     class="text-setting__value-selector"
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
-        //- div(class="text-setting__font-stepper")
-        //- svg-icon(class="pointer"
-        //-   :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+    div(class="text-setting__row2")
       div(class="text-setting__color")
         div(class="color-slip record-selection"
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
-        div(class="full-width text-left ml-10 overflow-hidden ")
+        div(class="full-width text-left ml-10 overflow-hidden")
           input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @click="handleColorModal")
       color-picker(v-if="openColorPicker"
         class="text-setting__color-picker"
         v-click-outside="handleColorModal"
         :currentColor="props.color"
         @update="handleColorUpdate")
+      div(class="action-bar action-bar--small flex-evenly")
+        svg-icon(class="pointer record-selection"
+          :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
+        svg-icon(class="pointer record-selection"
+          :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="pointer record-selection"
@@ -50,7 +53,7 @@
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
     div(class="text-setting__row5")
       div(class="relative")
-        property-bar
+        div(class="property-bar")
           button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
             input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
                   :value="props.lineHeight" @change="setHeight($event, true)")
@@ -67,7 +70,7 @@
             type="range"
             @input="setHeight")
       div(class="relative")
-        property-bar
+        div(class="property-bar")
           button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
             input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
                   :value="props.fontSpacing" @change="setSpacing")
@@ -84,7 +87,7 @@
             type="range"
             @input="setSpacing")
       div(class="relative")
-        property-bar
+        div(class="property-bar")
           button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
             input(class="body-2 text-gray-2 record-selection" type="text" ref="input-opacity"
                   :value="props.opacity" @change="setOpacity")
@@ -501,7 +504,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-setting {
-  text-align: left;
   &__title {
     margin-bottom: 30px;
   }
@@ -511,11 +513,23 @@ export default Vue.extend({
       margin-top: 0px;
     }
   }
-
+  &__row1 {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 3fr 1fr;
+    column-gap: 20px;
+    box-sizing: border-box;
+    position: relative;
+    > div:nth-child(1) {
+      > img {
+        width: 100px;
+      }
+    }
+  }
   &__row2 {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 2fr 3fr;
+    grid-template-columns: 3fr 2fr;
     column-gap: 20px;
     position: relative;
   }
@@ -591,11 +605,6 @@ export default Vue.extend({
   &__font-stepper {
     display: flex;
     flex-direction: column;
-  }
-  &__text-preview {
-    height: 25px;
-    display: inline-flex;
-    align-items: center;
   }
 }
 .color-slip {

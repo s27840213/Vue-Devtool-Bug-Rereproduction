@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="dropdown dropdown__flip bg-white")
-    div(v-for="(data,index) in dropdownDatas()"
-        :key="`dropdown-${index}`"
-        class="dropdown__item"
+  div(class="popup-flip")
+    div(v-for="(data,index) in popupDatas()"
+        :key="`popup-${index}`"
+        class="popup-flip__item"
         @click="data.action")
       svg-icon(
         class="pointer"
@@ -14,35 +14,23 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
 
 export default Vue.extend({
-  props: {
-    hasImage: {
-      type: Boolean,
-      default: true
-    },
-    type: String,
-    datas: Array
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
-  },
   data() {
     return {
     }
   },
   methods: {
-    dropdownDatas() {
+    popupDatas() {
       const icons = ['flip-h', 'flip-v']
       const texts = ['水平翻轉', '垂直翻轉']
       return icons.map((icon: string, index: number) => {
         return {
           icon: icons[index],
           text: texts[index],
-          action: MappingUtils.mappingIconAction(icon)
+          action: () => {
+            return false
+          }
         }
       })
     }
@@ -51,4 +39,22 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.popup-flip {
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
+    }
+  }
+}
 </style>
