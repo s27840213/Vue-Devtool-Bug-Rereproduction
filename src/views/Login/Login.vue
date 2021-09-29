@@ -124,6 +124,7 @@ export default Vue.extend({
   name: 'Login',
   data() {
     return {
+      token: '',
       email: '' as string,
       password: '' as string,
       vcode: '' as string,
@@ -314,7 +315,6 @@ export default Vue.extend({
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
-      console.log(data)
       if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
@@ -370,8 +370,7 @@ export default Vue.extend({
       if (data.flag === 0) {
         this.currentPageIndex = 3
         this.isResetClicked = false
-        const token = data.token
-        store.dispatch('user/setToken', { token })
+        this.token = data.token
       } else {
         this.vcodeErrorMessage = data.msg
         console.log(data.msg)
@@ -396,7 +395,7 @@ export default Vue.extend({
         return
       }
 
-      const { data } = await userApis.resetPassword(store.getters['user/getToken'], this.email, this.password) // token, account, upass
+      const { data } = await userApis.resetPassword(this.token, this.email, this.password) // token, account, upass
       if (data.flag === 0) {
         this.email = ''
         this.currentPageIndex = 0
