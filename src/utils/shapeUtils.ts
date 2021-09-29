@@ -208,16 +208,18 @@ class ShapeUtils {
   pointPreprocess(point: number[], markerWidth: number[], trimWidth: boolean[], scale: number, linecap: string, trimOffset: number[]): number[] {
     const { width, height, baseDegree } = this.lineDimension(point)
     const [startTrimOffset, endTrimOffset] = trimOffset
-    const trimxs = scale * markerWidth[0] * Math.cos(baseDegree)
-    const trimys = scale * markerWidth[0] * Math.sin(baseDegree)
-    const trimxe = scale * markerWidth[1] * Math.cos(baseDegree)
-    const trimye = scale * markerWidth[1] * Math.sin(baseDegree)
-    const trimxoffsets = scale * startTrimOffset * Math.cos(baseDegree)
-    const trimyoffsets = scale * startTrimOffset * Math.sin(baseDegree)
-    const trimxoffsete = scale * endTrimOffset * Math.cos(baseDegree)
-    const trimyoffsete = scale * endTrimOffset * Math.sin(baseDegree)
-    const trimedgex = (scale / 2) * Math.cos(baseDegree)
-    const trimedgey = (scale / 2) * Math.sin(baseDegree)
+    const cosine = Math.cos(baseDegree)
+    const sine = Math.sin(baseDegree)
+    const trimxs = scale * markerWidth[0] * cosine
+    const trimys = scale * markerWidth[0] * sine
+    const trimxe = scale * markerWidth[1] * cosine
+    const trimye = scale * markerWidth[1] * sine
+    const trimxoffsets = scale * startTrimOffset * cosine
+    const trimyoffsets = scale * startTrimOffset * sine
+    const trimxoffsete = scale * endTrimOffset * cosine
+    const trimyoffsete = scale * endTrimOffset * sine
+    const trimedgex = (scale / 2) * cosine
+    const trimedgey = (scale / 2) * sine
     const quadrant = this.getLineQuadrant(point)
     let startPoint: number[]
     let endPoint: number[]

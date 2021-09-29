@@ -41,15 +41,15 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper-marker")
-        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+      div(class="shape-setting__line-action-wrapper-marker pointer"
+          @click="handleValueModal('start-marker')")
+        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[startMarker].styleArray[0]"
           :svg="markerContentMap[startMarker].svg"
           :trimWidth="markerContentMap[startMarker].trimWidth"
           :markerWidth="markerContentMap[startMarker].vSize[0]"
-          :trimOffset="markerContentMap[startMarker].trimOffset"
-          @click.native="handleValueModal('start-marker')")
-        general-value-selector(v-if="openValueSelector === 'start-marker'"
+          :trimOffset="markerContentMap[startMarker].trimOffset")
+        general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
@@ -64,16 +64,25 @@
               :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset")
-      div(class="shape-setting__line-action-wrapper-marker")
-        marker-icon(class="pointer" iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+        general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
+                      :valueArray="[['pending']]"
+                      class="shape-setting__value-selector-marker"
+                      v-click-outside="handleValueModal"
+                      :values="['pending']"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+            template(v-slot:g0i0)
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+      div(class="shape-setting__line-action-wrapper-marker pointer"
+          @click="handleValueModal('end-marker')")
+        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
           :svg="markerContentMap[endMarker].svg"
           :trimWidth="markerContentMap[endMarker].trimWidth"
           :markerWidth="markerContentMap[endMarker].vSize[0]"
           :trimOffset="markerContentMap[endMarker].trimOffset"
-          style="transform: rotate(180deg)"
-          @click.native="handleValueModal('end-marker')")
-        general-value-selector(v-if="openValueSelector === 'end-marker'"
+          style="transform: rotate(180deg)")
+        general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
@@ -89,6 +98,15 @@
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset"
               style="transform: rotate(180deg)")
+        general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
+                      :valueArray="[['pending']]"
+                      class="shape-setting__value-selector-marker"
+                      v-click-outside="handleValueModal"
+                      :values="['pending']"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+            template(v-slot:g0i0)
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -174,8 +192,6 @@ export default Vue.extend({
       paletteRecord: [{ key: 0, value: -1 }],
       markerIds: ['none'],
       dashAndEdge: [1, 3],
-      startMarker: 'none',
-      endMarker: 'none',
       markerContentMap: ({
         none: {
           styleArray: [''],
@@ -184,7 +200,8 @@ export default Vue.extend({
           vSize: [0, 4],
           trimOffset: -1
         }
-      } as {[key: string]: IMarker})
+      } as {[key: string]: IMarker}),
+      markerListReady: false
     }
   },
   mounted() {
@@ -203,8 +220,7 @@ export default Vue.extend({
           trimOffset: markerContent.trimOffset ?? -1
         }
       }
-      this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
-      this.endMarker = (currLayer.markerId ?? ['none', 'none'])[1]
+      this.markerListReady = true
     })
     this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
     this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
@@ -237,14 +253,6 @@ export default Vue.extend({
      */
     lineWidth(): string | number {
       const { currLayer } = this
-      // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-      //   const layers = [...(currLayer as IGroup).layers]
-      //   return new Set(layers.map((l: ILayer) => {
-      //     return (l.type === 'shape' && l.category === 'D') ? ((l as IShape).size?.[0] ?? '--') : '--'
-      //   })).size === 1 ? ((layers[0] as IShape).size?.[0] ?? '--') : '--'
-      // } else {
-      //   return (currLayer as IShape).size?.[0] ?? '--'
-      // }
       return (currLayer as IShape).size?.[0] ?? '--'
     },
     currLayer(): ILayer {
@@ -274,6 +282,12 @@ export default Vue.extend({
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+    },
+    startMarker(): string {
+      return this.markerListReady ? (this.currLayer as IShape).markerId?.[0] ?? 'none' : 'none'
+    },
+    endMarker(): string {
+      return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
     }
   },
   watch: {
@@ -373,7 +387,6 @@ export default Vue.extend({
     },
     handleValueModal(modalName = '') {
       this.openValueSelector = modalName
-      console.log(this.openValueSelector)
     },
     setColor(newColor: string, index: number) {
       const { currLayer } = this
@@ -415,15 +428,6 @@ export default Vue.extend({
       if (GeneralUtils.isValidInt(value)) {
         const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
         const { currLayer } = this
-        // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        //   LayerUtils.updateAllGroupProps({ size: [lineWidth] })
-        // } else {
-        //   LayerUtils.updateLayerProps(
-        //     this.lastSelectedPageIndex,
-        //     this.currSelectedIndex,
-        //     { size: [lineWidth] }
-        //   )
-        // }
         const { point, styles, size } = (currLayer as IShape)
         LayerUtils.updateLayerProps(
           this.lastSelectedPageIndex,
@@ -484,7 +488,6 @@ export default Vue.extend({
           markerId: [value, (currLayer.markerId ?? ['none', 'none'])[1]]
         }
       )
-      this.startMarker = value
     },
     handleEndMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
@@ -507,10 +510,12 @@ export default Vue.extend({
           markerId: [(currLayer.markerId ?? ['none', 'none'])[0], value]
         }
       )
-      this.endMarker = value
     },
     makeSlots(markerIds: string[]): {marker: string, name: string}[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
+    },
+    getMarkerContent(markerId: string) {
+      return this.markerContentMap[markerId] ?? this.markerContentMap.none
     },
     initilizeRecord() {
       this.paletteRecord = []
