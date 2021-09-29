@@ -49,7 +49,7 @@
           :trimWidth="markerContentMap[startMarker].trimWidth"
           :markerWidth="markerContentMap[startMarker].vSize[0]"
           :trimOffset="markerContentMap[startMarker].trimOffset")
-        general-value-selector(v-if="openValueSelector === 'start-marker'"
+        general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
@@ -64,6 +64,15 @@
               :trimWidth="markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset")
+        general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
+                      :valueArray="[['pending']]"
+                      class="shape-setting__value-selector-marker"
+                      v-click-outside="handleValueModal"
+                      :values="['pending']"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+            template(v-slot:g0i0)
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
       div(class="shape-setting__line-action-wrapper-marker pointer"
           @click="handleValueModal('end-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
@@ -73,7 +82,7 @@
           :markerWidth="markerContentMap[endMarker].vSize[0]"
           :trimOffset="markerContentMap[endMarker].trimOffset"
           style="transform: rotate(180deg)")
-        general-value-selector(v-if="openValueSelector === 'end-marker'"
+        general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
                       :valueArray="[markerIds]"
                       class="shape-setting__value-selector-marker"
                       v-click-outside="handleValueModal"
@@ -89,6 +98,15 @@
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset"
               style="transform: rotate(180deg)")
+        general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
+                      :valueArray="[['pending']]"
+                      class="shape-setting__value-selector-marker"
+                      v-click-outside="handleValueModal"
+                      :values="['pending']"
+                      itemMinWidth="76",
+                      buttonHeight="37")
+            template(v-slot:g0i0)
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
