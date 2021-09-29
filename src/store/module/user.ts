@@ -18,6 +18,7 @@ const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
 export interface IUserModule {
   token: string,
   userId: string,
+  role: string,
   isAuthenticated: boolean,
   userAssets: IUserAssetsData,
   downloadUrl: string
@@ -29,6 +30,7 @@ export interface IUserModule {
 const getDefaultState = (): IUserModule => ({
   token: '',
   userId: '',
+  role: '',
   isAuthenticated: false,
   userAssets: {
     design: {
@@ -203,17 +205,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
-  async login({ commit }, { token, account, password }) {
+  async login({ commit, dispatch }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      if (data.flag === 0) {
-        console.log(data)
-        commit('SET_STATE', {
-          downloadUrl: data.data.download_url,
-          userId: data.data.user_id
-        })
-        uploadUtils.setLoginOutput(data.data)
-      }
+      await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)
@@ -230,11 +225,16 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async initializeToken({ commit, dispatch }, { token }) {
-    state.isAuthenticated = token.length > 0
-    const loginResponse = await dispatch('login', { token })
-    if (loginResponse.flag === 0) {
-      const newToken = loginResponse.data.token as string // token may be refreshed
+  async loginSetup({ commit, dispatch }, { data }) {
+    if (data.flag === 0) {
+      const newToken = data.data.token as string // token may be refreshed
+      commit('SET_STATE', {
+        isAuthenticated: newToken.length > 0,
+        downloadUrl: data.data.download_url,
+        userId: data.data.user_id,
+        role: data.data.role
+      })
+      uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('getAssets', { token: newToken })
       uploadUtils.uploadTmpJSON()

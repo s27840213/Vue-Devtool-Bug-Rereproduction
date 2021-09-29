@@ -104,7 +104,6 @@ import Vue from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
-import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -224,18 +223,13 @@ export default Vue.extend({
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },
@@ -243,18 +237,13 @@ export default Vue.extend({
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },

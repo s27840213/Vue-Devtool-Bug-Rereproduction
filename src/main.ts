@@ -45,7 +45,7 @@ if (urlParams.has('token')) {
 }
 
 if (token.length > 0) {
-  store.dispatch('user/initializeToken', { token })
+  store.dispatch('user/login', { token: token })
 }
 
 if (['production'].includes(process.env.NODE_ENV)) {
