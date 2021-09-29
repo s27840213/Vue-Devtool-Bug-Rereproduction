@@ -44,9 +44,9 @@ div(style="position:relative;")
       div
         span(class="body-2") Don't worry, please enter your email.<br> We will send an email to help you reset the password.
       div
-        property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+        property-bar(class="mt-5" :class="{'input-invalid': !mailValid || emailResponseError}")
           input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
-        div(v-if="!mailValid" class="invalid-message")
+        div(v-if="!mailValid || emailResponseError" class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="disp-flex" style="justify-content: center;")
         btn(:type="'primary-mid'" class="btn-shadow w-50 body-1"
@@ -131,6 +131,8 @@ export default Vue.extend({
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
       passwordErrorMessage: 'Please enter your password.' as string,
+      emailResponseError: false as boolean,
+      mailErrorMessage: 'Invalid email address format.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
@@ -168,13 +170,6 @@ export default Vue.extend({
         return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.email)
       } else {
         return false
-      }
-    },
-    mailErrorMessage(): string {
-      if (this.email.length === 0) {
-        return 'Please enter your email.'
-      } else {
-        return 'Invalid email address format.'
       }
     },
     passwordValid(): boolean {
@@ -327,27 +322,40 @@ export default Vue.extend({
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
+      this.emailResponseError = false
       this.isLoading = true
+      if (this.email.length === 0) {
+        this.isLoading = false
+        this.mailErrorMessage = 'Please enter your email.'
+        return
+      }
       if (!this.mailValid) {
         this.isLoading = false
+        this.mailErrorMessage = 'Invalid email address format.'
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
+      } else {
+        this.emailResponseError = true
+        this.mailErrorMessage = data.msg
       }
       this.isLoading = false
     },
     async onResendClicked() {
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
+        this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -361,6 +369,7 @@ export default Vue.extend({
       } else {
         // error
         this.currentPageIndex = 0
+        this.isLoading = false
       }
     },
     async onEnterCodeDoneClicked() {

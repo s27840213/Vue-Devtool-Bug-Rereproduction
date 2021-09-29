@@ -49,7 +49,7 @@ div(style="position:relative;")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(v-if="emptyPassword" class="password-hint" :style="`${passwordValid ? '' : 'color: #EB5757;'}`")
+          div(v-if="emptyPassword || emailResponseError" class="password-hint" :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
             span {{ passwordHint }}
           div(v-else class="invalid-message")
             div(class="disp-flex align-center")
@@ -119,6 +119,7 @@ export default Vue.extend({
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
+      emailResponseError: false as boolean,
       passwordHint: 'a mix of letters, numbers and symbols with at least 8 characters.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
@@ -271,6 +272,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     async onSignUpClicked() {
+      this.emailResponseError = false
       this.isSignUpClicked = true
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
@@ -283,20 +285,23 @@ export default Vue.extend({
         this.currentPageIndex = 2
         this.isVcodeClicked = false
       } else {
-        this.password = ''
+        this.emailResponseError = true
         this.passwordHint = response.msg
       }
       this.isLoading = false
     },
     async onResendClicked() {
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
-      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      const { data } = await userApis.sendVcode('', this.email, '', '1', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
+        this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -307,6 +312,10 @@ export default Vue.extend({
             this.leftTime = 60
           }
         }, 1000)
+      } else {
+        // error
+        this.currentPageIndex = 0
+        this.isLoading = false
       }
     },
     async onEnterCodeDoneClicked() {
