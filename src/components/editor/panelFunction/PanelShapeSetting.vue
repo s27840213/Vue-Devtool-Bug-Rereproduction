@@ -174,8 +174,6 @@ export default Vue.extend({
       paletteRecord: [{ key: 0, value: -1 }],
       markerIds: ['none'],
       dashAndEdge: [1, 3],
-      startMarker: 'none',
-      endMarker: 'none',
       markerContentMap: ({
         none: {
           styleArray: [''],
@@ -184,7 +182,8 @@ export default Vue.extend({
           vSize: [0, 4],
           trimOffset: -1
         }
-      } as {[key: string]: IMarker})
+      } as {[key: string]: IMarker}),
+      markerListReady: false
     }
   },
   mounted() {
@@ -203,8 +202,7 @@ export default Vue.extend({
           trimOffset: markerContent.trimOffset ?? -1
         }
       }
-      this.startMarker = (currLayer.markerId ?? ['none', 'none'])[0]
-      this.endMarker = (currLayer.markerId ?? ['none', 'none'])[1]
+      this.markerListReady = true
     })
     this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
     this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
@@ -237,14 +235,6 @@ export default Vue.extend({
      */
     lineWidth(): string | number {
       const { currLayer } = this
-      // if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-      //   const layers = [...(currLayer as IGroup).layers]
-      //   return new Set(layers.map((l: ILayer) => {
-      //     return (l.type === 'shape' && l.category === 'D') ? ((l as IShape).size?.[0] ?? '--') : '--'
-      //   })).size === 1 ? ((layers[0] as IShape).size?.[0] ?? '--') : '--'
-      // } else {
-      //   return (currLayer as IShape).size?.[0] ?? '--'
-      // }
       return (currLayer as IShape).size?.[0] ?? '--'
     },
     currLayer(): ILayer {
@@ -274,6 +264,12 @@ export default Vue.extend({
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+    },
+    startMarker(): string {
+      return this.markerListReady ? (this.currLayer as IShape).markerId?.[0] ?? 'none' : 'none'
+    },
+    endMarker(): string {
+      return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
     }
   },
   watch: {
@@ -373,7 +369,6 @@ export default Vue.extend({
     },
     handleValueModal(modalName = '') {
       this.openValueSelector = modalName
-      console.log(this.openValueSelector)
     },
     setColor(newColor: string, index: number) {
       const { currLayer } = this
@@ -475,7 +470,6 @@ export default Vue.extend({
           markerId: [value, (currLayer.markerId ?? ['none', 'none'])[1]]
         }
       )
-      this.startMarker = value
     },
     handleEndMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
@@ -498,10 +492,12 @@ export default Vue.extend({
           markerId: [(currLayer.markerId ?? ['none', 'none'])[0], value]
         }
       )
-      this.endMarker = value
     },
     makeSlots(markerIds: string[]): {marker: string, name: string}[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
+    },
+    getMarkerContent(markerId: string) {
+      return this.markerContentMap[markerId] ?? this.markerContentMap.none
     },
     initilizeRecord() {
       this.paletteRecord = []
