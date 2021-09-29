@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    action-bar(class="flex-around" style="padding: 8px 0"
+    div(class="action-bar flex-around" style="padding: 8px 0"
               v-if="isLine")
       div(class="shape-setting__line-action-wrapper-dashAndEdge")
         svg-icon(class="pointer"
@@ -608,14 +608,9 @@ export default Vue.extend({
     &-line-width {
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
-      left: -18px;
+      left: -15px;
       right: unset;
       top: 35px;
-    }
-
-    &-opacity {
-      @extend .shape-setting__range-input-wrapper;
-      margin-top: -12px;
     }
   }
   &__range-input {
