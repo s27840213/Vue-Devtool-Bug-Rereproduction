@@ -25,7 +25,7 @@ div(style="position:relative;")
         button(@click="onBackClicked")
               svg-icon(class="pointer"
               iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-2'")
-        span(class="text-blue-1 h-5") Create your account
+        span(class="text-blue-1") Create your account
         button
               svg-icon(class="pointer"
               iconName="page-close" :iconWidth="'0px'" :iconColor="'gray-2'")
@@ -467,6 +467,11 @@ export default Vue.extend({
       margin-bottom: 5vh;
       > button {
         padding-top: 7px;
+      }
+      > span {
+        font-size: 24px;
+        line-height: 32px;
+        font-weight: 600;
       }
     }
     &:nth-child(2) { // input fields
