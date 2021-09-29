@@ -124,13 +124,14 @@ export default Vue.extend({
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      isRollbackByFacebookSignIn: window.location.href.indexOf('facebook') > -1 as boolean,
       isLoading: false
     }
   },
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters['user/isLogin']) {
+    if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
       this.isLoading = true
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
@@ -227,7 +228,7 @@ export default Vue.extend({
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
         } else {
-          console.log('login failed')
+          console.log('fb login failed')
         }
         this.isLoading = false
       } catch (error) {
@@ -241,7 +242,7 @@ export default Vue.extend({
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
         } else {
-          console.log('login failed')
+          console.log('google login failed')
         }
         this.isLoading = false
       } catch (error) {
@@ -336,12 +337,12 @@ export default Vue.extend({
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
-          hostId: '1234abcd'
+          hostId: 'facebook_parameter_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
-        hostId: '1234abcd'
+        hostId: 'facebook_parameter_vivipic'
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
