@@ -18,6 +18,8 @@ export interface ISvg {
     markerWidth?: number[];
     trimWidth?: boolean[];
     trimOffset?: number[];
+    filled?: boolean;
+    shapeType?: string;
 }
 
 export interface IMarker {

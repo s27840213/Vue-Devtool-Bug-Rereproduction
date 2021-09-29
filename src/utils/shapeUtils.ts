@@ -20,7 +20,7 @@ class ShapeUtils {
     return className
   }
 
-  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray: number[], dashArray?: number[], linecap?: string): string {
+  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray: number[], dashArray?: number[], linecap?: string, filled?: boolean): string {
     let style = ''
     for (let i = 0; i < styleArray.length; i++) {
       const tmpStyle = `.${className}S${i}{${styleArray[i]}}`
@@ -41,6 +41,11 @@ class ShapeUtils {
     if (linecap) {
       const reg = new RegExp('\\$cap', 'g')
       style = style.replace(reg, linecap)
+    }
+    if (filled !== undefined) {
+      const fillcolor = filled ? colorArray[0] : 'none'
+      const reg = new RegExp('\\$fillcolor', 'g')
+      style = style.replace(reg, fillcolor)
     }
     return style
   }
@@ -78,7 +83,7 @@ class ShapeUtils {
     return style
   }
 
-  svgFormatter(svgIn: string, className: string, styleNum: number, transNum: number, mTransNum: number, point?: number[]): string {
+  svgFormatter(svgIn: string, className: string, styleNum: number, transNum: number, mTransNum: number, point?: number[], svgParameters?: number[]): string {
     let svgOut = svgIn
     for (let i = 0; i < styleNum; i++) {
       const reg = new RegExp('\\$style\\[' + i + '\\]', 'g')
@@ -98,7 +103,12 @@ class ShapeUtils {
         svgOut = svgOut.replace(reg, point[i].toString())
       }
     }
-    // console.log(svgOut)
+    if (svgParameters?.length !== undefined) {
+      for (let i = 0; i < svgParameters.length; i++) {
+        const reg = new RegExp('\\$svgParam\\[' + i + '\\]', 'g')
+        svgOut = svgOut.replace(reg, svgParameters[i].toString())
+      }
+    }
     return svgOut
   }
 
@@ -340,6 +350,20 @@ class ShapeUtils {
 
   genLineSvgTemplate(startSvg: string, endSvg: string): string {
     return `<g class="$mtrans[0] $style[1]">${startSvg}</g><line class="$style[0]" x1="$point[0]" y1="$point[1]" x2="$point[2]" y2="$point[3]"/><g class="$mtrans[1] $style[2]">${endSvg}</g>`
+  }
+
+  svgParameters(shapeType: string, vSize: number[], size: number[]): number[] {
+    let smallerSide: number
+    switch (shapeType) {
+      case 'e':
+        return [vSize[0] / 2, vSize[1] / 2]
+      case 'r':
+        // smallerSide = Math.min(vSize[0], vSize[1])
+        // return [(smallerSide / 2) * size[1] / 100, vSize[0] - 2 * size[1], vSize[1] - 2 * size[1]]
+        return [size[1], vSize[0] - 2 * size[1], vSize[1] - 2 * size[1]]
+      default:
+        return []
+    }
   }
 }
 
