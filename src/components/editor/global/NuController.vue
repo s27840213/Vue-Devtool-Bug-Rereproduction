@@ -73,7 +73,13 @@
       div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
           class="nu-controller__ctrl-points"
           :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-          div(v-for="(scaler, index) in controlPoints.scalers"
+          div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
+              class="control-point"
+              :key="index"
+              :marker-index="index"
+              :style="Object.assign(end, {'cursor': 'pointer'})"
+              @mousedown.left.stop="lineEndMoveStart")
+          div(v-for="(scaler, index) in (!isLine) ? controlPoints.scalers : []"
               class="control-point"
               :key="index"
               :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
@@ -90,7 +96,15 @@
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
+          div(class="control-point__mover-wrapper"
+              v-if="isLine"
+              :style="`transform: scale(${100/scaleRatio})`")
+            img(class="control-point__mover"
+              :src="require('@/assets/img/svg/move.svg')"
+              :style='moverStyles()'
+              @mousedown.left.stop="moveStart")
           div(class="control-point__rotater-wrapper"
+              v-else
               :style="`transform: scale(${100/scaleRatio})`")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
@@ -118,6 +132,7 @@ import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TemplateUtils from '@/utils/templateUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { Layer } from 'konva/types/Layer'
@@ -141,6 +156,9 @@ export default Vue.extend({
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
       initImgSize: { width: 0, height: 0 },
+      initCoordinate: { x: 0, y: 0 },
+      initReferencePoint: { x: 0, y: 0 },
+      initMarkerIndex: 0,
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
@@ -205,6 +223,9 @@ export default Vue.extend({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    isLine(): boolean {
+      return this.config.type === 'shape' && this.config.category === 'D'
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -400,6 +421,14 @@ export default Vue.extend({
       }
       return resizers
     },
+    lineEnds(scalers: any, point: number[]) {
+      const quadrant = shapeUtils.getLineQuadrant(point)
+      if (quadrant % 2 === 0) {
+        return [scalers[0], scalers[2]]
+      } else {
+        return [scalers[1], scalers[3]]
+      }
+    },
     textScaleStyle() {
       return {
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
@@ -440,20 +469,30 @@ export default Vue.extend({
       return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      if (this.isLine) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
     },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
-        outline: this.outlineStyles(type),
+        transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
+        width: `${width}px`,
+        height: `${height}px`,
+        outline: this.isLine ? 'none' : this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      }
+    },
+    moverStyles() {
+      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
+      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      return {
+        transform: `rotate(${-degree}deg)`
       }
     },
     subControllerStyles() {
@@ -709,6 +748,53 @@ export default Vue.extend({
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      this.$emit('setFocus')
+      this.$emit('clearSnap')
+    },
+    lineEndMoveStart(event: MouseEvent) {
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.isControlling = true
+
+      const quadrant = shapeUtils.getLineQuadrant(this.config.point)
+      const markerIndex = Number((event.target as HTMLElement).getAttribute('marker-index'))
+
+      this.initMarkerIndex = markerIndex
+      this.initCoordinate = { x: this.config.point[markerIndex * 2], y: this.config.point[markerIndex * 2 + 1] }
+
+      const quadrantByMarkerIndex = (markerIndex === 0) ? (quadrant - 1 + 2) % 4 + 1 : quadrant
+      this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
+
+      this.currCursorStyling(event)
+      document.documentElement.addEventListener('mousemove', this.lineEndMoving, false)
+      document.documentElement.addEventListener('mouseup', this.lineEndMoveEnd, false)
+    },
+    lineEndMoving(event: MouseEvent) {
+      event.preventDefault()
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
+      const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const markerIndex = this.initMarkerIndex
+
+      const newPoint: number[] = Array.from(this.config.point)
+      newPoint[markerIndex * 2] = this.initCoordinate.x + dx
+      newPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
+
+      const trans = ControlUtils.getTranslateCompensationForLine(markerIndex, this.initReferencePoint, this.config.styles, (this.config.size ?? [1])[0], newPoint)
+
+      ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, newPoint)
+      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+    },
+    lineEndMoveEnd() {
+      this.isControlling = false
+      StepsUtils.record()
+
+      this.setCursorStyle('default')
+      document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
+      document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -1329,6 +1415,23 @@ export default Vue.extend({
   }
 }
 
+@mixin widget-point-wrapper {
+  position: absolute;
+  top: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  transform-origin: top;
+}
+
+@mixin widget-point {
+  @include size(20px, 20px);
+  position: relative;
+  left: 0;
+  top: 0;
+  pointer-events: auto;
+  cursor: move;
+}
+
 .control-point {
   pointer-events: auto;
   position: absolute;
@@ -1343,19 +1446,16 @@ export default Vue.extend({
     color: "#00000000";
   }
   &__rotater-wrapper {
-    position: absolute;
-    top: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    transform-origin: top;
+    @include widget-point-wrapper;
   }
   &__rotater {
-    @include size(20px, 20px);
-    position: relative;
-    left: 0;
-    top: 0;
-    pointer-events: auto;
-    cursor: move;
+    @include widget-point;
+  }
+  &__mover-wrapper {
+    @include widget-point-wrapper;
+  }
+  &__mover {
+    @include widget-point;
   }
   &__move-bar {
     cursor: move;

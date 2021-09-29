@@ -33,7 +33,8 @@ export default Vue.extend({
     iconColor: {
       type: String,
       default: 'blue-1'
-    }
+    },
+    iconHeight: String
   },
   data() {
     return {
@@ -43,7 +44,7 @@ export default Vue.extend({
     iconStyles() {
       return {
         width: this.iconWidth,
-        height: this.iconWidth
+        height: this.iconHeight ?? this.iconWidth
       }
     }
   }

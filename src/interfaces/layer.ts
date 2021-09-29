@@ -92,7 +92,16 @@ export interface IShape extends ILayer<IStyle> {
   vSize: number[],
   cSize?: number[],
   pSize?: number[],
-  pDiff?: number[]
+  pDiff?: number[],
+  point?: number[],
+  size?: number[],
+  dasharray?: number[],
+  linecap?: "butt" | "round",
+  markerId?: string[],
+  markerWidth?: number[],
+  trimWidth?: (boolean | undefined)[],
+  trimOffset?: number[],
+  styleArray: string[]
 }
 export interface IImage extends ILayer<IImageStyle> {
   srcObj: {

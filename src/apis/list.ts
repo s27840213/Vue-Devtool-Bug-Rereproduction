@@ -63,6 +63,11 @@ class ListService {
       data
     })
   }
+
+  getMarker (params: IListServiceParams) {
+    params.type = 'marker'
+    return this.getList(params)
+  }
 }
 
 export default new ListService()
