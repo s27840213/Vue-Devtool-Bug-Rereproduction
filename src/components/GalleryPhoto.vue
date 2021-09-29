@@ -106,7 +106,6 @@ export default Vue.extend({
           return (layer.type === 'image') && (!layer.moved) && ((layer as IImage).srcObj.assetId === assetId)
         }) as Array<IImage>
 
-
         const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
         const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
         const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
