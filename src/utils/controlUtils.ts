@@ -409,6 +409,16 @@ class Controller {
       }
     })
   }
+
+  updateShapeVSize(pageIndex: number, layerIndex: number, vSize: number[]) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        vSize
+      }
+    })
+  }
 }
 
 export default new Controller()

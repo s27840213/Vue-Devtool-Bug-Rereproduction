@@ -737,6 +737,13 @@ export default Vue.extend({
             })
           }
           break
+        case 'shape':
+          if (this.config.category === 'E') {
+            scale = this.getLayerScale
+            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0])
+            ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [dimensions.width, dimensions.height])
+          }
+          break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)

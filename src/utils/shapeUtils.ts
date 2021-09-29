@@ -181,6 +181,20 @@ class ShapeUtils {
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
+  basicShapeDimensionIncludingStroke(vSize: number[], strokeWidth: number): {width: number, height: number} {
+    return {
+      width: vSize[0] + strokeWidth,
+      height: vSize[1] + strokeWidth
+    }
+  }
+
+  basicShapeDimensionExcludingStroke(vSize: number[], strokeWidth: number): {width: number, height: number} {
+    return {
+      width: vSize[0] - strokeWidth,
+      height: vSize[1] - strokeWidth
+    }
+  }
+
   getLineQuadrant(point: number[]): number {
     if (point?.length !== 4) {
       throw new Error(`input point coordinates (${point}) are invalid`)

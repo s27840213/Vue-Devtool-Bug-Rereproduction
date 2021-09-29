@@ -140,6 +140,13 @@ export default Vue.extend({
         this.styleNode.textContent = styleText
       },
       deep: true
+    },
+    'config.vSize': {
+      handler: function(newVal) {
+        const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0])
+        Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
+      },
+      deep: true
     }
   },
   computed: {
