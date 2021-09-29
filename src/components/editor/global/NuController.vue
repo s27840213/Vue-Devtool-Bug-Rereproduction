@@ -881,6 +881,11 @@ export default Vue.extend({
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
+
+          if (this.config.category === 'E') {
+            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0])
+            ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [dimensions.width, dimensions.height])
+          }
           break
         }
         case 'text':

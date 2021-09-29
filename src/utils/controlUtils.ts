@@ -234,6 +234,7 @@ class Controller {
       // category: C => 可被等比例縮放，也可沿着水平/垂直方向伸縮，伸縮時四個角落的形狀固定不變
       case 'B':
       case 'C':
+      case 'E':
         switch (scaleType) {
           case 1:
             return resizers
