@@ -128,6 +128,7 @@ class AlignUtils {
           width: layerBounding.width,
           height: layerBounding.height
         }
+        console.log(this.getAlignPos)
         Object.assign(layer.styles, this.getAlignPos(tmpStyles, layer.styles, offset, 'right'))
       })
       GroupUtils.reselect()

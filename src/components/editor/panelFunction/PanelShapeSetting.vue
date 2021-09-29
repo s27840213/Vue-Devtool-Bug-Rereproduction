@@ -96,16 +96,6 @@
                 :value="opacity" @change="setOpacity")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
-      div(v-if="openSliderBar === 'opacity'"
-          class="shape-setting__range-input-wrapper-opacity right"
-          v-click-outside="handleSliderModal")
-        input(class="shape-setting__range-input"
-          :value="opacity"
-          :max="fieldRange.opacity.max"
-          :min="fieldRange.opacity.min"
-          v-ratio-change
-          type="range"
-          @input="setOpacity")
     div(class="shape-setting__colors")
       div(v-if="isGrouped"
         class="shape-setting__color"
@@ -287,7 +277,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    currSelectedIndex: function() {
+    currSelectedIndex: function () {
       this.initilizeRecord()
     }
   },
@@ -553,7 +543,7 @@ export default Vue.extend({
   &__colors {
     width: 100%;
     margin-top: 10px;
-    padding: 5px;;
+    padding: 5px;
     display: flex;
     flex-wrap: wrap;
   }
@@ -563,9 +553,9 @@ export default Vue.extend({
     border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
     &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff
+      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
     }
-    transition: box-shadow .2s ease-in-out;
+    transition: box-shadow 0.2s ease-in-out;
   }
   &__value-selector {
     position: absolute;
@@ -593,7 +583,7 @@ export default Vue.extend({
     left: -5px;
     top: 35px;
   }
-  &__property-bar{
+  &__property-bar {
     width: 50%;
     box-sizing: border-box;
     position: relative;
@@ -685,7 +675,7 @@ export default Vue.extend({
 .rainbow {
   position: relative;
   &:hover {
-    box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff
+    box-shadow: 0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff;
   }
 }
 .vertical-rule {
@@ -696,5 +686,4 @@ export default Vue.extend({
   margin: 0;
   padding: 0;
 }
-
 </style>

@@ -4,14 +4,14 @@
       span(class="text-blue-1 label-lg") Page Setting
     div(class="page-setting__size")
       property-bar
-        input(class="body-2 text-gray-2"  type="number" min="0" v-model="pageWidth")
+        input(class="body-2 text-gray-2"  type="number" min="0" v-model.number="pageWidth")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="toggleLock()")
       property-bar
-        input(class="body-2 text-gray-2"  type="number" min="0" v-model="pageHeight")
+        input(class="body-2 text-gray-2"  type="number" min="0" v-model.number="pageHeight")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     div

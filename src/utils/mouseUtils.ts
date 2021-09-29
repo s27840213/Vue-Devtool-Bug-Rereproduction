@@ -32,7 +32,10 @@ class MouseUtils {
   }
 
   onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 },
-    clipPath = '', isClipper: boolean, clipperStyles: IStyle | null = null) {
+    clipPath: string | undefined, clipperStyles: IStyle) {
+    if (typeof clipPath === 'undefined') {
+      clipPath = `path('M0 0 L0 ${clipperStyles.height} ${clipperStyles.width} ${clipperStyles.height} ${clipperStyles.width} 0Z')`
+    }
     let layer = this.onDropHandler(e, pageIndex, targetOffset) as IImage
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)

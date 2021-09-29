@@ -191,6 +191,7 @@ class SnapUtils {
     if (snaplines.length === 0) {
       return offset
     }
+
     snaplines.forEach((snapline: ISnapline) => {
       if (snapline.orientation === 'V') {
         snapResult.x = snapline.pos + snapline.offset

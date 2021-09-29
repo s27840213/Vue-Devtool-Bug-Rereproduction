@@ -106,9 +106,10 @@
           div(class="control-point__rotater-wrapper"
               v-else
               :style="`transform: scale(${100/scaleRatio})`")
-            img(class="control-point__rotater"
+            svg-icon(class="control-point__rotater"
+              :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
-              @mousedown.left.stop="rotateStart")
+              @mousedown.native.left.stop="rotateStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -134,6 +135,8 @@ import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
+import { Layer } from 'konva/types/Layer'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   props: {
@@ -328,7 +331,8 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setIsMoving: 'SET_isMoving'
+      setIsMoving: 'SET_isMoving',
+      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
     onFrameMouseEnter(clipIndex: number) {
       if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
@@ -1097,12 +1101,12 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.isClipper, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
         case 'shape': {
           const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, true, config.styles)
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
           break
         }
       }
@@ -1333,16 +1337,10 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
-      this.setIsLayerDropdownsOpened(true)
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
-      this.$nextTick(() => {
-        const el = document.querySelector('.dropdowns--layer') as HTMLElement
-        const mousePos = MouseUtils.getMouseAbsPoint(event)
-        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-        el.focus()
-      })
+      popupUtils.openPopup('layer', { event })
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any

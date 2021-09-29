@@ -49,9 +49,6 @@ export default Vue.extend({
     })
   },
   methods: {
-    ...mapMutations({
-      setIsOrderDropdownsOpened: 'SET_isOrderDropdownsOpened'
-    }),
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
     },

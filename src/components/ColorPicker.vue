@@ -4,6 +4,7 @@
       class="color-picker__picker"
       :value="convertedHex"
       @input="updateHex"
+      @paste="onPaste"
       :disableFields="true"
       :disableAlpha="true")
     div(class="px-10 pb-20")
@@ -115,13 +116,17 @@ export default Vue.extend({
           break
         }
       }
-      console.log('#' + result)
       this.$emit('update', `#${result}`)
       return `#${result}`
     }
   },
   watch: {
     color(): void {
+      this.color = '#' + this.color.replaceAll(/[^a-fA-F0-9]/g, '')
+      this.color = this.color.toUpperCase()
+      if (this.color.indexOf('#') === -1) {
+        this.color = `#${this.color}`
+      }
       if (this.color.length === 0) {
         this.color = '#'
       }
@@ -137,7 +142,11 @@ export default Vue.extend({
       return str
     },
     updateHex(val: any) {
+      console.log(val)
       this.color = val.hex
+    },
+    onPaste(event: ClipboardEvent) {
+      console.log(event.clipboardData)
     },
     colorStyles(color: string) {
       return {

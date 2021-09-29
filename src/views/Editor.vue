@@ -11,7 +11,7 @@
           //-     div(v-for="nav in testNav" @click="setPanelType(FunctionPanelType[nav])") {{nav}}
           div(class="content__editor")
             editor-view
-            size-editor
+            scale-ratio-editor
         function-panel
 </template>
 
@@ -22,7 +22,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
-import SizeEditor from '@/components/editor/SizeEditor.vue'
+import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import { mapMutations } from 'vuex'
 import { FunctionPanelType } from '@/store/types'
 
@@ -33,7 +33,7 @@ export default Vue.extend({
     EditorHeader,
     SidebarPanel,
     EditorView,
-    SizeEditor,
+    ScaleRatioEditor,
     FunctionPanel
   },
   data() {
@@ -91,12 +91,12 @@ export default Vue.extend({
   }
 }
 
-.size-editor::v-deep {
+.scale-ratio-editor::v-deep {
   position: absolute;
   left: 50%;
   bottom: 30px;
   transform: translateX(-50%);
-  z-index: setZindex("size-editor");
+  z-index: setZindex("scale-ratio-editor");
 }
 
 .test-nav {

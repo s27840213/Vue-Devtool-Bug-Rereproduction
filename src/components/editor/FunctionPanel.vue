@@ -1,6 +1,6 @@
 <template lang="pug">
   div(v-if="!isGroup" class="function-panel p-20")
-    panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+    panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
     panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked"
       @openFontsPanel="openFontsPanel()")
     panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")
@@ -11,7 +11,7 @@
     panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked")
   div(v-else class="function-panel p-20")
     template(v-if="!hasSubSelectedLayer")
-      panel-group(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+      panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
       panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
         @openFontsPanel="openFontsPanel()")
       panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
@@ -21,7 +21,7 @@
       panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
       panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked")
     template(v-else)
-      panel-group
+      panel-general
       template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
         panel-text-setting(
           @openFontsPanel="openFontsPanel()")
@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import PanelGroup from '@/components/editor/panelFunction/PanelGroup.vue'
+import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
 import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
@@ -49,7 +49,7 @@ import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
-    PanelGroup,
+    PanelGeneral,
     PanelTextSetting,
     PanelColorPicker,
     PanelBackgroundSetting,
@@ -115,11 +115,12 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .function-panel {
   position: relative;
-  @include size(330px, 100%);
+  @include size(300px, 100%);
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
   overflow-y: scroll;
+  box-sizing: border-box;
   > div {
     // margin-bottom: 25px;
   }

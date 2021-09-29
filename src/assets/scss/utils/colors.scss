@@ -10,4 +10,8 @@
 	.bg-#{""+$type}{ // add "" to prevent warning 
 		background-color: $color;
 	}
+
+	.border-#{""+$type}{ // add "" to prevent warning 
+		border: 1px solid $color;
+	}
 }

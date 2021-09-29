@@ -3,9 +3,7 @@ import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
-import userApis from '@/apis/user'
 import zindexUtils from '@/utils/zindexUtils'
-import uploadUtils from '@/utils/uploadUtils'
 
 import photos from '@/store/photos'
 import user from '@/store/module/user'
@@ -18,6 +16,7 @@ import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
+import popup from '@/store/module/popup'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
@@ -142,9 +141,6 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     type: ''
   },
-  isOrderDropdownsOpened: false,
-  isLayerDropdownsOpened: false,
-  isPageDropdownsOpened: false,
   isColorPickerOpened: false,
   currSelectedPhotoInfo: {},
   asset: {},
@@ -237,15 +233,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
-  },
-  getIsOrderDropdownsOpened(state: IEditorState) {
-    return state.isOrderDropdownsOpened
-  },
-  getIsLayerDropdownsOpened(state: IEditorState) {
-    return state.isLayerDropdownsOpened
-  },
-  getIsPageDropdownsOpened(state: IEditorState) {
-    return state.isPageDropdownsOpened
   },
   getIsColorPickerOpened(state: IEditorState) {
     return state.isColorPickerOpened
@@ -551,15 +538,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
   },
-  SET_isOrderDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isOrderDropdownsOpened = isOpened
-  },
-  SET_isLayerDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isLayerDropdownsOpened = isOpened
-  },
-  SET_isPageDropdownsOpened(state: IEditorState, isOpened: boolean) {
-    state.isPageDropdownsOpened = isOpened
-  },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
     console.log(state.isColorPickerOpened)
@@ -621,6 +599,7 @@ export default new Vuex.Store({
     templates,
     textStock,
     background,
-    modal
+    modal,
+    popup
   }
 })
