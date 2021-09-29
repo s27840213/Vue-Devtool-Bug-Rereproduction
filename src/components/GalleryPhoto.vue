@@ -29,6 +29,7 @@ import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -96,10 +97,15 @@ export default Vue.extend({
         const photoAspectRatio = photo.width / photo.height
         const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
         const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
-        const imageLayers = this.getLayers(this.lastSelectedPageIndex).filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
+        const allLayers = this.getLayers(this.lastSelectedPageIndex)
+        const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
           const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
-          return (layer.type === 'image') && (!layer.moved) && (layer.src === src)
+          const type = ImageUtils.getSrcType(src)
+          const assetId = ImageUtils.getAssetId(src, type)
+
+          return (layer.type === 'image') && (!layer.moved) && ((layer as IImage).srcObj.assetId === assetId)
         }) as Array<IImage>
+
 
         const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
         const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20

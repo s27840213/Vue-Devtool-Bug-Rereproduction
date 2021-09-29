@@ -123,6 +123,7 @@ export default Vue.extend({
   watch: {
     color(): void {
       this.color = '#' + this.color.replaceAll(/[^a-fA-F0-9]/g, '')
+      this.color = this.color.toUpperCase()
       if (this.color.indexOf('#') === -1) {
         this.color = `#${this.color}`
       }
@@ -160,12 +161,6 @@ export default Vue.extend({
     setColor(color: string) {
       this.color = color
       this.$emit('update', color)
-    },
-    filterChar(str: string) {
-      const regex = /[#0-9a-f]/g
-      return str.match(regex)?.filter(function (char, index, arr) {
-        return index === arr.indexOf(char)
-      }).join('')
     }
   }
 })
