@@ -354,13 +354,14 @@ class ShapeUtils {
 
   svgParameters(shapeType: string, vSize: number[], size: number[]): number[] {
     let smallerSide: number
+    let corRadius: number
     switch (shapeType) {
       case 'e':
         return [vSize[0] / 2, vSize[1] / 2]
       case 'r':
-        // smallerSide = Math.min(vSize[0], vSize[1])
-        // return [(smallerSide / 2) * size[1] / 100, vSize[0] - 2 * size[1], vSize[1] - 2 * size[1]]
-        return [size[1], vSize[0] - 2 * size[1], vSize[1] - 2 * size[1]]
+        smallerSide = Math.min(vSize[0], vSize[1])
+        corRadius = (smallerSide / 2) * size[1] / 100
+        return [corRadius, vSize[0] - 2 * corRadius, vSize[1] - 2 * corRadius]
       default:
         return []
     }
