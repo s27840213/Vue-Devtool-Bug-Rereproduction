@@ -1,21 +1,22 @@
 <template lang="pug">
-  div(class="dropdowns bg-gray-6"
-      :class="`dropdowns--${type}`")
-    div(v-for="(data,index) in dropdownsDatas(type)"
-        :key="`dropdowns-${index}`"
-        class="dropdowns__item"
+  div(class="popup-order")
+    div(v-for="(data,index) in popupDatas('order')"
+        :key="`popup-order-${index}`"
+        class="popup-order__item"
         @click="data.action")
       svg-icon(
         class="pointer"
         :iconName="data.icon"
-        :iconWidth="'16px'"
+        :iconWidth="'12px'"
         :iconColor="'gray-1'")
-      span(class="ml-10 body-2") {{data.text}}
+      span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
+import { mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
 
 export default Vue.extend({
   props: {
@@ -25,6 +26,9 @@ export default Vue.extend({
     },
     type: String,
     datas: Array
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -38,10 +42,10 @@ export default Vue.extend({
       switch (type) {
         case 'order': {
           return [
-            'Bring to Front',
-            'Bring Forward',
-            'Bring Backward',
-            'Bring to Back'
+            '置前',
+            '移至最前',
+            '置後',
+            '移至最後'
           ]
         }
         case 'layer': {
@@ -56,7 +60,7 @@ export default Vue.extend({
         }
       }
     },
-    dropdownsDatas(type: string) {
+    popupDatas(type: string) {
       const icons = this.mappingIcons(type)
       const texts = this.mappingText(type)
       return icons.map((icon: string, index: number) => {
@@ -72,28 +76,26 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.dropdowns {
-  width: initial;
-  height: initial;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: setZindex("dropdowns");
-  justify-content: center;
-  border: 1px solid setColor(gray-4);
-  &:focus {
-    outline: none;
-  }
+.popup-order {
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: auto auto;
+  column-gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
   &__item {
     display: flex;
     align-items: center;
-    padding: 5px;
-    padding: 5px 10px;
+    transition: background-color 0.1s ease-in;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
     &:active {
       background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
     }
   }
 }

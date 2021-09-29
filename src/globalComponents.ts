@@ -5,7 +5,6 @@ import TmpImages from '@/components/TmpImages.vue'
 import TmpText from '@/components/TmpText.vue'
 import TmpSvg from '@/components/TmpSvg.vue'
 import TmpFiles from '@/components/TmpFiles.vue'
-import ActionBar from '@/components/global/ActionBar.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Btn from '@/components/global/Btn.vue'
 import NuPage from '@/components/editor/global/NuPage.vue'
@@ -28,7 +27,6 @@ Vue.component('tmp-text', TmpText)
 Vue.component('tmp-svg', TmpSvg)
 Vue.component('tmp-files', TmpFiles)
 Vue.component('btn', Btn)
-Vue.component('action-bar', ActionBar)
 Vue.component('property-bar', PropertyBar)
 Vue.component('nu-page', NuPage)
 Vue.component('nu-image', NuImage)

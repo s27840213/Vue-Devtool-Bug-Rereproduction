@@ -1,16 +1,15 @@
 <template lang="pug">
   div(class="photo-setting")
-    span(class="photo-setting__title text-blue-1 label-lg") Photo Setting
+    span(class="photo-setting__title text-blue-1 subtitle-1") 照片設定
     div(class="photo-setting__grid")
-      btn(class="full-width" :type="'primary-mid'") Replace
-      btn(class="full-width" :type="'primary-mid'") Crop
-      btn(class="full-width" :type="'primary-mid'") Filter
-      btn(class="full-width" :type="'primary-mid'") Adjust
-      btn(class="full-width" :type="'primary-mid'") BG Remover
-    property-bar
-      input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
-      svg-icon(class="pointer"
-        :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
+      btn(class="full-width" :type="'gray-mid'") 裁切
+      btn(class="full-width" :type="'gray-mid'") 濾鏡
+      btn(class="full-width" :type="'gray-mid'") 調整
+      btn(class="full-width" :type="'gray-mid'") 去背
+    //- property-bar
+    //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
+    //-   svg-icon(class="pointer"
+    //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
     //- action-bar(class="flex-evenly")
     //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
     //-     :key="`gp-action-icon-${index}`"
@@ -118,21 +117,16 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .photo-setting {
-  text-align: left;
+  text-align: center;
   > div:nth-child(n + 1) {
     margin-top: 15px;
   }
   &__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     row-gap: 10px;
     column-gap: 20px;
-
-    > button:nth-child(1) {
-      grid-column-start: 1;
-      grid-column-end: 3;
-    }
   }
 }
 </style>

@@ -133,6 +133,7 @@ import ControlUtils from '@/utils/controlUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -216,7 +217,7 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setIsPageDropdownsOpened: 'SET_isPageDropdownsOpened',
+      setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page'
     }),
@@ -288,13 +289,7 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     onRightClick(event: MouseEvent) {
-      this.setIsPageDropdownsOpened(true)
-      this.$nextTick(() => {
-        const el = document.querySelector('.dropdowns--page') as HTMLElement
-        const mousePos = MouseUtils.getMouseAbsPoint(event)
-        el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-        el.focus()
-      })
+      popupUtils.openPopup('page', { event })
     },
     addPage() {
       this._addPage({
@@ -355,6 +350,7 @@ export default Vue.extend({
   position: relative;
   margin: 15px auto;
   transform-style: preserve-3d;
+  user-select: none;
 }
 
 .page-title {

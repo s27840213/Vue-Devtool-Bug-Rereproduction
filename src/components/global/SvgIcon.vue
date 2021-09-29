@@ -15,6 +15,8 @@ import Vue from 'vue'
  * 因為是原生svg tag 瀏覽器支援度高！
  * 要注意目前無法直接透過 img(src="icon") 來獲取icon資料夾的svg哦，因為我有在 Webpack做些設定
  * icon資料夾的圖檔都是單色可切換顏色的圖片，若是普通的 svg icon 就把它放在img/svg資料夾內，以此來做區分
+ *
+ * 2021.9.24 更新: 如果說圖片是 svg 格式，但沒有顏色切換需求，其實也可以用這個元件，就只是改顏色不會影響到他而已
  */
 
 export default Vue.extend({
@@ -52,6 +54,7 @@ export default Vue.extend({
 .svg-icon {
   width: 100%;
   transition: background-color 0.2s;
+  fill: currentColor;
   &:focus {
     outline: none;
   }

@@ -2,13 +2,13 @@ import store from '@/store'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import AlignUtils from '@/utils/alignUtils'
 import OrderUtils from './orderUtils'
-import Vue from 'vue'
-import groupUtils from './groupUtils'
 import layerUtils from './layerUtils'
+import popupUtils from './popupUtils'
 
-const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align', 'distribute-vertically', 'distribute-horizontally']
+const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
+const iconDistribute = ['distribute-vertically', 'distribute-horizontally']
 const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
-const iconOrder = ['layers-front', 'layers-forward', 'layers-backward', 'layers-back']
+const iconOrder = ['layers-forward', 'layers-front', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
 const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify']
 class MappingUtils {
@@ -16,6 +16,8 @@ class MappingUtils {
     switch (set) {
       case 'align':
         return iconAlign
+      case 'distribute':
+        return iconDistribute
       case 'action':
         return iconAction
       case 'order':
@@ -69,21 +71,13 @@ class MappingUtils {
         return OrderUtils.bringToBack
       }
       case 'distribute-vertically': {
-        AlignUtils.distribueVr()
-        break
+        return AlignUtils.distribueVr
       }
       case 'distribute-horizontally': {
-        AlignUtils.distribueHr()
-        break
+        return AlignUtils.distribueHr
       }
       case 'layers-alt': {
-        store.commit('SET_isOrderDropdownsOpened', !store.getters.getIsOrderDropdownsOpened)
-        Vue.nextTick(() => {
-          const el = document.querySelector('.dropdowns--order') as HTMLElement
-          const layersAlt = document.querySelector('.layers-alt')?.getBoundingClientRect()
-          el.style.transform = `translate3d(${layersAlt?.left}px, ${layersAlt?.bottom}px,0)`
-          el.focus()
-        })
+        popupUtils.openPopup('order')
         break
       }
       case 'copy': {
@@ -100,6 +94,12 @@ class MappingUtils {
       }
       case 'trash': {
         ShortcutUtils.del()
+        break
+      }
+      case 'flip-h': {
+        break
+      }
+      case 'flip-v': {
         break
       }
     }

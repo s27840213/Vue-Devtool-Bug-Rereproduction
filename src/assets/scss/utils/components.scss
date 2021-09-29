@@ -1,0 +1,18 @@
+.action-bar {
+	display: flex;
+  align-items: center;
+	padding: 15px;
+	background-color: setColor(gray-6);
+  &--small {
+    padding: 10px 5px;
+  }
+}
+
+.property-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid setColor(gray-4);
+  border-radius: 3px;
+  padding: 5px 10px;
+}
