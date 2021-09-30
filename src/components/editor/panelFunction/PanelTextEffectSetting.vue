@@ -117,6 +117,8 @@ import vClickOutside from 'v-click-outside'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import colorUtils from '@/utils/colorUtils'
+import { ColorEventType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -184,6 +186,11 @@ export default Vue.extend({
       return textShape.name || 'none'
     }
   },
+  mounted() {
+    colorUtils.on(ColorEventType.textEffect, (color: string) => {
+      this.handleColorUpdate(color)
+    })
+  },
   methods: {
     optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
@@ -192,7 +199,10 @@ export default Vue.extend({
       this.openModal = !this.openModal
     },
     handleColorModal() {
-      this.openColorPicker = !this.openColorPicker
+      // this.openColorPicker = !this.openColorPicker
+      this.$emit('toggleColorPanel', true)
+      colorUtils.setCurrEvent(ColorEventType.textEffect)
+      colorUtils.setCurrColor(this.currentStyle.textEffect.color)
     },
     onEffectClick(effectName: string): void {
       TextEffectUtils.setTextEffect(effectName)

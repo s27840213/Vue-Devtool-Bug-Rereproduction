@@ -7,7 +7,7 @@
       @paste="onPaste"
       :disableFields="true"
       :disableAlpha="true")
-    div(class="px-10 pb-20")
+    div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
         span(class="body-1") Hex
         div(class="color-picker__input")
@@ -20,34 +20,35 @@
             maxlength="7")
         //- svg-icon(class="pointer"
         //- :iconName="'color-picker'" :iconWidth="'20px'" :iconColor="'gray-2'")
-      div(class="color-picker__colors")
-        div(class="text-left")
-          span(class="body-1") Brand Kit
-        div
-          div(v-for="color in brandColors"
-            class="pointer"
-            :style="colorStyles(color)")
-          svg-icon(class="pointer"
-            :iconName="'plus'"
-            :iconColor="'gray-2'"
-            :iconWidth="'18px'"
-            @click.native="addNewBrandColor(color)")
-      div(class="color-picker__colors")
-        div(class="text-left")
-          span(class="body-1") Document color
-        div
-          div(v-for="color in documentColors"
-            class="pointer"
-            :style="colorStyles(color)"
-            @click="setColor(color)")
-      div(class="color-picker__colors")
-        div(class="text-left")
-          span(class="body-1") Default color
-        div
-          div(v-for="color in defaultColors"
-            class="pointer"
-            :style="colorStyles(color)"
-            @click="setColor(color)")
+      template(v-if="showColorSlip")
+        div(class="color-picker__colors")
+          div(class="text-left")
+            span(class="body-1") Brand Kit
+          div
+            div(v-for="color in brandColors"
+              class="pointer"
+              :style="colorStyles(color)")
+            svg-icon(class="pointer"
+              :iconName="'plus'"
+              :iconColor="'gray-2'"
+              :iconWidth="'18px'"
+              @click.native="addNewBrandColor(color)")
+        div(class="color-picker__colors")
+          div(class="text-left")
+            span(class="body-1") Document color
+          div
+            div(v-for="color in documentColors"
+              class="pointer"
+              :style="colorStyles(color)"
+              @click="setColor(color)")
+        div(class="color-picker__colors")
+          div(class="text-left")
+            span(class="body-1") Default color
+          div
+            div(v-for="color in defaultColors"
+              class="pointer"
+              :style="colorStyles(color)"
+              @click="setColor(color)")
 </template>
 
 <script lang="ts">
@@ -57,7 +58,11 @@ import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
-    currentColor: String
+    currentColor: String,
+    showColorSlip: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {
     'chrome-picker': Chrome

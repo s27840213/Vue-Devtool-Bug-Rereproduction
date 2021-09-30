@@ -11,6 +11,21 @@ const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
 const iconOrder = ['layers-forward', 'layers-front', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
 const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify']
+const minMaxHash: { [index: string]: { min: number, max: number } } = {
+  opacity: {
+    min: 0,
+    max: 100
+  },
+  fontSize: {
+    min: 6, max: 800
+  },
+  lineHeight: {
+    min: 0, max: 300
+  },
+  letterSpacing: {
+    min: -200, max: 800
+  }
+}
 class MappingUtils {
   mappingIconSet(set: string): string[] {
     switch (set) {
@@ -71,10 +86,12 @@ class MappingUtils {
         return OrderUtils.bringToBack
       }
       case 'distribute-vertically': {
-        return AlignUtils.distribueVr
+        AlignUtils.distribueVr()
+        break
       }
       case 'distribute-horizontally': {
-        return AlignUtils.distribueHr
+        AlignUtils.distribueHr()
+        break
       }
       case 'layers-alt': {
         popupUtils.openPopup('order')
@@ -108,6 +125,10 @@ class MappingUtils {
   mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
     return indexs.map(index => layers[index])
+  }
+
+  mappingMinMax(type: string) {
+    return minMaxHash[type]
   }
 }
 

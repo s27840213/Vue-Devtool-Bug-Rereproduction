@@ -64,6 +64,18 @@ export enum FunctionPanelType {
   backgroundSetting
 }
 
+export enum ColorEventType {
+  text = 'setTextColor',
+  textEffect = 'setTextEffectColor',
+  shape = 'setShapeColor'
+}
+
+export enum PopupSliderEventType {
+  opacity = 'setLayerOpacity',
+  lineHeight = 'setTextLineHeight',
+  letterSpacing = 'setTextSpacing',
+}
+
 export enum LayerType {
   'nu-clipper',
   'nu-image',

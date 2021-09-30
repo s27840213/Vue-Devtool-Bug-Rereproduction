@@ -107,13 +107,13 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-    div(class="relative")
-      property-bar(class="shape-setting__property-bar")
-        button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
-          input(class="body-2 text-gray-2 record-selection" ref="input-opacity" type="text"
-                :value="opacity" @change="setOpacity")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
+    //- div(class="relative")
+    //-   property-bar(class="shape-setting__property-bar")
+    //-     button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
+    //-       input(class="body-2 text-gray-2 record-selection" ref="input-opacity" type="text"
+    //-             :value="opacity" @change="setOpacity")
+    //-     svg-icon(class="pointer"
+    //-       :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
     div(class="shape-setting__colors")
       div(v-if="isGrouped"
         class="shape-setting__color"
@@ -122,20 +122,20 @@
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    div(v-if="getColors.length || isGrouped" class="shape-setting__title")
-      span(class="shape-setting__title text-blue-1 label-lg") Color Palette
-      div(class="shape-setting__colors")
-        div(class="shape-setting__color rainbow" ref="rainbow"
-          :style="colorPickerStyles()" @click="handleColorModalOn")
-          color-picker(v-if="openColorPicker"
-            class="shape-setting__color-picker"
-            v-click-outside="handleColorModalOff"
-            :currentColor="getColors[currSelectedColorIndex]"
-            @update="handleColorUpdate")
-        div(v-for="(color, index) in colorPresets"
-          class="shape-setting__color palette"
-          :style="paletteColorStyle(color, index)"
-          @click="setColor(color, index)")
+    //- div(v-if="getColors.length || isGrouped" class="shape-setting__title")
+    //-   span(class="shape-setting__title text-blue-1 label-lg") Color Palette
+    //-   div(class="shape-setting__colors")
+    //-     div(class="shape-setting__color rainbow" ref="rainbow"
+    //-       :style="colorPickerStyles()" @click="handleColorModalOn")
+    //-       color-picker(v-if="openColorPicker"
+    //-         class="shape-setting__color-picker"
+    //-         v-click-outside="handleColorModalOff"
+    //-         :currentColor="getColors[currSelectedColorIndex]"
+    //-         @update="handleColorUpdate")
+    //-     div(v-for="(color, index) in colorPresets"
+    //-       class="shape-setting__color palette"
+    //-       :style="paletteColorStyle(color, index)"
+    //-       @click="setColor(color, index)")
 </template>
 
 <script lang="ts">
@@ -155,6 +155,8 @@ import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   components: {
@@ -200,11 +202,16 @@ export default Vue.extend({
           vSize: [0, 4],
           trimOffset: -1
         }
-      } as {[key: string]: IMarker}),
+      } as { [key: string]: IMarker }),
       markerListReady: false
     }
   },
   mounted() {
+    colorUtils.on(ColorEventType.shape, (color: string) => {
+      this.handleColorUpdate(color)
+    })
+    colorUtils.setCurrEvent(ColorEventType.shape)
+    colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
     this.initilizeRecord()
     const currLayer = this.currLayer as IShape
     this.getCategories().then(async () => {
@@ -511,7 +518,7 @@ export default Vue.extend({
         }
       )
     },
-    makeSlots(markerIds: string[]): {marker: string, name: string}[] {
+    makeSlots(markerIds: string[]): { marker: string, name: string }[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
     },
     getMarkerContent(markerId: string) {

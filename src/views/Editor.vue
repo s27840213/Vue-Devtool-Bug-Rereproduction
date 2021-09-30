@@ -6,13 +6,14 @@
       div(class="content")
         sidebar-panel
         div(class="content__main")
-          //- div(class="content__blank bg-white")
-          //-   div(class="test-nav")
-          //-     div(v-for="nav in testNav" @click="setPanelType(FunctionPanelType[nav])") {{nav}}
           div(class="content__editor")
             editor-view
             scale-ratio-editor
-        function-panel
+        div(class="content__panel")
+          function-panel(@toggleColorPanel="toggleColorPanel")
+          transition(name="panel-up")
+            color-panel(v-if="isColorPanelOpen || isShape"
+              @toggleColorPanel="toggleColorPanel")
 </template>
 
 <script lang="ts">
@@ -21,9 +22,10 @@ import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
+import ColorPanel from '@/components/editor/ColorPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
@@ -34,17 +36,21 @@ export default Vue.extend({
     SidebarPanel,
     EditorView,
     ScaleRatioEditor,
-    FunctionPanel
+    FunctionPanel,
+    ColorPanel
   },
   data() {
     return {
       FunctionPanelType,
-      testNav: [
-        'group',
-        'textSetting',
-        'colorPicker',
-        'pageSetting',
-        'photoSetting']
+      isColorPanelOpen: false
+    }
+  },
+  computed: {
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo'
+    }),
+    isShape(): boolean {
+      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
     }
   },
   methods: {
@@ -53,6 +59,11 @@ export default Vue.extend({
     }),
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
+    },
+    toggleColorPanel(bool: boolean) {
+      if (!this.isShape) {
+        this.isColorPanelOpen = bool
+      }
     }
   }
 })
@@ -89,6 +100,14 @@ export default Vue.extend({
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: 1fr auto;
   }
+
+  &__panel {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr;
+  }
 }
 
 .scale-ratio-editor::v-deep {
@@ -97,18 +116,5 @@ export default Vue.extend({
   bottom: 30px;
   transform: translateX(-50%);
   z-index: setZindex("scale-ratio-editor");
-}
-
-.test-nav {
-  display: flex;
-  top: 10px;
-  left: 10px;
-  > div {
-    margin: 0px 5px;
-    border: 1px solid setColor(gray-3);
-    padding: 5px 10px;
-    border-radius: 25px;
-    cursor: pointer;
-  }
 }
 </style>
