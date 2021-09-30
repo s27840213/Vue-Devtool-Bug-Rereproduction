@@ -147,6 +147,11 @@
             template(class="pointer" v-slot:g0i1)
               svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
               div(class="shape-setting__value-selector__button-text") 實心
+      label-with-range(:value="corRadPercentage" :min="0" :max="100" @update="handleBasicShapeCorRadPercentUpdate")
+        template
+          div(class="shape-setting__basic-shape-corner-radius flex-evenly")
+            svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
+            div 導圓角
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -195,13 +200,16 @@ import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
+import LabelWithRange from '@/components/LabelWithRange.vue'
+import controlUtils from '@/utils/controlUtils'
 
 export default Vue.extend({
   components: {
     SearchBar,
     ColorPicker,
     GeneralValueSelector,
-    MarkerIcon
+    MarkerIcon,
+    LabelWithRange
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -298,6 +306,11 @@ export default Vue.extend({
     filled(): boolean {
       const { currLayer } = this
       return (currLayer as IShape).filled ?? false
+    },
+    corRadPercentage(): number {
+      const { currLayer } = this
+      const { vSize, shapeType, size } = (currLayer as IShape)
+      return Math.min(controlUtils.getCorRadPercentage(vSize, size ?? [0, 0], shapeType ?? ''), 100)
     },
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
@@ -523,6 +536,19 @@ export default Vue.extend({
         { filled: filled === 1 }
       )
     },
+    handleBasicShapeCorRadPercentUpdate(value: string) {
+      const corRadPercentage = (GeneralUtils.isValidInt(value)) ? parseInt(value) : 0
+      const { vSize, size, shapeType } = (this.currLayer as IShape)
+      const newSize = Array.from(size ?? [])
+      if (newSize.length >= 2) {
+        newSize[1] = controlUtils.getCorRadValue(vSize, corRadPercentage, shapeType ?? '')
+      }
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        { size: newSize }
+      )
+    },
     handleStartMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
@@ -738,6 +764,10 @@ export default Vue.extend({
     grid-template-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
+  }
+  &__basic-shape-corner-radius {
+    display: flex;
+    align-items: center;
   }
 }
 .rainbow {
