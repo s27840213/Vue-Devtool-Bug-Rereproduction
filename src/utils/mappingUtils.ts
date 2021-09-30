@@ -6,7 +6,7 @@ import layerUtils from './layerUtils'
 import popupUtils from './popupUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
-const iconDistribute = ['distribute-vertically', 'distribute-horizontally']
+const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
 const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
 const iconOrder = ['layers-forward', 'layers-front', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
