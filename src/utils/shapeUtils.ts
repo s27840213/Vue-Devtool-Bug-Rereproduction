@@ -367,18 +367,57 @@ class ShapeUtils {
   }
 
   svgParameters(shapeType: string, vSize: number[], size: number[]): number[] {
-    let smallerSide: number
-    let corRadius: number
+    const appliedCorRadius = this.clipCorRad(shapeType, vSize, size)
     switch (shapeType) {
       case 'e':
         return [vSize[0] / 2, vSize[1] / 2]
       case 'r':
-        smallerSide = Math.min(vSize[0], vSize[1])
-        corRadius = (smallerSide / 2) * size[1] / 100
-        return [corRadius, vSize[0] - 2 * corRadius, vSize[1] - 2 * corRadius]
+        return [appliedCorRadius, vSize[0] - 2 * appliedCorRadius, vSize[1] - 2 * appliedCorRadius]
+      case 't':
+        return this.triangleSvgParameters(vSize, appliedCorRadius)
       default:
         return []
     }
+  }
+
+  triangleSvgParameters(vSize: number[], corRad: number): number[] {
+    const [width, height] = vSize
+    const halfWidth = width / 2
+    const hypotenuse = Math.sqrt(Math.pow(halfWidth, 2) + Math.pow(height, 2))
+    const sineA = height / hypotenuse
+    const cosineA = halfWidth / hypotenuse
+    const edgeTop = corRad * (sineA / cosineA)
+    const edgeSide = corRad / Math.sqrt((1 - cosineA) / (1 + cosineA))
+    const trimmedH = Math.max(hypotenuse - edgeSide - edgeTop, 0)
+    // Math.max(value, 0) prevents computation error from resulting negative value
+    return [corRad, halfWidth, edgeTop * cosineA, edgeTop * sineA, trimmedH * cosineA, trimmedH * sineA,
+      edgeSide * (1 - cosineA), edgeSide * sineA, Math.max(width - 2 * edgeSide, 0), 2 * edgeTop * cosineA]
+    // r W etcosA etsinA (H-es-et)cosA (H-es-et)sinA es-escosA essinA w-2es 2etcosA
+  }
+
+  getMaxCorRad(shapeType: string, vSize: number[]): number {
+    let smallerSide: number
+    let halfWidth: number
+    let height: number
+    let innerHypotenuse: number
+
+    switch (shapeType) {
+      case 'r':
+        smallerSide = Math.min(...vSize)
+        return smallerSide / 2
+      case 't':
+        halfWidth = vSize[0] / 2
+        height = vSize[1]
+        innerHypotenuse = Math.sqrt(Math.pow(height, 2) + Math.pow(halfWidth, 2))
+        return halfWidth - Math.sqrt((innerHypotenuse - halfWidth) / (innerHypotenuse + halfWidth))
+      default:
+        return Number.EPSILON
+    }
+  }
+
+  clipCorRad(shapeType: string, vSize: number[], size: number[]): number {
+    const maxCorRad = this.getMaxCorRad(shapeType, vSize)
+    return Math.min(size[1], maxCorRad)
   }
 }
 

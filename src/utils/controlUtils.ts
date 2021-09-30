@@ -225,6 +225,16 @@ class Controller {
     }
   }
 
+  getCorRadPercentage(vSize: number[], size: number[], shapeType: string): number {
+    const maxCorRad = shapeUtils.getMaxCorRad(shapeType, vSize)
+    return size[1] * 100 / maxCorRad
+  }
+
+  getCorRadValue(vSize: number[], percentage: number, shapeType: string): number {
+    const maxCorRad = shapeUtils.getMaxCorRad(shapeType, vSize)
+    return percentage * maxCorRad / 100
+  }
+
   shapeCategorySorter(resizers: any, category: string, scaleType: number) {
     switch (category) {
       // category: A => 只能被等比例縮放
@@ -417,6 +427,16 @@ class Controller {
       layerIndex,
       props: {
         vSize
+      }
+    })
+  }
+
+  updateShapeCorRad(pageIndex: number, layerIndex: number, size: number[], corRad: number) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        size: [size[0], corRad]
       }
     })
   }

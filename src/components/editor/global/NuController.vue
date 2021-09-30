@@ -159,6 +159,7 @@ export default Vue.extend({
       initCoordinate: { x: 0, y: 0 },
       initReferencePoint: { x: 0, y: 0 },
       initMarkerIndex: 0,
+      initCorRadPercentage: -1,
       imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
@@ -670,6 +671,10 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
 
+      if (this.config.category === 'E') {
+        this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
+      }
+
       this.currCursorStyling(event)
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
@@ -742,6 +747,8 @@ export default Vue.extend({
             scale = this.getLayerScale
             const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0])
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [dimensions.width, dimensions.height])
+            const corRad = ControlUtils.getCorRadValue([dimensions.width, dimensions.height], this.initCorRadPercentage, this.config.shapeType)
+            ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
           }
           break
       }
@@ -1025,6 +1032,9 @@ export default Vue.extend({
       ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
     resizeEnd() {
+      if (this.config.type === 'shape' && this.config.category === 'E') {
+        ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
+      }
       this.imgBuffer = { width: 0, height: 0, x: 0, y: 0 }
       this.isControlling = false
       StepsUtils.record()
