@@ -3,7 +3,7 @@
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     div(class="action-bar flex-around" style="padding: 8px 0"
               v-if="isLine")
-      div(class="shape-setting__line-action-wrapper-dashAndEdge")
+      div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleSliderModal('line-width')")
@@ -18,7 +18,7 @@
             type="range"
             @input="setLineWidth")
           div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
-      div(class="shape-setting__line-action-wrapper-dashAndEdge")
+      div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
                 iconName="line-dash" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
@@ -41,7 +41,7 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") 圓角
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper-marker pointer"
+      div(class="shape-setting__line-action-wrapper pointer"
           @click="handleValueModal('start-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[startMarker].styleArray[0]"
@@ -73,7 +73,7 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-      div(class="shape-setting__line-action-wrapper-marker pointer"
+      div(class="shape-setting__line-action-wrapper pointer"
           @click="handleValueModal('end-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
@@ -107,6 +107,32 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+    div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
+      div(class="action-bar flex-around")
+        div(class="shape-setting__line-action-wrapper")
+          svg-icon(class="pointer"
+                  iconName="line-width" iconWidth="24px" iconColor="gray-2"
+                  @click.native="handleSliderModal('line-width')")
+          div(v-if="openSliderBar === 'line-width'"
+              class="shape-setting__range-input-wrapper-line-width right"
+              v-click-outside="handleSliderModal")
+            input(class="shape-setting__range-input shape-setting__range-input-line-width"
+              :value="lineWidth"
+              :max="fieldRange.lineWidth.max"
+              :min="fieldRange.lineWidth.min"
+              v-ratio-change
+              type="range"
+              @input="setLineWidth")
+            div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
+        div(class="shape-setting__line-action-wrapper")
+          svg-icon(class="pointer"
+                  v-if="filled"
+                  iconName="filled" iconWidth="24px" iconColor="gray-2"
+                  @click.native="handleValueModal('isFilled')")
+          svg-icon(class="pointer"
+                  v-else
+                  iconName="non-filled" iconWidth="24px" iconColor="gray-2"
+                  @click.native="handleValueModal('isFilled')")
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -255,6 +281,10 @@ export default Vue.extend({
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? '--'
     },
+    filled(): boolean {
+      const { currLayer } = this
+      return (currLayer as IShape).filled ?? false
+    },
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
     },
@@ -282,6 +312,9 @@ export default Vue.extend({
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+    },
+    isBasicShape(): boolean {
+      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
     },
     startMarker(): string {
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[0] ?? 'none' : 'none'
@@ -428,21 +461,23 @@ export default Vue.extend({
       if (GeneralUtils.isValidInt(value)) {
         const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
         const { currLayer } = this
-        const { point, styles, size } = (currLayer as IShape)
+        const { point, styles, size, category } = (currLayer as IShape)
         LayerUtils.updateLayerProps(
           this.lastSelectedPageIndex,
           this.currSelectedIndex,
-          { size: [lineWidth] }
+          { size: [lineWidth, ...(size ?? []).slice(1)] }
         )
-        const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, size?.[0] ?? 1, lineWidth)
-        LayerUtils.updateLayerStyles(
-          this.lastSelectedPageIndex,
-          this.currSelectedIndex,
-          {
-            x: trans.x,
-            y: trans.y
-          }
-        )
+        if (this.isLine || this.isBasicShape) {
+          const trans = shapeUtils.getTranslateCompensationForLineWidth(category, point ?? [], styles, size?.[0] ?? 1, lineWidth)
+          LayerUtils.updateLayerStyles(
+            this.lastSelectedPageIndex,
+            this.currSelectedIndex,
+            {
+              x: trans.x,
+              y: trans.y
+            }
+          )
+        }
       }
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
@@ -661,15 +696,14 @@ export default Vue.extend({
   }
   &__line-action-wrapper {
     position: relative;
-
-    &-dashAndEdge {
-      @extend .shape-setting__line-action-wrapper;
-      height: 24px;
-    }
-
-    &-marker {
-      @extend .shape-setting__line-action-wrapper;
-    }
+    height: 24px;
+  }
+  &__basic-shape-action {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    row-gap: 10px;
+    column-gap: 20px;
   }
 }
 .rainbow {

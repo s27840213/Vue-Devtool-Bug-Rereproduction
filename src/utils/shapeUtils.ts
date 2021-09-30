@@ -349,12 +349,21 @@ class ShapeUtils {
     return res
   }
 
-  getTranslateCompensationForLineWidth(point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, newScale: number):
+  getTranslateCompensationForLineWidth(category: string, point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, newScale: number):
   {x: number, y: number} {
-    const ratio = styles.width / styles.initWidth
-    const { baseDegree } = this.lineDimension(point)
-    const dx = 2 * (scale - newScale) * Math.sin(baseDegree)
-    const dy = 2 * (scale - newScale) * Math.cos(baseDegree)
+    let dx = 0
+    let dy = 0
+
+    if (category === 'D') {
+      const { baseDegree } = this.lineDimension(point)
+      dx = 2 * (scale - newScale) * Math.sin(baseDegree)
+      dy = 2 * (scale - newScale) * Math.cos(baseDegree)
+    }
+
+    if (category === 'E') {
+      dx = (scale - newScale) / 2
+      dy = (scale - newScale) / 2
+    }
 
     return {
       x: styles.x + dx,

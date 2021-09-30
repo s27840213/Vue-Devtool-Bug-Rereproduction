@@ -111,6 +111,11 @@ export default Vue.extend({
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
         }
 
+        if (this.config.category === 'E') {
+          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(this.config.vSize, newVal[0])
+          Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
+        }
+
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap, this.config.filled)
         this.styleNode.textContent = styleText
       },
@@ -143,8 +148,10 @@ export default Vue.extend({
     },
     'config.vSize': {
       handler: function(newVal) {
-        const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0])
-        Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
+        if (this.config.category === 'E') {
+          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0])
+          Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
+        }
       },
       deep: true
     }
