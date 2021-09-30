@@ -114,7 +114,7 @@
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleSliderModal('line-width')")
           div(v-if="openSliderBar === 'line-width'"
-              class="shape-setting__range-input-wrapper-line-width right"
+              class="shape-setting__range-input-wrapper-stroke-width"
               v-click-outside="handleSliderModal")
             input(class="shape-setting__range-input shape-setting__range-input-line-width"
               :value="lineWidth"
@@ -675,6 +675,14 @@ export default Vue.extend({
       @extend .shape-setting__range-input-wrapper;
       width: 155px;
       left: -15px;
+      right: unset;
+      top: 35px;
+    }
+
+    &-stroke-width {
+      @extend .shape-setting__range-input-wrapper;
+      width: 155px;
+      left: -17px;
       right: unset;
       top: 35px;
     }
