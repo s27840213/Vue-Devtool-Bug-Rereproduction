@@ -418,7 +418,7 @@ class ShapeUtils {
         halfWidth = vSize[0] / 2
         height = vSize[1]
         innerHypotenuse = Math.sqrt(Math.pow(height, 2) + Math.pow(halfWidth, 2))
-        return halfWidth - Math.sqrt((innerHypotenuse - halfWidth) / (innerHypotenuse + halfWidth))
+        return halfWidth * Math.sqrt((innerHypotenuse - halfWidth) / (innerHypotenuse + halfWidth))
       default:
         return Number.EPSILON
     }
