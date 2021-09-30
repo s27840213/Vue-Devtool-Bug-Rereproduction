@@ -134,6 +134,12 @@ export default Vue.extend({
         this.styleNode.textContent = styleText
       }
     },
+    'config.filled': {
+      handler: function(newVal) {
+        const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, newVal)
+        this.styleNode.textContent = styleText
+      }
+    },
     'config.markerId': {
       handler: function(newVal) {
         if (this.config.category === 'D') {

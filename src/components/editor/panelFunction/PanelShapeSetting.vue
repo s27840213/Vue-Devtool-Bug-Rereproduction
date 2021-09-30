@@ -108,7 +108,7 @@
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
-      div(class="action-bar flex-around")
+      div(class="action-bar flex-around" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
           svg-icon(class="pointer"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
@@ -133,6 +133,20 @@
                   v-else
                   iconName="non-filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
+          general-value-selector(v-if="openValueSelector === 'isFilled'"
+                      :valueArray="[[0, 1]]"
+                      class="shape-setting__value-selector-filled"
+                      v-click-outside="handleValueModal"
+                      :values="[filled ? 1 : 0]"
+                      @update="handleBasicShapeFilledUpdate"
+                      itemMinWidth="64",
+                      buttonHeight="26")
+            template(class="pointer" v-slot:g0i0)
+              svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
+              div(class="shape-setting__value-selector__button-text") 空心
+            template(class="pointer" v-slot:g0i1)
+              svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
+              div(class="shape-setting__value-selector__button-text") 實心
     div(class="relative")
       property-bar(class="shape-setting__property-bar")
         button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
@@ -502,6 +516,13 @@ export default Vue.extend({
         { linecap: (edge === 3) ? 'butt' : 'round' }
       )
     },
+    handleBasicShapeFilledUpdate(index: number, filled: number) {
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        { filled: filled === 1 }
+      )
+    },
     handleStartMarkerUpdate(index: number, value: string) {
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
@@ -615,6 +636,11 @@ export default Vue.extend({
     &-marker {
       @extend .shape-setting__value-selector;
       left: -100%;
+    }
+
+    &-filled {
+      @extend .shape-setting__value-selector;
+      left: 0;
     }
   }
   &__color-picker {
