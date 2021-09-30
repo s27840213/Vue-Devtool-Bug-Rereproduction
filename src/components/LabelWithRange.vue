@@ -5,6 +5,7 @@
         slot
           div placeholder
       div(class="label-with-range__label__value"
+          :class="{ disabled: disabled }"
           @click="handleSliderModal('open')")
         | {{ Math.round(value) }}
         div(v-if="mode === 'open'"
@@ -31,7 +32,8 @@ export default Vue.extend({
   props: {
     value: Number,
     max: Number,
-    min: Number
+    min: Number,
+    disabled: Boolean
   },
   data() {
     return {
@@ -46,6 +48,7 @@ export default Vue.extend({
   },
   methods: {
     handleSliderModal(mode = '') {
+      if (this.disabled) return
       this.mode = mode
     },
     setValue(e: Event) {
@@ -78,6 +81,12 @@ export default Vue.extend({
 
     &__value {
       padding-right: 6%;
+      cursor: pointer;
+
+      &.disabled {
+        color: map-get($colors, gray-4);
+        cursor: not-allowed;
+      }
     }
   }
 

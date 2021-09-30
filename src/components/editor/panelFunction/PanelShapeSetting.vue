@@ -147,7 +147,9 @@
             template(class="pointer" v-slot:g0i1)
               svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
               div(class="shape-setting__value-selector__button-text") 實心
-      label-with-range(:value="corRadPercentage" :min="0" :max="100" @update="handleBasicShapeCorRadPercentUpdate")
+      label-with-range(:value="corRadPercentage" :min="0" :max="100"
+                      @update="handleBasicShapeCorRadPercentUpdate"
+                      :disabled="corRadDisabled")
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
@@ -311,6 +313,10 @@ export default Vue.extend({
       const { currLayer } = this
       const { vSize, shapeType, size } = (currLayer as IShape)
       return Math.min(controlUtils.getCorRadPercentage(vSize, size ?? [0, 0], shapeType ?? ''), 100)
+    },
+    corRadDisabled(): boolean {
+      const { currLayer } = this
+      return (currLayer as IShape).shapeType === 'e'
     },
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
