@@ -11,7 +11,7 @@ pipelines:
         - step:
             name: 'Start build with node module cache'
             caches: #set caches for node modules to speed up building
-              - node 
+              - node
             script:
               - yarn install
               - yarn build
@@ -19,6 +19,8 @@ pipelines:
               - dist/**
         - step:
             name: 'Run E2E Tests'
+            caches:
+              - node
             script:
               - yarn serve & npx wait-on http://localhost:8080
               - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY
