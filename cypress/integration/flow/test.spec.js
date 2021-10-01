@@ -144,6 +144,16 @@ describe('Flow: Image, Text, Group', () => {
             .trigger('mouseup', { force: true })
         })
 
+      cy.get('.pages-wrapper')
+        .first()
+        .click()
+        .type('{meta}d')
+        .type('{meta}a')
+
+      cy.get('.nu-controller__content')
+        .trigger('mousedown', { force: true })
+        .trigger('mouseup', { force: true })
+
       // zoom in
       cy.get('.nu-controller__content')
         .then($el => {
