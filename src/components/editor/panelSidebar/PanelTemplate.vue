@@ -21,6 +21,7 @@
           @action="handleSearch")
           template(v-slot:preview="{ item }")
             category-template-item(class="panel-template__item"
+              :showId="showTemplateId"
               :item="item")
       template(v-slot:category-template-item="{ list, title }")
         div(class="panel-template__items")
@@ -29,6 +30,7 @@
           category-template-item(v-for="item in list"
             class="panel-template__item"
             :key="item.id"
+            :showId="showTemplateId"
             :item="item")
 </template>
 
@@ -60,12 +62,19 @@ export default Vue.extend({
         'keyword'
       ]
     ),
+    ...mapState('user', ['role']),
+    showTemplateId (): boolean {
+      return this.role === 0
+    },
+    itemHeight (): number {
+      return this.showTemplateId ? 179 : 155
+    },
     listCategories(): any[] {
-      const { keyword, categories } = this
+      const { keyword, categories, itemHeight } = this
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
         .map(category => ({
-          size: 225,
+          size: itemHeight + 46,
           id: `rows_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
@@ -73,7 +82,7 @@ export default Vue.extend({
         }))
     },
     listResult(): any[] {
-      const { keyword } = this
+      const { keyword, itemHeight } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
       const result = new Array(Math.ceil(list.length / 2))
         .fill('')
@@ -85,7 +94,7 @@ export default Vue.extend({
             type: 'category-template-item',
             list: rowItems,
             title,
-            size: title ? (179 + 46) : 179,
+            size: title ? (itemHeight + 46) : itemHeight,
             sentinel: !idx
           }
         })

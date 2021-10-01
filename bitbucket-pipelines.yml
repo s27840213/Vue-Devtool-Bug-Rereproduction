@@ -17,13 +17,15 @@ pipelines:
               - yarn build
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - dist/**
-        # - step:
-        #     name: 'Run E2E Tests'
-        #     caches:
-        #       - node
-        #     script:
-        #       - yarn serve & npx wait-on http://localhost:8080
-        #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY
+        - step:
+            name: 'Run E2E Tests'
+            caches:
+              - node
+            image: cypress/browsers:node14.17.0-chrome88-ff89
+            script:
+              - npx cypress install
+              - yarn serve & npx wait-on http://localhost:8080
+              - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
     - step:
         name: 'Deploy to S3 test environment'
         deployment: test
