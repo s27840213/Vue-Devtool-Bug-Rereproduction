@@ -7,7 +7,8 @@
       div(class="label-with-range__label__value"
           :class="{ disabled: disabled }"
           @click="handleSliderModal('open')")
-        | {{ Math.round(value) }}
+        input(:value="Math.round(value)"
+              @input="setValue")
         div(v-if="mode === 'open'"
             class="label-with-range__range-input-wrapper"
             v-click-outside="handleSliderModal")
@@ -81,6 +82,7 @@ export default Vue.extend({
 
     &__value {
       padding-right: 6%;
+      width: 20%;
       cursor: pointer;
 
       &.disabled {
