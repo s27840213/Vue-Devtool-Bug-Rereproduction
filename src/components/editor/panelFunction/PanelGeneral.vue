@@ -42,6 +42,9 @@ import GroupUtils from '@/utils/groupUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
+import { ILayer } from '@/interfaces/layer'
+import { PopupSliderEventType } from '@/store/types'
+import popup from '@/store/module/popup'
 
 export default Vue.extend({
   data() {
@@ -52,7 +55,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      popupComponent: 'popup/getPopupComponent'
     }),
     selectedLayerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -63,9 +68,26 @@ export default Vue.extend({
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
-    isGroupBtnDisable(): boolean {
-      return this.isLocked || (!this.isGroup && this.selectedLayerNum <= 1)
+    layerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    opacity(): number {
+      if (this.layerNum === 1) {
+        return this.currSelectedInfo.layers[0].styles.opacity
+      }
+      return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
     }
+  },
+  mounted() {
+    popupUtils.on(PopupSliderEventType.opacity, (value: number) => {
+      this.setOpacity(value)
+    })
   },
   methods: {
     mappingIcons(type: string): string[] {
@@ -84,10 +106,51 @@ export default Vue.extend({
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
+      popupUtils.setCurrEvent(PopupSliderEventType.opacity)
+      popupUtils.setSliderConfig(Object.assign({ value: this.opacity }, MappingUtils.mappingMinMax('opacity')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-opacity'
       })
+    },
+    setOpacity(value: number): void {
+      if (value > 100) {
+        value = 100
+      }
+      if (!this.isGroup) {
+        if (this.currSelectedInfo.layers.length === 1) {
+          this.$store.commit('UPDATE_layerStyles', {
+            pageIndex: this.currSelectedInfo.pageIndex,
+            layerIndex: this.currSelectedInfo.index,
+            styles: {
+              opacity: value
+            }
+          })
+        } else {
+          this.$store.commit('UPDATE_selectedLayersStyles', {
+            styles: {
+              opacity: value
+            }
+          })
+        }
+      } else {
+        if (this.hasSubSelectedLayer) {
+          this.$store.commit('SET_subLayerStyles', {
+            pageIndex: this.currSelectedInfo.pageIndex,
+            primaryLayerIndex: this.currSelectedInfo.index,
+            subLayerIndex: this.currSubSelectedInfo.index,
+            styles: {
+              opacity: value
+            }
+          })
+        } else {
+          this.$store.commit('UPDATE_groupLayerStyles', {
+            styles: {
+              opacity: value
+            }
+          })
+        }
+      }
     }
   }
 })

@@ -3,7 +3,7 @@ div(style="position:relative;")
   div(class="login-wrapper")
     div(v-if="currentPageIndex === 0" class="login login-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
+        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
         span(class="text-blue-1 h-5") LOG IN
       div
@@ -124,6 +124,7 @@ export default Vue.extend({
   name: 'Login',
   data() {
     return {
+      token: '',
       email: '' as string,
       password: '' as string,
       vcode: '' as string,
@@ -314,7 +315,6 @@ export default Vue.extend({
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
-      console.log(data)
       if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
@@ -370,8 +370,7 @@ export default Vue.extend({
       if (data.flag === 0) {
         this.currentPageIndex = 3
         this.isResetClicked = false
-        const token = data.token
-        store.dispatch('user/setToken', { token })
+        this.token = data.token
       } else {
         this.vcodeErrorMessage = data.msg
         console.log(data.msg)
@@ -396,7 +395,7 @@ export default Vue.extend({
         return
       }
 
-      const { data } = await userApis.resetPassword(store.getters['user/getToken'], this.email, this.password) // token, account, upass
+      const { data } = await userApis.resetPassword(this.token, this.email, this.password) // token, account, upass
       if (data.flag === 0) {
         this.email = ''
         this.currentPageIndex = 0
@@ -422,13 +421,14 @@ export default Vue.extend({
     },
     onGoogleClicked() {
       this.isLoading = true
+      const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
       'include_granted_scopes=true&' +
       'response_type=code&' +
       'prompt=select_account&' +
       'state=state_parameter_vivipic&' +
-      `redirect_uri=${window.location.href}&` +
+      `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
@@ -555,9 +555,6 @@ export default Vue.extend({
   }
 }
 
-.w-50 {
-  width: 50%;
-}
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

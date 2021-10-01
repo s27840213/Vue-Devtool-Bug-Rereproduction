@@ -169,20 +169,20 @@
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    div(v-if="getColors.length || isGrouped" class="shape-setting__title")
-      span(class="shape-setting__title text-blue-1 label-lg") Color Palette
-      div(class="shape-setting__colors")
-        div(class="shape-setting__color rainbow" ref="rainbow"
-          :style="colorPickerStyles()" @click="handleColorModalOn")
-          color-picker(v-if="openColorPicker"
-            class="shape-setting__color-picker"
-            v-click-outside="handleColorModalOff"
-            :currentColor="getColors[currSelectedColorIndex]"
-            @update="handleColorUpdate")
-        div(v-for="(color, index) in colorPresets"
-          class="shape-setting__color palette"
-          :style="paletteColorStyle(color, index)"
-          @click="setColor(color, index)")
+    //- div(v-if="getColors.length || isGrouped" class="shape-setting__title")
+    //-   span(class="shape-setting__title text-blue-1 label-lg") Color Palette
+    //-   div(class="shape-setting__colors")
+    //-     div(class="shape-setting__color rainbow" ref="rainbow"
+    //-       :style="colorPickerStyles()" @click="handleColorModalOn")
+    //-       color-picker(v-if="openColorPicker"
+    //-         class="shape-setting__color-picker"
+    //-         v-click-outside="handleColorModalOff"
+    //-         :currentColor="getColors[currSelectedColorIndex]"
+    //-         @update="handleColorUpdate")
+    //-     div(v-for="(color, index) in colorPresets"
+    //-       class="shape-setting__color palette"
+    //-       :style="paletteColorStyle(color, index)"
+    //-       @click="setColor(color, index)")
 </template>
 
 <script lang="ts">
@@ -204,6 +204,8 @@ import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import controlUtils from '@/utils/controlUtils'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   components: {
@@ -250,11 +252,16 @@ export default Vue.extend({
           vSize: [0, 4],
           trimOffset: -1
         }
-      } as {[key: string]: IMarker}),
+      } as { [key: string]: IMarker }),
       markerListReady: false
     }
   },
   mounted() {
+    colorUtils.on(ColorEventType.shape, (color: string) => {
+      this.handleColorUpdate(color)
+    })
+    colorUtils.setCurrEvent(ColorEventType.shape)
+    colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
     this.initilizeRecord()
     const currLayer = this.currLayer as IShape
     this.getCategories().then(async () => {
@@ -599,7 +606,7 @@ export default Vue.extend({
         }
       )
     },
-    makeSlots(markerIds: string[]): {marker: string, name: string}[] {
+    makeSlots(markerIds: string[]): { marker: string, name: string }[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
     },
     getMarkerContent(markerId: string) {

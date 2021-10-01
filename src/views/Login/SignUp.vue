@@ -3,7 +3,7 @@ div(style="position:relative;")
   div(class="signup-wrapper")
     div(v-if="currentPageIndex === 0" class="signup signup-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
+        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
         span(class="text-blue-1 h-5") Start with Vivipic
       div
@@ -25,7 +25,7 @@ div(style="position:relative;")
         button(@click="onBackClicked")
               svg-icon(class="pointer"
               iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-2'")
-        span(class="text-blue-1 h-5") Create your account
+        span(class="text-blue-1") Create your account
         button
               svg-icon(class="pointer"
               iconName="page-close" :iconWidth="'0px'" :iconColor="'gray-2'")
@@ -323,7 +323,8 @@ export default Vue.extend({
       }
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
-        this.$router.push({ name: 'Login' })
+        store.commit('user/SET_TOKEN', data.token)
+        this.$router.push({ name: 'Editor' })
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
@@ -348,13 +349,14 @@ export default Vue.extend({
     },
     onGoogleClicked() {
       this.isLoading = true
+      const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
       'include_granted_scopes=true&' +
       'response_type=code&' +
       'prompt=select_account&' +
       'state=state_parameter_vivipic&' +
-      `redirect_uri=${window.location.href}&` +
+      `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
@@ -468,6 +470,11 @@ export default Vue.extend({
       > button {
         padding-top: 7px;
       }
+      > span {
+        font-size: 24px;
+        line-height: 32px;
+        font-weight: 600;
+      }
     }
     &:nth-child(2) { // input fields
       margin-bottom: 3vh;
@@ -494,9 +501,6 @@ export default Vue.extend({
   }
 }
 
-.w-50 {
-  width: 50%;
-}
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

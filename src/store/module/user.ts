@@ -207,6 +207,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async login({ commit, dispatch }, { token, account, password }) {
     try {
+      state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
       console.log(data)
       await dispatch('loginSetup', { data: data })
@@ -230,7 +231,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     if (data.flag === 0) {
       const newToken = data.data.token as string // token may be refreshed
       commit('SET_STATE', {
-        isAuthenticated: newToken.length > 0,
         downloadUrl: data.data.download_url,
         userId: data.data.user_id,
         role: data.data.role

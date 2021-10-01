@@ -34,10 +34,12 @@
         :currentColor="props.color"
         @update="handleColorUpdate")
       div(class="action-bar action-bar--small flex-evenly")
-        svg-icon(class="pointer record-selection"
-          :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'")
-        svg-icon(class="pointer record-selection"
-          :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'")
+        svg-icon(class="pointer record-selection btn-lh"
+          :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
+          @click.native="openLineHeightSliderPopup('.btn-lh')")
+        svg-icon(class="pointer record-selection btn-ls"
+          :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
+          @click.native="openSpacingSliderPopup('.btn-ls')")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="pointer record-selection"
@@ -51,59 +53,58 @@
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
-    div(class="text-setting__row5")
-      div(class="relative")
-        div(class="property-bar")
-          button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
-            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
-                  :value="props.lineHeight" @change="setHeight($event, true)")
-          svg-icon(class="pointer"
-            :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
-        div(v-if="openSliderBar === 'lineHeight'"
-            class="text-setting__range-input-wrapper"
-            v-click-outside="handleSliderModal")
-          input(class="text-setting__range-input"
-            :value="props.lineHeight * 100"
-            :max="fieldRange.lineHeight.max"
-            :min="fieldRange.lineHeight.min"
-            v-ratio-change
-            type="range"
-            @input="setHeight")
-      div(class="relative")
-        div(class="property-bar")
-          button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
-            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
-                  :value="props.fontSpacing" @change="setSpacing")
-          svg-icon(class="pointer"
-            :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
-        div(v-if="openSliderBar === 'fontSpacing'"
-            class="text-setting__range-input-wrapper"
-            v-click-outside="handleSliderModal")
-          input(class="text-setting__range-input"
-            :value="props.fontSpacing"
-            :max="fieldRange.fontSpacing.max"
-            :min="fieldRange.fontSpacing.min"
-            v-ratio-change
-            type="range"
-            @input="setSpacing")
-      div(class="relative")
-        div(class="property-bar")
-          button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
-            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-opacity"
-                  :value="props.opacity" @change="setOpacity")
-          svg-icon(class="pointer"
-            :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
-        div(v-if="openSliderBar === 'opacity'"
-            class="text-setting__range-input-wrapper right"
-            v-click-outside="handleSliderModal")
-          input(class="text-setting__range-input"
-            :value="props.opacity"
-            :max="fieldRange.opacity.max"
-            :min="fieldRange.opacity.min"
-            v-ratio-change
-            type="range"
-            @input="setOpacity")
-
+    //- div(class="text-setting__row5")
+    //-   div(class="relative")
+    //-     div(class="property-bar")
+    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
+    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
+    //-               :value="props.lineHeight" @change="setHeight($event, true)")
+    //-       svg-icon(class="pointer"
+    //-         :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
+    //-     div(v-if="openSliderBar === 'lineHeight'"
+    //-         class="text-setting__range-input-wrapper"
+    //-         v-click-outside="handleSliderModal")
+    //-       input(class="text-setting__range-input"
+    //-         :value="props.lineHeight * 100"
+    //-         :max="fieldRange.lineHeight.max"
+    //-         :min="fieldRange.lineHeight.min"
+    //-         v-ratio-change
+    //-         type="range"
+    //-         @input="setHeight")
+    //-   div(class="relative")
+    //-     div(class="property-bar")
+    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
+    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
+    //-               :value="props.fontSpacing" @change="setSpacing")
+    //-       svg-icon(class="pointer"
+    //-         :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
+    //-     div(v-if="openSliderBar === 'fontSpacing'"
+    //-         class="text-setting__range-input-wrapper"
+    //-         v-click-outside="handleSliderModal")
+    //-       input(class="text-setting__range-input"
+    //-         :value="props.fontSpacing"
+    //-         :max="fieldRange.fontSpacing.max"
+    //-         :min="fieldRange.fontSpacing.min"
+    //-         v-ratio-change
+    //-         type="range"
+    //-         @input="setSpacing")
+    //-   div(class="relative")
+    //-     div(class="property-bar")
+    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
+    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-opacity"
+    //-               :value="props.opacity" @change="setOpacity")
+    //-       svg-icon(class="pointer"
+    //-         :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
+    //-     div(v-if="openSliderBar === 'opacity'"
+    //-         class="text-setting__range-input-wrapper right"
+    //-         v-click-outside="handleSliderModal")
+    //-       input(class="text-setting__range-input"
+    //-         :value="props.opacity"
+    //-         :max="fieldRange.opacity.max"
+    //-         :min="fieldRange.opacity.min"
+    //-         v-ratio-change
+    //-         type="range"
+    //-         @input="setOpacity")
 </template>
 
 <script lang="ts">
@@ -123,7 +124,10 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { FunctionPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import popupUtils from '@/utils/popupUtils'
+import { parse } from 'uuid'
 
 export default Vue.extend({
   components: {
@@ -151,6 +155,16 @@ export default Vue.extend({
   mounted() {
     this.setCurrFunctionPanel(FunctionPanelType.textSetting)
     TextPropUtils.updateTextPropsState()
+    colorUtils.on(ColorEventType.text, (color: string) => {
+      this.handleColorUpdate(color)
+    })
+
+    popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
+      this.setHeight(value)
+    })
+    popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
+      this.setSpacing(value)
+    })
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
@@ -203,7 +217,11 @@ export default Vue.extend({
       this.$emit('openFontsPanel')
     },
     handleColorModal() {
-      this.openColorPicker = !this.openColorPicker
+      // this.openColorPicker = !this.openColorPicker
+      colorUtils.setCurrEvent(ColorEventType.text)
+      colorUtils.setCurrColor(this.props.color)
+
+      this.$emit('toggleColorPanel', true)
       if (!this.openColorPicker) {
         TextUtils.focus(this.sel.start, this.sel.end)
       }
@@ -431,26 +449,25 @@ export default Vue.extend({
         })
       }
     },
-    setSpacing(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidInt(value)) {
-        value = this.boundValue(parseInt(value), this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max)
+    setSpacing(value: number) {
+      // let { value } = e.target as HTMLInputElement
+      if (this.isValidInt(value.toString())) {
+        value = parseInt(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('fontSpacing', parseInt(value) / 1000, this.sel.start, this.sel.end)
+          TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000, this.sel.start, this.sel.end)
           TextPropUtils.updateTextPropsState({ fontSpacing: value })
         })
       }
     },
-    setHeight(e: Event, isInput?: boolean) {
-      let { value } = e.target as HTMLInputElement
-      if (isInput && this.isValidFloat(value)) {
-        value = (parseFloat(value) * 100).toString()
+    setHeight(value: number, isInput?: boolean) {
+      if (isInput && this.isValidFloat(value.toString())) {
+        value = (parseFloat(value.toString()) * 100)
       }
-      if (this.isValidInt(value)) {
-        value = this.boundValue(parseInt(value), this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max)
+      if (this.isValidInt(value.toString())) {
+        value = parseInt(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((parseInt(value) / 100).toFixed(2)), this.sel.start, this.sel.end)
-          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((parseInt(value) / 100).toFixed(2)) })
+          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value / 100).toFixed(2)), this.sel.start, this.sel.end)
+          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value / 100).toFixed(2)) })
         })
       }
     },
@@ -494,9 +511,24 @@ export default Vue.extend({
       }
     },
     onBlur() {
-      console.log('onBlur')
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
       TextPropUtils.updateTextPropsState()
+    },
+    openLineHeightSliderPopup() {
+      popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.openPopup('slider', {
+        posX: 'right',
+        target: '.btn-lh'
+      })
+    },
+    openSpacingSliderPopup() {
+      popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.openPopup('slider', {
+        posX: 'right',
+        target: '.btn-ls'
+      })
     }
   }
 })

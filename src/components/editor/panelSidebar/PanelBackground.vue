@@ -21,6 +21,7 @@
               v-click-outside="handleColorPicker"
               class="panel-bg__color-picker"
               :currentColor="currentPageColor"
+              :showColorSlip="true"
               @update="setBgColor")
             div(class="panel-bg__color"
               @click="handleColorPicker")

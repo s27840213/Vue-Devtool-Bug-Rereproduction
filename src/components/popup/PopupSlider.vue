@@ -1,26 +1,25 @@
 <template lang="pug">
   div(class="popup-slider")
     input(class="popup-slider__range-input"
-      v-model="opacity"
-      :max="100"
-      :min="0"
+      v-model="value"
+      :max="max"
+      :min="min"
       v-ratio-change
       type="range")
-    input(class="popup-slider__text body-2 text-gray-2 record-selection"
-      ref="input-opacity"
+    input(class="popup-slider__text body-2 text-gray-2"
       type="text"
-      v-model="opacity")
+      v-model="value")
 </template>
 
 <script lang="ts">
-import { ILayer } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
+import popupUtils from '@/utils/popupUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   data() {
     return {
+      popupUtils
     }
   },
   computed: {
@@ -29,64 +28,19 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       popupComponent: 'popup/getPopupComponent'
     }),
-    layerNum() {
-      return this.currSelectedInfo.layers.length
+    min(): number {
+      return popupUtils.sliderConfig.min
     },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    max(): number {
+      return popupUtils.sliderConfig.max
     },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    opacity: {
+    value: {
       get: function (): number {
-        if (this.layerNum === 1) {
-          return this.currSelectedInfo.layers[0].styles.opacity
-        }
-        return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
+        return popupUtils.sliderConfig.value
       },
       set(value: number): void {
-        console.log(this.currSelectedInfo)
-        if (value > 100) {
-          value = 100
-        }
-        if (!this.isGroup) {
-          if (this.currSelectedInfo.layers.length === 1) {
-            this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: this.currSelectedInfo.pageIndex,
-              layerIndex: this.currSelectedInfo.index,
-              styles: {
-                opacity: value
-              }
-            })
-          } else {
-            this.$store.commit('UPDATE_selectedLayersStyles', {
-              styles: {
-                opacity: value
-              }
-            })
-          }
-        } else {
-          if (this.hasSubSelectedLayer) {
-            this.$store.commit('SET_subLayerStyles', {
-              pageIndex: this.currSelectedInfo.pageIndex,
-              primaryLayerIndex: this.currSelectedInfo.index,
-              subLayerIndex: this.currSubSelectedInfo.index,
-              styles: {
-                opacity: value
-              }
-            })
-          } else {
-            this.$store.commit('UPDATE_groupLayerStyles', {
-              styles: {
-                opacity: value
-              }
-            })
-          }
-        }
+        popupUtils.event.emit(popupUtils.currEvent, value)
+        popupUtils.setSliderConfig({ value })
       }
     }
   }
