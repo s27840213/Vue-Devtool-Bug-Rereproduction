@@ -323,7 +323,7 @@ export default Vue.extend({
       }
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
-        store.commit('user/SET_TOKEN', data.token)
+        await store.dispatch('user/login', { token: data.token })
         this.$router.push({ name: 'Editor' })
         this.currentPageIndex = 0
       } else {
