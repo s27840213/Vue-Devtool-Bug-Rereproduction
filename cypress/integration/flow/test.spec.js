@@ -204,7 +204,7 @@ describe('Flow: Image, Text, Group', () => {
               }
               cy.get('.pages-wrapper')
                 .first()
-                .trigger('mousedown', scaleBtn.x, scaleBtn.y)
+                .trigger('mousedown', scaleBtn.x, scaleBtn.y, { force: true })
                 .trigger('mousemove', scaleBtn.x - 30, scaleBtn.y - 30, { force: true })
                 .trigger('mouseup', { force: true })
             })
@@ -213,7 +213,8 @@ describe('Flow: Image, Text, Group', () => {
       // text grouping
       cy.get('.pages-wrapper')
         .first()
-        .click(0, 0)
+        .click()
+        .type('{meta}d')
   
       cy.get('.nu-controller__content')
         .eq(2)
