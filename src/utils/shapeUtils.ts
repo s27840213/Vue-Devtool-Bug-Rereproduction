@@ -187,15 +187,20 @@ class ShapeUtils {
     switch (shapeType) {
       case 't':
         dx = dy = strokeWidth
-        break
+        return {
+          dx: 2 * dx, // stroke-miterlimit=4
+          dy: 2 * dy,
+          dw: 4 * dx,
+          dh: 4 * dy
+        }
       default:
         dx = dy = strokeWidth / 2
-    }
-    return {
-      dx: dx,
-      dy: dy,
-      dw: 2 * dx,
-      dh: 2 * dy
+        return {
+          dx: dx,
+          dy: dy,
+          dw: strokeWidth,
+          dh: strokeWidth
+        }
     }
   }
 
