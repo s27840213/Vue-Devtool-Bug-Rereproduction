@@ -196,7 +196,7 @@ describe('Flow: Image, Text, Group', () => {
         .then($el => {
           const { top, left } = $el.position()
           cy.get('.control-point')
-            .eq(2)
+            .eq(3)
             .then($el => {
               const scaleBtn = {
                 x: left + $el.position().left + 2,
@@ -204,8 +204,8 @@ describe('Flow: Image, Text, Group', () => {
               }
               cy.get('.pages-wrapper')
                 .first()
-                .trigger('mousedown', scaleBtn.x, scaleBtn.y, { force: true })
-                .trigger('mousemove', scaleBtn.x - 30, scaleBtn.y - 30, { force: true })
+                .trigger('mousedown', scaleBtn.x, scaleBtn.y)
+                .trigger('mousemove', scaleBtn.x + 30, scaleBtn.y - 30, { force: true })
                 .trigger('mouseup', { force: true })
             })
         })
