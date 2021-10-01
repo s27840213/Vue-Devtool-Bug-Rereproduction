@@ -8,7 +8,8 @@
           :class="{ disabled: disabled }"
           @click="handleSliderModal('open')")
         input(:value="Math.round(value)"
-              @input="setValue")
+              @input="setValue"
+              :disabled="disabled")
         div(v-if="mode === 'open'"
             class="label-with-range__range-input-wrapper"
             v-click-outside="handleSliderModal")

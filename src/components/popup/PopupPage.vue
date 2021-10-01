@@ -195,6 +195,7 @@ export default Vue.extend({
           shortcutText: 'Used for test',
           action: () => {
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 'e'
             newbasicShapeTest.svg = '<ellipse class="$style[0]" cx="$svgParam[0]" cy="$svgParam[1]" rx="$svgParam[0]" ry="$svgParam[1]"/>'
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 0]
@@ -207,6 +208,7 @@ export default Vue.extend({
           shortcutText: 'Used for test',
           action: () => {
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 'r'
             newbasicShapeTest.svg = '<path class="$style[0]" d="M $svgParam[0] 0 a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] $svgParam[0] v $svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] $svgParam[0] h $svgParam[1] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] -$svgParam[0] v -$svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] -$svgParam[0] z"/>'
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
@@ -219,6 +221,7 @@ export default Vue.extend({
           shortcutText: 'Used for test',
           action: () => {
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 't'
             newbasicShapeTest.svg = '<path class="$style[0]" d="M $svgParam[1] 0 m $svgParam[2] $svgParam[3] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[9] 0 l -$svgParam[4] $svgParam[5] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] $svgParam[7] h $svgParam[8] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] -$svgParam[7] z"/>'
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
