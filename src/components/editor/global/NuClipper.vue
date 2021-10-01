@@ -20,8 +20,9 @@ export default Vue.extend({
       const { type } = this.config
       let { width, height, initWidth, initHeight, scale } = this.config.styles
       // const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
-      const clipPath = type === 'image'
-        ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`) : 'none'
+      // const clipPath = type === 'image'
+      //   ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`) : 'none'
+      const clipPath = type === 'image' ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
       switch (type) {
         case 'shape':
           width = `${initWidth}px`
@@ -34,7 +35,7 @@ export default Vue.extend({
       return {
         width,
         height,
-        transform: 'translate3d(0, 0, 0)',
+        // transform: 'translate3d(0, 0, 0)',
         clipPath,
         // 'clip-path': this.config.clipPath
         //   ? (this.config.clipPath as string).includes('path')

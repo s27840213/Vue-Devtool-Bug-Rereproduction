@@ -386,7 +386,6 @@ export default Vue.extend({
 .page-content {
   overflow: hidden;
   position: absolute;
-  transform: tanslateZ(1px);
   // border: 5px solid green;
   box-sizing: border-box;
   background-size: cover;
@@ -402,7 +401,6 @@ export default Vue.extend({
 }
 .page-control {
   position: absolute;
-  transform: translateZ(2px);
   top: 0px;
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
@@ -439,7 +437,7 @@ export default Vue.extend({
 
 .dim-background {
   position: absolute;
-  transform: translateZ(3px);
+  transform: translateZ(1000px);
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.4);

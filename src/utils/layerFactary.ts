@@ -49,7 +49,6 @@ class LayerFactary {
 
   newFrame(config: IFrame): IFrame {
     const { clips, decoration, width, height } = config
-    console.log('0')
     clips.forEach(img => {
       const imgConfig = {
         isFrame: true,
@@ -64,16 +63,12 @@ class LayerFactary {
       Object.assign(img, this.newImage(imgConfig))
     })
 
-    console.log('1')
-    console.log(decoration)
-
     decoration.styles = {
       width,
       height,
       initWidth: width,
       initHeight: height
     } as any
-    console.log('2')
     return {
       type: 'frame',
       id: GeneralUtils.generateRandomString(8),
