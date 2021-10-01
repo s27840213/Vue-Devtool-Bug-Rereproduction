@@ -24,6 +24,7 @@ pipelines:
             image: cypress/browsers:node14.17.0-chrome88-ff89
             script:
               - npx cypress install
+              - yarn install
               - yarn serve & npx wait-on http://localhost:8080
               - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
     - step:
