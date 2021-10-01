@@ -181,17 +181,45 @@ class ShapeUtils {
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
-  basicShapeDimensionIncludingStroke(vSize: number[], strokeWidth: number): {width: number, height: number} {
+  basicShapeViewBoxDiff(vSize: number[], strokeWidth: number, shapeType: string): {dx: number, dy: number, dw: number, dh: number} {
+    let dx: number
+    let dy: number
+    switch (shapeType) {
+      case 't':
+        dx = dy = strokeWidth
+        break
+      default:
+        dx = dy = strokeWidth / 2
+    }
     return {
-      width: vSize[0] + strokeWidth,
-      height: vSize[1] + strokeWidth
+      dx: dx,
+      dy: dy,
+      dw: 2 * dx,
+      dh: 2 * dy
     }
   }
 
-  basicShapeDimensionExcludingStroke(vSize: number[], strokeWidth: number): {width: number, height: number} {
+  basicShapeViewBoxFormatter(vSize: number[], strokeWidth: number, shapeType: string): string {
+    const [width, height] = vSize
+    const { dx, dy, dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
+    return `${-dx} ${-dy} ${width + dw} ${height + dh}`
+  }
+
+  basicShapeDimensionIncludingStroke(vSize: number[], strokeWidth: number, shapeType: string): {width: number, height: number} {
+    const [width, height] = vSize
+    const { dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
     return {
-      width: vSize[0] - strokeWidth,
-      height: vSize[1] - strokeWidth
+      width: width + dw,
+      height: height + dh
+    }
+  }
+
+  basicShapeDimensionExcludingStroke(vSize: number[], strokeWidth: number, shapeType: string): {width: number, height: number} {
+    const [width, height] = vSize
+    const { dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
+    return {
+      width: width - dw,
+      height: height - dh
     }
   }
 
@@ -349,7 +377,7 @@ class ShapeUtils {
     return res
   }
 
-  getTranslateCompensationForLineWidth(category: string, point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, newScale: number):
+  getTranslateCompensationForLineWidth(category: string, point: number[], styles: {x: number, y: number, width: number, initWidth: number, height: number}, shapeType: string, scale: number, newScale: number):
   {x: number, y: number} {
     let dx = 0
     let dy = 0
@@ -361,8 +389,10 @@ class ShapeUtils {
     }
 
     if (category === 'E') {
-      dx = (scale - newScale) / 2
-      dy = (scale - newScale) / 2
+      const oldDiffs = this.basicShapeViewBoxDiff([styles.width, styles.height], scale, shapeType)
+      const newDiffs = this.basicShapeViewBoxDiff([styles.width, styles.height], newScale, shapeType)
+      dx = oldDiffs.dx - newDiffs.dx
+      dy = oldDiffs.dy - newDiffs.dy
     }
 
     return {

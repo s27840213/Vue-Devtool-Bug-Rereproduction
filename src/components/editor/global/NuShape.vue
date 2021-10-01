@@ -112,7 +112,7 @@ export default Vue.extend({
         }
 
         if (this.config.category === 'E') {
-          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(this.config.vSize, newVal[0])
+          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(this.config.vSize, newVal[0], this.config.shapeType)
           Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
         }
 
@@ -155,7 +155,7 @@ export default Vue.extend({
     'config.vSize': {
       handler: function(newVal) {
         if (this.config.category === 'E') {
-          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0])
+          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0], this.config.shapeType)
           Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
         }
       },
@@ -173,7 +173,10 @@ export default Vue.extend({
       if (this.config.category === 'D') {
         return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
       }
-      return `${-(this.config.size?.[0] ?? 0) / 2} ${-(this.config.size?.[0] ?? 0) / 2} ${this.config.vSize[0] + this.config.pDiff[0] + (this.config.size?.[0] ?? 0)} ${this.config.vSize[1] + this.config.pDiff[1] + (this.config.size?.[0] ?? 0)}`
+      if (this.config.category === 'E') {
+        return shapeUtils.basicShapeViewBoxFormatter(this.config.vSize, this.config.size[0], this.config.shapeType)
+      }
+      return `$0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {
       const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap, this.config.trimOffset) : this.config.point

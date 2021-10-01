@@ -501,14 +501,14 @@ export default Vue.extend({
       if (GeneralUtils.isValidInt(value)) {
         const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
         const { currLayer } = this
-        const { point, styles, size, category } = (currLayer as IShape)
+        const { point, styles, size, category, shapeType } = (currLayer as IShape)
         LayerUtils.updateLayerProps(
           this.lastSelectedPageIndex,
           this.currSelectedIndex,
           { size: [lineWidth, ...(size ?? []).slice(1)] }
         )
         if (this.isLine || this.isBasicShape) {
-          const trans = shapeUtils.getTranslateCompensationForLineWidth(category, point ?? [], styles, size?.[0] ?? 1, lineWidth)
+          const trans = shapeUtils.getTranslateCompensationForLineWidth(category, point ?? [], styles, shapeType ?? '', size?.[0] ?? 1, lineWidth)
           LayerUtils.updateLayerStyles(
             this.lastSelectedPageIndex,
             this.currSelectedIndex,

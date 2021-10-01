@@ -745,7 +745,7 @@ export default Vue.extend({
         case 'shape':
           if (this.config.category === 'E') {
             scale = this.getLayerScale
-            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0])
+            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0], this.config.shapeType)
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [dimensions.width, dimensions.height])
             const corRad = ControlUtils.getCorRadValue([dimensions.width, dimensions.height], this.initCorRadPercentage, this.config.shapeType)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
@@ -890,7 +890,7 @@ export default Vue.extend({
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
 
           if (this.config.category === 'E') {
-            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0])
+            const dimensions = shapeUtils.basicShapeDimensionExcludingStroke([width, height], this.config.size[0], this.config.shapeType)
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [dimensions.width, dimensions.height])
           }
           break

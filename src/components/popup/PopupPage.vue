@@ -226,8 +226,10 @@ export default Vue.extend({
             newbasicShapeTest.svg = '<path class="$style[0]" d="M $svgParam[1] 0 m $svgParam[2] $svgParam[3] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[9] 0 l -$svgParam[4] $svgParam[5] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] $svgParam[7] h $svgParam[8] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] -$svgParam[7] z"/>'
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
             newbasicShapeTest.vSize = [230.94010767585033, newbasicShapeTest.vSize?.[1] ?? 0]
-            newbasicShapeTest.styles.width = 230.94010767585033
-            newbasicShapeTest.styles.initWidth = 230.94010767585033
+            newbasicShapeTest.styles.width = 238.94010767585033
+            newbasicShapeTest.styles.height = 208
+            newbasicShapeTest.styles.initWidth = 238.94010767585033
+            newbasicShapeTest.styles.initHeight = 208
             layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
           }
         }
