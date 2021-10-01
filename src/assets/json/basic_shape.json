@@ -1,0 +1,60 @@
+{
+    "type": "shape",
+    "category": "E",
+    "scaleType": 1,
+    "ratio": 1,
+    "active": false,
+    "shown": false,
+    "cSize": [
+        0,
+        0
+    ],
+    "pSize": [
+        0,
+        0
+    ],
+    "pDiff": [
+        0,
+        0
+    ],
+    "vSize": [
+        200,
+        200
+    ],
+    "styleArray": [
+        "fill:$fillcolor; stroke:$color[0]; stroke-width:$size[0]"
+    ],
+    "color": [
+        "#1FF2BA"
+    ],
+    "svg": "<ellipse class=\"$style[0]\" cx=\"$svgParam[0]\" cy=\"$svgParam[1]\" rx=\"$svgParam[0]\" ry=\"$svgParam[1]\"/>",
+    "filled": false,
+    "shapeType": "e",
+    "className": "_PXXmVkdD",
+    "locked": false,
+    "moved": false,
+    "dragging": false,
+    "designId": "",
+    "size": [
+        4,
+        0
+    ],
+    "path": "",
+    "styles": {
+        "x": 243,
+        "y": 446.1588835116167,
+        "scale": 1,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotate": 0,
+        "width": 204,
+        "height": 204,
+        "initWidth": 204,
+        "initHeight": 204,
+        "zindex": 1,
+        "opacity": 100,
+        "color": [
+            "#1FF2BA"
+        ]
+    }
+}
