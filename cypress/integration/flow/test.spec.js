@@ -207,7 +207,7 @@ describe('Flow: Image, Text, Group', () => {
 
               cy.get('.pages-wrapper')
                 .first()
-                .trigger('mousemove', scaleBtn.x, scaleBtn.y)
+                .trigger('mousemove', scaleBtn.x, scaleBtn.y, { force: true })
                 .trigger('mousemove', scaleBtn.x + 30, scaleBtn.y - 30, { force: true })
                 .trigger('mouseup', { force: true })
             })
