@@ -97,6 +97,8 @@ class ShapeUtils {
       const reg = new RegExp('\\$mtrans\\[' + i + '\\]', 'g')
       svgOut = svgOut.replace(reg, `${className}T${i}`)
     }
+    const svgReg = new RegExp('\\$svgId', 'g')
+    svgOut = svgOut.replace(svgReg, `${className}SVG`)
     if (point?.length !== undefined) {
       for (let i = 0; i < point.length; i++) {
         const reg = new RegExp('\\$point\\[' + i + '\\]', 'g')
@@ -179,53 +181,6 @@ class ShapeUtils {
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
-  }
-
-  basicShapeViewBoxDiff(vSize: number[], strokeWidth: number, shapeType: string): {dx: number, dy: number, dw: number, dh: number} {
-    let dx: number
-    let dy: number
-    switch (shapeType) {
-      case 't':
-        dx = dy = strokeWidth
-        return {
-          dx: 2 * dx, // stroke-miterlimit=4
-          dy: 2 * dy,
-          dw: 4 * dx,
-          dh: 4 * dy
-        }
-      default:
-        dx = dy = strokeWidth / 2
-        return {
-          dx: dx,
-          dy: dy,
-          dw: strokeWidth,
-          dh: strokeWidth
-        }
-    }
-  }
-
-  basicShapeViewBoxFormatter(vSize: number[], strokeWidth: number, shapeType: string): string {
-    const [width, height] = vSize
-    const { dx, dy, dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
-    return `${-dx} ${-dy} ${width + dw} ${height + dh}`
-  }
-
-  basicShapeDimensionIncludingStroke(vSize: number[], strokeWidth: number, shapeType: string): {width: number, height: number} {
-    const [width, height] = vSize
-    const { dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
-    return {
-      width: width + dw,
-      height: height + dh
-    }
-  }
-
-  basicShapeDimensionExcludingStroke(vSize: number[], strokeWidth: number, shapeType: string): {width: number, height: number} {
-    const [width, height] = vSize
-    const { dw, dh } = this.basicShapeViewBoxDiff(vSize, strokeWidth, shapeType)
-    return {
-      width: width - dw,
-      height: height - dh
-    }
   }
 
   getLineQuadrant(point: number[]): number {
@@ -382,23 +337,11 @@ class ShapeUtils {
     return res
   }
 
-  getTranslateCompensationForLineWidth(category: string, point: number[], styles: {x: number, y: number, width: number, initWidth: number, height: number}, shapeType: string, scale: number, newScale: number):
+  getTranslateCompensationForLineWidth(point: number[], styles: {x: number, y: number, width: number, initWidth: number, height: number}, shapeType: string, scale: number, newScale: number):
   {x: number, y: number} {
-    let dx = 0
-    let dy = 0
-
-    if (category === 'D') {
-      const { baseDegree } = this.lineDimension(point)
-      dx = 2 * (scale - newScale) * Math.sin(baseDegree)
-      dy = 2 * (scale - newScale) * Math.cos(baseDegree)
-    }
-
-    if (category === 'E') {
-      const oldDiffs = this.basicShapeViewBoxDiff([styles.width, styles.height], scale, shapeType)
-      const newDiffs = this.basicShapeViewBoxDiff([styles.width, styles.height], newScale, shapeType)
-      dx = oldDiffs.dx - newDiffs.dx
-      dy = oldDiffs.dy - newDiffs.dy
-    }
+    const { baseDegree } = this.lineDimension(point)
+    const dx = 2 * (scale - newScale) * Math.sin(baseDegree)
+    const dy = 2 * (scale - newScale) * Math.cos(baseDegree)
 
     return {
       x: styles.x + dx,
