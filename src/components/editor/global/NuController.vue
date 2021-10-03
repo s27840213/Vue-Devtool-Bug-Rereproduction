@@ -139,6 +139,7 @@ import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { Layer } from 'konva/types/Layer'
 import popupUtils from '@/utils/popupUtils'
+import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   props: {
@@ -161,14 +162,12 @@ export default Vue.extend({
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
-      initImgSize: { width: 0, height: 0 },
       initCoordinate: { x: 0, y: 0 },
       initReferencePoint: { x: 0, y: 0 },
       initMarkerIndex: 0,
       initCorRadPercentage: -1,
-      imgBuffer: { width: 0, height: 0, x: 0, y: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, imgX: 0, imgY: 0, isHorizon: false },
+      control: { xSign: 1, ySign: 1, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
@@ -341,54 +340,6 @@ export default Vue.extend({
       setIsMoving: 'SET_isMoving',
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
-    onFrameMouseEnter(clipIndex: number) {
-      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
-        return
-      }
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      this.clipIndex = clipIndex
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
-        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
-
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-
-        const clip = clips[this.clipIndex]
-        const {
-          initWidth, initHeight,
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.clipIndex, {
-          initWidth,
-          initHeight,
-          imgWidth,
-          imgHeight,
-          imgX,
-          imgY
-        })
-      }
-    },
-    onFrameMouseLeave() {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
-        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
-        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      }
-      this.clipIndex = NaN
-    },
-    onFrameMouseUp() {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        LayerUtils.deleteLayer(LayerUtils.layerIndex)
-        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
-      }
-    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles('')
@@ -424,7 +375,8 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          resizers = []
+          break
+          // resizers = []
       }
       return resizers
     },
@@ -739,9 +691,9 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-          ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-          ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-          scale = this.getLayerScale
+          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
+          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
+          scale = 1
           break
         }
         case 'text':
@@ -751,6 +703,32 @@ export default Vue.extend({
             })
           }
           break
+        case 'frame': {
+          if (!(this.config as IFrame).decoration) {
+            let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
+            imgWidth *= scale
+            imgHeight *= scale
+            imgY *= scale
+            imgX *= scale
+
+            LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              initWidth: width,
+              initHeight: height
+            })
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
+              width: width,
+              height: height,
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            const clipPath = `M0,0h${width}v${height}h${-width}z`
+            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            scale = 1
+          }
+          break
+        }
         case 'shape':
           if (this.config.category === 'E') {
             scale = this.getLayerScale
@@ -863,12 +841,36 @@ export default Vue.extend({
           }
           break
         case 'image':
-          this.initImgSize = {
+          ImageUtils.initImgSize = {
             width: this.config.styles.imgWidth,
             height: this.config.styles.imgHeight
           }
-          this.control.imgX = this.config.styles.imgX
-          this.control.imgY = this.config.styles.imgY
+          ImageUtils.initImgPos = {
+            x: this.config.styles.imgX,
+            y: this.config.styles.imgY
+          }
+          ImageUtils.initLayerSize = this.initSize
+          ImageUtils.xSign = (clientP.x - center.x > 0) ? 1 : -1
+          ImageUtils.ySign = (clientP.y - center.y > 0) ? 1 : -1
+          ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
+          break
+        case 'frame':
+          /**
+           * only plain-rectangular-frame would have resizer
+           * the following logic of resizing is only for this kind of frame
+           */
+          ImageUtils.initImgSize = {
+            width: (this.config as IFrame).clips[0].styles.imgWidth,
+            height: (this.config as IFrame).clips[0].styles.imgHeight
+          }
+          ImageUtils.initImgPos = {
+            x: (this.config as IFrame).clips[0].styles.imgX,
+            y: (this.config as IFrame).clips[0].styles.imgY
+          }
+          ImageUtils.initLayerSize = this.initSize
+          ImageUtils.xSign = (clientP.x - center.x > 0) ? 1 : -1
+          ImageUtils.ySign = (clientP.y - center.y > 0) ? 1 : -1
+          ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
       }
     },
     resizing(event: MouseEvent) {
@@ -901,7 +903,7 @@ export default Vue.extend({
       const scale = this.getLayerScale
       switch (this.getLayerType) {
         case 'image':
-          this.imgResizeHandler(width, height, offsetWidth, offsetHeight)
+          ImageUtils.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
@@ -921,6 +923,14 @@ export default Vue.extend({
           } else {
             this.control.ySign = 1
           }
+          break
+        case 'frame': {
+          /**
+           * only plain-rectangular-frame would have resizer
+           * the follow logic is only for this kind of frame.
+           */
+          FrameUtils.frameResizeHandler(width, height, offsetWidth, offsetHeight)
+        }
       }
 
       const initData = {
@@ -937,121 +947,16 @@ export default Vue.extend({
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
-    resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
-      const imgPos = {
-        x: this.control.imgX,
-        y: this.control.imgY
-      }
-      /**
-       * Below is a conclusion of checking-if-the-Resizer-exceed-limit for the top/left resizer
-       * The origin derived algorithm is described as in imgContorller.vue: moving section
-       */
-      if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
-        imgPos.x += offsetX / this.getLayerScale
-        imgPos.y += offsetY / this.getLayerScale
-        if (imgPos.x > 0 || imgPos.y > 0) {
-          return true
-        }
-      } else {
-        width += offsetX
-        height += offsetY
-        if (this.control.isHorizon && width - imgPos.x * this.getLayerScale > this.initImgSize.width * this.getLayerScale) {
-          return true
-        }
-        if (!this.control.isHorizon && height - imgPos.y * this.getLayerScale > this.initImgSize.height * this.getLayerScale) {
-          return true
-        }
-      }
-      return false
-    },
-    imgResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
-      let offsetX
-      let offsetY
-      if ((this.control.isHorizon && this.control.xSign < 0) || (!this.control.isHorizon && this.control.ySign < 0)) {
-        offsetX = offsetWidth
-        offsetY = offsetHeight
-      }
-      if (this.resizeExceedLimit(this.initSize.width, this.initSize.height, offsetWidth, offsetHeight)) {
-        if (this.imgBuffer.width === 0 && this.imgBuffer.height === 0) {
-          this.imgScaling(width + offsetWidth, height + offsetHeight, 0, 0)
-          this.imgBuffer.width = offsetWidth
-          this.imgBuffer.height = offsetHeight
-        }
-        this.imgScaling(width, height, offsetWidth - this.imgBuffer.width, offsetHeight - this.imgBuffer.height)
-      } else {
-        this.imgClipping(width, height, offsetX, offsetY)
-      }
-    },
-    imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number) {
-      ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, layerWidth, layerHeight, this.getLayerScale)
-      let imgWidth = this.initImgSize.width
-      let imgHeight = this.initImgSize.height
-      const imgPos = {
-        x: this.control.imgX,
-        y: this.control.imgY
-      }
-
-      const ratio = imgHeight / imgWidth
-      const width = layerWidth / this.getLayerScale
-      const height = layerHeight / this.getLayerScale
-      offsetWidth /= this.getLayerScale
-      offsetHeight /= this.getLayerScale
-      const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-
-      if (this.control.isHorizon) {
-        imgWidth += offsetWidth
-        imgHeight = imgWidth * ratio
-      } else {
-        imgHeight += offsetHeight
-        imgWidth = imgHeight / ratio
-      }
-      /**
-       * Below is used to make sure the imgHW are always larger than (at least equal to) the layerHW,
-       * This guarantee the exceedLimitation returns the expect value.
-       * p.s. The reason of this the problem which the imgHW somehow smaller than the layerHW might
-       * be caused by the 'rounding-number' of the ratio.
-       */
-      if (imgHeight < layerHeight) {
-        imgHeight = layerHeight
-        imgWidth = layerHeight / ratio
-      } else if (imgWidth < layerWidth) {
-        imgWidth = layerWidth
-        imgHeight = layerWidth * ratio
-      }
-      if (this.control.isHorizon) {
-        imgPos.y -= (imgHeight - this.initImgSize.height) / 2
-        imgPos.x = this.control.xSign > 0 ? -(imgWidth - width) : 0
-      } else {
-        imgPos.x -= (imgWidth - this.initImgSize.width) / 2
-        imgPos.y = this.control.ySign > 0 ? -(imgHeight - height) : 0
-      }
-      if (this.imgBuffer.x === 0 && this.imgBuffer.y === 0) {
-        this.imgBuffer.x = -(imgWidth - this.initImgSize.width) / 2
-        this.imgBuffer.y = -(imgHeight - this.initImgSize.height) / 2
-      }
-
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
-      ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth, imgHeight)
-      ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-    },
-    imgClipping(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
-      ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getLayerScale)
-      const imgX = this.control.imgX
-      const imgY = this.control.imgY
-      const scale = this.getLayerScale
-      width /= scale
-      height /= scale
-      const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
-
-      ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, (offsetX ?? 0) / scale + imgX, (offsetY ?? 0) / scale + imgY)
-      ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, this.initImgSize.width, this.initImgSize.height)
-      ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
-    },
     resizeEnd() {
+      ImageUtils.imgBuffer = {
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0
+      }
       if (this.config.type === 'shape' && this.config.category === 'E') {
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
       }
-      this.imgBuffer = { width: 0, height: 0, x: 0, y: 0 }
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('default')
@@ -1412,6 +1317,51 @@ export default Vue.extend({
         return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+    },
+    onFrameMouseEnter(clipIndex: number) {
+      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
+        return
+      }
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      this.clipIndex = clipIndex
+      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
+        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
+
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+
+        const clip = clips[this.clipIndex]
+        const {
+          imgWidth, imgHeight,
+          imgX, imgY
+        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.clipIndex, {
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+      }
+    },
+    onFrameMouseLeave() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
+        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      }
+      this.clipIndex = NaN
+    },
+    onFrameMouseUp() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
+      }
     }
   }
 })

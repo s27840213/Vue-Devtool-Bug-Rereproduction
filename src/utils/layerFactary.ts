@@ -14,7 +14,7 @@ class LayerFactary {
         assetId: config.srcObj.assetId
       },
       id: GeneralUtils.generateRandomString(8),
-      clipPath: config.clipPath ?? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`,
+      clipPath: config.clipPath ?? '',
       active: false,
       shown: false,
       locked: false,
@@ -48,14 +48,13 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { clips, decoration, width, height } = config
-    console.log('0')
+    const { clips, decoration, width, height, styles } = config
     clips.forEach(img => {
       const imgConfig = {
         isFrame: true,
         clipPath: img.clipPath,
         styles: img.styles,
-        srcObj: {
+        srcObj: img.srcObj ?? {
           type: 'frame',
           assetId: '',
           userId: ''
@@ -63,17 +62,6 @@ class LayerFactary {
       }
       Object.assign(img, this.newImage(imgConfig))
     })
-
-    console.log('1')
-    console.log(decoration)
-
-    decoration.styles = {
-      width,
-      height,
-      initWidth: width,
-      initHeight: height
-    } as any
-    console.log('2')
     return {
       type: 'frame',
       id: GeneralUtils.generateRandomString(8),
@@ -82,23 +70,31 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
-      designId: '',
+      designId: config.designId ?? '',
       styles: {
-        x: 0,
-        y: 0,
+        x: styles.x ?? 0,
+        y: styles.y ?? 0,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: width as number,
-        height: height as number,
-        initWidth: width as number,
-        initHeight: height as number,
+        width: width as number ?? styles.width,
+        height: height as number ?? styles.height,
+        initWidth: width as number ?? styles.width,
+        initHeight: height as number ?? styles.height,
         zindex: -1,
         opacity: 100
       },
       clips,
-      decoration: this.newShape(decoration)
+      decoration: decoration ? this.newShape((() => {
+        decoration.styles = {
+          width,
+          height,
+          initWidth: width,
+          initHeight: height
+        } as any
+        return decoration
+      })()) : undefined
     }
   }
 

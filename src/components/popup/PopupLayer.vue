@@ -43,13 +43,13 @@
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     template(v-if="isImage")
       div(class="popup-layer__item"
-          @click="updateImageAsClipper.action")
+          @click="updateImageAsFrame.action")
         svg-icon(
           class="pointer"
-          :iconName="updateImageAsClipper.icon"
+          :iconName="updateImageAsFrame.icon"
           :iconWidth="'16px'"
           :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{updateImageAsClipper.text}}
+        span(class="ml-10 body-2") {{updateImageAsFrame.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     hr(class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
@@ -105,12 +105,15 @@ import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import FocusUtils from '@/utils/focusUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import { IImage } from '@/interfaces/layer'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
+import layerFactary from '@/utils/layerFactary'
+import zindexUtils from '@/utils/zindexUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -192,14 +195,42 @@ export default Vue.extend({
         }
       }
     },
-    updateImageAsClipper(): any {
+    updateImageAsFrame(): any {
       return {
         icon: 'copy',
-        text: 'Update image as Clipped-Image',
+        text: 'Update image as Frame',
         shortcutText: '',
         action: () => {
-          layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isClipper: true })
-          uploadUtils.updateTemplate()
+          const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage
+          if (currLayer.type === 'image') {
+            const { width, height, x, y } = currLayer.styles
+            const { designId } = currLayer
+            const layerIndex = layerUtils.layerIndex
+            const pageIndex = layerUtils.pageIndex
+            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0 })
+
+            const newFrame = layerFactary.newFrame({
+              designId,
+              styles: {
+                initWidth: width,
+                initHeight: height,
+                width,
+                height,
+                x,
+                y
+              },
+              clips: [{
+                ...currLayer,
+                clipPath: `M0,0h${width}v${height}h${-width}z`
+              }]
+            } as unknown as IFrame)
+            console.log(currLayer)
+            layerUtils.deleteLayer(layerIndex)
+            layerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
+            console.log(layerUtils.getPage(pageIndex))
+            zindexUtils.reassignZindex(pageIndex)
+            uploadUtils.updateTemplate()
+          }
         }
       }
     }

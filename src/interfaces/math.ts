@@ -4,3 +4,8 @@ export interface IBounding {
 	width: number,
 	height: number
 }
+
+export interface ISize {
+	width: number,
+	height: number
+}

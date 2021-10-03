@@ -222,9 +222,6 @@ export default Vue.extend({
     },
     imgClipping(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined) {
       ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, width, height, this.getLayerScale)
-      width /= this.getLayerScale
-      height /= this.getLayerScale
-      const path = `M0 0 L0 ${height} ${width} ${height} ${width} 0Z`
       if (typeof offsetX !== 'undefined' && typeof offsetY !== 'undefined') {
         const imgX = this.control.imgX
         const imgY = this.control.imgY
@@ -232,7 +229,6 @@ export default Vue.extend({
         offsetY /= this.config.styles.scale
         ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, offsetX + imgX, offsetY + imgY)
       }
-      ControlUtils.updateImgClipPath(this.pageIndex, this.layerIndex, `path('${path}')`)
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8

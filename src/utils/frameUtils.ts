@@ -1,10 +1,34 @@
-import LayerUtils from '@/utils/layerUtils'
+import LayerUtils from './layerUtils'
+import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
-
 class FrameUtils {
   frameClipFormatter(path: string) {
     return "<path d='" + path + "'></path>"
+  }
+
+  frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
+    const updateFrameLayer = () => {
+      const clipPath = `M0,0h${width}v${height}h${-width}z`
+      this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
+      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { initWidth: width, initHeight: height })
+    }
+
+    ImageUtils.imgResizeHandler(width, height, offsetWidth, offsetHeight,
+      (imgX: number, imgY: number) => {
+        this.updateFrameLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { imgX, imgY })
+        updateFrameLayer()
+      },
+      (imgWidth: number, imgHeight: number) => {
+        this.updateFrameLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, {
+          imgWidth,
+          imgHeight,
+          width,
+          height
+        })
+        updateFrameLayer()
+      }
+    )
   }
 
   updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {

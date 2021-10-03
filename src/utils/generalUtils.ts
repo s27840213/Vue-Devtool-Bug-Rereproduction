@@ -68,6 +68,17 @@ class GeneralUtils {
     el.remove()
     return Promise.resolve()
   }
+
+  // log(params: string, data: any = '') {
+  //   if (data) {
+  //     console.log(data)
+  //   } else {
+  //     store.commit('SET_LOG' {
+  //       params += 'time'
+  //     })
+  //     logData.push(params)
+  //   }
+  // }
 }
 
 const generalUtils = new GeneralUtils()

@@ -33,7 +33,7 @@ class LayerUtils {
     GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
   }
 
-  addLayersToPos(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp>, pos: number) {
+  addLayersToPos(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, pos: number) {
     store.commit('ADD_layersToPos', {
       pageIndex: pageIndex,
       layers: layers,
