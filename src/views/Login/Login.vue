@@ -3,7 +3,7 @@ div(style="position:relative;")
   div(class="login-wrapper")
     div(v-if="currentPageIndex === 0" class="login login-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
+        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
         span(class="text-blue-1 h-5") LOG IN
       div
@@ -44,9 +44,9 @@ div(style="position:relative;")
       div
         span(class="body-2") Don't worry, please enter your email.<br> We will send an email to help you reset the password.
       div
-        property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
+        property-bar(class="mt-5" :class="{'input-invalid': !mailValid || emailResponseError}")
           input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
-        div(v-if="!mailValid" class="invalid-message")
+        div(v-if="!mailValid || emailResponseError" class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="disp-flex" style="justify-content: center;")
         btn(:type="'primary-mid'" class="btn-shadow w-50 body-1"
@@ -119,18 +119,20 @@ import Vue from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
-import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'Login',
   data() {
     return {
+      token: '',
       email: '' as string,
       password: '' as string,
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
       passwordErrorMessage: 'Please enter your password.' as string,
+      emailResponseError: false as boolean,
+      mailErrorMessage: 'Invalid email address format.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
@@ -141,13 +143,14 @@ export default Vue.extend({
       confirmErrorMessage: '' as string,
       isResetClicked: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      isRollbackByFacebookSignIn: window.location.href.indexOf('facebook') > -1 as boolean,
       isLoading: false
     }
   },
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters['user/isLogin']) {
+    if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
       this.isLoading = true
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
@@ -168,13 +171,6 @@ export default Vue.extend({
         return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.email)
       } else {
         return false
-      }
-    },
-    mailErrorMessage(): string {
-      if (this.email.length === 0) {
-        return 'Please enter your email.'
-      } else {
-        return 'Invalid email address format.'
       }
     },
     passwordValid(): boolean {
@@ -246,18 +242,13 @@ export default Vue.extend({
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('fb login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },
@@ -265,18 +256,13 @@ export default Vue.extend({
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('google login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },
@@ -297,18 +283,7 @@ export default Vue.extend({
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (data.flag === 0) {
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
-          this.$router.push({ name: 'Editor' })
-        }
+        this.$router.push({ name: 'Editor' })
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg
@@ -327,27 +302,40 @@ export default Vue.extend({
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
+      this.emailResponseError = false
       this.isLoading = true
+      if (this.email.length === 0) {
+        this.isLoading = false
+        this.mailErrorMessage = 'Please enter your email.'
+        return
+      }
       if (!this.mailValid) {
         this.isLoading = false
+        this.mailErrorMessage = 'Invalid email address format.'
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
+      } else {
+        this.emailResponseError = true
+        this.mailErrorMessage = data.msg
       }
       this.isLoading = false
     },
     async onResendClicked() {
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
+        this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -361,6 +349,7 @@ export default Vue.extend({
       } else {
         // error
         this.currentPageIndex = 0
+        this.isLoading = false
       }
     },
     async onEnterCodeDoneClicked() {
@@ -381,8 +370,7 @@ export default Vue.extend({
       if (data.flag === 0) {
         this.currentPageIndex = 3
         this.isResetClicked = false
-        const token = data.token
-        store.dispatch('user/setToken', { token })
+        this.token = data.token
       } else {
         this.vcodeErrorMessage = data.msg
         console.log(data.msg)
@@ -407,7 +395,7 @@ export default Vue.extend({
         return
       }
 
-      const { data } = await userApis.resetPassword(store.getters['user/getToken'], this.email, this.password) // token, account, upass
+      const { data } = await userApis.resetPassword(this.token, this.email, this.password) // token, account, upass
       if (data.flag === 0) {
         this.email = ''
         this.currentPageIndex = 0
@@ -422,24 +410,25 @@ export default Vue.extend({
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
-          hostId: '1234abcd'
+          hostId: 'facebook_parameter_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
-        hostId: '1234abcd'
+        hostId: 'facebook_parameter_vivipic'
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
       this.isLoading = true
+      const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
       'include_granted_scopes=true&' +
       'response_type=code&' +
       'prompt=select_account&' +
       'state=state_parameter_vivipic&' +
-      `redirect_uri=${window.location.href}&` +
+      `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
@@ -566,9 +555,6 @@ export default Vue.extend({
   }
 }
 
-.w-50 {
-  width: 50%;
-}
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

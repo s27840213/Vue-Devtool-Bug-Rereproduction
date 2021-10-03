@@ -54,8 +54,11 @@ import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
-import { IFrame, IImage } from '@/interfaces/layer'
+import lineTest from '@/assets/json/line.json'
+import basicShapeTest from '@/assets/json/basic_shape.json'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
+import shapeUtils from '@/utils/shapeUtils'
 import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
@@ -174,6 +177,60 @@ export default Vue.extend({
           action: () => {
             console.log(layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)))
             layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)) as IFrame)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test line',
+          shortcutText: 'Used for test',
+          action: () => {
+            const newLineTest: IShape = GeneralUtils.deepCopy(lineTest)
+            newLineTest.className = shapeUtils.classGenerator()
+            layerUtils.addLayers(this.lastSelectedPageIndex, newLineTest)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test ellipse',
+          shortcutText: 'Used for test',
+          action: () => {
+            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
+            newbasicShapeTest.shapeType = 'e'
+            newbasicShapeTest.svg = '<ellipse class="$style[0]" cx="$svgParam[0]" cy="$svgParam[1]" rx="$svgParam[0]" ry="$svgParam[1]"/>'
+            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 0]
+            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test rectangle',
+          shortcutText: 'Used for test',
+          action: () => {
+            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
+            newbasicShapeTest.shapeType = 'r'
+            newbasicShapeTest.svg = '<path class="$style[0]" d="M $svgParam[0] 0 a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] $svgParam[0] v $svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] $svgParam[0] h $svgParam[1] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] -$svgParam[0] v -$svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] -$svgParam[0] z"/>'
+            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
+            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'Append test triangle',
+          shortcutText: 'Used for test',
+          action: () => {
+            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
+            newbasicShapeTest.className = shapeUtils.classGenerator()
+            newbasicShapeTest.shapeType = 't'
+            newbasicShapeTest.svg = '<path class="$style[0]" d="M $svgParam[1] 0 m $svgParam[2] $svgParam[3] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[9] 0 l -$svgParam[4] $svgParam[5] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] $svgParam[7] h $svgParam[8] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] -$svgParam[7] z"/>'
+            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
+            newbasicShapeTest.vSize = [230.94010767585033, newbasicShapeTest.vSize?.[1] ?? 0]
+            newbasicShapeTest.styles.width = 246.94010767585033
+            newbasicShapeTest.styles.height = 216
+            newbasicShapeTest.styles.initWidth = 246.94010767585033
+            newbasicShapeTest.styles.initHeight = 216
+            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
           }
         }
       ]

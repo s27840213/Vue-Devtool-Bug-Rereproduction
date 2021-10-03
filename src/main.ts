@@ -33,6 +33,12 @@ const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requir
 const req = require.context('@/assets/icon', true, /\.svg$/)
 requireAll(req)
 
+// add temporarily for testing
+if (window.location.href.indexOf('logout') > -1) {
+  localStorage.setItem('token', '')
+  router.push({ name: 'Login' })
+}
+
 let token = localStorage.getItem('token') || ''
 
 // if token is contained in queryString, it would be used
@@ -45,7 +51,7 @@ if (urlParams.has('token')) {
 }
 
 if (token.length > 0) {
-  store.dispatch('user/initializeToken', { token })
+  store.dispatch('user/login', { token: token })
 }
 
 if (['production'].includes(process.env.NODE_ENV)) {

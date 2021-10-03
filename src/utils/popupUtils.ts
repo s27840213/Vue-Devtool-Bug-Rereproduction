@@ -1,11 +1,55 @@
 import { IPopupComponent, IPopupProps } from '@/interfaces/popup'
 import store from '@/store'
+import { EventEmitter } from 'events'
 import Vue from 'vue'
 import MouseUtils from './mouseUtils'
+
+interface ISliderConfig {
+  value: number,
+  min: number,
+  max: number
+}
 
 class PopupUtils {
   get isPopupOpen(): boolean { return store.getters['popup/isPopupOpen'] }
   get popupComponent(): IPopupComponent { return store.getters['popup/popupComponent'] }
+  event: any
+  eventHash: { [index: string]: (value: number) => void }
+  currEvent: string
+  sliderConfig: {
+    value: number
+    min: number,
+    max: number
+  }
+
+  constructor() {
+    this.event = new EventEmitter()
+    this.eventHash = {}
+    this.currEvent = ''
+    this.sliderConfig = {
+      value: 0,
+      min: 0,
+      max: 0
+    }
+  }
+
+  on(type: string, callback: (value: number) => void) {
+    // replace origin event
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
+  }
+
+  setCurrEvent(event: string) {
+    this.currEvent = event
+  }
+
+  setSliderConfig(config: Partial<ISliderConfig>) {
+    Object.assign(this.sliderConfig, config)
+  }
 
   private openPopupUnderTarget(target: string, pos: { x: string, y: string }) {
     Vue.nextTick(() => {

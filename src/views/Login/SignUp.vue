@@ -3,7 +3,7 @@ div(style="position:relative;")
   div(class="signup-wrapper")
     div(v-if="currentPageIndex === 0" class="signup signup-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" class="w-50")
+        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
         span(class="text-blue-1 h-5") Start with Vivipic
       div
@@ -25,7 +25,7 @@ div(style="position:relative;")
         button(@click="onBackClicked")
               svg-icon(class="pointer"
               iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-2'")
-        span(class="text-blue-1 h-5") Create your account
+        span(class="text-blue-1") Create your account
         button
               svg-icon(class="pointer"
               iconName="page-close" :iconWidth="'0px'" :iconColor="'gray-2'")
@@ -49,7 +49,7 @@ div(style="position:relative;")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(v-if="emptyPassword" class="password-hint" :style="`${passwordValid ? '' : 'color: #EB5757;'}`")
+          div(v-if="emptyPassword || emailResponseError" class="password-hint" :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
             span {{ passwordHint }}
           div(v-else class="invalid-message")
             div(class="disp-flex align-center")
@@ -104,7 +104,6 @@ import Vue from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
-import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -119,18 +118,20 @@ export default Vue.extend({
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
+      emailResponseError: false as boolean,
       passwordHint: 'a mix of letters, numbers and symbols with at least 8 characters.' as string,
       vcodeErrorMessage: 'Invalid verification code.' as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      isRollbackByFacebookSignIn: window.location.href.indexOf('facebook') > -1 as boolean,
       isLoading: false
     }
   },
   created() {
     const code = this.$route.query.code as string
     // Facebook login status
-    if (code !== undefined && !store.getters['user/isLogin']) {
+    if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
       this.isLoading = true
       const redirectUri = window.location.href
       this.fbLogin(code, redirectUri)
@@ -223,18 +224,13 @@ export default Vue.extend({
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('fb login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },
@@ -242,18 +238,13 @@ export default Vue.extend({
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri)
-        const token = data.data.token
-        if (token.length > 0) {
-          store.commit('user/SET_STATE', {
-            downloadUrl: data.data.download_url,
-            userId: data.data.userId
-          })
-          store.commit('user/SET_TOKEN', token)
-          store.dispatch('user/getAssets', { token: token })
-          uploadUtils.setLoginOutput(data.data)
-          uploadUtils.uploadTmpJSON()
+        if (data.flag === 0) {
+          store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ name: 'Editor' })
+        } else {
+          console.log('google login failed')
         }
+        this.isLoading = false
       } catch (error) {
       }
     },
@@ -271,6 +262,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     async onSignUpClicked() {
+      this.emailResponseError = false
       this.isSignUpClicked = true
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
@@ -283,20 +275,23 @@ export default Vue.extend({
         this.currentPageIndex = 2
         this.isVcodeClicked = false
       } else {
-        this.password = ''
+        this.emailResponseError = true
         this.passwordHint = response.msg
       }
       this.isLoading = false
     },
     async onResendClicked() {
+      this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
+        this.isLoading = false
         return
       }
       this.resendAvailable = false
       this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
-      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      const { data } = await userApis.sendVcode('', this.email, '', '1', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
+        this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
           this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
@@ -307,6 +302,10 @@ export default Vue.extend({
             this.leftTime = 60
           }
         }, 1000)
+      } else {
+        // error
+        this.currentPageIndex = 0
+        this.isLoading = false
       }
     },
     async onEnterCodeDoneClicked() {
@@ -324,7 +323,8 @@ export default Vue.extend({
       }
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
-        this.$router.push({ name: 'Login' })
+        await store.dispatch('user/login', { token: data.token })
+        this.$router.push({ name: 'Editor' })
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
@@ -338,24 +338,25 @@ export default Vue.extend({
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
-          hostId: '1234abcd'
+          hostId: 'facebook_parameter_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
-        hostId: '1234abcd'
+        hostId: 'facebook_parameter_vivipic'
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
       this.isLoading = true
+      const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile&' +
+      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
       'include_granted_scopes=true&' +
       'response_type=code&' +
       'prompt=select_account&' +
       'state=state_parameter_vivipic&' +
-      `redirect_uri=${window.location.href}&` +
+      `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
@@ -469,6 +470,11 @@ export default Vue.extend({
       > button {
         padding-top: 7px;
       }
+      > span {
+        font-size: 24px;
+        line-height: 32px;
+        font-weight: 600;
+      }
     }
     &:nth-child(2) { // input fields
       margin-bottom: 3vh;
@@ -495,9 +501,6 @@ export default Vue.extend({
   }
 }
 
-.w-50 {
-  width: 50%;
-}
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

@@ -3,6 +3,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { stringToArray } from 'konva/types/shapes/Text'
 import { SidebarPanelType } from '@/store/types'
+import shapeUtils from '@/utils/shapeUtils'
 
 class Controller {
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
@@ -63,6 +64,24 @@ class Controller {
           transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
           left: '0',
           bottom: '0',
+          borderRadius: '50%'
+        }
+      ],
+      lineEnds: [
+        {
+          width: '8px',
+          height: '8px',
+          left: '0',
+          top: '50%',
+          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
+          borderRadius: '50%'
+        },
+        {
+          width: '8px',
+          height: '8px',
+          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
+          right: '0',
+          top: '50%',
           borderRadius: '50%'
         }
       ],
@@ -131,6 +150,91 @@ class Controller {
     }
   }
 
+  getAbsPointByQuadrant(point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+    const { width, height, baseDegree } = shapeUtils.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    const ratio = styles.width / styles.initWidth
+    switch (quadrant) {
+      case 1:
+        return { x: styles.x + dx * ratio, y: styles.y + (dy + height) * ratio }
+      case 2:
+        return { x: styles.x + (dx + width) * ratio, y: styles.y + (dy + height) * ratio }
+      case 3:
+        return { x: styles.x + (dx + width) * ratio, y: styles.y + dy * ratio }
+      case 4:
+        return { x: styles.x + dx * ratio, y: styles.y + dy * ratio }
+      default:
+        return { x: styles.x + dx * ratio, y: styles.y + dy * ratio }
+    }
+  }
+
+  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: {width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+    const { width, height, baseDegree } = shapeUtils.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    const ratio = styles.width / styles.initWidth
+    switch (quadrant) {
+      case 1:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - (dy + height) * ratio }
+      case 2:
+        return { x: referencePoint.x - (dx + width) * ratio, y: referencePoint.y - (dy + height) * ratio }
+      case 3:
+        return { x: referencePoint.x - (dx + width) * ratio, y: referencePoint.y - dy * ratio }
+      case 4:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - dy * ratio }
+      default:
+        return { x: referencePoint.x - dx * ratio, y: referencePoint.y - dy * ratio }
+    }
+  }
+
+  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: {width: number, initWidth: number}, scale: number, newPoint: number[]): ICoordinate {
+    const newNormalQuadrant = shapeUtils.getLineQuadrant(newPoint)
+    const newQuadrantByMarkerIndex = (markerIndex === 0) ? (newNormalQuadrant - 1 + 2) % 4 + 1 : newNormalQuadrant
+    // If the startMarker is dragged, take the symmetric version (w.r.t. the origin) of the quadrant
+    return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
+  }
+
+  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
+  {x: number, y: number, width: number, height: number, rotate: number} {
+    if (isLine) {
+      scale = scale ?? 1
+      const { x, y, width, height } = styles
+      const ratio = styles.width / styles.initWidth
+      const moverHeight = Math.max(scale, 8) * ratio
+      const { xDiff, yDiff } = shapeUtils.lineDimension(point)
+      const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
+      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      return {
+        x: x + (width - moverWidth) / 2,
+        y: y + (height - moverHeight) / 2,
+        width: moverWidth,
+        height: moverHeight,
+        rotate: degree
+      }
+    } else {
+      return styles
+    }
+  }
+
+  getMarkerIndex(control: {xSign: number, ySign: number}, quadrant: number) {
+    if ([2, 3].includes(quadrant)) {
+      return (1 - control.xSign) / 2 // -1 => 1, 1 => 0
+    } else {
+      return (control.xSign + 1) / 2 // -1 => 0, 1 => 1
+    }
+  }
+
+  getCorRadPercentage(vSize: number[], size: number[], shapeType: string): number {
+    const maxCorRad = shapeUtils.getMaxCorRad(shapeType, vSize)
+    return size[1] * 100 / maxCorRad
+  }
+
+  getCorRadValue(vSize: number[], percentage: number, shapeType: string): number {
+    const maxCorRad = shapeUtils.getMaxCorRad(shapeType, vSize)
+    return percentage * maxCorRad / 100
+  }
+
   shapeCategorySorter(resizers: any, category: string, scaleType: number) {
     switch (category) {
       // category: A => 只能被等比例縮放
@@ -140,6 +244,7 @@ class Controller {
       // category: C => 可被等比例縮放，也可沿着水平/垂直方向伸縮，伸縮時四個角落的形狀固定不變
       case 'B':
       case 'C':
+      case 'E':
         switch (scaleType) {
           case 1:
             return resizers
@@ -302,6 +407,36 @@ class Controller {
       layerIndex,
       props: {
         pDiff
+      }
+    })
+  }
+
+  updateShapeLinePoint(pageIndex: number, layerIndex: number, point: number[]) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        point
+      }
+    })
+  }
+
+  updateShapeVSize(pageIndex: number, layerIndex: number, vSize: number[]) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        vSize
+      }
+    })
+  }
+
+  updateShapeCorRad(pageIndex: number, layerIndex: number, size: number[], corRad: number) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      props: {
+        size: [size[0], corRad]
       }
     })
   }

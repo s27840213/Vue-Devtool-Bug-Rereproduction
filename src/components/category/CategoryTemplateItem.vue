@@ -6,7 +6,8 @@
       @error="handleNotFound"
       @dragstart="dragStart($event)"
       @click="addTemplate")
-    div(class="category-template-item__id"
+    div(v-if="showId"
+      class="category-template-item__id"
       @click="copyId") {{ item.id }}
 </template>
 
@@ -18,7 +19,8 @@ import GeneralUtils from '@/utils/generalUtils'
 export default Vue.extend({
   props: {
     src: String,
-    item: Object
+    item: Object,
+    showId: Boolean
   },
   methods: {
     handleNotFound(event: Event) {
@@ -49,6 +51,7 @@ export default Vue.extend({
     &__img {
       object-fit: contain;
       height: 145px;
+      width: 145px;
       vertical-align: top;
       margin-bottom: 2px;
     }
