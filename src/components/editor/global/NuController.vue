@@ -792,9 +792,10 @@ export default Vue.extend({
       const [dx, dy] = [diff.offsetX, diff.offsetY]
       const markerIndex = this.initMarkerIndex
 
-      const newPoint: number[] = Array.from(this.config.point)
-      newPoint[markerIndex * 2] = this.initCoordinate.x + dx
-      newPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
+      const copiedPoint: number[] = Array.from(this.config.point)
+      copiedPoint[markerIndex * 2] = this.initCoordinate.x + dx
+      copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
+      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint)
 
       const trans = ControlUtils.getTranslateCompensationForLine(markerIndex, this.initReferencePoint, this.config.styles, (this.config.size ?? [1])[0], newPoint)
 
@@ -1492,7 +1493,7 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
-  &__scale {
+  // &__scale {
     // position: absolute;
     // top: 0;
     // left: 0;
@@ -1500,7 +1501,7 @@ export default Vue.extend({
     // width: 100%;
     // position: relative;
     // transform-origin: 0px 0px;
-  }
+  // }
   &__wrapper {
     position: relative;
   }

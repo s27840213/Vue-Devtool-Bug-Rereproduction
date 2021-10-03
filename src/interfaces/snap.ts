@@ -13,6 +13,11 @@ export interface ISnaplineInfo {
   h: ISnapline[]
 }
 
+export interface ISnapAngle {
+  angle: number,
+  diff: number
+}
+
 export interface IConsideredEdges {
   pos: number,
   diff: number,
