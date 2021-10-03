@@ -74,6 +74,8 @@ export enum PopupSliderEventType {
   opacity = 'setLayerOpacity',
   lineHeight = 'setTextLineHeight',
   letterSpacing = 'setTextSpacing',
+  lineWidth = 'setlineWidth',
+  cornerRadius = 'setCornerRadius'
 }
 
 export enum LayerType {
