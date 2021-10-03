@@ -3,23 +3,29 @@ import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import MathUtils from '@/utils/mathUtils'
-import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline, ISnapAngle } from '@/interfaces/snap'
 import LayerUtils from '@/utils/layerUtils'
+import shapeUtils from '@/utils/shapeUtils'
 class SnapUtils {
   pageIndex: number
   GUIDELINE_OFFSET: number
+  GUIDEANGLE_OFFSET: number
   closestSnaplines: {
     v: Array<ISnapline>,
     h: Array<ISnapline>
   }
 
+  closestSnapAngle: number
+
   constructor(pageIndex: number) {
     this.pageIndex = pageIndex
     this.GUIDELINE_OFFSET = 10
+    this.GUIDEANGLE_OFFSET = 1
     this.closestSnaplines = {
       v: [],
       h: []
     }
+    this.closestSnapAngle = -1
   }
 
   getSnaplinePos(): ISnaplinePos {
@@ -172,6 +178,29 @@ class SnapUtils {
     }
   }
 
+  getClosestSnapAngle(markerIndex: number, point: number[], multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET): { lineLength: number, lineAngle: number } {
+    const { xDiff, yDiff, width, height } = shapeUtils.lineDimension(point)
+    let lineAngle = (Math.atan2(yDiff, xDiff) / Math.PI * 180 + 360) % 360
+    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+    if (markerIndex === 0) {
+      lineAngle = (lineAngle + 180) % 360
+    }
+    const quotient = Math.floor(lineAngle / multipleOf)
+    let candidateAngle = quotient * multipleOf
+    if ((lineAngle - candidateAngle) > multipleOf / 2) {
+      candidateAngle += multipleOf
+    }
+    if (Math.abs(lineAngle - candidateAngle) < allowedOffset) {
+      this.closestSnapAngle = candidateAngle % 360
+    } else {
+      this.closestSnapAngle = -1
+    }
+    return {
+      lineLength: hypotenuse,
+      lineAngle: lineAngle
+    }
+  }
+
   calcMoveSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number } {
     const snaplinePos = this.getSnaplinePos()
     const layerSnapInfo = this.getLayerSnappingPos(layer, 'move')
@@ -244,6 +273,30 @@ class SnapUtils {
     })
     LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { width: snapResult.width, height: snapResult.height, scale: snapResult.scale })
     return offset
+  }
+
+  calAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): {newPoint: number[], lineLength: number, lineAngle: number} {
+    const { lineLength, lineAngle } = this.getClosestSnapAngle(markerIndex, point, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : undefined)
+    if (this.closestSnapAngle >= 0) {
+      const referenceCoordinates = point.slice((1 - markerIndex) * 2, (1 - markerIndex) * 2 + 2)
+      const xDiff = lineLength * Math.cos(this.closestSnapAngle / 180 * Math.PI)
+      const yDiff = lineLength * Math.sin(this.closestSnapAngle / 180 * Math.PI)
+      const movedCoordinates = shapeUtils.vectorAdd(referenceCoordinates, [xDiff, yDiff])
+      const newPoint = [...point]
+      newPoint[markerIndex * 2] = movedCoordinates[0]
+      newPoint[markerIndex * 2 + 1] = movedCoordinates[1]
+      return {
+        newPoint: newPoint,
+        lineLength: lineLength,
+        lineAngle: this.closestSnapAngle
+      }
+    } else {
+      return {
+        newPoint: point,
+        lineLength: lineLength,
+        lineAngle: lineAngle
+      }
+    }
   }
 
   clear(): void {

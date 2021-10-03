@@ -1,9 +1,14 @@
 <template lang="pug">
   div(class="nu-shape" :style="styles()")
     svg(:view-box.camel="viewBoxFormatter")
+      defs(v-if="config.category === 'E'" v-html="svgFormatter")
       defs
         filter(v-if="config.category === 'C'" :id="config.className" v-html="filterFormatter")
-      g(:filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
+        clipPath(v-if="config.category === 'E'" :id="clipPathId")
+          use(:xlink:href="svgId")
+      g(v-if="config.category === 'E'")
+        use(:xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :class="config.className + 'S0'")
+      g(v-else :filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
 </template>
 
 <script lang="ts">
@@ -110,11 +115,6 @@ export default Vue.extend({
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
         }
 
-        if (this.config.category === 'E') {
-          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(this.config.vSize, newVal[0], this.config.shapeType)
-          Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
-        }
-
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap, this.config.filled)
         this.styleNode.textContent = styleText
       },
@@ -154,8 +154,8 @@ export default Vue.extend({
     'config.vSize': {
       handler: function(newVal) {
         if (this.config.category === 'E') {
-          const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0], this.config.shapeType)
-          Object.assign(this.config.styles, { width: dimensions.width, height: dimensions.height, initWidth: dimensions.width, initHeight: dimensions.height })
+          // const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0], this.config.shapeType)
+          Object.assign(this.config.styles, { width: newVal[0], height: newVal[1], initWidth: newVal[0], initHeight: newVal[1] })
         }
       },
       deep: true
@@ -168,12 +168,15 @@ export default Vue.extend({
       }
       return 'none'
     },
+    svgId(): string {
+      return `#${this.config.className}SVG`
+    },
+    clipPathId(): string {
+      return `${this.config.className}C`
+    },
     viewBoxFormatter(): string {
       if (this.config.category === 'D') {
         return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
-      }
-      if (this.config.category === 'E') {
-        return shapeUtils.basicShapeViewBoxFormatter(this.config.vSize, this.config.size[0], this.config.shapeType)
       }
       return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },

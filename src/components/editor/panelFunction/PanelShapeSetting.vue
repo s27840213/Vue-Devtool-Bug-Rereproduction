@@ -507,8 +507,8 @@ export default Vue.extend({
           this.currSelectedIndex,
           { size: [lineWidth, ...(size ?? []).slice(1)] }
         )
-        if (this.isLine || this.isBasicShape) {
-          const trans = shapeUtils.getTranslateCompensationForLineWidth(category, point ?? [], styles, shapeType ?? '', size?.[0] ?? 1, lineWidth)
+        if (this.isLine) {
+          const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, shapeType ?? '', size?.[0] ?? 1, lineWidth)
           LayerUtils.updateLayerStyles(
             this.lastSelectedPageIndex,
             this.currSelectedIndex,

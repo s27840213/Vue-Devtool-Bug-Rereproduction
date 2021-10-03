@@ -22,12 +22,12 @@
         200
     ],
     "styleArray": [
-        "fill:$fillcolor; stroke:$color[0]; stroke-width:$size[0]"
+        "fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])"
     ],
     "color": [
         "#1FF2BA"
     ],
-    "svg": "<ellipse class=\"$style[0]\" cx=\"$svgParam[0]\" cy=\"$svgParam[1]\" rx=\"$svgParam[0]\" ry=\"$svgParam[1]\"/>",
+    "svg": "<ellipse id=\"$svgId\" cx=\"$svgParam[0]\" cy=\"$svgParam[1]\" rx=\"$svgParam[0]\" ry=\"$svgParam[1]\"/>",
     "filled": false,
     "shapeType": "e",
     "className": "_PXXmVkdD",
@@ -36,7 +36,7 @@
     "dragging": false,
     "designId": "",
     "size": [
-        4,
+        20,
         0
     ],
     "path": "",
@@ -47,10 +47,10 @@
         "scaleX": 1,
         "scaleY": 1,
         "rotate": 0,
-        "width": 204,
-        "height": 204,
-        "initWidth": 204,
-        "initHeight": 204,
+        "width": 200,
+        "height": 200,
+        "initWidth": 200,
+        "initHeight": 200,
         "zindex": 1,
         "opacity": 100,
         "color": [
