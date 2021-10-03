@@ -4,7 +4,6 @@
       defs
         filter(v-if="config.category === 'C'" :id="config.className" v-html="filterFormatter")
       g(:filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
-
 </template>
 
 <script lang="ts">

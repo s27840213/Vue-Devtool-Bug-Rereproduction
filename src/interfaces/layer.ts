@@ -114,5 +114,5 @@ export interface ITmp extends ILayer<IStyle> {
 
 export interface IFrame extends ILayer<IStyle> {
   clips: Array<IImage>
-  decoration: IShape
+  decoration?: IShape
 }

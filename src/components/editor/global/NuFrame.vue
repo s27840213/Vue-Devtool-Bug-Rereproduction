@@ -12,6 +12,7 @@
 <script lang="ts">
 import { IFrame } from '@/interfaces/layer'
 import Vue from 'vue'
+import { config } from 'vue/types/umd'
 import { mapGetters } from 'vuex'
 
 export default Vue.extend({
@@ -25,9 +26,12 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     layers() {
-      if ((this.config as IFrame).decoration.svg) {
+      console.log('this.config-------------------')
+      console.log(this.config)
+      if ((this.config as IFrame).decoration) {
         return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
       } else {
+        console.log('there is no decoration')
         return [...(this.config as IFrame).clips]
       }
     }

@@ -312,54 +312,6 @@ export default Vue.extend({
       setIsMoving: 'SET_isMoving',
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
-    onFrameMouseEnter(clipIndex: number) {
-      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
-        return
-      }
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      this.clipIndex = clipIndex
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
-        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
-
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-
-        const clip = clips[this.clipIndex]
-        const {
-          initWidth, initHeight,
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.clipIndex, {
-          initWidth,
-          initHeight,
-          imgWidth,
-          imgHeight,
-          imgX,
-          imgY
-        })
-      }
-    },
-    onFrameMouseLeave() {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
-        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
-        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      }
-      this.clipIndex = NaN
-    },
-    onFrameMouseUp() {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        LayerUtils.deleteLayer(LayerUtils.layerIndex)
-        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
-      }
-    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles('')
@@ -446,6 +398,7 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      console.log(this.config)
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
@@ -699,28 +652,29 @@ export default Vue.extend({
           }
           break
         case 'frame': {
-          // TODO: only for plain rectangle
-          let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
-          imgWidth *= scale
-          imgHeight *= scale
-          imgY *= scale
-          imgX *= scale
+          if (!(this.config as IFrame).decoration) {
+            let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
+            imgWidth *= scale
+            imgHeight *= scale
+            imgY *= scale
+            imgX *= scale
 
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            initWidth: width,
-            initHeight: height
-          })
-          FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
-            width: width,
-            height: height,
-            imgWidth,
-            imgHeight,
-            imgX,
-            imgY
-          })
-          const clipPath = `M0,0h${width}v${height}h${-width}z`
-          FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
-          scale = 1
+            LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              initWidth: width,
+              initHeight: height
+            })
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
+              width: width,
+              height: height,
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            const clipPath = `M0,0h${width}v${height}h${-width}z`
+            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            scale = 1
+          }
         }
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
@@ -1240,6 +1194,51 @@ export default Vue.extend({
         return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+    },
+    onFrameMouseEnter(clipIndex: number) {
+      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
+        return
+      }
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      this.clipIndex = clipIndex
+      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+        Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
+        Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
+
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+
+        const clip = clips[this.clipIndex]
+        const {
+          imgWidth, imgHeight,
+          imgX, imgY
+        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.clipIndex, {
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+      }
+    },
+    onFrameMouseLeave() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
+        Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      }
+      this.clipIndex = NaN
+    },
+    onFrameMouseUp() {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
+      }
     }
   }
 })
