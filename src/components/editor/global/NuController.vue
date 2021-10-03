@@ -1,6 +1,8 @@
 <template lang="pug">
   keep-alive
     div(class="nu-controller" ref="self")
+      div(class="nu-controller__line-hint" :style="lineHintStyles()" v-if="isLineEndMoving")
+        | {{ Math.round(lineLength) + ' | ' + Math.round(lineAngle) % 360  + '°' }}
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -152,6 +154,10 @@ export default Vue.extend({
       ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
+      isLineEndMoving: false,
+      lineHintTranslation: { x: 0, y: 0 },
+      lineLength: 0,
+      lineAngle: 0,
       initialPos: { x: 0, y: 0 },
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
@@ -523,6 +529,9 @@ export default Vue.extend({
         strokeWidth: `${5 * (100 / this.scaleRatio)}px`
       }
     },
+    lineHintStyles() {
+      return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
+    },
     moveStart(e: MouseEvent) {
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
@@ -767,6 +776,7 @@ export default Vue.extend({
     lineEndMoveStart(event: MouseEvent) {
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
+      this.isLineEndMoving = true
 
       const quadrant = shapeUtils.getLineQuadrant(this.config.point)
       const markerIndex = Number((event.target as HTMLElement).getAttribute('marker-index'))
@@ -797,6 +807,12 @@ export default Vue.extend({
       copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
       const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint)
 
+      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      this.lineHintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.lineLength = lineLength
+      this.lineAngle = lineAngle
+
       const trans = ControlUtils.getTranslateCompensationForLine(markerIndex, this.initReferencePoint, this.config.styles, (this.config.size ?? [1])[0], newPoint)
 
       ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, newPoint)
@@ -804,6 +820,7 @@ export default Vue.extend({
     },
     lineEndMoveEnd() {
       this.isControlling = false
+      this.isLineEndMoving = false
       StepsUtils.record()
 
       this.setCursorStyle('default')
@@ -1402,6 +1419,15 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
+  &__line-hint {
+    position: absolute;
+    z-index: 9;
+    background-color: map-get($colors, gray-1);
+    border-radius: 5px;
+    color: map-get($colors, white);
+    padding: 5px 10px;
+    font-size: 14px;
+  }
   &__content {
     display: flex;
     justify-content: center;
