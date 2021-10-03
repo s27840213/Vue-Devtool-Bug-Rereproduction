@@ -275,8 +275,8 @@ class SnapUtils {
     return offset
   }
 
-  calAngleSnap(markerIndex: number, point: number[]): {newPoint: number[], lineLength: number, lineAngle: number} {
-    const { lineLength, lineAngle } = this.getClosestSnapAngle(markerIndex, point, 90)
+  calAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): {newPoint: number[], lineLength: number, lineAngle: number} {
+    const { lineLength, lineAngle } = this.getClosestSnapAngle(markerIndex, point, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : undefined)
     if (this.closestSnapAngle >= 0) {
       const referenceCoordinates = point.slice((1 - markerIndex) * 2, (1 - markerIndex) * 2 + 2)
       const xDiff = lineLength * Math.cos(this.closestSnapAngle / 180 * Math.PI)

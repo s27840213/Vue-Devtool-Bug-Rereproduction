@@ -805,7 +805,7 @@ export default Vue.extend({
       const copiedPoint: number[] = Array.from(this.config.point)
       copiedPoint[markerIndex * 2] = this.initCoordinate.x + dx
       copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
-      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint)
+      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
