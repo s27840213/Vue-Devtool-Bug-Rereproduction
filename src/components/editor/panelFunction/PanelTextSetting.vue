@@ -516,7 +516,7 @@ export default Vue.extend({
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, noText: false }, MappingUtils.mappingMinMax('lineHeight')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-lh'
@@ -524,7 +524,7 @@ export default Vue.extend({
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, noText: false }, MappingUtils.mappingMinMax('letterSpacing')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-ls'

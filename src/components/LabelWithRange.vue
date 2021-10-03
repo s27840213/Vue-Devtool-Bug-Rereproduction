@@ -6,26 +6,27 @@
           div placeholder
       div(class="label-with-range__label__value"
           :class="{ disabled: disabled }"
-          @click="handleSliderModal('open')")
+          @click="openCorRadSliderPopup")
         input(:value="Math.round(value)"
               @input="setValue"
               :disabled="disabled")
-        div(v-if="mode === 'open'"
-            class="label-with-range__range-input-wrapper"
-            v-click-outside="handleSliderModal")
-          input(class="label-with-range__range-input"
-            :value="value"
-            :max="max"
-            :min="min"
-            v-ratio-change
-            type="range"
-            @input="setValue")
+        //- div(v-if="mode === 'open'"
+        //-     class="label-with-range__range-input-wrapper"
+        //-     v-click-outside="handleSliderModal")
+        //-   input(class="label-with-range__range-input"
+        //-     :value="value"
+        //-     :max="max"
+        //-     :min="min"
+        //-     v-ratio-change
+        //-     type="range"
+        //-     @input="setValue")
 
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   directives: {
@@ -35,26 +36,32 @@ export default Vue.extend({
     value: Number,
     max: Number,
     min: Number,
+    event: String,
     disabled: Boolean
   },
-  data() {
-    return {
-      mode: ''
-    }
-  },
-  computed: {
-    // a
-  },
   mounted() {
-    // a
+    popupUtils.on(this.event, (value: number) => {
+      this.emitValue(value)
+    })
   },
   methods: {
-    handleSliderModal(mode = '') {
+    openCorRadSliderPopup() {
       if (this.disabled) return
-      this.mode = mode
+      popupUtils.setCurrEvent(this.event)
+      popupUtils.setSliderConfig({ value: this.value, min: this.min, max: this.max, noText: true })
+      popupUtils.openPopup('slider', {
+        posX: 'right',
+        target: '.label-with-range__label'
+      })
     },
     setValue(e: Event) {
-      this.$emit('update', (e.target as HTMLInputElement).value)
+      const valueString = (e.target as HTMLInputElement).value
+      const value = parseInt(valueString === '' ? '0' : valueString, 10)
+      popupUtils.setSliderConfig({ value: value })
+      this.emitValue(value)
+    },
+    emitValue(value: number) {
+      this.$emit('update', value)
     }
   }
 })

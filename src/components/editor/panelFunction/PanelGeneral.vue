@@ -107,7 +107,7 @@ export default Vue.extend({
     },
     openSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.opacity)
-      popupUtils.setSliderConfig(Object.assign({ value: this.opacity }, MappingUtils.mappingMinMax('opacity')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.opacity, noText: false }, MappingUtils.mappingMinMax('opacity')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-opacity'

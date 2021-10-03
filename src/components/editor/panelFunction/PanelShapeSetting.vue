@@ -127,6 +127,7 @@
               div(class="shape-setting__value-selector__button-text") 實心
       label-with-range(:value="corRadPercentage" :min="0" :max="100"
                       @update="handleBasicShapeCorRadPercentUpdate"
+                      :event="corRadEvent"
                       :disabled="corRadDisabled")
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
@@ -217,6 +218,7 @@ export default Vue.extend({
         opacity: { min: 0, max: 100 },
         lineWidth: { min: 1, max: 100 }
       },
+      corRadEvent: PopupSliderEventType.cornerRadius,
       currSelectedColorIndex: 0,
       openSliderBar: '',
       openValueSelector: '',
@@ -443,14 +445,14 @@ export default Vue.extend({
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
-      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
       popupUtils.openPopup('slider', {
         target: '.line-actions'
       })
     },
     openBasicShapeSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
-      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
       popupUtils.openPopup('slider', {
         target: '.basic-shape-actions'
       })
@@ -543,8 +545,8 @@ export default Vue.extend({
         { filled: filled === 1 }
       )
     },
-    handleBasicShapeCorRadPercentUpdate(value: string) {
-      const corRadPercentage = (GeneralUtils.isValidInt(value)) ? parseInt(value) : 0
+    handleBasicShapeCorRadPercentUpdate(value: number) {
+      const corRadPercentage = value
       const { vSize, size, shapeType } = (this.currLayer as IShape)
       const newSize = Array.from(size ?? [])
       if (newSize.length >= 2) {

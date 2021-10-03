@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="popup-slider")
+  div(class="popup-slider"
+      :style="styles")
     input(class="popup-slider__range-input"
       v-model="value"
       :max="max"
@@ -7,6 +8,7 @@
       v-ratio-change
       type="range")
     input(class="popup-slider__text body-2 text-gray-2"
+      v-if="!noText"
       type="text"
       v-model="value")
 </template>
@@ -42,6 +44,12 @@ export default Vue.extend({
         popupUtils.event.emit(popupUtils.currEvent, value)
         popupUtils.setSliderConfig({ value })
       }
+    },
+    noText(): boolean {
+      return popupUtils.sliderConfig.noText
+    },
+    styles(): string {
+      return this.noText ? 'grid-template-columns: 1fr; height: 26px' : 'grid-template-columns: 2.5fr 1fr;'
     }
   }
 })
@@ -52,7 +60,6 @@ export default Vue.extend({
   width: 150px;
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: 2.5fr 1fr;
   column-gap: 10px;
   padding: 0.375rem 0.625rem;
 
