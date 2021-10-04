@@ -87,7 +87,7 @@
         span(class="ml-10 body-2") {{data.text}}
         div(class="shortcut")
           span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(class="popup-layer__hr")
+    hr(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))" class="popup-layer__hr")
     div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
         class="popup-layer__item"
         @click="setBackgroundImage")

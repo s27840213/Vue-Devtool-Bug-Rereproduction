@@ -11,6 +11,7 @@
           @dragover.prevent,
           @click.left="onClick"
           @click.right.stop="onRightClick"
+          @contextmenu.prevent
           @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
@@ -178,15 +179,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const body = this.$refs.body as HTMLElement
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    if (body) {
-      body.addEventListener('contextmenu', (e: MouseEvent) => {
-        e.preventDefault()
-      }, false)
-    }
     this.setLastSelectedLayerIndex(this.layerIndex)
     // this if block is used to prevent the selection area being generated when adding text layer with the text panel
     if (this.config.type === 'text' && this.config.active) {
