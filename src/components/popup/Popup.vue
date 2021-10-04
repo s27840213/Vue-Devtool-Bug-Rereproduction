@@ -70,7 +70,6 @@ export default Vue.extend({
   left: 0;
   top: 0;
   z-index: setZindex("popup");
-  border: 1px solid setColor(gray-4);
   box-shadow: 0px 0px 7px setColor(gray-1, 0.25);
   &__item {
     display: flex;
