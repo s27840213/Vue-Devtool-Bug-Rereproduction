@@ -18,18 +18,6 @@ class UploadUtils {
   get supportTypes(): Array<string> {
     return ['jpeg', 'gif', 'png', 'apng', 'svg', 'bmp', 'png', 'ico']
   }
-  // private handleEvent(e: any) {
-  //   console.log(`${e.type}: ${e.loaded} bytes transferred, and total ${e.total}\n`)
-  // }
-
-  // private addListeners(xhr: XMLHttpRequest) {
-  //   xhr.addEventListener('loadstart', this.handleEvent)
-  //   xhr.addEventListener('load', this.handleEvent)
-  //   xhr.addEventListener('loadend', this.handleEvent)
-  //   xhr.addEventListener('progress', this.handleEvent)
-  //   xhr.addEventListener('error', this.handleEvent)
-  //   xhr.addEventListener('abort', this.handleEvent)
-  // }
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
@@ -126,7 +114,9 @@ class UploadUtils {
     }
   }
 
-  uploadText() {
+  uploadLayer(type: string) {
+    const targetBucket = type === 'shape' ? 'svg' : type
+    console.log(targetBucket)
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
@@ -139,17 +129,16 @@ class UploadUtils {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/config.json`)
+    formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const textInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-    Object.assign(textInfo, { active: false })
-    // console.log(textInfo)
+    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
+    Object.assign(layerInfo, { active: false })
 
-    const blob = new Blob([JSON.stringify(textInfo)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -169,18 +158,16 @@ class UploadUtils {
       targetLayer.dragging = false
       targetLayer.editing = false
 
-      console.log(targetLayer)
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
 
-      // console.log(pageJSON)
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_admin_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/page.json`)
+      formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
       formData.append('x-amz-meta-tn', this.userId)
@@ -193,12 +180,13 @@ class UploadUtils {
       xhrReq.send(formData)
       xhrReq.onload = () => {
         console.log(designId)
-        // console.log(xhrReq)
       }
     }
   }
 
-  updateText() {
+  updateLayer(type: string) {
+    const targetBucket = type === 'shape' ? 'svg' : type
+    console.log(targetBucket)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const designId = currSelectedInfo.layers[0].designId
 
@@ -207,24 +195,23 @@ class UploadUtils {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/config.json`)
+    formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const textInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
+    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
 
-    textInfo.active = false
-    textInfo.isTyping = false
-    textInfo.locked = false
-    textInfo.dragging = false
-    textInfo.editing = false
+    layerInfo.active = false
+    layerInfo.isTyping = false
+    layerInfo.locked = false
+    layerInfo.dragging = false
+    layerInfo.editing = false
 
-    Object.assign(textInfo, { active: false })
-    console.log(textInfo)
+    Object.assign(layerInfo, { active: false })
 
-    const blob = new Blob([JSON.stringify(textInfo)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -248,7 +235,7 @@ class UploadUtils {
         formData.append(key, this.loginOutput.upload_admin_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_admin_map.path}text/${designId}/page.json`)
+      formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
       formData.append('x-amz-meta-tn', this.userId)
@@ -260,8 +247,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        // console.log(xhrReq)
-        // console.log(designId)
+        console.log(designId)
       }
     }
   }

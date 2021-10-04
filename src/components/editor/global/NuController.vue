@@ -179,7 +179,6 @@ export default Vue.extend({
   },
   mounted() {
     const body = this.$refs.body as HTMLElement
-    console.log(this.config)
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
      */

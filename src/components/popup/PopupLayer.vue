@@ -21,7 +21,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
-    template(v-if="getToekn!=='' && isText")
+    template(v-if="getToekn!=='' && (isText || isShape)")
       div(class="popup-layer__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -31,7 +31,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && isText")
+    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && (isText || isShape)")
       div(class="popup-layer__item"
           @click="updateMenu.action")
         svg-icon(
@@ -159,6 +159,9 @@ export default Vue.extend({
     isText(): boolean {
       return this.getType.includes('text')
     },
+    isShape(): boolean {
+      return this.getType.includes('shape')
+    },
     isImage(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
     },
@@ -171,7 +174,7 @@ export default Vue.extend({
         text: `Upload ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
-          uploadUtils.uploadText()
+          uploadUtils.uploadLayer(this.getType[0])
         }
       }
     },
@@ -181,7 +184,7 @@ export default Vue.extend({
         text: `Modify ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
-          uploadUtils.updateText()
+          uploadUtils.updateLayer(this.getType[0])
         }
       }
     },
