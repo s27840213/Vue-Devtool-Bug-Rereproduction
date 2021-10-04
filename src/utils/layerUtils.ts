@@ -56,6 +56,7 @@ class LayerUtils {
   }
 
   getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
+    console.log(store.getters.getCurrSelectedIndex)
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 

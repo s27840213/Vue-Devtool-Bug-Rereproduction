@@ -1355,7 +1355,8 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
-        GroupUtils.set(this.pageIndex, this.layerIndex, [this.config])
+        const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
+        GroupUtils.set(this.pageIndex, newIndex, [this.config])
       }
     }
   }

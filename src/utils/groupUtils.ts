@@ -276,6 +276,7 @@ class GroupUtils {
   }
 
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
+    console.log('......')
     store.commit('SET_currSelectedInfo', {
       pageIndex: currSelectedPageIndex,
       index: currSelectedIndex,
