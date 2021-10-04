@@ -197,7 +197,7 @@ export default Vue.extend({
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
             newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 'e'
-            newbasicShapeTest.svg = '<ellipse id="$svgId" cx="$svgParam[0]" cy="$svgParam[1]" rx="$svgParam[0]" ry="$svgParam[1]"/>'
+            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('e')
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 0]
             layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
           }
@@ -210,7 +210,7 @@ export default Vue.extend({
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
             newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 'r'
-            newbasicShapeTest.svg = '<path id="$svgId" d="M $svgParam[0] 0 a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] $svgParam[0] v $svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] $svgParam[0] h $svgParam[1] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] -$svgParam[0] v -$svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] -$svgParam[0] z"/>'
+            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('r')
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
             layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
           }
@@ -223,13 +223,13 @@ export default Vue.extend({
             const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
             newbasicShapeTest.className = shapeUtils.classGenerator()
             newbasicShapeTest.shapeType = 't'
-            newbasicShapeTest.svg = '<path id="$svgId" d="M $svgParam[1] 0 m $svgParam[2] $svgParam[3] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[9] 0 l -$svgParam[4] $svgParam[5] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] $svgParam[7] h $svgParam[8] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] -$svgParam[7] z"/>'
+            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('t')
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
-            newbasicShapeTest.vSize = [230.94010767585033, newbasicShapeTest.vSize?.[1] ?? 0]
-            newbasicShapeTest.styles.width = 230.94010767585033
-            newbasicShapeTest.styles.height = 200
-            newbasicShapeTest.styles.initWidth = 230.94010767585033
-            newbasicShapeTest.styles.initHeight = 200
+            const height = newbasicShapeTest.vSize?.[1] ?? 0
+            const width = height * 2 / Math.sqrt(3)
+            newbasicShapeTest.vSize = [width, height]
+            newbasicShapeTest.styles.width = width
+            newbasicShapeTest.styles.initWidth = width
             layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
           }
         }
