@@ -18,7 +18,8 @@
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
-            v-html="FrameUtils.frameClipFormatter(clip.clipPath)" :style="frameClipStyles(clip.styles, index)"
+            v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
+            :style="frameClipStyles(clip.styles, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp")
@@ -366,8 +367,11 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          break
-        // resizers = []
+          if (FrameUtils.isImageFrame(this.config)) {
+            return resizers
+          } else {
+            return []
+          }
       }
       return resizers
     },
@@ -695,7 +699,7 @@ export default Vue.extend({
           }
           break
         case 'frame': {
-          if (!(this.config as IFrame).decoration) {
+          if (FrameUtils.isImageFrame(this.config)) {
             let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
             imgWidth *= scale
             imgHeight *= scale
@@ -714,8 +718,8 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            const clipPath = `M0,0h${width}v${height}h${-width}z`
-            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            // const clipPath = `M0,0h${width}v${height}h${-width}z`
+            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break
