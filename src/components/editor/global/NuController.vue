@@ -376,7 +376,7 @@ export default Vue.extend({
           break
         case 'frame':
           break
-          // resizers = []
+        // resizers = []
       }
       return resizers
     },
@@ -434,7 +434,7 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
@@ -549,7 +549,7 @@ export default Vue.extend({
         return
       }
       if (!this.isMoving) {
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
         this.setIsMoving(true)
       }
       if (this.isActive) {
@@ -1470,13 +1470,13 @@ export default Vue.extend({
     overflow-wrap: break-word;
   }
   // &__scale {
-    // position: absolute;
-    // top: 0;
-    // left: 0;
-    // height: 100%;
-    // width: 100%;
-    // position: relative;
-    // transform-origin: 0px 0px;
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  // height: 100%;
+  // width: 100%;
+  // position: relative;
+  // transform-origin: 0px 0px;
   // }
   &__wrapper {
     position: relative;
