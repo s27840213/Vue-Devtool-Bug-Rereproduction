@@ -7,7 +7,8 @@ import MouseUtils from './mouseUtils'
 interface ISliderConfig {
   value: number,
   min: number,
-  max: number
+  max: number,
+  noText: boolean
 }
 
 class PopupUtils {
@@ -19,7 +20,8 @@ class PopupUtils {
   sliderConfig: {
     value: number
     min: number,
-    max: number
+    max: number,
+    noText: boolean
   }
 
   constructor() {
@@ -29,7 +31,8 @@ class PopupUtils {
     this.sliderConfig = {
       value: 0,
       min: 0,
-      max: 0
+      max: 0,
+      noText: false
     }
   }
 

@@ -24,6 +24,12 @@ const minMaxHash: { [index: string]: { min: number, max: number } } = {
   },
   letterSpacing: {
     min: -200, max: 800
+  },
+  lineWidth: {
+    min: 1, max: 100
+  },
+  cornerRadius: {
+    min: 0, max: 100
   }
 }
 class MappingUtils {

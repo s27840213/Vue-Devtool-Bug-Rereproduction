@@ -11,6 +11,7 @@
           @dragover.prevent,
           @click.left="onClick"
           @click.right.stop="onRightClick"
+          @contextmenu.prevent
           @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
@@ -179,16 +180,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const body = this.$refs.body as HTMLElement
-    console.log(this.config)
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    if (body) {
-      body.addEventListener('contextmenu', (e: MouseEvent) => {
-        e.preventDefault()
-      }, false)
-    }
     this.setLastSelectedLayerIndex(this.layerIndex)
     // this if block is used to prevent the selection area being generated when adding text layer with the text panel
     if (this.config.type === 'text' && this.config.active) {
@@ -438,7 +429,7 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.layerIndex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
@@ -553,7 +544,7 @@ export default Vue.extend({
         return
       }
       if (!this.isMoving) {
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
         this.setIsMoving(true)
       }
       if (this.isActive) {
@@ -1474,13 +1465,13 @@ export default Vue.extend({
     overflow-wrap: break-word;
   }
   // &__scale {
-    // position: absolute;
-    // top: 0;
-    // left: 0;
-    // height: 100%;
-    // width: 100%;
-    // position: relative;
-    // transform-origin: 0px 0px;
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  // height: 100%;
+  // width: 100%;
+  // position: relative;
+  // transform-origin: 0px 0px;
   // }
   &__wrapper {
     position: relative;

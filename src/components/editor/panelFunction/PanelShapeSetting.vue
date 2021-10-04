@@ -1,23 +1,12 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    div(class="action-bar flex-around" style="padding: 8px 0"
+    div(class="action-bar flex-around line-actions" style="padding: 8px 0"
               v-if="isLine")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                @click.native="handleSliderModal('line-width')")
-        div(v-if="openSliderBar === 'line-width'"
-            class="shape-setting__range-input-wrapper-line-width right"
-            v-click-outside="handleSliderModal")
-          input(class="shape-setting__range-input shape-setting__range-input-line-width"
-            :value="lineWidth"
-            :max="fieldRange.lineWidth.max"
-            :min="fieldRange.lineWidth.min"
-            v-ratio-change
-            type="range"
-            @input="setLineWidth")
-          div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
+                @click.native="openLineSliderPopup")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer"
                 iconName="line-dash" iconWidth="24px" iconColor="gray-2"
@@ -108,22 +97,11 @@
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
-      div(class="action-bar flex-around" style="padding: 8px 0")
+      div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
           svg-icon(class="pointer"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleSliderModal('line-width')")
-          div(v-if="openSliderBar === 'line-width'"
-              class="shape-setting__range-input-wrapper-stroke-width"
-              v-click-outside="handleSliderModal")
-            input(class="shape-setting__range-input shape-setting__range-input-line-width"
-              :value="lineWidth"
-              :max="fieldRange.lineWidth.max"
-              :min="fieldRange.lineWidth.min"
-              v-ratio-change
-              type="range"
-              @input="setLineWidth")
-            div(class="shape-setting__range-input-line-width-value") {{ lineWidth }}
+                  @click.native="openBasicShapeSliderPopup")
         div(class="shape-setting__line-action-wrapper")
           svg-icon(class="pointer"
                   v-if="filled"
@@ -149,6 +127,7 @@
               div(class="shape-setting__value-selector__button-text") 實心
       label-with-range(:value="corRadPercentage" :min="0" :max="100"
                       @update="handleBasicShapeCorRadPercentUpdate"
+                      :event="corRadEvent"
                       :disabled="corRadDisabled")
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
@@ -204,8 +183,10 @@ import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import controlUtils from '@/utils/controlUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
+import popupUtils from '@/utils/popupUtils'
+import MappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   components: {
@@ -237,6 +218,7 @@ export default Vue.extend({
         opacity: { min: 0, max: 100 },
         lineWidth: { min: 1, max: 100 }
       },
+      corRadEvent: PopupSliderEventType.cornerRadius,
       currSelectedColorIndex: 0,
       openSliderBar: '',
       openValueSelector: '',
@@ -281,6 +263,9 @@ export default Vue.extend({
     })
     this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
     this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
+    popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
+      this.setLineWidth(value)
+    })
   },
   computed: {
     ...mapGetters({
@@ -308,9 +293,9 @@ export default Vue.extend({
      * This parameter means if current layer is a group/tmp and contains at least 2 of more
      * IShape that the color-list of them only has one entry.
      */
-    lineWidth(): string | number {
+    lineWidth(): number {
       const { currLayer } = this
-      return (currLayer as IShape).size?.[0] ?? '--'
+      return (currLayer as IShape).size?.[0] ?? 0
     },
     filled(): boolean {
       const { currLayer } = this
@@ -458,6 +443,20 @@ export default Vue.extend({
         input.select()
       }
     },
+    openLineSliderPopup() {
+      popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.openPopup('slider', {
+        target: '.line-actions'
+      })
+    },
+    openBasicShapeSliderPopup() {
+      popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.openPopup('slider', {
+        target: '.basic-shape-actions'
+      })
+    },
     handleValueModal(modalName = '') {
       this.openValueSelector = modalName
     },
@@ -496,28 +495,25 @@ export default Vue.extend({
         }
       }
     },
-    setLineWidth(e: Event) {
-      const { value } = e.target as HTMLInputElement
-      if (GeneralUtils.isValidInt(value)) {
-        const lineWidth = parseInt(this.boundValue(parseInt(value), this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
-        const { currLayer } = this
-        const { point, styles, size, category, shapeType } = (currLayer as IShape)
-        LayerUtils.updateLayerProps(
+    setLineWidth(value: number) {
+      const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
+      const { currLayer } = this
+      const { point, styles, size, shapeType } = (currLayer as IShape)
+      LayerUtils.updateLayerProps(
+        this.lastSelectedPageIndex,
+        this.currSelectedIndex,
+        { size: [lineWidth, ...(size ?? []).slice(1)] }
+      )
+      if (this.isLine) {
+        const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, shapeType ?? '', size?.[0] ?? 1, lineWidth)
+        LayerUtils.updateLayerStyles(
           this.lastSelectedPageIndex,
           this.currSelectedIndex,
-          { size: [lineWidth, ...(size ?? []).slice(1)] }
+          {
+            x: trans.x,
+            y: trans.y
+          }
         )
-        if (this.isLine) {
-          const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, shapeType ?? '', size?.[0] ?? 1, lineWidth)
-          LayerUtils.updateLayerStyles(
-            this.lastSelectedPageIndex,
-            this.currSelectedIndex,
-            {
-              x: trans.x,
-              y: trans.y
-            }
-          )
-        }
       }
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
@@ -549,8 +545,8 @@ export default Vue.extend({
         { filled: filled === 1 }
       )
     },
-    handleBasicShapeCorRadPercentUpdate(value: string) {
-      const corRadPercentage = (GeneralUtils.isValidInt(value)) ? parseInt(value) : 0
+    handleBasicShapeCorRadPercentUpdate(value: number) {
+      const corRadPercentage = value
       const { vSize, size, shapeType } = (this.currLayer as IShape)
       const newSize = Array.from(size ?? [])
       if (newSize.length >= 2) {
