@@ -353,6 +353,19 @@ class ShapeUtils {
     return `<g class="$mtrans[0] $style[1]">${startSvg}</g><line class="$style[0]" x1="$point[0]" y1="$point[1]" x2="$point[2]" y2="$point[3]"/><g class="$mtrans[1] $style[2]">${endSvg}</g>`
   }
 
+  genBasicShapeSvgTemplate(shapeType: string): string {
+    switch (shapeType) {
+      case 'e':
+        return '<ellipse id="$svgId" cx="$svgParam[0]" cy="$svgParam[1]" rx="$svgParam[0]" ry="$svgParam[1]"/>'
+      case 'r':
+        return '<path id="$svgId" d="M $svgParam[0] 0 a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] $svgParam[0] v $svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] $svgParam[0] h $svgParam[1] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[0] -$svgParam[0] v -$svgParam[2] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[0] -$svgParam[0] z"/>'
+      case 't':
+        return '<path id="$svgId" d="M $svgParam[1] 0 m $svgParam[2] $svgParam[3] a $svgParam[0] $svgParam[0] 0 0 0 -$svgParam[9] 0 l -$svgParam[4] $svgParam[5] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] $svgParam[7] h $svgParam[8] a $svgParam[0] $svgParam[0] 0 0 0 $svgParam[6] -$svgParam[7] z"/>'
+      default:
+        return '<ellipse id="$svgId" cx="$svgParam[0]" cy="$svgParam[1]" rx="$svgParam[0]" ry="$svgParam[1]"/>'
+    }
+  }
+
   svgParameters(shapeType: string, vSize: number[], size: number[]): number[] {
     const appliedCorRadius = this.clipCorRad(shapeType, vSize, size)
     switch (shapeType) {

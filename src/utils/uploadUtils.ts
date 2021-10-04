@@ -1,13 +1,16 @@
-import { IAssetPhoto } from '@/interfaces/api'
+import { IAssetPhoto, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import text from '@/store/text'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
+import shapeUtils from './shapeUtils'
+import AssetUtils from './assetUtils'
+import { IMarker } from '@/interfaces/shape'
 
 class UploadUtils {
   loginOutput: any
@@ -137,6 +140,7 @@ class UploadUtils {
 
     const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
     Object.assign(layerInfo, { active: false })
+    this.removeComputableInfo(layerInfo)
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -157,6 +161,7 @@ class UploadUtils {
       targetLayer.locked = false
       targetLayer.dragging = false
       targetLayer.editing = false
+      this.removeComputableInfo(targetLayer)
 
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
@@ -202,12 +207,12 @@ class UploadUtils {
     const xhr = new XMLHttpRequest()
 
     const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-
     layerInfo.active = false
     layerInfo.isTyping = false
     layerInfo.locked = false
     layerInfo.dragging = false
     layerInfo.editing = false
+    this.removeComputableInfo(layerInfo)
 
     Object.assign(layerInfo, { active: false })
 
@@ -225,6 +230,7 @@ class UploadUtils {
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
       const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       targetLayer.active = false
+      this.removeComputableInfo(targetLayer)
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
@@ -416,10 +422,95 @@ class UploadUtils {
   async getDesign(type: string, designId: string) {
     const jsonName = type === 'template' ? 'config.json' : 'page.json'
     const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`)
-    response.json().then((json) => {
+    response.json().then(async (json) => {
       console.log(json)
+      if (type !== 'template') {
+        await this.addComputableInfo(json.layers[0])
+      }
       store.commit('SET_pages', [json])
     })
+  }
+
+  removeComputableInfo(layer: ILayer) {
+    if (layer.type === 'shape') {
+      switch (layer.category) {
+        case 'D':
+          delete layer.markerTransArray
+          delete layer.markerWidth
+          delete layer.trimWidth
+          delete layer.trimOffset
+          delete layer.styleArray
+          delete layer.svg
+          delete layer.pDiff
+          delete layer.pSize
+          delete layer.cSize
+          delete layer.vSize
+          delete layer.className
+          break
+        case 'E':
+          delete layer.styleArray
+          delete layer.svg
+          delete layer.pDiff
+          delete layer.pSize
+          delete layer.cSize
+          delete layer.className
+          break
+      }
+    }
+  }
+
+  async addComputableInfo(layer: ILayer) {
+    if (layer.type === 'shape') {
+      const theLayer = layer as IShape
+      const svgs: string[] = []
+      let dummy
+      switch (theLayer.category) {
+        case 'D':
+          theLayer.styleArray = ['stroke:$color[0];stroke-width:$size[0];stroke-dasharray:$dash;stroke-linecap:$cap']
+          theLayer.markerTransArray = [
+            'transform: translate($txmspx, $tymspx) rotate($romsdeg) $finetunes scale($size[0]);',
+            'transform: translate($txmepx, $tymepx) rotate($romedeg) $finetunee scale($size[0]);'
+          ]
+          theLayer.markerWidth = []
+          theLayer.trimWidth = []
+          theLayer.trimOffset = []
+          for (const markerId of theLayer.markerId ?? []) {
+            if (markerId === 'none') {
+              theLayer.styleArray.push('')
+              dummy = theLayer.markerWidth?.push(0)
+              dummy = theLayer.trimWidth?.push(undefined)
+              dummy = theLayer.trimOffset?.push(-1)
+              svgs.push('')
+            } else {
+              const marker: IListServiceContentDataItem = {
+                id: markerId,
+                type: 9
+              }
+              const markerContent = (await AssetUtils.fetch(marker)).jsonData as IMarker
+              theLayer.styleArray.push(markerContent.styleArray[0])
+              dummy = theLayer.markerWidth?.push(markerContent.vSize[0])
+              dummy = theLayer.trimWidth?.push(markerContent.trimWidth)
+              dummy = theLayer.trimOffset?.push(markerContent.trimOffset ?? -1)
+              svgs.push(markerContent.svg)
+            }
+          }
+          theLayer.svg = shapeUtils.genLineSvgTemplate(svgs[0], svgs[1])
+          theLayer.pDiff = [0, 0]
+          theLayer.pSize = [0, 0]
+          theLayer.cSize = [0, 0]
+          theLayer.vSize = [0, 0]
+          theLayer.className = shapeUtils.classGenerator()
+          break
+        case 'E':
+          theLayer.styleArray = ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])']
+          theLayer.svg = shapeUtils.genBasicShapeSvgTemplate(theLayer.shapeType ?? '')
+          theLayer.pDiff = [0, 0]
+          theLayer.pSize = [0, 0]
+          theLayer.cSize = [0, 0]
+          theLayer.className = shapeUtils.classGenerator()
+          break
+      }
+    }
   }
 }
 
