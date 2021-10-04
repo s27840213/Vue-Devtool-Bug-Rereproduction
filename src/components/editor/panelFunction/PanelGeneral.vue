@@ -30,7 +30,7 @@
       btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") 位置對齊
-      btn(class="btn-flip full-width" :type="'gray-mid'"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isFlipDisabled}"
         @click.native="openFlipPopup") 翻轉
 </template>
 
@@ -82,6 +82,9 @@ export default Vue.extend({
         return this.currSelectedInfo.layers[0].styles.opacity
       }
       return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
+    },
+    isFlipDisabled(): boolean {
+      return this.isGroup || this.layerNum !== 1
     }
   },
   mounted() {
@@ -103,6 +106,7 @@ export default Vue.extend({
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
+      if (this.isFlipDisabled) return
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
@@ -186,5 +190,11 @@ export default Vue.extend({
       grid-column-end: 3;
     }
   }
+}
+
+.disabled {
+  color: map-get($colors, gray-3);
+  pointer-events: none;
+  cursor: not-allowed;
 }
 </style>

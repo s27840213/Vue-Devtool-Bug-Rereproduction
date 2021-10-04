@@ -1,7 +1,7 @@
 import { ICoordinate } from "./frame";
 
 export interface IStyle {
-  [key: string]: number | string | undefined,
+  [key: string]: number | string | boolean | undefined,
   x: number,
   y: number,
   scale: number
@@ -13,7 +13,9 @@ export interface IStyle {
   initWidth: number,
   initHeight: number,
   zindex: number,
-  opacity: number
+  opacity: number,
+  horizontalFlip: boolean,
+  verticalFlip: boolean
 }
 
 export interface IImageStyle extends IStyle {

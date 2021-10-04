@@ -63,7 +63,22 @@ class CssConveter {
     //   tmpArr.push(`scaleY(${scaleY})`)
     // }
     return {
-      transform: `translate3d(${x}px, ${y}px, ${zindex}px ) rotate(${rotate}deg)`
+      transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`
+    }
+  }
+
+  convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
+    if (horizontalFlip) {
+      if (verticalFlip) {
+        return { transform: 'rotate3d(0, 0, 1, 180deg)' }
+      } else {
+        return { transform: 'rotate3d(0, 1, 0, 180deg)' }
+      }
+    }
+    if (verticalFlip) {
+      return { transform: 'rotate3d(1, 0, 0, 180deg)' }
+    } else {
+      return { transform: '' }
     }
   }
 

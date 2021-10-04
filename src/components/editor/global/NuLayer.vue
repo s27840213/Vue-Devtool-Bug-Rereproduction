@@ -4,14 +4,15 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    div(class="layer-scale" ref="scale"
-        :style="scaleStyles()")
-      div(v-if="config.imgControl" :style="backImageStyle()")
-        nu-image(style="opacity: 0.45"
-                :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      nu-clipper(:config="config")
-        component(:is="`nu-${config.type}`" :config="config"
-        :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+    div(class="layer-flip" ref="flip" :style="flipStyles()")
+      div(class="layer-scale" ref="scale"
+          :style="scaleStyles()")
+        div(v-if="config.imgControl" :style="backImageStyle()")
+          nu-image(style="opacity: 0.45"
+                  :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
+        nu-clipper(:config="config")
+          component(:is="`nu-${config.type}`" :config="config"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //- div(class="test-index")
     //-   span {{layerIndex}}
     //- div(class="test-angle")
@@ -114,6 +115,10 @@ export default Vue.extend({
         'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
+    flipStyles() {
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      return CssConveter.convertFlipStyle(horizontalFlip, verticalFlip)
+    },
     backImageStyle() {
       const HW = { width: 0, height: 0 }
       HW.width = Math.ceil(this.config.styles.width / this.config.styles.scale)
@@ -170,6 +175,10 @@ export default Vue.extend({
   transform-origin: top left;
   top: 0;
   left: 0;
+}
+
+.layer-flip {
+  transition: transform 0.2s linear
 }
 
 .test-index {

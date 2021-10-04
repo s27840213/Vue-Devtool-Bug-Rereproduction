@@ -31,6 +31,8 @@
         "imgWidth": 581.9,
         "imgHeight": 467.13,
         "zindex": -1,
+        "horizontalFlip": false,
+        "verticalFlip": false,
         "opacity": 100
     }
 }

@@ -96,7 +96,9 @@ class MouseUtils {
             initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
             initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
             zindex: -1,
-            opacity: 100
+            opacity: 100,
+            horizontalFlip: data.styles.horizontalFlip,
+            verticalFlip: data.styles.verticalFlip
           }
         }
         const imgStyles = {
