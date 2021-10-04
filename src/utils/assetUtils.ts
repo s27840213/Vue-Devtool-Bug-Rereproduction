@@ -12,7 +12,9 @@ import ImageUtils from './imageUtils'
 import { IGroup, IImage } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import TextUtils from './textUtils'
+import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
+import { IMarker } from '@/interfaces/shape'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -41,7 +43,9 @@ class AssetUtils {
       7: 'text',
       5: 'svg',
       8: 'svg',
-      9: 'svg'
+      9: 'svg',
+      10: 'svg',
+      11: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
@@ -120,6 +124,109 @@ class AssetUtils {
         initWidth: (vSize as number[])[0],
         initHeight: (vSize as number[])[1],
         scale: svgWidth / (vSize as number[])[0],
+        color: json.color,
+        vSize,
+        ...styles
+      }
+    }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+  }
+
+  async addLine(json: any, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const oldPoint = json.point
+    const { width, height } = ShapeUtils.lineDimension(oldPoint)
+    const currentPage = this.getPage(targePageIndex)
+    const resizeRatio = 0.55
+    const pageAspectRatio = currentPage.width / currentPage.height
+    const svgAspectRatio = width / height
+    const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
+    const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
+    const svgs: string[] = []
+    json.ratio = 1
+    json.className = ShapeUtils.classGenerator()
+    json.styleArray = ['stroke:$color[0];stroke-width:$size[0];stroke-dasharray:$dash;stroke-linecap:$cap']
+    json.markerTransArray = [
+      'transform: translate($txmspx, $tymspx) rotate($romsdeg) $finetunes scale($size[0]);',
+      'transform: translate($txmepx, $tymepx) rotate($romedeg) $finetunee scale($size[0]);'
+    ]
+    json.markerWidth = []
+    json.trimWidth = []
+    json.trimOffset = []
+    for (const markerId of json.markerId) {
+      if (markerId === 'none') {
+        json.styleArray.push('')
+        json.markerWidth.push(0)
+        json.trimWidth.push(undefined)
+        json.trimOffset.push(-1)
+        svgs.push('')
+      } else {
+        const marker: IListServiceContentDataItem = {
+          id: markerId,
+          type: 9
+        }
+        const markerContent = (await this.fetch(marker)).jsonData as IMarker
+        json.styleArray.push(markerContent.styleArray[0])
+        json.markerWidth.push(markerContent.vSize[0])
+        json.trimWidth.push(markerContent.trimWidth)
+        json.trimOffset.push(markerContent.trimOffset ?? -1)
+        svgs.push(markerContent.svg)
+      }
+    }
+    json.svg = ShapeUtils.genLineSvgTemplate(svgs[0], svgs[1])
+    const quadrant = ShapeUtils.getLineQuadrant(json.point)
+    const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
+    json.point = point
+
+    const config = {
+      ...json,
+      styles: {
+        x: currentPage.width / 2 - realWidth / 2,
+        y: currentPage.height / 2 - realHeight / 2,
+        width: realWidth,
+        height: realHeight,
+        initWidth: realWidth,
+        initHeight: realHeight,
+        scale: 1,
+        color: json.color,
+        ...styles
+      }
+    }
+    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+  }
+
+  addBasicShape(json: any, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {} } = attrs
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const { vSize = [] } = json
+    const currentPage = this.getPage(targePageIndex)
+    const resizeRatio = 0.55
+    const pageAspectRatio = currentPage.width / currentPage.height
+    const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
+    const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
+    const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
+    json.ratio = 1
+    json.className = ShapeUtils.classGenerator()
+
+    const config = {
+      ...json,
+      styleArray: ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])'],
+      vSize: [svgWidth, svgHeight],
+      size: [json.size[0], ControlUtils.getCorRadValue(
+        [svgWidth, svgHeight],
+        ControlUtils.getCorRadPercentage(json.vSize, json.size, json.shapeType),
+        json.shapeType
+      )],
+      svg: ShapeUtils.genBasicShapeSvgTemplate(json.shapeType ?? ''),
+      styles: {
+        x: currentPage.width / 2 - svgWidth / 2,
+        y: currentPage.height / 2 - svgHeight / 2,
+        width: svgWidth,
+        height: svgHeight,
+        initWidth: svgWidth,
+        initHeight: svgHeight,
+        scale: 1,
         color: json.color,
         vSize,
         ...styles
@@ -258,6 +365,12 @@ class AssetUtils {
         case 5:
         case 9:
           this.addSvg(asset.jsonData, attrs)
+          break
+        case 10:
+          this.addLine(asset.jsonData, attrs)
+          break
+        case 11:
+          this.addBasicShape(asset.jsonData, attrs)
           break
         case 1:
           this.addBackground(

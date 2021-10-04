@@ -183,6 +183,35 @@ class ShapeUtils {
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
+  computePointForDimensions(quadrant: number, scale: number, width: number, height: number): {point: number[], realWidth: number, realHeight: number} {
+    const baseDegree = Math.atan2(height, width)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    let point: number[]
+    switch (quadrant) {
+      case 1:
+        point = [0, height, width, 0]
+        break
+      case 2:
+        point = [width, height, 0, 0]
+        break
+      case 3:
+        point = [width, 0, 0, height]
+        break
+      case 4:
+        point = [0, 0, width, height]
+        break
+      default:
+        point = [0, 0, width, height]
+        break
+    }
+    return {
+      point: point,
+      realWidth: width + 2 * dx + 2,
+      realHeight: height + 2 * dy + 2
+    }
+  }
+
   getLineQuadrant(point: number[]): number {
     if (point?.length !== 4) {
       throw new Error(`input point coordinates (${point}) are invalid`)
