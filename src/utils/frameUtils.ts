@@ -2,15 +2,20 @@ import LayerUtils from './layerUtils'
 import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
+import { IFrame } from '@/interfaces/layer'
 class FrameUtils {
+  isImageFrame(config: IFrame): boolean {
+    return config.clips.length === 1 && !config.clips[0].clipPath
+  }
+
   frameClipFormatter(path: string) {
     return "<path d='" + path + "'></path>"
   }
 
   frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
     const updateFrameLayer = () => {
-      const clipPath = `M0,0h${width}v${height}h${-width}z`
-      this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
+      // const clipPath = `M0,0h${width}v${height}h${-width}z`
+      // this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
       LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { initWidth: width, initHeight: height })
     }
 

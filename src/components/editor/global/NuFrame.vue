@@ -26,12 +26,10 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     layers() {
-      console.log('this.config-------------------')
-      console.log(this.config)
-      if ((this.config as IFrame).decoration) {
+      if ((this.config as IFrame).decoration?.svg) {
         return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
+        // return [...(this.config as IFrame).clips, (this.config as IFrame).decoration]
       } else {
-        console.log('there is no decoration')
         return [...(this.config as IFrame).clips]
       }
     }

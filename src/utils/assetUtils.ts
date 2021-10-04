@@ -135,19 +135,18 @@ class AssetUtils {
     const resizeRatio = 0.4
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
-
     const config = {
       decoration: Object.assign(json.decoration, {
-        vSize: [json.width, json.height]
+        vSize: [width, height]
       }),
       styles: {
         x: currentPage.width / 2 - width / 2,
         y: currentPage.height / 2 - height / 2,
         width,
         height,
-        initWidth: width,
-        initHeight: height,
-        scale: 1,
+        initWidth: json.width,
+        initHeight: json.height,
+        scale: resizeRatio,
         ...styles
       },
       ...json
@@ -267,6 +266,7 @@ class AssetUtils {
           )
           break
         case 8:
+          console.log(item.id)
           this.addFrame(asset.jsonData, attrs)
           break
         default:

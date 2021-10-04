@@ -2,6 +2,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import { init } from '@sentry/browser'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -32,8 +33,8 @@ class LayerFactary {
         rotate: 0,
         width: width,
         height: height,
-        initWidth: 0,
-        initHeight: 0,
+        initWidth: width,
+        initHeight: height,
         imgX: 0,
         imgY: 0,
         imgWidth: initWidth ?? width,
@@ -48,20 +49,43 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { clips, decoration, width, height, styles } = config
-    clips.forEach(img => {
-      const imgConfig = {
-        isFrame: true,
-        clipPath: img.clipPath,
-        styles: img.styles,
-        srcObj: img.srcObj ?? {
+    const { clips, decoration, styles } = config
+    let { width, height, initWidth, initHeight } = styles
+    if (clips.length) {
+      clips.forEach(img => {
+        const imgConfig = {
+          isFrame: true,
+          clipPath: img.clipPath,
+          styles: img.styles,
+          srcObj: img.srcObj ?? {
+            type: 'frame',
+            assetId: '',
+            userId: ''
+          }
+        }
+        Object.assign(img, this.newImage(imgConfig))
+      })
+    } else {
+      styles.scale = 1
+      styles.scaleX = 1
+      styles.scaleY = 1
+      initWidth = width
+      initHeight = height
+
+      clips.push(this.newImage({
+        styles: {
+          width,
+          height,
+          initWidth: width,
+          initHeight: height
+        },
+        srcObj: {
           type: 'frame',
           assetId: '',
           userId: ''
         }
-      }
-      Object.assign(img, this.newImage(imgConfig))
-    })
+      }))
+    }
     return {
       type: 'frame',
       id: GeneralUtils.generateRandomString(8),
@@ -74,24 +98,24 @@ class LayerFactary {
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
+        scale: styles.scale ?? 1,
+        scaleX: styles.scaleX ?? 1,
+        scaleY: styles.scaleY ?? 1,
         rotate: 0,
-        width: width as number ?? styles.width,
-        height: height as number ?? styles.height,
-        initWidth: width as number ?? styles.width,
-        initHeight: height as number ?? styles.height,
+        width: width,
+        height: height,
+        initWidth: initWidth,
+        initHeight: initHeight,
         zindex: -1,
         opacity: 100
       },
       clips,
       decoration: decoration ? this.newShape((() => {
         decoration.styles = {
-          width,
-          height,
-          initWidth: width,
-          initHeight: height
+          width: initWidth,
+          height: initHeight,
+          initWidth: initWidth,
+          initHeight: initHeight
         } as any
         return decoration
       })()) : undefined
