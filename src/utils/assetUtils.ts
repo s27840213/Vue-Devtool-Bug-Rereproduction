@@ -132,7 +132,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.4
+    const resizeRatio = 0.6
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
     const config = {

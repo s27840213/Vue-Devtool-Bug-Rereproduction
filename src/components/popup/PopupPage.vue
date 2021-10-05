@@ -164,23 +164,6 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'Append test clipper',
-          shortcutText: 'Used for test',
-          action: () => {
-            layerUtils.addLayers(this.lastSelectedPageIndex, GeneralUtils.deepCopy(clipTest) as IImage)
-          }
-        },
-        {
-          icon: 'copy',
-          text: 'Append test frame',
-          shortcutText: 'Used for test',
-          action: () => {
-            console.log(layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)))
-            layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newFrame(GeneralUtils.deepCopy(frameTest)) as IFrame)
-          }
-        },
-        {
-          icon: 'copy',
           text: 'Append test line',
           shortcutText: 'Used for test',
           action: () => {
@@ -273,6 +256,20 @@ export default Vue.extend({
     detachBackgroundImage() {
       const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(this.lastSelectedPageIndex))
       if (detachedBackgroundImage.config.srcObj.assetId) {
+        console.log(detachedBackgroundImage.config)
+        let { width, height } = detachedBackgroundImage.config.styles
+        while (width > 1000 && height > 1000) {
+          width /= 1.5
+          height /= 1.5
+        }
+        console.log(width)
+        console.log(height)
+        Object.assign(detachedBackgroundImage.config.styles, {
+          width,
+          height,
+          imgWidth: width,
+          imgHeight: height
+        })
         layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
         this._setBackgroundImage({
           pageIndex: this.lastSelectedPageIndex,

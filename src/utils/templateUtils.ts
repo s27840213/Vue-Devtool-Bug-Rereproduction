@@ -18,6 +18,7 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
+    console.log(json)
     // const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
     if (!json) { return }
     const layers = json.layers as Array<ILayer>

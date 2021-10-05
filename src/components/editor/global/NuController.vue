@@ -544,7 +544,6 @@ export default Vue.extend({
         return
       }
       if (!this.isMoving) {
-        // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
         this.setIsMoving(true)
       }
       if (this.isActive) {
@@ -570,6 +569,9 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
+        if (this.getLayerType === 'image') {
+          (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        }
       }
     },
     imgHandler(offset: ICoordinate) {
@@ -577,6 +579,7 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent) {
       if (this.isMoving) {
+        (this.$refs.body as HTMLElement).style.pointerEvents = 'auto'
         this.setIsMoving(false)
       }
       if (this.isActive) {
@@ -593,7 +596,6 @@ export default Vue.extend({
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
         }
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'auto'
         this.isControlling = false
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
@@ -1343,7 +1345,7 @@ export default Vue.extend({
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image') {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
         Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
@@ -1353,7 +1355,7 @@ export default Vue.extend({
     },
     onFrameMouseUp() {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image') {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
