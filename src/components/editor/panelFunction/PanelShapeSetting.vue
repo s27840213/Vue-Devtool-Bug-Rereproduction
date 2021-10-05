@@ -430,9 +430,8 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
-      if (this.openColorPicker) {
-        this.openColorPicker = false
-      }
+      console.log('select color')
+      this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
     },
     handleSliderModal(modalName = '') {
