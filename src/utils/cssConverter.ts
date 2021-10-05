@@ -68,18 +68,7 @@ class CssConveter {
   }
 
   convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
-    if (horizontalFlip) {
-      if (verticalFlip) {
-        return { transform: 'rotate3d(0, 0, 1, 180deg)' }
-      } else {
-        return { transform: 'rotate3d(0, 1, 0, 180deg)' }
-      }
-    }
-    if (verticalFlip) {
-      return { transform: 'rotate3d(1, 0, 0, 180deg)' }
-    } else {
-      return { transform: '' }
-    }
+    return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
   }
 
   fontStyleMap(prop: string): string {

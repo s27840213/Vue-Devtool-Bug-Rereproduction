@@ -6,13 +6,13 @@
       @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
-      div(class="layer-flip" ref="flip" :style="flipStyles()")
-        div(v-if="config.imgControl" :style="backImageStyle()")
-          nu-image(style="opacity: 0.45"
-                  :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-        nu-clipper(:config="config")
-          component(class="abs" :is="`nu-${config.type}`" :config="config"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+      div(v-if="config.imgControl" :style="backImageStyle()")
+        nu-image(style="opacity: 0.45"
+                :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
+      nu-clipper(:config="config")
+        component(class="abs layer-flip" :is="`nu-${config.type}`" :config="config"
+        :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+        :style="flipStyles()")
     //- div(class="test-index")
     //-   span {{layerIndex}}
     //- div(class="test-angle")
@@ -178,7 +178,7 @@ export default Vue.extend({
 }
 
 .layer-flip {
-  transition: transform 0.2s linear
+  transition: transform 0.2s linear;
 }
 
 .test-index {
