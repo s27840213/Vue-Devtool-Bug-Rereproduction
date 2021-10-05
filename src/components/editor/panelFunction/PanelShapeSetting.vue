@@ -430,7 +430,6 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
-      console.log('select color')
       this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
     },
