@@ -4,9 +4,9 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    div(class="layer-flip" ref="flip" :style="flipStyles()")
-      div(class="layer-scale" ref="scale"
-          :style="scaleStyles()")
+    div(class="layer-scale" ref="scale"
+        :style="scaleStyles()")
+      div(class="layer-flip" ref="flip" :style="flipStyles()")
         div(v-if="config.imgControl" :style="backImageStyle()")
           nu-image(style="opacity: 0.45"
                   :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")

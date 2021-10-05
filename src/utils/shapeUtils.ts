@@ -386,7 +386,7 @@ class ShapeUtils {
     const hypotenuse = Math.sqrt(Math.pow(halfWidth, 2) + Math.pow(height, 2))
     const sineA = height / hypotenuse
     const cosineA = halfWidth / hypotenuse
-    const edgeTop = corRad * (sineA / cosineA)
+    const edgeTop = corRad * (height / halfWidth)
     const edgeSide = corRad / Math.sqrt((1 - cosineA) / (1 + cosineA))
     const trimmedH = Math.max(hypotenuse - edgeSide - edgeTop, 0)
     // Math.max(value, 0) prevents computation error from resulting negative value
