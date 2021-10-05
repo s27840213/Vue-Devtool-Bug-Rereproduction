@@ -14,8 +14,8 @@ class FrameUtils {
 
   frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
     const updateFrameLayer = () => {
-      // const clipPath = `M0,0h${width}v${height}h${-width}z`
-      // this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
+      const clipPath = `M0,0h${width}v${height}h${-width}z`
+      this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
       LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { initWidth: width, initHeight: height })
     }
 

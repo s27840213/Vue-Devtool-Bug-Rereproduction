@@ -21,7 +21,7 @@ export default Vue.extend({
       let { width, height, initWidth, initHeight, scale } = this.config.styles
       // const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
       const clipPath = type === 'image'
-        ? (this.config.isFrame ? `path('${this.config.clipPath}')` : '') : ''
+        ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0,0h${width}v${height}h${-width}z`) : ''
       switch (type) {
         case 'shape':
           width = `${initWidth}px`
@@ -48,8 +48,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-clipper {
-  position: relative;
+  // position: relative;
   transform-style: preserve-3d;
-  overflow: hidden;
+  // overflow: hidden;
 }
 </style>

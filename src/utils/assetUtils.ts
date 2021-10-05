@@ -243,9 +243,6 @@ class AssetUtils {
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
     const config = {
-      decoration: Object.assign(json.decoration, {
-        vSize: [width, height]
-      }),
       styles: {
         x: currentPage.width / 2 - width / 2,
         y: currentPage.height / 2 - height / 2,

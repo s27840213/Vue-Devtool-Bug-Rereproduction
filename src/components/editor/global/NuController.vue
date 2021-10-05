@@ -22,7 +22,9 @@
             :style="frameClipStyles(clip.styles, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
-            @mouseup="onFrameMouseUp")
+            @mouseup="onFrameMouseUp"
+            @click="clickSubController(index)"
+            @dblclick="dblSubController(index)")
         template(v-if="isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
@@ -476,7 +478,7 @@ export default Vue.extend({
       return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
-      if (!this.isMoving) {
+      if (this.getLayerType === 'image') {
         this.setMoving(true)
       }
       this.initTranslate = this.getLayerPos
@@ -574,8 +576,8 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      if (this.isMoving) {
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'auto'
+      if (this.getLayerType === 'image') {
+        (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
         this.setMoving(false)
       }
       if (this.isActive) {
@@ -716,8 +718,8 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            // const clipPath = `M0,0h${width}v${height}h${-width}z`
-            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            const clipPath = `M0,0h${width}v${height}h${-width}z`
+            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break
@@ -1304,6 +1306,7 @@ export default Vue.extend({
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
+          console.log('ssss')
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
       }
       if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
