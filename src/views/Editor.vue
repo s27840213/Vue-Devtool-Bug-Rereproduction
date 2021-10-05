@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="editor")
+    editor-header
     sidebar
     section
-      editor-header
       div(class="content")
         sidebar-panel
         div(class="content__main")
@@ -87,6 +87,8 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: auto 1fr auto;
+  padding-top: 50px;
+  height: calc(100% - 50px);
   &__main {
     display: grid;
     grid-template-rows: minmax(0, 1fr);

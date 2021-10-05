@@ -1,9 +1,17 @@
 <template lang="pug">
   div(class="editor-header")
-    div
+    div(class="body-2")
+      svg-icon(:iconName="'logo'"
+        :iconWidth="'100px'" style="height: 50px;")
       div(class="subtitle-2 text-gray-2 pointer" @click="setPages()") New Design
-      div(class="subtitle-2 text-gray-2" @click="setModalOpen(true)") File
-      div(class="subtitle-2 text-gray-2") Resize
+      //- div(class="subtitle-2 text-gray-2" @click="setModalOpen(true)") File
+      //- div(class="subtitle-2 text-gray-2") Resize
+      div
+        span 檔案
+      div
+        span 調整尺寸
+      div
+        div(style="height: 25px; border-right: solid #474A57 1px;")
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
@@ -14,25 +22,38 @@
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
         @click.native="ShortcutUtils.redo()")
-    div
+    div(class="body-2")
+      span 我的設計 / 新增檔案名稱
+    div(class="body-2")
+      div(v-if="!isLogin")
+        span 若要儲存設計，請
+        a(href="/signup") 註冊
+        span 或
+        a(href="/login") 登入
+      svg-icon(v-if="isAdmin"
+        :iconName="`user-admin${getAdminModeText}`"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click.native="setAdminMode()")
       svg-icon(:iconName="'share-alt'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'")
+      //- btn(:hasIcon="true"
+      //-   :iconName="'download'"
+      //-   :iconWidth="'15px'"
+      //-   :type="'primary-mid'"
+      //-   @click.native="importJsonFile()") Import JSON
+      //- btn(:hasIcon="true"
+      //-   :iconName="'download'"
+      //-   :iconWidth="'15px'"
+      //-   :type="'primary-mid'"
+      //-   @click.native="exportJsonFile()") Export JSON
       btn(:hasIcon="true"
         :iconName="'download'"
         :iconWidth="'15px'"
-        :type="'primary-mid'"
-        @click.native="importJsonFile()") Import JSON
-      btn(:hasIcon="true"
-        :iconName="'download'"
-        :iconWidth="'15px'"
-        :type="'primary-mid'"
-        @click.native="exportJsonFile()") Export JSON
-      btn(:hasIcon="true"
-        :iconName="'download'"
-        :iconWidth="'15px'"
-        :type="'primary-mid'") Download
-      img(:src="require('@/assets/img/svg/avatar.svg')")
+        :type="'primary-sm'"
+        class="rounded" style="padding: 5px 40px;") 下 載
+      //- img(:src="require('@/assets/img/svg/avatar.svg')")
 </template>
 
 <script lang="ts">
@@ -41,7 +62,8 @@ import FileUtils from '@/utils/fileUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ModalUtils from '@/utils/modalUtils'
-import { mapMutations } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
+import store from '@/store'
 
 export default Vue.extend({
   data() {
@@ -51,11 +73,23 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     isInFirstStep(): boolean {
       return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
     },
     isInLastStep(): boolean {
       return (StepsUtils.currStep === (StepsUtils.steps.length - 1)) && (StepsUtils.steps.length > 1)
+    },
+    isLogin(): boolean {
+      return store.getters['user/isLogin']
+    },
+    isAdmin(): boolean {
+      return this.role === 0
+    },
+    getAdminModeText(): string {
+      return this.adminMode ? '' : '-disable'
     }
   },
   methods: {
@@ -69,6 +103,9 @@ export default Vue.extend({
     },
     importJsonFile() {
       FileUtils.import()
+    },
+    setAdminMode() {
+      store.commit('user/SET_ADMIN_MODE', !this.adminMode)
     },
     setPages() {
       this._setPages([{
@@ -141,25 +178,38 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 88px;
+  height: 50px;
   background-color: #eaf1f6;
   border: 1px solid #e2e5e6;
   box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: setZindex("editor-header");
   > div {
     &:nth-child(1) {
       display: grid;
-      grid-template-columns: repeat(6, auto);
+      grid-template-columns: repeat(7, auto);
       grid-template-rows: 1fr;
-      column-gap: 30px;
+      column-gap: 20px;
       justify-items: center;
       align-items: center;
-      margin-left: 60px;
+      margin-left: 40px;
     }
     &:nth-child(2) {
       display: grid;
-      grid-template-columns: repeat(5, auto);
+      grid-template-columns: repeat(1, auto);
       grid-template-rows: 1fr;
-      column-gap: 15px;
+      column-gap: 20px;
+      justify-items: center;
+      align-items: center;
+    }
+    &:nth-child(3) {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      grid-template-rows: 1fr;
+      column-gap: 20px;
       justify-items: center;
       align-items: center;
       margin-right: 40px;
