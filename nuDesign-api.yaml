@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20210924"
+  version: "20211005"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -124,6 +124,27 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/listDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-lib-photo:
+    post:
+      description: 取得圖庫(unsplash or pexels)照片列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listLibPhotoInput
+          required: true
+          schema:
+            $ref: "#/definitions/listLibPhotoInput"
       responses:
         "200":
           description: 200 response
@@ -380,6 +401,29 @@ definitions:
       redirect_uri:
         type: string
         description: google redirect url
+  listLibPhotoInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - page_index
+          - type
+        properties:
+          type:
+            type: string
+            description: "lib type: unsplash or pexels (pexels is not ready)."
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
