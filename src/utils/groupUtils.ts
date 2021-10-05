@@ -215,6 +215,7 @@ class GroupUtils {
   }
 
   deselect() {
+    console.log('deselet')
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
       // if (this.currSubSelectedIndex !== -1) {
@@ -285,6 +286,8 @@ class GroupUtils {
   }
 
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
+    console.log(pageIndex)
+    console.log(styles)
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles

@@ -25,6 +25,7 @@ export default Vue.extend({
   left:0;
   top:0;
   background-color: #000000a1;
+  z-index: 999999;
 
   div {
     display: flex;
