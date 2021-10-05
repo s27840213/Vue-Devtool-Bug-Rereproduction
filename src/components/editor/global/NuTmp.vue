@@ -47,6 +47,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-tmp {
+  transform-style: preserve-3d;
   position: absolute;
 }
 </style>

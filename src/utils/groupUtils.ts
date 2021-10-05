@@ -215,6 +215,7 @@ class GroupUtils {
   }
 
   deselect() {
+    console.log('deselet')
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
       // if (this.currSubSelectedIndex !== -1) {
@@ -276,7 +277,6 @@ class GroupUtils {
   }
 
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
-    console.log('......')
     store.commit('SET_currSelectedInfo', {
       pageIndex: currSelectedPageIndex,
       index: currSelectedIndex,
@@ -286,6 +286,8 @@ class GroupUtils {
   }
 
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
+    console.log(pageIndex)
+    console.log(styles)
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
       styles

@@ -12,7 +12,7 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @contextmenu.prevent
-          @mousedown.left="moveStart"
+          @mousedown.left.stop="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           @dblclick="onDblClick")
@@ -23,7 +23,7 @@
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp")
-        template(v-if="(config.type === 'group' || config.type === 'frame') && isActive")
+        template(v-if="isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -34,7 +34,7 @@
                 :layerIndex="index"
                 :primaryLayerIndex="layerIndex"
                 :config="layer"
-                :color="'#EB5757'"
+                :type="config.type"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && config.active")
@@ -181,10 +181,10 @@ export default Vue.extend({
   },
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
-    // this if block is used to prevent the selection area being generated when adding text layer with the text panel
-    if (this.config.type === 'text' && this.config.active) {
-      this.setIsMoving(true)
-    }
+  },
+  beforeDestroy() {
+    window.removeEventListener('mouseup', this.moveEnd)
+    window.removeEventListener('mousemove', this.moving)
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -193,7 +193,6 @@ export default Vue.extend({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      isMoving: 'getIsMoving',
       currSubSelectedInfo: 'getCurrSubSelectedInfo'
     }),
     getLayerPos(): ICoordinate {
@@ -210,7 +209,7 @@ export default Vue.extend({
     },
     getLayers(): Array<ILayer> {
       const type = this.getLayerType
-      return type === 'group'
+      return (type === 'group' || type === 'tmp')
         ? this.config.layers : (type === 'frame' ? this.config.clips : [])
     },
     isActive(): boolean {
@@ -276,7 +275,6 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
-      this.setIsMoving(false)
       if (!val) {
         this.setLastSelectedLayerIndex(this.layerIndex)
       }
@@ -301,7 +299,6 @@ export default Vue.extend({
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
-        this.setIsMoving(editing)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
@@ -320,16 +317,12 @@ export default Vue.extend({
     this.isControlling = false
     this.setCursorStyle('default')
     StepsUtils.record()
-    if (this.isMoving) {
-      this.setIsMoving(false)
-    }
   },
   methods: {
     ...mapMutations({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setIsMoving: 'SET_isMoving',
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
     }),
     resizerBarStyles(resizer: IResizer) {
@@ -438,6 +431,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.isLine ? 'none' : this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
+        'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
         'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
@@ -543,10 +537,7 @@ export default Vue.extend({
       if (this.isImgControl) {
         return
       }
-      if (!this.isMoving) {
-        // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
-        this.setIsMoving(true)
-      }
+      // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
       if (this.isActive) {
         e.preventDefault()
         this.setCursorStyle('move')
@@ -576,9 +567,6 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      if (this.isMoving) {
-        this.setIsMoving(false)
-      }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -1320,7 +1308,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       this.clipIndex = clipIndex
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image') {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
         Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
@@ -1343,7 +1331,7 @@ export default Vue.extend({
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image') {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
         Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
@@ -1353,7 +1341,7 @@ export default Vue.extend({
     },
     onFrameMouseUp() {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image') {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
@@ -1365,6 +1353,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
+  transform-style: preserve-3d;
   &__line-hint {
     position: absolute;
     z-index: 9;

@@ -39,8 +39,7 @@ export interface IEditorState {
     heading: Array<string>,
     subheading: Array<string>,
     body: Array<string>
-  },
-  isMoving: boolean
+  }
 }
 
 export enum SidebarPanelType {

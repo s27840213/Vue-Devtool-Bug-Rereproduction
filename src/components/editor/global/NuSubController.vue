@@ -5,10 +5,8 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @mouseout.stop="toggleHighlighter(pageIndex,layerIndex,false)"
-          @mouseover.stop="toggleHighlighter(pageIndex,layerIndex,true)"
-          @dblclick="onDblClick()"
-          @click.left.stop="onClickEvent()")
+          @dblclick="onDblClick(type)"
+          @click.left.stop="onClickEvent(type)")
         //- template(v-if="config.type === 'text' && config.active")
         //-   div(:style="textScaleStyle()")
         //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -25,11 +23,6 @@
         //-           :data-sindex="sIndex"
         //-           :key="span.id",
         //-           :style="textStyles(span.styles)") {{ span.text }}
-        div(v-if="isActive && isLocked && (scaleRatio >20)"
-            class="nu-sub-controller__lock-icon"
-            :style="`transform: scale(${100/scaleRatio})`")
-          svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-            @click.native="MappingUtils.mappingIconAction('unlock')")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -56,10 +49,7 @@ export default Vue.extend({
     pageIndex: Number,
     primaryLayerIndex: Number,
     snapUtils: Object,
-    color: {
-      type: String,
-      default: '#BB6BD9'
-    }
+    type: String
   },
   data() {
     return {
@@ -188,14 +178,8 @@ export default Vue.extend({
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      // console.log('shown group controller')
-      // LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-      //   shown
-      // })
-    },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 10)
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg) `,
@@ -501,9 +485,15 @@ export default Vue.extend({
       }
     },
     onClickEvent() {
+      if (this.type === 'tmp') {
+        return
+      }
       this.$emit('clickSubController', this.layerIndex, this.config.type)
     },
     onDblClick() {
+      if (this.type === 'tmp') {
+        return
+      }
       this.$emit('dblSubController', this.layerIndex)
     }
   }
@@ -512,6 +502,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-sub-controller {
+  transform-style: preserve-3d;
   &__content {
     display: flex;
     justify-content: center;
