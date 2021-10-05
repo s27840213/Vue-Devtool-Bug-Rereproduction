@@ -55,8 +55,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageSize: 'getPageSize',
-      pageScaleRatio: 'getPageScaleRatio',
-      isMoving: 'getIsMoving'
+      pageScaleRatio: 'getPageScaleRatio'
     })
     // getLastLayer(): ILayer {
     //   const page = this.$refs[`page-${this.getLastSelectedPageIndex}`] as [Vue]
@@ -83,13 +82,6 @@ export default Vue.extend({
     //   return this.getLastLayer.imgControl as boolean
     // }
   },
-  watch: {
-    isMoving(newVal) {
-      if (newVal === true) {
-        this.isSelecting = false
-      }
-    }
-  },
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
@@ -113,19 +105,17 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
-      if (!this.isMoving) {
-        if (!this.isSelecting) {
-          if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-            GroupUtils.deselect()
-          }
-          this.isSelecting = true
-          this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
-          return
+      if (!this.isSelecting) {
+        if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
+          GroupUtils.deselect()
         }
-        this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-        this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
-        this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
+        this.isSelecting = true
+        this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
+        return
       }
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
+      this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
       const event = new MouseEvent('mousemove', {

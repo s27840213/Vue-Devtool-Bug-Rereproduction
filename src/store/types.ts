@@ -26,6 +26,7 @@ export interface IEditorState {
   currSelectedInfo: ICurrSelectedInfo,
   currSubSelectedInfo: ICurrSubSelectedInfo,
   isColorPickerOpened: boolean,
+  isMoving: boolean,
   currSelectedPhotoInfo: Record<string, never> | {
     userName: string,
     userLink: string,
@@ -39,8 +40,7 @@ export interface IEditorState {
     heading: Array<string>,
     subheading: Array<string>,
     body: Array<string>
-  },
-  isMoving: boolean
+  }
 }
 
 export enum SidebarPanelType {

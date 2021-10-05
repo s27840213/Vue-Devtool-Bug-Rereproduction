@@ -273,6 +273,10 @@ class GroupUtils {
       layers: [],
       types: new Set<string>()
     })
+    store.commit('SET_currSelectedInfo', {
+      index: -1,
+      type: ''
+    })
   }
 
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
@@ -332,7 +336,7 @@ class GroupUtils {
         layer.styles.scale *= tmpLayer.styles.scale
       }
 
-      // calculate the center shift of scaled image
+      // calculate the center  of scaled image
       if (layer.styles.scale !== 1) {
         const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]

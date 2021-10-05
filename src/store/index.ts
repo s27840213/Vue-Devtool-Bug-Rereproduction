@@ -185,8 +185,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame => {
-      const length = state.pages[pageIndex].layers.length
-      return state.pages[pageIndex].layers[layerIndex >= 0 ? layerIndex : length + layerIndex]
+      return state.pages[pageIndex].layers[layerIndex >= 0 ? layerIndex : state.pages[pageIndex].layers.length + layerIndex]
     }
   },
   getLayers(state: IEditorState) {
@@ -250,9 +249,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
-  },
-  getIsMoving(state: IEditorState) {
-    return state.isMoving
   }
 }
 
@@ -393,9 +389,7 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
-    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
-    console.log(state.pages[updateInfo.pageIndex].layers.map((layer) => layer.styles.zindex))
   },
   UPDATE_layerOrder(state: IEditorState, updateInfo: { type: string }): void {
     const layerIndex = state.currSelectedInfo.index
@@ -566,6 +560,9 @@ const mutations: MutationTree<IEditorState> = {
         Object.assign(state.asset, { [id]: json[id] })
       })
   },
+  SET_moving(state: IEditorState, isMoving: boolean) {
+    state.isMoving = isMoving
+  },
   UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
     const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data
     const targetLayer = state.pages[pageIndex].layers[layerIndex] as IGroup | ITmp
@@ -583,9 +580,6 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
-  },
-  SET_isMoving(state: IEditorState, isMoving: boolean) {
-    state.isMoving = isMoving
   }
 }
 

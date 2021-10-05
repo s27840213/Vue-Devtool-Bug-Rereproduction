@@ -62,6 +62,7 @@ export default Vue.extend({
         handler: () => {
           this.$emit('toggleColorPanel', false)
         },
+        middleware: null as unknown,
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       },
@@ -69,6 +70,9 @@ export default Vue.extend({
       brandColors: ['#2D9CDB'],
       colorUtils
     }
+  },
+  created() {
+    this.vcoConfig.middleware = this.middleware
   },
   computed: {
     ...mapGetters({
@@ -90,10 +94,13 @@ export default Vue.extend({
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
     },
-    handleColorModal() {
+    handleColorModal(): void {
       this.openColorPicker = !this.openColorPicker
     },
-    closePanel() {
+    middleware(event: MouseEvent): boolean {
+      return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+    },
+    closePanel(): void {
       this.$emit('toggleColorPanel', false)
     }
   }

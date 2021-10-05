@@ -49,31 +49,34 @@
         @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
         tabindex="0")
       div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
-        div(class="snap-area")
-          div(v-for="line in closestSnaplines.v"
-            class="snap-area__line snap-area__line--vr"
-            :style="snapLineStyles('v', line.pos)")
-          div(v-for="line in closestSnaplines.h"
-            class="snap-area__line snap-area__line--hr"
-            :style="snapLineStyles('h', line.pos)")
-        div(:class="['page-content', `.nu-page-${pageIndex}`]"
-            :style="styles('content')"
-            ref="page-content"
-            @drop="onDrop"
-            @dragover.prevent,
-            @dragenter.prevent
-            @click.right.stop="onRightClick"
-            @click.left.self="pageClickHandler()"
-            @mouseover="togglePageHighlighter(true)"
-            @mouseout="togglePageHighlighter(false)")
-          nu-layer(v-for="(layer,index) in config.layers"
-            :key="layer.id"
-            :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
-            :data-index="`${index}`"
-            :data-pindex="`${pageIndex}`"
-            :layerIndex="index"
-            :pageIndex="pageIndex"
-            :config="layer")
+        div(class="overflow-container"
+            :style="styles()")
+          div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
+            div(class="snap-area")
+              div(v-for="line in closestSnaplines.v"
+                class="snap-area__line snap-area__line--vr"
+                :style="snapLineStyles('v', line.pos)")
+              div(v-for="line in closestSnaplines.h"
+                class="snap-area__line snap-area__line--hr"
+                :style="snapLineStyles('h', line.pos)")
+            div(:class="['page-content', `.nu-page-${pageIndex}`]"
+                :style="styles('content')"
+                ref="page-content"
+                @drop="onDrop"
+                @dragover.prevent,
+                @dragenter.prevent
+                @click.right.stop="onRightClick"
+                @click.left.self="pageClickHandler()"
+                @mouseover="togglePageHighlighter(true)"
+                @mouseout="togglePageHighlighter(false)")
+              nu-layer(v-for="(layer,index) in config.layers"
+                :key="layer.id"
+                :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
+                :data-index="`${index}`"
+                :data-pindex="`${pageIndex}`"
+                :layerIndex="index"
+                :pageIndex="pageIndex"
+                :config="layer")
         div(v-if="pageIsHover"
           class="page-highlighter"
           :style="styles()")
@@ -81,7 +84,7 @@
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
-              :key="`controller-${index}`"
+              :key="`controller-${layer.id}`"
               :layerIndex="index"
               :pageIndex="pageIndex"
               :config="layer"
@@ -378,15 +381,22 @@ export default Vue.extend({
   width: 0px;
   height: 0px;
   position: relative;
-  // border: 1px solid blue;
   box-sizing: border-box;
   transform-origin: 0 0;
   transform-style: preserve-3d;
 }
-.page-content {
+
+/*
+    because overflow: hidden will disable the translateZ props in page-content(layers' order will be incorrect)
+    That's why we need this additional container
+ */
+.overflow-container {
+  position: relative;
   overflow: hidden;
+}
+
+.page-content {
   position: absolute;
-  // border: 5px solid green;
   box-sizing: border-box;
   background-size: cover;
   background-repeat: no-repeat;

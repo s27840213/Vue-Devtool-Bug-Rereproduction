@@ -15,7 +15,7 @@ class LayerFactary {
         assetId: config.srcObj.assetId
       },
       id: GeneralUtils.generateRandomString(8),
-      clipPath: config.clipPath ?? '',
+      clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
       active: false,
       shown: false,
       locked: false,
@@ -51,7 +51,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { clips, decoration, styles } = config
+    const { clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
     if (clips.length) {
       clips.forEach(img => {
@@ -115,6 +115,7 @@ class LayerFactary {
       },
       clips,
       decoration: decoration ? this.newShape((() => {
+        decoration.vSize = [styles.width, styles.height]
         decoration.styles = {
           width: initWidth,
           height: initHeight,
@@ -122,6 +123,16 @@ class LayerFactary {
           initHeight: initHeight
         } as any
         return decoration
+      })()) : undefined,
+      decorationTop: decorationTop ? this.newShape((() => {
+        decorationTop.vSize = [styles.width, styles.height]
+        decorationTop.styles = {
+          width: initWidth,
+          height: initHeight,
+          initWidth: initWidth,
+          initHeight: initHeight
+        } as any
+        return decorationTop
       })()) : undefined
     }
   }
