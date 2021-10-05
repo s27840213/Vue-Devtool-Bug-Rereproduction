@@ -419,6 +419,26 @@ class ShapeUtils {
     const maxCorRad = this.getMaxCorRad(shapeType, vSize)
     return Math.min(size[1], maxCorRad)
   }
+
+  flipLine(point: number[], horizontalFlip: boolean, verticalFlip: boolean): number[] {
+    const newPoint = [...point]
+    const { width, height, xDiff, yDiff } = this.lineDimension(point)
+    if (horizontalFlip) {
+      if (xDiff > 0) {
+        newPoint[0] += 2 * width
+      } else {
+        newPoint[0] -= 2 * width
+      }
+    }
+    if (verticalFlip) {
+      if (yDiff > 0) {
+        newPoint[1] += 2 * height
+      } else {
+        newPoint[1] -= 2 * height
+      }
+    }
+    return newPoint
+  }
 }
 
 const shapeUtils = new ShapeUtils()
