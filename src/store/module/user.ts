@@ -14,11 +14,13 @@ const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
 const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
 const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
 const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
+const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
 
 export interface IUserModule {
   token: string,
   userId: string,
   role: string,
+  adminMode: boolean,
   isAuthenticated: boolean,
   userAssets: IUserAssetsData,
   downloadUrl: string
@@ -31,6 +33,7 @@ const getDefaultState = (): IUserModule => ({
   token: '',
   userId: '',
   role: '',
+  adminMode: true,
   isAuthenticated: false,
   userAssets: {
     design: {
@@ -177,6 +180,9 @@ const mutations: MutationTree<IUserModule> = {
   },
   [CLEAR_CHECKED_ASSETS](state: IUserModule) {
     state.checkedAssets = []
+  },
+  [SET_ADMIN_MODE](state: IUserModule, mode: boolean) {
+    state.adminMode = mode
   }
 }
 
