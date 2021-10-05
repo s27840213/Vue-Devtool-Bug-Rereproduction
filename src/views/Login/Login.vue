@@ -49,10 +49,10 @@ div(style="position:relative;")
         div(v-if="!mailValid || emailResponseError" class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="disp-flex" style="justify-content: center;")
-        btn(:type="'primary-mid'" class="btn-shadow w-50 body-1"
+        btn(:type="'primary-mid'" class="btn-shadow body-1" style="width: 50%;"
         @click.native="onSendEmailClicked()") Send email
       div(class="disp-flex" style="justify-content: center;")
-        btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow w-50"
+        btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow" style="width: 50%;"
         @click.native="onBackClicked()") Back to login
     div(v-if="currentPageIndex === 2" class="login")
       div(class="text-center")
@@ -110,7 +110,8 @@ div(style="position:relative;")
         div(v-if="!confirmPasswordValid" class="invalid-message")
             span {{ confirmErrorMessage }}
         div(class="mt-20 disp-flex" style="justify-content: center;")
-          btn(:type="'primary-mid'" class="btn-shadow w-50" @click.native="onResetDoneClicked()") Done
+          btn(:type="'primary-mid'" class="btn-shadow"  style="width: 50%;"
+          @click.native="onResetDoneClicked()") Done
   spinner(v-if="isLoading")
 </template>
 
