@@ -10,7 +10,7 @@
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(:config="config")
-        component(:is="`nu-${config.type}`" :config="config"
+        component(class="abs" :is="`nu-${config.type}`" :config="config"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //- div(class="test-index")
     //-   span {{layerIndex}}
