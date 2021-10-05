@@ -98,7 +98,7 @@ export default Vue.extend({
       this.openColorPicker = !this.openColorPicker
     },
     middleware(event: MouseEvent): boolean {
-      return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : false
+      return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
     },
     closePanel(): void {
       this.$emit('toggleColorPanel', false)
