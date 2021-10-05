@@ -62,9 +62,9 @@ export default Vue.extend({
         'keyword'
       ]
     ),
-    ...mapState('user', ['role']),
+    ...mapState('user', ['role', 'adminMode']),
     showTemplateId (): boolean {
-      return this.role === 0
+      return (this.role === 0) && this.adminMode
     },
     itemHeight (): number {
       return this.showTemplateId ? 179 : 155

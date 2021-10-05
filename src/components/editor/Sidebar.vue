@@ -68,7 +68,7 @@ export default Vue.extend({
 
 .logo {
   width: 100%;
-  height: 88px;
+  height: 50px;
   background-color: setColor(blue-1);
 }
 

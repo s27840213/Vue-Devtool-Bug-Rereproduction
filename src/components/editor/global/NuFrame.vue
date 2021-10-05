@@ -10,7 +10,9 @@
 </template>
 
 <script lang="ts">
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
+import { Layer } from 'konva/types/Layer'
 import Vue from 'vue'
 import { config } from 'vue/types/umd'
 import { mapGetters } from 'vuex'
@@ -26,12 +28,18 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     layers() {
-      if ((this.config as IFrame).decoration?.svg) {
-        return [(this.config as IFrame).decoration, ...(this.config as IFrame).clips]
-        // return [...(this.config as IFrame).clips, (this.config as IFrame).decoration]
-      } else {
-        return [...(this.config as IFrame).clips]
+      const config = this.config as IFrame
+      let layers: Array<IImage | IShape> = []
+      if (config.decoration && config.decoration.svg) {
+        layers = layers.concat(config.decoration)
       }
+
+      layers = layers.concat(...config.clips)
+
+      if (config.decorationTop && config.decorationTop.svg) {
+        layers = layers.concat(config.decorationTop)
+      }
+      return layers
     }
   },
   methods: {

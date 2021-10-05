@@ -148,7 +148,8 @@ const getDefaultState = (): IEditorState => ({
     heading: [],
     subheading: [],
     body: []
-  }
+  },
+  isMoving: false
 })
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
@@ -554,6 +555,9 @@ const mutations: MutationTree<IEditorState> = {
       .forEach(id => {
         Object.assign(state.asset, { [id]: json[id] })
       })
+  },
+  SET_moving(state: IEditorState, isMoving: boolean) {
+    state.isMoving = isMoving
   },
   UPDATE_specLayerData(state: IEditorState, data: ISpecLayerData) {
     const { pageIndex, layerIndex, subLayerIndex, props, styles, type } = data

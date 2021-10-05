@@ -22,7 +22,9 @@
             :style="frameClipStyles(clip.styles, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
-            @mouseup="onFrameMouseUp")
+            @mouseup="onFrameMouseUp"
+            @click="clickSubController(index)"
+            @dblclick="dblSubController(index)")
         template(v-if="isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
@@ -188,6 +190,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
+    ...mapState(['isMoving']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -323,7 +326,8 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo'
+      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo',
+      setMoving: 'SET_moving'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
@@ -474,6 +478,9 @@ export default Vue.extend({
       return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      if (this.getLayerType === 'image') {
+        this.setMoving(true)
+      }
       this.initTranslate = this.getLayerPos
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -537,7 +544,6 @@ export default Vue.extend({
       if (this.isImgControl) {
         return
       }
-      // (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
       if (this.isActive) {
         e.preventDefault()
         this.setCursorStyle('move')
@@ -561,12 +567,19 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
+        if (this.getLayerType === 'image') {
+          (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        }
       }
     },
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
+      if (this.getLayerType === 'image') {
+        (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
+        this.setMoving(false)
+      }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -581,7 +594,6 @@ export default Vue.extend({
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
         }
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'auto'
         this.isControlling = false
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
@@ -706,8 +718,8 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            // const clipPath = `M0,0h${width}v${height}h${-width}z`
-            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            const clipPath = `M0,0h${width}v${height}h${-width}z`
+            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break
@@ -1294,6 +1306,7 @@ export default Vue.extend({
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
+          console.log('ssss')
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
       }
       if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
@@ -1308,7 +1321,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       this.clipIndex = clipIndex
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image') {
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         Object.assign(this.clipedImgBuff, clips[this.clipIndex].srcObj)
         Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
