@@ -62,7 +62,8 @@
               @keydown.38.stop
               @keydown.39.stop
               @keydown.40.stop
-              @keyup="onKeyUp")
+              @keyup="onKeyUp"
+              @blur="onTextBlur")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
                 :key="p.id",
@@ -507,6 +508,7 @@ export default Vue.extend({
           return
         }
         this.contentEditable = true
+        TextUtils.updateIsEditing(this.isTextEditing)
       }
       if (!this.config.locked) {
         this.isControlling = true
@@ -592,6 +594,7 @@ export default Vue.extend({
         }
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
+          TextUtils.updateIsEditing(this.isTextEditing)
         }
         this.isControlling = false
         this.setCursorStyle('default')
@@ -1111,6 +1114,10 @@ export default Vue.extend({
         TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
         TextPropUtils.updateTextPropsState()
       }
+    },
+    onTextBlur() {
+      this.contentEditable = false
+      TextUtils.updateIsEditing(this.isTextEditing)
     },
     composingEnd() {
       this.isComposing = false

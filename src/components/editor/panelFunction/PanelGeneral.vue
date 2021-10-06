@@ -45,6 +45,7 @@ import popupUtils from '@/utils/popupUtils'
 import { ILayer } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import popup from '@/store/module/popup'
+import TextUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   data() {
@@ -83,8 +84,11 @@ export default Vue.extend({
       }
       return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
     },
+    isTextEditing(): boolean {
+      return !!TextUtils.getCurrTextProps?.isEditing
+    },
     isFlipDisabled(): boolean {
-      return this.isGroup || this.layerNum !== 1
+      return this.isGroup || this.layerNum !== 1 || this.isTextEditing
     }
   },
   mounted() {
