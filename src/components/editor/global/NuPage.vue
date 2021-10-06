@@ -404,9 +404,11 @@ export default Vue.extend({
 }
 .page-highlighter {
   position: absolute;
+  top: 0px;
+  left: 0px;
   outline: 2px solid setColor(blue-2, 0.5);
   box-sizing: border-box;
-  z-index: 5;
+  z-index: setZindex("page-highlighter");
   pointer-events: none;
 }
 .page-control {
