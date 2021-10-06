@@ -258,6 +258,7 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
+    const { styles, vSize } = config
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
@@ -267,7 +268,7 @@ class LayerFactary {
       color: [],
       size: [],
       svg: '',
-      vSize: [0, 0],
+      vSize: [...vSize],
       cSize: [0, 0],
       pSize: [0, 0],
       pDiff: [0, 0],
@@ -279,22 +280,23 @@ class LayerFactary {
       dragging: false,
       designId: '',
       styles: {
-        x: 0,
-        y: 0,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
-        rotate: 0,
-        width: config.width,
-        height: config.height,
-        initWidth: config.width,
-        initHeight: config.height,
+        x: styles.x ?? 0,
+        y: styles.y ?? 0,
+        scale: styles.scale ?? 1,
+        scaleX: styles.scaleX ?? 1,
+        scaleY: styles.scaleY ?? 1,
+        rotate: styles.rotate ?? 0,
+        width: styles.width,
+        height: styles.height,
+        initWidth: styles.initWidth,
+        initHeight: styles.initHeight,
         zindex: -1,
         opacity: 100,
         horizontalFlip: false,
         verticalFlip: false
       }
     }
+    console.log(GeneralUtils.deepCopy(config))
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)

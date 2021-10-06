@@ -6,7 +6,7 @@
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
-          :style="styles('')"
+          :style="styles(getLayerType)"
           @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
           @dragover.prevent,
           @click.left="onClick"
@@ -29,6 +29,7 @@
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+                class="relative"
                 data-identifier="controller"
                 :style="subControllerStyles()"
                 :key="`group-controller-${index}`"
@@ -327,6 +328,7 @@ export default Vue.extend({
     window.removeEventListener('mousemove', this.moving)
     this.isControlling = false
     this.setCursorStyle('default')
+    this.setMoving(false)
     StepsUtils.record()
   },
   methods: {
@@ -359,9 +361,6 @@ export default Vue.extend({
               : controlPoints.resizers.slice(0, 2)
           }
           break
-        // case 'image':
-        //   resizers = this.config.isClipper ? [] : resizers
-        //   break
         case 'shape':
           resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
           break
@@ -372,7 +371,7 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          if (this.config.isFrameImage) {
+          if (FrameUtils.isImageFrame(this.config)) {
             return resizers
           } else {
             return []
@@ -434,7 +433,18 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.config.styles.zindex + 1)
+      const zindex = (() => {
+        if (type === 'frame' && this.isMoving) {
+          return (this.layerIndex + 1) * 1000
+        } else if (type === 'control-point') {
+          return (this.layerIndex + 1) * (this.getLayerType === 'frame' && this.isMoving ? 1000 : 100)
+        } else if (type === 'tmp') {
+          return 0
+        } else {
+          return this.config.styles.zindex + 1
+        }
+      })()
+      // type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.config.styles.zindex + 1)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
@@ -456,8 +466,8 @@ export default Vue.extend({
     },
     subControllerStyles() {
       return {
-        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
-        position: 'relative'
+        // transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
+        // position: 'relative'
       }
     },
     outlineStyles(type: string) {
@@ -587,10 +597,10 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      // if (this.getLayerType === 'image') {
-      //   (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
-      //   this.setMoving(false)
-      // }
+      if (this.getLayerType === 'image') {
+        // (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
+        this.setMoving(false)
+      }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -1356,6 +1366,7 @@ export default Vue.extend({
           imgY
         })
       }
+      console.log(this.config)
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
@@ -1483,15 +1494,6 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
-  // &__scale {
-  // position: absolute;
-  // top: 0;
-  // left: 0;
-  // height: 100%;
-  // width: 100%;
-  // position: relative;
-  // transform-origin: 0px 0px;
-  // }
   &__wrapper {
     position: relative;
   }
@@ -1504,6 +1506,7 @@ export default Vue.extend({
 
 .sub-controller {
   transform-style: preserve-3d;
+  isolation: isolate;
   position: absolute;
   top: 0;
   left: 0;

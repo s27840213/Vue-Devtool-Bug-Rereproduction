@@ -233,10 +233,8 @@ export default Vue.extend({
                 clipPath: `M0,0h${width}v${height}h${-width}z`
               }]
             } as unknown as IFrame)
-            console.log(currLayer)
             layerUtils.deleteLayer(layerIndex)
             layerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
-            console.log(layerUtils.getPage(pageIndex))
             zindexUtils.reassignZindex(pageIndex)
             uploadUtils.updateTemplate()
           }

@@ -89,18 +89,22 @@ $spacer: 5;
     }
 }
 
-.rounded-none	{
+.rounded-none {
     border-radius: 0px;
 }
-.rounded-sm {	
+
+.rounded-sm {
     border-radius: 0.125rem;
 }
+
 .rounded {
     border-radius: 0.25rem;
 }
-.rounded-md {	
+
+.rounded-md {
     border-radius: 0.375rem;
 }
+
 .rounded-lg {
     border-radius: 0.5rem;
 }
@@ -159,4 +163,8 @@ $spacer: 5;
 
 .contain {
     background-size: contain;
+}
+
+.relative {
+    position: relative;
 }
