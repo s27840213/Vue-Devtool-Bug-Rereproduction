@@ -73,7 +73,7 @@
                   :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
-            :style="`transform: scale(${100/scaleRatio})`")
+            :style="lockIconStyles")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
@@ -271,6 +271,12 @@ export default Vue.extend({
             })
       }
       return false
+    },
+    lockIconStyles(): { [index: string]: string } {
+      const zindex = (this.layerIndex + 1) * 100
+      return {
+        transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio})`
+      }
     }
   },
   watch: {
@@ -420,14 +426,13 @@ export default Vue.extend({
       return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      console.log(pageIndex, layerIndex, shown)
       if (this.isLine) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.layerIndex + 1)
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.config.styles.zindex + 1)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
@@ -436,7 +441,7 @@ export default Vue.extend({
         outline: this.isLine ? 'none' : this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
         // 'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
-        'pointer-events': this.isImgControl ? 'none' : 'auto',
+        'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -1309,7 +1314,6 @@ export default Vue.extend({
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
-          console.log('ssss')
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
       }
       if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
@@ -1385,6 +1389,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    transform-style: preserve-3d;
     &:hover {
       cursor: pointer;
     }
@@ -1490,6 +1495,7 @@ export default Vue.extend({
 }
 
 .sub-controller {
+  transform-style: preserve-3d;
   position: absolute;
   top: 0;
   left: 0;

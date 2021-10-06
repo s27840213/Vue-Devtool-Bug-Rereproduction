@@ -1,6 +1,5 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import userApis from '@/apis/user'
-import store from '..'
 import uploadUtils from '@/utils/uploadUtils'
 import { IAssetPhoto, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
 
@@ -19,7 +18,7 @@ const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
 export interface IUserModule {
   token: string,
   userId: string,
-  role: string,
+  role: number,
   adminMode: boolean,
   isAuthenticated: boolean,
   userAssets: IUserAssetsData,
@@ -32,7 +31,7 @@ export interface IUserModule {
 const getDefaultState = (): IUserModule => ({
   token: '',
   userId: '',
-  role: '',
+  role: -1,
   adminMode: true,
   isAuthenticated: false,
   userAssets: {

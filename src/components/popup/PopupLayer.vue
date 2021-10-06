@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class=" popup-layer bg-gray-6"
       @click.stop="closePopup")
-    template(v-if="getToekn!==''")
+    template(v-if="inAdminMode && isLogin")
       div(class="popup-layer__item"
           @click="pageUploadMenu.action")
         svg-icon(
@@ -21,7 +21,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
-    template(v-if="getToekn!=='' && (isText || isShape)")
+    template(v-if="inAdminMode && isLogin && (isText || isShape)")
       div(class="popup-layer__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -31,7 +31,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && getToekn!=='' && (isText || isShape)")
+    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && inAdminMode && isLogin && (isText || isShape)")
       div(class="popup-layer__item"
           @click="updateMenu.action")
         svg-icon(
@@ -51,7 +51,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateImageAsFrame.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    hr(class="popup-layer__hr")
+    hr(v-if="inAdminMode && isLogin" class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`popup-layer__shortcut-${index}`"
         class="popup-layer__item"
@@ -104,7 +104,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import FocusUtils from '@/utils/focusUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import TextUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -137,13 +137,19 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getToekn: 'user/getToken',
+      isLogin: 'user/isLogin',
       _layerNum: 'getLayersNum'
     }),
+    inAdminMode(): boolean {
+      return this.role === 0 && this.adminMode === true
+    },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },

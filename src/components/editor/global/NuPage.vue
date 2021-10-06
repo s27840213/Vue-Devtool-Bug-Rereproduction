@@ -383,7 +383,6 @@ export default Vue.extend({
   position: relative;
   box-sizing: border-box;
   transform-origin: 0 0;
-  transform-style: preserve-3d;
 }
 
 /*
@@ -416,6 +415,7 @@ export default Vue.extend({
   top: 0px;
   left: 0px;
   // this css property will prevent the page-control div from blocking all the event of page-content
+  transform-style: preserve-3d;
   pointer-events: none;
 }
 

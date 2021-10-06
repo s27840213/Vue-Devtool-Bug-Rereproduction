@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="popup-page bg-gray-6"
       @click.stop="closePopup")
-    template(v-if="getToekn!==''")
+    template(v-if="inAdminMode && isLogin")
       div(class="popup-page__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -11,7 +11,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{uploadMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="hasDesignId && getToekn!==''")
+    template(v-if="inAdminMode && hasDesignId && isLogin")
       div(class="popup-page__item"
           @click="updateMenu.action")
         svg-icon(
@@ -49,7 +49,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
@@ -114,15 +114,21 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getBackgroundImage: 'getBackgroundImage',
-      getToekn: 'user/getToken'
+      isLogin: 'user/isLogin'
     }),
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
+    },
+    inAdminMode(): boolean {
+      return this.role === 0 && this.adminMode === true
     }
   },
   methods: {

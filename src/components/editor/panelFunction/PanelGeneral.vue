@@ -5,9 +5,9 @@
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
-      div(class="border-gray-4 p-10  btn-opacity")
+      div(class="border-gray-4 p-5  btn-opacity")
         svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'"
+          :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
       svg-icon(class="layers-alt"
