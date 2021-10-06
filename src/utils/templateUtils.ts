@@ -61,12 +61,7 @@ class TemplateUtils {
           }
         }
       }
-      if (typeof layer.styles.horizontalFlip === 'undefined') {
-        layer.styles.horizontalFlip = false
-      }
-      if (typeof layer.styles.verticalFlip === 'undefined') {
-        layer.styles.verticalFlip = false
-      }
+      LayerUtils.fillInDefaultStyles(layer)
       // } else if (layer.type === 'shape') {
       //   const { initWidth, initHeight, scale, scaleX, scaleY } = layer.styles
       //   layer.styles.width = initWidth * scale * scaleX
