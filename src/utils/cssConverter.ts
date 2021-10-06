@@ -63,8 +63,12 @@ class CssConveter {
     //   tmpArr.push(`scaleY(${scaleY})`)
     // }
     return {
-      transform: `translate3d(${x}px, ${y}px, ${zindex}px ) rotate(${rotate}deg)`
+      transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`
     }
+  }
+
+  convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
+    return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
   }
 
   fontStyleMap(prop: string): string {

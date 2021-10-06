@@ -5,7 +5,7 @@
       @openFontsPanel="openFontsPanel()"
       v-on="$listeners")
     panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")
-    panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked")
+    panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
     //- panel-background-setting(v-if="selectedLayerNum===0")
     panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
     panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -17,7 +17,7 @@
         @openFontsPanel="openFontsPanel()"
         v-on="$listeners")
       panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
-      panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked")
+      panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
       //- panel-background-setting(v-if="selectedLayerNum===0")
       panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
       panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -30,7 +30,7 @@
           v-on="$listeners")
         panel-text-effect-setting(v-on="$listeners")
       panel-photo-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'image' && !isLocked")
-      panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked")
+      panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
       panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 

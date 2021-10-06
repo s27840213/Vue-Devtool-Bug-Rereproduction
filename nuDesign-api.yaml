@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211005"
+  version: "20211006"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -520,7 +520,15 @@ definitions:
               upload_map: Map for uploading files to path in private bucket
 
               upload_admin_map: Map for uploading files to path in public bucket.
-               How to upload asset file:
+
+              design_type_map: Map for design type id (number) to design type name (string)
+
+              role: 0 for admin, 1 for normal user
+
+              ver_uni: universal version for cache control 
+
+              How to upload asset file:
+
               1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
 
               2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
@@ -560,12 +568,19 @@ definitions:
                 $ref: "#/definitions/uploadMap"
               upload_admin_map:
                 $ref: "#/definitions/uploadMap"
+              role:
+                type: number
+              ver_uni:
+                type: number
             required:
+              - design_type_map
               - download_url
+              - role
               - token
               - upload_map
               - user_id
               - user_name
+              - ver_uni
   Empty:
     type: object
     title: Empty Schema

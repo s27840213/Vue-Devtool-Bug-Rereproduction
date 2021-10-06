@@ -4,10 +4,10 @@
       btn(class="full-width mr-10 rounded"
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
-        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'消取群組':'群組'}}
-      div(class="border-gray-4 p-10  btn-opacity")
+        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
+      div(class="border-gray-4 p-5  btn-opacity")
         svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'"
+          :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
       svg-icon(class="layers-alt"
@@ -30,7 +30,7 @@
       btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") 位置對齊
-      btn(class="btn-flip full-width" :type="'gray-mid'"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isFlipDisabled}"
         @click.native="openFlipPopup") 翻轉
 </template>
 
@@ -45,6 +45,7 @@ import popupUtils from '@/utils/popupUtils'
 import { ILayer } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import popup from '@/store/module/popup'
+import TextUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   data() {
@@ -82,6 +83,12 @@ export default Vue.extend({
         return this.currSelectedInfo.layers[0].styles.opacity
       }
       return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
+    },
+    isTextEditing(): boolean {
+      return !!TextUtils.getCurrTextProps?.isEditing
+    },
+    isFlipDisabled(): boolean {
+      return this.isGroup || this.layerNum !== 1 || this.isTextEditing
     }
   },
   mounted() {
@@ -103,6 +110,7 @@ export default Vue.extend({
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
+      if (this.isFlipDisabled) return
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
@@ -186,5 +194,11 @@ export default Vue.extend({
       grid-column-end: 3;
     }
   }
+}
+
+.disabled {
+  color: map-get($colors, gray-3);
+  pointer-events: none;
+  cursor: not-allowed;
 }
 </style>

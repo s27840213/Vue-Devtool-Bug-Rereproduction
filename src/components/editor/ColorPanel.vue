@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="color-panel p-20" v-click-outside="vcoConfig")
-    img(v-if="!isShape" class="color-panel__btn"
+    img(class="color-panel__btn"
       :src="require('@/assets/img/svg/btn-pack-hr.svg')"
       @click="closePanel()")
     search-bar(:placeholder="'Search color'"
@@ -62,13 +62,21 @@ export default Vue.extend({
         handler: () => {
           this.$emit('toggleColorPanel', false)
         },
+        middleware: null as unknown,
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       },
       openColorPicker: false,
       brandColors: ['#2D9CDB'],
-      colorUtils
+      colorUtils,
+      middlewareMap: {
+        text: 'shape-setting__color',
+        shapge: 'shape-setting__color'
+      }
     }
+  },
+  created() {
+    this.vcoConfig.middleware = this.middleware
   },
   computed: {
     ...mapGetters({
@@ -78,6 +86,9 @@ export default Vue.extend({
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+    },
+    isText(): boolean {
+      return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     }
   },
   methods: {
@@ -90,10 +101,13 @@ export default Vue.extend({
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
     },
-    handleColorModal() {
+    handleColorModal(): void {
       this.openColorPicker = !this.openColorPicker
     },
-    closePanel() {
+    middleware(event: MouseEvent): boolean {
+      return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+    },
+    closePanel(): void {
       this.$emit('toggleColorPanel', false)
     }
   }

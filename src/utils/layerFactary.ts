@@ -40,7 +40,9 @@ class LayerFactary {
         imgWidth: initWidth ?? width,
         imgHeight: initHeight ?? height,
         zindex: -1,
-        opacity: 100
+        opacity: 100,
+        horizontalFlip: false,
+        verticalFlip: false
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -108,7 +110,9 @@ class LayerFactary {
         initWidth: initWidth,
         initHeight: initHeight,
         zindex: -1,
-        opacity: 100
+        opacity: 100,
+        horizontalFlip: false,
+        verticalFlip: false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
@@ -161,7 +165,9 @@ class LayerFactary {
         initHeight: config.styles.height ? config.styles.height : 0,
         zindex: -1,
         writingMode: 'initial',
-        align: 'center'
+        align: 'center',
+        horizontalFlip: false,
+        verticalFlip: false
       },
       paragraphs: [
         {
@@ -213,7 +219,9 @@ class LayerFactary {
         initWidth: styles.width,
         initHeight: styles.height,
         zindex: -1,
-        opacity: 100
+        opacity: 100,
+        horizontalFlip: false,
+        verticalFlip: false
       },
       layers: layers
     }
@@ -241,7 +249,9 @@ class LayerFactary {
         initWidth: styles.width,
         initHeight: styles.height,
         zindex: 0,
-        opacity: 100
+        opacity: 100,
+        horizontalFlip: false,
+        verticalFlip: false
       },
       layers: layers
     }
@@ -280,7 +290,9 @@ class LayerFactary {
         initWidth: config.width,
         initHeight: config.height,
         zindex: -1,
-        opacity: 100
+        opacity: 100,
+        horizontalFlip: false,
+        verticalFlip: false
       }
     }
     Object.assign(basicConfig.styles, config.styles)

@@ -12,7 +12,7 @@
         div(class="content__panel")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
-            color-panel(v-if="isColorPanelOpen || isShape"
+            color-panel(v-if="isColorPanelOpen"
               @toggleColorPanel="toggleColorPanel")
 </template>
 
@@ -61,9 +61,7 @@ export default Vue.extend({
       this.setCurrFunctionPanel(type)
     },
     toggleColorPanel(bool: boolean) {
-      if (!this.isShape) {
-        this.isColorPanelOpen = bool
-      }
+      this.isColorPanelOpen = bool
     }
   }
 })

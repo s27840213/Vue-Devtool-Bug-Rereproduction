@@ -14,7 +14,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
-import { IMarker } from '@/interfaces/shape'
+import uploadUtils from './uploadUtils'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -143,38 +143,8 @@ class AssetUtils {
     const svgAspectRatio = width / height
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
-    const svgs: string[] = []
     json.ratio = 1
-    json.className = ShapeUtils.classGenerator()
-    json.styleArray = ['stroke:$color[0];stroke-width:$size[0];stroke-dasharray:$dash;stroke-linecap:$cap']
-    json.markerTransArray = [
-      'transform: translate($txmspx, $tymspx) rotate($romsdeg) $finetunes scale($size[0]);',
-      'transform: translate($txmepx, $tymepx) rotate($romedeg) $finetunee scale($size[0]);'
-    ]
-    json.markerWidth = []
-    json.trimWidth = []
-    json.trimOffset = []
-    for (const markerId of json.markerId) {
-      if (markerId === 'none') {
-        json.styleArray.push('')
-        json.markerWidth.push(0)
-        json.trimWidth.push(undefined)
-        json.trimOffset.push(-1)
-        svgs.push('')
-      } else {
-        const marker: IListServiceContentDataItem = {
-          id: markerId,
-          type: 9
-        }
-        const markerContent = (await this.fetch(marker)).jsonData as IMarker
-        json.styleArray.push(markerContent.styleArray[0])
-        json.markerWidth.push(markerContent.vSize[0])
-        json.trimWidth.push(markerContent.trimWidth)
-        json.trimOffset.push(markerContent.trimOffset ?? -1)
-        svgs.push(markerContent.svg)
-      }
-    }
-    json.svg = ShapeUtils.genLineSvgTemplate(svgs[0], svgs[1])
+    await uploadUtils.addComputableInfo(json)
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
     json.point = point
@@ -196,7 +166,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
   }
 
-  addBasicShape(json: any, attrs: IAssetProps = {}) {
+  async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const { vSize = [] } = json
@@ -207,18 +177,16 @@ class AssetUtils {
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
-    json.className = ShapeUtils.classGenerator()
+    await uploadUtils.addComputableInfo(json)
 
     const config = {
       ...json,
-      styleArray: ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])'],
       vSize: [svgWidth, svgHeight],
       size: [json.size[0], ControlUtils.getCorRadValue(
         [svgWidth, svgHeight],
         ControlUtils.getCorRadPercentage(json.vSize, json.size, json.shapeType),
         json.shapeType
       )],
-      svg: ShapeUtils.genBasicShapeSvgTemplate(json.shapeType ?? ''),
       styles: {
         x: currentPage.width / 2 - svgWidth / 2,
         y: currentPage.height / 2 - svgHeight / 2,

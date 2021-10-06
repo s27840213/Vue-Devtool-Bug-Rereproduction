@@ -12,7 +12,7 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @contextmenu.prevent
-          @mousedown.left.stop="moveStart"
+          @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           @dblclick="onDblClick")
@@ -62,7 +62,8 @@
               @keydown.38.stop
               @keydown.39.stop
               @keydown.40.stop
-              @keyup="onKeyUp")
+              @keyup="onKeyUp"
+              @blur="onTextBlur")
               p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
                 :data-pindex="pIndex"
                 :key="p.id",
@@ -73,7 +74,7 @@
                   :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
-            :style="`transform: scale(${100/scaleRatio})`")
+            :style="lockIconStyles")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
@@ -272,6 +273,12 @@ export default Vue.extend({
             })
       }
       return false
+    },
+    lockIconStyles(): { [index: string]: string } {
+      const zindex = (this.layerIndex + 1) * 100
+      return {
+        transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio})`
+      }
     }
   },
   watch: {
@@ -427,8 +434,7 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.layerIndex + 1)
-      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.config.styles.zindex + 1)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
@@ -436,7 +442,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.isLine ? 'none' : this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
-        'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
+        // 'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
         'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
@@ -479,6 +485,9 @@ export default Vue.extend({
       return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      if (!this.isLocked) {
+        e.stopPropagation()
+      }
       if (this.getLayerType === 'image') {
         this.setMoving(true)
       }
@@ -509,6 +518,7 @@ export default Vue.extend({
           return
         }
         this.contentEditable = true
+        TextUtils.updateIsEditing(this.isTextEditing)
       }
       if (!this.config.locked) {
         this.isControlling = true
@@ -568,19 +578,19 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
-        if (this.getLayerType === 'image') {
-          (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
-        }
+        // if (this.getLayerType === 'image') {
+        //   (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        // }
       }
     },
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      if (this.getLayerType === 'image') {
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
-        this.setMoving(false)
-      }
+      // if (this.getLayerType === 'image') {
+      //   (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
+      //   this.setMoving(false)
+      // }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -594,6 +604,7 @@ export default Vue.extend({
         }
         if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.contentEditable = false
+          TextUtils.updateIsEditing(this.isTextEditing)
         }
         this.isControlling = false
         this.setCursorStyle('default')
@@ -1114,6 +1125,10 @@ export default Vue.extend({
         TextPropUtils.updateTextPropsState()
       }
     },
+    onTextBlur() {
+      this.contentEditable = false
+      TextUtils.updateIsEditing(this.isTextEditing)
+    },
     composingEnd() {
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
@@ -1307,7 +1322,6 @@ export default Vue.extend({
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
-          console.log('ssss')
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
       }
       if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
@@ -1383,6 +1397,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    transform-style: preserve-3d;
     &:hover {
       cursor: pointer;
     }
@@ -1488,6 +1503,7 @@ export default Vue.extend({
 }
 
 .sub-controller {
+  transform-style: preserve-3d;
   position: absolute;
   top: 0;
   left: 0;

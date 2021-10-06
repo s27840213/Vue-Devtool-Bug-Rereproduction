@@ -15,7 +15,8 @@ export interface ITextState {
     weight: string,
     style: string,
     decoration: string,
-    isVertical: boolean
+    isVertical: boolean,
+    isEditing: boolean
   },
   fontStore: Array<IFont>
 }
@@ -44,7 +45,8 @@ const getDefaultState = (): ITextState => ({
     weight: 'normal',
     style: 'normal',
     decoration: 'none',
-    isVertical: false
+    isVertical: false,
+    isEditing: false
   },
   fontStore: [
     {

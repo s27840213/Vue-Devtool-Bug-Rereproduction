@@ -425,6 +425,12 @@ class TextUtils {
     })
   }
 
+  updateIsEditing(isEditing: boolean) {
+    store.commit('text/UPDATE_props', {
+      isEditing
+    })
+  }
+
   setSelectionDefault() {
     const nan = {
       pIndex: NaN,

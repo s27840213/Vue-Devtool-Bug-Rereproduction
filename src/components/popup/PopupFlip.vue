@@ -3,7 +3,7 @@
     div(v-for="(data,index) in popupDatas()"
         :key="`popup-${index}`"
         class="popup-flip__item"
-        @click="data.action")
+        @click="MappingUtils.mappingIconAction(data.icon)")
       svg-icon(
         class="pointer"
         :iconName="data.icon"
@@ -13,11 +13,13 @@
 </template>
 
 <script lang="ts">
+import MappingUtils from '@/utils/mappingUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
   data() {
     return {
+      MappingUtils
     }
   },
   methods: {
@@ -27,10 +29,7 @@ export default Vue.extend({
       return icons.map((icon: string, index: number) => {
         return {
           icon: icons[index],
-          text: texts[index],
-          action: () => {
-            return false
-          }
+          text: texts[index]
         }
       })
     }
