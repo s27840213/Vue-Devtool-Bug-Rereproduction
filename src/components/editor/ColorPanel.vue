@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="color-panel p-20" v-click-outside="vcoConfig")
-    img(v-if="!isShape" class="color-panel__btn"
+    img(class="color-panel__btn"
       :src="require('@/assets/img/svg/btn-pack-hr.svg')"
       @click="closePanel()")
     search-bar(:placeholder="'Search color'"

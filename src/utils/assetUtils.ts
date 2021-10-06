@@ -14,7 +14,6 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
-import { IMarker } from '@/interfaces/shape'
 import uploadUtils from './uploadUtils'
 
 class AssetUtils {
