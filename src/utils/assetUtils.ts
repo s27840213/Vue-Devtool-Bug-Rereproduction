@@ -29,7 +29,7 @@ class AssetUtils {
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
-    return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 
   getTypeCategory(type: number): string | undefined {
