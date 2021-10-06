@@ -2,7 +2,7 @@
   div(class="category-template-item")
     img(class="category-template-item__img pointer"
       draggable="true"
-      :src="src || `https://template.vivipic.com/template/${item.id}/prev`"
+      :src="src || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
       @error="handleNotFound"
       @dragstart="dragStart($event)"
       @click="addTemplate")

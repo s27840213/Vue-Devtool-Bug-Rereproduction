@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src || `https://template.vivipic.com/text/${item.id}/prev`"
+    :src="src || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     draggable="true"
     style="object-fit: contain;"
     @dragstart="dragStart($event)"

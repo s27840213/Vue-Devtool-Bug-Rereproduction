@@ -1,7 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     draggable="true"
-    :src="src || `https://template.vivipic.com/svg/${item.id}/prev`"
+    :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`"
     @dragstart="dragStart($event)"
     @click="addSvg")
 </template>
