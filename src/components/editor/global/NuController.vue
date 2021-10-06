@@ -12,7 +12,7 @@
           @click.left="onClick"
           @click.right.stop="onRightClick"
           @contextmenu.prevent
-          @mousedown.left.stop="moveStart"
+          @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           @dblclick="onDblClick")
@@ -420,6 +420,7 @@ export default Vue.extend({
       return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
+      console.log(pageIndex, layerIndex, shown)
       if (this.isLine) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
@@ -434,8 +435,8 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.isLine ? 'none' : this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
-        'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
-        'pointer-events': this.isImgControl ? 'none' : 'initial',
+        // 'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
+        'pointer-events': this.isImgControl ? 'none' : 'auto',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -477,6 +478,9 @@ export default Vue.extend({
       return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      if (!this.isLocked) {
+        e.stopPropagation()
+      }
       if (this.getLayerType === 'image') {
         this.setMoving(true)
       }
@@ -566,19 +570,19 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
-        if (this.getLayerType === 'image') {
-          (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
-        }
+        // if (this.getLayerType === 'image') {
+        //   (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
+        // }
       }
     },
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      if (this.getLayerType === 'image') {
-        (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
-        this.setMoving(false)
-      }
+      // if (this.getLayerType === 'image') {
+      //   (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
+      //   this.setMoving(false)
+      // }
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),

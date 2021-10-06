@@ -68,7 +68,11 @@ export default Vue.extend({
       },
       openColorPicker: false,
       brandColors: ['#2D9CDB'],
-      colorUtils
+      colorUtils,
+      middlewareMap: {
+        text: 'shape-setting__color',
+        shapge: 'shape-setting__color'
+      }
     }
   },
   created() {
@@ -82,6 +86,9 @@ export default Vue.extend({
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+    },
+    isText(): boolean {
+      return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     }
   },
   methods: {

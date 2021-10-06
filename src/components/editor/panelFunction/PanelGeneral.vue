@@ -4,7 +4,7 @@
       btn(class="full-width mr-10 rounded"
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
-        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'消取群組':'群組'}}
+        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
       div(class="border-gray-4 p-10  btn-opacity")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'18px'" :iconColor="'gray-2'"

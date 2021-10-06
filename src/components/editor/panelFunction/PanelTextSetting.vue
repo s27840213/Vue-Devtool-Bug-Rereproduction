@@ -28,11 +28,6 @@
           @click="handleColorModal")
         div(class="full-width text-left ml-10 overflow-hidden")
           input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @click="handleColorModal")
-      color-picker(v-if="openColorPicker"
-        class="text-setting__color-picker"
-        v-click-outside="handleColorModal"
-        :currentColor="props.color"
-        @update="handleColorUpdate")
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
