@@ -11,6 +11,7 @@ import modalUtils from './modalUtils'
 import shapeUtils from './shapeUtils'
 import AssetUtils from './assetUtils'
 import { IMarker } from '@/interfaces/shape'
+import zindexUtils from './zindexUtils'
 
 class UploadUtils {
   loginOutput: any
@@ -336,7 +337,7 @@ class UploadUtils {
     }
   }
 
-  default(page: any) {
+  private default(page: any) {
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -355,13 +356,33 @@ class UploadUtils {
       delete page.backgroundImage.config.src
     }
 
-    for (const layer of page.layers) {
+    for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
           layer.imgControl = false
+          break
+        case 'tmp': {
+          const tmpLayer = layer as ITmp
+          const layers = generalUtils.deepCopy(tmpLayer).layers
+          if (tmpLayer.layers.filter(l => l.type === 'group').length) {
+            for (let i = 0; i < tmpLayer.layers.length; i++) {
+              if (tmpLayer.layers[i].type === 'group') {
+                layers.splice(i, 1, ...groupUtils.mapGroupLayersToTmp(tmpLayer.layers[i] as IGroup))
+              }
+            }
+          }
+          LayerUtils.updateLayerProps(LayerUtils.pageIndex, index, {
+            type: 'group',
+            active: false,
+            shown: false,
+            layers
+          })
+          zindexUtils.reassignZindex(LayerUtils.pageIndex)
+        }
       }
       basicDefault(layer)
     }
+    groupUtils.reset()
     return page
   }
 

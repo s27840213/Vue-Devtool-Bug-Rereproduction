@@ -377,7 +377,7 @@ class GroupUtils {
         layer.styles.imgX *= groupLayer.styles.scale
         layer.styles.imgY *= groupLayer.styles.scale
 
-        layer.clipPath = `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')`
+        layer.clipPath = `M0,0h${width}v${height}h${-width}z`
         const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]

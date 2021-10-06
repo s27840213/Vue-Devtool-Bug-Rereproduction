@@ -83,7 +83,8 @@ class LayerFactary {
           type: 'frame',
           assetId: '',
           userId: ''
-        }
+        },
+        isFrameImage: true
       }))
     }
     return {
@@ -111,7 +112,7 @@ class LayerFactary {
       },
       clips,
       decoration: decoration ? this.newShape((() => {
-        decoration.vSize = [styles.width, styles.height]
+        decoration.vSize = [initWidth, initHeight]
         decoration.styles = {
           width: initWidth,
           height: initHeight,
@@ -121,7 +122,7 @@ class LayerFactary {
         return decoration
       })()) : undefined,
       decorationTop: decorationTop ? this.newShape((() => {
-        decorationTop.vSize = [styles.width, styles.height]
+        decorationTop.vSize = [initWidth, initHeight]
         decorationTop.styles = {
           width: initWidth,
           height: initHeight,

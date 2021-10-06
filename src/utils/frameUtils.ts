@@ -5,7 +5,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IFrame } from '@/interfaces/layer'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
-    return config.clips.length === 1 && !config.clips[0].clipPath
+    return config.clips.length === 1 && (config.clips[0].isFrameImage as boolean)
   }
 
   frameClipFormatter(path: string) {

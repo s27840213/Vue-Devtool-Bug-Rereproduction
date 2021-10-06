@@ -182,6 +182,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -364,7 +365,7 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          if (FrameUtils.isImageFrame(this.config)) {
+          if (this.config.isFrameImage) {
             return resizers
           } else {
             return []
