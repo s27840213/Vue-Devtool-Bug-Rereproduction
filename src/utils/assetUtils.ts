@@ -65,11 +65,12 @@ class AssetUtils {
   }
 
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
-    const { id, type, ...attrs } = item
+    const { id, type, ver, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
+      ver,
       urls: {
         prev: [this.host, typeCategory, id, this.preview].join('/'),
         json: [this.host, typeCategory, id, this.data].join('/')
@@ -84,7 +85,7 @@ class AssetUtils {
         return Promise.resolve(asset)
       }
       default: {
-        return fetch(asset.urls.json)
+        return fetch(asset.urls.json + `?ver=${ver}`)
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData

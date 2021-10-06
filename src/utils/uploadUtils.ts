@@ -505,7 +505,8 @@ class UploadUtils {
             } else {
               const marker: IListServiceContentDataItem = {
                 id: markerId,
-                type: 9
+                type: 9,
+                ver: 0
               }
               const markerContent = (await AssetUtils.fetch(marker)).jsonData as IMarker
               theLayer.styleArray.push(markerContent.styleArray[0])
