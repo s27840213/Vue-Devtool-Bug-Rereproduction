@@ -29,8 +29,6 @@ class AssetUtils {
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
-    console.log(asset)
-    console.log(this.fetch(item))
     return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 

@@ -250,7 +250,7 @@ export default Vue.extend({
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
       for (const marker of markerList) {
-        const markerContent = (await AssetUtils.fetch(marker)).jsonData as IMarker
+        const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
         this.markerContentMap[marker.id] = {
           styleArray: markerContent.styleArray,
           svg: markerContent.svg,
@@ -574,7 +574,7 @@ export default Vue.extend({
         this.lastSelectedPageIndex,
         this.currSelectedIndex,
         {
-          markerId: [value, (currLayer.markerId ?? ['none', 'none'])[1]]
+          markerId: [value, currLayer.markerId?.[1] ?? 'none']
         }
       )
     },
