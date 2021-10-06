@@ -61,7 +61,9 @@ const getDefaultState = (): IEditorState => ({
             imgWidth: 0,
             imgHeight: 0,
             zindex: -1,
-            opacity: 100
+            opacity: 100,
+            horizontalFlip: false,
+            verticalFlip: false
           }
         },
         posX: -1,
@@ -110,7 +112,9 @@ const getDefaultState = (): IEditorState => ({
             imgWidth: 0,
             imgHeight: 0,
             zindex: -1,
-            opacity: 100
+            opacity: 100,
+            horizontalFlip: false,
+            verticalFlip: false
           }
         },
         posX: -1,

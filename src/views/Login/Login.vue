@@ -149,12 +149,18 @@ export default Vue.extend({
     }
   },
   created() {
-    const code = this.$route.query.code as string
     // Facebook login status
     if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
       this.isLoading = true
-      const redirectUri = window.location.href
-      this.fbLogin(code, redirectUri)
+      if (this.$route.query.error) {
+        this.isLoading = false
+        console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
+        this.$router.push({ query: {} })
+      } else {
+        const code = this.$route.query.code as string
+        const redirectUri = window.location.href
+        this.fbLogin(code, redirectUri)
+      }
     }
     // Google login status
     if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
@@ -407,7 +413,6 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      this.isLoading = true
       if (this.$route.query.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.$route.query.redirect,
@@ -421,7 +426,6 @@ export default Vue.extend({
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
-      this.isLoading = true
       const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
       'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +

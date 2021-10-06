@@ -53,7 +53,8 @@ describe('Flow: Image, Text, Group', () => {
             .trigger('mousedown', left + width, top)
             .trigger('mousemove', left + width * 0.7, top + height * 0.3, { force: true })
             .trigger('mouseup', { force: true })
-            .click(0, 0)
+          
+          cy.get('.nu-controller__content').eq(0).click()
         })
 
       // add heading
@@ -248,10 +249,12 @@ describe('Flow: Image, Text, Group', () => {
         .last()
         .then($el => {
           const { left, top } = $el.position()
+          const w = $el.width() / 4
+          const h = $el.height() / 4
           cy.get('.pages-wrapper')
             .first()
-            .trigger('mousedown', left + 10, top + 10)
-            .trigger('mousemove', left + 60, top + 10, { force: true })
+            .trigger('mousedown', left + w, top + h)
+            .trigger('mousemove', left + w + 50, top + h, { force: true })
 
           cy.get('.pages-wrapper')
             .first()

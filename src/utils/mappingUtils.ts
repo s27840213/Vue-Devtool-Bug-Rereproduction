@@ -4,6 +4,7 @@ import AlignUtils from '@/utils/alignUtils'
 import OrderUtils from './orderUtils'
 import layerUtils from './layerUtils'
 import popupUtils from './popupUtils'
+import flipUtils from './flipUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -120,9 +121,11 @@ class MappingUtils {
         break
       }
       case 'flip-h': {
+        flipUtils.horizontalFlip()
         break
       }
       case 'flip-v': {
+        flipUtils.verticalFlip()
         break
       }
     }

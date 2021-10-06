@@ -415,7 +415,7 @@ class ShapeUtils {
     const hypotenuse = Math.sqrt(Math.pow(halfWidth, 2) + Math.pow(height, 2))
     const sineA = height / hypotenuse
     const cosineA = halfWidth / hypotenuse
-    const edgeTop = corRad * (sineA / cosineA)
+    const edgeTop = corRad * (height / halfWidth)
     const edgeSide = corRad / Math.sqrt((1 - cosineA) / (1 + cosineA))
     const trimmedH = Math.max(hypotenuse - edgeSide - edgeTop, 0)
     // Math.max(value, 0) prevents computation error from resulting negative value
@@ -447,6 +447,26 @@ class ShapeUtils {
   clipCorRad(shapeType: string, vSize: number[], size: number[]): number {
     const maxCorRad = this.getMaxCorRad(shapeType, vSize)
     return Math.min(size[1], maxCorRad)
+  }
+
+  flipLine(point: number[], horizontalFlip: boolean, verticalFlip: boolean): number[] {
+    const newPoint = [...point]
+    const { width, height, xDiff, yDiff } = this.lineDimension(point)
+    if (horizontalFlip) {
+      if (xDiff > 0) {
+        newPoint[0] += 2 * width
+      } else {
+        newPoint[0] -= 2 * width
+      }
+    }
+    if (verticalFlip) {
+      if (yDiff > 0) {
+        newPoint[1] += 2 * height
+      } else {
+        newPoint[1] -= 2 * height
+      }
+    }
+    return newPoint
   }
 }
 
