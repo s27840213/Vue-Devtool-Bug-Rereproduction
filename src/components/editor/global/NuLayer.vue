@@ -9,7 +9,7 @@
       div(v-if="config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      nu-clipper(:config="config" :style="flipStyles()" class="layer-flip")
+      nu-clipper(class="layer-flip" :config="config" :style="flipStyles()")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //-   span {{layerIndex}}

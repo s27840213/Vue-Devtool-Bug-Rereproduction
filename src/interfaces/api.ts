@@ -109,6 +109,7 @@ export interface IListServiceParams {
 export interface IListServiceContentDataItem {
   id: string
   type: number
+  ver: number
   width?: number
   height?: number
 }

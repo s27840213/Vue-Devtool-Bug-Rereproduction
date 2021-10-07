@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src || `https://template.vivipic.com/background/${item.id}/prev`"
+    :src="src || `https://template.vivipic.com/background/${item.id}/prev?ver=${item.ver}`"
     draggable="false"
     @click="addBackground"
     @error="handleNotFound")

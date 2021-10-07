@@ -29,9 +29,7 @@ class AssetUtils {
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
-    console.log(asset)
-    console.log(this.fetch(item))
-    return asset ? GeneralUtils.deepCopy(asset) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? GeneralUtils.deepCopy(asset) : this.fetch(item)
   }
 
   getTypeCategory(type: number): string | undefined {
@@ -65,11 +63,12 @@ class AssetUtils {
   }
 
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
-    const { id, type, ...attrs } = item
+    const { id, type, ver, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
+      ver,
       urls: {
         prev: [this.host, typeCategory, id, this.preview].join('/'),
         json: [this.host, typeCategory, id, this.data].join('/')
@@ -84,7 +83,7 @@ class AssetUtils {
         return Promise.resolve(asset)
       }
       default: {
-        return fetch(asset.urls.json)
+        return fetch(asset.urls.json + `?ver=${ver}`)
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData
@@ -98,7 +97,7 @@ class AssetUtils {
   addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    PageUtils.updateSpecPage(targePageIndex, TemplateUtils.updateTemplate(json))
+    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {

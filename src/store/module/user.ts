@@ -25,7 +25,8 @@ export interface IUserModule {
   downloadUrl: string
   pending: boolean,
   images: Array<IAssetPhoto>,
-  checkedAssets: Array<string>
+  checkedAssets: Array<string>,
+  verUni: number
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -51,7 +52,8 @@ const getDefaultState = (): IUserModule => ({
   downloadUrl: '',
   pending: false,
   images: [],
-  checkedAssets: []
+  checkedAssets: [],
+  verUni: 0
 })
 
 const state = getDefaultState()
@@ -80,6 +82,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getCheckedAssets(state) {
     return state.checkedAssets
+  },
+  getVerUni(state) {
+    return state.verUni
   }
 }
 
@@ -238,7 +243,8 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_STATE', {
         downloadUrl: data.data.download_url,
         userId: data.data.user_id,
-        role: data.data.role
+        role: data.data.role,
+        verUni: data.data.ver_uni
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)

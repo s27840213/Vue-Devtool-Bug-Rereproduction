@@ -1,7 +1,6 @@
 import { IAssetPhoto, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import text from '@/store/text'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ImageUtils from '@/utils/imageUtils'
@@ -505,9 +504,10 @@ class UploadUtils {
             } else {
               const marker: IListServiceContentDataItem = {
                 id: markerId,
-                type: 9
+                type: 9,
+                ver: store.getters['user/getVerUni']
               }
-              const markerContent = (await AssetUtils.fetch(marker)).jsonData as IMarker
+              const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
               theLayer.styleArray.push(markerContent.styleArray[0])
               dummy = theLayer.markerWidth?.push(markerContent.vSize[0])
               dummy = theLayer.trimWidth?.push(markerContent.trimWidth)

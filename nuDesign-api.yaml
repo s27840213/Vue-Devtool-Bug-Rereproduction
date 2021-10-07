@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211006"
+  version: "20211007"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -254,6 +254,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /update-design:
+    post:
+      description: 更新或取得素材資訊
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/updateDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /verify-vcode:
     post:
       consumes:
@@ -424,6 +445,35 @@ definitions:
           keyword:
             type: string
             description: keyword to search
+  updateDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - key_id
+          - query
+          - type
+        properties:
+          type:
+            type: string
+            description: design type
+          key_id:
+            type: string
+            description: design key_id
+          query:
+            type: string
+            description: get or update design info
+          data:
+            type: string
+            description: design info to be updated
+  updateDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: string
+            description: json string for design info
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -450,6 +500,9 @@ definitions:
           keyword:
             type: string
             description: keyword to search
+          search_tag:
+            type: number
+            description: 0 for search category title (equal), 1 for search tag (like)
           font_list:
             type: number
             description: 0 (default) for return all font key id in single array, 1 for

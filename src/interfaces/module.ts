@@ -21,6 +21,7 @@ export interface IListModuleState {
 export interface IAsset {
   id: string
   type: number
+  ver: number
   jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup | IMarker
   width?: number
   height?: number
