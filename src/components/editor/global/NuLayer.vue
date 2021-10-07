@@ -9,7 +9,7 @@
       div(v-if="config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      nu-clipper(:config="config" :style="flipStyles()")
+      nu-clipper(:config="config" :style="flipStyles()" class="layer-flip")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //-   span {{layerIndex}}
@@ -82,7 +82,6 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      const { horizontalFlip, verticalFlip } = this.config.styles
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles),
         { 'pointer-events': this.isImgControl ? 'none' : 'initial' }

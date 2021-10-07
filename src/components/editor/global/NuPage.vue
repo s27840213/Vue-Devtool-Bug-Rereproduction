@@ -454,5 +454,6 @@ export default Vue.extend({
   left: 0px;
   background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
+  transform-style: preserve-3d;
 }
 </style>

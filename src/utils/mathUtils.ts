@@ -67,6 +67,25 @@ class MathUtils {
       offsetY: y * (100 / scaleRatio)
     }
   }
+
+  multipy(multiplier: number, ...params: [string, number][] | number[]) {
+    if (!params.length) return []
+
+    try {
+      const result = (params as any).map((el: number | [string, number]) => {
+        if (typeof el === 'number') {
+          return el * multiplier
+        } else {
+          const k = el[0] as string
+          const v = el[1] as number
+          return [k, v * multiplier]
+        }
+      })
+      return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
+    } catch {
+      console.error('input params with wrong types')
+    }
+  }
 }
 
 const mathUtils = new MathUtils()

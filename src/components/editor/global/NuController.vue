@@ -25,7 +25,7 @@
             @mouseup="onFrameMouseUp"
             @click="clickSubController(index)"
             @dblclick="dblSubController(index)")
-        template(v-if="isActive")
+        template(v-if="(getLayerType === 'group' || getLayerType === 'frame') && isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -36,7 +36,7 @@
                 :pageIndex="pageIndex"
                 :layerIndex="index"
                 :primaryLayerIndex="layerIndex"
-                :config="layer"
+                :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
                 :type="config.type"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
@@ -146,6 +146,7 @@ import ImageUtils from '@/utils/imageUtils'
 import { Layer } from 'konva/types/Layer'
 import popupUtils from '@/utils/popupUtils'
 import { config } from 'vue/types/umd'
+import objects from '@/store/module/objects'
 
 export default Vue.extend({
   props: {
@@ -339,6 +340,23 @@ export default Vue.extend({
       setCurrSubSelectedInfo: 'SET_currSubSelectedInfo',
       setMoving: 'SET_moving'
     }),
+    frameLayerMapper(_config: any) {
+      const config = GeneralUtils.deepCopy(_config)
+      const { x, y, width, height, initWidth, initHeight } = config.styles
+      return Object.assign(config, {
+        styles: {
+          ...config.styles,
+          ...MathUtils.multipy(this.getLayerScale, ...Object.entries({
+            x,
+            y,
+            width,
+            height,
+            initWidth,
+            initHeight
+          }))
+        }
+      })
+    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = Object.assign({}, resizer)
       const ControllerStyles = this.styles('')
@@ -434,7 +452,7 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        if (type === 'frame' && this.isMoving) {
+        if ((type === 'frame' && this.isMoving) || (type === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex)) {
           return (this.layerIndex + 1) * 1000
         } else if (type === 'control-point') {
           return (this.layerIndex + 1) * (this.getLayerType === 'frame' && this.isMoving ? 1000 : 100)
@@ -1506,7 +1524,7 @@ export default Vue.extend({
 
 .sub-controller {
   transform-style: preserve-3d;
-  isolation: isolate;
+  // isolation: isolate;
   position: absolute;
   top: 0;
   left: 0;

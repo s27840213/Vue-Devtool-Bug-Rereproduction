@@ -182,7 +182,7 @@ export default Vue.extend({
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg) `,
+        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)

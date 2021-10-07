@@ -210,6 +210,16 @@ class AssetUtils {
     const resizeRatio = 0.6
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
+
+    const clips = json.clips as Array<IImage>
+    clips.forEach(img => {
+      // img.styles.initWidth *= resizeRatio
+      // img.styles.initHeight *= resizeRatio
+      // img.styles.width *= resizeRatio
+      // img.styles.height *= resizeRatio
+      // img.styles.scale = resizeRatio
+    })
+
     const config = {
       styles: {
         x: currentPage.width / 2 - width / 2,
@@ -344,7 +354,6 @@ class AssetUtils {
           )
           break
         case 8:
-          console.log(item.id)
           this.addFrame(asset.jsonData, attrs)
           break
         default:

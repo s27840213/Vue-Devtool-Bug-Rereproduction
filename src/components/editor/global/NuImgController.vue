@@ -361,7 +361,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-img-controller {
-  z-index: 1000;
+  // z-index: 1000;
+  transform-style: preserve-3d;
 }
 
 .controller-point {

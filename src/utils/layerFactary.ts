@@ -53,6 +53,7 @@ class LayerFactary {
   newFrame(config: IFrame): IFrame {
     const { clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
+    console.log(GeneralUtils.deepCopy(config))
     if (clips.length) {
       clips.forEach(img => {
         const imgConfig = {
@@ -258,7 +259,7 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    const { styles, vSize } = config
+    const { styles, vSize, cSize, pSize, ratio } = config
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
