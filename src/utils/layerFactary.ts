@@ -53,7 +53,6 @@ class LayerFactary {
   newFrame(config: IFrame): IFrame {
     const { clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
-    console.log(GeneralUtils.deepCopy(config))
     if (clips.length) {
       clips.forEach(img => {
         const imgConfig = {
@@ -259,17 +258,20 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    const { styles, vSize, cSize, pSize, ratio } = config
+    console.log(GeneralUtils.deepCopy(config))
+    const { styles } = config
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
+      itemId: '',
       active: false,
       shown: false,
       path: '',
       color: [],
       size: [],
+      styleArray: [],
       svg: '',
-      vSize: [...vSize],
+      vSize: [0, 0],
       cSize: [0, 0],
       pSize: [0, 0],
       pDiff: [0, 0],
@@ -297,7 +299,6 @@ class LayerFactary {
         verticalFlip: false
       }
     }
-    console.log(GeneralUtils.deepCopy(config))
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)
@@ -306,6 +307,7 @@ class LayerFactary {
   newTemplate(config: any): any {
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+      console.log(config.layers[layerIndex])
     }
     return config
   }

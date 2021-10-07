@@ -95,12 +95,15 @@ export default Vue.extend({
     styles() {
       const zindex = (this.layerIndex + 1) * 100
       const pos = this.imgControllerPosHandler()
+      console.log(this.primaryLayerIndex)
+      console.log(this.layerIndex)
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth}px`,
-        height: `${this.config.styles.imgHeight}px`,
+        width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
+        height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${3 * (100 / this.scaleRatio)}px solid red`,
         'pointer-events': this.config.pointerEvents ?? 'initial'
+        // 'pointer-events': 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -157,16 +160,22 @@ export default Vue.extend({
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent) {
+      console.log(this.getLayerScale)
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
         x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
+      // x: -this.getImgWidth / 2 + (this.config.styles.width) / 2,
+      // y: -this.getImgHeight / 2 + (this.config.styles.height) / 2
       const translateLimit = {
         width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
         height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
       }
+      //   width: (this.getImgWidth - this.config.styles.width) / 2,
+      //   height: (this.getImgHeight - this.config.styles.height) / 2
+      // }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
@@ -362,7 +371,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-img-controller {
   // z-index: 1000;
-  transform-style: preserve-3d;
+  // transform-style: preserve-3d;
 }
 
 .controller-point {

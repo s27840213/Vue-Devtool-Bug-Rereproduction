@@ -8,10 +8,11 @@ import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get currSubSelectedInfo(): ICurrSubSelectedInfo { return store.getters.getSubSelectedInfo }
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get layerIndex() { return store.getters.getCurrSelectedIndex }

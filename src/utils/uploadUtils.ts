@@ -267,6 +267,10 @@ class UploadUtils {
       designId: designId
     })
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
+    pageJSON.layers
+      .forEach((l: ILayer) => {
+        l = this.layerInfoFilter(l)
+      })
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -303,7 +307,10 @@ class UploadUtils {
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 
-    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
+    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex)) as IPage
+    for (const [i, layer] of pageJSON.layers.entries()) {
+      pageJSON.layers[i] = this.layerInfoFilter(layer)
+    }
     console.log(pageJSON)
     console.log(designId)
 
@@ -530,6 +537,33 @@ class UploadUtils {
           theLayer.cSize = [0, 0]
           theLayer.className = shapeUtils.classGenerator()
           break
+      }
+    }
+  }
+
+  layerInfoFilter(layer: ILayer): any {
+    switch (layer.type) {
+      case 'shape': {
+        const shape = layer as IShape
+        const { designId, pDiff, ratio, color, styles } = shape
+        return {
+          designId,
+          pDiff,
+          ratio,
+          color,
+          styles: {
+            x: styles.x,
+            y: styles.y,
+            scale: styles.scale,
+            scaleX: styles.scaleX,
+            scaleY: styles.scaleY,
+            rotate: styles.rotate,
+            zindex: styles.zindex,
+            opacity: styles.opacity,
+            horizontalFlip: styles.horizontalFlip,
+            verticalFlip: styles.verticalFlip
+          }
+        }
       }
     }
   }

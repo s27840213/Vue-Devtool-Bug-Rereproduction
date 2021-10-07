@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
+import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import { Layer } from 'konva/types/Layer'
 import Vue from 'vue'
@@ -48,7 +49,8 @@ export default Vue.extend({
         // width: `${this.config.styles.width}px`,
         // height: `${this.config.styles.height}px`
         width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        pointerEvents: imageUtils.isImgControl ? 'none' : 'initial'
       }
     }
   }

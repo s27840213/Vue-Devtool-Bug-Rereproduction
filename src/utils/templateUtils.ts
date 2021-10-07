@@ -19,7 +19,6 @@ class TemplateUtils {
 
   updateTemplate(json: any): any {
     console.log(json)
-    // const layers = (json.layers as Array<ILayer>).filter(layer => layer.type === 'text')
     if (!json) { return }
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
@@ -61,20 +60,6 @@ class TemplateUtils {
           }
         }
       }
-      // } else if (layer.type === 'shape') {
-      //   const { initWidth, initHeight, scale, scaleX, scaleY } = layer.styles
-      //   layer.styles.width = initWidth * scale * scaleX
-      //   layer.styles.height = initHeight * scale * scaleY
-      // }
-      // const srcObj = json.backgroundImage.config.srcObj
-      // console.log(srcObj)
-      // if (json.backgroundImage.src || srcObj.userId) {
-      //   Object.assign(srcObj, {
-      //     type: 'background',
-      //     assetId: imageUtils.getAssetId(json.backgroundImage.src || srcObj.userId, 'background'),
-      //     userId: ''
-      //   })
-      // }
     }
     return json
   }

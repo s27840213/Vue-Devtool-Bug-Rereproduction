@@ -101,6 +101,8 @@ class AssetUtils {
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
+    console.log(json)
+    console.log(attrs)
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const { vSize = [] } = json
@@ -209,15 +211,6 @@ class AssetUtils {
     const resizeRatio = 0.6
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
-
-    const clips = json.clips as Array<IImage>
-    clips.forEach(img => {
-      // img.styles.initWidth *= resizeRatio
-      // img.styles.initHeight *= resizeRatio
-      // img.styles.width *= resizeRatio
-      // img.styles.height *= resizeRatio
-      // img.styles.scale = resizeRatio
-    })
 
     const config = {
       styles: {
@@ -328,17 +321,19 @@ class AssetUtils {
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
+      console.log('item ID: ' + item.id)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 7:
           this.addText(asset.jsonData, attrs)
           break
         case 6:
+          console.log(asset)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:
         case 9:
-          this.addSvg(asset.jsonData, attrs)
+          this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         case 10:
           this.addLine(asset.jsonData, attrs)

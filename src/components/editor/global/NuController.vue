@@ -31,7 +31,7 @@
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
                 class="relative"
                 data-identifier="controller"
-                :style="subControllerStyles()"
+                :style="getLayerType === 'frame' ? '' : subControllerStyles()"
                 :key="`group-controller-${index}`"
                 :pageIndex="pageIndex"
                 :layerIndex="index"
@@ -336,12 +336,15 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setCurrSubSelectedInfo: 'SET_currSubSelectedInfo',
       setMoving: 'SET_moving'
     }),
     frameLayerMapper(_config: any) {
       const config = GeneralUtils.deepCopy(_config)
-      const { x, y, width, height, initWidth, initHeight } = config.styles
+      const {
+        x, y, width, height, initWidth, initHeight,
+        imgX, imgY, imgWidth, imgHeight, scale
+      } = config.styles
+
       return Object.assign(config, {
         styles: {
           ...config.styles,
@@ -351,7 +354,12 @@ export default Vue.extend({
             width,
             height,
             initWidth,
-            initHeight
+            initHeight,
+            // imgX,
+            // imgY,
+            // imgWidth,
+            // imgHeight,
+            scale
           }))
         }
       })
@@ -483,8 +491,8 @@ export default Vue.extend({
     },
     subControllerStyles() {
       return {
-        // transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
-        // position: 'relative'
+        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
+        position: 'relative'
       }
     },
     outlineStyles(type: string) {
@@ -1207,7 +1215,7 @@ export default Vue.extend({
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-          TemplateUtils.updateTextInfo(this.config)
+          // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })

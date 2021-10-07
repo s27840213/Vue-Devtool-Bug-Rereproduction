@@ -113,6 +113,7 @@
             div(class="page-control" :style="Object.assign(styles('control'))")
                 nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                   :pageIndex="pageIndex"
+                                  :primaryLayerIndex="currSelectedInfo.index"
                                   :config="Object.assign(getCurrSubSelectedLayer, { pointerEvents: 'none' })")
           template(v-else)
             nu-layer(:layerIndex="currSelectedIndex"
@@ -137,12 +138,14 @@ import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   data() {
     return {
       pageIsHover: false,
       ImageUtils,
+      layerUtils,
       ShortcutUtils,
       // for test used
       coordinate: null as unknown as HTMLElement,

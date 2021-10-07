@@ -30,6 +30,7 @@ import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import { IGroup } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
@@ -84,7 +85,7 @@ export default Vue.extend({
     styles() {
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles),
-        { 'pointer-events': this.isImgControl ? 'none' : 'initial' }
+        { 'pointer-events': imageUtils.isImgControl ? 'none' : 'initial' }
       )
       if (this.config.type === 'text') {
         Object.assign(
