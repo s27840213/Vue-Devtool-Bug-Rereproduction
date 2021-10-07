@@ -97,7 +97,7 @@ class AssetUtils {
   addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    PageUtils.updateSpecPage(targePageIndex, TemplateUtils.updateTemplate(json))
+    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {

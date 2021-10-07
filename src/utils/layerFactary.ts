@@ -1,5 +1,5 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { init } from '@sentry/browser'
@@ -300,6 +300,38 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)
+  }
+
+  newTemplate(config: any): any {
+    for (const layerIndex in config.layers) {
+      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+    }
+    return config
+  }
+
+  newByLayerType(config: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+    switch (config.type) {
+      case 'shape':
+        return this.newShape(config)
+      case 'text':
+        return this.newText(config)
+      case 'image':
+        return this.newImage(config)
+      case 'frame':
+        return this.newFrame(config)
+      case 'group':
+        for (const layerIndex in config.layers) {
+          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+        }
+        return this.newGroup(config.styles, config.layers)
+      case 'tmp':
+        for (const layerIndex in config.layers) {
+          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+        }
+        return this.newTmp(config.styles, config.layers)
+      default:
+        throw new Error(`Unknown layer type: ${config.type}`)
+    }
   }
 }
 

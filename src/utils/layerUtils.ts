@@ -223,20 +223,6 @@ class LayerUtils {
       styles: { initWidth: layer.styles.width }
     })
   }
-
-  fillInDefaultStyles(layer: ILayer) {
-    if (layer.type === 'group') {
-      for (const subLayer of (layer as IGroup).layers) {
-        this.fillInDefaultStyles(subLayer)
-      }
-    }
-    if (layer.type === 'tmp') {
-      for (const subLayer of (layer as ITmp).layers) {
-        this.fillInDefaultStyles(subLayer)
-      }
-    }
-    layer.styles = Object.assign({ horizontalFlip: false, verticalFlip: false }, layer.styles)
-  }
 }
 
 const layerUtils = new LayerUtils()

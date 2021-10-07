@@ -61,7 +61,6 @@ class TemplateUtils {
           }
         }
       }
-      LayerUtils.fillInDefaultStyles(layer)
       // } else if (layer.type === 'shape') {
       //   const { initWidth, initHeight, scale, scaleX, scaleY } = layer.styles
       //   layer.styles.width = initWidth * scale * scaleX
