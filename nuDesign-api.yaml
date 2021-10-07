@@ -254,6 +254,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /update-design:
+    post:
+      description: 更新或取得素材資訊
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/updateDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /verify-vcode:
     post:
       consumes:
@@ -424,6 +445,35 @@ definitions:
           keyword:
             type: string
             description: keyword to search
+  updateDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - key_id
+          - query
+          - type
+        properties:
+          type:
+            type: string
+            description: design type
+          key_id:
+            type: string
+            description: design key_id
+          query:
+            type: string
+            description: get or update design info
+          data:
+            type: string
+            description: design info to be updated
+  updateDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: string
+            description: json string for design info
   listDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
