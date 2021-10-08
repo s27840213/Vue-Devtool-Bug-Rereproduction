@@ -25,7 +25,7 @@
             @mouseup="onFrameMouseUp"
             @click="clickSubController(index)"
             @dblclick="dblSubController(index)")
-        template(v-if="(getLayerType === 'group' || getLayerType === 'frame') && isActive")
+        template(v-if="(['group','frame','tmp'].includes(getLayerType)) && isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -1525,7 +1525,6 @@ export default Vue.extend({
 
 .sub-controller {
   transform-style: preserve-3d;
-  // isolation: isolate;
   position: absolute;
   top: 0;
   left: 0;
