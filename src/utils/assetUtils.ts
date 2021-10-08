@@ -348,7 +348,7 @@ class AssetUtils {
           )
           break
         case 8:
-          this.addFrame(asset.jsonData, attrs)
+          this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)

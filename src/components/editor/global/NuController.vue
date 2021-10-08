@@ -1392,7 +1392,7 @@ export default Vue.extend({
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image') {
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
         Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)

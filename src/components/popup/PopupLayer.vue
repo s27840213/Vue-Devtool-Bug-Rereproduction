@@ -230,7 +230,8 @@ export default Vue.extend({
               },
               clips: [{
                 ...currLayer,
-                clipPath: `M0,0h${width}v${height}h${-width}z`
+                clipPath: `M0,0h${width}v${height}h${-width}z`,
+                isFrameImg: true
               }]
             } as unknown as IFrame)
             layerUtils.deleteLayer(layerIndex)
