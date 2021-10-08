@@ -38,10 +38,10 @@ export default function (this: any) {
 
     getContent: async ({ commit, state }, params = {}) => {
       const { locale } = state
-      const { keyword } = params
+      const { keyword, searchTag } = params
       commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, listAll: 1 })
+        const { data } = await this.api({ locale, keyword, searchTag, listAll: 1 })
         commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
