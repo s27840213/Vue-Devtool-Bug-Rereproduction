@@ -267,10 +267,10 @@ class UploadUtils {
       designId: designId
     })
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
-    pageJSON.layers
-      .forEach((l: ILayer) => {
-        l = this.layerInfoFilter(l)
-      })
+    // pageJSON.layers
+    //   .forEach((l: ILayer) => {
+    //     l = this.layerInfoFilter(l)
+    //   })
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -307,10 +307,10 @@ class UploadUtils {
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex)) as IPage
-    for (const [i, layer] of pageJSON.layers.entries()) {
-      pageJSON.layers[i] = this.layerInfoFilter(layer)
-    }
+    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
+    // for (const [i, layer] of pageJSON.layers.entries()) {
+    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
+    // }
     console.log(pageJSON)
     console.log(designId)
 
@@ -541,7 +541,35 @@ class UploadUtils {
     }
   }
 
-  layerInfoFilter(layer: ILayer): any {
+  private layerInfoFilter(layer: ILayer): any {
+    const styleFilter = (styles: any, type = 'general') => {
+      const general = {
+        x: styles.x,
+        y: styles.y,
+        scale: styles.scale,
+        scaleX: styles.scaleX,
+        scaleY: styles.scaleY,
+        rotate: styles.rotate,
+        zindex: styles.zindex,
+        opacity: styles.opacity,
+        horizontalFlip: styles.horizontalFlip,
+        verticalFlip: styles.verticalFlip
+      }
+
+      switch (type) {
+        case 'image':
+          return {
+            ...general,
+            imgX: styles.imgX,
+            imgY: styles.imgY,
+            imgWidth: styles.imgWidth,
+            imgHeight: styles.imgHeight
+          }
+        default:
+          return general
+      }
+    }
+
     switch (layer.type) {
       case 'shape': {
         const shape = layer as IShape
@@ -551,18 +579,30 @@ class UploadUtils {
           pDiff,
           ratio,
           color,
-          styles: {
-            x: styles.x,
-            y: styles.y,
-            scale: styles.scale,
-            scaleX: styles.scaleX,
-            scaleY: styles.scaleY,
-            rotate: styles.rotate,
-            zindex: styles.zindex,
-            opacity: styles.opacity,
-            horizontalFlip: styles.horizontalFlip,
-            verticalFlip: styles.verticalFlip
-          }
+          styles: styleFilter(styles)
+        }
+      }
+      case 'frame': {
+        const frame = layer as IFrame
+        const { designId, clips, decoration, decorationTop, styles } = frame
+        return {
+          designId,
+          clips: [
+            ...clips.map(img => {
+              const { srcObj, styles } = img
+              return {
+                srcObj,
+                styles: styleFilter(styles, 'image')
+              }
+            })
+          ],
+          styles: styleFilter(styles),
+          decoration: decoration ? {
+            color: decoration.color
+          } : undefined,
+          decorationTop: decorationTop ? {
+            color: decorationTop.color
+          } : undefined
         }
       }
     }

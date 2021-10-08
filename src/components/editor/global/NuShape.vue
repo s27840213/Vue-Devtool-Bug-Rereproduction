@@ -55,7 +55,8 @@ export default Vue.extend({
       filterTemplate: ''
     }
   },
-  mounted() {
+  async mounted() {
+    // fetch
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
     this.styleNode = shapeUtils.addStyleTag(styleText)
 

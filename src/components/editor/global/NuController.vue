@@ -933,7 +933,10 @@ export default Vue.extend({
 
       width = offsetWidth + initWidth
       height = offsetHeight + initHeight
-      if (width <= 20 || height <= 20) return
+      if (width <= 5 || height <= 5) {
+        width = width <= 5 ? 5 : width
+        height = height <= 5 ? 5 : height
+      }
 
       const offsetSize = {
         width: width - initWidth,

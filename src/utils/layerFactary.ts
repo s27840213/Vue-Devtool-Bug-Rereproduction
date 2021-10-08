@@ -51,13 +51,13 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { clips, decoration, decorationTop, styles } = config
+    const { designId, clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
     if (clips.length) {
       clips.forEach(img => {
         const imgConfig = {
           isFrame: true,
-          clipPath: img.clipPath,
+          clipPath: img.clipPath ?? '$designId_' + designId,
           styles: img.styles,
           srcObj: img.srcObj ?? {
             type: 'frame',
@@ -97,7 +97,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
-      designId: config.designId ?? '',
+      designId: designId ?? '',
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -258,12 +258,10 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    console.log(GeneralUtils.deepCopy(config))
     const { styles } = config
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
-      itemId: '',
       active: false,
       shown: false,
       path: '',
