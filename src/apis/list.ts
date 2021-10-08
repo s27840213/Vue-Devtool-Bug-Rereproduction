@@ -15,7 +15,7 @@ class ListService {
       list_all: params.listAll,
       keyword: params.keyword,
       // font_list: 1,
-      return_obj: 1
+      search_tag: params.searchTag
     }
 
     return axios.request<IListServiceResponse>({
