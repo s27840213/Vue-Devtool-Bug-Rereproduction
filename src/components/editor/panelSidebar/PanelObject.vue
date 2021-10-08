@@ -18,7 +18,7 @@
           v-if="!keyword"
           :list="list"
           :title="title"
-          @action="handleSearch")
+          @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-object-item(class="panel-objects__item"
               :item="item")
@@ -111,6 +111,9 @@ export default Vue.extend({
       ]
     ),
     handleSearch(keyword: string) {
+      keyword ? this.getContent({ keyword, searchTag: 1 }) : this.resetContent()
+    },
+    handleCategorySearch(keyword: string) {
       keyword ? this.getContent({ keyword }) : this.resetContent()
     },
     handleLoadMore() {

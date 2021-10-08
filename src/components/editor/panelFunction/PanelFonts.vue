@@ -21,22 +21,6 @@
           :preview="preview"
           :preview2="preview2"
           :objectId="item.id")
-      //- template(v-slot:category-list-font="{ list, title }")
-      //-   category-list-font(:list="list" :title="title")
-      //-     template(v-slot="{ item }")
-      //-       category-font-item(
-      //-         :host="host"
-      //-         :preview="preview"
-      //-         :preview2="preview2"
-      //-         :objectId="item.id")
-      //- template(v-slot:category-font-item="{ list }")
-      //-   div(class="panel-fonts__items")
-      //-     category-font-item(v-for="item in list"
-      //-       :key="item"
-      //-       :host="host"
-      //-       :preview="preview"
-      //-       :preview2="preview2"
-      //-       :objectId="item")
     btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
@@ -90,19 +74,20 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     list(): any[] {
-      const { list = [] } = this.content as { list: IListServiceContentDataItem }
-      const tmpList = list as any[]
-      const result = []
-      while (tmpList.length) {
-        const rowItems = tmpList.splice(0, 1)
-        result.push({
-          id: `${rowItems.map(item => item.id).join('_')}`,
-          size: 35,
-          type: 'category-font-item',
-          list: rowItems,
-          sentinel: !tmpList.length
+      const { hasNextPage } = this
+      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
+      const result = new Array(list.length)
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx, idx + 1)
+          return {
+            id: `${rowItems.map(item => item.id).join('_')}`,
+            size: 35,
+            type: 'category-font-item',
+            list: rowItems,
+            sentinel: hasNextPage && idx === (list.length - 1)
+          }
         })
-      }
       return result
     }
     // listCategories(): any[] {
