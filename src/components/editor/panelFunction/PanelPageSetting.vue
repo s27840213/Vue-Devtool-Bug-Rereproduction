@@ -25,6 +25,16 @@
           @click.native="setPageSize(format)")
         span(class="text-blue-1 label-md text-bold") {{format.name}}
         span(class="text-gray-3 body-2") {{`${format.width}x${format.height} px`}}
+      property-bar(class="p-10 pointer"
+          class="page-setting__format"
+          @click.native="resizePage({ name: 'wider', width: 1080, height: 700})")
+        span(class="text-blue-1 label-md text-bold") Test Wider
+        span(class="text-gray-3 body-2") 1080x700px
+      property-bar(class="p-10 pointer"
+          class="page-setting__format"
+          @click.native="resizePage({ name: 'higher', width: 700, height: 1080})")
+        span(class="text-blue-1 label-md text-bold") Test Higher
+        span(class="text-gray-3 body-2") 700x1080px
 </template>
 
 <script lang="ts">
@@ -32,6 +42,7 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import StepsUtils from '@/utils/stepsUtils'
+import ResizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   components: {
@@ -141,6 +152,10 @@ export default Vue.extend({
         }
       })
       StepsUtils.record()
+    },
+    resizePage(format: { name: string, width: number, height: number }) {
+      ResizeUtils.resizePage(this.lastSelectedPageIndex, this.getPage(this.lastSelectedPageIndex), format)
+      this.setPageSize(format)
     },
     toggleLock() {
       this.isLocked = !this.isLocked
