@@ -777,6 +777,32 @@ export default Vue.extend({
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
           }
           break
+        case 'tmp':
+        case 'group':
+          (this.config as IGroup).layers.forEach((layer, index) => {
+            if (layer.type === 'shape') {
+              layer = layer as IShape
+              const scaleRatio = scale / this.getLayerScale
+              if (layer.category === 'D') {
+                const [lineWidth] = layer.size ?? [1]
+                LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, index, {
+                  size: [lineWidth / scaleRatio]
+                })
+                const trans = shapeUtils.getTranslateCompensationForLineWidth(layer.point ?? [], layer.styles, lineWidth, lineWidth / scaleRatio)
+                LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, index, {
+                  x: trans.x,
+                  y: trans.y
+                })
+              }
+              if (layer.category === 'E') {
+                const [lineWidth, corRad] = layer.size ?? [1, 0]
+                LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, index, {
+                  size: [lineWidth / scaleRatio, corRad]
+                })
+              }
+            }
+          })
+          break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)

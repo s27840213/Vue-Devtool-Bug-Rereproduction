@@ -9,6 +9,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import FrameUtils from './frameUtils'
+import ShapeUtils from './shapeUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -330,6 +331,49 @@ class GroupUtils {
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
         layer.styles.y = shiftY
+      } else if (layer.type === 'shape') {
+        if (layer.category === 'D') {
+          const [lineWidth] = (layer as IShape).size ?? [1]
+          const point = (layer as IShape).point ?? []
+
+          const newLineWidth = Math.round(lineWidth * tmpLayer.styles.scale)
+          layer.size = [newLineWidth]
+
+          const { width, height } = ShapeUtils.lineDimension(point)
+          const [targetWidth, targetHeight] = [width * tmpLayer.styles.scale, height * tmpLayer.styles.scale]
+          const { point: newPoint, realWidth, realHeight } = ShapeUtils.computePointForDimensions(ShapeUtils.getLineQuadrant(point), newLineWidth, targetWidth, targetHeight)
+          layer.point = newPoint
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.scale = 1
+
+          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const [x1, y1] = [layer.styles.x, layer.styles.y]
+          const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+          layer.styles.x = shiftX
+          layer.styles.y = shiftY
+        } else if (layer.category === 'E') {
+          layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+          layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
+          layer.styles.initWidth = layer.styles.width
+          layer.styles.initHeight = layer.styles.height
+          layer.vSize = [layer.styles.width, layer.styles.height]
+          const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
+          layer.size = [Math.round(lineWidth * tmpLayer.styles.scale), corRad * tmpLayer.styles.scale]
+          layer.styles.scale = 1
+
+          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const [x1, y1] = [layer.styles.x, layer.styles.y]
+          const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+          layer.styles.x = shiftX
+          layer.styles.y = shiftY
+        } else {
+          layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
+          layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
+          layer.styles.scale *= tmpLayer.styles.scale
+        }
       } else {
         layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
         layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale

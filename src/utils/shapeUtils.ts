@@ -366,7 +366,7 @@ class ShapeUtils {
     return res
   }
 
-  getTranslateCompensationForLineWidth(point: number[], styles: {x: number, y: number, width: number, initWidth: number, height: number}, shapeType: string, scale: number, newScale: number):
+  getTranslateCompensationForLineWidth(point: number[], styles: {x: number, y: number}, scale: number, newScale: number):
   {x: number, y: number} {
     const { baseDegree } = this.lineDimension(point)
     const dx = 2 * (scale - newScale) * Math.sin(baseDegree)
