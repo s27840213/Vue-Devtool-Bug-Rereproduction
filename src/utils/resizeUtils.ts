@@ -85,6 +85,31 @@ class ResizeUtils {
           controlUtils.updateShapeCorRad(pageIndex, layerIndex, layer.size ?? [], corRad)
         }
         break
+      case 'group':
+        layer = targetLayer as IGroup
+        layer.layers.forEach((subLayer, index) => {
+          if (subLayer.type === 'shape') {
+            subLayer = subLayer as IShape
+            if (subLayer.category === 'D') {
+              const [lineWidth] = subLayer.size ?? [1]
+              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
+                size: [lineWidth / targetScale]
+              })
+              const trans = shapeUtils.getTranslateCompensationForLineWidth(subLayer.point ?? [], subLayer.styles, lineWidth, lineWidth / targetScale)
+              layerUtils.updateSubLayerStyles(pageIndex, layerIndex, index, {
+                x: trans.x,
+                y: trans.y
+              })
+            }
+            if (subLayer.category === 'E') {
+              const [lineWidth, corRad] = subLayer.size ?? [1, 0]
+              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
+                size: [lineWidth / targetScale, corRad]
+              })
+            }
+          }
+        })
+        break
       case 'tmp':
         throw new Error('Unexpected tmp layer encountered')
     }
