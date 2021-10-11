@@ -297,8 +297,9 @@ class UploadUtils {
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('上傳中')
     xhr.onload = () => {
+      navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
 
@@ -555,7 +556,6 @@ class UploadUtils {
         horizontalFlip: styles.horizontalFlip,
         verticalFlip: styles.verticalFlip
       }
-
       switch (type) {
         case 'image':
           return {
@@ -565,21 +565,61 @@ class UploadUtils {
             imgWidth: styles.imgWidth,
             imgHeight: styles.imgHeight
           }
+        case 'text':
+          return {
+            ...general,
+            writingMode: styles.writingMode,
+            align: styles.align
+          }
         default:
           return general
       }
     }
 
     switch (layer.type) {
+      case 'image': {
+        const image = layer as IImage
+        const { srcObj, styles } = image
+        return {
+          srcObj,
+          styles: styleFilter(styles, 'image')
+        }
+      }
       case 'shape': {
         const shape = layer as IShape
-        const { designId, pDiff, ratio, color, styles } = shape
-        return {
-          designId,
-          pDiff,
-          ratio,
-          color,
-          styles: styleFilter(styles)
+        switch (shape.category) {
+          case 'D': {
+            delete layer.markerTransArray
+            delete layer.markerWidth
+            delete layer.trimWidth
+            delete layer.trimOffset
+            delete layer.styleArray
+            delete layer.svg
+            delete layer.pDiff
+            delete layer.pSize
+            delete layer.cSize
+            delete layer.vSize
+            delete layer.className
+            return shape
+          }
+          case 'E':
+            delete layer.styleArray
+            delete layer.svg
+            delete layer.pDiff
+            delete layer.pSize
+            delete layer.cSize
+            delete layer.className
+            return shape
+          default: {
+            const { designId, pDiff, ratio, color, styles } = shape
+            return {
+              designId,
+              pDiff,
+              ratio,
+              color,
+              styles: styleFilter(styles)
+            }
+          }
         }
       }
       case 'frame': {
@@ -589,20 +629,43 @@ class UploadUtils {
           designId,
           clips: [
             ...clips.map(img => {
-              const { srcObj, styles } = img
+              const { isFrameImg } = img
               return {
-                srcObj,
+                ...this.layerInfoFilter(img),
+                isFrameImg,
                 styles: styleFilter(styles, 'image')
               }
             })
           ],
-          styles: styleFilter(styles),
           decoration: decoration ? {
             color: decoration.color
           } : undefined,
           decorationTop: decorationTop ? {
             color: decorationTop.color
-          } : undefined
+          } : undefined,
+          styles: styleFilter(styles)
+        }
+      }
+      case 'text': {
+        const text = layer as IText
+        const { widthLimit, isEdited, paragraphs, styles } = text
+        return {
+          widthLimit,
+          isEdited,
+          paragraphs: paragraphs,
+          styles: styleFilter(styles, 'text')
+        }
+      }
+      case 'group': {
+        const group = layer as IGroup
+        const { layers, styles } = group
+        const filteredLayers = layers
+          .map(layer => {
+            return this.layerInfoFilter(layer)
+          })
+        return {
+          layers: filteredLayers,
+          styles: styleFilter(styles)
         }
       }
     }

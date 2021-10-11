@@ -31,7 +31,7 @@
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
                 class="relative"
                 data-identifier="controller"
-                :style="getLayerType === 'frame' ? '' : subControllerStyles()"
+                :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
                 :key="`group-controller-${index}`"
                 :pageIndex="pageIndex"
                 :layerIndex="index"
@@ -458,6 +458,7 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
+      // console.log(this.config.styles.width)
       const zindex = (() => {
         if ((type === 'frame' && this.isMoving) || (type === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex)) {
           return (this.layerIndex + 1) * 1000
@@ -489,15 +490,26 @@ export default Vue.extend({
         transform: `rotate(${-degree}deg)`
       }
     },
-    subControllerStyles() {
-      return {
-        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`,
-        position: 'relative'
+    subControllerStyles(isImgControl: boolean) {
+      return isImgControl ? {
+        transform: `translate(-50%, -50%) translateZ(1000px) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
+      } : {
+        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
       }
     },
     outlineStyles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
-      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      // const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const outlineColor = (() => {
+        if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
+          return '#F10994'
+        } else if (this.isLocked) {
+          return '#EB5757'
+        } else {
+          return '#7190CC'
+        }
+      })()
+
       if (this.isShown || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
           return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
@@ -513,7 +525,7 @@ export default Vue.extend({
         transform: `translate(${clip.x}px, ${clip.y}px)`,
         fill: '#00000000',
         stroke: this.clipIndex === index ? '#7190CC' : 'none',
-        strokeWidth: `${5 * (100 / this.scaleRatio)}px`
+        strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
     lineHintStyles() {
@@ -578,6 +590,7 @@ export default Vue.extend({
             }
           } else {
             targetIndex = this.config.styles.zindex - 1
+            console.log(targetIndex)
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
             GroupUtils.select(this.pageIndex, [targetIndex])

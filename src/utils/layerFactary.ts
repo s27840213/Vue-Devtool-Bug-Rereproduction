@@ -53,7 +53,7 @@ class LayerFactary {
   newFrame(config: IFrame): IFrame {
     const { designId, clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
-    if (clips.length) {
+    if (clips.length && !clips[0].isFrameImg) {
       clips.forEach(img => {
         const imgConfig = {
           isFrame: true,
@@ -67,6 +67,8 @@ class LayerFactary {
         }
         Object.assign(img, this.newImage(imgConfig))
       })
+    } else if (clips.length) {
+      Object.assign(clips[0], { isFrameImg: true })
     } else {
       styles.scale = 1
       styles.scaleX = 1
@@ -86,7 +88,7 @@ class LayerFactary {
           assetId: '',
           userId: ''
         },
-        isFrameImage: true
+        isFrameImg: true
       }))
     }
     return {
