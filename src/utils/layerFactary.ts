@@ -43,7 +43,8 @@ class LayerFactary {
         zindex: -1,
         opacity: 100,
         horizontalFlip: false,
-        verticalFlip: false
+        verticalFlip: false,
+        adjust: {}
       }
     }
     Object.assign(basicConfig.styles, config.styles)
