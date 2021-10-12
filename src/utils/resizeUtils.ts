@@ -135,11 +135,9 @@ class ResizeUtils {
     const targetAspectRatio = format.width / format.height
     let scale: number
     if (targetAspectRatio > aspectRatio) {
-      console.log(`wider; temp format: ${height * targetAspectRatio}x${height}px`)
       scale = format.height / height
       this.scaleAndMoveLayers(pageIndex, page, scale, ((height * targetAspectRatio - width) / 2) * scale, 0)
     } else {
-      console.log(`higher; temp format: ${width}x${width / targetAspectRatio}px`)
       scale = format.width / width
       this.scaleAndMoveLayers(pageIndex, page, scale, 0, ((width / targetAspectRatio - height) / 2) * scale)
     }

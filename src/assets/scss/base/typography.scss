@@ -48,6 +48,16 @@
 	line-height: 22px;
 	font-weight: 400;
 }
+@mixin body-3 {
+	font-size: 12px;
+	line-height: 16px;
+	font-weight: 400;
+}
+@mixin body-4 {
+	font-size: 10px;
+	line-height: 16px;
+	font-weight: 400;
+}
 @mixin label-sm(){
 	font-size: 12px;
 	line-height: 16px;
@@ -105,6 +115,12 @@
 	}
 	&-2 {
 		@include body-2()
+	}
+	&-3 {
+		@include body-3()
+	}
+	&-4 {
+		@include body-4()
 	}
 }
 

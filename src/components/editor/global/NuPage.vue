@@ -345,6 +345,9 @@ export default Vue.extend({
       })
     },
     deletePage() {
+      GroupUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex - 1)
+      this.setCurrActivePageIndex(this.pageIndex - 1)
       this._deletePage(this.pageIndex)
     }
   }
