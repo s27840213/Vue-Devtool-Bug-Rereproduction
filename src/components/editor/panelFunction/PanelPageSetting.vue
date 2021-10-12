@@ -31,6 +31,8 @@
         div(class="template-information__line" style="background: #eee;")
           span(class="body-1") focus
           span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
+        img(style="margin: 0 auto;"
+          :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
         btn(:type="'primary-sm'" class="rounded my-5" style="padding: 8px 40px;"
           @click.native="getDataClicked()") 取得模板資料
         div(class="template-information__line")
@@ -125,7 +127,8 @@ export default Vue.extend({
         tags_us: '' as string,
         tags_jp: '' as string,
         locale: '' as string
-      }
+      },
+      imgRandQuery: ''
     }
   },
   watch: {
@@ -139,6 +142,7 @@ export default Vue.extend({
         tags_jp: '',
         locale: ''
       }
+      this.imgRandQuery = GeneralUtils.generateRandomString(5)
     }
   },
   computed: {
