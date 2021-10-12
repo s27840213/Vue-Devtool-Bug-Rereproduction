@@ -29,7 +29,7 @@ export default Vue.extend({
     isAdjustImage(): boolean {
       const { styles } = this.config
       return Object
-        .values(styles.adjust)
+        .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     }
   },
