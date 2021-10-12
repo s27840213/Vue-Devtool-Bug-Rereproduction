@@ -2,6 +2,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import ZindexUtils from './zindexUtils'
 import { init } from '@sentry/browser'
 
 class LayerFactary {
@@ -307,8 +308,8 @@ class LayerFactary {
   newTemplate(config: any): any {
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      console.log(config.layers[layerIndex])
     }
+    config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config
   }
 

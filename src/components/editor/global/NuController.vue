@@ -590,6 +590,7 @@ export default Vue.extend({
             }
           } else {
             targetIndex = this.config.styles.zindex - 1
+            // targetIndex = this.layerIndex
             console.log(targetIndex)
             this.setLastSelectedPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)

@@ -579,8 +579,9 @@ class UploadUtils {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { srcObj, styles } = image
+        const { type, srcObj, styles } = image
         return {
+          type,
           srcObj,
           styles: styleFilter(styles, 'image')
         }
@@ -611,8 +612,9 @@ class UploadUtils {
             delete layer.className
             return shape
           default: {
-            const { designId, pDiff, ratio, color, styles } = shape
+            const { type, designId, pDiff, ratio, color, styles } = shape
             return {
+              type,
               designId,
               pDiff,
               ratio,
@@ -624,8 +626,9 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { designId, clips, decoration, decorationTop, styles } = frame
+        const { type, designId, clips, decoration, decorationTop, styles } = frame
         return {
+          type,
           designId,
           clips: [
             ...clips.map(img => {
@@ -648,8 +651,9 @@ class UploadUtils {
       }
       case 'text': {
         const text = layer as IText
-        const { widthLimit, isEdited, paragraphs, styles } = text
+        const { type, widthLimit, isEdited, paragraphs, styles } = text
         return {
+          type,
           widthLimit,
           isEdited,
           paragraphs: paragraphs,
@@ -658,12 +662,13 @@ class UploadUtils {
       }
       case 'group': {
         const group = layer as IGroup
-        const { layers, styles } = group
+        const { type, layers, styles } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
+          type,
           layers: filteredLayers,
           styles: styleFilter(styles)
         }
