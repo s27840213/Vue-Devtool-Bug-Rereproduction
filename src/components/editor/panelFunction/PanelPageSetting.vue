@@ -198,13 +198,13 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex'
     }),
     currentPageWidth(): number {
-      return Math.round(this.getPage(this.lastSelectedPageIndex).width)
+      return Math.round(this.getPage(this.lastSelectedPageIndex)?.width ?? 0)
     },
     currentPageHeight(): number {
-      return Math.round(this.getPage(this.lastSelectedPageIndex).height)
+      return Math.round(this.getPage(this.lastSelectedPageIndex)?.height ?? 0)
     },
     aspectRatio(): number {
-      return this.getPage(this.lastSelectedPageIndex).width / this.getPage(this.lastSelectedPageIndex).height
+      return (this.getPage(this.lastSelectedPageIndex)?.width ?? 1) / this.getPage(this.lastSelectedPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
       return this.pageWidth !== '' && this.pageHeight !== ''
