@@ -7,7 +7,10 @@
         :iconWidth="'30px'"
         :iconColor="'gray-2'"
         @click.native="closeFontsPanel")
-    search-bar(:placeholder="'Search font'")
+    search-bar(placeholder="Search font"
+      clear
+      :defaultKeyword="keyword"
+      @search="handleSearch")
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -15,6 +18,8 @@
           svg-icon(iconName="loading"
             iconColor="gray-1"
             iconWidth="20px")
+      template(v-slot:title="{ title }")
+        div(class="panel-fonts__category-title") {{ title }}
       template(v-slot:category-font-item="{ list }")
         category-font-item(v-for="item in list"
           :host="host"
@@ -49,8 +54,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getContent()
-    // this.getCategories()
+    this.getCategories()
   },
   computed: {
     ...mapState(
@@ -73,34 +77,55 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
     }),
-    list(): any[] {
-      const { hasNextPage } = this
+    listResult(): any[] {
+      const { hasNextPage, keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
+      if (!keyword) return []
       const result = new Array(list.length)
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx, idx + 1)
           return {
             id: `${rowItems.map(item => item.id).join('_')}`,
-            size: 35,
+            size: 32,
             type: 'category-font-item',
             list: rowItems,
             sentinel: hasNextPage && idx === (list.length - 1)
           }
         })
       return result
+    },
+    listCategories(): any[] {
+      const { hasNextPage } = this
+      const { categories, keyword } = this
+      let result = [] as any[]
+      if (keyword) return result
+      categories.forEach((category: IListServiceContentData) => {
+        if (category.list.length) {
+          result = result.concat([
+            {
+              size: 36,
+              id: category.title,
+              type: 'title',
+              title: category.title
+            },
+            ...category.list.map(font => ({
+              id: font.id,
+              size: 32,
+              type: 'category-font-item',
+              list: [font]
+            }))
+          ])
+        }
+      })
+      if (result.length) {
+        result[result.length - 1].sentinel = hasNextPage
+      }
+      return result
+    },
+    list(): any[] {
+      return this.listCategories.concat(this.listResult)
     }
-    // listCategories(): any[] {
-    //   const { categories } = this
-    //   return (categories as IListServiceContentData[])
-    //     .map((category, idx) => ({
-    //       id: `list_${category.list.map(list => list.id).join('_')}`,
-    //       type: 'category-list-font',
-    //       list: category.list,
-    //       title: category.title,
-    //       sentinel: !idx
-    //     }))
-    // }
   },
   methods: {
     ...mapActions('font',
@@ -108,7 +133,8 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getCategories',
-        'getMoreContent'
+        'getMoreContent',
+        'getMoreCategory'
       ]
     ),
     mappingIcons(type: string) {
@@ -133,8 +159,12 @@ export default Vue.extend({
       TextUtils.updateFontFace({ name: fontName, face: fontName })
     },
     handleLoadMore() {
-      console.log('loadmore')
-      this.getMoreContent()
+      const { keyword } = this
+      keyword ? this.getMoreContent() : this.getMoreCategory()
+    },
+    handleSearch(keyword: string) {
+      this.resetContent()
+      this.getContent({ keyword, searchTag: 1 })
     }
   }
 })
@@ -166,6 +196,12 @@ export default Vue.extend({
     grid-template-columns: auto;
     grid-gap: 10px;
     margin-left: auto;
+  }
+  &__category-title {
+    color: setColor(gray-3);
+    text-align: left;
+    font-size: 14px;
+    line-height: 36px;
   }
 }
 .category-list::v-deep::-webkit-scrollbar-thumb {

@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="category-fonts" draggable="false" @click="setFont()")
+  div(class="category-fonts pointer" draggable="false" @click="setFont()")
     div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item pointer"
+      img(class="category-fonts__item"
         :src="`${host}/${objectId}/${preview}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item pointer"
+      img(class="category-fonts__item"
         :src="`${host}/${objectId}/${preview2}`"
         @error="handleNotFound")
     div(v-if="props.font === objectId" class="category-fonts__done-icon")
@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -71,6 +71,7 @@ export default Vue.extend({
     &__item-wrapper {
       overflow: hidden;
       position: relative;
+      text-align: left;
     }
     &__item {
     height: 25px;

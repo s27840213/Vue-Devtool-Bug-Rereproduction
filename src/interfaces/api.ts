@@ -105,6 +105,7 @@ export interface IListServiceParams {
   pageIndex?: number
   listAll?: 0 | 1
   searchTag?: 0 | 1
+  fontList?: 0 | 1
 }
 
 export interface IListServiceContentDataItem {
