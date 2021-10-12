@@ -131,10 +131,12 @@ export default Vue.extend({
             type: 'category-background-item',
             list: rowItems,
             size: title ? (155 + 46) : 155,
-            title,
-            sentinel: !idx
+            title
           }
         })
+      if (result.length) {
+        Object.assign(result[result.length - 1], { sentinel: true })
+      }
       return result
     },
     list(): any[] {

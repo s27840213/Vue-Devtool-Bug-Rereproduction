@@ -109,10 +109,12 @@ export default Vue.extend({
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: title ? (155 + 46) : 155,
-            sentinel: !idx
+            size: title ? (155 + 46) : 155
           }
         })
+      if (result.length) {
+        Object.assign(result[result.length - 1], { sentinel: true })
+      }
       return result
     },
     list(): any[] {
