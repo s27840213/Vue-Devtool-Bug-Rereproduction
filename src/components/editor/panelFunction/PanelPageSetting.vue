@@ -201,6 +201,8 @@ export default Vue.extend({
     for (const format of formatPresets) {
       this.formatList.set(format.id, format)
     }
+    this.pageWidth = this.currentPageWidth
+    this.pageHeight = this.currentPageHeight
   },
   data() {
     return {
@@ -265,6 +267,12 @@ export default Vue.extend({
         locale: ''
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
+    },
+    currentPageWidth: function (newVal) {
+      this.pageWidth = newVal
+    },
+    currentPageHeight: function (newVal) {
+      this.pageHeight = newVal
     }
   },
   computed: {
