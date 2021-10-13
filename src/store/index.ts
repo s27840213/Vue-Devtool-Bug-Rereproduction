@@ -318,6 +318,9 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
   },
+  SET_backgroundImageMode(state: IEditorState, updateInfo: { pageIndex: number, newDisplayMode: boolean }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.newDisplayMode = updateInfo.newDisplayMode
+  },
   SET_textInfo(state: IEditorState, textInfo: { [key: string]: Array<string> }) {
     Object.entries(textInfo).forEach(([k, v]) => {
       if (Object.keys(state.textInfo).includes(k)) {

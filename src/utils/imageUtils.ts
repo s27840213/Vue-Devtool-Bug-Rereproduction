@@ -333,6 +333,21 @@ class ImageUtils {
       return { width: defaultWidth, height: defaultHeight }
     }
   }
+
+  adaptToSize(srcSize: {width: number, height: number}, targetSize: {width: number, height: number}): {width: number, height: number} {
+    const srcAspectRatio = srcSize.width / srcSize.height
+    const targetAspectRatio = targetSize.width / targetSize.height
+    let width = 0
+    let height = 0
+    if (srcAspectRatio > targetAspectRatio) {
+      width = targetSize.height * srcAspectRatio
+      height = targetSize.height
+    } else {
+      width = targetSize.width
+      height = targetSize.width / srcAspectRatio
+    }
+    return { width, height }
+  }
 }
 
 export default new ImageUtils()

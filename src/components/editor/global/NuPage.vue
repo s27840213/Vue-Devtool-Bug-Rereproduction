@@ -139,6 +139,7 @@ import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
+import background from '@/store/module/background'
 
 export default Vue.extend({
   data() {
@@ -234,7 +235,8 @@ export default Vue.extend({
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${this.config.backgroundImage.config.srcObj ? ImageUtils.getSrc(this.config.backgroundImage.config) : this.config.backgroundImage.src})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-          : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
+          : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
+        backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`
@@ -272,6 +274,7 @@ export default Vue.extend({
         sel.empty()
         sel.removeAllRanges()
       }
+      console.log(this.config)
     },
     setFocus(): void {
       this.$nextTick(() => {
