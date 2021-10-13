@@ -14,8 +14,7 @@ class ListService {
       page_index: params.pageIndex,
       list_all: params.listAll,
       keyword: params.keyword,
-      font_list: params.fontList,
-      search_tag: params.searchTag
+      font_list: params.fontList
     }
 
     return axios.request<IListServiceResponse>({
@@ -47,6 +46,7 @@ class ListService {
 
   getFont (params: IListServiceParams) {
     params.type = 'font'
+    params.fontList = 1
     return this.getList(params)
   }
 

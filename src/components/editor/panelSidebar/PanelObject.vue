@@ -108,12 +108,13 @@ export default Vue.extend({
       [
         'resetContent',
         'getContent',
+        'getTagContent',
         'getCategories',
         'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {
-      keyword ? this.getContent({ keyword, searchTag: 1 }) : this.resetContent()
+      keyword ? this.getTagContent({ keyword }) : this.resetContent()
     },
     handleCategorySearch(keyword: string) {
       keyword ? this.getContent({ keyword }) : this.resetContent()

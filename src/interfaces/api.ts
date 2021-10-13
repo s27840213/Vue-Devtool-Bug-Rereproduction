@@ -104,7 +104,6 @@ export interface IListServiceParams {
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
-  searchTag?: 0 | 1
   fontList?: 0 | 1
 }
 

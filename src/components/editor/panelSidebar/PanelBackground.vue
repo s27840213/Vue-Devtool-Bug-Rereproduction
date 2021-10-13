@@ -151,8 +151,8 @@ export default Vue.extend({
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any background for "${this.keyword}".` : ''
     }
   },
-  mounted() {
-    this.getCategories()
+  async mounted() {
+    await this.getCategories()
     this.getContent()
   },
   destroyed() {
@@ -163,6 +163,7 @@ export default Vue.extend({
       [
         'resetContent',
         'getContent',
+        'getTagContent',
         'getCategories',
         'getMoreContent'
       ]
@@ -183,7 +184,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.resetContent()
-      this.getContent({ keyword, searchTag: 1 })
+      this.getTagContent({ keyword })
     },
     handleCategorySearch(keyword: string) {
       this.resetContent()

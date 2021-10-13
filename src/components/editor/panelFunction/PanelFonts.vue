@@ -11,6 +11,7 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
+    div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -93,6 +94,9 @@ export default Vue.extend({
             sentinel: hasNextPage && idx === (list.length - 1)
           }
         })
+      if (result.length) {
+        result[result.length - 1].sentinel = hasNextPage
+      }
       return result
     },
     listCategories(): any[] {
@@ -125,13 +129,16 @@ export default Vue.extend({
     },
     list(): any[] {
       return this.listCategories.concat(this.listResult)
+    },
+    emptyResultMessage(): string {
+      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any font for "${this.keyword}".` : ''
     }
   },
   methods: {
     ...mapActions('font',
       [
         'resetContent',
-        'getContent',
+        'getTagContent',
         'getCategories',
         'getMoreContent',
         'getMoreCategory'
@@ -164,7 +171,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.resetContent()
-      this.getContent({ keyword, searchTag: 1 })
+      this.getTagContent({ keyword })
     }
   }
 })
