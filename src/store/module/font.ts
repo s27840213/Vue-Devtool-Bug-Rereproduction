@@ -28,7 +28,7 @@ actions.getMoreCategory = async ({ commit, getters, state }) => {
   }
 }
 
-mutations[SET_MORE_CATEGORY] = function(state: IListModuleState, objects: IListServiceData) {
+mutations[SET_MORE_CATEGORY] = function (state: IListModuleState, objects: IListServiceData) {
   for (let idx = 0; idx < objects.content.length; idx++) {
     state.categories[idx].list = state.categories[idx].list.concat(objects.content[idx].list)
   }
