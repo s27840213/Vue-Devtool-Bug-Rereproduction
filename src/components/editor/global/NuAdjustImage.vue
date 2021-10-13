@@ -17,7 +17,7 @@
       image(:xlink:href="src"
         :width="svgImageWidth"
         :height="svgImageHeight"
-        :filter="`url(#${filterId})`"
+        :filter="imageFilter"
         crossorigin="anonymous")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import Vue from 'vue'
 
@@ -60,7 +61,14 @@ export default Vue.extend({
       return ImageAdjustUtil.getHalation(adjust.halation, svgImageWidth, svgImageHeight)
     },
     filterId(): string {
-      return `filter__${new Date().getTime()}`
+      const randomId = GeneralUtils.generateRandomString(5)
+      return `filter__${randomId}`
+    },
+    imageFilter(): string {
+      if (this.svgFilterElms.length) {
+        return `url(#${this.filterId})`
+      }
+      return ''
     }
   }
 })
