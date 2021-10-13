@@ -55,6 +55,7 @@ function calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set
     return typeSet
   }
   if (layers.length === 1) {
+    typeSet.add(layers[0].type)
     return typeSet
   } else {
     layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
