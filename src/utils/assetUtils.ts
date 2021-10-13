@@ -234,8 +234,8 @@ class AssetUtils {
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const config = LayerFactary.newImage({
       styles: {
-        width: width / 2,
-        height: height / 2,
+        width: width,
+        height: height,
         x: 200,
         y: 200
       },
@@ -245,7 +245,6 @@ class AssetUtils {
         userId: ''
       }
     })
-    console.log(config)
     store.commit('SET_backgroundImage', {
       pageIndex: targePageIndex,
       config
@@ -344,7 +343,7 @@ class AssetUtils {
         case 1:
           this.addBackground(
             asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height } }
+            { ...attrs, styles: await ImageUtils.getImageSize(asset.urls.full, asset.width ?? 0, asset.height ?? 0) }
           )
           break
         case 8:
