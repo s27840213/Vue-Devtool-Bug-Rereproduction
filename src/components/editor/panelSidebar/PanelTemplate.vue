@@ -94,10 +94,12 @@ export default Vue.extend({
             type: 'category-template-item',
             list: rowItems,
             title,
-            size: title ? (itemHeight + 46) : itemHeight,
-            sentinel: !idx
+            size: title ? (itemHeight + 46) : itemHeight
           }
         })
+      if (result.length) {
+        Object.assign(result[result.length - 1], { sentinel: true })
+      }
       return result
     },
     list(): any[] {

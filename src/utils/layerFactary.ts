@@ -2,6 +2,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import ZindexUtils from './zindexUtils'
 import { init } from '@sentry/browser'
 
 class LayerFactary {
@@ -42,7 +43,8 @@ class LayerFactary {
         zindex: -1,
         opacity: 100,
         horizontalFlip: false,
-        verticalFlip: false
+        verticalFlip: false,
+        adjust: {}
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -51,13 +53,13 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { clips, decoration, decorationTop, styles } = config
+    const { designId, clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
-    if (clips.length) {
+    if (clips.length && !clips[0].isFrameImg) {
       clips.forEach(img => {
         const imgConfig = {
           isFrame: true,
-          clipPath: img.clipPath,
+          clipPath: img.clipPath ?? '$designId_' + designId,
           styles: img.styles,
           srcObj: img.srcObj ?? {
             type: 'frame',
@@ -67,6 +69,8 @@ class LayerFactary {
         }
         Object.assign(img, this.newImage(imgConfig))
       })
+    } else if (clips.length) {
+      Object.assign(clips[0], { isFrameImg: true })
     } else {
       styles.scale = 1
       styles.scaleX = 1
@@ -86,7 +90,7 @@ class LayerFactary {
           assetId: '',
           userId: ''
         },
-        isFrameImage: true
+        isFrameImg: true
       }))
     }
     return {
@@ -97,7 +101,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
-      designId: config.designId ?? '',
+      designId: designId ?? '',
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -258,12 +262,10 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    console.log(GeneralUtils.deepCopy(config))
     const { styles } = config
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
-      itemId: '',
       active: false,
       shown: false,
       path: '',
@@ -307,8 +309,8 @@ class LayerFactary {
   newTemplate(config: any): any {
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      console.log(config.layers[layerIndex])
     }
+    config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config
   }
 

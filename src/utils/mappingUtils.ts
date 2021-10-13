@@ -133,6 +133,8 @@ class MappingUtils {
 
   mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
+    console.log(layers)
+    console.log(indexs)
     return indexs.map(index => layers[index])
   }
 

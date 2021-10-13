@@ -14,6 +14,14 @@ class ZindexUtils {
       }
     })
   }
+
+  assignTemplateZidx(layers: Array<ILayer>) {
+    layers
+      .forEach((layer: ILayer | IImage | ITmp | IGroup | IShape, index: number) => {
+        layer.styles.zindex = index + 1
+      })
+    return layers
+  }
 }
 
 const zindexUtils = new ZindexUtils()

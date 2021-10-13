@@ -4,6 +4,7 @@ import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
+import FrameUtils from './frameUtils'
 
 class ImageUtils {
   get isImgControl(): boolean {
@@ -114,6 +115,35 @@ class ImageUtils {
       }
       default:
         return ''
+    }
+  }
+
+  setImgControlDefault() {
+    const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
+    switch (currLayer.type) {
+      case 'image':
+        LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
+        break
+      case 'group': {
+        const primaryLayer = currLayer as IGroup
+        for (let i = 0; i < primaryLayer.layers.length; i++) {
+          const props = {
+            active: false
+          } as { [key: string]: boolean | string | number }
+
+          if (primaryLayer.layers[i].type === 'image') {
+            props.imgControl = false
+          }
+          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+        }
+        break
+      }
+      case 'frame': {
+        const primaryLayer = currLayer as IFrame
+        for (let i = 0; i < primaryLayer.clips.length; i++) {
+          FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+        }
+      }
     }
   }
 

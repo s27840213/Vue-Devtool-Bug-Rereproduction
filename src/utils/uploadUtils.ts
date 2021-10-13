@@ -267,10 +267,10 @@ class UploadUtils {
       designId: designId
     })
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
-    pageJSON.layers
-      .forEach((l: ILayer) => {
-        l = this.layerInfoFilter(l)
-      })
+    // pageJSON.layers
+    //   .forEach((l: ILayer) => {
+    //     l = this.layerInfoFilter(l)
+    //   })
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -297,8 +297,9 @@ class UploadUtils {
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('上傳中')
     xhr.onload = () => {
+      navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
 
@@ -307,10 +308,10 @@ class UploadUtils {
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 
-    const pageJSON = generalUtils.deepCopy(store.getters.getPage(pageIndex)) as IPage
-    for (const [i, layer] of pageJSON.layers.entries()) {
-      pageJSON.layers[i] = this.layerInfoFilter(layer)
-    }
+    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
+    // for (const [i, layer] of pageJSON.layers.entries()) {
+    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
+    // }
     console.log(pageJSON)
     console.log(designId)
 
@@ -541,28 +542,135 @@ class UploadUtils {
     }
   }
 
-  layerInfoFilter(layer: ILayer): any {
+  private layerInfoFilter(layer: ILayer): any {
+    const styleFilter = (styles: any, type = 'general') => {
+      const general = {
+        x: styles.x,
+        y: styles.y,
+        scale: styles.scale,
+        scaleX: styles.scaleX,
+        scaleY: styles.scaleY,
+        rotate: styles.rotate,
+        zindex: styles.zindex,
+        opacity: styles.opacity,
+        horizontalFlip: styles.horizontalFlip,
+        verticalFlip: styles.verticalFlip
+      }
+      switch (type) {
+        case 'image':
+          return {
+            ...general,
+            imgX: styles.imgX,
+            imgY: styles.imgY,
+            imgWidth: styles.imgWidth,
+            imgHeight: styles.imgHeight
+          }
+        case 'text':
+          return {
+            ...general,
+            writingMode: styles.writingMode,
+            align: styles.align
+          }
+        default:
+          return general
+      }
+    }
+
     switch (layer.type) {
+      case 'image': {
+        const image = layer as IImage
+        const { type, srcObj, styles } = image
+        return {
+          type,
+          srcObj,
+          styles: styleFilter(styles, 'image')
+        }
+      }
       case 'shape': {
         const shape = layer as IShape
-        const { designId, pDiff, ratio, color, styles } = shape
-        return {
-          designId,
-          pDiff,
-          ratio,
-          color,
-          styles: {
-            x: styles.x,
-            y: styles.y,
-            scale: styles.scale,
-            scaleX: styles.scaleX,
-            scaleY: styles.scaleY,
-            rotate: styles.rotate,
-            zindex: styles.zindex,
-            opacity: styles.opacity,
-            horizontalFlip: styles.horizontalFlip,
-            verticalFlip: styles.verticalFlip
+        switch (shape.category) {
+          case 'D': {
+            delete layer.markerTransArray
+            delete layer.markerWidth
+            delete layer.trimWidth
+            delete layer.trimOffset
+            delete layer.styleArray
+            delete layer.svg
+            delete layer.pDiff
+            delete layer.pSize
+            delete layer.cSize
+            delete layer.vSize
+            delete layer.className
+            return shape
           }
+          case 'E':
+            delete layer.styleArray
+            delete layer.svg
+            delete layer.pDiff
+            delete layer.pSize
+            delete layer.cSize
+            delete layer.className
+            return shape
+          default: {
+            const { type, designId, pDiff, ratio, color, styles } = shape
+            return {
+              type,
+              designId,
+              pDiff,
+              ratio,
+              color,
+              styles: styleFilter(styles)
+            }
+          }
+        }
+      }
+      case 'frame': {
+        const frame = layer as IFrame
+        const { type, designId, clips, decoration, decorationTop, styles } = frame
+        return {
+          type,
+          designId,
+          clips: [
+            ...clips.map(img => {
+              const { isFrameImg } = img
+              return {
+                ...this.layerInfoFilter(img),
+                isFrameImg,
+                styles: styleFilter(styles, 'image')
+              }
+            })
+          ],
+          decoration: decoration ? {
+            color: decoration.color
+          } : undefined,
+          decorationTop: decorationTop ? {
+            color: decorationTop.color
+          } : undefined,
+          styles: styleFilter(styles)
+        }
+      }
+      case 'text': {
+        const text = layer as IText
+        const { type, widthLimit, isEdited, paragraphs, styles } = text
+        return {
+          type,
+          widthLimit,
+          isEdited,
+          paragraphs: paragraphs,
+          styles: styleFilter(styles, 'text')
+        }
+      }
+      case 'group': {
+        const group = layer as IGroup
+        const { type, layers, styles } = group
+        const filteredLayers = layers
+          .map(layer => {
+            return this.layerInfoFilter(layer)
+          })
+        return {
+          type,
+          layers: filteredLayers,
+          styles: styleFilter(styles)
         }
       }
     }

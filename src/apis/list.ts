@@ -14,7 +14,7 @@ class ListService {
       page_index: params.pageIndex,
       list_all: params.listAll,
       keyword: params.keyword,
-      // font_list: 1,
+      font_list: params.fontList,
       search_tag: params.searchTag
     }
 
