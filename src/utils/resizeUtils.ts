@@ -5,6 +5,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import controlUtils from '@/utils/controlUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -129,6 +130,28 @@ class ResizeUtils {
     return page
   }
 
+  scaleBackground(pageIndex: number, page: IPage, scale: number) {
+    pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
+    pageUtils.updateBackgroundImageSize(
+      pageIndex,
+      page.backgroundImage.config.styles.imgWidth * scale,
+      page.backgroundImage.config.styles.imgHeight * scale
+    )
+  }
+
+  centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number}) {
+    const { width, height } = imageUtils.adaptToSize({
+      width: page.backgroundImage.config.styles.initWidth,
+      height: page.backgroundImage.config.styles.initHeight
+    }, format)
+    pageUtils.updateBackgroundImagePos(pageIndex, (format.width - width) / 2, (format.height - height) / 2)
+    pageUtils.updateBackgroundImageSize(
+      pageIndex,
+      width,
+      height
+    )
+  }
+
   resizePage(pageIndex: number, page: IPage, format: { width: number, height: number}) {
     const { width, height } = page
     const aspectRatio = width / height
@@ -140,6 +163,11 @@ class ResizeUtils {
     } else {
       scale = format.width / width
       this.scaleAndMoveLayers(pageIndex, page, scale, 0, ((width / targetAspectRatio - height) / 2) * scale)
+    }
+    if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
+      this.scaleBackground(pageIndex, page, scale)
+    } else {
+      this.centerBackground(pageIndex, page, format)
     }
   }
 }

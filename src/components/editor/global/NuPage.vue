@@ -6,7 +6,7 @@
         type="text"
         v-model="pageName"
         @focus="ShortcutUtils.deselect()")
-      div(v-if="getLastSelectedPageIndex===pageIndex")
+      div(v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
         svg-icon(class="pointer"
           :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
@@ -48,7 +48,7 @@
         @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
         @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
         tabindex="0")
-      div(class="scale-container" :style="`transform: scale(${scaleRatio/100})`")
+      div(class="scale-container relative" :style="`transform: scale(${scaleRatio/100})`")
         div(class="overflow-container"
             :style="styles()")
           div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
@@ -67,6 +67,7 @@
                 @dragenter.prevent
                 @click.right.stop="onRightClick"
                 @click.left.self="pageClickHandler()"
+                @dblclick="pageDblClickHandler()"
                 @mouseover="togglePageHighlighter(true)"
                 @mouseout="togglePageHighlighter(false)")
               nu-layer(v-for="(layer,index) in config.layers"
@@ -123,6 +124,13 @@
                 nu-img-controller(:layerIndex="currSelectedIndex"
                                   :pageIndex="pageIndex"
                                   :config="getCurrLayer")
+        div(v-if="isBackgroundImageControl"
+            class="background-control"
+            :style="backgroundControlStyles()")
+          nu-image(:config="config.backgroundImage.config")
+          nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
+          div(:style="backgroundContorlClipStyles()")
+            nu-image(:config="config.backgroundImage.config")
 </template>
 
 <script lang="ts">
@@ -139,6 +147,10 @@ import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
+import PageUtils from '@/utils/pageUtils'
+import background from '@/store/module/background'
+import NuImage from '@/components/editor/global/NuImage.vue'
+import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 
 export default Vue.extend({
   data() {
@@ -163,6 +175,10 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     pageScaleRatio: Number
+  },
+  components: {
+    NuImage,
+    NuBackgroundController
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
@@ -216,6 +232,9 @@ export default Vue.extend({
           }
         })
       }
+    },
+    isBackgroundImageControl(): boolean {
+      return this.config.backgroundImage.config.imgControl
     }
   },
   methods: {
@@ -234,7 +253,8 @@ export default Vue.extend({
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${this.config.backgroundImage.config.srcObj ? ImageUtils.getSrc(this.config.backgroundImage.config) : this.config.backgroundImage.src})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-          : `${this.config.backgroundImage.posX}% ${this.config.backgroundImage.posY}%`
+          : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
+        backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
         width: `${this.config.width}px`,
         height: `${this.config.height}px`
@@ -271,6 +291,11 @@ export default Vue.extend({
       if (sel) {
         sel.empty()
         sel.removeAllRanges()
+      }
+    },
+    pageDblClickHandler(): void {
+      if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
+        PageUtils.startBackgroundImageControl(this.pageIndex)
       }
     },
     setFocus(): void {
@@ -350,6 +375,22 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.pageIndex - 1)
       this.setCurrActivePageIndex(this.pageIndex - 1)
       this._deletePage(this.pageIndex)
+    },
+    backgroundControlStyles() {
+      const backgroundImage = this.config.backgroundImage
+      return {
+        width: `${backgroundImage.config.styles.imgWidth}px`,
+        height: `${backgroundImage.config.styles.imgHeight}px`,
+        left: `${backgroundImage.posX}px`,
+        top: `${backgroundImage.posY}px`
+      }
+    },
+    backgroundContorlClipStyles() {
+      const { posX, posY } = this.config.backgroundImage
+      return {
+        clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
+        'pointer-events': 'none'
+      }
     }
   }
 })
@@ -404,7 +445,6 @@ export default Vue.extend({
 .page-content {
   position: absolute;
   box-sizing: border-box;
-  background-size: cover;
   background-repeat: no-repeat;
   transform-style: preserve-3d;
 }
@@ -462,5 +502,12 @@ export default Vue.extend({
   background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
   transform-style: preserve-3d;
+}
+
+.background-control {
+  position: absolute;
+  transform: translateZ(1000px);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
 }
 </style>

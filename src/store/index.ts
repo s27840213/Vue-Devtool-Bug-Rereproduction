@@ -17,6 +17,7 @@ import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
+import page from '@/store/module/page'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
@@ -318,6 +319,21 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
   },
+  SET_backgroundImageSize(state: IEditorState, updateInfo: { pageIndex: number, imageSize: { width: number, height: number } }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgWidth = updateInfo.imageSize.width
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgHeight = updateInfo.imageSize.height
+  },
+  SET_backgroundImageMode(state: IEditorState, updateInfo: { pageIndex: number, newDisplayMode: boolean }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.newDisplayMode = updateInfo.newDisplayMode
+  },
+  SET_backgroundImageControl(state: IEditorState, updateInfo: { pageIndex: number, imgControl: boolean }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config.imgControl = updateInfo.imgControl
+  },
+  SET_allBackgroundImageControl(state: IEditorState, imgControl: boolean) {
+    state.pages.forEach((page) => {
+      page.backgroundImage.config.imgControl = imgControl
+    })
+  },
   SET_textInfo(state: IEditorState, textInfo: { [key: string]: Array<string> }) {
     Object.entries(textInfo).forEach(([k, v]) => {
       if (Object.keys(state.textInfo).includes(k)) {
@@ -591,6 +607,7 @@ export default new Vuex.Store({
     textStock,
     background,
     modal,
-    popup
+    popup,
+    page
   }
 })

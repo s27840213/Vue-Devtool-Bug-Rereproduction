@@ -1,16 +1,17 @@
 <template lang="pug">
-  div(class="editor-view bg-gray-5"
+  div(class="editor-view"
+      :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
     div(class="editor-canvas")
       div(class="page-container"
           ref="container"
           @mousedown.left.self="outerClick($event)")
-        nu-page(v-for="(page,index) in pages"
-          :ref="`page-${index}`"
-          :key="`page-${index}`"
-          :pageIndex="index"
-          :style="{'z-index': `${pageNum-index}`}"
-          :config="page" :index="index")
+        nu-page(v-for="(page,index) in filterByBackgroundImageControl(pages)"
+                :ref="`page-${nonFilteredIndex(index)}`"
+                :key="`page-${nonFilteredIndex(index)}`"
+                :pageIndex="nonFilteredIndex(index)"
+                :style="{'z-index': `${pageNum-nonFilteredIndex(index)}`}"
+                :config="page" :index="nonFilteredIndex(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
 </template>
@@ -24,6 +25,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import PageUtils from '@/utils/pageUtils'
 import ImageUtils from '@/utils/imageUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   data() {
@@ -35,7 +37,8 @@ export default Vue.extend({
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
       pageIndex: -1,
-      currActivePageIndex: -1
+      currActivePageIndex: -1,
+      backgroundControllingPageIndex: -1
     }
   },
   mounted() {
@@ -60,6 +63,9 @@ export default Vue.extend({
       pageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio'
     }),
+    isBackgroundImageControl(): boolean {
+      return (this.pages as IPage[]).some(page => page.backgroundImage.config.imgControl)
+    },
     pageNum(): number {
       return this.pages.length
     }
@@ -74,6 +80,7 @@ export default Vue.extend({
     outerClick(e: MouseEvent) {
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
+      PageUtils.setBackgroundImageControlDefault()
       PageUtils.activeMostCentralPage()
     },
     selectStart(e: MouseEvent) {
@@ -171,6 +178,27 @@ export default Vue.extend({
           }
         })
       }, 0)
+    },
+    filterByBackgroundImageControl(pages: IPage[]): IPage[] {
+      if (this.isBackgroundImageControl) {
+        let res: IPage | undefined
+        pages.forEach((page, index) => {
+          if (page.backgroundImage.config.imgControl) {
+            res = page
+            this.backgroundControllingPageIndex = index
+          }
+        })
+        if (res) {
+          return [res]
+        } else {
+          return []
+        }
+      } else {
+        return pages
+      }
+    },
+    nonFilteredIndex(index: number): number {
+      return this.isBackgroundImageControl ? this.backgroundControllingPageIndex : index
     }
   }
 })
@@ -217,5 +245,9 @@ export default Vue.extend({
   left: 0;
   border: 1px solid #03a9f4;
   background-color: rgba(3, 169, 244, 0.08);
+}
+
+.dim-background {
+  background-color: rgba(0, 0, 0, 0.4)
 }
 </style>

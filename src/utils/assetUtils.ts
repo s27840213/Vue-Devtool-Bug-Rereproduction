@@ -87,6 +87,7 @@ class AssetUtils {
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData
+            console.log(jsonData)
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })
@@ -97,7 +98,9 @@ class AssetUtils {
   addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    this.updateBackground(json).then((json) => {
+      PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    })
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
@@ -145,7 +148,7 @@ class AssetUtils {
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
-    await uploadUtils.addComputableInfo(json)
+    await ShapeUtils.addComputableInfo(json)
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
     json.point = point
@@ -178,7 +181,7 @@ class AssetUtils {
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
-    await uploadUtils.addComputableInfo(json)
+    await ShapeUtils.addComputableInfo(json)
 
     const config = {
       ...json,
@@ -228,14 +231,24 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newFrame(config)])
   }
 
-  addBackground(url: string, attrs: IAssetProps = {}) {
+  addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
     const { pageIndex, styles = {} } = attrs
-    const { width = 0, height = 0 } = styles
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targetPageIndex = pageIndex || this.lastSelectedPageIndex
+    const { width: assetWidth = 0, height: assetHeight = 0 } = styles
+    const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
+    const page = store.getters.getPage(targetPageIndex)
+    const { width, height } = ImageUtils.adaptToSize({
+      width: srcWidth,
+      height: srcHeight
+    }, page)
     const config = LayerFactary.newImage({
       styles: {
-        width: width / 2,
-        height: height / 2,
+        width: assetWidth / 2,
+        height: assetHeight / 2,
+        imgWidth: width,
+        imgHeight: height,
+        initWidth: srcWidth,
+        initHeight: srcHeight,
         x: 200,
         y: 200
       },
@@ -245,11 +258,39 @@ class AssetUtils {
         userId: ''
       }
     })
-    console.log(config)
     store.commit('SET_backgroundImage', {
-      pageIndex: targePageIndex,
+      pageIndex: targetPageIndex,
       config
     })
+    store.commit('SET_backgroundImagePos', {
+      pageIndex: targetPageIndex,
+      imagePos: {
+        x: (page.width - width) / 2,
+        y: (page.height - height) / 2
+      }
+    })
+    store.commit('SET_backgroundImageMode', {
+      pageIndex: targetPageIndex,
+      newDisplayMode: true
+    })
+  }
+
+  async updateBackground(json: any): Promise<any> {
+    if ((json.backgroundImage.config.srcObj?.assetId ?? '') !== '' && !json.backgroundImage.newDisplayMode) {
+      const { width: srcWidth, height: srcHeight } = await ImageUtils.getImageSize(ImageUtils.getSrc(json.backgroundImage.config), json.backgroundImage.config.styles.width, json.backgroundImage.config.styles.height)
+      const { width, height } = ImageUtils.adaptToSize({
+        width: srcWidth,
+        height: srcHeight
+      }, json)
+      json.backgroundImage.config.styles.imgWidth = width
+      json.backgroundImage.config.styles.imgHeight = height
+      json.backgroundImage.config.styles.initWidth = srcWidth
+      json.backgroundImage.config.styles.initHeight = srcHeight
+      json.backgroundImage.posX = (json.width - width) / 2
+      json.backgroundImage.posY = (json.height - height) / 2
+      json.backgroundImage.newDisplayMode = true
+    }
+    return json
   }
 
   addText(json: any, attrs: IAssetProps = {}) {
@@ -344,7 +385,8 @@ class AssetUtils {
         case 1:
           this.addBackground(
             asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height } }
+            { ...attrs, styles: { width: asset.width, height: asset.height } },
+            await ImageUtils.getImageSize(asset.urls.full, asset.width ?? 0, asset.height ?? 0)
           )
           break
         case 8:

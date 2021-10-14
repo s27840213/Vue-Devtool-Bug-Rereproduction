@@ -7,11 +7,13 @@ div(style="position:relative;")
       div(class="text-center")
         span(class="text-blue-1 h-5") LOG IN
       div
+        btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
-        btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'") Log in with Facebook
+        span(class="body-2") Log in with Facebook
       div
+        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
-        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'") Log in with Google
+        span(class="body-2") Log in with Google
       div
         span or
       div
@@ -479,6 +481,7 @@ export default Vue.extend({
     &:nth-child(3),
     &:nth-child(4) {
       // Facebook and Google
+      position: relative;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -497,10 +500,23 @@ export default Vue.extend({
         background: setColor(gray-4);
       }
 
+      > button {
+        width: 100%;
+        height: 100%;
+      }
+
       > img {
+        position: absolute;
+        left: 15%;
         width: 25px;
         height: 25px;
-        padding-left: 15%;
+        pointer-events: none;
+      }
+
+      > span {
+        position: absolute;
+        left: 30%;
+        pointer-events: none;
       }
     }
     &:nth-child(5) {

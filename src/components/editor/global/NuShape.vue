@@ -14,6 +14,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
+import assetUtils from '@/utils/assetUtils'
+import generalUtils from '@/utils/generalUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -55,30 +57,58 @@ export default Vue.extend({
       filterTemplate: ''
     }
   },
-  async mounted() {
-    // fetch
+  async created() {
+    switch (this.config.category) {
+      case 'C': {
+        // should be deleted after the new json format stablize
+        if (!this.config.svg) {
+          const shape = await shapeUtils.fetchSvg(this.config)
+          shape.color = this.config.color
+          shape.className = shapeUtils.classGenerator()
+          this.config.styles.initWidth = shape.vSize[0]
+          this.config.styles.initHeight = shape.vSize[1]
+          Object.assign(this.config, shape)
+        }
+        const transText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
+          cSize: this.config.cSize,
+          pSize: this.config.pSize,
+          pDiff: this.config.pDiff
+        })
+        this.transNode = shapeUtils.addStyleTag(transText)
+        this.filterTemplate = this.getFilterTemplate()
+        break
+      }
+      case 'D': {
+        if (!this.config.markerWidth) {
+          await shapeUtils.addComputableInfo(this.config)
+        }
+        const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
+        this.transNode = shapeUtils
+        break
+      }
+      case 'E': {
+        if (!this.config.svg) {
+          shapeUtils.addComputableInfo(this.config)
+        }
+        break
+      }
+      default: {
+        if (!this.config.svg) {
+          const shape = await shapeUtils.fetchSvg(this.config)
+          shape.color = this.config.color
+          shape.className = shapeUtils.classGenerator()
+          Object.assign(this.config, shape)
+        }
+      }
+    }
     const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
     this.styleNode = shapeUtils.addStyleTag(styleText)
-
-    if (this.config.category === 'C') {
-      const transText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
-        cSize: this.config.cSize,
-        pSize: this.config.pSize,
-        pDiff: this.config.pDiff
-      })
-      this.transNode = shapeUtils.addStyleTag(transText)
-      this.filterTemplate = this.getFilterTemplate()
-    } else if (this.config.category === 'D') {
-      const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
-      this.transNode = shapeUtils.addStyleTag(transText)
-    }
   },
   watch: {
     'config.color': {
       handler: function(newVal) {
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
         this.styleNode.textContent = styleText
-        // console.log(this.styleNode.textContent)
       },
       deep: true
     },

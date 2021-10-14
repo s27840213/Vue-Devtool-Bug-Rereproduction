@@ -18,7 +18,7 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
-    console.log(json)
+    console.log(GeneralUtils.deepCopy(json))
     if (!json) { return }
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
@@ -34,33 +34,33 @@ class TemplateUtils {
       }
     }
 
-    const fields = [...this.fields]
-    for (const layer of json.layers) {
-      if (layer.type === 'text') {
-        if (typeof (layer as IText).isEdited === 'undefined') {
-          layer.isEdited = false
-        }
-        for (const [i, field] of fields.entries()) {
-          if (layer[this.fieldsMap[field]] && this.getTextInfo[field].length) {
-            const paraStyles = GeneralUtils.deepCopy(layer.paragraphs[0].styles)
-            const spanStyles = GeneralUtils.deepCopy(layer.paragraphs[0].spans[0].styles)
-            const paragraphs = [] as Array<IParagraph>
-            for (const text of this.getTextInfo[field]) {
-              paragraphs.push({
-                styles: paraStyles,
-                spans: [{
-                  styles: spanStyles,
-                  text: text
-                }]
-              })
-            }
-            layer.paragraphs = paragraphs
-            fields.splice(i, 1)
-            break
-          }
-        }
-      }
-    }
+    // const fields = [...this.fields]
+    // for (const layer of json.layers) {
+    //   if (layer.type === 'text') {
+    //     if (typeof (layer as IText).isEdited === 'undefined') {
+    //       layer.isEdited = false
+    //     }
+    //     for (const [i, field] of fields.entries()) {
+    //       if (layer[this.fieldsMap[field]] && this.getTextInfo[field].length) {
+    //         const paraStyles = GeneralUtils.deepCopy(layer.paragraphs[0].styles)
+    //         const spanStyles = GeneralUtils.deepCopy(layer.paragraphs[0].spans[0].styles)
+    //         const paragraphs = [] as Array<IParagraph>
+    //         for (const text of this.getTextInfo[field]) {
+    //           paragraphs.push({
+    //             styles: paraStyles,
+    //             spans: [{
+    //               styles: spanStyles,
+    //               text: text
+    //             }]
+    //           })
+    //         }
+    //         layer.paragraphs = paragraphs
+    //         fields.splice(i, 1)
+    //         break
+    //       }
+    //     }
+    //   }
+    // }
     return json
   }
 

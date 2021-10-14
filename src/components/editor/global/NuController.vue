@@ -40,7 +40,7 @@
                 :type="config.type"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
-        template(v-if="config.type === 'text' && config.active")
+        template(v-if="config.type === 'text' && (config.active || isLocked)")
           div(class="text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
@@ -300,7 +300,7 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing: false
         })
-        if (this.currSelectedInfo.layers.length <= 1) {
+        if (this.currSelectedInfo.layers.length <= 1 && !this.isLocked) {
           this.contentEditable = false
           ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
         }
@@ -499,7 +499,6 @@ export default Vue.extend({
     },
     outlineStyles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
-      // const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
           return '#F10994'
@@ -608,6 +607,8 @@ export default Vue.extend({
     },
     moving(e: MouseEvent) {
       if (this.isImgControl) {
+        window.removeEventListener('mouseup', this.moveEnd)
+        window.removeEventListener('mousemove', this.moving)
         return
       }
       if (this.isActive) {
@@ -651,13 +652,13 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if (posDiff.x === 0 && posDiff.y === 0) {
+        if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
           if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
             GroupUtils.deselect()
             this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
           }
         }
-        if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
+        if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) && !this.isLocked) {
           this.contentEditable = false
         }
         this.isControlling = false

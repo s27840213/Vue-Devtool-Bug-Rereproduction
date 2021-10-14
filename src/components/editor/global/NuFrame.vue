@@ -10,13 +10,16 @@
 </template>
 
 <script lang="ts">
+import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
+import AssetUtils from '@/utils/assetUtils'
+import ImageUtils from '@/utils/imageUtils'
+import LayerUtils from '@/utils/layerUtils'
 import { Layer } from 'konva/types/Layer'
 import Vue from 'vue'
 import { config } from 'vue/types/umd'
 import { mapGetters } from 'vuex'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -24,10 +27,41 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number
   },
+  async created() {
+    console.log(GeneralUtils.deepCopy(this.config))
+    if (this.config.needFetch) {
+      const config = this.config as IFrame
+      const asset = {
+        type: 8,
+        id: config.designId,
+        ver: this.getVerUni
+      } as IListServiceContentDataItem
+
+      const json = (await AssetUtils.get(asset)).jsonData as IFrame
+
+      this.config.styles.initWidth = json.width
+      this.config.styles.initHeight = json.height
+      config.clips.forEach((img, idx) => {
+        if (json.clips[idx]) {
+          img.clipPath = json.clips[idx].clipPath
+        }
+      })
+      if (config.decoration && json.decoration) {
+        json.decoration.color = [...config.decoration.color]
+        Object.assign(config.decoration, json.decoration)
+      }
+      if (config.decorationTop && json.decorationTop) {
+        json.decorationTop.color = [...config.decorationTop.color]
+        Object.assign(config.decoration, json.decorationTop)
+      }
+      delete config.needFetch
+    }
+  },
   computed: {
     ...mapGetters({
       getLayer: 'getLayer'
     }),
+    ...mapGetters('user', ['getVerUni']),
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
@@ -50,7 +84,7 @@ export default Vue.extend({
         // height: `${this.config.styles.height}px`
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        pointerEvents: imageUtils.isImgControl ? 'none' : 'initial'
+        pointerEvents: ImageUtils.isImgControl ? 'none' : 'initial'
       }
     }
   }
