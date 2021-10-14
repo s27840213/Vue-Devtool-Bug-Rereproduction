@@ -53,7 +53,7 @@ class MouseUtils {
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
-      LayerUtils.addLayers(pageIndex, layer)
+      LayerUtils.addLayers(pageIndex, [layer])
       // if (layer.type === 'text') {
       //   TextUtils.updateTextPropsState()
       // }

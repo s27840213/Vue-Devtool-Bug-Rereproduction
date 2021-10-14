@@ -5,8 +5,8 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @dblclick="onDblClick(type)"
-          @click.left.stop="onClickEvent(type)")
+          @dblclick="onDblClick()"
+          @click.left.stop="onClickEvent($event)")
         //- template(v-if="config.type === 'text' && config.active")
         //-   div(:style="textScaleStyle()")
         //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -41,6 +41,7 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
@@ -484,8 +485,11 @@ export default Vue.extend({
         return `rgb(${r}, ${g}, ${b})`
       }
     },
-    onClickEvent() {
+    onClickEvent(e: MouseEvent) {
       if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
         return
       }
       this.$emit('clickSubController', this.layerIndex, this.config.type)
