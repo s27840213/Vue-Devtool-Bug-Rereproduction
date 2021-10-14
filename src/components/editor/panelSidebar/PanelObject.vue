@@ -114,7 +114,12 @@ export default Vue.extend({
       ]
     ),
     handleSearch(keyword: string) {
-      keyword ? this.getTagContent({ keyword }) : this.resetContent()
+      if (keyword) {
+        this.getTagContent({ keyword })
+      } else {
+        this.resetContent()
+        this.getCategories()
+      }
     },
     handleCategorySearch(keyword: string) {
       keyword ? this.getContent({ keyword }) : this.resetContent()
