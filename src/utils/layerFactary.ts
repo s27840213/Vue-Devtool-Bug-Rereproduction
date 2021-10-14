@@ -55,11 +55,14 @@ class LayerFactary {
   newFrame(config: IFrame): IFrame {
     const { designId, clips, decoration, decorationTop, styles } = config
     let { width, height, initWidth, initHeight } = styles
+    initWidth = initWidth || width
+    initHeight = initHeight || height
+
     if (clips.length && !clips[0].isFrameImg) {
       clips.forEach(img => {
         const imgConfig = {
           isFrame: true,
-          clipPath: img.clipPath ?? '$designId_' + designId,
+          clipPath: img.clipPath,
           styles: img.styles,
           srcObj: img.srcObj ?? {
             type: 'frame',
@@ -70,7 +73,8 @@ class LayerFactary {
         Object.assign(img, this.newImage(imgConfig))
       })
     } else if (clips.length) {
-      Object.assign(clips[0], { isFrameImg: true })
+      clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
+      clips[0].isFrameImg = true
     } else {
       styles.scale = 1
       styles.scaleX = 1
@@ -214,17 +218,17 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
-        rotate: 0,
+        scale: styles.scale as number ?? 1,
+        scaleX: styles.scaleX as number ?? 1,
+        scaleY: styles.scaleY as number ?? 1,
+        rotate: styles.rotate as number ?? 1,
         width: styles.width,
         height: styles.height,
         initWidth: styles.width,
         initHeight: styles.height,
         zindex: -1,
         opacity: 100,
-        horizontalFlip: false,
+        horizontalFlip: styles.horizontalFlip as boolean || false,
         verticalFlip: false
       },
       layers: layers
@@ -309,6 +313,9 @@ class LayerFactary {
   newTemplate(config: any): any {
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+      if (config.layers[layerIndex].type === 'frame') {
+        config.layers[layerIndex].needFetch = true
+      }
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config

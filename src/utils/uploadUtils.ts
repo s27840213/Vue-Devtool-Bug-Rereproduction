@@ -3,12 +3,11 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
+import ShapeUtils from './shapeUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
-import shapeUtils from './shapeUtils'
-import AssetUtils from './assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import zindexUtils from './zindexUtils'
 
@@ -309,9 +308,9 @@ class UploadUtils {
     const designId = store.getters.getPage(pageIndex).designId
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
-    // for (const [i, layer] of pageJSON.layers.entries()) {
-    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
-    // }
+    for (const [i, layer] of pageJSON.layers.entries()) {
+      pageJSON.layers[i] = this.layerInfoFilter(layer)
+    }
     console.log(pageJSON)
     console.log(designId)
 
@@ -453,7 +452,7 @@ class UploadUtils {
     response.json().then(async (json) => {
       console.log(json)
       if (type !== 'template') {
-        await this.addComputableInfo(json.layers[0])
+        await ShapeUtils.addComputableInfo(json.layers[0])
       }
       store.commit('SET_pages', [json])
     })
@@ -487,66 +486,13 @@ class UploadUtils {
     }
   }
 
-  async addComputableInfo(layer: ILayer) {
-    if (layer.type === 'shape') {
-      const theLayer = layer as IShape
-      const svgs: string[] = []
-      let dummy
-      switch (theLayer.category) {
-        case 'D':
-          theLayer.styleArray = ['stroke:$color[0];stroke-width:$size[0];stroke-dasharray:$dash;stroke-linecap:$cap']
-          theLayer.markerTransArray = [
-            'transform: translate($txmspx, $tymspx) rotate($romsdeg) $finetunes scale($size[0]);',
-            'transform: translate($txmepx, $tymepx) rotate($romedeg) $finetunee scale($size[0]);'
-          ]
-          theLayer.markerWidth = []
-          theLayer.trimWidth = []
-          theLayer.trimOffset = []
-          for (const markerId of theLayer.markerId ?? []) {
-            if (markerId === 'none') {
-              theLayer.styleArray.push('')
-              dummy = theLayer.markerWidth?.push(0)
-              dummy = theLayer.trimWidth?.push(undefined)
-              dummy = theLayer.trimOffset?.push(-1)
-              svgs.push('')
-            } else {
-              const marker: IListServiceContentDataItem = {
-                id: markerId,
-                type: 9,
-                ver: store.getters['user/getVerUni']
-              }
-              const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
-              theLayer.styleArray.push(markerContent.styleArray[0])
-              dummy = theLayer.markerWidth?.push(markerContent.vSize[0])
-              dummy = theLayer.trimWidth?.push(markerContent.trimWidth)
-              dummy = theLayer.trimOffset?.push(markerContent.trimOffset ?? -1)
-              svgs.push(markerContent.svg)
-            }
-          }
-          theLayer.svg = shapeUtils.genLineSvgTemplate(svgs[0], svgs[1])
-          theLayer.pDiff = [0, 0]
-          theLayer.pSize = [0, 0]
-          theLayer.cSize = [0, 0]
-          theLayer.vSize = [0, 0]
-          theLayer.className = shapeUtils.classGenerator()
-          break
-        case 'E':
-          theLayer.styleArray = ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])']
-          theLayer.svg = shapeUtils.genBasicShapeSvgTemplate(theLayer.shapeType ?? '')
-          theLayer.pDiff = [0, 0]
-          theLayer.pSize = [0, 0]
-          theLayer.cSize = [0, 0]
-          theLayer.className = shapeUtils.classGenerator()
-          break
-      }
-    }
-  }
-
   private layerInfoFilter(layer: ILayer): any {
     const styleFilter = (styles: any, type = 'general') => {
       const general = {
         x: styles.x,
         y: styles.y,
+        width: styles.width,
+        height: styles.height,
         scale: styles.scale,
         scaleX: styles.scaleX,
         scaleY: styles.scaleY,
@@ -636,7 +582,7 @@ class UploadUtils {
               return {
                 ...this.layerInfoFilter(img),
                 isFrameImg,
-                styles: styleFilter(styles, 'image')
+                styles: styleFilter(img.styles, 'image')
               }
             })
           ],
@@ -667,6 +613,7 @@ class UploadUtils {
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
+        console.log(generalUtils.deepCopy(styles))
         return {
           type,
           layers: filteredLayers,

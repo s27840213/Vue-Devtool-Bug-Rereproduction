@@ -11,23 +11,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
     layerIndex: Number
-  },
-  watch: {
-    'config.styles.width'(val) {
-      console.log('group width', val)
-    }
-  },
-  computed: {
-    ...mapGetters({
-      getLayer: 'getLayer'
-    })
   },
   methods: {
     styles() {

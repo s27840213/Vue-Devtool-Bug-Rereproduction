@@ -87,6 +87,7 @@ class AssetUtils {
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData
+            console.log(jsonData)
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })
@@ -145,7 +146,7 @@ class AssetUtils {
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
-    await uploadUtils.addComputableInfo(json)
+    await ShapeUtils.addComputableInfo(json)
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
     json.point = point
@@ -178,7 +179,7 @@ class AssetUtils {
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
-    await uploadUtils.addComputableInfo(json)
+    await ShapeUtils.addComputableInfo(json)
 
     const config = {
       ...json,
