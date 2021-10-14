@@ -276,7 +276,7 @@ class AssetUtils {
   }
 
   async updateBackground(json: any): Promise<any> {
-    if (json.backgroundImage.config.srcObj && !json.backgroundImage.newDisplayMode) {
+    if ((json.backgroundImage.config.srcObj?.assetId ?? '') !== '' && !json.backgroundImage.newDisplayMode) {
       const { width: srcWidth, height: srcHeight } = await ImageUtils.getImageSize(ImageUtils.getSrc(json.backgroundImage.config), json.backgroundImage.config.styles.width, json.backgroundImage.config.styles.height)
       const { width, height } = ImageUtils.adaptToSize({
         width: srcWidth,

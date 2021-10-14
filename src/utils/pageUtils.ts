@@ -45,6 +45,37 @@ class PageUtils {
       store.commit('SET_pages', pagesTmp)
     }
   }
+
+  startBackgroundImageControl(pageIndex: number): void {
+    store.commit('SET_backgroundImageControl', {
+      pageIndex: pageIndex,
+      imgControl: true
+    })
+  }
+
+  setBackgroundImageControlDefault(): void {
+    store.commit('SET_allBackgroundImageControl', false)
+  }
+
+  updateBackgroundImagePos(pageIndex: number, imgX: number, imgY: number): void {
+    store.commit('SET_backgroundImagePos', {
+      pageIndex: pageIndex,
+      imagePos: {
+        x: imgX,
+        y: imgY
+      }
+    })
+  }
+
+  updateBackgroundImageSize(pageIndex: number, width: number, height: number): void {
+    store.commit('SET_backgroundImageSize', {
+      pageIndex: pageIndex,
+      imageSize: {
+        width: width,
+        height: height
+      }
+    })
+  }
 }
 
 const pageUtils = new PageUtils()
