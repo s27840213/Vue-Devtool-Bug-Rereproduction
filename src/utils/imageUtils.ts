@@ -317,6 +317,37 @@ class ImageUtils {
       }
     })
   }
+
+  async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number }> {
+    const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error('Could not load image'))
+      image.src = url
+    })
+    try {
+      const img = await loadImage
+      return { width: img.width, height: img.height }
+    } catch (error) {
+      console.log(error)
+      return { width: defaultWidth, height: defaultHeight }
+    }
+  }
+
+  adaptToSize(srcSize: {width: number, height: number}, targetSize: {width: number, height: number}): {width: number, height: number} {
+    const srcAspectRatio = srcSize.width / srcSize.height
+    const targetAspectRatio = targetSize.width / targetSize.height
+    let width = 0
+    let height = 0
+    if (srcAspectRatio > targetAspectRatio) {
+      width = targetSize.height * srcAspectRatio
+      height = targetSize.height
+    } else {
+      width = targetSize.width
+      height = targetSize.width / srcAspectRatio
+    }
+    return { width, height }
+  }
 }
 
 export default new ImageUtils()
