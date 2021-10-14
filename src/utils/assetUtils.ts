@@ -100,7 +100,6 @@ class AssetUtils {
     this.updateBackground(json).then((json) => {
       PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
     })
-    // PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {

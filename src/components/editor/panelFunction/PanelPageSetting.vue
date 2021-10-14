@@ -270,8 +270,10 @@ export default Vue.extend({
     },
     currentPageWidth: function (newVal) {
       this.pageWidth = newVal
+      this.pageHeight = this.currentPageHeight
     },
     currentPageHeight: function (newVal) {
+      this.pageWidth = this.currentPageWidth
       this.pageHeight = newVal
     }
   },
