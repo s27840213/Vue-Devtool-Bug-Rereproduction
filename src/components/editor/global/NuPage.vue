@@ -264,6 +264,7 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       GroupUtils.deselect()
+      console.log(this.pageIndex)
       this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
@@ -345,6 +346,9 @@ export default Vue.extend({
       })
     },
     deletePage() {
+      GroupUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex - 1)
+      this.setCurrActivePageIndex(this.pageIndex - 1)
       this._deletePage(this.pageIndex)
     }
   }

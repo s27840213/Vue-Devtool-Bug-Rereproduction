@@ -95,8 +95,6 @@ export default Vue.extend({
     styles() {
       const zindex = (this.layerIndex + 1) * 100
       const pos = this.imgControllerPosHandler()
-      console.log(this.primaryLayerIndex)
-      console.log(this.layerIndex)
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,

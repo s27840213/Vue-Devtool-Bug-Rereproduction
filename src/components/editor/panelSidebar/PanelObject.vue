@@ -82,10 +82,12 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
             list: rowItems,
-            size: 90,
-            sentinel: !idx
+            size: 90
           }
         })
+      if (result.length) {
+        Object.assign(result[result.length - 1], { sentinel: true })
+      }
       return result
     },
     list(): any[] {
@@ -106,12 +108,13 @@ export default Vue.extend({
       [
         'resetContent',
         'getContent',
+        'getTagContent',
         'getCategories',
         'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {
-      keyword ? this.getContent({ keyword, searchTag: 1 }) : this.resetContent()
+      keyword ? this.getTagContent({ keyword }) : this.resetContent()
     },
     handleCategorySearch(keyword: string) {
       keyword ? this.getContent({ keyword }) : this.resetContent()

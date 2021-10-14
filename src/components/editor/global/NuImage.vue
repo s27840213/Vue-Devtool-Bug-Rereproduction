@@ -2,20 +2,22 @@
   div(class="nu-image"
       :style="styles()"
       draggable="false")
-    img(class="nu-image__picture" :src="src")
+    nu-adjust-image(v-if="isAdjustImage"
+      :src="src"
+      :styles="config.styles")
+    img(v-else class="nu-image__picture" :src="src")
 </template>
 
 <script lang="ts">
-import ImageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
+import NuAdjustImage from './NuAdjustImage.vue'
+import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
     config: Object
   },
-  mounted() {
-    // console.log(this.config)
-  },
+  components: { NuAdjustImage },
   computed: {
     src(): string {
       if (this.config.src) {
@@ -23,6 +25,12 @@ export default Vue.extend({
       } else {
         return ImageUtils.getSrc(this.config)
       }
+    },
+    isAdjustImage(): boolean {
+      const { styles } = this.config
+      return Object
+        .values(styles.adjust || {})
+        .some(val => typeof val === 'number' && val !== 0)
     }
   },
   methods: {

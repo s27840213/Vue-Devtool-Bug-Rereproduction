@@ -23,6 +23,7 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import PageUtils from '@/utils/pageUtils'
+import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   data() {
