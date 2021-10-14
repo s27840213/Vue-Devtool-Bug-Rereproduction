@@ -74,7 +74,8 @@
                   :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
-            :style="lockIconStyles")
+            :style="lockIconStyles"
+            v-hint="'unlock'")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked && !isImgControl"

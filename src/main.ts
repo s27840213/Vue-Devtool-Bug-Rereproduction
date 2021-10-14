@@ -9,6 +9,7 @@ import { Store } from 'vuex'
 import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
+import hintUtils from './utils/hintUtils'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
@@ -23,9 +24,18 @@ Vue.directive('ratio-change', {
     })
   },
   unbind: (el) => {
-    el.addEventListener('change', function () {
+    el.removeEventListener('change', function () {
       el.blur()
     })
+  }
+})
+
+Vue.directive('hint', {
+  bind: (el, binding, vnode) => {
+    hintUtils.bind(el, binding.value)
+  },
+  unbind: (el, binding) => {
+    hintUtils.unbind(el, binding.value)
   }
 })
 

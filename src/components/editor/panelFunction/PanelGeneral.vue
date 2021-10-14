@@ -5,7 +5,7 @@
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
-      div(class="border-gray-4 p-5  btn-opacity")
+      div(class="border-gray-4 p-5  btn-opacity"  v-hint="'透明度'")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
@@ -13,19 +13,24 @@
       svg-icon(class="layers-alt"
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="openOrderPopup()")
+        @click.native="openOrderPopup()"
+        v-hint="'Align'")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="iconAction('copy')")
+        @click.native="iconAction('copy')"
+        v-hint="'複製'")
       svg-icon(class="pointer"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="iconAction('unlock')")
+        @click.native="iconAction('unlock')"
+        v-hint="'解鎖'")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="iconAction('trash')")
+        @click.native="iconAction('trash')"
+        v-hint="'刪除'")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="")
+        @click.native=""
+        v-hint="'複製樣式'")
     div(class="panel-group__adjust")
       btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
@@ -44,7 +49,6 @@ import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
 import { ILayer } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
-import popup from '@/store/module/popup'
 
 export default Vue.extend({
   data() {
