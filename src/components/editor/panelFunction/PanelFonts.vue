@@ -26,7 +26,7 @@
           :host="host"
           :preview="preview"
           :preview2="preview2"
-          :objectId="item.id")
+          :item="item")
     btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
 </template>
 
@@ -113,8 +113,8 @@ export default Vue.extend({
               type: 'title',
               title: category.title
             },
-            ...category.list.map(font => ({
-              id: font.id,
+            ...category.list.map((font, idx) => ({
+              id: `${category.title}_${idx}`,
               size: 32,
               type: 'category-font-item',
               list: [font]

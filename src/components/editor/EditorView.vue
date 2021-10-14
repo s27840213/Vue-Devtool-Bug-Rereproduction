@@ -10,8 +10,10 @@
                 :ref="`page-${nonFilteredIndex(index)}`"
                 :key="`page-${nonFilteredIndex(index)}`"
                 :pageIndex="nonFilteredIndex(index)"
+                :style="{'z-index': `${pageNum-nonFilteredIndex(index)}`}"
                 :config="page" :index="nonFilteredIndex(index)")
-        div(v-show="isSelecting" class="selection-area" ref="selectionArea")
+        div(v-show="isSelecting" class="selection-area" ref="selectionArea"
+          :style="{'z-index': `${pageNum+1}`}")
 </template>
 
 <script lang="ts">
@@ -63,31 +65,10 @@ export default Vue.extend({
     }),
     isBackgroundImageControl(): boolean {
       return (this.pages as IPage[]).some(page => page.backgroundImage.config.imgControl)
+    },
+    pageNum(): number {
+      return this.pages.length
     }
-    // getLastLayer(): ILayer {
-    //   const page = this.$refs[`page-${this.getLastSelectedPageIndex}`] as [Vue]
-    //   let layer = this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)
-    //   if (layer) {
-    //     layer = JSON.parse(JSON.stringify(this.getLayer(this.getLastSelectedPageIndex, this.getLastSelectedLayerIndex)))
-    //   }
-    //   let pagePos = { x: 0, y: 0 }
-    //   if (page) {
-    //     const container = this.$refs.container as HTMLElement
-    //     pagePos = {
-    //       x: page[0].$el.getBoundingClientRect().x,
-    //       y: page[0].$el.getBoundingClientRect().y
-    //     }
-    //     console.log(window.scrollY)
-    //     console.log(container.scrollTop)
-    //     // layer.styles.x += (pagePos.x - container.getBoundingClientRect().x)
-    //     // layer.styles.y += (pagePos.y - container.getBoundingClientRect().y)
-    //   }
-    //   return layer
-    // },
-    // isImgControl(): boolean {
-    //   console.log(this.getLastLayer.imgControl as boolean)
-    //   return this.getLastLayer.imgControl as boolean
-    // }
   },
   methods: {
     ...mapMutations({
@@ -255,6 +236,7 @@ export default Vue.extend({
   padding: 20px;
   flex-direction: column;
   justify-content: center;
+  transform-style: preserve-3d;
 }
 
 .selection-area {

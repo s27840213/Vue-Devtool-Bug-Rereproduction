@@ -439,7 +439,7 @@ export default Vue.extend({
  */
 .overflow-container {
   position: relative;
-  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0%, 100% 100%, 0% 100%);
 }
 
 .page-content {

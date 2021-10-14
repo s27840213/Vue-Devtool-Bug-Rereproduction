@@ -133,7 +133,7 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
   }
 
   async addLine(json: any, attrs: IAssetProps = {}) {
@@ -167,7 +167,7 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
   }
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
@@ -204,7 +204,7 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, LayerFactary.newShape(config))
+    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
   }
 
   addFrame(json: any, attrs: IAssetProps = {}) {
@@ -228,7 +228,7 @@ class AssetUtils {
       },
       ...json
     }
-    LayerUtils.addLayers(targePageIndex, LayerFactary.newFrame(config))
+    LayerUtils.addLayers(targePageIndex, [LayerFactary.newFrame(config)])
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
@@ -313,7 +313,7 @@ class AssetUtils {
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup((config.styles as ICalculatedGroupStyle), (config as IGroup).layers)
       : LayerFactary.newText(config)
-    LayerUtils.addLayers(targePageIndex, newLayer)
+    LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
   addStanardText(type: string, pageIndex?: number) {
@@ -328,7 +328,7 @@ class AssetUtils {
         const field = fieldMap[type]
         const textLayer = GeneralUtils.deepCopy(jsonData)
         TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, LayerFactary.newText(Object.assign(textLayer, { editing: true })))
+        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
       })
       .catch(() => {
         console.log('Cannot find the file')
@@ -357,7 +357,7 @@ class AssetUtils {
         imgHeight: height
       }
     }
-    LayerUtils.addLayers(targePageIndex, LayerFactary.newImage(config))
+    LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
   }
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {

@@ -351,6 +351,18 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.splice(updateInfo.layerIndex, 1)
   },
+  DELETE_subLayer(state: IEditorState, updateInfo: { pageIndex: number, primaryIndex: number, subIndex: number }) {
+    const { pageIndex, primaryIndex, subIndex } = updateInfo
+    const { currSelectedInfo, pages } = state
+    const targetLayer = pages[pageIndex].layers[primaryIndex] as IGroup | ITmp
+    targetLayer.layers.splice(subIndex, 1)
+    // currSelectedInfo.layers.splice(subIndex, 1)
+    // currSelectedInfo.types = groupUtils.calcType(currSelectedInfo.layers)
+  },
+  REPLACE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, layer: IShape | IGroup | IImage | IText }) {
+    const { pageIndex, layerIndex, layer } = updateInfo
+    state.pages[pageIndex].layers.splice(layerIndex, 1, layer)
+  },
   UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
@@ -512,29 +524,6 @@ const mutations: MutationTree<IEditorState> = {
       layers: (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
     })
   },
-  // DELETE_textParagraphsSpans(state: IEditorState, deleteInfo: { pageIndex: number, layerIndex: number, pIndex: number | number[], sIndex: number | number[] }) {
-  //   if ((Array.isArray(deleteInfo.pIndex) && deleteInfo.pIndex.length !== 2) || (Array.isArray(deleteInfo.sIndex) && deleteInfo.sIndex.length !== 2 )) {
-  //     console.log('The delete range of array is wrong!')
-  //     return
-  //   }
-  //   /**
-  //    *  If the selected delete range is multi-paragraphs, pIndex and sIndex are both of type of array
-  //    */
-  //   if (Array.isArray(deleteInfo.pIndex) && Array.isArray(deleteInfo.sIndex)) {
-  //     const text = (state.pages[deleteInfo.pageIndex].layers[deleteInfo.layerIndex] as IText)
-  //     let spanLength = text.paragraphs[deleteInfo.pIndex[0]].spans.length
-
-  //     text.paragraphs[deleteInfo.pIndex[0]].spans.splice(deleteInfo.sIndex[0], spanLength - deleteInfo.sIndex[0])
-  //     text.paragraphs[deleteInfo.pIndex[1]].spans.splice(0, deleteInfo.sIndex[1] + 1)
-  //     text.paragraphs.splice(deleteInfo.pIndex[0] + 1, deleteInfo.pIndex[1] - (deleteInfo.pIndex[0] + 1))
-  //     console.log(text.paragraphs)
-  //   /**
-  //    *  If the delete range is about only a certain span inside a certain paragraph, pIndex and sIndex are both of type of number
-  //    */
-  //   } else if (Array.isArray(deleteInfo.sIndex)) {
-
-  //   }
-  // },
   DELETE_selectedLayer(state: IEditorState) {
     const index = state.currSelectedInfo.index
     if (index < 0) {

@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IFrame, ILayer } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import LayerFactary from '@/utils/layerFactary'
 import MappingUtils from '@/utils/mappingUtils'
@@ -51,27 +51,6 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): I
   } as ICalculatedGroupStyle
 }
 
-function calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
-  const typeSet = new Set<string>()
-  if (layers.length === 0) {
-    return typeSet
-  }
-  if (layers.length === 1) {
-    typeSet.add(layers[0].type)
-    return typeSet
-  } else {
-    layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
-      if (!typeSet.has(layer.type)) {
-        typeSet.add(layer.type)
-      }
-    })
-    return typeSet
-  }
-}
-
-function getTmpLayer() {
-  return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
-}
 class GroupUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
@@ -81,6 +60,26 @@ class GroupUtils {
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
+  get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
+
+  calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
+    const typeSet = new Set<string>()
+    if (layers.length === 0) {
+      return typeSet
+    }
+    if (layers.length === 1) {
+      typeSet.add(layers[0].type)
+      return typeSet
+    } else {
+      layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
+        if (!typeSet.has(layer.type)) {
+          typeSet.add(layer.type)
+        }
+      })
+      return typeSet
+    }
+  }
+
   group() {
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
     if (currSelectedInfo.layers.length < 2) {
@@ -171,6 +170,7 @@ class GroupUtils {
     } else { // when we already have selected layers
       if (store.getters.getCurrSelectedLayers.length === 1) {
         const indexs = [this.currSelectedInfo.index, ...layerIndexs]
+        console.log(indexs)
         this.deselect()
         const layers = MappingUtils.mappingLayers(pageIndex, indexs)
         const tmpStyles = calcTmpProps(layers)
@@ -190,8 +190,8 @@ class GroupUtils {
         LayerUtils.addLayersToPos(pageIndex, [tmp], currSelectedIndex)
       } else {
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
-        const tmpLayer = getTmpLayer()
-        const tmpStyles = calcTmpProps([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, getTmpLayer()), ...layers])
+        const tmpLayer = this.tmpLayer
+        const tmpStyles = calcTmpProps([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, this.tmpLayer), ...layers])
         const currSelectedLayers = this.mapLayersToTmp([...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer), ...layers], tmpStyles)
         const topIndex = Math.max(this.currSelectedInfo.index, ...layerIndexs)
         const newLayersNum = 1 + layerIndexs.length
@@ -219,10 +219,6 @@ class GroupUtils {
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
-      // if (this.currSubSelectedIndex !== -1) {
-      //   LayerUtils.updateSubLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, this.currSubSelectedIndex, { active: false })
-      //   store.commit('SET_currSubSelectedIndex', -1)
-      // }
       if (store.getters.getCurrSelectedLayers.length === 1) {
         const { pageIndex, index: layerIndex } = this.currSelectedInfo
         LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -230,7 +226,7 @@ class GroupUtils {
         })
         ImageUtils.setImgControlDefault()
       } else {
-        const tmpLayer = getTmpLayer()
+        const tmpLayer = this.tmpLayer
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
         LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
@@ -239,6 +235,48 @@ class GroupUtils {
       this.reset()
       ZindexUtils.reassignZindex(tmpPageIndex)
     }
+  }
+
+  deselectTargetLayer(targetIndex: number) {
+    /**
+     * This function is only used when we have sub-controller (i.e. we have Tmp or Group layer)
+     * The purpose of this function is to deselect one of the layer in Tmp layer when we press shift/cmd/ctrl key + click
+     *
+     * Steps:
+     *  1. Used currSelectedInfo and targetIndex to get the target layer we want to remove
+     *  2. Remove the target layer from the tmp layer
+     *  3. Add the target layer to the page
+     *  4. Update Layer order
+     */
+    const { index, pageIndex, layers } = this.currSelectedInfo
+    const tmpLayer = LayerUtils.getTmpLayer() as ITmp
+
+    /**
+     * @param targetLayer - the layer we want to remove from tmp
+     */
+    const targetLayer = this.mapLayersToPage(
+      [GeneralUtils.deepCopy(this.currSelectedInfo.layers[targetIndex])],
+      tmpLayer
+    )
+
+    const shift = targetLayer[0].styles.zindex > (index + 1) ? 0 : 1
+
+    LayerUtils.deleteSubLayer(pageIndex, index, targetIndex)
+    if (layers.length === 1) {
+      const tmp = this.mapLayersToPage(layers, tmpLayer)[0]
+      tmp.active = true
+      LayerUtils.replaceLayer(pageIndex, index, tmp)
+      LayerUtils.addLayersToPos(pageIndex, targetLayer, 0)
+      LayerUtils.updateLayersOrder(pageIndex)
+      this.set(pageIndex, tmp.styles.zindex - 1, layers)
+    } else {
+      LayerUtils.addLayersToPos(pageIndex, targetLayer, 0)
+      LayerUtils.updateLayersOrder(pageIndex)
+      this.set(pageIndex, 0, layers)
+      this.reselect()
+    }
+
+    // now I use lazy mode to complete this part, need to be optimized
   }
 
   reselect() {
@@ -268,8 +306,14 @@ class GroupUtils {
       pageIndex: currSelectedPageIndex,
       index: currSelectedIndex,
       layers: currSelectedLayers,
-      types: calcType(currSelectedLayers)
+      types: this.calcType(currSelectedLayers)
     })
+  }
+
+  updateTmpIndex() {
+    const { pageIndex, layers } = this.currSelectedInfo
+    const index = this.getLayer(this.pageIndex).findIndex((layer: ILayer) => layer.type === 'tmp')
+    this.set(pageIndex, index, layers)
   }
 
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
@@ -363,7 +407,7 @@ class GroupUtils {
         layer.styles.scale *= tmpLayer.styles.scale
       }
 
-      // calculate the center  of scaled image
+      // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
         const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const [x1, y1] = [layer.styles.x, layer.styles.y]
