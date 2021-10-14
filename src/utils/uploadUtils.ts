@@ -558,9 +558,10 @@ class UploadUtils {
             delete layer.className
             return shape
           default: {
-            const { type, designId, pDiff, ratio, color, styles } = shape
+            const { type, designId, pDiff, ratio, color, styles, category } = shape
             return {
               type,
+              category,
               designId,
               pDiff,
               ratio,

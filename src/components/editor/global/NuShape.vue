@@ -65,6 +65,8 @@ export default Vue.extend({
           const shape = await shapeUtils.fetchSvg(this.config)
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
+          this.config.styles.initWidth = shape.vSize[0]
+          this.config.styles.initHeight = shape.vSize[1]
           Object.assign(this.config, shape)
         }
         const transText = shapeUtils.transFormatter(this.config.className, this.config.transArray, {
@@ -107,7 +109,6 @@ export default Vue.extend({
       handler: function(newVal) {
         const styleText = shapeUtils.styleFormatter(this.config.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
         this.styleNode.textContent = styleText
-        // console.log(this.styleNode.textContent)
       },
       deep: true
     },
