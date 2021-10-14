@@ -175,7 +175,7 @@ export default Vue.extend({
           action: () => {
             const newLineTest: IShape = GeneralUtils.deepCopy(lineTest)
             newLineTest.className = shapeUtils.classGenerator()
-            layerUtils.addLayers(this.lastSelectedPageIndex, newLineTest)
+            layerUtils.addLayers(this.lastSelectedPageIndex, [newLineTest])
           }
         },
         {
@@ -188,7 +188,7 @@ export default Vue.extend({
             newbasicShapeTest.shapeType = 'e'
             newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('e')
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 0]
-            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
+            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
           }
         },
         {
@@ -201,7 +201,7 @@ export default Vue.extend({
             newbasicShapeTest.shapeType = 'r'
             newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('r')
             newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
-            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
+            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
           }
         },
         {
@@ -219,7 +219,7 @@ export default Vue.extend({
             newbasicShapeTest.vSize = [width, height]
             newbasicShapeTest.styles.width = width
             newbasicShapeTest.styles.initWidth = width
-            layerUtils.addLayers(this.lastSelectedPageIndex, newbasicShapeTest)
+            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
           }
         }
       ]

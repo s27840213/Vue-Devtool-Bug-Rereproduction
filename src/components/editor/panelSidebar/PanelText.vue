@@ -109,10 +109,12 @@ export default Vue.extend({
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: title ? (155 + 46) : 155,
-            sentinel: !idx
+            size: title ? (155 + 46) : 155
           }
         })
+      if (result.length) {
+        Object.assign(result[result.length - 1], { sentinel: true })
+      }
       return result
     },
     list(): any[] {
@@ -124,8 +126,8 @@ export default Vue.extend({
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any text for "${this.keyword}".` : ''
     }
   },
-  mounted() {
-    this.getCategories()
+  async mounted() {
+    await this.getCategories()
     this.getContent()
     this.loadDefaultFonts()
   },
@@ -137,13 +139,14 @@ export default Vue.extend({
       [
         'resetContent',
         'getContent',
+        'getTagContent',
         'getCategories',
         'getMoreContent'
       ]
     ),
     handleSearch(keyword: string) {
       this.resetContent()
-      this.getContent({ keyword, searchTag: 1 })
+      this.getTagContent({ keyword })
     },
     handleCategorySearch(keyword: string) {
       this.resetContent()

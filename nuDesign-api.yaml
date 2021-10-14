@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211007"
+  version: "20211013"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -450,6 +450,7 @@ definitions:
       - $ref: "#/definitions/apiCommonInput"
       - type: object
         required:
+          - data
           - key_id
           - query
           - type
@@ -500,9 +501,6 @@ definitions:
           keyword:
             type: string
             description: keyword to search
-          search_tag:
-            type: number
-            description: 0 for search category title (equal), 1 for search tag (like)
           font_list:
             type: number
             description: 0 (default) for return all font key id in single array, 1 for

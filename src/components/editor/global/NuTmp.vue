@@ -7,7 +7,7 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :config="layer"
-      :style="{'outline': '2px solid #7190CC'}")
+      :style="subLayerStyles(layer)")
 </template>
 
 <script lang="ts">
@@ -40,6 +40,9 @@ export default Vue.extend({
         width: `${this.config.styles.initWidth}px`,
         height: `${this.config.styles.initHeight}px`
       }
+    },
+    subLayerStyles(layer: ILayer) {
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: '2px solid #7190CC' }
     }
   }
 })

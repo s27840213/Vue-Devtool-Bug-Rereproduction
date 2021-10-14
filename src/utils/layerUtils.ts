@@ -22,10 +22,10 @@ class LayerUtils {
     return store.getters.getLayer
   }
 
-  addLayers(pageIndex: number, layer: IShape | IText | IImage | IGroup | ITmp | IFrame) {
+  addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,
-      layers: [layer]
+      layers: [...layers]
     })
     ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
@@ -44,8 +44,7 @@ class LayerUtils {
 
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
-    store.commit('SET_lastSelectedLayerIndex', -1)
-    ZindexUtils.reassignZindex(store.getters.getCurrSelectedPageIndex)
+    ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)
     TemplateUtils.updateTextInfoTarget()
   }
 
@@ -53,6 +52,22 @@ class LayerUtils {
     store.commit('DELETE_layer', {
       pageIndex: this.pageIndex,
       layerIndex: index
+    })
+  }
+
+  deleteSubLayer(pageIndex: number, primaryIndex: number, subIndex: number) {
+    store.commit('DELETE_subLayer', {
+      pageIndex,
+      primaryIndex,
+      subIndex
+    })
+  }
+
+  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup) {
+    store.commit('REPLACE_layer', {
+      pageIndex,
+      layerIndex,
+      layer
     })
   }
 
@@ -103,7 +118,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,

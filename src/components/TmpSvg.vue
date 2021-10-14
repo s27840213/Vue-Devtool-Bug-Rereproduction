@@ -127,7 +127,7 @@ export default Vue.extend({
         }
       }
       Object.assign(config, svgData)
-      layerUtils.addLayers(this.lastSelectedPageIndex, layerFactary.newShape(config))
+      layerUtils.addLayers(this.lastSelectedPageIndex, [layerFactary.newShape(config)])
     }
   }
 })

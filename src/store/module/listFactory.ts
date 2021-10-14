@@ -3,10 +3,10 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 
-const SET_STATE = 'SET_STATE' as const
-const SET_CONTENT = 'SET_CONTENT' as const
-const SET_CATEGORIES = 'SET_CATEGORIES' as const
-const SET_MORE_CONTENT = 'SET_MORE_CONTENT' as const
+export const SET_STATE = 'SET_STATE' as const
+export const SET_CONTENT = 'SET_CONTENT' as const
+export const SET_CATEGORIES = 'SET_CATEGORIES' as const
+export const SET_MORE_CONTENT = 'SET_MORE_CONTENT' as const
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
@@ -20,6 +20,7 @@ export default function (this: any) {
     host: '',
     data: '',
     preview: '',
+    preview2: '',
     locale: 'tw',
     error: ''
   })
@@ -38,10 +39,26 @@ export default function (this: any) {
 
     getContent: async ({ commit, state }, params = {}) => {
       const { locale } = state
-      const { keyword, searchTag } = params
+      const { keyword } = params
       commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, searchTag, listAll: 1 })
+        const { data } = await this.api({ locale, keyword, listAll: 1 })
+        commit(SET_CONTENT, data.data)
+      } catch (error) {
+        captureException(error)
+      }
+    },
+
+    getTagContent: async ({ commit, state }, params = {}) => {
+      const { locale } = state
+      const { keyword } = params
+      commit(SET_STATE, { pending: true, keyword, content: {} })
+      try {
+        const { data } = await this.api({
+          locale,
+          keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
+          listAll: 1
+        })
         commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
@@ -86,7 +103,9 @@ export default function (this: any) {
       state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
       state.data = objects.data
       state.preview = objects.preview
+      state.preview2 = objects.preview2
       state.pending = false
+      state.nextPage = objects.next_page
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       state.content = objects.content.find(content => content.list.length) || {}

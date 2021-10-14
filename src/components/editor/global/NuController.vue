@@ -184,7 +184,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -531,6 +530,7 @@ export default Vue.extend({
       return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
       }
@@ -542,11 +542,11 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           dragging: true
         })
-        if (this.isActive && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+        if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
           return
         } else if (!this.isActive) {
           let targetIndex = this.layerIndex
-          if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && this.currSelectedInfo.index >= 0) {
+          if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
             GroupUtils.deselect()
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedPageIndex(this.pageIndex)
@@ -565,7 +565,7 @@ export default Vue.extend({
         }
         this.contentEditable = true
       }
-      if (!this.config.locked) {
+      if (!this.config.locked && !inSelectionMode) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
@@ -573,11 +573,17 @@ export default Vue.extend({
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
-        if (!this.isActive) {
+        if (this.isActive && this.currSelectedInfo.layers.length === 1) {
+          if (inSelectionMode) {
+            GroupUtils.deselect()
+            targetIndex = this.config.styles.zindex - 1
+            this.setLastSelectedLayerIndex(this.layerIndex)
+          }
+        } else if (!this.isActive) {
           // already have selected layer
           if (this.currSelectedInfo.index >= 0) {
             // Did not press shift/cmd/ctrl key -> deselect selected layers first
-            if (!GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+            if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
@@ -660,7 +666,6 @@ export default Vue.extend({
         window.removeEventListener('mousemove', this.moving)
 
         StepsUtils.record()
-        LayerUtils.isOutOfBoundary()
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
@@ -791,6 +796,32 @@ export default Vue.extend({
             const corRad = ControlUtils.getCorRadValue([width, height], this.initCorRadPercentage, this.config.shapeType)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
           }
+          break
+        case 'tmp':
+        case 'group':
+          (this.config as IGroup).layers.forEach((layer, index) => {
+            if (layer.type === 'shape') {
+              layer = layer as IShape
+              const scaleRatio = scale / this.getLayerScale
+              if (layer.category === 'D') {
+                const [lineWidth] = layer.size ?? [1]
+                LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, index, {
+                  size: [lineWidth / scaleRatio]
+                })
+                const trans = shapeUtils.getTranslateCompensationForLineWidth(layer.point ?? [], layer.styles, lineWidth, lineWidth / scaleRatio)
+                LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, index, {
+                  x: trans.x,
+                  y: trans.y
+                })
+              }
+              if (layer.category === 'E') {
+                const [lineWidth, corRad] = layer.size ?? [1, 0]
+                LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, index, {
+                  size: [lineWidth / scaleRatio, corRad]
+                })
+              }
+            }
+          })
           break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
