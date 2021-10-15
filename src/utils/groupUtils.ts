@@ -424,7 +424,20 @@ class GroupUtils {
       const centerOffset = MathUtils.getRotatedPoint(tmpLayer.styles.rotate, MathUtils.getCenter(tmpLayer.styles), MathUtils.getCenter(layer.styles))
       layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
       layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
-      layer.styles.rotate = (layer.styles.rotate + tmpLayer.styles.rotate) % 360
+
+      if (layer.type === 'shape' && layer.category === 'D') {
+        const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate((layer as IShape).point ?? [], tmpLayer.styles.rotate, (layer as IShape).size?.[0] ?? 1)
+        layer.point = point
+        layer.styles.width = realWidth
+        layer.styles.height = realHeight
+        layer.styles.initWidth = realWidth
+        layer.styles.initHeight = realHeight
+        layer.styles.x += dx
+        layer.styles.y += dy
+      } else {
+        layer.styles.rotate = (layer.styles.rotate + tmpLayer.styles.rotate) % 360
+      }
+
       layer.shown = false
       layer.locked = tmpLayer.locked
       layer.moved = tmpLayer.moved
@@ -455,6 +468,49 @@ class GroupUtils {
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
         layer.styles.y = shiftY
+      } else if (layer.type === 'shape') {
+        if (layer.category === 'D') {
+          const [lineWidth] = (layer as IShape).size ?? [1]
+          const point = (layer as IShape).point ?? []
+
+          const newLineWidth = Math.round(lineWidth * groupLayer.styles.scale)
+          layer.size = [newLineWidth]
+
+          const { width, height } = ShapeUtils.lineDimension(point)
+          const [targetWidth, targetHeight] = [width * groupLayer.styles.scale, height * groupLayer.styles.scale]
+          const { point: newPoint, realWidth, realHeight } = ShapeUtils.computePointForDimensions(ShapeUtils.getLineQuadrant(point), newLineWidth, targetWidth, targetHeight)
+          layer.point = newPoint
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.scale = 1
+
+          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const [x1, y1] = [layer.styles.x, layer.styles.y]
+          const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+          layer.styles.x = shiftX
+          layer.styles.y = shiftY
+        } else if (layer.category === 'E') {
+          layer.styles.width = layer.styles.width as number * groupLayer.styles.scale
+          layer.styles.height = layer.styles.height as number * groupLayer.styles.scale
+          layer.styles.initWidth = layer.styles.width
+          layer.styles.initHeight = layer.styles.height
+          layer.vSize = [layer.styles.width, layer.styles.height]
+          const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
+          layer.size = [Math.round(lineWidth * groupLayer.styles.scale), corRad * groupLayer.styles.scale]
+          layer.styles.scale = 1
+
+          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const [x1, y1] = [layer.styles.x, layer.styles.y]
+          const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+          layer.styles.x = shiftX
+          layer.styles.y = shiftY
+        } else {
+          layer.styles.width = layer.styles.width as number * groupLayer.styles.scale
+          layer.styles.height = layer.styles.height as number * groupLayer.styles.scale
+          layer.styles.scale *= groupLayer.styles.scale
+        }
       } else {
         layer.styles.width = layer.styles.width as number * groupLayer.styles.scale
         layer.styles.height = layer.styles.height as number * groupLayer.styles.scale
@@ -478,7 +534,20 @@ class GroupUtils {
       const centerOffset = MathUtils.getRotatedPoint(groupLayer.styles.rotate, MathUtils.getCenter(groupLayer.styles), MathUtils.getCenter(layer.styles))
       layer.styles.x = centerOffset.x - (layer.styles.width as number) / 2
       layer.styles.y = centerOffset.y - (layer.styles.height as number) / 2
-      layer.styles.rotate = (layer.styles.rotate + groupLayer.styles.rotate) % 360
+
+      if (layer.type === 'shape' && layer.category === 'D') {
+        const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate((layer as IShape).point ?? [], groupLayer.styles.rotate, (layer as IShape).size?.[0] ?? 1)
+        layer.point = point
+        layer.styles.width = realWidth
+        layer.styles.height = realHeight
+        layer.styles.initWidth = realWidth
+        layer.styles.initHeight = realHeight
+        layer.styles.x += dx
+        layer.styles.y += dy
+      } else {
+        layer.styles.rotate = (layer.styles.rotate + groupLayer.styles.rotate) % 360
+      }
+
       layer.shown = false
       layer.locked = groupLayer.locked
       layer.moved = groupLayer.moved
