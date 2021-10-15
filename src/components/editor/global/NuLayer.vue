@@ -6,7 +6,7 @@
       @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
-      div(v-if="config.imgControl" :style="backImageStyle()")
+      div(v-if="config.type === 'image' && config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-clipper(class="layer-flip" :config="config" :style="flipStyles()")

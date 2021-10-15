@@ -377,6 +377,7 @@ class UploadUtils {
               }
             }
           }
+          layer.type = 'group'
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, index, {
             type: 'group',
             active: false,
@@ -515,7 +516,9 @@ class UploadUtils {
           return {
             ...general,
             writingMode: styles.writingMode,
-            align: styles.align
+            align: styles.align,
+            textShape: styles.textShape,
+            textEffect: styles.textEffect
           }
         default:
           return general

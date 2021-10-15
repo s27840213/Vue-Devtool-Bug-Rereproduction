@@ -28,9 +28,11 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage) {
+  getSrc(config: IImage, size: string | number = -1) {
     const { type, userId, assetId } = config.srcObj || config.src_obj
-    const size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
+    if (size === -1) {
+      size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
+    }
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
@@ -50,16 +52,24 @@ class ImageUtils {
     }
   }
 
-  getSrcSize(type: string, width: number) {
+  getSrcSize(type: string, width: number, preload = '') {
     if (type === 'pexels' || type === 'unsplash') {
       if (width < 540) {
-        return 540
+        return preload === 'next' ? 800 : 540
       } else if (width < 800) {
-        return 800
+        if (preload === 'pre') {
+          return 540
+        } else if (preload === 'next') {
+          return 1080
+        } else return 800
       } else if (width < 1080) {
-        return 1080
+        if (preload === 'pre') {
+          return 800
+        } else if (preload === 'next') {
+          return 1600
+        } else return 1080
       } else {
-        return 1600
+        return preload === 'pre' ? 1080 : 1600
       }
     } else {
       return 'full'

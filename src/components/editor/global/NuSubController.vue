@@ -182,12 +182,22 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const outline = (() => {
+        if ((this.isShown || this.isActive) && LayerUtils.getCurrLayer.type !== 'frame') {
+          if (this.config.type === 'tmp' || this.isControlling) {
+            return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
+          } else {
+            return `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`
+          }
+        } else {
+          return 'none'
+        }
+      })()
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline: this.isShown || this.isActive ? ((this.config.type === 'tmp' || this.isControlling)
-          ? `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}` : `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`) : 'none',
+        outline,
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
