@@ -73,9 +73,11 @@ class LayerFactary {
         Object.assign(img, this.newImage(imgConfig))
       })
     } else if (clips.length) {
+      // template frame with image, need to copy the info of the image
       clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
       clips[0].isFrameImg = true
     } else {
+      // new image-frame no image info need to be resored
       styles.scale = 1
       styles.scaleX = 1
       styles.scaleY = 1
@@ -313,7 +315,7 @@ class LayerFactary {
   newTemplate(config: any): any {
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      if (config.layers[layerIndex].type === 'frame') {
+      if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
         config.layers[layerIndex].needFetch = true
       }
     }

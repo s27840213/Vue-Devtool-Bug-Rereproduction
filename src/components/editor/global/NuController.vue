@@ -15,11 +15,12 @@
           @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+          @keydown="ShortcutUtils.delFrameImg()"
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
             v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-            :style="frameClipStyles(clip.styles, index)"
+            :style="frameClipStyles(clip, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp"
@@ -184,6 +185,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -354,10 +356,6 @@ export default Vue.extend({
             height,
             initWidth,
             initHeight,
-            // imgX,
-            // imgY,
-            // imgWidth,
-            // imgHeight,
             scale
           }))
         }
@@ -520,9 +518,9 @@ export default Vue.extend({
     },
     frameClipStyles(clip: any, index: number) {
       return {
-        transform: `translate(${clip.x}px, ${clip.y}px)`,
+        transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
         fill: '#00000000',
-        stroke: this.clipIndex === index ? '#7190CC' : 'none',
+        stroke: this.clipIndex === index || clip.active ? '#7190CC' : 'none',
         strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
@@ -1392,6 +1390,7 @@ export default Vue.extend({
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
+      console.log(this.config)
     },
     dblSubController(targetIndex: number) {
       let updateSubLayerProps = null as any

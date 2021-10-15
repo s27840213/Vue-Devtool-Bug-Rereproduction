@@ -98,6 +98,8 @@ export default Vue.extend({
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
           Object.assign(this.config, shape)
+          this.config.styles.initWidth = shape.vSize[0]
+          this.config.styles.initHeight = shape.vSize[1]
         }
       }
     }
