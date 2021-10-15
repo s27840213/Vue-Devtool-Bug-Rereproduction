@@ -1452,6 +1452,8 @@ export default Vue.extend({
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.clipIndex, { active: true })
+        this.clipIndex = NaN
       }
     }
   }
