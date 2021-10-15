@@ -14,6 +14,8 @@
           transition(name="panel-up")
             color-panel(v-if="isColorPanelOpen"
               @toggleColorPanel="toggleColorPanel")
+        div(v-if="isShowPagePreview" class="content__pages")
+          page-preview
 </template>
 
 <script lang="ts">
@@ -25,6 +27,7 @@ import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import PagePreview from '@/components/editor/PagePreview.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { FunctionPanelType } from '@/store/types'
 
@@ -37,7 +40,8 @@ export default Vue.extend({
     EditorView,
     ScaleRatioEditor,
     FunctionPanel,
-    ColorPanel
+    ColorPanel,
+    PagePreview
   },
   data() {
     return {
@@ -47,7 +51,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -107,6 +112,14 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: 1fr auto;
     grid-template-columns: 1fr;
+  }
+
+  &__pages {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: setZindex("pages-preview");
+    background: setColor(gray-5);
   }
 }
 

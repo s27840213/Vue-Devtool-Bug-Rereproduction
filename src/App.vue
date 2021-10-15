@@ -8,20 +8,11 @@
     router-view
     div(class="popup-area")
       popup
-      //- dropdown-order(v-if="isOrderDropdownOpened"
-      //-   v-click-outside="vcoConfig('order')")
-      //- dropdown-align(v-if="isAlignDropdownOpened"
-      //-   v-click-outside="vcoConfig('align')")
-      //- dropdown-flip(v-if="isFlipDropdownOpened"
-      //-   v-click-outside="vcoConfig('flip')")
-      //- dropdown-layer(v-if="isLayerDropdownOpened"
-      //-   v-click-outside="vcoConfig('layer')")
-      //- dropdown-page(v-if="isPageDropdownOpened"
-      //-   v-click-outside="vcoConfig('page')")
       photo-info(v-show="currSelectedPhotoInfo.userName"
         :info="currSelectedPhotoInfo"
         @blur.native="setCurrSelectedPhotoInfo()"
         tabindex="0")
+      hint
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
