@@ -51,7 +51,7 @@ pipelines:
               SUBJECT: 'NEW TEST DEPLOYED'
     - step:
         name: 'Deploy to S3 edit environment'
-        deployment: production
+        deployment: staging
         trigger: manual
         script:
           - pipe: atlassian/aws-s3-deploy:0.5.0
@@ -74,7 +74,7 @@ pipelines:
               SUBJECT: 'NEW EDIT DEPLOYED'
     - step:
         name: 'Deploy to S3 prod environment'
-        deployment: production2
+        deployment: production
         trigger: manual
         script:
           - pipe: atlassian/aws-s3-deploy:0.5.0
