@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211013"
+  version: "20211015"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -87,6 +87,27 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /group-design:
+    post:
+      description: 設定模板群組的內容或封面
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: groupDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/groupDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/groupDesignOutput"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -309,62 +330,6 @@ definitions:
       path:
         type: string
         description: Allowed path for upload.
-  listDesignOutput:
-    allOf:
-      - $ref: "#/definitions/apiCommonResponse"
-      - type: object
-        properties:
-          data:
-            type: object
-            description: >-
-              
-              host: Host domain for design preview and data.
-
-              preview: File name for design preview.
-
-              preview2: File name for font sample text preview, only present for font.
-
-              data: File name for design data (json for non-font, woff2 for font).
-
-              content: array of design category, with category_id as id of category, title as categroy name, and list as array of objects with design id and design type. category_id will be -1 and title '' for list_all = 1.
-
-              next_page: pagination index for next query, only for query with list_all = 1.
-
-              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
-            properties:
-              host:
-                type: string
-              preview:
-                type: string
-              preview2:
-                type: string
-              data:
-                type: string
-              content:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    category_id:
-                      type: number
-                    title:
-                      type: string
-                    list:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          type:
-                            type: number
-              next_page:
-                type: number
-            required:
-              - content
-              - data
-              - host
-              - preview
   listAssetOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -410,63 +375,6 @@ definitions:
           meta:
             type: string
             description: meta data
-  googleLoginInput:
-    type: object
-    required:
-      - code
-      - redirect_uri
-    properties:
-      code:
-        type: string
-        description: google code
-      redirect_uri:
-        type: string
-        description: google redirect url
-  listLibPhotoInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-          - page_index
-          - type
-        properties:
-          type:
-            type: string
-            description: "lib type: unsplash or pexels (pexels is not ready)."
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          page_index:
-            type: number
-            description: pagination index
-          keyword:
-            type: string
-            description: keyword to search
-  updateDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - data
-          - key_id
-          - query
-          - type
-        properties:
-          type:
-            type: string
-            description: design type
-          key_id:
-            type: string
-            description: design key_id
-          query:
-            type: string
-            description: get or update design info
-          data:
-            type: string
-            description: design info to be updated
   updateDesignOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
@@ -475,36 +383,6 @@ definitions:
           data:
             type: string
             description: json string for design info
-  listDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - locale
-          - type
-        properties:
-          type:
-            type: string
-            description: "design type: background, font, svg, marker, template, or text"
-          locale:
-            type: string
-            description: |-
-              country code for locale, ex: tw, us, jp...
-              Allowed characters: a-zA-Z.
-          list_all:
-            type: number
-            description: 0 (default) for list first 10 elements in each category except
-              category 0. 1 for list all elements including category 0.
-          page_index:
-            type: number
-            description: pagination index
-          keyword:
-            type: string
-            description: keyword to search
-          font_list:
-            type: number
-            description: 0 (default) for return all font key id in single array, 1 for
-              return key id in various arrays according to title
   sendVcodeInput:
     type: object
     required:
@@ -646,20 +524,6 @@ definitions:
           expire_time:
             type: string
             description: expire time
-  addDesignInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - design_id
-          - type
-        properties:
-          type:
-            type: string
-            description: "design type: background, font, svg, template, or text"
-          design_id:
-            type: string
-            description: design id selected by user
   apiCommonInput:
     type: object
     required:
@@ -670,18 +534,6 @@ definitions:
         description: |-
           User token.
           Allowed characters: 0-9a-zA-Z.
-  verifyVcodeInput:
-    type: object
-    required:
-      - account
-      - vcode
-    properties:
-      account:
-        type: string
-        description: user account
-      vcode:
-        type: string
-        description: verification code
   reprocessDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -713,6 +565,203 @@ definitions:
       msg:
         type: string
         description: error message
+  groupDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          update:
+            type: number
+            description: "update type: 0 for create new group, 1 for update group list, 2
+              for update group cover"
+          list:
+            type: string
+            description: Template id list, separate by comma (,). Necessary for update = 0
+              and 1
+          cover:
+            type: string
+            description: Cover type and id as ${cover_type}:${cover_id} (separate by :).
+              Necessary for update = 2
+          group_id:
+            type: string
+            description: Current group id. Necessary for update = 1 and 2
+  listDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for design preview and data.
+
+              preview: File name for design preview.
+
+              preview2: File name for font sample text preview, only present for font.
+
+              data: File name for design data (json for non-font, woff2 for font).
+
+              content: array of design category, with category_id as id of category, title as categroy name, and list as array of objects with design id and design type. category_id will be -1 and title '' for list_all = 1.
+
+              next_page: pagination index for next query, only for query with list_all = 1.
+
+              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              preview2:
+                type: string
+              data:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          type:
+                            type: number
+              next_page:
+                type: number
+            required:
+              - content
+              - data
+              - host
+              - preview
+  groupDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          group_id:
+            type: string
+            description: current group id
+  googleLoginInput:
+    type: object
+    required:
+      - code
+      - redirect_uri
+    properties:
+      code:
+        type: string
+        description: google code
+      redirect_uri:
+        type: string
+        description: google redirect url
+  listLibPhotoInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - page_index
+          - type
+        properties:
+          type:
+            type: string
+            description: "lib type: unsplash or pexels (pexels is not ready)."
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+  updateDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - data
+          - key_id
+          - query
+          - type
+        properties:
+          type:
+            type: string
+            description: design type
+          key_id:
+            type: string
+            description: design key_id
+          query:
+            type: string
+            description: get or update design info
+          data:
+            type: string
+            description: design info to be updated
+  listDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, marker, template, or text"
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          list_all:
+            type: number
+            description: 0 (default) for list first 10 elements in each category except
+              category 0. 1 for list all elements including category 0.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+          font_list:
+            type: number
+            description: 0 (default) for return all font key id in single array, 1 for
+              return key id in various arrays according to title
+  addDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - design_id
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, template, or text"
+          design_id:
+            type: string
+            description: design id selected by user
+  verifyVcodeInput:
+    type: object
+    required:
+      - account
+      - vcode
+    properties:
+      account:
+        type: string
+        description: user account
+      vcode:
+        type: string
+        description: verification code
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
