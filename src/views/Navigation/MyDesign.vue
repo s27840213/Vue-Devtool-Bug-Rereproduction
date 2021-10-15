@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor")
     navigation-header(node="My Design")
-    sidebar(:paths="paths")
+    sidebar
     section
       div(class="content")
 </template>
@@ -19,26 +19,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      paths: [
-        {
-          name: 'Toby',
-          contains: [
-            {
-              name: '素材',
-              contains: [
-                {
-                  name: '材質',
-                  contains: []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          name: '日本行銷',
-          contains: []
-        }
-      ]
     }
   },
   computed: {

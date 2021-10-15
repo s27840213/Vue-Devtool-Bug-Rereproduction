@@ -17,6 +17,7 @@ import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
+import design from '@/store/module/design'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 
@@ -606,6 +607,7 @@ export default new Vuex.Store({
     textStock,
     background,
     modal,
-    popup
+    popup,
+    design
   }
 })
