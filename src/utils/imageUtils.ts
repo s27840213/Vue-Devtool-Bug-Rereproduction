@@ -344,7 +344,8 @@ class ImageUtils {
     }
   }
 
-  adaptToSize(srcSize: {width: number, height: number}, targetSize: {width: number, height: number}): {width: number, height: number} {
+  adaptToSize(srcSize: {width: number, height: number}, targetSize: {width: number, height: number}):
+  {width: number, height: number, posX: number, posY: number} {
     const srcAspectRatio = srcSize.width / srcSize.height
     const targetAspectRatio = targetSize.width / targetSize.height
     let width = 0
@@ -356,7 +357,9 @@ class ImageUtils {
       width = targetSize.width
       height = targetSize.width / srcAspectRatio
     }
-    return { width, height }
+    const posX = (targetSize.width - width) / 2
+    const posY = (targetSize.height - height) / 2
+    return { width, height, posX, posY }
   }
 }
 

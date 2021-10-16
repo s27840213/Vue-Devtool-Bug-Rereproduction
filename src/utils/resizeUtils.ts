@@ -140,11 +140,11 @@ class ResizeUtils {
   }
 
   centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number}) {
-    const { width, height } = imageUtils.adaptToSize({
+    const { width, height, posX, posY } = imageUtils.adaptToSize({
       width: page.backgroundImage.config.styles.initWidth,
       height: page.backgroundImage.config.styles.initHeight
     }, format)
-    pageUtils.updateBackgroundImagePos(pageIndex, (format.width - width) / 2, (format.height - height) / 2)
+    pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageSize(
       pageIndex,
       width,
