@@ -114,6 +114,8 @@ import popupUtils from '@/utils/popupUtils'
 import layerFactary from '@/utils/layerFactary'
 import zindexUtils from '@/utils/zindexUtils'
 import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -322,10 +324,15 @@ export default Vue.extend({
       ]
     },
     setBackgroundImage() {
+      const image = this.currSelectedInfo.layers[0] as IImage
+      const pageIndex = this.currSelectedInfo.pageIndex
       this._setBackgroundImage({
-        pageIndex: this.currSelectedInfo.pageIndex,
-        config: (this.currSelectedInfo.layers[0] as IImage)
+        pageIndex: pageIndex,
+        config: image
       })
+      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
+      pageUtils.updateBackgroundImageSize(pageIndex, width, height)
+      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
       ShortcutUtils.del()
     },
     closePopup() {
