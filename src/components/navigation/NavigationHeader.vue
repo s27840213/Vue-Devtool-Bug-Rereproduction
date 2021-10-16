@@ -14,9 +14,10 @@
         svg-icon(iconName="search"
           iconWidth="20px"
           iconColor="gray-2-7")
-      //- search
-      //- notification
-      //- user thumbnail
+      svg-icon(iconName="notification-on"
+          iconWidth="20px"
+          iconColor="blue-1")
+      div(class="avatar-container")
 </template>
 
 <script lang="ts">
@@ -104,19 +105,27 @@ export default Vue.extend({
       display: grid;
       grid-template-columns: repeat(3, auto);
       grid-template-rows: 1fr;
-      column-gap: 20px;
+      grid-gap: 18px;
       justify-items: center;
       align-items: center;
-      margin-right: 40px;
+      margin-right: 181px;
       > .search {
         display: grid;
         grid-template-columns: 170px 20px;
         grid-template-rows: 1fr;
         padding: 4px 16px;
         border-radius: 4px;
+        margin-right: 7px;
         > input {
           font-family: 'Mulish';
         }
+      }
+
+      > .avatar-container {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: setColor(blue-2);
       }
     }
   }
