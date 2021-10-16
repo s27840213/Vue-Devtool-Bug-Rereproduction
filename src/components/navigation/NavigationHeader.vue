@@ -105,7 +105,7 @@ export default Vue.extend({
       display: grid;
       grid-template-columns: repeat(3, auto);
       grid-template-rows: 1fr;
-      grid-gap: 18px;
+      grid-gap: 25px 18px;
       justify-items: center;
       align-items: center;
       margin-right: 181px;
