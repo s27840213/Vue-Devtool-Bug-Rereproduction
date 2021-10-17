@@ -27,16 +27,14 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/navigation/mydesign/SidebarFolder.vue'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   components: {
     SidebarFolder
   },
-  data() {
-    return {
-    }
-  },
-  props: {
+  mounted() {
+    this.setFolders(designUtils.makeDesignsForTesting())
   },
   computed: {
     ...mapGetters('design', {
@@ -46,7 +44,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder'
+      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setFolders: 'SET_folders'
     }),
     handleSelection(selection: string) {
       this.setCurrentSelectedFolder(selection)

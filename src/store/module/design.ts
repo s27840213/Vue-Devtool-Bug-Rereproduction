@@ -1,7 +1,7 @@
-import { IFolder } from '@/interfaces/design'
+import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { GetterTree, MutationTree } from 'vuex'
 
 interface IDesignSidebarState {
   currentSelectedFolder: string,
@@ -10,57 +10,19 @@ interface IDesignSidebarState {
 
 const getDefaultState = (): IDesignSidebarState => ({
   currentSelectedFolder: 'a',
-  folders: [
-    {
-      name: 'Toby',
-      isExpanded: false,
-      isSelected: false,
-      contains: [
-        {
-          name: '素材2',
-          isExpanded: false,
-          isSelected: false,
-          contains: [
-            {
-              name: '材質3',
-              isExpanded: false,
-              isSelected: false,
-              contains: [
-                {
-                  name: '材質4',
-                  isExpanded: false,
-                  isSelected: false,
-                  contains: [
-                    {
-                      name: '材質5',
-                      isExpanded: false,
-                      isSelected: false,
-                      contains: []
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      name: '日本行銷',
-      isExpanded: false,
-      isSelected: false,
-      contains: []
-    }
-  ]
+  folders: []
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IDesignSidebarState, unknown> = {
-  getCurrSelectedFolder(state: IDesignSidebarState) {
+  getCurrSelectedFolder(state: IDesignSidebarState): string {
     return state.currentSelectedFolder
   },
-  getFolders(state: IDesignSidebarState) {
+  getFolders(state: IDesignSidebarState): IFolder[] {
     return state.folders
+  },
+  getDesigns(state: IDesignSidebarState, path: string[]): IDesign[] {
+    return designUtils.search(state.folders, path)?.designs ?? []
   }
 }
 

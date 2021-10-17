@@ -1,6 +1,68 @@
 import { IFolder } from '@/interfaces/design'
 
 class DesignUtils {
+  makeDesignsForTesting(): IFolder[] {
+    return [
+      {
+        name: 'Toby',
+        isExpanded: false,
+        isSelected: false,
+        designs: [],
+        subFolders: [
+          {
+            name: '素材1',
+            isExpanded: false,
+            isSelected: false,
+            designs: [],
+            subFolders: []
+          },
+          {
+            name: '素材2',
+            isExpanded: false,
+            isSelected: false,
+            designs: [],
+            subFolders: [
+              {
+                name: '材質3',
+                isExpanded: false,
+                isSelected: false,
+                designs: [],
+                subFolders: [
+                  {
+                    name: '材質4',
+                    isExpanded: false,
+                    isSelected: false,
+                    designs: [],
+                    subFolders: [
+                      {
+                        name: '材質5',
+                        isExpanded: false,
+                        isSelected: false,
+                        designs: [],
+                        subFolders: []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        name: '日本行銷',
+        isExpanded: false,
+        isSelected: false,
+        designs: [],
+        subFolders: []
+      }
+    ]
+  }
+
+  makePath(selectInfo: string): string[] {
+    return selectInfo.substring(2).split('/')
+  }
+
   findFolder(folders: IFolder[], name: string): IFolder | undefined {
     for (const folder of folders) {
       if (folder.name === name) {
@@ -12,7 +74,7 @@ class DesignUtils {
   findFolders(folders: IFolder[], name: string): IFolder[] {
     for (const folder of folders) {
       if (folder.name === name) {
-        return folder.contains
+        return folder.subFolders
       }
     }
     return []
@@ -31,7 +93,7 @@ class DesignUtils {
 
   deselect(folders: IFolder[], selectInfo: string) {
     if (selectInfo.startsWith('f')) { // f:Toby/素材/材質
-      const targetFolder = this.search(folders, selectInfo.substring(2).split('/'))
+      const targetFolder = this.search(folders, this.makePath(selectInfo))
       if (targetFolder) {
         targetFolder.isSelected = false
       }
@@ -40,7 +102,7 @@ class DesignUtils {
 
   select(folders: IFolder[], selectInfo: string) {
     if (selectInfo.startsWith('f')) { // f:Toby/素材/材質
-      const targetFolder = this.search(folders, selectInfo.substring(2).split('/'))
+      const targetFolder = this.search(folders, this.makePath(selectInfo))
       if (targetFolder) {
         targetFolder.isSelected = true
       }

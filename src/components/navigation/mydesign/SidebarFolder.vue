@@ -2,16 +2,18 @@
   section
     div(:class="[`nav-folder-${level}`, {'bg-blue-1': folder.isSelected}]"
         @click="handleSelection")
-      svg-icon(iconName="chevron-down"
-          iconColor="white"
-          iconWidth="15px"
-          :style="expandIconStyles()"
-          @click.native.stop="toggleExpansion")
+      div(class="nav-folder__expand-icon-container"
+          @click.stop="toggleExpansion")
+        svg-icon(class="nav-folder__expand-icon"
+            iconName="chevron-down"
+            iconColor="white"
+            iconWidth="15px"
+            :style="expandIconStyles()")
       svg-icon(iconName="folder"
           iconColor="white"
           iconWidth="20px")
       div(:class="`nav-folder-${level}__text`") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(folder.contains)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]")
+    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -24,7 +26,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      isExpanded: false
     }
   },
   props: {
@@ -110,5 +111,15 @@ $maxLevels: 5;
       white-space: nowrap;
     }
   }
+}
+.nav-folder__expand-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+}
+.nav-folder__expand-icon {
+  transition: 0.1s linear
 }
 </style>
