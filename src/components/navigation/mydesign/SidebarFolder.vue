@@ -86,7 +86,8 @@ export default Vue.extend({
     handleDrop() {
       this.isDraggedOver = false
       if (this.folder.isSelected) return
-      const { path, id } = this.draggingDesign
+      const { path = [], id = '' } = this.draggingDesign
+      if (id === '') return
       designUtils.move(id, path, [...(this.parents as string[]), this.folder.name as string])
     }
   }

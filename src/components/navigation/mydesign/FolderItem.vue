@@ -49,7 +49,8 @@ export default Vue.extend({
     },
     handleDrop() {
       this.isMouseOver = false
-      const { path, id } = this.draggingDesign
+      const { path = [], id = '' } = this.draggingDesign
+      if (id === '') return
       designUtils.move(id, path, [...(this.path as string[]), this.name as string])
     }
   }
