@@ -24,6 +24,10 @@
         btn(@click.native="goToPage('/faq')"
           style="padding: 5px;" :type="'icon-mid-body'"
           :class="{'text-blue-1': currentPage === '/faq'}") 常見問題
+      div(v-if="isLogin")
+        btn(@click.native="goToPage('/mydesign')"
+          style="padding: 5px;" :type="'icon-mid-body'"
+          :class="{'text-blue-1': currentPage === '/mydesign'}") 我的設計
     div(class="body-2")
       div(style="width: 180px;")
         search-bar(
@@ -74,15 +78,14 @@ export default Vue.extend({
       return this.role === 0
     }
   },
-  created() {
-    console.log(this.currentPage)
-  },
   methods: {
     goToPage(pageName = '' as string) {
       console.log(pageName)
       console.log(this.currentPage)
       if (pageName === this.currentPage) {
         this.$router.go(0)
+      } else if (pageName === '/login' || pageName === '/signup') {
+        this.$router.push({ path: pageName, query: { redirect: this.$route.path } })
       } else {
         this.$router.push({ path: pageName })
       }
@@ -117,7 +120,7 @@ export default Vue.extend({
     }
     &:nth-child(2) {
       display: grid;
-      grid-template-columns: repeat(6, auto);
+      grid-template-columns: repeat(7, auto);
       grid-template-rows: 1fr;
       column-gap: 1.5vw;
       justify-items: center;

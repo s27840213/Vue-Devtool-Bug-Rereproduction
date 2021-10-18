@@ -27,9 +27,9 @@
     div(class="body-2")
       div(v-if="!isLogin")
         span 若要儲存設計，請
-        a(href="/signup") 註冊
+        a(:href="`/signup?redirect=${path}`") 註冊
         span 或
-        a(href="/login") 登入
+        a(:href="`/login?redirect=${path}`") 登入
       svg-icon(v-if="isAdmin"
         :iconName="`user-admin${getAdminModeText}`"
         :iconWidth="'20px'"
@@ -90,6 +90,9 @@ export default Vue.extend({
     },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
+    },
+    path(): string {
+      return this.$route.path
     }
   },
   methods: {
