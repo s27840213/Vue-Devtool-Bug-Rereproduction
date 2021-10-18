@@ -7,7 +7,32 @@ class DesignUtils {
         name: 'Toby',
         isExpanded: false,
         isSelected: false,
-        designs: [],
+        designs: [
+          {
+            name: 'Name',
+            width: 1200,
+            height: 1200,
+            thumbnail: ''
+          },
+          {
+            name: 'Name',
+            width: 1200,
+            height: 1200,
+            thumbnail: ''
+          },
+          {
+            name: 'Name',
+            width: 1200,
+            height: 1200,
+            thumbnail: ''
+          },
+          {
+            name: 'Name',
+            width: 1200,
+            height: 1200,
+            thumbnail: ''
+          }
+        ],
         subFolders: [
           {
             name: '素材1',
