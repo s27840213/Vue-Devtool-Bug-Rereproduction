@@ -237,7 +237,7 @@ class AssetUtils {
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
     const page = store.getters.getPage(targetPageIndex)
-    const { width, height } = ImageUtils.adaptToSize({
+    const { width, height, posX, posY } = ImageUtils.adaptToSize({
       width: srcWidth,
       height: srcHeight
     }, page)
@@ -265,8 +265,8 @@ class AssetUtils {
     store.commit('SET_backgroundImagePos', {
       pageIndex: targetPageIndex,
       imagePos: {
-        x: (page.width - width) / 2,
-        y: (page.height - height) / 2
+        x: posX,
+        y: posY
       }
     })
     store.commit('SET_backgroundImageMode', {
@@ -278,7 +278,7 @@ class AssetUtils {
   async updateBackground(json: any): Promise<any> {
     if ((json.backgroundImage.config.srcObj?.assetId ?? '') !== '' && !json.backgroundImage.newDisplayMode) {
       const { width: srcWidth, height: srcHeight } = await ImageUtils.getImageSize(ImageUtils.getSrc(json.backgroundImage.config), json.backgroundImage.config.styles.width, json.backgroundImage.config.styles.height)
-      const { width, height } = ImageUtils.adaptToSize({
+      const { width, height, posX, posY } = ImageUtils.adaptToSize({
         width: srcWidth,
         height: srcHeight
       }, json)
@@ -286,8 +286,8 @@ class AssetUtils {
       json.backgroundImage.config.styles.imgHeight = height
       json.backgroundImage.config.styles.initWidth = srcWidth
       json.backgroundImage.config.styles.initHeight = srcHeight
-      json.backgroundImage.posX = (json.width - width) / 2
-      json.backgroundImage.posY = (json.height - height) / 2
+      json.backgroundImage.posX = posX
+      json.backgroundImage.posY = posY
       json.backgroundImage.newDisplayMode = true
     }
     return json
@@ -369,7 +369,7 @@ class AssetUtils {
           this.addText(asset.jsonData, attrs)
           break
         case 6:
-          console.log(asset)
+          console.log(GeneralUtils.deepCopy(asset))
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:

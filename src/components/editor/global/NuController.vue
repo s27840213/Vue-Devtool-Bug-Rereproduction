@@ -7,7 +7,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
-          @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
+          @drop="onDrop($event)"
           @dragover.prevent,
           @click.left="onClick"
           @click.right.stop="onRightClick"
@@ -15,11 +15,13 @@
           @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+          @keydown="ShortcutUtils.delFrameImg()"
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
             v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-            :style="frameClipStyles(clip.styles, index)"
+            :style="frameClipStyles(clip, index)"
+            @drop="onDropFrame($event, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp"
@@ -38,6 +40,7 @@
                 :primaryLayerIndex="layerIndex"
                 :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
                 :type="config.type"
+                @drop="getLayerType === 'frame' ? onDropFrame($event, index) : null"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && (config.active || isLocked)")
@@ -74,7 +77,8 @@
                   :style="textStyles(span.styles)") {{ span.text }}
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
-            :style="lockIconStyles")
+            :style="lockIconStyles"
+            v-hint="'unlock'")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('unlock')")
       div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
@@ -184,6 +188,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -354,10 +359,6 @@ export default Vue.extend({
             height,
             initWidth,
             initHeight,
-            // imgX,
-            // imgY,
-            // imgWidth,
-            // imgHeight,
             scale
           }))
         }
@@ -520,9 +521,9 @@ export default Vue.extend({
     },
     frameClipStyles(clip: any, index: number) {
       return {
-        transform: `translate(${clip.x}px, ${clip.y}px)`,
+        transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
         fill: '#00000000',
-        stroke: this.clipIndex === index ? '#7190CC' : 'none',
+        stroke: this.clipIndex === index || clip.active ? '#7190CC' : 'none',
         strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
@@ -1127,21 +1128,20 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-    },
-    onDropClipper(e: DragEvent) {
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
           MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
-        case 'shape': {
-          const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
-          break
-        }
+        case 'frame':
+          return
+        default:
+          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
+    },
+    onDropFrame(e: DragEvent, clipIdx: number) {
+      MouseUtils.onDropFrame(e, this.pageIndex, this.layerIndex, clipIdx)
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
@@ -1392,6 +1392,7 @@ export default Vue.extend({
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
+      console.log(this.config)
     },
     dblSubController(targetIndex: number) {
       let updateSubLayerProps = null as any
@@ -1434,7 +1435,6 @@ export default Vue.extend({
           imgY
         })
       }
-      console.log(this.config)
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
@@ -1452,6 +1452,8 @@ export default Vue.extend({
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.clipIndex, { active: true })
+        this.clipIndex = NaN
       }
     }
   }

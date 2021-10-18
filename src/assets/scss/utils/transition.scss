@@ -108,19 +108,6 @@
   }
 }
 
-// check in seal animation
-.seal-enter-active {
-  transition: all 1s;
-}
-.seal-leave-active {
-  transition: all 0.5s;
-}
-.seal-enter,
-.seal-leave-to {
-  opacity: 0;
-  transform: scale(3);
-}
-
 .slide {
   &-x {
     &-left {
@@ -219,9 +206,6 @@
   0% {
     opacity: 1;
     transform: translateY(0px);
-  }
-  25% {
-    transform: translateY(-10px);
   }
   100% {
     transform: translateY(-10px);

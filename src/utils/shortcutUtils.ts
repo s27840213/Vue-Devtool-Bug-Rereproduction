@@ -5,11 +5,13 @@ import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
+import { Layer } from 'konva/types/Layer'
+import FrameUtils from './frameUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -239,8 +241,25 @@ class ShortcutHandler {
   }
 
   del() {
-    LayerUtils.deleteSelectedLayer()
-    GroupUtils.reset()
+    const currLayer = LayerUtils.getCurrLayer as IFrame
+    if (currLayer.type === 'frame' && currLayer.clips.some(img => img.active)) {
+      const idx = currLayer.clips.findIndex(img => img.active)
+      if (currLayer.clips[idx].srcObj.type === 'frame') {
+        LayerUtils.deleteSelectedLayer()
+        GroupUtils.reset()
+        return
+      }
+      const clips = GeneralUtils.deepCopy(currLayer.clips)
+      clips[idx].srcObj = {
+        type: 'frame',
+        assetId: '',
+        userId: ''
+      }
+      LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+    } else {
+      LayerUtils.deleteSelectedLayer()
+      GroupUtils.reset()
+    }
   }
 
   cut() {

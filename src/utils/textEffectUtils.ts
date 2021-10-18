@@ -6,7 +6,7 @@ import store from '@/store'
 
 class Controller {
   private shadowScale = 0.2
-  private storkeScale = 0.04
+  private storkeScale = 0.1
   effects = {} as { [key: string]: any }
   constructor () {
     this.effects = this.getDefaultEffects()

@@ -51,6 +51,16 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateImageAsFrame.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+    template(v-if="isFrame")
+      div(class="popup-layer__item"
+          @click="detachImage.action")
+        svg-icon(
+          class="pointer"
+          :iconName="detachImage.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{detachImage.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     hr(v-if="inAdminMode && isLogin" class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`popup-layer__shortcut-${index}`"
@@ -114,6 +124,8 @@ import popupUtils from '@/utils/popupUtils'
 import layerFactary from '@/utils/layerFactary'
 import zindexUtils from '@/utils/zindexUtils'
 import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -171,6 +183,9 @@ export default Vue.extend({
     isImage(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
     },
+    isFrame(): boolean {
+      return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
+    },
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
@@ -201,6 +216,43 @@ export default Vue.extend({
         shortcutText: this.isGroup ? 'Cmd+Shift+G' : 'Cmd+G',
         action: () => {
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
+        }
+      }
+    },
+    detachImage(): any {
+      const currLayer = layerUtils.getCurrLayer as IFrame
+      let idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
+      if (idx === -1) {
+        idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
+      }
+
+      return {
+        icon: 'copy',
+        text: 'Detach Image',
+        shortcutText: '',
+        action: () => {
+          if (idx !== -1) {
+            const clips = generalUtils.deepCopy(currLayer.clips)
+            const srcObj = {
+              ...clips[idx].srcObj
+            }
+            clips[idx].srcObj = {
+              type: 'frame',
+              userId: '',
+              assetId: ''
+            }
+            const { width, height } = clips[idx].styles
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { clips })
+            layerUtils.addLayers(layerUtils.pageIndex, [layerFactary.newImage({
+              srcObj,
+              styles: {
+                x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
+                y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
+                width,
+                height
+              }
+            })])
+          }
         }
       }
     },
@@ -322,10 +374,15 @@ export default Vue.extend({
       ]
     },
     setBackgroundImage() {
+      const image = this.currSelectedInfo.layers[0] as IImage
+      const pageIndex = this.currSelectedInfo.pageIndex
       this._setBackgroundImage({
-        pageIndex: this.currSelectedInfo.pageIndex,
-        config: (this.currSelectedInfo.layers[0] as IImage)
+        pageIndex: pageIndex,
+        config: image
       })
+      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
+      pageUtils.updateBackgroundImageSize(pageIndex, width, height)
+      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
       ShortcutUtils.del()
     },
     closePopup() {

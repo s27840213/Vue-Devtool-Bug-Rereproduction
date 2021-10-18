@@ -93,16 +93,6 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-            //- nu-controller(v-if="!(layer.type === 'image' && layer.imgControl)"
-            //-   data-identifier="controller"
-            //-   :key="`controller-${index}`"
-            //-   :layerIndex="index"
-            //-   :pageIndex="pageIndex"
-            //-   :config="layer"
-            //-   :snapUtils="snapUtils"
-            //-   @setFocus="setFocus()"
-            //-   @getClosestSnaplines="getClosestSnaplines"
-            //-   @clearSnap="clearSnap")
         div(v-if="ImageUtils.isImgControl"
             class="dim-background"
             :style="styles('control')"

@@ -7,6 +7,8 @@
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+    svg-icon(class="pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
+      :iconName="gridIcon" :iconColor="'gray-2'" iconWidth="16px")
 </template>
 
 <script lang="ts">
@@ -19,7 +21,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     ratioInPercent: {
       get(): number {
@@ -28,14 +31,22 @@ export default Vue.extend({
       set(val: number): void {
         this.setScaleRatio(Math.round(val * 100))
       }
+    },
+    gridIcon(): string {
+      return `grid${this.isShowPagePreview ? '-selected' : ''}`
     }
   },
   methods: {
     ...mapMutations({
-      _setScaleRatio: 'SET_pageScaleRatio'
+      _setScaleRatio: 'SET_pageScaleRatio',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
+    },
+    setIsShowPagePreview(show: boolean) {
+      console.log('function in progress...')
+      // this._setIsShowPagePreview(show)
     }
   }
 })
@@ -45,7 +56,7 @@ export default Vue.extend({
 .scale-ratio-editor {
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto auto auto auto;
   background-color: setColor(white);
   align-items: center;
   box-shadow: 0px 0px 5px setColor(gray-2, 0.3);

@@ -17,6 +17,8 @@ const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
 
 export interface IUserModule {
   token: string,
+  uname: string,
+  shortName: string,
   userId: string,
   role: number,
   adminMode: boolean,
@@ -31,6 +33,8 @@ export interface IUserModule {
 
 const getDefaultState = (): IUserModule => ({
   token: '',
+  uname: '',
+  shortName: '',
   userId: '',
   role: -1,
   adminMode: true,
@@ -240,8 +244,18 @@ const actions: ActionTree<IUserModule, unknown> = {
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
       const newToken = data.data.token as string // token may be refreshed
+      const uname = data.data.user_name
+      const words = uname.split(' ')
+      let shortName = ''
+      if (words.length > 1) {
+        shortName = (words[0][0] + words[1][0]).toUpperCase()
+      } else {
+        shortName = (uname.substring(0, 2)).toUpperCase()
+      }
       commit('SET_STATE', {
         downloadUrl: data.data.download_url,
+        uname: uname,
+        shortName: shortName,
         userId: data.data.user_id,
         role: data.data.role,
         verUni: data.data.ver_uni

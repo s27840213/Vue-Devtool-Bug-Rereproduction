@@ -13,9 +13,9 @@ describe('Flow: Image, Text, Group', () => {
     describe(`format ${btnText}`, () => {
       it('add new design', () => {
         cy.contains('New Design')
-          .click();
+          .click()
         cy.contains('Templates')
-          .click();
+          .click()
       })
 
       it(`select page format ${btnText}`, () => {
@@ -46,31 +46,26 @@ describe('Flow: Image, Text, Group', () => {
         }).as('unsplashApi')
         cy.contains('Photos').click()
         cy.wait('@unsplashApi')
-        cy.get('.gallery-photo__img').eq(0).click()
-  
+        cy.get('.gallery-photo__img')
+          .eq(0)
+          .click()
+        
         cy.get('.nu-controller__content')
           .eq(0)
-          .trigger('mousedown', 20, 20)
-          .trigger('mousemove', 20, -200, { force: true })
-          .trigger('mouseup', { force: true })
+          .dragTo(0, -200)
       })
 
       it('add second image', () => {
-        cy.get('.gallery-photo__img').eq(1).click()
-        cy.wait(1000)
-        cy.get('.nu-controller__content')
+        cy.get('.gallery-photo__img')
           .eq(1)
-          .then($el => {
-            const { left, top } = $el.position()
-            const width = $el.width()
-            const height = $el.height()
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + width, top)
-              .trigger('mousemove', left + width * 0.7, top + height * 0.3, { force: true })
-              .trigger('mouseup', { force: true })
-            cy.get('.nu-controller__content').eq(0).click()
-          })
+          .click()
+        cy.wait(500)
+        cy.get('.control-point')
+          .eq(2)
+          .dragTo(-100, -100)
+        cy.get('.nu-controller__content')
+          .eq(0)
+          .click({ force: true })
       })
   
       it('add heading', () => {
@@ -78,218 +73,77 @@ describe('Flow: Image, Text, Group', () => {
         cy.contains('Text').click()
         cy.wait('@listApi')
         cy.get('.btn-text-heading').click()
-        cy.wait(1000)
+        cy.wait(500)
         cy.get('.text__body')
-          .click()
           .type('{selectall}{backspace}我最愛Vivipic')
-  
+        cy.deselectAll()
         cy.get('.nu-controller__content')
           .eq(2)
-          .then($el => {
-            const offsetx = $el.width() / 2
-            const offsety = $el.height() / 2
-            const { left, top } = $el.position()
-            cy.get('.pages-wrapper')
-              .first()
-              .click(0, 0)
-              .type('{meta}d')
-            cy.get('.nu-text')
-              .click({ force: true })
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + offsetx, top + offsety)
-              .trigger('mousemove', left + offsetx + 100, top + offsety, { force: true })
-              .trigger('mouseup', { force: true })
-          })
+          .dragTo(100, 0)
       })
     
       it('add subheading', () => {
         cy.get('.btn-text-subheading').click()
-        cy.wait(1000)
+        cy.wait(500)
         cy.get('.text__body')
-          .click()
           .type('{selectall}{backspace}Vivipic最棒了')
-  
+        cy.deselectAll()
         cy.get('.nu-controller__content')
           .eq(3)
-          .then($el => {
-            const offsetx = $el.width() / 2
-            const offsety = $el.height() / 2
-            const { left, top } = $el.position()
-            cy.get('.pages-wrapper')
-              .first()
-              .type('{meta}d')
-            cy.get('.nu-text')
-              .eq(1)
-              .click({ force: true })
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + offsetx, top + offsety)
-              .trigger('mousemove', left + offsetx, top + offsety + 50, { force: true })
-              .trigger('mouseup', { force: true })
-          })
+          .dragTo(0, 50)
       })
   
       it('select all', () => {
-        cy.get('.pages-wrapper')
-          .first()
-          .click()
-          .type('{meta}d')
-          .type('{meta}a')
-  
+        cy.deselectAll()
+        cy.selectAll()
+
         cy.get('.nu-controller__content')
           .trigger('mousedown', { force: true })
           .trigger('mouseup', { force: true })
       })
-  
+
       it('rotate 30deg', () => {
-        cy.get('.nu-controller__content')
-          .then($el => {
-            const { top, left } = $el.position()
-            const width = $el.width()
-            const height = $el.height()
-  
-            const rotater = {
-              x: left + (width / 2),
-              y: top + height + 15,
-            }
-            const destination = {
-              x: rotater.x - 20,
-              y: rotater.y + (20 * Math.sqrt(3))
-            }
-  
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', rotater.x, rotater.y)
-              .trigger('mousemove', destination.x, destination.y, { force: true })
-              .trigger('mouseup', { force: true })
-          })
-  
-        cy.get('.pages-wrapper')
-          .first()
-          .type('{meta}d')
-          .type('{meta}a')
-  
-        cy.get('.nu-controller__content')
-          .trigger('mousedown', { force: true })
-          .trigger('mouseup', { force: true })
+        cy.get('.control-point__rotater')
+          .dragTo(-20, 20 * Math.sqrt(3))
       })
     
       it('zoom in', () => {
-        cy.get('.nu-controller__content')
-          .then($el => {
-            const { top, left } = $el.position()
-            cy.get('.control-point')
-              .eq(2)
-              .then($el => {
-                const scaleBtn = {
-                  x: left + $el.position().left + 2,
-                  y: top + $el.position().top + 2
-                }
-                cy.get('.pages-wrapper')
-                  .first()
-                  .trigger('mousedown', scaleBtn.x, scaleBtn.y)
-                  .trigger('mousemove', scaleBtn.x + 30, scaleBtn.y + 30, { force: true })
-                  .trigger('mouseup', { force: true })
-              })
-          })
+        cy.get('.control-point')
+          .eq(2)
+          .dragTo(30, 30)
       })
     
       it('rotate -45deg', () => {
-        cy.get('.nu-controller__content')
-          .then($el => {
-            const { top, left } = $el.position()
-            cy.get('.control-point__rotater-wrapper')
-              .then($el => {
-                const rotater = {
-                  x: left + $el.position().left + 15,
-                  y: top + $el.position().top + 15
-                }
-                cy.get('.pages-wrapper')
-                  .first()
-                  .trigger('mousedown', rotater.x, rotater.y)
-                  .trigger('mousemove', rotater.x + 50, rotater.y + 50 * (2 + Math.sqrt(3)), { force: true })
-                  .trigger('mouseup', { force: true })
-              })
-          })
+        cy.get('.control-point__rotater')
+          .dragTo(50, 50 * (2 + Math.sqrt(3)))
       })
     
       it('zoom out', () => {
-        cy.get('.nu-controller__content')
-          .then($el => {
-            const { top, left } = $el.position()
-            cy.get('.control-point')
-              .eq(3)
-              .then($el => {
-                const scaleBtn = {
-                  x: left + $el.position().left + 2,
-                  y: top + $el.position().top + 2
-                }
-                cy.wrap($el)
-                  .trigger('mousedown')
-  
-                cy.get('.pages-wrapper')
-                  .first()
-                  .trigger('mousemove', scaleBtn.x, scaleBtn.y, { force: true })
-                  .trigger('mousemove', scaleBtn.x + 30, scaleBtn.y - 30, { force: true })
-                  .trigger('mouseup', { force: true })
-              })
-          })
+        cy.get('.control-point')
+          .eq(3)
+          .dragTo(30, -30)
       })
     
       it('text grouping', () => {
-        cy.get('.pages-wrapper')
-          .first()
-          .click()
-          .type('{meta}d')
+        cy.deselectAll()
     
         cy.get('.nu-controller__content')
           .eq(2)
-          .then($el => {
-            const { left, top } = $el.position()
-            const width = $el.width()
-            const height = $el.height()
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + width / 2, top + height / 2)
-              .trigger('mouseup', left + width / 2, top + height / 2, { force: true })
-          })
+          .select()
   
         cy.get('.nu-controller__content')
           .eq(3)
-          .then($el => {
-            const { left, top } = $el.position()
-            const width = $el.width()
-            const height = $el.height()
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + width / 2, top + height / 2, { shiftKey: true })
-              .trigger('mouseup', left + width / 2, top + height / 2, { force: true })
-          })
+          .select()
       })
   
       it('move text group', () => {
         cy.get('.nu-controller__content')
           .last()
-          .then($el => {
-            const { left, top } = $el.position()
-            const w = $el.width() / 4
-            const h = $el.height() / 4
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mousedown', left + w, top + h)
-              .trigger('mousemove', left + w + 50, top + h, { force: true })
-  
-            cy.get('.pages-wrapper')
-              .first()
-              .trigger('mouseup')
-          })
+          .dragTo(50, 0, { force: true })
       })
   
       it('takes a screenshot', () => {
-        cy.get('.pages-wrapper')
-          .first()
-          .type('{meta}d')
+        cy.deselectAll()
         cy.screenshot(`${size.width}x${size.height}`, { capture: 'runner' })
       })
     })

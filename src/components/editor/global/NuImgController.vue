@@ -158,7 +158,6 @@ export default Vue.extend({
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent) {
-      console.log(this.getLayerScale)
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {

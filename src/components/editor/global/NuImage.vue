@@ -17,8 +17,31 @@ export default Vue.extend({
   props: {
     config: Object
   },
+  created() {
+    const { type } = this.config.srcObj
+    fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre')))
+    fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))
+  },
+  data() {
+    return {
+      width: 0
+    }
+  },
+  watch: {
+    getImgWidth() {
+      this.width = this.sizeMap(this.getImgWidth)
+    },
+    width() {
+      const { type } = this.config.srcObj
+      fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'pre')))
+      fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'next')))
+    }
+  },
   components: { NuAdjustImage },
   computed: {
+    getImgWidth(): number {
+      return this.config.styles.width
+    },
     src(): string {
       if (this.config.src) {
         return this.config.src
@@ -40,6 +63,17 @@ export default Vue.extend({
         transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
         width: `${styles.imgWidth}px`,
         height: `${styles.imgHeight}px`
+      }
+    },
+    sizeMap(width: number) {
+      if (width < 540) {
+        return 540
+      } else if (width < 800) {
+        return 800
+      } else if (width < 1080) {
+        return 1080
+      } else {
+        return 1600
       }
     }
   }
