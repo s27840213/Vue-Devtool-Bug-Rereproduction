@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 h-5") LOG IN
+        span(class="text-blue-1 heading-5") LOG IN
       div
         btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
@@ -40,6 +40,10 @@ div(style="position:relative;")
       div
         span New to Here?
         btn(:type="'icon'" class="h-link" @click.native="onSignupClicked()") Sign up
+      div
+        button(@click="onCloseClicked")
+              svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
     div(v-if="currentPageIndex === 1" class="login")
       div(class="text-center")
         span(class="text-blue-1 h-5") Forgot you password?
@@ -289,7 +293,11 @@ export default Vue.extend({
       }
     },
     onSignupClicked () {
-      this.$router.push({ name: 'SignUp' })
+      if (this.redirect) {
+        this.$router.push({ name: 'SignUp', query: { redirect: this.redirect } })
+      } else {
+        this.$router.push({ name: 'SignUp' })
+      }
     },
     async onLogInClicked() {
       this.isLoginClicked = true
@@ -321,6 +329,13 @@ export default Vue.extend({
     onBackClicked() {
       this.currentPageIndex = 0
       this.isLoginClicked = false
+    },
+    onCloseClicked() {
+      if (this.redirect) {
+        this.$router.push({ path: this.redirect })
+      } else {
+        this.$router.push({ name: 'Home' })
+      }
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
@@ -494,6 +509,7 @@ export default Vue.extend({
 }
 
 .login-p0 {
+  position: relative;
   padding: 0 32px 20px 32px;
   > div {
     margin-bottom: 2vh;
@@ -596,6 +612,11 @@ export default Vue.extend({
     &:nth-child(8) {
       // signup hint
       font-size: 14px;
+    }
+    &:nth-child(9) {
+      position: absolute;
+      right: 15px;
+      top: 15px;
     }
   }
 }

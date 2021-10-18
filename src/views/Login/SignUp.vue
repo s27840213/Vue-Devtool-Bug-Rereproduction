@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Start with Vivipic
+        span(class="text-blue-1 heading-5") Start with Vivipic
       div
         div Let Vivipic be your good design assistant in the E-commerce world!
         div Sign up now, enjoy unlimited templates for free!
@@ -22,6 +22,10 @@ div(style="position:relative;")
       div
         span Already sign up?
         btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
+      div
+        button(@click="onCloseClicked")
+              svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
     div(v-if="currentPageIndex === 1" class="signup signup-p1")
       div
         button(@click="onBackClicked")
@@ -275,12 +279,23 @@ export default Vue.extend({
       this.isLoading = false
     },
     onLoginClicked() {
-      this.$router.push({ name: 'Login' })
+      if (this.redirect) {
+        this.$router.push({ name: 'Login', query: { redirect: this.redirect } })
+      } else {
+        this.$router.push({ name: 'Login' })
+      }
     },
     onBackClicked() {
       this.isLoading = true
       this.currentPageIndex = 0
       this.isLoading = false
+    },
+    onCloseClicked() {
+      if (this.redirect) {
+        this.$router.push({ path: this.redirect })
+      } else {
+        this.$router.push({ name: 'Home' })
+      }
     },
     async onSignUpClicked() {
       this.emailResponseError = false
@@ -345,7 +360,7 @@ export default Vue.extend({
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
         await store.dispatch('user/login', { token: data.token })
-        this.$router.push({ name: 'Editor' })
+        this.$router.push({ path: this.redirect || '/' })
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
@@ -420,6 +435,7 @@ export default Vue.extend({
   }
 }
 .signup-p0 {
+  position: relative;
   padding: 0 32px 32px 32px;
   > div {
     &:nth-child(1) { // img
@@ -504,6 +520,12 @@ export default Vue.extend({
       width: 80%;
       font-size: 14px;
       margin-bottom: 2vh;
+    }
+
+    &:nth-child(8) { // close icon
+      position: absolute;
+      right: 15px;
+      top: 15px;
     }
   }
 }
