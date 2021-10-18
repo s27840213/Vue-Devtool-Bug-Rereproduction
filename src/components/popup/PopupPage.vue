@@ -276,7 +276,7 @@ export default Vue.extend({
           imgWidth: width,
           imgHeight: height
         })
-        layerUtils.addLayers(this.lastSelectedPageIndex, detachedBackgroundImage.config)
+        layerUtils.addLayers(this.lastSelectedPageIndex, [detachedBackgroundImage.config])
         this._setBackgroundImage({
           pageIndex: this.lastSelectedPageIndex,
           config: this.baseBgImgConfig
