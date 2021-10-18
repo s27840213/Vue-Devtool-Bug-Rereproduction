@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211015"
+  version: "20211018"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -736,6 +736,12 @@ definitions:
             type: number
             description: 0 (default) for return all font key id in single array, 1 for
               return key id in various arrays according to title
+          group_id:
+            type: string
+            description: group id
+          aspect:
+            type: string
+            description: limit aspect type for return templates
   addDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
