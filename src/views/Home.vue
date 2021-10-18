@@ -27,11 +27,11 @@
         img(:src="require('@/assets/img/png/home-plaque.png')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
         div(class="home-content-plaque-subtitle") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
-      div(class="home-content-feature" style="display: none;")
-        div(style="height: 140px;" class="x-scrollbar")
-          div(v-for="item in featureList" class="home-content-feature-item")
-            img(:src="require(`@/assets/img/svg/home-feature/${item.name}.svg`)")
-            div(class="pt-10 body-1") {{item.title}}
+      //- div(class="home-content-feature" style="display: none;")
+      //-   div(style="height: 140px;" class="x-scrollbar")
+      //-     div(v-for="item in featureList" class="home-content-feature-item")
+      //-       img(:src="require(`@/assets/img/svg/home-feature/${item.name}.svg`)")
+      //-       div(class="pt-10 body-1") {{item.title}}
       div(class="home-content-title label-lg" style="display: none;") 熱門模板
     nu-footer
 </template>
