@@ -55,11 +55,7 @@
       design-item(v-for="design in folder.designs"
                   :key="design.id"
                   :path="path"
-                  :name="design.name"
-                  :width="design.width"
-                  :height="design.height"
-                  :designId="design.id"
-                  :thumbnail="design.thumbnail")
+                  :config="design")
 </template>
 
 <script lang="ts">

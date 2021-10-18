@@ -12,9 +12,9 @@
             draggable="false"
             :src="appliedUrl")
     div(class="design-name")
-      span {{ name }}
+      span {{ config.name }}
     div(class="design-size")
-      span {{ `${width}x${height}` }}
+      span {{ `${config.width}x${config.height}` }}
     div(class="dragged-thumbnail" :style="draggedImageStyles()")
       img(:src="appliedUrl")
 </template>
@@ -27,14 +27,10 @@ import { mapMutations } from 'vuex'
 export default Vue.extend({
   props: {
     path: Array,
-    name: String,
-    width: Number,
-    height: Number,
-    designId: String,
-    thumbnail: String
+    config: Object
   },
   created() {
-    imageUtils.getImageSize(this.thumbnail, this.width, this.height).then((size) => {
+    imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
       const { width, height } = size
       this.aspectRatio = width / height
     })
@@ -48,7 +44,7 @@ export default Vue.extend({
   },
   watch: {
     thumbnail(newVal) {
-      imageUtils.getImageSize(newVal, this.width, this.height).then((size) => {
+      imageUtils.getImageSize(newVal, this.config.width, this.config.height).then((size) => {
         const { width, height } = size
         this.aspectRatio = width / height
       })
@@ -56,7 +52,7 @@ export default Vue.extend({
   },
   computed: {
     appliedUrl() {
-      return this.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.thumbnail
+      return this.config.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.config.thumbnail
     }
   },
   methods: {
@@ -87,19 +83,23 @@ export default Vue.extend({
         }
       }
     },
-    draggedImageStyles() {
-      return this.isDragged ? {
-        left: `${this.draggedImageCoordinate.x}px`,
-        top: `${this.draggedImageCoordinate.y}px`,
-        display: 'block'
-      } : {}
+    draggedImageStyles(): {[key: string]: string} {
+      if (this.isDragged) {
+        return {
+          left: `${this.draggedImageCoordinate.x}px`,
+          top: `${this.draggedImageCoordinate.y}px`,
+          display: 'block'
+        }
+      } else {
+        return {}
+      }
     },
     handleDragStart(e: DragEvent) {
       const target = e.target as HTMLElement
       target.style.opacity = '0'
       this.setDraggingDesign({
         path: this.path,
-        id: this.designId
+        id: this.config.id
       })
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
