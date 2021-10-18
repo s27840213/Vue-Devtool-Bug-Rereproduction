@@ -13,28 +13,28 @@ class DesignUtils {
             width: 1200,
             height: 1200,
             id: '0',
-            thumbnail: ''
+            thumbnail: require('@/assets/img/png/mydesign/sample1.png')
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
             id: '1',
-            thumbnail: ''
+            thumbnail: require('@/assets/img/png/mydesign/sample2.png')
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
             id: '2',
-            thumbnail: ''
+            thumbnail: require('@/assets/img/png/mydesign/sample3.png')
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
             id: '3',
-            thumbnail: ''
+            thumbnail: require('@/assets/img/png/mydesign/sample4.png')
           }
         ],
         subFolders: [
