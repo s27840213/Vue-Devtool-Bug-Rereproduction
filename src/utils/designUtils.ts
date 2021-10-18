@@ -1,5 +1,5 @@
 import { IFolder } from '@/interfaces/design'
-
+import store from '@/store'
 class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     return [
@@ -12,24 +12,28 @@ class DesignUtils {
             name: 'Name',
             width: 1200,
             height: 1200,
+            id: '0',
             thumbnail: ''
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
+            id: '1',
             thumbnail: ''
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
+            id: '2',
             thumbnail: ''
           },
           {
             name: 'Name',
             width: 1200,
             height: 1200,
+            id: '3',
             thumbnail: ''
           }
         ],
@@ -132,6 +136,30 @@ class DesignUtils {
         targetFolder.isSelected = true
       }
     }
+  }
+
+  move(id: string, source: string[], destination: string[]) {
+    const folders = store.getters['design/getFolders']
+    const sourceFolder = this.search(folders, source)
+    if (!sourceFolder) {
+      console.log('source path doesn\'t exist')
+      return
+    }
+    const designIndex = sourceFolder.designs.findIndex(design => design.id === id)
+    if (designIndex === -1) {
+      console.log('source design doesn\'t exist')
+      return
+    }
+    const design = sourceFolder.designs[designIndex]
+    sourceFolder.designs.splice(designIndex, 1)
+
+    const destFolder = this.search(folders, destination)
+    if (!destFolder) {
+      console.log('destination path doesn\'t exist')
+      return
+    }
+    destFolder.designs.push(design)
+    store.commit('design/SET_folders', folders)
   }
 }
 

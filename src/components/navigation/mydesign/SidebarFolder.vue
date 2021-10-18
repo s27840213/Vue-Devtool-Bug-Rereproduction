@@ -1,6 +1,11 @@
 <template lang="pug">
   section
     div(:class="[`nav-folder-${level}`, {'bg-blue-1': folder.isSelected}]"
+        :style="draggedOverStyles()"
+        @dragenter="handleDragEnter"
+        @dragleave="handleDragLeave"
+        @dragover.prevent
+        @drop="handleDrop"
         @click="handleSelection")
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")
@@ -11,14 +16,17 @@
             :style="expandIconStyles()")
       svg-icon(iconName="folder"
           iconColor="white"
-          iconWidth="20px")
-      div(:class="`nav-folder-${level}__text`") {{ folder.name }}
+          iconWidth="20px"
+          style="pointer-events: none")
+      div(:class="`nav-folder-${level}__text`"
+          style="pointer-events: none") {{ folder.name }}
     sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   name: 'sidebar-folder',
@@ -26,6 +34,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      isDraggedOver: false
     }
   },
   props: {
@@ -35,7 +44,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder'
+      currentSelectedFolder: 'getCurrSelectedFolder',
+      draggingDesign: 'getDraggingDesign'
     })
   },
   methods: {
@@ -44,13 +54,10 @@ export default Vue.extend({
       setExpand: 'SET_expand'
     }),
     expandIconStyles() {
-      if (this.folder.isExpanded) {
-        return {}
-      } else {
-        return {
-          transform: 'rotate(-90deg)'
-        }
-      }
+      return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
+    },
+    draggedOverStyles() {
+      return (this.isDraggedOver && !this.folder.isSelected) ? { 'background-color': '#2C2F43' } : {}
     },
     toggleExpansion() {
       // const pseudoSelectInfo = `f:${[...this.parents, this.folder.name].join('/')}`
@@ -69,6 +76,18 @@ export default Vue.extend({
     },
     handleSelection() {
       this.setCurrentSelectedFolder(`f:${[...this.parents, this.folder.name].join('/')}`)
+    },
+    handleDragEnter() {
+      this.isDraggedOver = true
+    },
+    handleDragLeave() {
+      this.isDraggedOver = false
+    },
+    handleDrop() {
+      this.isDraggedOver = false
+      if (this.folder.isSelected) return
+      const { path, id } = this.draggingDesign
+      designUtils.move(id, path, [...(this.parents as string[]), this.folder.name as string])
     }
   }
 })

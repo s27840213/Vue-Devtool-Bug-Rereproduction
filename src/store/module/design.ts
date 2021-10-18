@@ -1,16 +1,18 @@
-import { IDesign, IFolder } from '@/interfaces/design'
+import { IDesign, IDraggingDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 interface IDesignSidebarState {
   currentSelectedFolder: string,
-  folders: IFolder[]
+  folders: IFolder[],
+  draggingDesign: IDraggingDesign | undefined
 }
 
 const getDefaultState = (): IDesignSidebarState => ({
   currentSelectedFolder: 'a',
-  folders: []
+  folders: [],
+  draggingDesign: undefined
 })
 
 const state = getDefaultState()
@@ -23,6 +25,9 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   },
   getDesigns(state: IDesignSidebarState, path: string[]): IDesign[] {
     return designUtils.search(state.folders, path)?.designs ?? []
+  },
+  getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
+    return state.draggingDesign
   }
 }
 
@@ -42,6 +47,9 @@ const mutations: MutationTree<IDesignSidebarState> = {
   },
   SET_folders(state: IDesignSidebarState, folders: IFolder[]) {
     state.folders = folders
+  },
+  SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign) {
+    state.draggingDesign = draggingDesign
   }
 }
 

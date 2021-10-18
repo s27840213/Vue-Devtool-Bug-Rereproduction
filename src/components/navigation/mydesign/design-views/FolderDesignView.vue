@@ -37,7 +37,9 @@
       div(class="folder-design-view__folder-title")
         span 資料夾
     div(v-if="foldersExpanded" class="folder-design-view__folders")
-      folder-item(v-for="subFolder in folder.subFolders" :name="subFolder.name"
+      folder-item(v-for="subFolder in folder.subFolders"
+                  :path="path"
+                  :name="subFolder.name"
                   @goto="handleGotoFolder(subFolder.name)")
     div(class="folder-design-view__design-header")
       div(class="folder-design-view__expand-icon-container"
@@ -51,9 +53,11 @@
         span 設計
     div(v-if="designsExpanded" class="folder-design-view__designs")
       design-item(v-for="design in folder.designs"
+                  :path="path"
                   :name="design.name"
                   :width="design.width"
                   :height="design.height"
+                  :designId="design.id"
                   :thumbnail="design.thumbnail")
 </template>
 
@@ -81,11 +85,14 @@ export default Vue.extend({
       currentSelectedFolder: 'getCurrSelectedFolder',
       folders: 'getFolders'
     }),
+    path(): string[] {
+      return designUtils.makePath(this.currentSelectedFolder)
+    },
     folder(): IFolder {
-      return designUtils.search(this.folders, designUtils.makePath(this.currentSelectedFolder)) as IFolder
+      return designUtils.search(this.folders, this.path) as IFolder
     },
     parents(): string[] {
-      const path = designUtils.makePath(this.currentSelectedFolder)
+      const path = this.path
       return path.slice(0, path.length - 1)
     }
   },
@@ -112,7 +119,7 @@ export default Vue.extend({
     },
     handleGotoFolder(name: string) {
       this.setExpand({
-        path: designUtils.makePath(this.currentSelectedFolder),
+        path: this.path,
         isExpanded: true
       })
       this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${name}`)

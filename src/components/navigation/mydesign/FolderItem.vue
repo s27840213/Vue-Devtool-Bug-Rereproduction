@@ -1,8 +1,16 @@
 <template lang="pug">
   div(class="folder-item")
     div(class="folder-block"
+        :class="isMouseOver ? 'block-over' : 'block'"
+        @dragenter="handleMouseEnter"
+        @mouseenter="handleMouseEnter"
+        @dragleave="handleMouseLeave"
+        @mouseleave="handleMouseLeave"
+        @dragover.prevent
+        @drop="handleDrop"
         @click="emitGoto")
-      svg-icon(iconName="folder"
+      svg-icon(style="pointer-events: none"
+              iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
     div(class="folder-name")
@@ -10,15 +18,39 @@
 </template>
 
 <script lang="ts">
+import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
+    path: Array,
     name: String
+  },
+  data() {
+    return {
+      isMouseOver: false
+    }
+  },
+  computed: {
+    ...mapGetters('design', {
+      draggingDesign: 'getDraggingDesign'
+    })
   },
   methods: {
     emitGoto() {
       this.$emit('goto')
+    },
+    handleMouseEnter() {
+      this.isMouseOver = true
+    },
+    handleMouseLeave() {
+      this.isMouseOver = false
+    },
+    handleDrop() {
+      this.isMouseOver = false
+      const { path, id } = this.draggingDesign
+      designUtils.move(id, path, [...(this.path as string[]), this.name as string])
     }
   }
 })
@@ -32,14 +64,18 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid setColor(gray-4);
   box-sizing: border-box;
   border-radius: 4px;
   cursor: pointer;
-  &:hover {
-    border: none;
-    background-color: setColor(gray-5);
-  }
+}
+
+.block {
+  border: 1px solid setColor(gray-4);
+}
+
+.block-over {
+  border: none;
+  background-color: setColor(gray-5);
 }
 
 .folder-name {
