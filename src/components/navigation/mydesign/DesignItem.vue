@@ -5,24 +5,22 @@
       @dragstart="handleDragStart"
       @drag="handleDragging"
       @dragend="handleDragEnd")
-      img(v-if="thumbnail === ''" class="design-thumbnail"
-          draggable="false"
-          :src="require('@/assets/img/svg/image-preview.svg')")
-      img(v-else class="design-thumbnail"
-          draggable="false"
-          :src="thumbnail")
+      div(class="design-img-container"
+        :style="containerStyles()")
+        img(class="design-thumbnail"
+            :style="imageStyles()"
+            draggable="false"
+            :src="appliedUrl")
     div(class="design-name")
       span {{ name }}
     div(class="design-size")
       span {{ `${width}x${height}` }}
-    div(v-if="isDragged" class="dragged-thumbnail" :style="draggedImageStyles()")
-      img(v-if="thumbnail === ''"
-          :src="require('@/assets/img/svg/image-preview.svg')")
-      img(v-else
-          :src="thumbnail")
+    div(class="dragged-thumbnail" :style="draggedImageStyles()")
+      img(:src="appliedUrl")
 </template>
 
 <script lang="ts">
+import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 import { mapMutations } from 'vuex'
 
@@ -35,34 +33,78 @@ export default Vue.extend({
     designId: String,
     thumbnail: String
   },
+  created() {
+    imageUtils.getImageSize(this.thumbnail, this.width, this.height).then((size) => {
+      const { width, height } = size
+      this.aspectRatio = width / height
+    })
+  },
   data() {
     return {
       isDragged: false,
-      draggedImageCoordinate: { x: 0, y: 0 }
+      draggedImageCoordinate: { x: 0, y: 0 },
+      aspectRatio: 1
+    }
+  },
+  watch: {
+    thumbnail(newVal) {
+      imageUtils.getImageSize(newVal, this.width, this.height).then((size) => {
+        const { width, height } = size
+        this.aspectRatio = width / height
+      })
     }
   },
   computed: {
+    appliedUrl() {
+      return this.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.thumbnail
+    }
   },
   methods: {
     ...mapMutations('design', {
       setDraggingDesign: 'SET_draggingDesign'
     }),
-    draggedImageStyles() {
-      return {
-        left: `${this.draggedImageCoordinate.x}px`,
-        top: `${this.draggedImageCoordinate.y}px`
+    containerStyles() {
+      if (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) {
+        return {
+          padding: '26px'
+        }
+      } else {
+        return {
+          padding: '17px'
+        }
       }
+    },
+    imageStyles() {
+      if (this.aspectRatio > 1) {
+        return {
+          width: '100%',
+          height: 'auto'
+        }
+      } else {
+        return {
+          width: 'auto',
+          height: '100%'
+        }
+      }
+    },
+    draggedImageStyles() {
+      return this.isDragged ? {
+        left: `${this.draggedImageCoordinate.x}px`,
+        top: `${this.draggedImageCoordinate.y}px`,
+        display: 'block'
+      } : {}
     },
     handleDragStart(e: DragEvent) {
       const target = e.target as HTMLElement
       target.style.opacity = '0'
-      this.isDragged = true
       this.setDraggingDesign({
         path: this.path,
         id: this.designId
       })
+      document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
     handleDragging(e: DragEvent) {
+      this.isDragged = true
       const target = e.target as HTMLElement
       target.style.opacity = '1'
       this.draggedImageCoordinate = {
@@ -72,25 +114,46 @@ export default Vue.extend({
     },
     handleDragEnd() {
       this.isDragged = false
+      document.removeEventListener('dragover', this.preventDefaultDragOver, false)
+    },
+    preventDefaultDragOver(e: DragEvent) {
+      e.preventDefault()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.design-block {
-  width: 205px;
-  height: 182px;
+.design-item {
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.design-block {
   border: 1px solid setColor(gray-4);
   box-sizing: border-box;
   border-radius: 4px;
+  width: 100%;
+  padding-top: 90%;
+  position: relative;
+}
+
+.design-img-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 .design-name {
-  width: 205px;
+  width: 100%;
   height: 40px;
   display: flex;
   align-items: center;
@@ -104,7 +167,7 @@ export default Vue.extend({
 }
 
 .design-size {
-  width: 205px;
+  width: 100%;
   height: 20px;
   display: flex;
   align-items: center;
@@ -119,6 +182,7 @@ export default Vue.extend({
 }
 
 .dragged-thumbnail {
+  display: none;
   position: fixed;
   transform: translate(-50%, -50%) scale(0.5);
   pointer-events: none;

@@ -2,41 +2,12 @@ import { IFolder } from '@/interfaces/design'
 import store from '@/store'
 class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
-    return [
+    const template: IFolder[] = [
       {
         name: 'Toby',
         isExpanded: false,
         isSelected: false,
-        designs: [
-          {
-            name: 'Name',
-            width: 1200,
-            height: 1200,
-            id: '0',
-            thumbnail: require('@/assets/img/png/mydesign/sample1.png')
-          },
-          {
-            name: 'Name',
-            width: 1200,
-            height: 1200,
-            id: '1',
-            thumbnail: require('@/assets/img/png/mydesign/sample2.png')
-          },
-          {
-            name: 'Name',
-            width: 1200,
-            height: 1200,
-            id: '2',
-            thumbnail: require('@/assets/img/png/mydesign/sample3.png')
-          },
-          {
-            name: 'Name',
-            width: 1200,
-            height: 1200,
-            id: '3',
-            thumbnail: require('@/assets/img/png/mydesign/sample4.png')
-          }
-        ],
+        designs: [],
         subFolders: [
           {
             name: '素材1',
@@ -86,6 +57,16 @@ class DesignUtils {
         subFolders: []
       }
     ]
+    for (let i = 0; i < 15; i++) {
+      template[0].designs.push({
+        name: `Name${i + 1}`,
+        width: 1200,
+        height: 1200,
+        id: `${i}`,
+        thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`)
+      })
+    }
+    return template
   }
 
   makePath(selectInfo: string): string[] {

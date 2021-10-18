@@ -53,6 +53,7 @@
         span 設計
     div(v-if="designsExpanded" class="folder-design-view__designs")
       design-item(v-for="design in folder.designs"
+                  :key="design.id"
                   :path="path"
                   :name="design.name"
                   :width="design.width"
@@ -104,14 +105,8 @@ export default Vue.extend({
     foldersExpansionIconStyles() {
       return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
-    foldersStyles() {
-      return this.foldersExpanded ? { 'max-height': '93px' } : { 'max-height': '0px' } // 63 + 10 + 20
-    },
     designsExpansionIconStyles() {
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
-    designsStyles() {
-      return this.designsExpanded ? { 'max-height': '100%' } : { 'max-height': '0px' }
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
@@ -136,12 +131,15 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .folder-design-view {
-  padding-top: 94px;
-  padding-left: 55px;
-  padding-right: 65px;
   text-align: left;
   font-family: NotoSansTC;
+  overflow-y: auto;
+  > div {
+    margin-left: 55px;
+    margin-right: 65px;
+  }
   &__folder-name {
+    margin-top: 94px;
     font-size: 24px;
     font-weight: 700;
     line-height: 40px;
@@ -231,8 +229,21 @@ export default Vue.extend({
     margin-bottom: 45px;
   }
   &__designs {
-    display: flex;
-    gap: 24px;
+    display: grid;
+    grid-gap: 25px;
+    justify-items: stretch;
+    width: calc(100% - 120px);
+    margin-bottom: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media(min-width: 976px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media(min-width: 1260px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    @media(min-width: 1560px) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
   }
 }
 
