@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImgSrc } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
@@ -20,6 +20,7 @@ import popup from '@/store/module/popup'
 import page from '@/store/module/page'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { SrcObj } from '@/interfaces/gallery'
 
 Vue.use(Vuex)
 
@@ -381,7 +382,7 @@ const mutations: MutationTree<IEditorState> = {
       targetLayer[k] = v
     })
   },
-  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj } }) {
     const frame = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IFrame
     const targetLayer = frame.clips[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {

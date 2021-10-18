@@ -1,4 +1,5 @@
 import { ICoordinate } from "./frame";
+import { SrcObj } from "./gallery";
 
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
@@ -108,16 +109,13 @@ export interface IShape extends ILayer<IStyle> {
   shapeType?: string
 }
 export interface IImage extends ILayer<IImageStyle> {
-  srcObj: {
-    type: string,
-    userId: string,
-    assetId: string
-  },
+  srcObj: SrcObj,
   clipPath: string,
   isClipper: boolean,
   isFrame?: boolean,
   imgControl: boolean
 }
+
 export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }

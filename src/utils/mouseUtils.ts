@@ -66,6 +66,19 @@ class MouseUtils {
       ...data.srcObj
     }
     LayerUtils.updateLayerProps(pageIndex, layerIndex, { clips })
+
+    const clip = clips[clipIdx]
+    console.log(data)
+    const {
+      imgWidth, imgHeight,
+      imgX, imgY
+    } = this.clipperHandler(data, clip.clipPath, clip.styles).styles
+    FrameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIdx, {
+      imgX,
+      imgY,
+      imgWidth,
+      imgHeight
+    })
   }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
