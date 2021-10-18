@@ -18,7 +18,6 @@ export default Vue.extend({
     config: Object
   },
   created() {
-    console.log(this.config)
     const { type } = this.config.srcObj
     fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre')))
     fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))

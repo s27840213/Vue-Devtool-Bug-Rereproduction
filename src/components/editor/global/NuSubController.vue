@@ -5,6 +5,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
+          @drop="onDrop($event)"
           @dblclick="onDblClick()"
           @click.left.stop="onClickEvent($event)")
         //- template(v-if="config.type === 'text' && config.active")
@@ -240,21 +241,7 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-    },
-    onDropClipper(e: DragEvent) {
-      switch (this.getLayerType) {
-        case 'image': {
-          const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-          break
-        }
-        case 'shape': {
-          const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
-          break
-        }
-      }
+      this.$emit('drop', e)
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)

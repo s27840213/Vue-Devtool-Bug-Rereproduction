@@ -308,9 +308,9 @@ class UploadUtils {
     const designId = store.getters.getPage(pageIndex).designId
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
-    for (const [i, layer] of pageJSON.layers.entries()) {
-      pageJSON.layers[i] = this.layerInfoFilter(layer)
-    }
+    // for (const [i, layer] of pageJSON.layers.entries()) {
+    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
+    // }
     console.log(pageJSON)
     console.log(designId)
 
@@ -365,6 +365,11 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
+          if (layer.styles.scale !== 1) {
+            layer.styles.imgWidth = layer.styles.width as number
+            layer.styles.imgHeight = layer.styles.height as number
+            layer.styles.scale = 1
+          }
           layer.imgControl = false
           break
         case 'tmp': {
@@ -505,6 +510,11 @@ class UploadUtils {
       }
       switch (type) {
         case 'image':
+          if (general.scale !== 1) {
+            general.width = styles.imgWidth
+            general.height = styles.imgHeight
+            general.scale = 1
+          }
           return {
             ...general,
             imgX: styles.imgX,

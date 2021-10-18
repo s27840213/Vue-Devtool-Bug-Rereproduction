@@ -239,16 +239,13 @@ export default Vue.extend({
               userId: '',
               assetId: ''
             }
-            let { width, height } = clips[idx].styles
-            width *= currLayer.styles.scale
-            height *= currLayer.styles.scale
-
+            const { width, height } = clips[idx].styles
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { clips })
             layerUtils.addLayers(layerUtils.pageIndex, [layerFactary.newImage({
               srcObj,
               styles: {
-                x: currLayer.styles.x + clips[idx].styles.x * currLayer.styles.scale + width / 4,
-                y: currLayer.styles.y + clips[idx].styles.y * currLayer.styles.scale + height / 4,
+                x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
+                y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
                 width,
                 height
               }

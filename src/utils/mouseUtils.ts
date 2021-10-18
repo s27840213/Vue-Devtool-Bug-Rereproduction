@@ -1,7 +1,7 @@
 /**
  */
 import store from '@/store'
-import { IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'
@@ -11,6 +11,10 @@ import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
 import AssetUtils from './assetUtils'
 import generalUtils from './generalUtils'
+import FrameUtils from './frameUtils'
+import { drop } from 'lodash'
+import { Layer } from 'konva/types/Layer'
+import page from '@/store/module/page'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -48,6 +52,20 @@ class MouseUtils {
         StepsUtils.record()
       }
     }
+  }
+
+  onDropFrame(e: DragEvent, pageIndex: number, layerIndex: number, clipIdx: number) {
+    const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
+    if (dropData === null || typeof dropData !== 'string') {
+      throw new Error('Drop item is null!')
+    }
+    const data = JSON.parse(dropData)
+    const frame = LayerUtils.getLayer(pageIndex, layerIndex) as IFrame
+    const clips = generalUtils.deepCopy(frame.clips)
+    clips[clipIdx].srcObj = {
+      ...data.srcObj
+    }
+    LayerUtils.updateLayerProps(pageIndex, layerIndex, { clips })
   }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {

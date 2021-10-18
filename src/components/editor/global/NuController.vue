@@ -7,7 +7,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
-          @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
+          @drop="onDrop($event)"
           @dragover.prevent,
           @click.left="onClick"
           @click.right.stop="onRightClick"
@@ -21,6 +21,7 @@
           g(v-for="(clip, index) in config.clips"
             v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
             :style="frameClipStyles(clip, index)"
+            @drop="onDropFrame($event, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp"
@@ -39,6 +40,7 @@
                 :primaryLayerIndex="layerIndex"
                 :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
                 :type="config.type"
+                @drop="getLayerType === 'frame' ? onDropFrame($event, index) : null"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && (config.active || isLocked)")
@@ -1126,21 +1128,20 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-    },
-    onDropClipper(e: DragEvent) {
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
           MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
-        case 'shape': {
-          const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
-          break
-        }
+        case 'frame':
+          return
+        default:
+          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
+    },
+    onDropFrame(e: DragEvent, clipIdx: number) {
+      MouseUtils.onDropFrame(e, this.pageIndex, this.layerIndex, clipIdx)
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
@@ -1434,7 +1435,6 @@ export default Vue.extend({
           imgY
         })
       }
-      console.log(this.config)
     },
     onFrameMouseLeave() {
       const currLayer = LayerUtils.getCurrLayer as IImage
