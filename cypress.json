@@ -1,5 +1,6 @@
 {
   "projectId": "dg4gqg",
   "viewportHeight": 1400,
-  "viewportWidth": 1680
+  "viewportWidth": 1680,
+  "supportFile": "cypress/support/commands.js"
 }
