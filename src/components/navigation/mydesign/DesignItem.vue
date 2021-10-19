@@ -9,7 +9,8 @@
       @mouseleave="handleMouseLeave")
       div(class="design-item__img-container"
         :style="containerStyles()")
-        img(class="design-item__thumbnail"
+        img(v-if="ratioReady"
+            class="design-item__thumbnail"
             :style="imageStyles()"
             draggable="false"
             :src="appliedUrl")
@@ -59,9 +60,11 @@ export default Vue.extend({
     isOtherSelected: Boolean
   },
   created() {
+    this.ratioReady = false
     imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
       const { width, height } = size
       this.aspectRatio = width / height
+      this.ratioReady = true
     })
   },
   data() {
@@ -69,15 +72,18 @@ export default Vue.extend({
       isDragged: false,
       isMouseOver: false,
       draggedImageCoordinate: { x: 0, y: 0 },
+      ratioReady: false,
       aspectRatio: 1
     }
   },
   watch: {
     thumbnail(newVal) {
       this.isDragged = false
+      this.ratioReady = false
       imageUtils.getImageSize(newVal, this.config.width, this.config.height).then((size) => {
         const { width, height } = size
         this.aspectRatio = width / height
+        this.ratioReady = true
       })
     }
   },
