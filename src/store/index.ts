@@ -518,7 +518,12 @@ const mutations: MutationTree<IEditorState> = {
     state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
-    (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    console.log(state.pages[state.currSelectedInfo.pageIndex])
+    console.log(state.pages[state.currSelectedInfo.pageIndex].layers)
+    const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp
+    console.log(tmpLayer)
+    console.log(tmpLayer.layers)
+    tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
     Object.assign(state.currSelectedInfo, {

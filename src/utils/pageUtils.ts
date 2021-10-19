@@ -1,8 +1,25 @@
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import GeneralUtils from './generalUtils'
 
 class PageUtils {
+  get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get getPage() { return store.getters.getPage }
+  get lastSelectedPageIndex(): number {
+    return store.getters.getLastSelectedPageIndex
+  }
+
+  get currActivePageIndex(): number {
+    return store.getters.getCurrActivePageIndex
+  }
+
+  get currFocusPage() {
+    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+    console.log(targetIndex)
+    return this.getPage(targetIndex)
+  }
+
   activeMostCentralPage(): number {
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       return {

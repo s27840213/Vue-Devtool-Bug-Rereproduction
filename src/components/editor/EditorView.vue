@@ -2,8 +2,8 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)")
-    div(class="editor-canvas")
-      div(class="page-container"
+    div(class="editor-view__grid")
+      div(class="editor-view__canvas"
           ref="container"
           @mousedown.left.self="outerClick($event)")
         nu-page(v-for="(page,index) in filterByBackgroundImageControl(pages)"
@@ -14,6 +14,9 @@
                 :config="page" :index="nonFilteredIndex(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
+      div(class="scale-bar scale-bar--vr")
+      div(class="scale-bar scale-bar--hr")
+      div(class="corner-block")
 </template>
 
 <script lang="ts">
@@ -24,7 +27,6 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import PageUtils from '@/utils/pageUtils'
-import ImageUtils from '@/utils/imageUtils'
 import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
@@ -38,7 +40,8 @@ export default Vue.extend({
       editorView: null as unknown as HTMLElement,
       pageIndex: -1,
       currActivePageIndex: -1,
-      backgroundControllingPageIndex: -1
+      backgroundControllingPageIndex: -1,
+      PageUtils
     }
   },
   mounted() {
@@ -68,6 +71,9 @@ export default Vue.extend({
     },
     pageNum(): number {
       return this.pages.length
+    },
+    currFocusPage(): IPage {
+      return this.PageUtils.currFocusPage
     }
   },
   methods: {
@@ -205,19 +211,33 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+$REULER_SIZE: 20px;
+
 .editor-view {
-  width: 100%;
-  height: 100%;
-  display: flex;
   overflow: scroll;
   position: relative;
   z-index: setZindex("editor-view");
-}
-.editor-canvas {
-  display: flex;
-  position: absolute;
-  min-width: 100%;
-  min-height: 100%;
+  &__grid {
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    display: grid;
+    grid-template-rows: $REULER_SIZE 1fr;
+    grid-template-columns: $REULER_SIZE 1fr;
+    grid-template-areas:
+      "corner-block hr-rulers"
+      "vr-rulers canvas";
+  }
+  &__canvas {
+    grid-area: canvas;
+    display: flex;
+    flex: 1;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    transform-style: preserve-3d;
+    transform: scale(1);
+  }
 }
 
 .editor-background {
@@ -229,16 +249,6 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-.page-container {
-  display: flex;
-  width: 100%;
-  position: relative;
-  padding: 20px;
-  flex-direction: column;
-  justify-content: center;
-  transform-style: preserve-3d;
-}
-
 .selection-area {
   position: absolute;
   top: 0;
@@ -247,7 +257,38 @@ export default Vue.extend({
   background-color: rgba(3, 169, 244, 0.08);
 }
 
+.scale-bar {
+  display: flex;
+  position: sticky;
+
+  &--vr {
+    grid-area: vr-rulers;
+    top: 0px;
+    left: 0;
+    background-color: setColor(gray-3);
+    overflow: hidden;
+  }
+
+  &--hr {
+    grid-area: hr-rulers;
+    top: 0px;
+    left: 0px;
+    background-color: setColor(gray-3);
+    overflow: hidden;
+  }
+}
+
+.corner-block {
+  position: sticky;
+  top: 0;
+  left: 0;
+  grid-area: corner-block;
+  width: $REULER_SIZE;
+  height: $REULER_SIZE;
+  background: red;
+}
+
 .dim-background {
-  background-color: rgba(0, 0, 0, 0.4)
+  background-color: rgba(0, 0, 0, 0.4);
 }
 </style>
