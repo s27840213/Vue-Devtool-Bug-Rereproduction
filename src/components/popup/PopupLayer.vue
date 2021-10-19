@@ -383,6 +383,7 @@ export default Vue.extend({
       const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
       pageUtils.updateBackgroundImageSize(pageIndex, width, height)
       pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+      pageUtils.updateBackgroundImageMode(pageIndex, true)
       ShortcutUtils.del()
     },
     closePopup() {

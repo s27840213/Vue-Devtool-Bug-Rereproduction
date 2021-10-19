@@ -76,6 +76,13 @@ class PageUtils {
       }
     })
   }
+
+  updateBackgroundImageMode(pageIndex: number, mode: boolean): void {
+    store.commit('SET_backgroundImageMode', {
+      pageIndex: pageIndex,
+      newDisplayMode: mode
+    })
+  }
 }
 
 const pageUtils = new PageUtils()
