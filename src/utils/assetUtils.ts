@@ -87,7 +87,6 @@ class AssetUtils {
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData
-            console.log(jsonData)
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })

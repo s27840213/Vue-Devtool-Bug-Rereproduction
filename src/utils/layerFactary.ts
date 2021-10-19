@@ -53,7 +53,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles } = config
+    const { designId, clips, decoration, decorationTop, styles } = GeneralUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height

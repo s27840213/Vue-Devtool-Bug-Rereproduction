@@ -308,9 +308,11 @@ class UploadUtils {
     const designId = store.getters.getPage(pageIndex).designId
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
-    // for (const [i, layer] of pageJSON.layers.entries()) {
-    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
-    // }
+    for (const [i, layer] of pageJSON.layers.entries()) {
+      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      }
+    }
     console.log(pageJSON)
     console.log(designId)
 
