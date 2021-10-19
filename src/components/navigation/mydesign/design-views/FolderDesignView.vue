@@ -1,6 +1,24 @@
 <template lang="pug">
   div(class="folder-design-view")
-    div(class="folder-design-view__folder-name") {{ folder.name }}
+    div(class="folder-design-view__folder-name")
+      span
+        div(v-if="isFolderNameEditing"
+            v-click-outside="handleFolderNameEditEnd")
+          input(ref="folderName"
+                v-model="editableFolderName"
+                @change="handleFolderNameEditEnd")
+          svg-icon(iconName="pen"
+                  iconWidth="20px"
+                  iconColor="gray-3")
+        button(v-else
+              @mouseenter="handleFolderNameMouseEnter"
+              @mouseleave="handleFolderNameMouseLeave"
+              @click="handleFolderNameClick")
+          span {{ folder.name }}
+          svg-icon(v-if="isFolderNameMouseOver"
+                  iconName="pen"
+                  iconWidth="20px"
+                  iconColor="gray-3")
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in parents")
@@ -62,9 +80,10 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
 import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
@@ -78,8 +97,14 @@ export default Vue.extend({
   data() {
     return {
       foldersExpanded: true,
-      designsExpanded: true
+      designsExpanded: true,
+      isFolderNameMouseOver: false,
+      isFolderNameEditing: false,
+      editableFolderName: ''
     }
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   computed: {
     ...mapGetters('design', {
@@ -111,7 +136,8 @@ export default Vue.extend({
       setCurrentSelectedFolder: 'SET_currSelectedFolder',
       setExpand: 'SET_expand',
       addToFavoriate: 'UPDATE_addToFavoriate',
-      removeFromFavoriate: 'UPDATE_removeFromFavoriate'
+      removeFromFavoriate: 'UPDATE_removeFromFavoriate',
+      setFolderName: 'UPDATE_folderName'
     }),
     foldersExpansionIconStyles() {
       return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -132,6 +158,31 @@ export default Vue.extend({
         isExpanded: true
       })
       this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${name}`)
+    },
+    handleFolderNameMouseEnter() {
+      this.isFolderNameMouseOver = true
+    },
+    handleFolderNameMouseLeave() {
+      this.isFolderNameMouseOver = false
+    },
+    handleFolderNameClick() {
+      this.editableFolderName = this.folder.name
+      this.isFolderNameEditing = true
+      this.$nextTick(() => {
+        const folderNameInput = this.$refs.folderName as HTMLInputElement
+        folderNameInput.focus()
+      })
+    },
+    handleFolderNameEditEnd() {
+      this.isFolderNameEditing = false
+      this.isFolderNameMouseOver = false
+      if (this.editableFolderName === '') return
+      if (designUtils.checkExistingFolderName(this.folders, this.parents, this.editableFolderName)) return
+      this.setFolderName({
+        path: this.path,
+        newFolderName: this.editableFolderName
+      })
+      this.setCurrentSelectedFolder(`f:${[...this.parents, this.editableFolderName].join('/')}`)
     },
     toggleFoldersExpansion() {
       this.foldersExpanded = !this.foldersExpanded
@@ -165,11 +216,61 @@ export default Vue.extend({
   }
   &__folder-name {
     margin-top: 94px;
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 40px;
-    letter-spacing: 0.205em;
-    color: setColor(bu);
+    > span {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 40px;
+      letter-spacing: 0.205em;
+      color: setColor(bu);
+      > button {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        border: none;
+        &:hover {
+          border-bottom: 1px dashed;
+        }
+        > span {
+          font-size: inherit;
+          font-weight: inherit;
+          line-height: inherit;
+          letter-spacing: inherit;
+          color: inherit;
+          white-space: nowrap;
+        }
+      }
+      > div {
+        display: flex;
+        align-items: center;
+        width: 321px;
+        height: 40px;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        border: none;
+        border-bottom: 1px dashed;
+        > input {
+          height: calc(100% - 1px);
+          padding: 0;
+          font-size: inherit;
+          font-weight: inherit;
+          line-height: inherit;
+          letter-spacing: inherit;
+          color: inherit;
+        }
+      }
+    }
   }
   &__toolbar {
     margin-top: 4px;

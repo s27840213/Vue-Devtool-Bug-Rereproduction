@@ -1,5 +1,6 @@
 import { IDesign, IFolder, IPathedDesign, ITraverseItem } from '@/interfaces/design'
 import store from '@/store'
+import generalUtils from './generalUtils'
 class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = [
@@ -101,6 +102,14 @@ class DesignUtils {
     return this.findFolder(currentFolders, name)
   }
 
+  goTo(folders: IFolder[], path: string[]): IFolder[] {
+    let currentFolders = folders
+    for (const node of path) {
+      currentFolders = this.findFolders(currentFolders, node)
+    }
+    return currentFolders
+  }
+
   deselect(folders: IFolder[], selectInfo: string) {
     if (selectInfo.startsWith('f')) { // f:Toby/素材/材質
       const targetFolder = this.search(folders, this.makePath(selectInfo))
@@ -120,6 +129,8 @@ class DesignUtils {
   }
 
   move(id: string, source: string[], destination: string[]) {
+    // if move to current folder, skip moving
+    if (generalUtils.arrayCompare<string>(source, destination)) return
     const folders = store.getters['design/getFolders']
     const sourceFolder = this.search(folders, source)
     if (!sourceFolder) {
@@ -199,6 +210,11 @@ class DesignUtils {
 
   checkIfPathed(designs: IDesign[] | IPathedDesign[]) { // if empty, return true
     return (designs.length === 0) || ('path' in designs[0])
+  }
+
+  checkExistingFolderName(folders: IFolder[], parents: string[], name: string) {
+    const subFolders = this.goTo(folders, parents)
+    return subFolders.some(folder => folder.name === name)
   }
 }
 

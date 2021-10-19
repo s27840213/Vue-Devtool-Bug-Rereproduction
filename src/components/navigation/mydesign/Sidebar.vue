@@ -57,9 +57,6 @@ export default Vue.extend({
 .sidebar {
   @include size(240px, 100%);
   background-color: setColor(nav);
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr;
   z-index: setZindex(sidebar);
 }
 
