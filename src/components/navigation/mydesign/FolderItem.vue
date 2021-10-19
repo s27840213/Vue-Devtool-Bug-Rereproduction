@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="folder-item")
-    div(class="folder-block"
+    div(class="folder-item__block"
         :class="isMouseOver ? 'block-over' : 'block'"
         @dragenter="handleMouseEnter"
         @mouseenter="handleMouseEnter"
@@ -13,7 +13,7 @@
               iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
-    div(class="folder-name")
+    div(class="folder-item__name")
       span {{ name }}
 </template>
 
@@ -58,16 +58,31 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.folder-block {
-  width: 63px;
-  height: 63px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  border-radius: 4px;
-  cursor: pointer;
+.folder-item {
+  &__block {
+    width: 63px;
+    height: 63px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  &__name {
+    width: 63px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > span {
+      font-family: Mulish;
+      font-size: 14px;
+      font-weight: 400;
+      color: setColor(gray-1);
+    }
+  }
 }
 
 .block {
@@ -77,19 +92,5 @@ export default Vue.extend({
 .block-over {
   border: none;
   background-color: setColor(gray-5);
-}
-
-.folder-name {
-  width: 63px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  > span {
-    font-family: Mulish;
-    font-size: 14px;
-    font-weight: 400;
-    color: setColor(gray-1);
-  }
 }
 </style>
