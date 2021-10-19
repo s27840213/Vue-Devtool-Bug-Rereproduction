@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="sidebar")
-    div(class="logo")
     div(class="nav")
       div(class="nav-container")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'a')}"
@@ -62,12 +61,6 @@ export default Vue.extend({
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   z-index: setZindex(sidebar);
-}
-
-.logo {
-  width: 100%;
-  height: 50px;
-  background-color: setColor(blue-1);
 }
 
 .nav {

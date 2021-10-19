@@ -1,9 +1,10 @@
 <template lang="pug">
   div(class="my-design")
-    navigation-header(node="My Design")
-    sidebar
-    section
-      component(:is="mydesignView" class="design-view")
+    nu-header
+    div(class="my-design__content")
+      sidebar
+      section
+        component(:is="mydesignView" class="design-view")
 
 </template>
 
@@ -11,7 +12,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
-import NavigationHeader from '@/components/navigation/NavigationHeader.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
 import FavoriateDesignView from '@/components/navigation/mydesign/design-views/FavoriateDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
@@ -21,7 +22,7 @@ export default Vue.extend({
   name: 'MyDesgin',
   components: {
     Sidebar,
-    NavigationHeader,
+    NuHeader,
     AllDesignView,
     FavoriateDesignView,
     TrashDesignView,
@@ -59,14 +60,16 @@ export default Vue.extend({
 .my-design {
   @include size(100%, 100%);
   max-height: 100%;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr);
-  grid-template-columns: auto 1fr;
+  &__content {
+    height: calc(100% - 50px);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: auto 1fr;
+  }
 }
 
 .design-view {
-  margin-top: 50px;
-  height: calc(100% - 50px);
+  height: 100%;
   width: 100%
 }
 </style>
