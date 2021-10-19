@@ -5,7 +5,7 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ShapeUtils from './shapeUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import { IMarker } from '@/interfaces/shape'
@@ -397,6 +397,9 @@ class UploadUtils {
       basicDefault(layer)
     }
     groupUtils.reset()
+
+    page.appVer = new Date().toISOString()
+    page.jsonVer = jsonVer
     return page
   }
 

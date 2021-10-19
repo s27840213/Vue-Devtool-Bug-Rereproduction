@@ -1,6 +1,6 @@
-import { ICoordinate } from "./frame";
 import { SrcObj } from "./gallery";
 
+export const jsonVer = '1.0.0'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
