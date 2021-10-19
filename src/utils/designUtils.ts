@@ -1,4 +1,4 @@
-import { IFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, ITraverseItem } from '@/interfaces/design'
 import store from '@/store'
 class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
@@ -141,6 +141,60 @@ class DesignUtils {
     }
     destFolder.designs.push(design)
     store.commit('design/SET_folders', folders)
+  }
+
+  getAllDesigns(folders: IFolder[]): IPathedDesign[] {
+    const nodes: ITraverseItem[] = []
+    for (const folder of folders) {
+      nodes.push({
+        parents: [],
+        folder
+      })
+    }
+    const res = []
+    while (nodes.length > 0) {
+      const node = nodes.shift()
+      if (node) {
+        const { parents, folder } = node
+        for (const design of folder.designs) {
+          res.push({
+            path: [...parents, folder.name],
+            design
+          })
+        }
+        for (const subFolder of folder.subFolders) {
+          nodes.push({
+            parents: [...parents, folder.name],
+            folder: subFolder
+          })
+        }
+      }
+    }
+    return res
+  }
+
+  sortByNamePathed(designs: IPathedDesign[]) {
+    designs.sort((a, b) => {
+      return a.design.name.localeCompare(b.design.name)
+    })
+  }
+
+  sortByNameNonPathed(designs: IDesign[]) {
+    designs.sort((a, b) => {
+      return a.name.localeCompare(b.name)
+    })
+  }
+
+  sortByName(designs: IDesign[] | IPathedDesign[]) {
+    if (this.checkIfPathed(designs)) {
+      this.sortByNamePathed(designs as IPathedDesign[])
+    } else {
+      this.sortByNameNonPathed(designs as IDesign[])
+    }
+  }
+
+  checkIfPathed(designs: IDesign[] | IPathedDesign[]) { // if empty, return true
+    return (designs.length === 0) || ('path' in designs[0])
   }
 }
 

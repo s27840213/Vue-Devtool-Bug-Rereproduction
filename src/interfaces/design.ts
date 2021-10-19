@@ -18,3 +18,13 @@ export interface IDraggingDesign {
   path: string[],
   id: string
 }
+
+export interface IPathedDesign {
+  design: IDesign,
+  path: string[]
+}
+
+export interface ITraverseItem {
+  parents: string[],
+  folder: IFolder
+}

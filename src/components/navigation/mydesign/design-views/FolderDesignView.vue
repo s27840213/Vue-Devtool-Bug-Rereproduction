@@ -52,19 +52,21 @@
       div(class="folder-design-view__design-title")
         span 設計
     div(v-if="designsExpanded" class="folder-design-view__designs")
-      design-item(v-for="design in folder.designs"
+      design-item(v-for="design in designs"
                   :key="design.id"
                   :path="path"
-                  :config="design")
+                  :config="design"
+                  :favorable="true")
 </template>
 
 <script lang="ts">
-import { IFolder } from '@/interfaces/design'
+import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
 import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -91,6 +93,11 @@ export default Vue.extend({
     parents(): string[] {
       const path = this.path
       return path.slice(0, path.length - 1)
+    },
+    designs(): IDesign[] {
+      const designs = generalUtils.deepCopy(this.folder.designs)
+      designUtils.sortByName(designs)
+      return designs
     }
   },
   methods: {
@@ -227,7 +234,6 @@ export default Vue.extend({
   &__designs {
     display: grid;
     grid-gap: 25px;
-    justify-items: stretch;
     width: calc(100% - 120px);
     margin-bottom: 20px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
