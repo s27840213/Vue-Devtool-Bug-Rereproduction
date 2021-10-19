@@ -22,10 +22,10 @@
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in parents")
-          span(@click="goToParent(index)") {{ parent + ' ' }}
+          span(class="folder-design-view__path__node" @click="goToParent(index)") {{ parent + ' ' }}
           span {{ ' > ' }}
           span {{ ' ' }}
-        span {{ folder.name }}
+        span(class="folder-design-view__path__node") {{ folder.name }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more")
           svg-icon(class="header-icon"
@@ -284,10 +284,10 @@ export default Vue.extend({
     line-height: 20px;
     color: setColor(gray-2);
     white-space: pre-wrap;
-    > span {
+    &__node {
       cursor: pointer;
       &:hover {
-        text-decoration: underline;
+        border-bottom: 1px solid;
       }
     }
   }
