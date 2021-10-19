@@ -26,7 +26,7 @@
                   iconColor="gray-2")
           span(class="header-sort") 排序方式
     div(class="horizontal-rule")
-    div(class="folder-design-view__folder-header")
+    div(v-if="folder.subFolders.length > 0" class="folder-design-view__folder-header")
       div(class="folder-design-view__expand-icon-container"
           @click="toggleFoldersExpansion")
         svg-icon(:style="foldersExpansionIconStyles()"
@@ -41,7 +41,7 @@
                   :path="path"
                   :name="subFolder.name"
                   @goto="handleGotoFolder(subFolder.name)")
-    div(class="folder-design-view__design-header")
+    div(v-if="designs.length > 0" class="folder-design-view__design-header")
       div(class="folder-design-view__expand-icon-container"
           @click="toggleDesignsExpansion")
         svg-icon(:style="designsExpansionIconStyles()"
