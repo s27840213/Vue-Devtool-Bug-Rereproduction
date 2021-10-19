@@ -281,6 +281,41 @@ class ShapeUtils {
     }
   }
 
+  computePointForAngle(length: number, angle: number, scale: number): {point: number[], realWidth: number, realHeight: number} {
+    const rad = angle * Math.PI / 180
+    const vectX = length * Math.cos(rad)
+    const vectY = length * Math.sin(rad)
+    const point = [0, 0, vectX, vectY]
+    const { width, height, baseDegree } = this.lineDimension(point)
+    const dx = 2 * scale * Math.sin(baseDegree)
+    const dy = 2 * scale * Math.cos(baseDegree)
+    return {
+      point: point,
+      realWidth: width + 2 * dx + 2,
+      realHeight: height + 2 * dy + 2
+    }
+  }
+
+  lineCenterRotate(point: number[], angle: number, scale: number): {
+    point: number[], realWidth: number, realHeight: number, dx: number, dy: number
+  } {
+    const { width, height, xDiff, yDiff, baseDegree } = this.lineDimension(point)
+    const oldDx = 2 * scale * Math.sin(baseDegree)
+    const oldDy = 2 * scale * Math.cos(baseDegree)
+    const oldRad = Math.atan2(yDiff, xDiff)
+    const oldWidth = width + 2 * oldDx + 2
+    const oldHeight = height + 2 * oldDy + 2
+    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+    const { point: newPoint, realWidth, realHeight } = this.computePointForAngle(hypotenuse, (oldRad / Math.PI * 180 + angle) % 360, scale)
+    return {
+      point: newPoint,
+      realWidth,
+      realHeight,
+      dx: (oldWidth - realWidth) / 2,
+      dy: (oldHeight - realHeight) / 2
+    }
+  }
+
   getLineQuadrant(point: number[]): number {
     if (point?.length !== 4) {
       throw new Error(`input point coordinates (${point}) are invalid`)

@@ -182,9 +182,14 @@ export default Vue.extend({
         color: color
       })
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetContent()
-      this.getTagContent({ keyword })
+      if (keyword) {
+        this.getTagContent({ keyword })
+      } else {
+        await this.getCategories()
+        this.getContent()
+      }
     },
     handleCategorySearch(keyword: string) {
       this.resetContent()

@@ -7,7 +7,7 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
-          @drop="(config.type === 'shape' && config.path !== '') || (config.type === 'image' && config.isClipper) ? onDropClipper($event) : onDrop($event)"
+          @drop="onDrop($event)"
           @dragover.prevent,
           @click.left="onClick"
           @click.right.stop="onRightClick"
@@ -19,10 +19,13 @@
         svg(v-if="getLayerType === 'frame'" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
             v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-            :style="frameClipStyles(clip.styles, index)"
+            :style="frameClipStyles(clip, index)"
+            @drop="onDropFrame($event, index)"
             @mouseenter="onFrameMouseEnter(index)"
             @mouseleave="onFrameMouseLeave()"
             @mouseup="onFrameMouseUp"
+            @dragenter="onFrameDragEnter($event)",
+            @dragleave="onFrameDragLeave($event)",
             @click="clickSubController(index)"
             @dblclick="dblSubController(index)")
         template(v-if="(['group','frame','tmp'].includes(getLayerType)) && isActive")
@@ -38,6 +41,7 @@
                 :primaryLayerIndex="layerIndex"
                 :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
                 :type="config.type"
+                @drop="getLayerType === 'frame' ? onDropFrame($event, index) : null"
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && (config.active || isLocked)")
@@ -185,6 +189,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -355,10 +360,6 @@ export default Vue.extend({
             height,
             initWidth,
             initHeight,
-            // imgX,
-            // imgY,
-            // imgWidth,
-            // imgHeight,
             scale
           }))
         }
@@ -458,7 +459,6 @@ export default Vue.extend({
       })
     },
     styles(type: string) {
-      // console.log(this.config.styles.width)
       const zindex = (() => {
         if ((type === 'frame' && this.isMoving) || (type === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex)) {
           return (this.layerIndex + 1) * 1000
@@ -470,15 +470,13 @@ export default Vue.extend({
           return this.config.styles.zindex + 1
         }
       })()
-      // type === 'control-point' ? (this.layerIndex + 1) * 100 : this.config.type === 'tmp' ? 0 : (this.config.styles.zindex + 1)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
         height: `${height}px`,
-        outline: this.isLine ? 'none' : this.outlineStyles(type),
+        outline: this.outlineStyles(type),
         opacity: this.isImgControl ? 0 : 1,
-        // 'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d',
         'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
@@ -498,7 +496,6 @@ export default Vue.extend({
       }
     },
     outlineStyles(type: string) {
-      const zindex = type === 'control-point' ? (this.layerIndex + 1) * 100 : (this.layerIndex + 1)
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
           return '#F10994'
@@ -509,7 +506,9 @@ export default Vue.extend({
         }
       })()
 
-      if (this.isShown || this.isActive) {
+      if (this.isLine || (this.isMoving && LayerUtils.currSelectedInfo.index !== this.layerIndex)) {
+        return 'none'
+      } else if (this.isShown || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
           return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
         } else {
@@ -521,9 +520,9 @@ export default Vue.extend({
     },
     frameClipStyles(clip: any, index: number) {
       return {
-        transform: `translate(${clip.x}px, ${clip.y}px)`,
+        transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
         fill: '#00000000',
-        stroke: this.clipIndex === index ? '#7190CC' : 'none',
+        stroke: this.clipIndex === index || clip.active ? '#7190CC' : 'none',
         strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
@@ -1128,21 +1127,20 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-    },
-    onDropClipper(e: DragEvent) {
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
           MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
           break
         }
-        case 'shape': {
-          const config = this.config as IShape
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.path, config.styles)
-          break
-        }
+        case 'frame':
+          return
+        default:
+          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
+    },
+    onDropFrame(e: DragEvent, clipIdx: number) {
+      MouseUtils.onDropFrame(e, this.pageIndex, this.layerIndex, clipIdx)
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
@@ -1393,6 +1391,7 @@ export default Vue.extend({
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
+      console.log(this.config)
     },
     dblSubController(targetIndex: number) {
       let updateSubLayerProps = null as any
@@ -1412,6 +1411,7 @@ export default Vue.extend({
       if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
         return
       }
+      console.log('on frame mouse in')
       const currLayer = LayerUtils.getCurrLayer as IImage
       this.clipIndex = clipIndex
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
@@ -1421,6 +1421,7 @@ export default Vue.extend({
         Object.assign(clips[this.clipIndex].srcObj, currLayer.srcObj)
 
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.clipIndex, currLayer.srcObj)
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
 
         const clip = clips[this.clipIndex]
@@ -1435,15 +1436,16 @@ export default Vue.extend({
           imgY
         })
       }
-      console.log(this.config)
     },
     onFrameMouseLeave() {
+      console.log('on frame mouse out')
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
         Object.assign(clips[this.clipIndex].srcObj, this.clipedImgBuff)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.clipIndex, this.clipedImgBuff)
       }
       this.clipIndex = NaN
     },
@@ -1453,7 +1455,18 @@ export default Vue.extend({
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.clipIndex, { active: true })
+        this.clipIndex = NaN
       }
+    },
+    onFrameDragEnter(e: DragEvent) {
+      console.log('on frame drag over')
+    },
+    onFrameDragLeave(e: DragEvent) {
+      console.log('on frame drage leave')
+    },
+    onFrameDrop(e: DragEvent) {
+      console.log('on frmae drop')
     }
   }
 })

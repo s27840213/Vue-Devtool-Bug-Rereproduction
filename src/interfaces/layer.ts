@@ -1,4 +1,4 @@
-import { ICoordinate } from "./frame";
+import { ICoordinate } from './frame'
 
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
@@ -37,28 +37,6 @@ export interface ILayer<T extends IStyle = IStyle> {
   styles: T
 }
 
-export interface IText extends ILayer<ITextStyle> {
-  paragraphs: Array<IParagraph>,
-  widthLimit: number,
-  editing: boolean,
-  isHeading?: boolean,
-  isSubheading?: boolean,
-  isBody?: boolean,
-  isEdited: boolean
-}
-
-export interface IParagraph {
-  [key: string]: string | number | Array<ISpan> | IParagraphStyle,
-  spans: Array<ISpan>,
-  styles: IParagraphStyle
-}
-
-export interface ISpan {
-  [key: string]: string | number | ISpanStyle,
-  text: string,
-  styles: ISpanStyle
-}
-
 export interface ITextStyle extends IStyle {
   writingMode: string
 }
@@ -82,6 +60,27 @@ export interface ISpanStyle {
   opacity: number
 }
 
+export interface ISpan {
+  [key: string]: string | number | ISpanStyle,
+  text: string,
+  styles: ISpanStyle
+}
+export interface IParagraph {
+  [key: string]: string | number | Array<ISpan> | IParagraphStyle,
+  spans: Array<ISpan>,
+  styles: IParagraphStyle
+}
+
+export interface IText extends ILayer<ITextStyle> {
+  paragraphs: Array<IParagraph>,
+  widthLimit: number,
+  editing: boolean,
+  isHeading?: boolean,
+  isSubheading?: boolean,
+  isBody?: boolean,
+  isEdited: boolean
+}
+
 export interface IShape extends ILayer<IStyle> {
   // svgID: string,
   category: string,
@@ -98,7 +97,7 @@ export interface IShape extends ILayer<IStyle> {
   point?: number[],
   size?: number[],
   dasharray?: number[],
-  linecap?: "butt" | "round",
+  linecap?: 'butt' | 'round',
   markerId?: string[],
   markerWidth?: number[],
   trimWidth?: (boolean | undefined)[],
@@ -130,3 +129,5 @@ export interface IFrame extends ILayer<IStyle> {
   decoration?: IShape,
   decorationTop? : IShape
 }
+
+export const jsonVer = '1.0.0'

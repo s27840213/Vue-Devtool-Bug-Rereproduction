@@ -29,7 +29,6 @@ import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   props: {
@@ -89,6 +88,8 @@ export default Vue.extend({
         }
       }
       dataTransfer.setData('data', JSON.stringify(data))
+      fetch(ImageUtils.getSrc(data as IImage))
+      fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type, data.styles.width, 'next')))
     },
     addImage(photo: any) {
       if (!this.isUploading) {

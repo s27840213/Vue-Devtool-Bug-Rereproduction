@@ -14,8 +14,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
-import assetUtils from '@/utils/assetUtils'
-import generalUtils from '@/utils/generalUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -98,6 +96,8 @@ export default Vue.extend({
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
           Object.assign(this.config, shape)
+          this.config.styles.initWidth = shape.vSize[0]
+          this.config.styles.initHeight = shape.vSize[1]
         }
       }
     }

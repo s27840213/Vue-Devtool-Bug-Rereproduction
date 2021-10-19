@@ -148,6 +148,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
+      this.resetContent()
       this.$emit('closeFontsPanel')
     },
     // TODO //
@@ -171,7 +172,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.resetContent()
-      this.getTagContent({ keyword })
+      keyword ? this.getTagContent({ keyword }) : this.getCategories()
     }
   }
 })

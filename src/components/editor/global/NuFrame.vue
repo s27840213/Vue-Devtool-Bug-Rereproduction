@@ -10,14 +10,11 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
-import LayerUtils from '@/utils/layerUtils'
-import { Layer } from 'konva/types/Layer'
-import Vue from 'vue'
-import { config } from 'vue/types/umd'
 import { mapGetters } from 'vuex'
 import GeneralUtils from '@/utils/generalUtils'
 
@@ -28,7 +25,6 @@ export default Vue.extend({
     layerIndex: Number
   },
   async created() {
-    console.log(GeneralUtils.deepCopy(this.config))
     if (this.config.needFetch) {
       const config = this.config as IFrame
       const asset = {

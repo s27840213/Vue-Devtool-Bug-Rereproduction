@@ -5,7 +5,7 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ShapeUtils from './shapeUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import { IMarker } from '@/interfaces/shape'
@@ -309,7 +309,9 @@ class UploadUtils {
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
     for (const [i, layer] of pageJSON.layers.entries()) {
-      pageJSON.layers[i] = this.layerInfoFilter(layer)
+      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      }
     }
     console.log(pageJSON)
     console.log(designId)
@@ -365,6 +367,11 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
+          if (layer.styles.scale !== 1) {
+            layer.styles.imgWidth = layer.styles.width as number
+            layer.styles.imgHeight = layer.styles.height as number
+            layer.styles.scale = 1
+          }
           layer.imgControl = false
           break
         case 'tmp': {
@@ -377,6 +384,7 @@ class UploadUtils {
               }
             }
           }
+          layer.type = 'group'
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, index, {
             type: 'group',
             active: false,
@@ -389,6 +397,9 @@ class UploadUtils {
       basicDefault(layer)
     }
     groupUtils.reset()
+
+    page.appVer = new Date().toISOString()
+    page.jsonVer = jsonVer
     return page
   }
 
@@ -504,6 +515,11 @@ class UploadUtils {
       }
       switch (type) {
         case 'image':
+          if (general.scale !== 1) {
+            general.width = styles.imgWidth
+            general.height = styles.imgHeight
+            general.scale = 1
+          }
           return {
             ...general,
             imgX: styles.imgX,
@@ -515,7 +531,9 @@ class UploadUtils {
           return {
             ...general,
             writingMode: styles.writingMode,
-            align: styles.align
+            align: styles.align,
+            textShape: styles.textShape,
+            textEffect: styles.textEffect
           }
         default:
           return general
