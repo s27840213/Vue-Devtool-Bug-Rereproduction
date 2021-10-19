@@ -6,11 +6,14 @@
       design-item(v-for="[path, design] in allDesigns"
                   :key="design.id"
                   :path="path"
-                  :config="design")
+                  :config="design"
+                  :favorable="true"
+                  :isInFavoriates="checkFavoriate(design.id)"
+                  @like="toggleFavoriate(path, design)")
 </template>
 
 <script lang="ts">
-import { IFolder } from '@/interfaces/design'
+import { IDesign, IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -26,8 +29,12 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders'
+      folders: 'getFolders',
+      favoriateDesigns: 'getFavoriateDesigns'
     }),
+    favoriateIds(): string[] {
+      return this.favoriateDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    },
     allDesigns() {
       const designs = designUtils.getAllDesigns(this.folders)
       designUtils.sortByName(designs)
@@ -35,6 +42,24 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations('design', {
+      addToFavoriate: 'UPDATE_addToFavoriate',
+      removeFromFavoriate: 'UPDATE_removeFromFavoriate'
+    }),
+    checkFavoriate(id: string): boolean {
+      return this.favoriateIds.includes(id)
+    },
+    toggleFavoriate(path: string[], design: IDesign) {
+      const payload = {
+        path,
+        design
+      }
+      if (this.checkFavoriate(design.id)) {
+        this.removeFromFavoriate(payload)
+      } else {
+        this.addToFavoriate(payload)
+      }
+    }
   }
 })
 </script>
