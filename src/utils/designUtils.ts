@@ -141,6 +141,10 @@ class DesignUtils {
     }
     destFolder.designs.push(design)
     store.commit('design/SET_folders', folders)
+    store.commit('design/UPDATE_path', {
+      id,
+      path: destination
+    })
   }
 
   getAllDesigns(folders: IFolder[]): IPathedDesign[] {

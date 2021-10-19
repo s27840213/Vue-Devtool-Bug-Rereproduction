@@ -1,4 +1,4 @@
-import { IDesign, IDraggingDesign, IFolder } from '@/interfaces/design'
+import { IDesign, IDraggingDesign, IFolder, IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import { GetterTree, MutationTree } from 'vuex'
@@ -6,13 +6,17 @@ import { GetterTree, MutationTree } from 'vuex'
 interface IDesignSidebarState {
   currentSelectedFolder: string,
   folders: IFolder[],
-  draggingDesign: IDraggingDesign | undefined
+  draggingDesign: IDraggingDesign | undefined,
+  favoriateDesigns: IPathedDesign[],
+  trashDesigns: IPathedDesign[]
 }
 
 const getDefaultState = (): IDesignSidebarState => ({
   currentSelectedFolder: 'a',
   folders: [],
-  draggingDesign: undefined
+  draggingDesign: undefined,
+  favoriateDesigns: [],
+  trashDesigns: []
 })
 
 const state = getDefaultState()
@@ -28,6 +32,12 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   },
   getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
     return state.draggingDesign
+  },
+  getFavoriateDesigns(state: IDesignSidebarState): IPathedDesign[] {
+    return state.favoriateDesigns
+  },
+  getTrashDesigns(state: IDesignSidebarState): IPathedDesign[] {
+    return state.trashDesigns
   }
 }
 
@@ -50,6 +60,36 @@ const mutations: MutationTree<IDesignSidebarState> = {
   },
   SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign) {
     state.draggingDesign = draggingDesign
+  },
+  UPDATE_addToFavoriate(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    state.favoriateDesigns.push({
+      design: updateInfo.design,
+      path: updateInfo.path
+    })
+  },
+  UPDATE_addToTrash(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    state.trashDesigns.push({
+      design: updateInfo.design,
+      path: updateInfo.path
+    })
+  },
+  UPDATE_removeFromFavoriate(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    const index = state.favoriateDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
+    if (index >= 0) {
+      state.favoriateDesigns.splice(index, 1)
+    }
+  },
+  UPDATE_removeFromTrash(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    const index = state.trashDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
+    if (index >= 0) {
+      state.trashDesigns.splice(index, 1)
+    }
+  },
+  UPDATE_path(state: IDesignSidebarState, updateInfo: {id: string, path: string[]}) {
+    const index = state.favoriateDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.id)
+    if (index >= 0) {
+      state.favoriateDesigns[index].path = updateInfo.path
+    }
   }
 }
 
