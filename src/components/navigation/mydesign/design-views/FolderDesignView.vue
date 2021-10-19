@@ -6,10 +6,12 @@
             v-click-outside="handleFolderNameEditEnd")
           input(ref="folderName"
                 v-model="editableFolderName"
-                @change="handleFolderNameEditEnd")
-          svg-icon(iconName="pen"
-                  iconWidth="20px"
-                  iconColor="gray-3")
+                @change="handleFolderNameEditEnd"
+                @keyup="checkFolderNameEnter")
+          div(class="pen-container")
+            svg-icon(iconName="pen"
+                    iconWidth="20px"
+                    iconColor="gray-3")
         button(v-else
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
@@ -54,7 +56,7 @@
                 iconColor="gray-2")
       div(class="folder-design-view__folder-title")
         span 資料夾
-    div(v-if="foldersExpanded" class="folder-design-view__folders")
+    div(v-if="foldersExpanded && folder.subFolders.length > 0" class="folder-design-view__folders")
       folder-item(v-for="subFolder in folder.subFolders"
                   :path="path"
                   :name="subFolder.name"
@@ -176,13 +178,18 @@ export default Vue.extend({
     handleFolderNameEditEnd() {
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
-      if (this.editableFolderName === '') return
+      if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
       if (designUtils.checkExistingFolderName(this.folders, this.parents, this.editableFolderName)) return
       this.setFolderName({
         path: this.path,
         newFolderName: this.editableFolderName
       })
       this.setCurrentSelectedFolder(`f:${[...this.parents, this.editableFolderName].join('/')}`)
+    },
+    checkFolderNameEnter(e: KeyboardEvent) {
+      if (e.key === 'Enter') {
+        this.handleFolderNameEditEnd()
+      }
     },
     toggleFoldersExpansion() {
       this.foldersExpanded = !this.foldersExpanded
@@ -235,7 +242,7 @@ export default Vue.extend({
         color: inherit;
         border: none;
         &:hover {
-          border-bottom: 1px dashed;
+          border-bottom: 1px dashed setColor(gray-3);
         }
         > span {
           font-size: inherit;
@@ -259,7 +266,7 @@ export default Vue.extend({
         letter-spacing: inherit;
         color: inherit;
         border: none;
-        border-bottom: 1px dashed;
+        border-bottom: 1px dashed setColor(gray-3);
         > input {
           height: calc(100% - 1px);
           padding: 0;
@@ -378,6 +385,14 @@ export default Vue.extend({
     color: setColor(blue-1);
     background-color: setColor(gray-6);
   }
+}
+
+.pen-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .horizontal-rule {

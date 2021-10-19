@@ -96,6 +96,15 @@ const mutations: MutationTree<IDesignSidebarState> = {
     if (targetFolder) {
       targetFolder.name = updateInfo.newFolderName
     }
+  },
+  UPDATE_designName(state: IDesignSidebarState, updateInfo: {path: string[], id: string, newDesignName: string}) {
+    const targetFolder = designUtils.search(state.folders, updateInfo.path)
+    if (targetFolder) {
+      const index = targetFolder.designs.findIndex(design => design.id === updateInfo.id)
+      if (index >= 0) {
+        targetFolder.designs[index].name = updateInfo.newDesignName
+      }
+    }
   }
 }
 

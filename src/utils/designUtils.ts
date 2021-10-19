@@ -216,6 +216,14 @@ class DesignUtils {
     const subFolders = this.goTo(folders, parents)
     return subFolders.some(folder => folder.name === name)
   }
+
+  checkExistingDesignName(folder: IFolder[], path: string[], name: string) {
+    const targetFolder = this.search(folder, path)
+    if (targetFolder) {
+      return targetFolder.designs.some(design => design.name === name)
+    }
+    return false
+  }
 }
 
 export default new DesignUtils()

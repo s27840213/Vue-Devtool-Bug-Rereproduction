@@ -38,8 +38,31 @@
                     iconName="favoriates-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
-    div(class="design-item__name")
-      span {{ config.name }}
+    div(class="design-item__name"
+        v-click-outside="handleNameEditEnd"
+        @mouseenter="handleNameMouseEnter"
+        @mouseleave="handleNameMouseLeave"
+        @click="handleNameClick")
+      div(v-if="isNameEditing" class="design-item__name__container design-item__name__container-editor")
+        input(ref="name"
+              v-model="editableName"
+              @change="handleNameEditEnd"
+              @keyup="checkNameEnter")
+        div(class="pen-container")
+          svg-icon(iconName="pen"
+                  iconWidth="13px"
+                  iconColor="gray-3")
+      div(v-else class="design-item__name__container")
+        svg-icon(v-if="isNameMouseOver"
+                iconName="pen"
+                iconWidth="13px"
+                iconColor="gray-3"
+                style="color: transparent")
+        span {{ config.name }}
+        svg-icon(v-if="isNameMouseOver"
+                iconName="pen"
+                iconWidth="13px"
+                iconColor="gray-3")
     div(class="design-item__size")
       span {{ `${config.width}x${config.height}` }}
     div(class="dragged-thumbnail" :style="draggedImageStyles()")
@@ -47,9 +70,11 @@
 </template>
 
 <script lang="ts">
-import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import imageUtils from '@/utils/imageUtils'
+import vClickOutside from 'v-click-outside'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
@@ -59,6 +84,21 @@ export default Vue.extend({
     isInFavoriates: Boolean,
     isOtherSelected: Boolean
   },
+  data() {
+    return {
+      isDragged: false,
+      isMouseOver: false,
+      isNameMouseOver: false,
+      isNameEditing: false,
+      editableName: '',
+      draggedImageCoordinate: { x: 0, y: 0 },
+      ratioReady: false,
+      aspectRatio: 1
+    }
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   created() {
     this.ratioReady = false
     imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
@@ -66,15 +106,6 @@ export default Vue.extend({
       this.aspectRatio = width / height
       this.ratioReady = true
     })
-  },
-  data() {
-    return {
-      isDragged: false,
-      isMouseOver: false,
-      draggedImageCoordinate: { x: 0, y: 0 },
-      ratioReady: false,
-      aspectRatio: 1
-    }
   },
   watch: {
     thumbnail(newVal) {
@@ -88,13 +119,17 @@ export default Vue.extend({
     }
   },
   computed: {
-    appliedUrl() {
+    ...mapGetters('design', {
+      folders: 'getFolders'
+    }),
+    appliedUrl(): string {
       return this.config.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.config.thumbnail
     }
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingDesign: 'SET_draggingDesign'
+      setDraggingDesign: 'SET_draggingDesign',
+      setDesignName: 'UPDATE_designName'
     }),
     containerStyles() {
       let res = {}
@@ -165,6 +200,36 @@ export default Vue.extend({
     },
     handleMouseLeave() {
       this.isMouseOver = false
+    },
+    handleNameMouseEnter() {
+      this.isNameMouseOver = true
+    },
+    handleNameMouseLeave() {
+      this.isNameMouseOver = false
+    },
+    handleNameClick() {
+      this.editableName = this.config.name
+      this.isNameEditing = true
+      this.$nextTick(() => {
+        const nameInput = this.$refs.name as HTMLInputElement
+        nameInput.focus()
+      })
+    },
+    handleNameEditEnd() {
+      this.isNameEditing = false
+      this.isNameMouseOver = false
+      if (this.editableName === '' || this.editableName === this.config.name) return
+      if (designUtils.checkExistingDesignName(this.folders, this.path as string[], this.editableName)) return
+      this.setDesignName({
+        path: this.path,
+        id: this.config.id,
+        newDesignName: this.editableName
+      })
+    },
+    checkNameEnter(e: KeyboardEvent) {
+      if (e.key === 'Enter') {
+        this.handleNameEditEnd()
+      }
     },
     emitLike() {
       this.$emit('like')
@@ -252,11 +317,39 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    > span {
-      font-family: Mulish;
-      font-size: 16px;
-      font-weight: 400;
-      color: setColor(gray-1);
+    &__container {
+      width: 100%;
+      height: 28px;
+      padding: 4px 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      gap: 5px;
+      border: none;
+      &:hover {
+        border-top: 1px dashed transparent;
+        border-bottom: 1px dashed setColor(gray-4);
+      }
+      > span {
+        height: 20px;
+        font-family: Mulish;
+        font-size: 16px;
+        font-weight: 400;
+        color: setColor(gray-1);
+      }
+      &-editor {
+        border-top: 1px dashed transparent;
+        border-bottom: 1px dashed setColor(gray-4);
+        > input {
+          padding: 0;
+          height: 20px;
+          font-family: Mulish;
+          font-size: 16px;
+          font-weight: 400;
+          color: setColor(gray-1);
+        }
+      }
     }
   }
   &__size {
@@ -273,6 +366,14 @@ export default Vue.extend({
       color: setColor(gray-3);
     }
   }
+}
+
+.pen-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
 }
 
 .dragged-thumbnail {
