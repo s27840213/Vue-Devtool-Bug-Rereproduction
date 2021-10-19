@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Start with Vivipic
+        span(class="text-blue-1 heading-5") Start with Vivipic
       div
         div Let Vivipic be your good design assistant in the E-commerce world!
         div Sign up now, enjoy unlimited templates for free!
@@ -22,6 +22,10 @@ div(style="position:relative;")
       div
         span Already sign up?
         btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
+      div
+        button(@click="onCloseClicked")
+              svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
     div(v-if="currentPageIndex === 1" class="signup signup-p1")
       div
         button(@click="onBackClicked")
@@ -109,6 +113,12 @@ import Facebook from '@/utils/facebook'
 
 export default Vue.extend({
   name: 'SignUp',
+  props: {
+    redirect: {
+      type: String,
+      default: undefined
+    }
+  },
   data() {
     return {
       name: '' as string,
@@ -131,25 +141,32 @@ export default Vue.extend({
     }
   },
   created() {
-    // Facebook login status
-    if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
-      this.isLoading = true
-      if (this.$route.query.error) {
-        this.isLoading = false
-        console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
-        this.$router.push({ query: {} })
-      } else {
+    if (this.$route.query.state) {
+      const stateStr = this.$route.query.state as string
+      const platform = JSON.parse(stateStr).platform
+      const redirect = JSON.parse(stateStr).redirect
+
+      // Google login status
+      if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && platform === 'google_vivipic') {
+        this.isLoading = true
         const code = this.$route.query.code as string
-        const redirectUri = window.location.href
-        this.fbLogin(code, redirectUri)
+        const redirectUri = window.location.href.split('?')[0]
+        this.googleLogin(code, redirectUri, redirect)
       }
-    }
-    // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
-      this.isLoading = true
-      const code = this.$route.query.code as string
-      const redirectUri = window.location.href.split('?')[0]
-      this.googleLogin(code, redirectUri)
+
+      // Facebook login status
+      if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin'] && platform === 'fb_vivipic') {
+        this.isLoading = true
+        if (this.$route.query.error) {
+          this.isLoading = false
+          console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
+          this.$router.push({ query: {} })
+        } else {
+          const code = this.$route.query.code as string
+          const redirectUri = window.location.href
+          this.fbLogin(code, redirectUri, redirect)
+        }
+      }
     }
   },
   computed: {
@@ -228,13 +245,13 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fbLogin(code: string, redirectUri: string) {
+    async fbLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ name: 'Editor' })
+          this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
           console.log('fb login failed')
         }
@@ -242,13 +259,13 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    async googleLogin(code: string, redirectUri: string) {
+    async googleLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ name: 'Editor' })
+          this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
           console.log('google login failed')
         }
@@ -262,12 +279,23 @@ export default Vue.extend({
       this.isLoading = false
     },
     onLoginClicked() {
-      this.$router.push({ name: 'Login' })
+      if (this.redirect) {
+        this.$router.push({ name: 'Login', query: { redirect: this.redirect } })
+      } else {
+        this.$router.push({ name: 'Login' })
+      }
     },
     onBackClicked() {
       this.isLoading = true
       this.currentPageIndex = 0
       this.isLoading = false
+    },
+    onCloseClicked() {
+      if (this.redirect) {
+        this.$router.push({ path: this.redirect })
+      } else {
+        this.$router.push({ name: 'Home' })
+      }
     },
     async onSignUpClicked() {
       this.emailResponseError = false
@@ -332,7 +360,7 @@ export default Vue.extend({
       const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
       if (data.flag === 0) {
         await store.dispatch('user/login', { token: data.token })
-        this.$router.push({ name: 'Editor' })
+        this.$router.push({ path: this.redirect || '/' })
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
@@ -342,26 +370,37 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      if (this.$route.query.redirect) {
+      if (this.redirect) {
         const redirectStr = JSON.stringify({
-          redirect: this.$route.query.redirect,
-          hostId: 'facebook_parameter_vivipic'
+          redirect: this.redirect,
+          platform: 'fb_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
-        hostId: 'facebook_parameter_vivipic'
+        platform: 'fb_vivipic'
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
+      let stateStr
+      if (this.redirect) {
+        stateStr = JSON.stringify({
+          redirect: this.redirect,
+          platform: 'google_vivipic'
+        })
+      } else {
+        stateStr = JSON.stringify({
+          platform: 'google_vivipic'
+        })
+      }
       const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
       'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
       'include_granted_scopes=true&' +
       'response_type=code&' +
       'prompt=select_account&' +
-      'state=state_parameter_vivipic&' +
+      `state=${stateStr}&` +
       `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
@@ -396,6 +435,7 @@ export default Vue.extend({
   }
 }
 .signup-p0 {
+  position: relative;
   padding: 0 32px 32px 32px;
   > div {
     &:nth-child(1) { // img
@@ -480,6 +520,12 @@ export default Vue.extend({
       width: 80%;
       font-size: 14px;
       margin-bottom: 2vh;
+    }
+
+    &:nth-child(8) { // close icon
+      position: absolute;
+      right: 15px;
+      top: 15px;
     }
   }
 }

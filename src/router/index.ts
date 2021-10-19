@@ -34,6 +34,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/signup',
     name: 'SignUp',
+    props: route => ({ redirect: route.query.redirect }),
     component: SignUp,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
@@ -51,6 +52,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/login',
     name: 'Login',
+    props: route => ({ redirect: route.query.redirect }),
     component: Login,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
