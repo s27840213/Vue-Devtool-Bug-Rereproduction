@@ -464,7 +464,8 @@ class UploadUtils {
     const jsonName = type === 'template' ? 'config.json' : 'page.json'
     const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`)
     if (type === 'template') {
-      assetUtils.addTemplate(response)
+      const json = await response.json()
+      assetUtils.addTemplate(json)
     } else {
       response.json().then(async (json) => {
         if (type !== 'template') {
