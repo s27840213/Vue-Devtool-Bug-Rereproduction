@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="ruler-hr pointer")
-  div(class="ruler-hr__body"
+div(class="ruler-vr pointer")
+  div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
 </template>
@@ -38,10 +38,10 @@ export default Vue.extend({
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
-        width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
-        height: `${this.RULER_SIZE}px`,
+        width: `${this.RULER_SIZE}px`,
+        height: `${this.currFocusPage.height * (this.pageScaleRatio / 100)}px`,
         backgroundColor: '#969BAB',
-        transform: `translate3d(${this.rulerBodyOffset}px,0px,0px)`
+        transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`
       }
     }
   },
@@ -55,17 +55,17 @@ export default Vue.extend({
   },
   methods: {
     calcRulerBodyOffset(): void {
-      this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect.left + this.editorView.scrollLeft
+      this.rulerBodyOffset = pageUtils.pageRect.top - this.canvasRect.top + this.editorView.scrollTop
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.ruler-hr {
+.ruler-vr {
   display: flex;
   position: sticky;
-  grid-area: hr-rulers;
+  grid-area: vr-rulers;
   top: 0px;
   left: 0px;
   background-color: setColor(gray-4);

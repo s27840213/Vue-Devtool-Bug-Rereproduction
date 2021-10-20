@@ -40,6 +40,11 @@ export interface IEditorState {
     heading: Array<string>,
     subheading: Array<string>,
     body: Array<string>
+  },
+  guidelines: {
+    [index: string]: Array<number>,
+    v: Array<number>,
+    h: Array<number>
   }
 }
 

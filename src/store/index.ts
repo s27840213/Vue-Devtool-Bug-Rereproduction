@@ -155,8 +155,13 @@ const getDefaultState = (): IEditorState => ({
     subheading: [],
     body: []
   },
-  isMoving: false
+  isMoving: false,
+  guidelines: {
+    v: [],
+    h: []
+  }
 })
+
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
   getPage(state: IEditorState) {
@@ -251,6 +256,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
+  },
+  getGuidelines(state: IEditorState) {
+    return state.guidelines
   }
 }
 
@@ -594,6 +602,23 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
+  },
+  ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string }) {
+    const { pos, type } = updateInfo
+    switch (type) {
+      case 'v': {
+        state.guidelines.v.push(pos)
+        break
+      }
+      case 'h': {
+        state.guidelines.h.push(pos)
+        break
+      }
+    }
+  },
+  DELETE_guideline(state: IEditorState, updateInfo: { index: number, type: string }) {
+    const { index, type } = updateInfo
+    state.guidelines[type].splice(index, 1)
   }
 }
 

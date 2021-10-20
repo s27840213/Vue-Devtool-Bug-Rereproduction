@@ -55,11 +55,19 @@
             div(class="snap-area")
               div(v-for="line in closestSnaplines.v"
                 class="snap-area__line snap-area__line--vr"
-                :style="snapLineStyles('v', line.pos)")
+                :style="snapLineStyles('v', line)")
               div(v-for="line in closestSnaplines.h"
                 class="snap-area__line snap-area__line--hr"
-                :style="snapLineStyles('h', line.pos)")
-            div(:class="['page-content', `.nu-page-${pageIndex}`]"
+                :style="snapLineStyles('h', line)")
+              div(v-for="(line,index) in guidelines.v"
+                class="snap-area__line snap-area__line--vr"
+                :style="snapLineStyles('v', line,true)"
+                @mouseover="showGuideline(line,'v',index)")
+              div(v-for="(line,index) in guidelines.h"
+                class="snap-area__line snap-area__line--hr"
+                :style="snapLineStyles('h', line,true)"
+                @mouseover="showGuideline(line,'h',index)")
+            div(:class="['page-content']"
                 :style="styles('content')"
                 ref="page-content"
                 @drop="onDrop"
@@ -141,6 +149,7 @@ import PageUtils from '@/utils/pageUtils'
 import background from '@/store/module/background'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
+import rulerUtils from '@/utils/rulerUtils'
 
 export default Vue.extend({
   data() {
@@ -155,8 +164,8 @@ export default Vue.extend({
       coordinateHeight: 0,
       snapUtils: new SnapUtils(this.pageIndex),
       closestSnaplines: {
-        v: [] as Array<ISnapline>,
-        h: [] as Array<ISnapline>
+        v: [] as Array<number>,
+        h: [] as Array<number>
       },
       GeneralUtils
     }
@@ -190,7 +199,8 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      guidelines: 'getGuidelines'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
@@ -227,6 +237,14 @@ export default Vue.extend({
       return this.config.backgroundImage.config.imgControl
     }
   },
+  watch: {
+    guidelines: {
+      handler() {
+        this.getClosestSnaplines()
+      },
+      deep: true
+    }
+  },
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
@@ -234,7 +252,8 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _deletePage: 'DELETE_page',
+      deleteGuideline: 'DELETE_guideline'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -256,9 +275,19 @@ export default Vue.extend({
         height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
     },
-    snapLineStyles(dir: string, pos: number) {
-      return dir === 'v' ? { height: `${this.config.height}px`, transform: `translate3d(${pos}px,0,3000px)` }
-        : { width: `${this.config.width}px`, transform: `translate3d(0,${pos}px,3000px)` }
+    snapLineStyles(dir: string, pos: number, isGuideline?: string) {
+      return dir === 'v' ? {
+        height: `${this.config.height}px`,
+        width: `${GeneralUtils.fixSize(1)}px`,
+        transform: `translate3d(${pos}px,0,3000px)`,
+        'pointer-events': isGuideline ? 'auto' : 'none'
+      }
+        : {
+          width: `${this.config.width}px`,
+          height: `${GeneralUtils.fixSize(1)}px`,
+          transform: `translate3d(0,${pos}px,3000px)`,
+          'pointer-events': isGuideline ? 'auto' : 'none'
+        }
     },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex)
@@ -274,7 +303,6 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       GroupUtils.deselect()
-      console.log(this.pageIndex)
       this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
@@ -302,8 +330,8 @@ export default Vue.extend({
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
     getClosestSnaplines() {
-      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v]
-      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h]
+      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
+      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
     },
     clearSnap(): void {
       this.snapUtils.clear()
@@ -381,6 +409,13 @@ export default Vue.extend({
         clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
         'pointer-events': 'none'
       }
+    },
+    showGuideline(pos: number, type: string, index: number) {
+      this.deleteGuideline({
+        index,
+        type
+      })
+      rulerUtils.event.emit('showGuideline', rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
     }
   }
 })
@@ -429,7 +464,7 @@ export default Vue.extend({
  */
 .overflow-container {
   position: relative;
-  clip-path: polygon(0 0, 100% 0%, 100% 100%, 0% 100%);
+  overflow: hidden;
 }
 
 .page-content {
@@ -468,13 +503,7 @@ export default Vue.extend({
     top: 0;
     left: 0;
     z-index: setZindex(coordinate);
-    background-color: blue;
-    &--vr {
-      width: 1px;
-    }
-    &--hr {
-      height: 1px;
-    }
+    background-color: setColor("blue-1");
   }
 }
 

@@ -6,6 +6,7 @@ import MathUtils from '@/utils/mathUtils'
 import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline, ISnapAngle } from '@/interfaces/snap'
 import LayerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import generalUtils from './generalUtils'
 class SnapUtils {
   pageIndex: number
   GUIDELINE_OFFSET: number
@@ -19,7 +20,7 @@ class SnapUtils {
 
   constructor(pageIndex: number) {
     this.pageIndex = pageIndex
-    this.GUIDELINE_OFFSET = 10
+    this.GUIDELINE_OFFSET = 5
     this.GUIDEANGLE_OFFSET = 1
     this.closestSnaplines = {
       v: [],
@@ -28,13 +29,17 @@ class SnapUtils {
     this.closestSnapAngle = -1
   }
 
+  get guidelinePos() {
+    return store.getters.getGuidelines
+  }
+
   getSnaplinePos(): ISnaplinePos {
     const page = store.getters.getPages[this.pageIndex] as IPage
     /**
      * Push page edge and center snapline first
      */
-    const v = [0, page.width / 2, page.width]
-    const h = [0, page.height / 2, page.height]
+    const v = [0, page.width / 2, page.width, ...this.guidelinePos.v]
+    const h = [0, page.height / 2, page.height, ...this.guidelinePos.h]
 
     /**
      * Then push all bounding edges and center line of layers
@@ -127,7 +132,7 @@ class SnapUtils {
       layerSnappingInfos.v.forEach((layerSnappingInfo: ISnapline) => {
         // if the distance between snapline and layer snap edge is close, we can consider this edge for snapping
         const diff = Math.abs(pos - layerSnappingInfo.pos)
-        if (diff < this.GUIDELINE_OFFSET) {
+        if (diff < generalUtils.fixSize(this.GUIDELINE_OFFSET)) {
           resultV.push({
             pos: pos,
             diff: diff,
@@ -140,7 +145,7 @@ class SnapUtils {
     snaplinesPos.h.forEach((pos: number) => {
       layerSnappingInfos.h.forEach((layerSnappingInfo: ISnapline) => {
         const diff = Math.abs(pos - layerSnappingInfo.pos)
-        if (diff < this.GUIDELINE_OFFSET) {
+        if (diff < generalUtils.fixSize(this.GUIDELINE_OFFSET)) {
           resultH.push({
             pos: pos,
             diff: diff,
@@ -275,7 +280,7 @@ class SnapUtils {
     return offset
   }
 
-  calAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): {newPoint: number[], lineLength: number, lineAngle: number} {
+  calAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): { newPoint: number[], lineLength: number, lineAngle: number } {
     const { lineLength, lineAngle } = this.getClosestSnapAngle(markerIndex, point, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : undefined)
     if (this.closestSnapAngle >= 0) {
       const referenceCoordinates = point.slice((1 - markerIndex) * 2, (1 - markerIndex) * 2 + 2)
