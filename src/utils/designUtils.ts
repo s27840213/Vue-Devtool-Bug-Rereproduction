@@ -282,6 +282,7 @@ class DesignUtils {
         const newId = generalUtils.generateAssetId()
         const newDesign = generalUtils.deepCopy(design)
         newDesign.id = newId
+        newDesign.name += ' 的副本'
         store.commit('design/UPDATE_addDesign', {
           path,
           design: newDesign
