@@ -99,6 +99,19 @@ class DesignUtils {
     ]
   }
 
+  makeTrashMenuItems(): {icon: string, text: string}[] {
+    return [
+      {
+        icon: 'reduction',
+        text: '還原'
+      },
+      {
+        icon: 'trash',
+        text: '永久刪除'
+      }
+    ]
+  }
+
   findFolder(folders: IFolder[], name: string): IFolder | undefined {
     for (const folder of folders) {
       if (folder.name === name) {
