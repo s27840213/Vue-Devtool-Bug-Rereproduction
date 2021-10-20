@@ -1,5 +1,6 @@
-import { ICoordinate } from './frame'
+import { SrcObj } from './gallery'
 
+export const jsonVer = '1.0.0'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
@@ -107,11 +108,7 @@ export interface IShape extends ILayer<IStyle> {
   shapeType?: string
 }
 export interface IImage extends ILayer<IImageStyle> {
-  srcObj: {
-    type: string,
-    userId: string,
-    assetId: string
-  },
+  srcObj: SrcObj
   clipPath: string,
   isClipper: boolean,
   isFrame?: boolean,
@@ -129,5 +126,3 @@ export interface IFrame extends ILayer<IStyle> {
   decoration?: IShape,
   decorationTop? : IShape
 }
-
-export const jsonVer = '1.0.0'
