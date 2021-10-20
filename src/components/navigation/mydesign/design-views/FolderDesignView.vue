@@ -78,7 +78,16 @@
                   :config="design"
                   :favorable="true"
                   :isInFavorites="checkFavorite(design.id)"
+                  :menuItemNum="menuItemSlots.length"
                   @like="toggleFavorite(design)")
+        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, checkFavorite(design.id))")
+            div(class="design-menu-item__icon")
+              svg-icon(:iconName="menuItemSlot.icon"
+                      iconWidth="10px"
+                      iconColor="gray-2")
+            div(class="design-menu-item__text")
+              span {{ menuItemSlot.text }}
 </template>
 
 <script lang="ts">
@@ -102,7 +111,8 @@ export default Vue.extend({
       designsExpanded: true,
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
-      editableFolderName: ''
+      editableFolderName: '',
+      menuItems: designUtils.makeNormalMenuItems()
     }
   },
   directives: {
@@ -131,6 +141,9 @@ export default Vue.extend({
     },
     favoriteIds(): string[] {
       return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    },
+    menuItemSlots(): {name: string, icon: string, text: string}[] {
+      return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     }
   },
   methods: {
@@ -185,6 +198,9 @@ export default Vue.extend({
         newFolderName: this.editableFolderName
       })
       this.setCurrentSelectedFolder(`f:${[...this.parents, this.editableFolderName].join('/')}`)
+    },
+    handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+      designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

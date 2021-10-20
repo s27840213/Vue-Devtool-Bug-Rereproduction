@@ -63,7 +63,7 @@ class DesignUtils {
         name: `Name${i + 1}`,
         width: 1200,
         height: 1200,
-        id: `${i}`,
+        id: `${generalUtils.generateAssetId()}`,
         thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`)
       })
     }
@@ -72,6 +72,31 @@ class DesignUtils {
 
   makePath(selectInfo: string): string[] {
     return selectInfo.substring(2).split('/')
+  }
+
+  makeNormalMenuItems(): {icon: string, text: string}[] {
+    return [
+      {
+        icon: 'copy',
+        text: '建立副本'
+      },
+      {
+        icon: 'share-alt',
+        text: '分享'
+      },
+      {
+        icon: 'download',
+        text: '下載'
+      },
+      {
+        icon: 'folder',
+        text: '移至資料夾'
+      },
+      {
+        icon: 'trash',
+        text: '刪除'
+      }
+    ]
   }
 
   findFolder(folders: IFolder[], name: string): IFolder | undefined {
@@ -208,6 +233,11 @@ class DesignUtils {
     }
   }
 
+  removeDeleted(designs: IPathedDesign[]): IPathedDesign[] {
+    const deletedDesignIds = store.getters['design/getTrashDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    return designs.filter(design => !(deletedDesignIds.includes(design.design.id)))
+  }
+
   checkIfPathed(designs: IDesign[] | IPathedDesign[]) { // if empty, return true
     return (designs.length === 0) || ('path' in designs[0])
   }
@@ -223,6 +253,38 @@ class DesignUtils {
       return targetFolder.designs.some(design => design.name === name)
     }
     return false
+  }
+
+  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+    switch (icon) {
+      case 'copy': {
+        const newId = generalUtils.generateAssetId()
+        const newDesign = generalUtils.deepCopy(design)
+        newDesign.id = newId
+        store.commit('design/UPDATE_addDesign', {
+          path,
+          design: newDesign
+        })
+        if (isInFavorites) {
+          store.commit('design/UPDATE_addToFavorite', {
+            path,
+            design: newDesign
+          })
+        }
+        break
+      }
+      case 'trash': {
+        store.commit('design/UPDATE_addToTrash', {
+          path,
+          design
+        })
+        store.commit('design/UPDATE_deleteDesign', {
+          path,
+          design
+        })
+        break
+      }
+    }
   }
 }
 

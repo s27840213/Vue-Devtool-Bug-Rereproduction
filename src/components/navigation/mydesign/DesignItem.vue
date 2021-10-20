@@ -19,12 +19,15 @@
           div(v-if="isMouseOver || isOtherSelected"
             class="design-item__checkbox")
           div(v-if="isMouseOver"
-            class="design-item__more")
+            class="design-item__more"
+            @click="toggleMenu()")
             svg-icon(iconName="more_horizontal"
                     iconWidth="24px"
                     iconColor="gray-2")
-          div(class="design-item__menu")
-            slot
+          div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
+              class="design-item__menu"
+              v-click-outside="closeMenu")
+            slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
           div(v-if="favorable" class="design-item__favorite" @click="emitLike")
             svg-icon(v-if="isMouseOver && !isInFavorites"
                     iconName="favorites"
@@ -80,6 +83,7 @@ export default Vue.extend({
   props: {
     path: Array,
     config: Object,
+    menuItemNum: Number,
     favorable: Boolean,
     isInFavorites: Boolean,
     isOtherSelected: Boolean
@@ -90,6 +94,7 @@ export default Vue.extend({
       isMouseOver: false,
       isNameMouseOver: false,
       isNameEditing: false,
+      isMenuOpen: false,
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
       ratioReady: false,
@@ -124,6 +129,9 @@ export default Vue.extend({
     }),
     appliedUrl(): string {
       return this.config.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.config.thumbnail
+    },
+    menuItems(): any[] {
+      return Array(this.menuItemNum ?? 0)
     }
   },
   methods: {
@@ -200,6 +208,7 @@ export default Vue.extend({
     },
     handleMouseLeave() {
       this.isMouseOver = false
+      this.isMenuOpen = false
     },
     handleNameMouseEnter() {
       this.isNameMouseOver = true
@@ -219,7 +228,7 @@ export default Vue.extend({
       this.isNameEditing = false
       this.isNameMouseOver = false
       if (this.editableName === '' || this.editableName === this.config.name) return
-      if (designUtils.checkExistingDesignName(this.folders, this.path as string[], this.editableName)) return
+      // if (designUtils.checkExistingDesignName(this.folders, this.path as string[], this.editableName)) return
       this.setDesignName({
         path: this.path,
         id: this.config.id,
@@ -230,6 +239,12 @@ export default Vue.extend({
       if (e.key === 'Enter') {
         this.handleNameEditEnd()
       }
+    },
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen
+    },
+    closeMenu() {
+      this.isMenuOpen = false
     },
     emitLike() {
       this.$emit('like')
@@ -292,13 +307,61 @@ export default Vue.extend({
     position: absolute;
     width: 24px;
     height: 24px;
-    border-radius: 4px;
+    border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: white;
     right: 8px;
     top: 8px;
+    cursor: pointer;
+  }
+  &__menu {
+    position: absolute;
+    width: 108px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+    right: 8px;
+    top: 35px;
+    & .design-menu-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      gap: 5px;
+      padding: 8px 0;
+      cursor: pointer;
+      &:hover {
+        background-color: setColor(gray-5);
+      }
+      &__icon {
+        margin-left: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 10px;
+        height: 10px;
+      }
+      &__text {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        height: 12px;
+        > span {
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 12px;
+          color: setColor(gray-2);
+        }
+      }
+    }
   }
   &__favorite {
     position: absolute;

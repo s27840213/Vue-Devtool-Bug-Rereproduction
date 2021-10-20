@@ -9,7 +9,16 @@
                   :config="design"
                   :favorable="true"
                   :isInFavorites="checkFavorite(design.id)"
+                  :menuItemNum="menuItemSlots.length"
                   @like="toggleFavorite(path, design)")
+        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, checkFavorite(design.id))")
+            div(class="design-menu-item__icon")
+              svg-icon(:iconName="menuItemSlot.icon"
+                      iconWidth="10px"
+                      iconColor="gray-2")
+            div(class="design-menu-item__text")
+              span {{ menuItemSlot.text }}
 </template>
 
 <script lang="ts">
@@ -26,6 +35,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      menuItems: designUtils.makeNormalMenuItems()
     }
   },
   computed: {
@@ -36,9 +46,13 @@ export default Vue.extend({
       return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     },
     allDesigns() {
-      const designs = generalUtils.deepCopy(this.favoriteDesigns) as IPathedDesign[]
+      let designs = generalUtils.deepCopy(this.favoriteDesigns) as IPathedDesign[]
+      designs = designUtils.removeDeleted(designs)
       designUtils.sortByName(designs)
       return designs.map((item) => [item.path, item.design])
+    },
+    menuItemSlots(): {name: string, icon: string, text: string}[] {
+      return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     }
   },
   methods: {
@@ -48,6 +62,9 @@ export default Vue.extend({
     }),
     checkFavorite(id: string): boolean {
       return this.favoriteIds.includes(id)
+    },
+    handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+      designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
     },
     toggleFavorite(path: string[], design: IDesign) {
       const payload = {
