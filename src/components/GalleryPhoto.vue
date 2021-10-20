@@ -15,6 +15,7 @@
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event,photo)"
+      @dragend="dragEnd"
       @click="hasCheckedAssets ? modifyCheckedAssets(photo.id) :addImage(photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
@@ -58,10 +59,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo',
+      _x: 'SET_currSelectedPhotoInfo',
       addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
       deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
-      updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS'
+      updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     dragStart(e: DragEvent, photo: any) {
       const dataTransfer = e.dataTransfer as DataTransfer
@@ -90,6 +92,25 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(data))
       fetch(ImageUtils.getSrc(data as IImage))
       fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type, data.styles.width, 'next')))
+      this.setCurrDraggedPhoto({
+        srcObj: {
+          ...data.srcObj
+        },
+        styles: { width, height }
+      })
+    },
+    dragEnd() {
+      this.setCurrDraggedPhoto({
+        srcObj: {
+          type: '',
+          assetId: '',
+          userId: ''
+        },
+        styles: {
+          width: 0,
+          height: 0
+        }
+      })
     },
     addImage(photo: any) {
       if (!this.isUploading) {
@@ -121,7 +142,7 @@ export default Vue.extend({
     },
     showPhotoInfo(evt: Event) {
       const { user = {}, tags, vendor } = this.photo
-      this._setCurrSelectedPhotoInfo({
+      this._x({
         userName: user.name || '',
         userLink: user.link || '',
         vendor,

@@ -143,6 +143,17 @@ const getDefaultState = (): IEditorState => ({
     layers: [],
     types: new Set<string>()
   },
+  currDraggedPhoto: {
+    srcObj: {
+      type: '',
+      assetId: '',
+      userId: ''
+    },
+    styles: {
+      width: 0,
+      height: 0
+    }
+  },
   currSubSelectedInfo: {
     index: -1,
     type: ''
@@ -341,6 +352,14 @@ const mutations: MutationTree<IEditorState> = {
         Object.assign(state.textInfo, { [k]: v })
       }
     })
+  },
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }}) {
+    state.currDraggedPhoto.srcObj = {
+      ...photo.srcObj
+    }
+    state.currDraggedPhoto.styles = {
+      ...photo.styles
+    }
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {

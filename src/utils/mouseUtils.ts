@@ -59,6 +59,8 @@ class MouseUtils {
     if (dropData === null || typeof dropData !== 'string') {
       throw new Error('Drop item is null!')
     }
+    console.log(dropData)
+
     const data = JSON.parse(dropData)
     const frame = LayerUtils.getLayer(pageIndex, layerIndex) as IFrame
     const clips = generalUtils.deepCopy(frame.clips)
