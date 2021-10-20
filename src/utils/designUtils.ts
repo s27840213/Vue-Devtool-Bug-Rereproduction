@@ -5,61 +5,69 @@ class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = [
       {
-        name: 'Toby',
+        name: '$ROOT$',
         isExpanded: false,
         isSelected: false,
         designs: [],
         subFolders: [
           {
-            name: '素材1',
-            isExpanded: false,
-            isSelected: false,
-            designs: [],
-            subFolders: []
-          },
-          {
-            name: '素材2',
+            name: 'Toby',
             isExpanded: false,
             isSelected: false,
             designs: [],
             subFolders: [
               {
-                name: '材質3',
+                name: '素材1',
+                isExpanded: false,
+                isSelected: false,
+                designs: [],
+                subFolders: []
+              },
+              {
+                name: '素材2',
                 isExpanded: false,
                 isSelected: false,
                 designs: [],
                 subFolders: [
                   {
-                    name: '材質4',
+                    name: '材質3',
                     isExpanded: false,
                     isSelected: false,
                     designs: [],
                     subFolders: [
                       {
-                        name: '材質5',
+                        name: '材質4',
                         isExpanded: false,
                         isSelected: false,
                         designs: [],
-                        subFolders: []
+                        subFolders: [
+                          {
+                            name: '材質5',
+                            isExpanded: false,
+                            isSelected: false,
+                            designs: [],
+                            subFolders: []
+                          }
+                        ]
                       }
                     ]
                   }
                 ]
               }
             ]
+          },
+          {
+            name: '日本行銷',
+            isExpanded: false,
+            isSelected: false,
+            designs: [],
+            subFolders: []
           }
         ]
-      },
-      {
-        name: '日本行銷',
-        isExpanded: false,
-        isSelected: false,
-        designs: [],
-        subFolders: []
       }
     ]
     for (let i = 0; i < 15; i++) {
-      template[0].designs.push({
+      template[0].subFolders[0].designs.push({
         name: `Name${i + 1}`,
         width: 1200,
         height: 1200,
@@ -297,7 +305,34 @@ class DesignUtils {
         })
         break
       }
+      case 'reduction': {
+        this.recover(design.id)
+        break
+      }
     }
+  }
+
+  recover(id: string) {
+    const folders = store.getters['design/getFolders'] as IFolder[]
+    const trashDesigns = store.getters['design/getTrashDesigns'] as IPathedDesign[]
+    const index = trashDesigns.findIndex(pathedDesign => pathedDesign.design.id === id)
+    const pathedDesign = trashDesigns[index]
+    const folder = this.search(folders, pathedDesign.path)
+    if (folder) {
+      store.commit('design/UPDATE_addDesign', {
+        path: pathedDesign.path,
+        design: pathedDesign.design
+      })
+    } else {
+      store.commit('design/UPDATE_addDesign', {
+        path: ['$ROOT$'],
+        design: pathedDesign.design
+      })
+    }
+    store.commit('design/UPDATE_removeFromTrash', {
+      path: pathedDesign.path,
+      design: pathedDesign.design
+    })
   }
 }
 

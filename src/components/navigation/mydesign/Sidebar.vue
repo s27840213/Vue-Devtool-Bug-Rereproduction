@@ -14,7 +14,7 @@
               iconColor="white"
               iconWidth="20px")
           div(class="nav-item__text") 我的最愛
-        sidebar-folder(v-for="folder in folders" :folder="folder" :level="0" :parents="[]")
+        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="['$ROOT$']")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 't')}"
             @click="handleSelection('t')")
           svg-icon(iconName="trash"
@@ -27,6 +27,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/navigation/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
+import { IFolder } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
@@ -39,7 +40,13 @@ export default Vue.extend({
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
       folders: 'getFolders'
-    })
+    }),
+    realFolders(): IFolder[] {
+      if (this.folders.length > 0) {
+        return this.folders[0].subFolders
+      }
+      return []
+    }
   },
   methods: {
     ...mapMutations('design', {

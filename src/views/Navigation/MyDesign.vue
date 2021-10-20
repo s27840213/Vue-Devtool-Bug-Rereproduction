@@ -3,9 +3,16 @@
     nu-header
     div(class="my-design__content")
       sidebar
-      section
-        component(:is="mydesignView" class="design-view")
-
+      section(class="relative")
+        component(:is="mydesignView"
+                  class="design-view"
+                  @deleteDesign="handleDeleteDesign")
+        div(v-if="isShowMessage" class="my-design__message")
+          div(class="my-design__message__img" :style="messageImageStyles()")
+          div(class="my-design__message__text")
+            span 設計已移至垃圾桶
+          div(class="my-design__message__button" @click="recover")
+            span 復原
 </template>
 
 <script lang="ts">
@@ -17,6 +24,8 @@ import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesi
 import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
+import { IDesign } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -30,6 +39,11 @@ export default Vue.extend({
   },
   data() {
     return {
+      deletedDesignThumbnail: require('@/assets/img/svg/frame.svg'),
+      deletedDesignQueue: [] as IDesign[],
+      waitingRecovery: '',
+      messageTimer: -1,
+      isShowMessage: false
     }
   },
   computed: {
@@ -52,6 +66,37 @@ export default Vue.extend({
     }
   },
   methods: {
+    messageImageStyles() {
+      return { 'background-image': `url(${this.deletedDesignThumbnail})` }
+    },
+    showDeletionMessage() {
+      const design = this.deletedDesignQueue[0]
+      if (design) {
+        this.deletedDesignThumbnail = design.thumbnail
+        this.waitingRecovery = design.id
+        this.isShowMessage = true
+        this.messageTimer = setTimeout(() => {
+          this.isShowMessage = false
+          setTimeout(() => {
+            this.deletedDesignQueue.shift()
+            this.showDeletionMessage()
+          }, 1000)
+        }, 5000)
+      }
+    },
+    handleDeleteDesign(design: IDesign) {
+      this.deletedDesignQueue.push(design)
+      if (this.deletedDesignQueue.length === 1) {
+        this.showDeletionMessage()
+      }
+    },
+    recover() {
+      clearTimeout(this.messageTimer)
+      designUtils.recover(this.waitingRecovery)
+      this.isShowMessage = false
+      this.deletedDesignQueue.shift()
+      this.showDeletionMessage()
+    }
   }
 })
 </script>
@@ -61,10 +106,63 @@ export default Vue.extend({
   @include size(100%, 100%);
   max-height: 100%;
   &__content {
+    position: relative;
     height: calc(100% - 50px);
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: auto 1fr;
+  }
+  &__message {
+    position: absolute;
+    left: 50%;
+    top: 27px;
+    transform: translateX(-50%);
+    height: 49px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-left: 8px;
+    padding-right: 10px;
+    background-color: #373B53;
+    border-radius: 10px;
+    &__img {
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
+      background-size: cover;
+      background-position: center center;
+    }
+    &__text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 25px;
+      > span {
+        font-family: NotoSansTC;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 25px;
+        color: white;
+        letter-spacing: 0.205em;
+      }
+    }
+    &__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 25px;
+      background-color: setColor(blue-3);
+      border-radius: 18px;
+      > span {
+        font-family: NotoSansTC;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 25px;
+        color: setColor(gray-2);
+        letter-spacing: 0.205em;
+      }
+    }
   }
 }
 

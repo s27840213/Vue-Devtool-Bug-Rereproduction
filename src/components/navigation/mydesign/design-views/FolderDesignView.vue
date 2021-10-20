@@ -23,8 +23,8 @@
                   iconColor="gray-3")
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
-        template(v-for="(parent, index) in parents")
-          span(class="folder-design-view__path__node" @click="goToParent(index)") {{ parent + ' ' }}
+        template(v-for="(parent, index) in shownParents")
+          span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
           span {{ ' > ' }}
           span {{ ' ' }}
         span(class="folder-design-view__path__node") {{ folder.name }}
@@ -134,6 +134,9 @@ export default Vue.extend({
       const path = this.path
       return path.slice(0, path.length - 1)
     },
+    shownParents(): string[] {
+      return this.parents.slice(1)
+    },
     designs(): IDesign[] {
       const designs = generalUtils.deepCopy(this.folder.designs)
       designUtils.sortByName(designs)
@@ -201,6 +204,9 @@ export default Vue.extend({
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+      if (icon === 'trash') {
+        this.$emit('deleteDesign', design)
+      }
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

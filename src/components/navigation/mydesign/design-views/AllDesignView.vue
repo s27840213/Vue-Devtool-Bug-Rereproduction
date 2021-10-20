@@ -64,6 +64,9 @@ export default Vue.extend({
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+      if (icon === 'trash') {
+        this.$emit('deleteDesign', design)
+      }
     },
     toggleFavorite(path: string[], design: IDesign) {
       const payload = {

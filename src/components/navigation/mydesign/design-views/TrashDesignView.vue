@@ -20,7 +20,7 @@
                   :favorable="false"
                   :menuItemNum="menuItemSlots.length")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item")
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, false)")
             div(class="design-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -69,6 +69,7 @@ export default Vue.extend({
     // ...mapMutations('design', {
     // }),
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+      if (icon === 'trash') icon = 'delete'
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
     },
     toggleInfo() {
