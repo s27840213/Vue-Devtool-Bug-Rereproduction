@@ -77,8 +77,8 @@
                   :path="path"
                   :config="design"
                   :favorable="true"
-                  :isInFavoriates="checkFavoriate(design.id)"
-                  @like="toggleFavoriate(design)")
+                  :isInFavorites="checkFavorite(design.id)"
+                  @like="toggleFavorite(design)")
 </template>
 
 <script lang="ts">
@@ -112,7 +112,7 @@ export default Vue.extend({
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
       folders: 'getFolders',
-      favoriateDesigns: 'getFavoriateDesigns'
+      favoriteDesigns: 'getFavoriteDesigns'
     }),
     path(): string[] {
       return designUtils.makePath(this.currentSelectedFolder)
@@ -129,16 +129,16 @@ export default Vue.extend({
       designUtils.sortByName(designs)
       return designs
     },
-    favoriateIds(): string[] {
-      return this.favoriateDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    favoriteIds(): string[] {
+      return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     }
   },
   methods: {
     ...mapMutations('design', {
       setCurrentSelectedFolder: 'SET_currSelectedFolder',
       setExpand: 'SET_expand',
-      addToFavoriate: 'UPDATE_addToFavoriate',
-      removeFromFavoriate: 'UPDATE_removeFromFavoriate',
+      addToFavorite: 'UPDATE_addToFavorite',
+      removeFromFavorite: 'UPDATE_removeFromFavorite',
       setFolderName: 'UPDATE_folderName'
     }),
     foldersExpansionIconStyles() {
@@ -147,8 +147,8 @@ export default Vue.extend({
     designsExpansionIconStyles() {
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
-    checkFavoriate(id: string): boolean {
-      return this.favoriateIds.includes(id)
+    checkFavorite(id: string): boolean {
+      return this.favoriteIds.includes(id)
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
@@ -197,15 +197,15 @@ export default Vue.extend({
     toggleDesignsExpansion() {
       this.designsExpanded = !this.designsExpanded
     },
-    toggleFavoriate(design: IDesign) {
+    toggleFavorite(design: IDesign) {
       const payload = {
         path: this.path,
         design
       }
-      if (this.checkFavoriate(design.id)) {
-        this.removeFromFavoriate(payload)
+      if (this.checkFavorite(design.id)) {
+        this.removeFromFavorite(payload)
       } else {
-        this.addToFavoriate(payload)
+        this.addToFavorite(payload)
       }
     }
   }

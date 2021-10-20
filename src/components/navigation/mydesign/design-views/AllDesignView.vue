@@ -8,8 +8,8 @@
                   :path="path"
                   :config="design"
                   :favorable="true"
-                  :isInFavoriates="checkFavoriate(design.id)"
-                  @like="toggleFavoriate(path, design)")
+                  :isInFavorites="checkFavorite(design.id)"
+                  @like="toggleFavorite(path, design)")
 </template>
 
 <script lang="ts">
@@ -30,10 +30,10 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders',
-      favoriateDesigns: 'getFavoriateDesigns'
+      favoriteDesigns: 'getFavoriteDesigns'
     }),
-    favoriateIds(): string[] {
-      return this.favoriateDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    favoriteIds(): string[] {
+      return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     },
     allDesigns() {
       const designs = designUtils.getAllDesigns(this.folders)
@@ -43,21 +43,21 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      addToFavoriate: 'UPDATE_addToFavoriate',
-      removeFromFavoriate: 'UPDATE_removeFromFavoriate'
+      addToFavorite: 'UPDATE_addToFavorite',
+      removeFromFavorite: 'UPDATE_removeFromFavorite'
     }),
-    checkFavoriate(id: string): boolean {
-      return this.favoriateIds.includes(id)
+    checkFavorite(id: string): boolean {
+      return this.favoriteIds.includes(id)
     },
-    toggleFavoriate(path: string[], design: IDesign) {
+    toggleFavorite(path: string[], design: IDesign) {
       const payload = {
         path,
         design
       }
-      if (this.checkFavoriate(design.id)) {
-        this.removeFromFavoriate(payload)
+      if (this.checkFavorite(design.id)) {
+        this.removeFromFavorite(payload)
       } else {
-        this.addToFavoriate(payload)
+        this.addToFavorite(payload)
       }
     }
   }

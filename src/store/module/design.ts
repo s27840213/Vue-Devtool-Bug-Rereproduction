@@ -7,7 +7,7 @@ interface IDesignSidebarState {
   currentSelectedFolder: string,
   folders: IFolder[],
   draggingDesign: IDraggingDesign | undefined,
-  favoriateDesigns: IPathedDesign[],
+  favoriteDesigns: IPathedDesign[],
   trashDesigns: IPathedDesign[]
 }
 
@@ -15,7 +15,7 @@ const getDefaultState = (): IDesignSidebarState => ({
   currentSelectedFolder: 'a',
   folders: [],
   draggingDesign: undefined,
-  favoriateDesigns: [],
+  favoriteDesigns: [],
   trashDesigns: []
 })
 
@@ -33,8 +33,8 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
     return state.draggingDesign
   },
-  getFavoriateDesigns(state: IDesignSidebarState): IPathedDesign[] {
-    return state.favoriateDesigns
+  getFavoriteDesigns(state: IDesignSidebarState): IPathedDesign[] {
+    return state.favoriteDesigns
   },
   getTrashDesigns(state: IDesignSidebarState): IPathedDesign[] {
     return state.trashDesigns
@@ -61,8 +61,8 @@ const mutations: MutationTree<IDesignSidebarState> = {
   SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign) {
     state.draggingDesign = draggingDesign
   },
-  UPDATE_addToFavoriate(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    state.favoriateDesigns.push({
+  UPDATE_addToFavorite(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    state.favoriteDesigns.push({
       design: updateInfo.design,
       path: updateInfo.path
     })
@@ -73,10 +73,10 @@ const mutations: MutationTree<IDesignSidebarState> = {
       path: updateInfo.path
     })
   },
-  UPDATE_removeFromFavoriate(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    const index = state.favoriateDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
+  UPDATE_removeFromFavorite(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
+    const index = state.favoriteDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
     if (index >= 0) {
-      state.favoriateDesigns.splice(index, 1)
+      state.favoriteDesigns.splice(index, 1)
     }
   },
   UPDATE_removeFromTrash(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
@@ -86,9 +86,9 @@ const mutations: MutationTree<IDesignSidebarState> = {
     }
   },
   UPDATE_path(state: IDesignSidebarState, updateInfo: {id: string, path: string[]}) {
-    const index = state.favoriateDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.id)
+    const index = state.favoriteDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.id)
     if (index >= 0) {
-      state.favoriateDesigns[index].path = updateInfo.path
+      state.favoriteDesigns[index].path = updateInfo.path
     }
   },
   UPDATE_folderName(state: IDesignSidebarState, updateInfo: {path: string[], newFolderName: string}) {

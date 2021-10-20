@@ -14,7 +14,7 @@ import { mapGetters } from 'vuex'
 import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
-import FavoriateDesignView from '@/components/navigation/mydesign/design-views/FavoriateDesignView.vue'
+import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
 
@@ -24,7 +24,7 @@ export default Vue.extend({
     Sidebar,
     NuHeader,
     AllDesignView,
-    FavoriateDesignView,
+    FavoriteDesignView,
     TrashDesignView,
     FolderDesignView
   },
@@ -41,7 +41,7 @@ export default Vue.extend({
         case 'a':
           return 'all-design-view'
         case 'h':
-          return 'favoriate-design-view'
+          return 'favorite-design-view'
         case 't':
           return 'trash-design-view'
         case 'f':

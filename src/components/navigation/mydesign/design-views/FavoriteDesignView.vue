@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="favoriate-design-view")
-    div(class="favoriate-design-view__folder-name") 我的最愛
+  div(class="favorite-design-view")
+    div(class="favorite-design-view__folder-name") 我的最愛
     div(class="horizontal-rule")
-    div(class="favoriate-design-view__designs")
+    div(class="favorite-design-view__designs")
       design-item(v-for="[path, design] in allDesigns"
                   :key="design.id"
                   :path="path"
                   :config="design"
                   :favorable="true"
-                  :isInFavoriates="checkFavoriate(design.id)"
-                  @like="toggleFavoriate(path, design)")
+                  :isInFavorites="checkFavorite(design.id)"
+                  @like="toggleFavorite(path, design)")
 </template>
 
 <script lang="ts">
@@ -30,34 +30,34 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      favoriateDesigns: 'getFavoriateDesigns'
+      favoriteDesigns: 'getFavoriteDesigns'
     }),
-    favoriateIds(): string[] {
-      return this.favoriateDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    favoriteIds(): string[] {
+      return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     },
     allDesigns() {
-      const designs = generalUtils.deepCopy(this.favoriateDesigns) as IPathedDesign[]
+      const designs = generalUtils.deepCopy(this.favoriteDesigns) as IPathedDesign[]
       designUtils.sortByName(designs)
       return designs.map((item) => [item.path, item.design])
     }
   },
   methods: {
     ...mapMutations('design', {
-      addToFavoriate: 'UPDATE_addToFavoriate',
-      removeFromFavoriate: 'UPDATE_removeFromFavoriate'
+      addToFavorite: 'UPDATE_addToFavorite',
+      removeFromFavorite: 'UPDATE_removeFromFavorite'
     }),
-    checkFavoriate(id: string): boolean {
-      return this.favoriateIds.includes(id)
+    checkFavorite(id: string): boolean {
+      return this.favoriteIds.includes(id)
     },
-    toggleFavoriate(path: string[], design: IDesign) {
+    toggleFavorite(path: string[], design: IDesign) {
       const payload = {
         path,
         design
       }
-      if (this.checkFavoriate(design.id)) {
-        this.removeFromFavoriate(payload)
+      if (this.checkFavorite(design.id)) {
+        this.removeFromFavorite(payload)
       } else {
-        this.addToFavoriate(payload)
+        this.addToFavorite(payload)
       }
     }
   }
@@ -65,7 +65,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.favoriate-design-view {
+.favorite-design-view {
   text-align: left;
   font-family: NotoSansTC;
   overflow-y: auto;

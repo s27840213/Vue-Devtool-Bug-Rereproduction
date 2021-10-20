@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="favoriate-design-view")
+  div(class="favorite-design-view")
 </template>
 
 <script lang="ts">

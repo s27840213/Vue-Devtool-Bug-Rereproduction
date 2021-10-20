@@ -25,17 +25,17 @@
                     iconColor="gray-2")
           div(class="design-item__menu")
             slot
-          div(v-if="favorable" class="design-item__favoriate" @click="emitLike")
-            svg-icon(v-if="isMouseOver && !isInFavoriates"
-                    iconName="favoriates"
+          div(v-if="favorable" class="design-item__favorite" @click="emitLike")
+            svg-icon(v-if="isMouseOver && !isInFavorites"
+                    iconName="favorites"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="isMouseOver && isInFavoriates"
-                    iconName="favoriates-fill"
+            svg-icon(v-if="isMouseOver && isInFavorites"
+                    iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="!isMouseOver && isInFavoriates"
-                    iconName="favoriates-fill"
+            svg-icon(v-if="!isMouseOver && isInFavorites"
+                    iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
     div(class="design-item__name"
@@ -81,7 +81,7 @@ export default Vue.extend({
     path: Array,
     config: Object,
     favorable: Boolean,
-    isInFavoriates: Boolean,
+    isInFavorites: Boolean,
     isOtherSelected: Boolean
   },
   data() {
@@ -300,7 +300,7 @@ export default Vue.extend({
     right: 8px;
     top: 8px;
   }
-  &__favoriate {
+  &__favorite {
     position: absolute;
     width: 20px;
     height: 20px;
