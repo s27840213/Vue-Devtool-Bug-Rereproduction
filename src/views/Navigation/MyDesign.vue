@@ -7,12 +7,13 @@
         component(:is="mydesignView"
                   class="design-view"
                   @deleteDesign="handleDeleteDesign")
-        div(v-if="isShowMessage" class="my-design__message")
-          div(class="my-design__message__img" :style="messageImageStyles()")
-          div(class="my-design__message__text")
-            span 設計已移至垃圾桶
-          div(class="my-design__message__button" @click="recover")
-            span 復原
+        transition(name="slide-fade")
+          div(v-if="isShowMessage" class="my-design__message")
+            div(class="my-design__message__img" :style="messageImageStyles()")
+            div(class="my-design__message__text")
+              span 設計已移至垃圾桶
+            div(class="my-design__message__button" @click="recover")
+              span 復原
 </template>
 
 <script lang="ts">
@@ -169,5 +170,18 @@ export default Vue.extend({
 .design-view {
   height: 100%;
   width: 100%
+}
+
+.slide-fade-enter-active {
+  transition: .3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: .5s ease;
+}
+
+.slide-fade-enter, .slide-fade-leave-to {
+  top: 17px;
+  opacity: 0;
 }
 </style>

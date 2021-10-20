@@ -9,9 +9,11 @@
         svg-icon(iconName="info"
                 iconWidth="16px"
                 iconColor="bu")
-        img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
-        div(v-if="isInfoOpen" class="trash-design-view__info__text")
-          span 30天後自動永久刪除。
+        transition(name="slide-fade-img")
+          img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
+        transition(name="slide-fade-text")
+          div(v-if="isInfoOpen" class="trash-design-view__info__text")
+            span 30天後自動永久刪除。
     div(class="trash-design-view__designs")
       design-item(v-for="[path, design] in allDesigns"
                   :key="design.id"
@@ -177,5 +179,22 @@ export default Vue.extend({
   width: calc(100% - 120px);
   margin-top: 21px;
   margin-bottom: 58px;
+}
+
+.slide-fade-img, .slide-fade-text {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+}
+
+.slide-fade-img-enter, .slide-fade-img-leave-to {
+  left: 100%
+}
+
+.slide-fade-text-enter, .slide-fade-text-leave-to {
+  left: calc(100% + 9px);
 }
 </style>
