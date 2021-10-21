@@ -52,7 +52,7 @@
                           iconColor="gray-2")
                 div(class="more-menu-text")
                   span 重新命名
-              div
+              div(@click="handleDeleteFolder")
                 div(class="more-menu-icon")
                   svg-icon(iconName="trash"
                           iconWidth="15px"
@@ -158,6 +158,11 @@ export default Vue.extend({
   watch: {
     designs() {
       this.$emit('clearSelection')
+    },
+    currentSelectedFolder() {
+      this.isFolderNameMouseOver = false
+      this.isFolderNameEditing = false
+      this.isFolderMenuOpen = false
     }
   },
   computed: {
@@ -266,6 +271,15 @@ export default Vue.extend({
       if (icon === 'trash') {
         this.$emit('deleteDesign', design)
       }
+    },
+    handleDeleteFolder() {
+      this.$emit('deleteFolder', {
+        pathedFolder: {
+          parents: this.parents,
+          folder: this.folder
+        },
+        empty: this.isEmpty
+      })
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

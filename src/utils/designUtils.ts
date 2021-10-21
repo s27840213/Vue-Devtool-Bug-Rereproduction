@@ -282,6 +282,15 @@ class DesignUtils {
     return !pathedDesigns.some(pathedDesign => !favoriteDesignIds.includes(pathedDesign.design.id))
   }
 
+  checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
+    const targetFolder = this.search(folders, path)
+    if (targetFolder) {
+      return targetFolder.name === '$ROOT$' ? '我所有的設計' : targetFolder.name
+    } else {
+      return '我所有的設計'
+    }
+  }
+
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
     switch (icon) {
       case 'copy': {
@@ -317,6 +326,17 @@ class DesignUtils {
         break
       }
     }
+  }
+
+  deleteFolder(parents: string[], folder: IFolder) {
+    store.commit('design/UPDATE_addFolderToTrash', {
+      parents,
+      folder
+    })
+    store.commit('design/UPDATE_deleteFolder', {
+      parents,
+      folder
+    })
   }
 
   recover(id: string) {

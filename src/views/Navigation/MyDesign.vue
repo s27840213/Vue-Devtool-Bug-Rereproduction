@@ -36,7 +36,8 @@
                   @selectDesign="handleSelectDesign"
                   @deselectDesign="handleDeselectDesign"
                   @clearSelection="handleClearSelection"
-                  @recoverDesign="handleRecoverDesign")
+                  @recoverDesign="handleRecoverDesign"
+                  @deleteFolder="handleDeleteFolder")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
@@ -63,6 +64,19 @@
               span 取 消
             div(class="delete-all-message__confirm" @click="deleteAllConfirmed")
               span 刪 除
+      div(v-if="isShowDeleteFolderMessage" class="dim-background" @click="closeDeleteFolderMessage")
+        div(class="delete-folder-message")
+          div(class="delete-folder-message__img")
+            img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
+          div
+            div(class="delete-folder-message__text")
+              span(class="first-line") 此資料夾含有多項設計/資料夾
+              span 是否要全部刪除？
+            div(class="delete-folder-message__buttons")
+              div(class="delete-folder-message__cancel" @click="closeDeleteFolderMessage")
+                span 取 消
+              div(class="delete-folder-message__confirm" @click="deleteFolder(folderToBeDeleted)")
+                span 刪 除
 </template>
 
 <script lang="ts">
@@ -74,7 +88,7 @@ import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesi
 import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
-import { IDesign, IPathedDesign } from '@/interfaces/design'
+import { IDesign, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -97,12 +111,15 @@ export default Vue.extend({
       recoveredDirectory: '我所有的設計',
       recoveredDesignQueue: [] as IPathedDesign[],
       isShowRecoverMessage: false,
-      isShowDeleteAllMessage: false
+      isShowDeleteAllMessage: false,
+      folderToBeDeleted: undefined as IPathedFolder | undefined,
+      isShowDeleteFolderMessage: false
     }
   },
   computed: {
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
+      folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns'
     }),
     mydesignView(): string {
@@ -135,7 +152,8 @@ export default Vue.extend({
     ...mapMutations('design', {
       addToSelection: 'UPDATE_addToSelection',
       removeFromSelection: 'UPDATE_removeFromSelection',
-      clearSelection: 'UPDATE_clearSelection'
+      clearSelection: 'UPDATE_clearSelection',
+      setCurrentSelectedFolder: 'SET_currSelectedFolder'
     }),
     messageImageStyles() {
       return { 'background-image': `url(${this.deletedDesignThumbnail})` }
@@ -158,9 +176,7 @@ export default Vue.extend({
     showRecoverMessage() {
       const design = this.recoveredDesignQueue[0]
       if (design) {
-        let recoveredDirectory = design.path[design.path.length - 1]
-        if (recoveredDirectory === '$ROOT$') recoveredDirectory = '我所有的設計'
-        this.recoveredDirectory = recoveredDirectory
+        this.recoveredDirectory = designUtils.checkRecoveredDirectory(this.folders, design.path)
         this.isShowRecoverMessage = true
         setTimeout(() => {
           this.isShowRecoverMessage = false
@@ -200,6 +216,23 @@ export default Vue.extend({
         this.showRecoverMessage()
       }
     },
+    handleDeleteFolder(payload: {pathedFolder: IPathedFolder, empty: boolean}) {
+      const { pathedFolder, empty } = payload
+      if (empty) {
+        this.deleteFolder(pathedFolder)
+      } else {
+        this.folderToBeDeleted = pathedFolder
+        this.isShowDeleteFolderMessage = true
+      }
+    },
+    deleteFolder(pathedFolder: IPathedFolder) {
+      designUtils.deleteFolder(pathedFolder.parents, pathedFolder.folder)
+      if (pathedFolder.parents.length > 1) {
+        this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
+      } else {
+        this.setCurrentSelectedFolder('a')
+      }
+    },
     recover() {
       clearTimeout(this.messageTimer)
       designUtils.recover(this.waitingRecovery)
@@ -224,6 +257,10 @@ export default Vue.extend({
     },
     closeDeleteAllMessage() {
       this.isShowDeleteAllMessage = false
+    },
+    closeDeleteFolderMessage() {
+      this.isShowDeleteFolderMessage = false
+      this.folderToBeDeleted = undefined
     }
   }
 })
@@ -439,6 +476,91 @@ export default Vue.extend({
         color: white;
       }
       & ~ .delete-all-message__confirm {
+        background-color: setColor(gray-4);
+        > span {
+          color: white;
+        }
+      }
+    }
+    > span {
+      color: black;
+    }
+  }
+  &__confirm {
+    background-color: setColor(red-1);
+    &:hover {
+      background-color: setColor(red-2);
+    }
+    > span {
+      color: white;
+    }
+  }
+}
+
+.delete-folder-message {
+  width: 349px;
+  background-color: white;
+  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+  border-radius: 2px;
+  display: flex;
+  gap: 16px;
+  &__img {
+    margin-top: 14px;
+    margin-left: 14px;
+    width: 76px;
+    height: 79px;
+  }
+  &__text {
+    display: flex;
+    flex-direction: column;
+    > span {
+      text-align: left;
+      width: 240px;
+      display: block;
+      font-family: NotoSansTC;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 26px;
+      color: setColor(gray-2);
+      letter-spacing: 0.115em;
+      margin-left: 3px;
+      &.first-line {
+        margin-top: 22px;
+      }
+    }
+  }
+  &__buttons {
+    margin-top: 17px;
+    margin-bottom: 37px;
+    width: 183px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    > div {
+      width: 84.67px;
+      height: 25px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: NotoSansTC;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 25px;
+      }
+    }
+  }
+  &__cancel {
+    background-color: setColor(gray-4);
+    &:hover {
+      background-color: setColor(red-2);
+      > span {
+        color: white;
+      }
+      & ~ .delete-folder-message__confirm {
         background-color: setColor(gray-4);
         > span {
           color: white;

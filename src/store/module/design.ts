@@ -147,6 +147,15 @@ const mutations: MutationTree<IDesignSidebarState> = {
       }
     }
   },
+  UPDATE_deleteFolder(state: IDesignSidebarState, updateInfo: {parents: string[], folder: IFolder}) {
+    const targetParent = designUtils.search(state.folders, updateInfo.parents)
+    if (targetParent) {
+      const index = targetParent.subFolders.findIndex(folder => folder.name === updateInfo.folder.name)
+      if (index >= 0) {
+        targetParent.subFolders.splice(index, 1)
+      }
+    }
+  },
   UPDATE_addToSelection(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
     Vue.set(state.selectedDesigns, pathedDesign.design.id, pathedDesign)
   },
