@@ -78,7 +78,9 @@
     div(class="design-item__size")
       span {{ `${config.width}x${config.height}` }}
     div(class="dragged-thumbnail" :style="draggedImageStyles()")
-      img(:src="appliedUrl")
+      div(class="relative")
+        img(:src="appliedUrl")
+        div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
 </template>
 
 <script lang="ts">
@@ -95,7 +97,8 @@ export default Vue.extend({
     favorable: Boolean,
     isInFavorites: Boolean,
     isAnySelected: Boolean,
-    isSelected: Boolean
+    isSelected: Boolean,
+    isMultiSelected: Boolean
   },
   data() {
     return {
@@ -107,7 +110,8 @@ export default Vue.extend({
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
       ratioReady: false,
-      aspectRatio: 1
+      imgWidth: 10,
+      imgHeight: 10
     }
   },
   directives: {
@@ -117,7 +121,8 @@ export default Vue.extend({
     this.ratioReady = false
     imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
       const { width, height } = size
-      this.aspectRatio = width / height
+      this.imgWidth = width
+      this.imgHeight = height
       this.ratioReady = true
     })
   },
@@ -127,7 +132,8 @@ export default Vue.extend({
       this.ratioReady = false
       imageUtils.getImageSize(newVal, this.config.width, this.config.height).then((size) => {
         const { width, height } = size
-        this.aspectRatio = width / height
+        this.imgWidth = width
+        this.imgHeight = height
         this.ratioReady = true
       })
     }
@@ -141,6 +147,9 @@ export default Vue.extend({
     },
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
+    },
+    aspectRatio(): number {
+      return this.imgWidth / this.imgHeight
     }
   },
   methods: {
@@ -173,6 +182,16 @@ export default Vue.extend({
           left: `${this.draggedImageCoordinate.x}px`,
           top: `${this.draggedImageCoordinate.y}px`,
           display: 'block'
+        }
+      } else {
+        return {}
+      }
+    },
+    draggedImageStackStyles(): {[key: string]: string} {
+      if (this.isDragged) {
+        return {
+          width: `${this.imgWidth}px`,
+          height: `${this.imgHeight}px`
         }
       } else {
         return {}
@@ -477,5 +496,12 @@ export default Vue.extend({
   transform: translate(-50%, -50%) scale(0.5);
   pointer-events: none;
   z-index: 1000;
+  &__stack {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: setColor(gray-3);
+    z-index: -1;
+  }
 }
 </style>

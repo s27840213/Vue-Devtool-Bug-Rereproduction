@@ -11,6 +11,7 @@
                   :isInFavorites="checkFavorite(design.id)"
                   :isSelected="checkSelected(design.id)"
                   :isAnySelected="isAnySelected"
+                  :isMultiSelected="isMultiSelected"
                   :menuItemNum="menuItemSlots.length"
                   @like="toggleFavorite(path, design)"
                   @select="selectDesign(path, design)"
@@ -67,8 +68,14 @@ export default Vue.extend({
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
     isAnySelected(): boolean {
-      return Object.keys(this.selectedDesigns).length > 0
+      return this.selectedNum > 0
+    },
+    isMultiSelected(): boolean {
+      return this.selectedNum > 1
     }
   },
   methods: {

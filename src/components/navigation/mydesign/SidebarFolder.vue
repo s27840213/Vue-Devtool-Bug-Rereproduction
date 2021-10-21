@@ -45,8 +45,15 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
-      draggingDesign: 'getDraggingDesign'
-    })
+      draggingDesign: 'getDraggingDesign',
+      selectedDesigns: 'getSelectedDesigns'
+    }),
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
+    isMultiSelected(): boolean {
+      return this.selectedNum > 1
+    }
   },
   methods: {
     ...mapMutations('design', {
