@@ -18,6 +18,7 @@ import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
 import page from '@/store/module/page'
+import homeTemplate from '@/store/module/homeTemplate'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -683,6 +684,7 @@ export default new Vuex.Store({
     background,
     modal,
     popup,
-    page
+    page,
+    homeTemplate
   }
 })

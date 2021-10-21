@@ -262,14 +262,11 @@ export default Vue.extend({
     detachBackgroundImage() {
       const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(this.lastSelectedPageIndex))
       if (detachedBackgroundImage.config.srcObj.assetId) {
-        console.log(detachedBackgroundImage.config)
-        let { width, height } = detachedBackgroundImage.config.styles
+        let { initWidth: width, initHeight: height } = detachedBackgroundImage.config.styles
         while (width > 1000 && height > 1000) {
           width /= 1.5
           height /= 1.5
         }
-        console.log(width)
-        console.log(height)
         Object.assign(detachedBackgroundImage.config.styles, {
           width,
           height,
