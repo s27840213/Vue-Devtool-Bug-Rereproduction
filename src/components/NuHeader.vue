@@ -80,15 +80,18 @@ export default Vue.extend({
   },
   methods: {
     goToPage(pageName = '' as string) {
-      console.log(pageName)
-      console.log(this.currentPage)
       if (pageName === this.currentPage) {
         this.$router.go(0)
       } else if (pageName === '/login' || pageName === '/signup') {
         this.$router.push({ path: pageName, query: { redirect: this.$route.path } })
+      // Temporary setting ----
+      } else if (pageName === '/toturial' || pageName === '/faq') {
+        window.location.href = 'https://www.facebook.com/vivipictw'
       } else {
-        this.$router.push({ path: pageName })
+        // this.$router.push({ path: pageName })
+        this.$router.push({ name: 'Editor' })
       }
+      // ----------------------
     }
   }
 })
