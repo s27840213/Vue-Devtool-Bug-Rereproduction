@@ -1,4 +1,4 @@
-import { IDesign, IDraggingDesign, IFolder, IPathedDesign } from '@/interfaces/design'
+import { IDesign, IDraggingDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import { GetterTree, MutationTree } from 'vuex'
@@ -9,6 +9,7 @@ interface IDesignSidebarState {
   folders: IFolder[],
   favoriteDesigns: IPathedDesign[],
   trashDesigns: IPathedDesign[],
+  trashFolders: IPathedFolder[],
   draggingDesign: IDraggingDesign | undefined,
   selectedDesigns: {[key: string]: IPathedDesign}
 }
@@ -18,6 +19,16 @@ const getDefaultState = (): IDesignSidebarState => ({
   folders: [],
   favoriteDesigns: [],
   trashDesigns: [],
+  trashFolders: [{
+    parents: ['$ROOT$'],
+    folder: {
+      name: 'test',
+      isExpanded: false,
+      isSelected: false,
+      designs: [],
+      subFolders: []
+    }
+  }],
   draggingDesign: undefined,
   selectedDesigns: {}
 })
@@ -35,6 +46,9 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   },
   getTrashDesigns(state: IDesignSidebarState): IPathedDesign[] {
     return state.trashDesigns
+  },
+  getTrashFolders(state: IDesignSidebarState): IPathedFolder[] {
+    return state.trashFolders
   },
   getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
     return state.draggingDesign
@@ -61,31 +75,36 @@ const mutations: MutationTree<IDesignSidebarState> = {
   SET_folders(state: IDesignSidebarState, folders: IFolder[]) {
     state.folders = folders
   },
-  SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign) {
+  SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign | undefined) {
     state.draggingDesign = draggingDesign
   },
-  UPDATE_addToFavorite(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    state.favoriteDesigns.push({
-      design: updateInfo.design,
-      path: updateInfo.path
-    })
+  UPDATE_addToFavorite(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    state.favoriteDesigns.push(pathedDesign)
   },
-  UPDATE_addToTrash(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    state.trashDesigns.push({
-      design: updateInfo.design,
-      path: updateInfo.path
-    })
+  UPDATE_addToTrash(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    state.trashDesigns.push(pathedDesign)
   },
-  UPDATE_removeFromFavorite(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    const index = state.favoriteDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
+  UPDATE_addFolderToTrash(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    state.trashFolders.push(pathedFolder)
+  },
+  UPDATE_removeFromFavorite(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    const index = state.favoriteDesigns.findIndex(pathedDesign1 => pathedDesign1.design.id === pathedDesign.design.id)
     if (index >= 0) {
       state.favoriteDesigns.splice(index, 1)
     }
   },
-  UPDATE_removeFromTrash(state: IDesignSidebarState, updateInfo: {path: string[], design: IDesign}) {
-    const index = state.trashDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.design.id)
+  UPDATE_removeFromTrash(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    const index = state.trashDesigns.findIndex(pathedDesign1 => pathedDesign1.design.id === pathedDesign.design.id)
     if (index >= 0) {
       state.trashDesigns.splice(index, 1)
+    }
+  },
+  UPDATE_removeFolderFromTrash(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    const index = state.trashFolders.findIndex(pathedFolder1 => {
+      return generalUtils.arrayCompare<string>(pathedFolder1.parents, pathedFolder.parents) && pathedFolder1.folder.name === pathedFolder.folder.name
+    })
+    if (index >= 0) {
+      state.trashFolders.splice(index, 1)
     }
   },
   UPDATE_path(state: IDesignSidebarState, updateInfo: {id: string, path: string[]}) {

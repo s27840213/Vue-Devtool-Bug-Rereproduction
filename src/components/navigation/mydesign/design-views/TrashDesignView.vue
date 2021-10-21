@@ -14,7 +14,33 @@
         transition(name="slide-fade-text")
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
             span 30天後自動永久刪除。
-    div(class="trash-design-view__designs")
+    div(class="horizontal-rule")
+    div(v-if="allFolders.length > 0" class="trash-design-view__folder-header")
+      div(class="trash-design-view__expand-icon-container"
+          @click="toggleFoldersExpansion")
+        svg-icon(:style="foldersExpansionIconStyles()"
+                iconName="caret-down"
+                iconWidth="10px"
+                iconHeight="5px"
+                iconColor="gray-2")
+      div(class="trash-design-view__folder-title")
+        span 資料夾
+    div(v-if="foldersExpanded && allFolders.length > 0" class="trash-design-view__folders")
+      folder-item(v-for="[parents, folder] in allFolders"
+                  :path="parents"
+                  :name="folder.name"
+                  :undroppable="true")
+    div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
+      div(class="trash-design-view__expand-icon-container"
+          @click="toggleDesignsExpansion")
+        svg-icon(:style="designsExpansionIconStyles()"
+                iconName="caret-down"
+                iconWidth="10px"
+                iconHeight="5px"
+                iconColor="gray-2")
+      div(class="trash-design-view__design-title")
+        span 設計
+    div(v-if="designsExpanded" class="trash-design-view__designs")
       design-item(v-for="[path, design] in allDesigns"
                   :key="design.id"
                   :path="path"
@@ -40,17 +66,21 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IPathedDesign } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
 import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
+    FolderItem,
     DesignItem
   },
   data() {
     return {
+      foldersExpanded: true,
+      designsExpanded: true,
       isInfoOpen: false,
       menuItems: designUtils.makeTrashMenuItems()
     }
@@ -62,12 +92,16 @@ export default Vue.extend({
     ...mapGetters('design', {
       folders: 'getFolders',
       trashDesigns: 'getTrashDesigns',
+      trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns'
     }),
-    allDesigns() {
+    allDesigns(): [string[], IDesign][] {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
       designUtils.sortByName(designs)
       return designs.map((item) => [item.path, item.design])
+    },
+    allFolders(): [string[], IFolder][] {
+      return (this.trashFolders as IPathedFolder[]).map((item) => [item.parents, item.folder])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
@@ -76,10 +110,22 @@ export default Vue.extend({
   methods: {
     // ...mapMutations('design', {
     // }),
+    foldersExpansionIconStyles() {
+      return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
+    },
+    designsExpansionIconStyles() {
+      return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
+    },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
       if (icon === 'trash') icon = 'delete'
       if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+    },
+    toggleFoldersExpansion() {
+      this.foldersExpanded = !this.foldersExpanded
+    },
+    toggleDesignsExpansion() {
+      this.designsExpanded = !this.designsExpanded
     },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen
@@ -102,7 +148,6 @@ export default Vue.extend({
   }
   &__title {
     margin-top: 94px;
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: start;
@@ -119,6 +164,57 @@ export default Vue.extend({
       line-height: 40px;
       letter-spacing: 0.205em;
       color: setColor(bu);
+    }
+  }
+  &__folder-header, &__design-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+  &__folder-title, &__design-title {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    > span {
+      line-height: 40px;
+      font-size: 24px;
+      font-weight: 700;
+      color: setColor(gray-2);
+      letter-spacing: 0.205em;
+    }
+  }
+  &__expand-icon-container {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    > svg {
+      transition: 0.1s linear;
+    }
+  }
+  &__folders {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 45px;
+  }
+  &__designs {
+    display: grid;
+    grid-gap: 25px;
+    justify-items: stretch;
+    width: calc(100% - 120px);
+    margin-bottom: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media(min-width: 976px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media(min-width: 1260px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    @media(min-width: 1560px) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
   &__info {
@@ -151,23 +247,6 @@ export default Vue.extend({
         white-space: nowrap;
         color: white;
       }
-    }
-  }
-  &__designs {
-    display: grid;
-    grid-gap: 25px;
-    justify-items: stretch;
-    width: calc(100% - 120px);
-    margin-bottom: 20px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    @media(min-width: 976px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    @media(min-width: 1260px) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    @media(min-width: 1560px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 }

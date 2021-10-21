@@ -2,9 +2,8 @@
   div(class="folder-item")
     div(class="folder-item__block"
         :class="isMouseOver ? 'block-over' : 'block'"
-        @dragenter="handleMouseEnter"
+        v-on="undroppable ? {} : { dragenter: handleMouseEnter, dragleave: handleMouseLeave }"
         @mouseenter="handleMouseEnter"
-        @dragleave="handleMouseLeave"
         @mouseleave="handleMouseLeave"
         @dragover.prevent
         @drop="handleDrop"
@@ -25,7 +24,8 @@ import { mapGetters } from 'vuex'
 export default Vue.extend({
   props: {
     path: Array,
-    name: String
+    name: String,
+    undroppable: Boolean
   },
   data() {
     return {
@@ -56,7 +56,8 @@ export default Vue.extend({
     },
     handleDrop() {
       this.isMouseOver = false
-      const { path = [], id = '' } = this.draggingDesign
+      if (this.undroppable) return
+      const { path = [], id = '' } = this.draggingDesign ?? {}
       if (id === '') return
       if (this.isMultiSelected && this.selectedDesigns[id]) {
         designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.path as string[]), this.name as string])

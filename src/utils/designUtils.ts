@@ -1,4 +1,4 @@
-import { IDesign, IFolder, IPathedDesign, ITraverseItem } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import store from '@/store'
 import generalUtils from './generalUtils'
 class DesignUtils {
@@ -206,7 +206,7 @@ class DesignUtils {
   }
 
   getAllDesigns(folders: IFolder[]): IPathedDesign[] {
-    const nodes: ITraverseItem[] = []
+    const nodes: IPathedFolder[] = []
     for (const folder of folders) {
       nodes.push({
         parents: [],

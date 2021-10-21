@@ -23,8 +23,7 @@ export interface IPathedDesign {
   design: IDesign,
   path: string[]
 }
-
-export interface ITraverseItem {
+export interface IPathedFolder {
   parents: string[],
   folder: IFolder
 }

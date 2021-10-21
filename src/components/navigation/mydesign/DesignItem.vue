@@ -218,6 +218,7 @@ export default Vue.extend({
     },
     handleDragEnd() {
       this.isDragged = false
+      this.setDraggingDesign(undefined)
       document.removeEventListener('dragover', this.preventDefaultDragOver, false)
     },
     preventDefaultDragOver(e: DragEvent) {
