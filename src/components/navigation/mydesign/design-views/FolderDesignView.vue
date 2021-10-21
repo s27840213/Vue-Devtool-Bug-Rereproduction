@@ -29,11 +29,36 @@
           span {{ ' ' }}
         span(class="folder-design-view__path__node") {{ folder.name }}
       div(class="folder-design-view__actions")
-        div(class="folder-design-view__more")
+        div(class="folder-design-view__more"
+            @click="toggleFolderMenu"
+            v-click-outside="closeFolderMenu")
           svg-icon(class="header-icon"
                   iconName="more_horizontal"
                   iconWidth="18px"
                   iconColor="gray-2")
+          div(v-if="isFolderMenuOpen"
+              class="folder-design-view__more__menu"
+              @click.stop)
+            div(class="folder-design-view__more__menu__title")
+              span {{ folder.name }}
+            div(class="folder-design-view__more__menu__text")
+              span {{ `由 創作 | ${designs.length}個項目` }}
+            div(class="folder-design-view__more__menu__divider")
+            div(class="folder-design-view__more__menu__actions")
+              div(@click="handleFolderNameClick")
+                div(class="more-menu-icon")
+                  svg-icon(iconName="pen"
+                          iconWidth="15px"
+                          iconColor="gray-2")
+                div(class="more-menu-text")
+                  span 重新命名
+              div
+                div(class="more-menu-icon")
+                  svg-icon(iconName="trash"
+                          iconWidth="15px"
+                          iconColor="gray-2")
+                div(class="more-menu-text")
+                  span 刪除資料夾
         div(class="folder-design-view__new-folder")
           svg-icon(class="header-icon"
                   iconName="folder_plus"
@@ -123,7 +148,8 @@ export default Vue.extend({
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
       editableFolderName: '',
-      menuItems: designUtils.makeNormalMenuItems()
+      menuItems: designUtils.makeNormalMenuItems(),
+      isFolderMenuOpen: false
     }
   },
   directives: {
@@ -218,6 +244,7 @@ export default Vue.extend({
     handleFolderNameClick() {
       this.editableFolderName = this.folder.name
       this.isFolderNameEditing = true
+      this.isFolderMenuOpen = false
       this.$nextTick(() => {
         const folderNameInput = this.$refs.folderName as HTMLInputElement
         folderNameInput.focus()
@@ -261,6 +288,12 @@ export default Vue.extend({
       } else {
         this.addToFavorite(payload)
       }
+    },
+    toggleFolderMenu() {
+      this.isFolderMenuOpen = !this.isFolderMenuOpen
+    },
+    closeFolderMenu() {
+      this.isFolderMenuOpen = false
     },
     selectDesign(design: IDesign) {
       this.$emit('selectDesign', {
@@ -372,6 +405,90 @@ export default Vue.extend({
       height: 29px;
       display: flex;
       align-items: center;
+    }
+  }
+  &__more {
+    position: relative;
+    &__menu {
+      position: absolute;
+      width: 159px;
+      top: calc(100% + 5px);
+      right: 0;
+      background: white;
+      box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+      border-radius: 2px;
+      &__title {
+        margin-top: 13px;
+        margin-left: 8px;
+        height: 22px;
+        > span {
+          width: 143px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          display: block;
+          overflow: hidden;
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 22px;
+          color: setColor(gray-2);
+        }
+      }
+      &__text {
+        margin-left: 8px;
+        height: 16px;
+        > span {
+          width: 143px;
+          display: block;
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 10px;
+          line-height: 16px;
+          letter-spacing: 0.07em;
+          color: setColor(gray-3);
+        }
+      }
+      &__divider {
+        margin: 10px 8px 5px 6px;
+        width: 145px;
+        height: 1px;
+        background-color: setColor(gray-4);
+      }
+      &__actions {
+        display: flex;
+        flex-direction: column;
+        > div {
+          height: 30px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
+          &:hover {
+            background-color: setColor(gray-5);
+          }
+          > .more-menu-icon {
+            margin-left: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+          }
+          > .more-menu-text{
+            height: 16px;
+            display: flex;
+            align-items: center;
+            > span {
+              font-family: NotoSansTC;
+              font-weight: 400;
+              font-size: 12px;
+              line-height: 16px;
+              letter-spacing: 0.03em;
+              color: setColor(gray-2);
+            }
+          }
+        }
+      }
     }
   }
   &__sort-by {
