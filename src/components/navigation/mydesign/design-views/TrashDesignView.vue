@@ -76,7 +76,7 @@ export default Vue.extend({
     // }),
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
       if (icon === 'trash') icon = 'delete'
-      if (icon === 'reduction') this.$emit('recoverDesign', design)
+      if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
     },
     toggleInfo() {

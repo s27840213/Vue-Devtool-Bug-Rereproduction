@@ -46,6 +46,12 @@
                 span 設計已移至垃圾桶
               div(class="my-design__message__button" @click="recover")
                 span 復原
+          transition(name="slide-fade")
+            div(v-if="isShowRecoverMessage" class="my-design__message")
+              div(class="my-design__message__text")
+                span 設計已移至
+              div(class="my-design__message__text")
+                span {{ recoveredDirectory }}
     transition(name="scale-fade")
       div(v-if="isShowDeleteAllMessage" class="dim-background" @click="closeDeleteAllMessage")
         div(class="delete-all-message")
@@ -89,6 +95,9 @@ export default Vue.extend({
       waitingRecovery: '',
       messageTimer: -1,
       isShowDeleteMessage: false,
+      recoveredDirectory: '我所有的設計',
+      recoveredDesignQueue: [] as IPathedDesign[],
+      isShowRecoverMessage: false,
       selectedDesigns: {} as {[key: string]: IPathedDesign},
       isShowDeleteAllMessage: false
     }
@@ -127,7 +136,7 @@ export default Vue.extend({
     messageImageStyles() {
       return { 'background-image': `url(${this.deletedDesignThumbnail})` }
     },
-    showDeletionMessage() {
+    showDeleteMessage() {
       const design = this.deletedDesignQueue[0]
       if (design) {
         this.deletedDesignThumbnail = design.thumbnail
@@ -137,7 +146,23 @@ export default Vue.extend({
           this.isShowDeleteMessage = false
           setTimeout(() => {
             this.deletedDesignQueue.shift()
-            this.showDeletionMessage()
+            this.showDeleteMessage()
+          }, 1000)
+        }, 5000)
+      }
+    },
+    showRecoverMessage() {
+      const design = this.recoveredDesignQueue[0]
+      let recoveredDirectory = design.path[design.path.length - 1]
+      if (recoveredDirectory === '$ROOT$') recoveredDirectory = '我所有的設計'
+      if (design) {
+        this.recoveredDirectory = recoveredDirectory
+        this.isShowRecoverMessage = true
+        setTimeout(() => {
+          this.isShowRecoverMessage = false
+          setTimeout(() => {
+            this.recoveredDesignQueue.shift()
+            this.showRecoverMessage()
           }, 1000)
         }, 5000)
       }
@@ -145,7 +170,7 @@ export default Vue.extend({
     handleDeleteDesign(design: IDesign) {
       this.deletedDesignQueue.push(design)
       if (this.deletedDesignQueue.length === 1) {
-        this.showDeletionMessage()
+        this.showDeleteMessage()
       }
     },
     handleSelectDesign(pathedDesign: IPathedDesign) {
@@ -157,14 +182,18 @@ export default Vue.extend({
     handleClearSelection() {
       this.selectedDesigns = {}
     },
-    handleRecoverDesign(design: IDesign) {
-      if (design.id === this.waitingRecovery) {
+    handleRecoverDesign(pathedDesign: IPathedDesign) {
+      if (pathedDesign.design.id === this.waitingRecovery) {
         clearTimeout(this.messageTimer)
         this.isShowDeleteMessage = false
         setTimeout(() => {
           this.deletedDesignQueue.shift()
-          this.showDeletionMessage()
+          this.showDeleteMessage()
         }, 500)
+      }
+      this.recoveredDesignQueue.push(pathedDesign)
+      if (this.recoveredDesignQueue.length === 1) {
+        this.showRecoverMessage()
       }
     },
     recover() {
@@ -173,7 +202,7 @@ export default Vue.extend({
       this.isShowDeleteMessage = false
       setTimeout(() => {
         this.deletedDesignQueue.shift()
-        this.showDeletionMessage()
+        this.showDeleteMessage()
       }, 500)
     },
     toggleAllFavorite() {
@@ -436,7 +465,7 @@ export default Vue.extend({
 }
 
 .slide-fade-enter, .slide-fade-leave-to {
-  transform: translateY(-10px);
+  transform: translateY(-5px);
   opacity: 0;
 }
 
