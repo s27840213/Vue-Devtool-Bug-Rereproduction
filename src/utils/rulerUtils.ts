@@ -25,6 +25,7 @@ class RulerUtils {
   event: any
   eventHash: { [index: string]: (pos: number, type: string) => void }
   templateSettings: Array<ITemplateSetting>
+  isDragging: boolean
   lastMapedInfo: {
     type: string,
     index: number
@@ -37,6 +38,7 @@ class RulerUtils {
       type: 'v',
       index: -1
     }
+    this.isDragging = false
     this.templateSettings = [
       {
         v: [],
@@ -160,6 +162,10 @@ class RulerUtils {
 
   setShowGuideline(bool: boolean) {
     store.commit('SET_showGuideline', bool)
+  }
+
+  setIsDragging(bool: boolean) {
+    this.isDragging = bool
   }
 
   deleteGuideline(index: number, type: string) {

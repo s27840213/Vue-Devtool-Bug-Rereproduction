@@ -60,7 +60,6 @@ export default Vue.extend({
   data() {
     return {
       isSelecting: false,
-      isDragging: false,
       isShowGuidelineV: false,
       isShowGuidelineH: false,
       initialAbsPos: { x: 0, y: 0 },
@@ -135,6 +134,9 @@ export default Vue.extend({
     },
     currFocusPage(): IPage {
       return this.PageUtils.currFocusPage
+    },
+    isDragging(): boolean {
+      return RulerUtils.isDragging
     }
   },
   methods: {
@@ -174,7 +176,7 @@ export default Vue.extend({
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
-      if (this.isSelecting || this.isDragging) {
+      if (this.isSelecting || RulerUtils.isDragging) {
         const event = new MouseEvent('mousemove', {
           clientX: this.currentAbsPos.x,
           clientY: this.currentAbsPos.y
@@ -182,11 +184,11 @@ export default Vue.extend({
         document.documentElement.dispatchEvent(event)
       }
 
-      if (this.isShowGuidelineV && !this.isDragging) {
+      if (this.isShowGuidelineV && !RulerUtils.isDragging) {
         this.closeGuidelineV()
       }
 
-      if (this.isShowGuidelineH && !this.isDragging) {
+      if (this.isShowGuidelineH && !RulerUtils.isDragging) {
         this.closeGuidelineH()
       }
 
@@ -277,7 +279,7 @@ export default Vue.extend({
       return this.isBackgroundImageControl ? this.backgroundControllingPageIndex : index
     },
     dragStartV(e: MouseEvent) {
-      this.isDragging = true
+      RulerUtils.setIsDragging(true)
       this.isShowGuidelineV = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       document.documentElement.addEventListener('mousemove', this.draggingV)
@@ -290,7 +292,7 @@ export default Vue.extend({
       this.renderGuidelineV(this.currentRelPos)
     },
     dragEndV(e: MouseEvent) {
-      this.isDragging = false
+      RulerUtils.setIsDragging(false)
       if (!this.mapGuidelineToPage('v').outOfPage) {
         this.closeGuidelineV()
       }
@@ -312,7 +314,7 @@ export default Vue.extend({
       }
     },
     dragStartH(e: MouseEvent) {
-      this.isDragging = true
+      RulerUtils.setIsDragging(true)
       this.isShowGuidelineH = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       document.documentElement.addEventListener('mousemove', this.draggingH)
@@ -325,7 +327,7 @@ export default Vue.extend({
       this.renderGuidelineH(this.currentRelPos)
     },
     dragEndH(e: MouseEvent) {
-      this.isDragging = false
+      RulerUtils.setIsDragging(false)
       if (!this.mapGuidelineToPage('h').outOfPage) {
         this.closeGuidelineH()
       }
@@ -453,7 +455,7 @@ $REULER_SIZE: 25px;
     &::before {
       content: "";
       position: absolute;
-      top: 0;
+      top: -5px;
       right: 0;
       width: 100%;
       height: 5px;

@@ -375,11 +375,13 @@ export default Vue.extend({
       }
     },
     showGuideline(pos: number, type: string, index: number) {
-      this.deleteGuideline({
-        index,
-        type
-      })
-      rulerUtils.event.emit('showGuideline', rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+      if (!rulerUtils.isDragging) {
+        this.deleteGuideline({
+          index,
+          type
+        })
+        rulerUtils.event.emit('showGuideline', rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+      }
     },
     openLineTemplatePopup() {
       popupUtils.openPopup('line-template', {
