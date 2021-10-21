@@ -274,7 +274,6 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       GroupUtils.deselect()
-      console.log(this.pageIndex)
       this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()

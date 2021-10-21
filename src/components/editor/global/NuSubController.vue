@@ -5,9 +5,14 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @drop="onDrop($event)"
           @dblclick="onDblClick()"
           @click.left.stop="onClickEvent($event)")
+        svg(class="full-width" v-if="config.type === 'image' && config.isFrame" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+            g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
+              :style="frameClipStyles()"
+              @drop="onFrameDrop()"
+              @dragenter="onDrageEnter()"
+              @dragleave="onDragLeave()")
         //- template(v-if="config.type === 'text' && config.active")
         //-   div(:style="textScaleStyle()")
         //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -43,6 +48,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import LayerUtils from '@/utils/layerUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
+import FrameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   props: {
@@ -56,6 +62,7 @@ export default Vue.extend({
   data() {
     return {
       MappingUtils,
+      FrameUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
@@ -68,11 +75,15 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: false
+      contentEditable: false,
+      clipedImgBuff: [] as Array<{
+        index: number,
+        styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
+        srcObj: { type: string, assetId: string, userId: string }
+      }>
     }
   },
   mounted() {
-    // console.log(this.config)
     const body = this.$refs.body as HTMLElement
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
@@ -145,6 +156,13 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
+    frameClipStyles() {
+      return {
+        fill: '#00000000',
+        stroke: this.isActive ? '#7190CC' : 'none',
+        strokeWidth: `${5 * (100 / this.scaleRatio)}px`
+      }
+    },
     textScaleStyle() {
       return {
         position: 'absolute',
@@ -239,9 +257,6 @@ export default Vue.extend({
     currCursorStyling(e: MouseEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
-    },
-    onDrop(e: DragEvent) {
-      this.$emit('drop', e)
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
@@ -496,6 +511,26 @@ export default Vue.extend({
         return
       }
       this.$emit('dblSubController', this.layerIndex)
+    },
+    onDrageEnter() {
+      this.$emit('onFrameDragenter', this.layerIndex)
+    },
+    onDragLeave() {
+      // const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+      // clips[this.layerIndex].srcObj = {
+      //   ...this.clipedImgBuff
+      // }
+      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      // this.clipedImgBuff = {
+      //   type: '',
+      //   userId: '',
+      //   assetId: ''
+      // }
+      // console.log(this.clipedImgBuff)
+      this.$emit('onFrameDragleave', this.layerIndex)
+    },
+    onFrameDrop() {
+      this.$emit('onFrameDrop')
     }
   }
 })

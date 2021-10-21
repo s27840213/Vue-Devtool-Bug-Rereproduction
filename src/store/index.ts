@@ -123,8 +123,7 @@ const getDefaultState = (): IEditorState => ({
         posY: -1
       },
       name: 'Default Page',
-      layers: [
-      ],
+      layers: [],
       documentColor: [],
       designId: ''
     }
