@@ -49,13 +49,13 @@
         scroll-list(:list="tagTemplateList")
       div(class="home-content-title label-lg")
         span 熱門模板
-        span(class="pointer"
+        span(class="pointer body-1"
         @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
       div(class="home-content-template")
         scroll-list(:list="popularTemplateList")
       div(class="home-content-title label-lg")
         span 最新模板
-        span(class="pointer"
+        span(class="pointer body-1"
         @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
       div(class="home-content-template")
         scroll-list(:list="latestTemplateList")
