@@ -276,6 +276,11 @@ class DesignUtils {
     return false
   }
 
+  checkAllInFavorite(pathedDesigns: IPathedDesign[]): boolean {
+    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    return !pathedDesigns.some(pathedDesign => !favoriteDesignIds.includes(pathedDesign.design.id))
+  }
+
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
     switch (icon) {
       case 'copy': {
@@ -334,6 +339,39 @@ class DesignUtils {
       path: pathedDesign.path,
       design: pathedDesign.design
     })
+  }
+
+  removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {
+    for (const pathedDesign of pathedDesigns) {
+      store.commit('design/UPDATE_removeFromFavorite', {
+        path: pathedDesign.path,
+        design: pathedDesign.design
+      })
+    }
+  }
+
+  addAllToFavorite(pathedDesigns: IPathedDesign[]) {
+    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    for (const pathedDesign of pathedDesigns) {
+      if (favoriteDesignIds.includes(pathedDesign.design.id)) continue
+      store.commit('design/UPDATE_addToFavorite', {
+        path: pathedDesign.path,
+        design: pathedDesign.design
+      })
+    }
+  }
+
+  deleteAll(pathedDesigns: IPathedDesign[]) {
+    for (const pathedDesign of pathedDesigns) {
+      store.commit('design/UPDATE_addToTrash', {
+        path: pathedDesign.path,
+        design: pathedDesign.design
+      })
+      store.commit('design/UPDATE_deleteDesign', {
+        path: pathedDesign.path,
+        design: pathedDesign.design
+      })
+    }
   }
 }
 

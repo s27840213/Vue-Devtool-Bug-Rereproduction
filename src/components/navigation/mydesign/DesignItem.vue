@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="design-item")
     div(class="design-item__block"
+      :style="blockStyles()"
       draggable="true"
       @dragstart="handleDragStart"
       @drag="handleDragging"
@@ -16,8 +17,16 @@
             :src="appliedUrl")
       div(class="design-item__controller")
         div(class="design-item__controller-content")
-          div(v-if="isMouseOver || isOtherSelected"
-            class="design-item__checkbox")
+          div(v-if="isSelected"
+            class="design-item__checkbox-checked"
+            @click="emitDeselect")
+            svg-icon(iconName="check-large"
+                    iconWidth="10px"
+                    iconHeight="8px"
+                    iconColor="white")
+          div(v-if="!isSelected && (isMouseOver || isAnySelected)"
+            class="design-item__checkbox"
+            @click="emitSelect")
           div(v-if="isMouseOver"
             class="design-item__more"
             @click="toggleMenu()")
@@ -77,7 +86,6 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
 import vClickOutside from 'v-click-outside'
-import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
@@ -86,7 +94,8 @@ export default Vue.extend({
     menuItemNum: Number,
     favorable: Boolean,
     isInFavorites: Boolean,
-    isOtherSelected: Boolean
+    isAnySelected: Boolean,
+    isSelected: Boolean
   },
   data() {
     return {
@@ -139,20 +148,11 @@ export default Vue.extend({
       setDraggingDesign: 'SET_draggingDesign',
       setDesignName: 'UPDATE_designName'
     }),
+    blockStyles() {
+      return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
+    },
     containerStyles() {
-      let res = {}
-      if (this.isMouseOver) {
-        res = { 'background-color': '#474a5780' }
-      }
-      if (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) {
-        return Object.assign(res, {
-          padding: '26px'
-        })
-      } else {
-        return Object.assign(res, {
-          padding: '17px'
-        })
-      }
+      return (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) ? { padding: '26px' } : { padding: '17px' }
     },
     imageStyles() {
       if (this.aspectRatio > 1) {
@@ -248,6 +248,12 @@ export default Vue.extend({
     },
     emitLike() {
       this.$emit('like')
+    },
+    emitSelect() {
+      this.$emit('select')
+    },
+    emitDeselect() {
+      this.$emit('deselect')
     }
   }
 })
@@ -302,6 +308,22 @@ export default Vue.extend({
     background-color: white;
     left: 10px;
     top: 12px;
+    border: 1px solid #969BAB;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  &__checkbox-checked {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: setColor(blue-1);
+    left: 10px;
+    top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
   &__more {
     position: absolute;

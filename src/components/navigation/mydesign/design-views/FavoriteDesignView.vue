@@ -9,8 +9,12 @@
                   :config="design"
                   :favorable="true"
                   :isInFavorites="checkFavorite(design.id)"
+                  :isSelected="checkSelected(design.id)"
+                  :isAnySelected="isAnySelected"
                   :menuItemNum="menuItemSlots.length"
-                  @like="toggleFavorite(path, design)")
+                  @like="toggleFavorite(path, design)"
+                  @select="selectDesign(path, design)"
+                  @deselect="deselectDesign(path, design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, checkFavorite(design.id))")
             div(class="design-menu-item__icon")
@@ -33,9 +37,17 @@ export default Vue.extend({
   components: {
     DesignItem
   },
+  props: {
+    selectedDesigns: Object
+  },
   data() {
     return {
       menuItems: designUtils.makeNormalMenuItems()
+    }
+  },
+  watch: {
+    allDesigns() {
+      this.$emit('clearSelection')
     }
   },
   computed: {
@@ -53,6 +65,9 @@ export default Vue.extend({
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
+    },
+    isAnySelected(): boolean {
+      return Object.keys(this.selectedDesigns).length > 0
     }
   },
   methods: {
@@ -62,6 +77,9 @@ export default Vue.extend({
     }),
     checkFavorite(id: string): boolean {
       return this.favoriteIds.includes(id)
+    },
+    checkSelected(id: string): boolean {
+      return !!this.selectedDesigns[id]
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
       designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
@@ -79,6 +97,18 @@ export default Vue.extend({
       } else {
         this.addToFavorite(payload)
       }
+    },
+    selectDesign(path: string[], design: IDesign) {
+      this.$emit('selectDesign', {
+        path,
+        design
+      })
+    },
+    deselectDesign(path: string[], design: IDesign) {
+      this.$emit('deselectDesign', {
+        path,
+        design
+      })
     }
   }
 })
