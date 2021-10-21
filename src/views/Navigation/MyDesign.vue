@@ -38,13 +38,14 @@
                   @deselectDesign="handleDeselectDesign"
                   @clearSelection="handleClearSelection"
                   @recoverDesign="handleRecoverDesign")
-        transition(name="slide-fade")
-          div(v-if="isShowMessage" class="my-design__message")
-            div(class="my-design__message__img" :style="messageImageStyles()")
-            div(class="my-design__message__text")
-              span 設計已移至垃圾桶
-            div(class="my-design__message__button" @click="recover")
-              span 復原
+        div(class="my-design__message-stack")
+          transition(name="slide-fade")
+            div(v-if="isShowDeleteMessage" class="my-design__message")
+              div(class="my-design__message__img" :style="messageImageStyles()")
+              div(class="my-design__message__text")
+                span 設計已移至垃圾桶
+              div(class="my-design__message__button" @click="recover")
+                span 復原
     transition(name="scale-fade")
       div(v-if="isShowDeleteAllMessage" class="dim-background" @click="closeDeleteAllMessage")
         div(class="delete-all-message")
@@ -87,7 +88,7 @@ export default Vue.extend({
       deletedDesignQueue: [] as IDesign[],
       waitingRecovery: '',
       messageTimer: -1,
-      isShowMessage: false,
+      isShowDeleteMessage: false,
       selectedDesigns: {} as {[key: string]: IPathedDesign},
       isShowDeleteAllMessage: false
     }
@@ -131,9 +132,9 @@ export default Vue.extend({
       if (design) {
         this.deletedDesignThumbnail = design.thumbnail
         this.waitingRecovery = design.id
-        this.isShowMessage = true
+        this.isShowDeleteMessage = true
         this.messageTimer = setTimeout(() => {
-          this.isShowMessage = false
+          this.isShowDeleteMessage = false
           setTimeout(() => {
             this.deletedDesignQueue.shift()
             this.showDeletionMessage()
@@ -159,7 +160,7 @@ export default Vue.extend({
     handleRecoverDesign(design: IDesign) {
       if (design.id === this.waitingRecovery) {
         clearTimeout(this.messageTimer)
-        this.isShowMessage = false
+        this.isShowDeleteMessage = false
         setTimeout(() => {
           this.deletedDesignQueue.shift()
           this.showDeletionMessage()
@@ -169,7 +170,7 @@ export default Vue.extend({
     recover() {
       clearTimeout(this.messageTimer)
       designUtils.recover(this.waitingRecovery)
-      this.isShowMessage = false
+      this.isShowDeleteMessage = false
       setTimeout(() => {
         this.deletedDesignQueue.shift()
         this.showDeletionMessage()
@@ -269,11 +270,18 @@ export default Vue.extend({
       cursor: pointer;
     }
   }
-  &__message {
+  &__message-stack {
     position: absolute;
     left: 50%;
     top: 27px;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  &__message {
     height: 49px;
     display: flex;
     align-items: center;
@@ -428,7 +436,7 @@ export default Vue.extend({
 }
 
 .slide-fade-enter, .slide-fade-leave-to {
-  top: 17px;
+  transform: translateY(-10px);
   opacity: 0;
 }
 
