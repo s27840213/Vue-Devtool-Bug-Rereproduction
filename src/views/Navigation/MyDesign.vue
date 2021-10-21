@@ -218,6 +218,7 @@ export default Vue.extend({
     background-color: setColor(gray-6);
     box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
+    z-index: 1;
     &__container {
       position: relative;
       @include size(100%, 100%);
