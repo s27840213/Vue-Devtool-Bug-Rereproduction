@@ -21,6 +21,7 @@ import page from '@/store/module/page'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
+import pageUtils from '@/utils/pageUtils'
 
 Vue.use(Vuex)
 
@@ -75,7 +76,11 @@ const getDefaultState = (): IEditorState => ({
       layers: [
       ],
       documentColor: [],
-      designId: ''
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
     },
     {
       width: 1080,
@@ -126,7 +131,11 @@ const getDefaultState = (): IEditorState => ({
       layers: [
       ],
       documentColor: [],
-      designId: ''
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
     }
   ],
   designId: '',
@@ -167,10 +176,8 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
-  guidelines: {
-    v: [],
-    h: []
-  }
+  showRuler: false,
+  showGuideline: true
 })
 
 const state = getDefaultState()
@@ -268,15 +275,18 @@ const getters: GetterTree<IEditorState, unknown> = {
   getTextInfo(state: IEditorState) {
     return state.textInfo
   },
-  getGuidelines(state: IEditorState) {
-    return state.guidelines
+  getShowRuler(state: IEditorState) {
+    return state.showRuler
+  },
+  getShowGuideline(state: IEditorState) {
+    return state.showGuideline
   }
 }
 
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     groupUtils.reset()
-    state.pages = newPages
+    state.pages = pageUtils.newPages(newPages)
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
@@ -361,7 +371,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }}) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number } }) {
     state.currDraggedPhoto.srcObj = {
       ...photo.srcObj
     }
@@ -624,20 +634,36 @@ const mutations: MutationTree<IEditorState> = {
   },
   ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string }) {
     const { pos, type } = updateInfo
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
     switch (type) {
       case 'v': {
-        state.guidelines.v.push(pos)
+        pages[currFocusPageIndex].guidelines.v.push(pos)
         break
       }
       case 'h': {
-        state.guidelines.h.push(pos)
+        pages[currFocusPageIndex].guidelines.h.push(pos)
         break
       }
     }
   },
   DELETE_guideline(state: IEditorState, updateInfo: { index: number, type: string }) {
     const { index, type } = updateInfo
-    state.guidelines[type].splice(index, 1)
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines[type].splice(index, 1)
+  },
+  CLEAR_guideline(state: IEditorState) {
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines.v = []
+    pages[currFocusPageIndex].guidelines.h = []
+  },
+  SET_showRuler(state: IEditorState, bool: boolean) {
+    state.showRuler = bool
+  },
+  SET_showGuideline(state: IEditorState, bool: boolean) {
+    state.showGuideline = bool
   }
 }
 

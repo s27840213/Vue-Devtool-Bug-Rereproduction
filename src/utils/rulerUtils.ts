@@ -2,19 +2,87 @@ import store from '@/store'
 import { EventEmitter } from 'events'
 import pageUtils from './pageUtils'
 
+interface ITemplateSetting {
+  v: Array<number>
+  h: Array<number>
+}
 class RulerUtils {
   get currFocusPage() {
     return pageUtils.currFocusPage
   }
 
+  get currFocusPageGuidelineNum(): { [index: string]: number } {
+    return {
+      v: this.currFocusPage.guidelines.v.length,
+      h: this.currFocusPage.guidelines.h.length
+    }
+  }
+
   get scaleRatio() { return store.getters.getPageScaleRatio }
+  get showRuler() { return store.getters.getShowRuler }
+  get showGuideline() { return store.getters.getShowGuideline }
 
   event: any
   eventHash: { [index: string]: (pos: number, type: string) => void }
+  templateSettings: Array<ITemplateSetting>
+  lastMapedInfo: {
+    type: string,
+    index: number
+  }
 
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
+    this.lastMapedInfo = {
+      type: 'v',
+      index: -1
+    }
+    this.templateSettings = [
+      {
+        v: [],
+        h: []
+      },
+      {
+        v: [50],
+        h: []
+      },
+      {
+        v: [],
+        h: [50]
+      },
+      {
+        v: [],
+        h: [33.33, 66.66]
+      },
+      {
+        v: [50],
+        h: [50]
+      },
+      {
+        v: [50],
+        h: [50]
+      },
+      {
+        v: [],
+        h: [50, 75]
+      },
+      {
+        v: [33.33, 66.66],
+        h: [50]
+      },
+      {
+        v: [33.33, 66.66],
+        h: [33.33, 66.66]
+      },
+      {
+        v: [50],
+        h: [50]
+      },
+      {
+        v: [50],
+        h: [33.33, 66.66]
+      }
+    ]
   }
 
   on(type: string, callback: (pos: number, type: string) => void) {
@@ -27,43 +95,45 @@ class RulerUtils {
     this.eventHash[type] = callback
   }
 
-  mapGuidelineToPage(guildline: HTMLElement, type: string): number {
+  mapGuidelineToPage(guildline: HTMLElement, type: string): { pos: number, outOfPage: boolean } {
     const guildlineRect = guildline.getBoundingClientRect()
     switch (type) {
       case 'v': {
-        const rulerHRect = document.getElementsByClassName('ruler-hr__body')[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.left - rulerHRect.left) / (this.scaleRatio / 100)
-        if (mapResult < 0 || mapResult > this.currFocusPage.width) {
-          return -1
+        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const mapResult = (guildlineRect.left - pageRect.left) / (this.scaleRatio / 100)
+        return {
+          pos: mapResult,
+          outOfPage: mapResult < 0 || mapResult > this.currFocusPage.width
         }
-        return mapResult
         break
       }
       case 'h': {
-        const rulerHRect = document.getElementsByClassName('ruler-vr__body')[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.top - rulerHRect.top) / (this.scaleRatio / 100)
-        if (mapResult < 0 || mapResult > this.currFocusPage.height) {
-          return -1
+        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const mapResult = (guildlineRect.top - pageRect.top) / (this.scaleRatio / 100)
+        return {
+          pos: mapResult,
+          outOfPage: mapResult < 0 || mapResult > this.currFocusPage.height
         }
-        return mapResult
         break
       }
     }
-    return -1
+    return {
+      pos: -1,
+      outOfPage: true
+    }
   }
 
   mapSnaplineToGuidelineArea(pos: number, type: string): number {
     switch (type) {
       case 'v': {
-        const rulerHRect = document.getElementsByClassName('ruler-hr__body')[0].getBoundingClientRect()
-        const mapResult = pos * (this.scaleRatio / 100) + rulerHRect.left
-        console.log(pos, pos * (this.scaleRatio / 100), rulerHRect.left)
+        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const mapResult = pos * (this.scaleRatio / 100) + pageRect.left
         return mapResult
         break
       }
       case 'h': {
-        const rulerHRect = document.getElementsByClassName('ruler-vr__body')[0].getBoundingClientRect()
-        const mapResult = pos * (this.scaleRatio / 100) + rulerHRect.top
+        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const mapResult = pos * (this.scaleRatio / 100) + pageRect.top
         return mapResult
         break
       }
@@ -72,9 +142,54 @@ class RulerUtils {
   }
 
   addGuidelineToPage(pos: number, type: string) {
+    this.lastMapedInfo.index = this.currFocusPageGuidelineNum[type]
+    this.lastMapedInfo.type = type
     store.commit('ADD_guideline', {
       pos,
       type
+    })
+  }
+
+  clearGuidelines() {
+    store.commit('CLEAR_guideline')
+  }
+
+  setShowRuler(bool: boolean) {
+    store.commit('SET_showRuler', bool)
+  }
+
+  setShowGuideline(bool: boolean) {
+    store.commit('SET_showGuideline', bool)
+  }
+
+  deleteGuideline(index: number, type: string) {
+    store.commit('DELETE_guideline', {
+      index,
+      type
+    })
+  }
+
+  deleteLastMapedGuideline() {
+    const { index, type } = this.lastMapedInfo
+    this.deleteGuideline(index, type)
+  }
+
+  addLineTemplate(index: number) {
+    this.clearGuidelines()
+    this.setShowGuideline(true)
+    const targetTemplate = this.templateSettings[index]
+    const v = targetTemplate.v.map((pos: number) => {
+      return this.currFocusPage.width * (pos / 100)
+    })
+    const h = targetTemplate.h.map((pos: number) => {
+      return this.currFocusPage.height * (pos / 100)
+    })
+    v.forEach((pos: number) => {
+      this.addGuidelineToPage(pos, 'v')
+    })
+
+    h.forEach((pos: number) => {
+      this.addGuidelineToPage(pos, 'h')
     })
   }
 }

@@ -19,7 +19,7 @@ class PageUtils {
     return this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
   }
 
-  get currFocusPage() {
+  get currFocusPage(): IPage {
     const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
     return this.getPage(targetIndex)
   }
@@ -78,9 +78,19 @@ class PageUtils {
       layers: [
       ],
       documentColor: [],
-      designId: ''
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
     }
     return Object.assign(defaultPage, pageData)
+  }
+
+  newPages(pages: Array<IPage>) {
+    return pages.map((page: IPage) => {
+      return this.newPage(page)
+    })
   }
 
   activeMostCentralPage(): number {

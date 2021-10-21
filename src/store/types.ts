@@ -49,11 +49,8 @@ export interface IEditorState {
     subheading: Array<string>,
     body: Array<string>
   },
-  guidelines: {
-    [index: string]: Array<number>,
-    v: Array<number>,
-    h: Array<number>
-  }
+  showRuler: boolean,
+  showGuideline: boolean
 }
 
 export enum SidebarPanelType {

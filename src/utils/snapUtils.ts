@@ -7,6 +7,7 @@ import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline, ISnapAngle } 
 import LayerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import generalUtils from './generalUtils'
+import pageUtils from './pageUtils'
 class SnapUtils {
   pageIndex: number
   GUIDELINE_OFFSET: number
@@ -29,8 +30,8 @@ class SnapUtils {
     this.closestSnapAngle = -1
   }
 
-  get guidelinePos() {
-    return store.getters.getGuidelines
+  get guidelinePos(): { [index: string]: Array<number> } {
+    return pageUtils.currFocusPage.guidelines
   }
 
   getSnaplinePos(): ISnaplinePos {

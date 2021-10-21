@@ -18,7 +18,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      RULER_SIZE: 20,
+      RULER_SIZE: 25,
       rulerBodyOffset: 0
     }
   },
@@ -44,6 +44,9 @@ export default Vue.extend({
         transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`
       }
     }
+  },
+  mounted() {
+    this.calcRulerBodyOffset()
   },
   watch: {
     pageScaleRatio() {

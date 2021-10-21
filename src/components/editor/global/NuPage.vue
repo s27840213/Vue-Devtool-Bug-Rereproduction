@@ -7,6 +7,9 @@
         v-model="pageName"
         @focus="ShortcutUtils.deselect()")
       div(v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        svg-icon(class="pointer btn-line-template"
+          :iconName="'line-template'" :iconWidth="`${24}px`" :iconColor="'gray-3'"
+          @click.native="openLineTemplatePopup()")
         svg-icon(class="pointer"
           :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
@@ -59,14 +62,15 @@
               div(v-for="line in closestSnaplines.h"
                 class="snap-area__line snap-area__line--hr"
                 :style="snapLineStyles('h', line)")
-              div(v-for="(line,index) in guidelines.v"
-                class="snap-area__line snap-area__line--vr"
-                :style="snapLineStyles('v', line,true)"
-                @mouseover="showGuideline(line,'v',index)")
-              div(v-for="(line,index) in guidelines.h"
-                class="snap-area__line snap-area__line--hr"
-                :style="snapLineStyles('h', line,true)"
-                @mouseover="showGuideline(line,'h',index)")
+              template(v-if="isShowGuideline")
+                div(v-for="(line,index) in guidelines.v"
+                  class="snap-area__line snap-area__line--vr"
+                  :style="snapLineStyles('v', line,true)"
+                  @mouseover="showGuideline(line,'v',index)")
+                div(v-for="(line,index) in guidelines.h"
+                  class="snap-area__line snap-area__line--hr"
+                  :style="snapLineStyles('h', line,true)"
+                  @mouseover="showGuideline(line,'h',index)")
             div(:class="['page-content']"
                 :style="styles('content')"
                 ref="page-content"
@@ -139,17 +143,16 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
-import ControlUtils from '@/utils/controlUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import PageUtils from '@/utils/pageUtils'
-import background from '@/store/module/background'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   data() {
@@ -199,8 +202,7 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
-      getLayer: 'getLayer',
-      guidelines: 'getGuidelines'
+      getLayer: 'getLayer'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
@@ -235,6 +237,12 @@ export default Vue.extend({
     },
     isBackgroundImageControl(): boolean {
       return this.config.backgroundImage.config.imgControl
+    },
+    guidelines(): { [index: string]: Array<number> } {
+      return (this.config as IPage).guidelines
+    },
+    isShowGuideline(): boolean {
+      return rulerUtils.showGuideline
     }
   },
   watch: {
@@ -342,51 +350,7 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     addPage() {
-      this._addPage({
-        width: 1080,
-        height: 1080,
-        backgroundColor: '#ffffff',
-        backgroundImage: {
-          config: {
-            type: 'image',
-            src: 'none',
-            clipPath: '',
-            active: false,
-            shown: false,
-            locked: false,
-            moved: false,
-            imgControl: false,
-            isClipper: false,
-            dragging: false,
-            designId: '',
-            styles: {
-              x: 0,
-              y: 0,
-              scale: 1,
-              scaleX: 0,
-              scaleY: 0,
-              rotate: 0,
-              width: 0,
-              height: 0,
-              initWidth: 0,
-              initHeight: 0,
-              imgX: 0,
-              imgY: 0,
-              imgWidth: 0,
-              imgHeight: 0,
-              zindex: -1,
-              opacity: 100
-            }
-          },
-          posX: -1,
-          posY: -1
-        },
-        name: 'Default Page',
-        layers: [
-        ],
-        documentColor: [],
-        designId: ''
-      })
+      this._addPage(PageUtils.newPage({}))
     },
     deletePage() {
       GroupUtils.deselect()
@@ -416,6 +380,11 @@ export default Vue.extend({
         type
       })
       rulerUtils.event.emit('showGuideline', rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+    },
+    openLineTemplatePopup() {
+      popupUtils.openPopup('line-template', {
+        posX: 'right'
+      })
     }
   }
 })
@@ -438,9 +407,6 @@ export default Vue.extend({
   transform: translate3d(0, 0, 10000px);
   > input {
     background-color: transparent;
-  }
-  > div {
-    height: 18px;
   }
 }
 .pages-wrapper {
@@ -504,6 +470,22 @@ export default Vue.extend({
     left: 0;
     z-index: setZindex(coordinate);
     background-color: setColor("blue-1");
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+    }
   }
 }
 

@@ -15,21 +15,27 @@
                 :config="page" :index="nonFilteredIndex(index)")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
-      ruler-hr(:canvasRect="canvasRect"
-        :editorView="editorView"
-        @mousedown.native.stop="dragStartH($event)")
-      ruler-vr(:canvasRect="canvasRect"
-        :editorView="editorView"
-        @mousedown.native.stop="dragStartV($event)")
-      div(class="corner-block")
+      template(v-if="showRuler")
+        ruler-hr(:canvasRect="canvasRect"
+          :editorView="editorView"
+          @mousedown.native.stop="dragStartH($event)")
+        ruler-vr(:canvasRect="canvasRect"
+          :editorView="editorView"
+          @mousedown.native.stop="dragStartV($event)")
+        div(class="corner-block")
     div(class="editor-view__guidelines-area"
         ref="guidelinesArea")
-      div(v-if="isShowGuidelineV" class="guideline--v pointer" ref="guidelineV"
+      div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         @mousedown.stop="dragStartV($event)"
-        @mouseleave.stop="closeGuidelineV()")
-      div(v-if="isShowGuidelineH" class="guideline--h pointer" ref="guidelineH"
+        @mouseout.stop="closeGuidelineV()"
+        @click.right.stop.prevent="openGuidelinePopup($event)")
+        div(class="guideline__pos guideline__pos--v") {{rulerVPos}}
+      div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
         @mousedown.stop="dragStartH($event)"
-        @mouseleave.stop="closeGuidelineH()")
+        @mouseout.stop="closeGuidelineH()"
+        @click.right.stop.prevent="openGuidelinePopup($event)")
+        div(class="guideline__pos guideline__pos--h")
+          span {{rulerHPos}}
 </template>
 
 <script lang="ts">
@@ -44,6 +50,7 @@ import RulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   components: {
@@ -67,7 +74,10 @@ export default Vue.extend({
       backgroundControllingPageIndex: -1,
       PageUtils,
       canvasRect: null as unknown as DOMRect,
-      RulerUtils
+      RulerUtils,
+      rulerVPos: 0,
+      rulerHPos: 0,
+      scrollListener: null as unknown
     }
   },
   mounted() {
@@ -114,7 +124,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageSize: 'getPageSize',
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      showRuler: 'getShowRuler'
     }),
     isBackgroundImageControl(): boolean {
       return (this.pages as IPage[]).some(page => page.backgroundImage.config.imgControl)
@@ -163,16 +174,25 @@ export default Vue.extend({
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
-      const event = new MouseEvent('mousemove', {
-        clientX: this.currentAbsPos.x,
-        clientY: this.currentAbsPos.y
-      })
-      document.documentElement.dispatchEvent(event)
+      if (this.isSelecting || this.isDragging) {
+        const event = new MouseEvent('mousemove', {
+          clientX: this.currentAbsPos.x,
+          clientY: this.currentAbsPos.y
+        })
+        document.documentElement.dispatchEvent(event)
+      }
+
+      if (this.isShowGuidelineV && !this.isDragging) {
+        this.closeGuidelineV()
+      }
+
+      if (this.isShowGuidelineH && !this.isDragging) {
+        this.closeGuidelineH()
+      }
 
       if (this.geCurrActivePageIndex === -1) {
         PageUtils.activeMostCentralPage()
       }
-      // console.log(document.activeElement?.tagName, document.activeElement?.tagName === 'BODY')
     },
     selectEnd() {
       if (this.isSelecting) {
@@ -260,20 +280,26 @@ export default Vue.extend({
       this.isDragging = true
       this.isShowGuidelineV = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      window.addEventListener('mousemove', this.draggingV)
-      window.addEventListener('mouseup', this.dragEndV)
+      document.documentElement.addEventListener('mousemove', this.draggingV)
+      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.documentElement.addEventListener('mouseup', this.dragEndV)
     },
     draggingV(e: MouseEvent) {
+      this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
     dragEndV(e: MouseEvent) {
       this.isDragging = false
-      if (this.mapGuidelineToPage('v') < 0) {
-        this.isShowGuidelineV = false
+      if (!this.mapGuidelineToPage('v').outOfPage) {
+        this.closeGuidelineV()
       }
-      window.removeEventListener('mousemove', this.draggingV)
-      window.removeEventListener('mouseup', this.dragEndV)
+      this.isShowGuidelineV = false
+      this.$nextTick(() => {
+        document.documentElement.removeEventListener('mousemove', this.draggingV)
+        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+        document.documentElement.removeEventListener('mouseup', this.dragEndV)
+      })
     },
     renderGuidelineV(pos: { x: number, y: number }) {
       const guidelineV = this.$refs.guidelineV as HTMLElement
@@ -282,33 +308,39 @@ export default Vue.extend({
     closeGuidelineV() {
       if (!this.isDragging) {
         this.isShowGuidelineV = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v'), 'v')
+        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
       }
     },
     dragStartH(e: MouseEvent) {
       this.isDragging = true
       this.isShowGuidelineH = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      window.addEventListener('mousemove', this.draggingH)
-      window.addEventListener('mouseup', this.dragEndH)
+      document.documentElement.addEventListener('mousemove', this.draggingH)
+      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.documentElement.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
+      this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
     dragEndH(e: MouseEvent) {
       this.isDragging = false
-      if (this.mapGuidelineToPage('h') < 0) {
-        this.isShowGuidelineV = false
+      if (!this.mapGuidelineToPage('h').outOfPage) {
+        this.closeGuidelineH()
       }
-      window.removeEventListener('mousemove', this.draggingH)
-      window.removeEventListener('mouseup', this.dragEndH)
+      this.isShowGuidelineV = false
+      this.$nextTick(() => {
+        document.documentElement.removeEventListener('mousemove', this.draggingH)
+        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+        document.documentElement.removeEventListener('mouseup', this.dragEndH)
+      })
     },
     renderGuidelineH(pos: { x: number, y: number }) {
       const guidelineH = this.$refs.guidelineH as HTMLElement
       guidelineH.style.transform = `translate(0px,${pos.y}px)`
     },
-    mapGuidelineToPage(type: string): number {
+    mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
       return RulerUtils.mapGuidelineToPage(guideline, type)
@@ -316,15 +348,18 @@ export default Vue.extend({
     closeGuidelineH() {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h'), 'h')
+        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
       }
+    },
+    openGuidelinePopup(event: MouseEvent) {
+      popupUtils.openPopup('guideline', { event })
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-$REULER_SIZE: 20px;
+$REULER_SIZE: 25px;
 
 .editor-view {
   overflow: scroll;
@@ -383,14 +418,15 @@ $REULER_SIZE: 20px;
 }
 
 .guideline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
   &--v {
-    position: absolute;
-    top: 0;
-    left: 0;
     border-right: 1px solid setColor(blue-1);
     width: 0px;
     height: 100%;
-    pointer-events: auto;
+    cursor: url("/assets/icon/ruler/ruler-v.svg");
     &::before {
       content: "";
       position: absolute;
@@ -410,13 +446,10 @@ $REULER_SIZE: 20px;
   }
 
   &--h {
-    position: absolute;
-    top: 0;
-    left: 0;
     border-top: 1px solid setColor(blue-1);
     width: 100%;
     height: 0px;
-    pointer-events: auto;
+    cursor: "@/assets/icon/ruler/ruler-v.svg";
     &::before {
       content: "";
       position: absolute;
@@ -432,6 +465,29 @@ $REULER_SIZE: 20px;
       left: 0;
       width: 100%;
       height: 5px;
+    }
+  }
+
+  &__pos {
+    position: absolute;
+    background-color: setColor(blue-1);
+    &--h {
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+      border-radius: 50px;
+      color: setColor(white);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.325rem;
+      top: 5px;
+      left: 0;
+    }
+    &--v {
+      top: 0px;
+      left: 5px;
+      border-radius: 50px;
+      color: setColor(white);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.325rem;
     }
   }
 }
