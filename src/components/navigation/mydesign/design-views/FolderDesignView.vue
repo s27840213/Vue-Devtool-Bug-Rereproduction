@@ -113,9 +113,6 @@ export default Vue.extend({
     FolderItem,
     DesignItem
   },
-  props: {
-    selectedDesigns: Object
-  },
   data() {
     return {
       foldersExpanded: true,
@@ -138,7 +135,8 @@ export default Vue.extend({
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
       folders: 'getFolders',
-      favoriteDesigns: 'getFavoriteDesigns'
+      favoriteDesigns: 'getFavoriteDesigns',
+      selectedDesigns: 'getSelectedDesigns'
     }),
     path(): string[] {
       return designUtils.makePath(this.currentSelectedFolder)

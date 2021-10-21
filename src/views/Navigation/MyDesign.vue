@@ -32,7 +32,6 @@
                         iconColor="gray-2")
         component(:is="mydesignView"
                   class="design-view"
-                  :selectedDesigns="selectedDesigns"
                   @deleteDesign="handleDeleteDesign"
                   @selectDesign="handleSelectDesign"
                   @deselectDesign="handleDeselectDesign"
@@ -68,7 +67,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
@@ -98,13 +97,13 @@ export default Vue.extend({
       recoveredDirectory: '我所有的設計',
       recoveredDesignQueue: [] as IPathedDesign[],
       isShowRecoverMessage: false,
-      selectedDesigns: {} as {[key: string]: IPathedDesign},
       isShowDeleteAllMessage: false
     }
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder'
+      currentSelectedFolder: 'getCurrSelectedFolder',
+      selectedDesigns: 'getSelectedDesigns'
     }),
     mydesignView(): string {
       switch (this.currentSelectedFolder[0]) {
@@ -133,6 +132,11 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations('design', {
+      addToSelection: 'UPDATE_addToSelection',
+      removeFromSelection: 'UPDATE_removeFromSelection',
+      clearSelection: 'UPDATE_clearSelection'
+    }),
     messageImageStyles() {
       return { 'background-image': `url(${this.deletedDesignThumbnail})` }
     },
@@ -174,13 +178,13 @@ export default Vue.extend({
       }
     },
     handleSelectDesign(pathedDesign: IPathedDesign) {
-      this.$set(this.selectedDesigns, pathedDesign.design.id, pathedDesign)
+      this.addToSelection(pathedDesign)
     },
     handleDeselectDesign(pathedDesign: IPathedDesign) {
-      this.$delete(this.selectedDesigns, pathedDesign.design.id)
+      this.removeFromSelection(pathedDesign)
     },
     handleClearSelection() {
-      this.selectedDesigns = {}
+      this.clearSelection()
     },
     handleRecoverDesign(pathedDesign: IPathedDesign) {
       if (pathedDesign.design.id === this.waitingRecovery) {

@@ -2,21 +2,24 @@ import { IDesign, IDraggingDesign, IFolder, IPathedDesign } from '@/interfaces/d
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import { GetterTree, MutationTree } from 'vuex'
+import Vue from 'vue'
 
 interface IDesignSidebarState {
   currentSelectedFolder: string,
   folders: IFolder[],
-  draggingDesign: IDraggingDesign | undefined,
   favoriteDesigns: IPathedDesign[],
-  trashDesigns: IPathedDesign[]
+  trashDesigns: IPathedDesign[],
+  draggingDesign: IDraggingDesign | undefined,
+  selectedDesigns: {[key: string]: IPathedDesign}
 }
 
 const getDefaultState = (): IDesignSidebarState => ({
   currentSelectedFolder: 'a',
   folders: [],
-  draggingDesign: undefined,
   favoriteDesigns: [],
-  trashDesigns: []
+  trashDesigns: [],
+  draggingDesign: undefined,
+  selectedDesigns: {}
 })
 
 const state = getDefaultState()
@@ -27,17 +30,17 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   getFolders(state: IDesignSidebarState): IFolder[] {
     return state.folders
   },
-  getDesigns(state: IDesignSidebarState, path: string[]): IDesign[] {
-    return designUtils.search(state.folders, path)?.designs ?? []
-  },
-  getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
-    return state.draggingDesign
-  },
   getFavoriteDesigns(state: IDesignSidebarState): IPathedDesign[] {
     return state.favoriteDesigns
   },
   getTrashDesigns(state: IDesignSidebarState): IPathedDesign[] {
     return state.trashDesigns
+  },
+  getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
+    return state.draggingDesign
+  },
+  getSelectedDesigns(state: IDesignSidebarState): {[key: string]: IPathedDesign} {
+    return state.selectedDesigns
   }
 }
 
@@ -124,6 +127,15 @@ const mutations: MutationTree<IDesignSidebarState> = {
         targetFolder.designs.splice(index, 1)
       }
     }
+  },
+  UPDATE_addToSelection(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    Vue.set(state.selectedDesigns, pathedDesign.design.id, pathedDesign)
+  },
+  UPDATE_removeFromSelection(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
+    Vue.delete(state.selectedDesigns, pathedDesign.design.id)
+  },
+  UPDATE_clearSelection(state: IDesignSidebarState) {
+    state.selectedDesigns = {}
   }
 }
 

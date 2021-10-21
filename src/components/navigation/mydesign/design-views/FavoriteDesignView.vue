@@ -41,9 +41,6 @@ export default Vue.extend({
   components: {
     DesignItem
   },
-  props: {
-    selectedDesigns: Object
-  },
   data() {
     return {
       menuItems: designUtils.makeNormalMenuItems()
@@ -56,7 +53,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      favoriteDesigns: 'getFavoriteDesigns'
+      favoriteDesigns: 'getFavoriteDesigns',
+      selectedDesigns: 'getSelectedDesigns'
     }),
     favoriteIds(): string[] {
       return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)

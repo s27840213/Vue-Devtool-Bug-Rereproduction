@@ -60,7 +60,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders',
-      trashDesigns: 'getTrashDesigns'
+      trashDesigns: 'getTrashDesigns',
+      selectedDesigns: 'getSelectedDesigns'
     }),
     allDesigns() {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
