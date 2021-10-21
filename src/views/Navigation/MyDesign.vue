@@ -36,7 +36,8 @@
                   @deleteDesign="handleDeleteDesign"
                   @selectDesign="handleSelectDesign"
                   @deselectDesign="handleDeselectDesign"
-                  @clearSelection="handleClearSelection")
+                  @clearSelection="handleClearSelection"
+                  @recoverDesign="handleRecoverDesign")
         transition(name="slide-fade")
           div(v-if="isShowMessage" class="my-design__message")
             div(class="my-design__message__img" :style="messageImageStyles()")
@@ -155,12 +156,24 @@ export default Vue.extend({
     handleClearSelection() {
       this.selectedDesigns = {}
     },
+    handleRecoverDesign(design: IDesign) {
+      if (design.id === this.waitingRecovery) {
+        clearTimeout(this.messageTimer)
+        this.isShowMessage = false
+        setTimeout(() => {
+          this.deletedDesignQueue.shift()
+          this.showDeletionMessage()
+        }, 500)
+      }
+    },
     recover() {
       clearTimeout(this.messageTimer)
       designUtils.recover(this.waitingRecovery)
       this.isShowMessage = false
-      this.deletedDesignQueue.shift()
-      this.showDeletionMessage()
+      setTimeout(() => {
+        this.deletedDesignQueue.shift()
+        this.showDeletionMessage()
+      }, 500)
     },
     toggleAllFavorite() {
       if (designUtils.checkAllInFavorite(Object.values(this.selectedDesigns))) {
