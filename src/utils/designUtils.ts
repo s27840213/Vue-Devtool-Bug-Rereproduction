@@ -374,6 +374,12 @@ class DesignUtils {
       })
     }
   }
+
+  moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
+    for (const pathedDesign of pathedDesigns) {
+      this.move(pathedDesign.design.id, pathedDesign.path, destination)
+    }
+  }
 }
 
 export default new DesignUtils()

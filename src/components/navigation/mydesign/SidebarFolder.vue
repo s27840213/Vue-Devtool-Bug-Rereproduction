@@ -25,7 +25,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { IFolder } from '@/interfaces/design'
+import { IFolder, IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -95,7 +95,11 @@ export default Vue.extend({
       if (this.folder.isSelected) return
       const { path = [], id = '' } = this.draggingDesign
       if (id === '') return
-      designUtils.move(id, path, [...(this.parents as string[]), this.folder.name as string])
+      if (this.isMultiSelected && this.selectedDesigns[id]) {
+        designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.parents as string[]), this.folder.name as string])
+      } else {
+        designUtils.move(id, path, [...(this.parents as string[]), this.folder.name as string])
+      }
     }
   }
 })

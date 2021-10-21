@@ -34,8 +34,15 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      draggingDesign: 'getDraggingDesign'
-    })
+      draggingDesign: 'getDraggingDesign',
+      selectedDesigns: 'getSelectedDesigns'
+    }),
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
+    isMultiSelected(): boolean {
+      return this.selectedNum > 1
+    }
   },
   methods: {
     emitGoto() {
@@ -51,7 +58,11 @@ export default Vue.extend({
       this.isMouseOver = false
       const { path = [], id = '' } = this.draggingDesign
       if (id === '') return
-      designUtils.move(id, path, [...(this.path as string[]), this.name as string])
+      if (this.isMultiSelected && this.selectedDesigns[id]) {
+        designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.path as string[]), this.name as string])
+      } else {
+        designUtils.move(id, path, [...(this.path as string[]), this.name as string])
+      }
     }
   }
 })
