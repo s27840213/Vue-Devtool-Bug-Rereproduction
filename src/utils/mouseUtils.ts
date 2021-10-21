@@ -54,19 +54,34 @@ class MouseUtils {
     }
   }
 
-  onDropFrame(e: DragEvent, pageIndex: number, layerIndex: number, clipIdx: number) {
-    const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
-    if (dropData === null || typeof dropData !== 'string') {
-      throw new Error('Drop item is null!')
-    }
-    const data = JSON.parse(dropData)
-    const frame = LayerUtils.getLayer(pageIndex, layerIndex) as IFrame
-    const clips = generalUtils.deepCopy(frame.clips)
-    clips[clipIdx].srcObj = {
-      ...data.srcObj
-    }
-    LayerUtils.updateLayerProps(pageIndex, layerIndex, { clips })
-  }
+  // onDropFrame(e: DragEvent, pageIndex: number, layerIndex: number, clipIdx: number) {
+  //   const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
+  //   if (dropData === null || typeof dropData !== 'string') {
+  //     throw new Error('Drop item is null!')
+  //   }
+  //   console.log(dropData)
+
+  //   const data = JSON.parse(dropData)
+  //   const frame = LayerUtils.getLayer(pageIndex, layerIndex) as IFrame
+  //   const clips = generalUtils.deepCopy(frame.clips)
+  //   clips[clipIdx].srcObj = {
+  //     ...data.srcObj
+  //   }
+  //   LayerUtils.updateLayerProps(pageIndex, layerIndex, { clips })
+
+  //   const clip = clips[clipIdx]
+  //   console.log(data)
+  //   const {
+  //     imgWidth, imgHeight,
+  //     imgX, imgY
+  //   } = this.clipperHandler(data, clip.clipPath, clip.styles).styles
+  //   FrameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIdx, {
+  //     imgX,
+  //     imgY,
+  //     imgWidth,
+  //     imgHeight
+  //   })
+  // }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)

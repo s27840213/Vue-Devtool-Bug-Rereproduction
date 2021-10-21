@@ -87,7 +87,6 @@ class AssetUtils {
           .then(response => response.json())
           .then(jsonData => {
             asset.jsonData = jsonData
-            console.log(jsonData)
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })
@@ -363,13 +362,14 @@ class AssetUtils {
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       console.log('item ID: ' + item.id)
+      console.log(item)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 7:
           this.addText(asset.jsonData, attrs)
           break
         case 6:
-          console.log(GeneralUtils.deepCopy(asset))
+          console.log(GeneralUtils.deepCopy(asset.jsonData))
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:

@@ -12,6 +12,9 @@ const iconAction = ['layers-alt', 'copy', 'unlock', 'trash']
 const iconOrder = ['layers-forward', 'layers-front', 'layers-backward', 'layers-back']
 const iconFont = ['bold', 'underline', 'italic', 'font-vertical']
 const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify']
+const iconLineTemplate = [...Array(12).keys()].slice(1).map((num: number) => {
+  return `line-template-${num}`
+})
 const minMaxHash: { [index: string]: { min: number, max: number } } = {
   opacity: {
     min: 0,
@@ -48,6 +51,8 @@ class MappingUtils {
         return iconFont
       case 'font-align':
         return iconFontAlign
+      case 'lineTemplate':
+        return iconLineTemplate
       default:
         return []
     }

@@ -90,24 +90,26 @@ class PopupUtils {
       let xDiff = 0
       let yDiff = 0
       if ((mousePos.x + width) > vw) {
-        xDiff = (mousePos.x + width) - vw
+        xDiff = (mousePos.x + width - 5) - vw
       }
       if ((mousePos.y + height) > vh) {
-        yDiff = (mousePos.y + height) - vh
+        yDiff = (mousePos.y + height - 5) - vh
       }
       el.style.transform = `translate3d(${mousePos.x - xDiff}px, ${mousePos.y - yDiff}px,0)`
     })
   }
 
   openPopup(type: string, properties?: Partial<IPopupProps>) {
-    const underTarget = ['order', 'align', 'flip', 'slider']
+    const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template']
     const targetMap: { [index: string]: string } = {
       order: '.layers-alt',
       align: '.btn-align',
       flip: '.btn-flip',
-      slider: '.btn-opacity'
+      slider: '.btn-opacity',
+      file: '.btn-file',
+      'line-template': '.btn-line-template'
     }
-    const onMousePos = ['layer', 'page']
+    const onMousePos = ['layer', 'page', 'guideline']
     store.dispatch('popup/openPopup', {
       component: `popup-${type}`,
       properties,
@@ -123,6 +125,7 @@ class PopupUtils {
         x: posX,
         y: posY
       })
+      return
     }
     if (onMousePos.includes(type) && properties?.event) {
       this.openPopupOnMousePos(properties.event)

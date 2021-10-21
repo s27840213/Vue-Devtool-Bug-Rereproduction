@@ -6,7 +6,7 @@
     height: 100%;
 }
 
-.disp-flex {
+.flex {
     display: flex
 }
 
@@ -21,8 +21,11 @@
 .flex-evenly {
     justify-content: space-evenly;
 }
+.justify-center {
+    justify-content: center;
+}
 
-.align-center {
+.items-center {
     align-items: center;
 }
 

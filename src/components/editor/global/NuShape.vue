@@ -14,8 +14,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
-import assetUtils from '@/utils/assetUtils'
-import generalUtils from '@/utils/generalUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'

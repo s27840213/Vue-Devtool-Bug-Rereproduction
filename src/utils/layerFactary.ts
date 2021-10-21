@@ -53,7 +53,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles } = config
+    const { designId, clips, decoration, decorationTop, styles } = GeneralUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
@@ -318,6 +318,7 @@ class LayerFactary {
       if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
         config.layers[layerIndex].needFetch = true
       }
+      console.log(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config

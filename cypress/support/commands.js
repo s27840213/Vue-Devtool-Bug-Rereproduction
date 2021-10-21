@@ -54,8 +54,39 @@ Cypress.Commands.add(
   {
     prevSubject: true
   },
+  (subject, option = {}) => {
+    cy.wrap(subject)
+      .trigger('mousedown', { shiftKey: true, ...option })
+  }
+)
+
+Cypress.Commands.add(
+  'selectFormat',
+  (width, height) => {
+    cy.get('.page-setting__apply__text').click()
+    cy.get('.page-setting__suggestion-panel__body__custom svg')
+      .click()
+    cy.get('.page-setting__suggestion-panel__body__custom__box')
+      .eq(0)
+      .find('input')
+      .type(`{selectall}{backspace}${width}`)
+    cy.get('.page-setting__suggestion-panel__body__custom__box')
+      .eq(1)
+      .find('input')
+      .type(`{selectall}{backspace}${height}`)
+    cy.get('.page-setting__suggestion-panel__body__button')
+      .contains(/^調整尺寸$/)
+      .click()
+  }
+)
+
+Cypress.Commands.add(
+  'delete',
+  {
+    prevSubject: true
+  },
   (subject) => {
     cy.wrap(subject)
-      .trigger('mousedown', { shiftKey: true })
+      .type('{del}')
   }
 )

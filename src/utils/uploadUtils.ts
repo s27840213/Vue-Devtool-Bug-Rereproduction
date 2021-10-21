@@ -5,11 +5,12 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import ShapeUtils from './shapeUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import { IMarker } from '@/interfaces/shape'
 import zindexUtils from './zindexUtils'
+import assetUtils from './assetUtils'
 
 class UploadUtils {
   loginOutput: any
@@ -308,9 +309,13 @@ class UploadUtils {
     const designId = store.getters.getPage(pageIndex).designId
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
-    // for (const [i, layer] of pageJSON.layers.entries()) {
-    //   pageJSON.layers[i] = this.layerInfoFilter(layer)
-    // }
+    for (const [i, layer] of pageJSON.layers.entries()) {
+      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      } else if (layer.type !== 'shape') {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      }
+    }
     console.log(pageJSON)
     console.log(designId)
 
@@ -395,6 +400,9 @@ class UploadUtils {
       basicDefault(layer)
     }
     groupUtils.reset()
+
+    page.appVer = new Date().toISOString()
+    page.jsonVer = jsonVer
     return page
   }
 
@@ -455,13 +463,17 @@ class UploadUtils {
   async getDesign(type: string, designId: string) {
     const jsonName = type === 'template' ? 'config.json' : 'page.json'
     const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`)
-    response.json().then(async (json) => {
-      console.log(json)
-      if (type !== 'template') {
-        await ShapeUtils.addComputableInfo(json.layers[0])
-      }
-      store.commit('SET_pages', [json])
-    })
+    if (type === 'template') {
+      const json = await response.json()
+      assetUtils.addTemplate(json)
+    } else {
+      response.json().then(async (json) => {
+        if (type !== 'template') {
+          await ShapeUtils.addComputableInfo(json.layers[0])
+        }
+        store.commit('SET_pages', [json])
+      })
+    }
   }
 
   removeComputableInfo(layer: ILayer) {

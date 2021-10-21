@@ -6,7 +6,7 @@
       div(class="subtitle-2 text-gray-2 pointer" @click="setPages()") New Design
       //- div(class="subtitle-2 text-gray-2" @click="setModalOpen(true)") File
       //- div(class="subtitle-2 text-gray-2") Resize
-      div
+      div(class="btn-file" @click="openFIlePopup()")
         span 檔案
       div
         span 調整尺寸
@@ -27,9 +27,9 @@
     div(class="body-2")
       div(v-if="!isLogin")
         span 若要儲存設計，請
-        a(href="/signup") 註冊
+        a(:href="`/signup?redirect=${path}`") 註冊
         span 或
-        a(href="/login") 登入
+        a(:href="`/login?redirect=${path}`") 登入
       svg-icon(v-if="isAdmin"
         :iconName="`user-admin${getAdminModeText}`"
         :iconWidth="'20px'"
@@ -64,6 +64,8 @@ import StepsUtils from '@/utils/stepsUtils'
 import ModalUtils from '@/utils/modalUtils'
 import { mapState, mapMutations } from 'vuex'
 import store from '@/store'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -90,6 +92,9 @@ export default Vue.extend({
     },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
+    },
+    path(): string {
+      return this.$route.path
     }
   },
   methods: {
@@ -108,52 +113,7 @@ export default Vue.extend({
       store.commit('user/SET_ADMIN_MODE', !this.adminMode)
     },
     setPages() {
-      this._setPages([{
-        width: 1080,
-        height: 1080,
-        backgroundColor: '#ffffff',
-        backgroundImage: {
-          src: 'none',
-          config: {
-            type: 'image',
-            src: 'none',
-            clipPath: '',
-            active: false,
-            shown: false,
-            locked: false,
-            moved: false,
-            imgControl: false,
-            isClipper: false,
-            dragging: false,
-            designId: '',
-            styles: {
-              x: 0,
-              y: 0,
-              scale: 1,
-              scaleX: 0,
-              scaleY: 0,
-              rotate: 0,
-              width: 0,
-              height: 0,
-              initWidth: 0,
-              initHeight: 0,
-              imgX: 0,
-              imgY: 0,
-              imgWidth: 0,
-              imgHeight: 0,
-              zindex: -1,
-              opacity: 100
-            }
-          },
-          posX: -1,
-          posY: -1
-        },
-        name: 'Default Page',
-        layers: [
-        ],
-        documentColor: [],
-        designId: ''
-      }])
+      this._setPages([pageUtils.newPage({})])
     },
     setModalOpen(open: boolean) {
       ModalUtils.setModalInfo('測試', ['1', '2', '3'], {
@@ -168,6 +128,9 @@ export default Vue.extend({
         }
       })
       this._setModalOpen(open)
+    },
+    openFIlePopup() {
+      popupUtils.openPopup('file')
     }
   }
 })

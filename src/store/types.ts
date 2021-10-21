@@ -3,6 +3,7 @@ import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
 import { IAsset } from '@/interfaces/module'
+import { SrcObj } from '@/interfaces/gallery'
 
 /**
  * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
@@ -33,6 +34,13 @@ export interface IEditorState {
     vendor: string,
     tags: string[]
   },
+  currDraggedPhoto: {
+    srcObj: SrcObj,
+    styles: {
+      width: number,
+      height: number
+    }
+  },
   asset: {
     [key: string]: IAsset
   },
@@ -40,7 +48,9 @@ export interface IEditorState {
     heading: Array<string>,
     subheading: Array<string>,
     body: Array<string>
-  }
+  },
+  showRuler: boolean,
+  showGuideline: boolean
 }
 
 export enum SidebarPanelType {

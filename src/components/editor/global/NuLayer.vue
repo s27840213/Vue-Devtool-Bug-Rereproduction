@@ -108,8 +108,8 @@ export default Vue.extend({
        * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
        */
       return {
-        width: `${width}px`,
-        height: `${height}px`,
+        // width: `${width}px`,
+        // height: `${height}px`,
         transform: type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
         'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }

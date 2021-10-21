@@ -5,7 +5,7 @@ div(style="position:relative;")
       div
         img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 h-5") LOG IN
+        span(class="text-blue-1 heading-5") LOG IN
       div
         btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
@@ -24,7 +24,7 @@ div(style="position:relative;")
           div(v-if="!mailValid" class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          div(class="disp-flex flex-between")
+          div(class="flex flex-between")
             span(class="label-mid") Password
             btn(:type="'icon'" class="text-gray-3 body-2 forgot-pwd" @click.native="onForgotClicked()") Forgot your password
           property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
@@ -40,6 +40,10 @@ div(style="position:relative;")
       div
         span New to Here?
         btn(:type="'icon'" class="h-link" @click.native="onSignupClicked()") Sign up
+      div
+        button(@click="onCloseClicked")
+              svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
     div(v-if="currentPageIndex === 1" class="login")
       div(class="text-center")
         span(class="text-blue-1 h-5") Forgot you password?
@@ -50,10 +54,10 @@ div(style="position:relative;")
           input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
         div(v-if="!mailValid || emailResponseError" class="invalid-message")
           span {{ mailErrorMessage }}
-      div(class="disp-flex" style="justify-content: center;")
+      div(class="flex" style="justify-content: center;")
         btn(:type="'primary-mid'" class="btn-shadow body-1" style="width: 50%;"
         @click.native="onSendEmailClicked()") Send email
-      div(class="disp-flex" style="justify-content: center;")
+      div(class="flex" style="justify-content: center;")
         btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow" style="width: 50%;"
         @click.native="onBackClicked()") Back to login
     div(v-if="currentPageIndex === 2" class="login")
@@ -68,11 +72,11 @@ div(style="position:relative;")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(v-if="resendAvailable" class="disp-flex flex-between align-center"
+      div(v-if="resendAvailable" class="flex flex-between align-center"
       style="height:30px; margin-bottom: 0;")
         span didn't receive email?
         btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
-      div(v-else class="disp-flex align-center text-gray-3"
+      div(v-else class="flex align-center text-gray-3"
       style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
     div(v-if="currentPageIndex === 3" class="login")
@@ -87,17 +91,17 @@ div(style="position:relative;")
             svg-icon(class="pointer"
             :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(class="invalid-message")
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
             span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
             span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
@@ -111,7 +115,7 @@ div(style="position:relative;")
             :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(v-if="!confirmPasswordValid" class="invalid-message")
             span {{ confirmErrorMessage }}
-        div(class="mt-20 disp-flex" style="justify-content: center;")
+        div(class="mt-20 flex" style="justify-content: center;")
           btn(:type="'primary-mid'" class="btn-shadow"  style="width: 50%;"
           @click.native="onResetDoneClicked()") Done
   spinner(v-if="isLoading")
@@ -125,6 +129,12 @@ import Facebook from '@/utils/facebook'
 
 export default Vue.extend({
   name: 'Login',
+  props: {
+    redirect: {
+      type: String,
+      default: undefined
+    }
+  },
   data() {
     return {
       token: '',
@@ -151,25 +161,32 @@ export default Vue.extend({
     }
   },
   created() {
-    // Facebook login status
-    if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin']) {
-      this.isLoading = true
-      if (this.$route.query.error) {
-        this.isLoading = false
-        console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
-        this.$router.push({ query: {} })
-      } else {
+    if (this.$route.query.state) {
+      const stateStr = this.$route.query.state as string
+      const platform = JSON.parse(stateStr).platform
+      const redirect = JSON.parse(stateStr).redirect
+
+      // Google login status
+      if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && platform === 'google_vivipic') {
+        this.isLoading = true
         const code = this.$route.query.code as string
-        const redirectUri = window.location.href
-        this.fbLogin(code, redirectUri)
+        const redirectUri = window.location.href.split('?')[0]
+        this.googleLogin(code, redirectUri, redirect)
       }
-    }
-    // Google login status
-    if (this.isRollbackByGoogleSignIn && !store.getters['user/isLogin'] && this.$route.query.state === 'state_parameter_vivipic') {
-      this.isLoading = true
-      const code = this.$route.query.code as string
-      const redirectUri = window.location.href.split('?')[0]
-      this.googleLogin(code, redirectUri)
+
+      // Facebook login status
+      if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin'] && platform === 'fb_vivipic') {
+        this.isLoading = true
+        if (this.$route.query.error) {
+          this.isLoading = false
+          console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
+          this.$router.push({ query: {} })
+        } else {
+          const code = this.$route.query.code as string
+          const redirectUri = window.location.href
+          this.fbLogin(code, redirectUri, redirect)
+        }
+      }
     }
   },
   computed: {
@@ -247,13 +264,13 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fbLogin(code: string, redirectUri: string) {
+    async fbLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ name: 'Editor' })
+          this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
           console.log('fb login failed')
         }
@@ -261,13 +278,13 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    async googleLogin(code: string, redirectUri: string) {
+    async googleLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ name: 'Editor' })
+          this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
           console.log('google login failed')
         }
@@ -275,8 +292,12 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    onSignupClicked () {
-      this.$router.push({ name: 'SignUp' })
+    onSignupClicked() {
+      if (this.redirect) {
+        this.$router.push({ name: 'SignUp', query: { redirect: this.redirect } })
+      } else {
+        this.$router.push({ name: 'SignUp' })
+      }
     },
     async onLogInClicked() {
       this.isLoginClicked = true
@@ -292,7 +313,7 @@ export default Vue.extend({
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (data.flag === 0) {
-        this.$router.push({ name: 'Editor' })
+        this.$router.push({ path: this.redirect || '/' })
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg
@@ -308,6 +329,13 @@ export default Vue.extend({
     onBackClicked() {
       this.currentPageIndex = 0
       this.isLoginClicked = false
+    },
+    onCloseClicked() {
+      if (this.redirect) {
+        this.$router.push({ path: this.redirect })
+      } else {
+        this.$router.push({ name: 'Home' })
+      }
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
@@ -415,28 +443,39 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      if (this.$route.query.redirect) {
+      if (this.redirect) {
         const redirectStr = JSON.stringify({
-          redirect: this.$route.query.redirect,
-          hostId: 'facebook_parameter_vivipic'
+          redirect: this.redirect,
+          platform: 'fb_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
       }
       const redirectStr = JSON.stringify({
-        hostId: 'facebook_parameter_vivipic'
+        platform: 'fb_vivipic'
       })
       window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
     },
     onGoogleClicked() {
+      let stateStr
+      if (this.redirect) {
+        stateStr = JSON.stringify({
+          redirect: this.redirect,
+          platform: 'google_vivipic'
+        })
+      } else {
+        stateStr = JSON.stringify({
+          platform: 'google_vivipic'
+        })
+      }
       const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-      'include_granted_scopes=true&' +
-      'response_type=code&' +
-      'prompt=select_account&' +
-      'state=state_parameter_vivipic&' +
-      `redirect_uri=${redirectUri}&` +
-      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
+        'include_granted_scopes=true&' +
+        'response_type=code&' +
+        'prompt=select_account&' +
+        `state=${stateStr}&` +
+        `redirect_uri=${redirectUri}&` +
+        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })
@@ -470,6 +509,7 @@ export default Vue.extend({
 }
 
 .login-p0 {
+  position: relative;
   padding: 0 32px 20px 32px;
   > div {
     margin-bottom: 2vh;
@@ -572,6 +612,11 @@ export default Vue.extend({
     &:nth-child(8) {
       // signup hint
       font-size: 14px;
+    }
+    &:nth-child(9) {
+      position: absolute;
+      right: 15px;
+      top: 15px;
     }
   }
 }

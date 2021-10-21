@@ -11,7 +11,7 @@ Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
+    path: '/editor',
     name: 'Editor',
     component: Editor,
     // eslint-disable-next-line space-before-function-paren
@@ -35,6 +35,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/signup',
     name: 'SignUp',
+    props: route => ({ redirect: route.query.redirect }),
     component: SignUp,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
@@ -52,6 +53,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/login',
     name: 'Login',
+    props: route => ({ redirect: route.query.redirect }),
     component: Login,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
@@ -72,7 +74,7 @@ const routes: Array<RouteConfig> = [
     component: MyDesign
   },
   {
-    path: '/home',
+    path: '/',
     name: 'Home',
     component: Home,
     // eslint-disable-next-line space-before-function-paren

@@ -1,4 +1,7 @@
+import store from '@/store'
 class GeneralUtils {
+  get scaleRatio() { return store.getters.getPageScaleRatio }
+
   deepCopy(el: unknown) {
     return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
   }
@@ -75,6 +78,10 @@ class GeneralUtils {
       if (a[i] !== b[i]) return false
     }
     return true
+  }
+
+  fixSize(size: number) {
+    return size * (100 / this.scaleRatio)
   }
 
   // log(params: string, data: any = '') {
