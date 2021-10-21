@@ -328,6 +328,28 @@ class DesignUtils {
     }
   }
 
+  addNewFolder(folders: IFolder[], path: string[]) {
+    const newFolderNamePrefix = '新增資料夾'
+    let newFolderName = newFolderNamePrefix
+    let postfixCounter = 1
+    const targetFolder = this.search(folders, path)
+    if (!targetFolder) return
+    while (targetFolder.subFolders.some(folder => folder.name === newFolderName)) {
+      postfixCounter++
+      newFolderName = `${newFolderNamePrefix}${postfixCounter}`
+    }
+    store.commit('design/UPDATE_addFolder', {
+      parents: path,
+      folder: {
+        name: newFolderName,
+        isExpanded: false,
+        isSelected: false,
+        designs: [],
+        subFolders: []
+      }
+    })
+  }
+
   deleteFolder(parents: string[], folder: IFolder) {
     store.commit('design/UPDATE_addFolderToTrash', {
       parents,

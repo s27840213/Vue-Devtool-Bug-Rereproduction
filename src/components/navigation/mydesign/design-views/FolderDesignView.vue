@@ -59,7 +59,8 @@
                           iconColor="gray-2")
                 div(class="more-menu-text")
                   span 刪除資料夾
-        div(class="folder-design-view__new-folder")
+        div(class="folder-design-view__new-folder"
+            @click="handleNewFolder")
           svg-icon(class="header-icon"
                   iconName="folder_plus"
                   iconWidth="18px"
@@ -280,6 +281,9 @@ export default Vue.extend({
         },
         empty: this.isEmpty
       })
+    },
+    handleNewFolder() {
+      designUtils.addNewFolder(this.folders, this.path)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

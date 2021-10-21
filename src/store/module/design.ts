@@ -147,6 +147,12 @@ const mutations: MutationTree<IDesignSidebarState> = {
       }
     }
   },
+  UPDATE_addFolder(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    const targetParent = designUtils.search(state.folders, pathedFolder.parents)
+    if (targetParent) {
+      targetParent.subFolders.push(pathedFolder.folder)
+    }
+  },
   UPDATE_deleteFolder(state: IDesignSidebarState, updateInfo: {parents: string[], folder: IFolder}) {
     const targetParent = designUtils.search(state.folders, updateInfo.parents)
     if (targetParent) {
