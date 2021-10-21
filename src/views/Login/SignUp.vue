@@ -58,17 +58,17 @@ div(style="position:relative;")
           div(v-if="emptyPassword || emailResponseError" class="password-hint" :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
             span {{ passwordHint }}
           div(v-else class="invalid-message")
-            div(class="disp-flex align-center")
+            div(class="flex align-center")
               svg-icon(class="pointer"
               :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
               span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of at least 8 characters.
-            div(class="disp-flex align-center")
+            div(class="flex align-center")
               svg-icon(class="pointer"
               :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
               span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
-            div(class="disp-flex align-center")
+            div(class="flex align-center")
               svg-icon(class="pointer"
               :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
@@ -95,11 +95,11 @@ div(style="position:relative;")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(v-if="resendAvailable" class="disp-flex flex-between align-center"
+      div(v-if="resendAvailable" class="flex flex-between align-center"
       style="height:30px; margin-bottom: 0;")
         span didn't receive email?
         btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
-      div(v-else class="disp-flex align-center text-gray-3"
+      div(v-else class="flex align-center text-gray-3"
       style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
   spinner(v-if="isLoading")
@@ -396,13 +396,13 @@ export default Vue.extend({
       }
       const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-      'include_granted_scopes=true&' +
-      'response_type=code&' +
-      'prompt=select_account&' +
-      `state=${stateStr}&` +
-      `redirect_uri=${redirectUri}&` +
-      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
+        'include_granted_scopes=true&' +
+        'response_type=code&' +
+        'prompt=select_account&' +
+        `state=${stateStr}&` +
+        `redirect_uri=${redirectUri}&` +
+        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })
@@ -438,12 +438,14 @@ export default Vue.extend({
   position: relative;
   padding: 0 32px 32px 32px;
   > div {
-    &:nth-child(1) { // img
+    &:nth-child(1) {
+      // img
       display: flex;
       justify-content: center;
       margin-bottom: 1vh;
     }
-    &:nth-child(3) { // intro text
+    &:nth-child(3) {
+      // intro text
       margin: 0 auto;
       width: 85%;
       font-size: 14px;
@@ -453,7 +455,8 @@ export default Vue.extend({
       }
     }
     &:nth-child(4),
-    &:nth-child(5) { // fb/google buttons
+    &:nth-child(5) {
+      // fb/google buttons
       position: relative;
       margin: 0 auto;
       display: flex;
@@ -492,13 +495,18 @@ export default Vue.extend({
         pointer-events: none;
       }
     }
-    &:nth-child(6) { //email button
+    &:nth-child(6) {
+      //email button
       margin: 0 auto;
       display: flex;
       justify-content: center;
       width: 80%;
       border-radius: 3px;
-      background: linear-gradient(180deg, rgba(78, 171, 230, 0.817708) 0%, #3EA1E0 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(78, 171, 230, 0.817708) 0%,
+        #3ea1e0 100%
+      );
       margin-bottom: 2vh;
       &:hover {
         cursor: pointer;
@@ -522,7 +530,8 @@ export default Vue.extend({
       margin-bottom: 2vh;
     }
 
-    &:nth-child(8) { // close icon
+    &:nth-child(8) {
+      // close icon
       position: absolute;
       right: 15px;
       top: 15px;
@@ -534,7 +543,8 @@ export default Vue.extend({
   padding: 32px;
 
   > div {
-    &:nth-child(1) { // title
+    &:nth-child(1) {
+      // title
       display: flex;
       justify-content: space-between;
       margin-bottom: 5vh;
@@ -547,7 +557,8 @@ export default Vue.extend({
         font-weight: 600;
       }
     }
-    &:nth-child(2) { // input fields
+    &:nth-child(2) {
+      // input fields
       margin-bottom: 3vh;
       > div {
         margin-bottom: 1vh;

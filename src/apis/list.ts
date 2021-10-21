@@ -14,7 +14,8 @@ class ListService {
       page_index: params.pageIndex,
       list_all: params.listAll,
       keyword: params.keyword,
-      font_list: params.fontList
+      font_list: params.fontList,
+      aspect: params.aspect || ''
     }
 
     return axios.request<IListServiceResponse>({

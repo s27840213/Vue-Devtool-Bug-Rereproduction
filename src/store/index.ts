@@ -18,9 +18,11 @@ import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
 import page from '@/store/module/page'
+import homeTemplate from '@/store/module/homeTemplate'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
+import pageUtils from '@/utils/pageUtils'
 
 Vue.use(Vuex)
 
@@ -75,7 +77,11 @@ const getDefaultState = (): IEditorState => ({
       layers: [
       ],
       documentColor: [],
-      designId: ''
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
     },
     {
       width: 1080,
@@ -125,7 +131,11 @@ const getDefaultState = (): IEditorState => ({
       name: 'Default Page',
       layers: [],
       documentColor: [],
-      designId: ''
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
     }
   ],
   designId: '',
@@ -165,8 +175,11 @@ const getDefaultState = (): IEditorState => ({
     subheading: [],
     body: []
   },
-  isMoving: false
+  isMoving: false,
+  showRuler: false,
+  showGuideline: true
 })
+
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
   getPage(state: IEditorState) {
@@ -261,13 +274,19 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getTextInfo(state: IEditorState) {
     return state.textInfo
+  },
+  getShowRuler(state: IEditorState) {
+    return state.showRuler
+  },
+  getShowGuideline(state: IEditorState) {
+    return state.showGuideline
   }
 }
 
 const mutations: MutationTree<IEditorState> = {
   SET_pages(state: IEditorState, newPages: Array<IPage>) {
     groupUtils.reset()
-    state.pages = newPages
+    state.pages = pageUtils.newPages(newPages)
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
@@ -352,7 +371,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }}) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number } }) {
     state.currDraggedPhoto.srcObj = {
       ...photo.srcObj
     }
@@ -537,7 +556,12 @@ const mutations: MutationTree<IEditorState> = {
     state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
-    (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    console.log(state.pages[state.currSelectedInfo.pageIndex])
+    console.log(state.pages[state.currSelectedInfo.pageIndex].layers)
+    const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp
+    console.log(tmpLayer)
+    console.log(tmpLayer.layers)
+    tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
     Object.assign(state.currSelectedInfo, {
@@ -607,6 +631,39 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
+  },
+  ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string }) {
+    const { pos, type } = updateInfo
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    switch (type) {
+      case 'v': {
+        pages[currFocusPageIndex].guidelines.v.push(pos)
+        break
+      }
+      case 'h': {
+        pages[currFocusPageIndex].guidelines.h.push(pos)
+        break
+      }
+    }
+  },
+  DELETE_guideline(state: IEditorState, updateInfo: { index: number, type: string }) {
+    const { index, type } = updateInfo
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines[type].splice(index, 1)
+  },
+  CLEAR_guideline(state: IEditorState) {
+    const { pages } = state
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines.v = []
+    pages[currFocusPageIndex].guidelines.h = []
+  },
+  SET_showRuler(state: IEditorState, bool: boolean) {
+    state.showRuler = bool
+  },
+  SET_showGuideline(state: IEditorState, bool: boolean) {
+    state.showGuideline = bool
   }
 }
 
@@ -627,6 +684,7 @@ export default new Vuex.Store({
     background,
     modal,
     popup,
-    page
+    page,
+    homeTemplate
   }
 })
