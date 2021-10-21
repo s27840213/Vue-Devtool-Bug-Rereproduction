@@ -158,6 +158,14 @@ export default Vue.extend({
     }
   },
   async mounted() {
+    window.setInterval(() => {
+      if (this.featureSelected === this.featureList.length - 1) {
+        this.featureSelected = 0
+      } else {
+        this.featureSelected++
+      }
+    }, 4000)
+
     const a = await this.getApiResponse
     console.log('getApiResponse', a)
 

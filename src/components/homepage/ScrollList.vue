@@ -15,6 +15,7 @@
         img(class="pointer"
         draggable="true"
         :src="`https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+        @click="goToPage('Editor')"
         @error="handleNotFound")
 </template>
 <script lang="ts">
@@ -39,6 +40,9 @@ export default Vue.extend({
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
     },
     handleNext () {
       const { scrollLeft, offsetWidth } = this.items
