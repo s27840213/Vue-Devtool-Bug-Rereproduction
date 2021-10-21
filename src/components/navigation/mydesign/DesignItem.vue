@@ -352,6 +352,7 @@ export default Vue.extend({
     right: 8px;
     top: 35px;
     & .design-menu-item {
+      position: relative;
       width: 100%;
       display: flex;
       align-items: center;
@@ -382,6 +383,15 @@ export default Vue.extend({
           line-height: 12px;
           color: setColor(gray-2);
         }
+      }
+      &__right {
+        position: absolute;
+        right: 3px;
+        top: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-50%)
       }
     }
   }

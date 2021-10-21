@@ -82,7 +82,7 @@ class DesignUtils {
     return selectInfo.substring(2).split('/')
   }
 
-  makeNormalMenuItems(): {icon: string, text: string}[] {
+  makeNormalMenuItems(): {icon: string, text: string, extendable?: boolean}[] {
     return [
       {
         icon: 'copy',
@@ -98,7 +98,8 @@ class DesignUtils {
       },
       {
         icon: 'folder',
-        text: '移至資料夾'
+        text: '移至資料夾',
+        extendable: true
       },
       {
         icon: 'trash',

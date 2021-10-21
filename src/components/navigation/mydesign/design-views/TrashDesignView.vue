@@ -29,6 +29,10 @@
                       iconColor="gray-2")
             div(class="design-menu-item__text")
               span {{ menuItemSlot.text }}
+            div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
+              svg-icon(iconName="chevron-right"
+                      iconWidth="10px"
+                      iconColor="gray-2")
 </template>
 
 <script lang="ts">
