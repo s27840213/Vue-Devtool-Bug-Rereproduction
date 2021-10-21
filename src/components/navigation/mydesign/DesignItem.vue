@@ -2,7 +2,7 @@
   div(class="design-item")
     div(class="design-item__block"
       :style="blockStyles()"
-      draggable="true"
+      :draggable="!undraggable"
       @dragstart="handleDragStart"
       @drag="handleDragging"
       @dragend="handleDragEnd"
@@ -95,6 +95,7 @@ export default Vue.extend({
     config: Object,
     menuItemNum: Number,
     favorable: Boolean,
+    undraggable: Boolean,
     isInFavorites: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,

@@ -157,9 +157,9 @@ export default Vue.extend({
     },
     showRecoverMessage() {
       const design = this.recoveredDesignQueue[0]
-      let recoveredDirectory = design.path[design.path.length - 1]
-      if (recoveredDirectory === '$ROOT$') recoveredDirectory = '我所有的設計'
       if (design) {
+        let recoveredDirectory = design.path[design.path.length - 1]
+        if (recoveredDirectory === '$ROOT$') recoveredDirectory = '我所有的設計'
         this.recoveredDirectory = recoveredDirectory
         this.isShowRecoverMessage = true
         setTimeout(() => {

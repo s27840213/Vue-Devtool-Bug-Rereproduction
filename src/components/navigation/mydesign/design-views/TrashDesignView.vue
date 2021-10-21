@@ -20,6 +20,7 @@
                   :path="path"
                   :config="design"
                   :favorable="false"
+                  :undraggable="true"
                   :menuItemNum="menuItemSlots.length")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, false)")
