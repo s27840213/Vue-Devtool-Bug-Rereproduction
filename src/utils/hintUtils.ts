@@ -25,7 +25,7 @@ class HintUtils {
     el.addEventListener('mouseenter', () => {
       this.timerId = setTimeout(() => {
         this.openHint(el, hint)
-      }, 1000)
+      }, 300)
     })
     el.addEventListener('mouseleave', () => {
       this.closeHint()
@@ -37,7 +37,7 @@ class HintUtils {
     el.removeEventListener('mouseenter', () => {
       this.timerId = setTimeout(() => {
         this.openHint(el, hint)
-      }, 1000)
+      }, 300)
     })
     el.removeEventListener('mouseleave', () => {
       clearTimeout(this.timerId)

@@ -25,6 +25,15 @@ class RulerUtils {
   event: any
   eventHash: { [index: string]: (pos: number, type: string) => void }
   templateSettings: Array<ITemplateSetting>
+  splitUnitMap: {
+    xxs: number,
+    xs: number,
+    s: number,
+    m: number,
+    l: number,
+    xl: number
+  }
+
   isDragging: boolean
   lastMapedInfo: {
     type: string,
@@ -39,6 +48,14 @@ class RulerUtils {
       index: -1
     }
     this.isDragging = false
+    this.splitUnitMap = {
+      xxs: 250,
+      xs: 200,
+      s: 150,
+      m: 100,
+      l: 50,
+      xl: 25
+    }
     this.templateSettings = [
       {
         v: [],
@@ -197,6 +214,22 @@ class RulerUtils {
     h.forEach((pos: number) => {
       this.addGuidelineToPage(pos, 'h')
     })
+  }
+
+  mapSplitUnit() {
+    if (this.scaleRatio < 30) {
+      return this.splitUnitMap.xxs
+    } else if (this.scaleRatio < 30) {
+      return this.splitUnitMap.xs
+    } else if (this.scaleRatio < 80) {
+      return this.splitUnitMap.s
+    } else if (this.scaleRatio < 150) {
+      return this.splitUnitMap.m
+    } else if (this.scaleRatio < 350) {
+      return this.splitUnitMap.l
+    } else {
+      return this.splitUnitMap.xl
+    }
   }
 }
 

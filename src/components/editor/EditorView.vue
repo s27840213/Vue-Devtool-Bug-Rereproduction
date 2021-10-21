@@ -26,11 +26,13 @@
     div(class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartV($event)"
         @mouseout.stop="closeGuidelineV()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--v") {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartH($event)"
         @mouseout.stop="closeGuidelineH()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
@@ -293,10 +295,9 @@ export default Vue.extend({
     },
     dragEndV(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (!this.mapGuidelineToPage('v').outOfPage) {
-        this.closeGuidelineV()
+      if (this.mapGuidelineToPage('v').outOfPage) {
+        this.isShowGuidelineV = false
       }
-      this.isShowGuidelineV = false
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingV)
         document.documentElement.removeEventListener('scroll', this.scrollUpdate)
@@ -328,10 +329,9 @@ export default Vue.extend({
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (!this.mapGuidelineToPage('h').outOfPage) {
-        this.closeGuidelineH()
+      if (this.mapGuidelineToPage('h').outOfPage) {
+        this.isShowGuidelineH = false
       }
-      this.isShowGuidelineV = false
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingH)
         document.documentElement.removeEventListener('scroll', this.scrollUpdate)
@@ -451,7 +451,7 @@ $REULER_SIZE: 25px;
     border-top: 1px solid setColor(blue-1);
     width: 100%;
     height: 0px;
-    cursor: "@/assets/icon/ruler/ruler-v.svg";
+    cursor: "/assets/icon/ruler/ruler-v.svg";
     &::before {
       content: "";
       position: absolute;
@@ -501,7 +501,7 @@ $REULER_SIZE: 25px;
   grid-area: corner-block;
   width: $REULER_SIZE;
   height: $REULER_SIZE;
-  background: red;
+  background: #dfe1e7;
 }
 
 .dim-background {
