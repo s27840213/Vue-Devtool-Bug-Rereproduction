@@ -10,7 +10,7 @@ Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
+    path: '/editor',
     name: 'Editor',
     component: Editor,
     // eslint-disable-next-line space-before-function-paren
@@ -68,7 +68,7 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
-    path: '/home',
+    path: '/',
     name: 'Home',
     component: Home,
     // eslint-disable-next-line space-before-function-paren

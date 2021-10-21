@@ -375,6 +375,12 @@ export default Vue.extend({
     },
     setBackgroundImage() {
       const image = this.currSelectedInfo.layers[0] as IImage
+      image.styles.width = image.styles.imgWidth
+      image.styles.height = image.styles.imgHeight
+      image.styles.initWidth = image.styles.imgWidth
+      image.styles.initHeight = image.styles.imgHeight
+      image.styles.imgX = 0
+      image.styles.imgY = 0
       const pageIndex = this.currSelectedInfo.pageIndex
       this._setBackgroundImage({
         pageIndex: pageIndex,
