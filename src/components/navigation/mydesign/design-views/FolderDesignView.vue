@@ -97,6 +97,8 @@
               svg-icon(iconName="chevron-right"
                       iconWidth="10px"
                       iconColor="gray-2")
+    div(v-if="isEmpty" class="folder-design-view__empty")
+      img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
 </template>
 
 <script lang="ts">
@@ -171,6 +173,9 @@ export default Vue.extend({
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    isEmpty(): boolean {
+      return this.folder.subFolders.length + this.designs.length === 0
     }
   },
   methods: {
@@ -436,6 +441,16 @@ export default Vue.extend({
     }
     @media(min-width: 1560px) {
       grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  &__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 120px);
+    height: calc(100% - 270px);
+    &__img {
+      filter: grayscale(100%);
     }
   }
 }
