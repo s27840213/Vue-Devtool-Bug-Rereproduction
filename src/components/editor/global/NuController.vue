@@ -46,7 +46,7 @@
                 @onFrameDragleave="onFrameDragLeave(index)",
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
-        template(v-if="config.type === 'text' && (config.active || isLocked)")
+        template(v-if="config.type === 'text' && config.active")
           div(class="text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
