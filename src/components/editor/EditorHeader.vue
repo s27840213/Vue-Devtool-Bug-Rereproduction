@@ -1,8 +1,9 @@
 <template lang="pug">
   div(class="editor-header")
     div(class="body-2")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'" style="height: 50px;")
+      svg-icon(class="pointer" style="height: 50px;"
+      :iconName="'logo'" :iconWidth="'100px'"
+      @click.native="goToPage('Home')")
       div(class="btn-file" @click="openFIlePopup()")
         span 檔案
       div
@@ -126,6 +127,9 @@ export default Vue.extend({
     },
     openFIlePopup() {
       popupUtils.openPopup('file')
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
     }
   }
 })
