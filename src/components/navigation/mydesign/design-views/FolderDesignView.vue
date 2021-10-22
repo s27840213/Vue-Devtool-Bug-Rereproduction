@@ -29,7 +29,8 @@
           span {{ ' ' }}
         span(class="folder-design-view__path__node") {{ folder.name }}
       div(class="folder-design-view__actions")
-        div(class="folder-design-view__more"
+        div(ref="more"
+            class="folder-design-view__more"
             @click="toggleFolderMenu"
             v-click-outside="closeFolderMenu")
           svg-icon(class="header-icon"
@@ -59,7 +60,8 @@
                           iconColor="gray-2")
                 div(class="more-menu-text")
                   span 刪除資料夾
-        div(class="folder-design-view__new-folder"
+        div(ref="newFolder"
+            class="folder-design-view__new-folder"
             @click="handleNewFolder")
           svg-icon(class="header-icon"
                   iconName="folder_plus"
@@ -155,8 +157,17 @@ import { mapGetters, mapMutations } from 'vuex'
 import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
 import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
+import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
+  mounted() {
+    hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
+    hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+  },
+  destroyed() {
+    hintUtils.unbind(this.$refs.more as HTMLElement, '顯示更多', 500)
+    hintUtils.unbind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+  },
   components: {
     FolderItem,
     DesignItem
