@@ -820,10 +820,17 @@ definitions:
         properties:
           type:
             type: string
-            description: "design type: background, font, svg, template, or text"
+            description: "design type: background, font, svg, template, text, or layout"
           design_id:
             type: string
-            description: design id selected by user
+            description: design id selected by user, fill '-1' for layout case with
+              non-empty custom width/height
+          width:
+            type: number
+            description: custom width for layout
+          height:
+            type: number
+            description: custom height for layout
   verifyVcodeInput:
     type: object
     required:

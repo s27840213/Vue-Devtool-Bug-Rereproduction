@@ -2,7 +2,8 @@
   div(v-if="last" class="page-preview-plus-last")
   div(v-else class="page-preview-plus"
   @mouseover="pageMoveTo($event)" @mouseout="pageMoveBack($event)")
-    div(class="page-preview-plus-wrapper")
+    div(class="page-preview-plus-wrapper pointer"
+      @click="addPage(index)")
         svg-icon(class="pb-5"
             :iconColor="'blue-1'"
             :iconName="'plus-origin'"
@@ -12,7 +13,8 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -25,9 +27,13 @@ export default Vue.extend({
     })
   },
   methods: {
+    ...mapMutations({
+      _addPageToPos: 'ADD_pageToPos',
+      _setFocusPage: 'page/SET_focusPage'
+    }),
     pageMoveTo($event: any) {
       const prev = $event.currentTarget.previousElementSibling
-      if (prev && this.index % this.getPagesPerRow !== 0) {
+      if (prev) {
         prev.style.transform = 'translate(-15px)'
       }
       const next = $event.currentTarget.nextElementSibling
@@ -45,8 +51,12 @@ export default Vue.extend({
         next.style.transform = ''
       }
     },
-    addPage() {
-      console.log('add page')
+    addPage(position: number) {
+      this._addPageToPos({
+        newPage: pageUtils.newPage({}),
+        pos: position
+      })
+      this._setFocusPage(position)
     }
   }
 })
@@ -63,23 +73,23 @@ export default Vue.extend({
     transition: 0.25s;
 
     &:hover {
-        opacity: 1;
+      opacity: 1;
     }
 
     &-wrapper {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        width: 40px;
-        height: 70px;
-        font-size: 10px;
-        background: setColor(gray-4);
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 40px;
+      height: 70px;
+      font-size: 10px;
+      background: setColor(gray-4);
     }
 
     &-last {
-        background: setColor(gray-1);
+      opacity: 0;
     }
 }
 </style>
