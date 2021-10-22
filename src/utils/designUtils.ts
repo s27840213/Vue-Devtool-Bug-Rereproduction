@@ -18,8 +18,8 @@ const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => numb
   }
 }
 class DesignUtils {
-  newFolder(name: string, author: string): IFolder {
-    const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+  newFolder(name: string, author: string, randomTime = false): IFolder {
+    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
       name,
       author,
@@ -37,7 +37,7 @@ class DesignUtils {
     const res = this.newFolder(path[0], author)
     let currentFolder = res
     for (let i = 1; i < path.length; i++) {
-      currentFolder.subFolders.push(this.newFolder(path[i], author))
+      currentFolder.subFolders.push(this.newFolder(path[i], author, true))
       currentFolder = currentFolder.subFolders[0]
     }
     return res
@@ -45,10 +45,10 @@ class DesignUtils {
 
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
-    template[0] = this.newFolder('$ROOT$', 'SYSTEM')
+    template[0] = this.newFolder('$ROOT$', 'SYSTEM', true)
     template[0].subFolders = [
       this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
-      this.newFolder('日本行銷', 'Daniel')
+      this.newFolder('日本行銷', 'Daniel', true)
     ]
     for (let i = 0; i < 15; i++) {
       const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
@@ -335,13 +335,7 @@ class DesignUtils {
     }
     store.commit('design/UPDATE_addFolder', {
       parents: path,
-      folder: {
-        name: newFolderName,
-        isExpanded: false,
-        isSelected: false,
-        designs: [],
-        subFolders: []
-      }
+      folder: this.newFolder(newFolderName, 'Daniel')
     })
   }
 

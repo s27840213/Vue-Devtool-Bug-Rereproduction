@@ -42,7 +42,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folder.name }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 創作 | ${designs.length}個項目` }}
+              span {{ `由 ${folder.author} 創作 | ${designs.length}個項目` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -65,12 +65,30 @@
                   iconName="folder_plus"
                   iconWidth="18px"
                   iconColor="gray-2")
-        div(class="folder-design-view__sort-by")
+        div(class="folder-design-view__sort-by"
+            @click="toggleSortMenu"
+            v-click-outside="closeSortMenu")
           svg-icon(class="header-sort"
                   iconName="sequence"
                   iconWidth="18px"
                   iconColor="gray-2")
           span(class="header-sort") 排序方式
+          div(v-if="isSortMenuOpen"
+              class="folder-design-view__sort-by__menu"
+              @click.stop)
+            div(v-for="sortMenuItem in sortMenuItems"
+                @click="handleSortByClick(sortMenuItem.payload)")
+              div(class="sort-menu-icon")
+                svg-icon(:iconName="sortMenuItem.icon"
+                        iconWidth="15px"
+                        iconColor="gray-2"
+                        :style="sortMenuItem.style")
+              div(class="sort-menu-text")
+                span {{ sortMenuItem.text }}
+              div(v-if="checkSortSelected(sortMenuItem.payload)" class="sort-menu-right")
+                svg-icon(iconName="done"
+                        iconWidth="15px"
+                        iconColor="gray-2")
     div(class="horizontal-rule")
     div(v-if="subFolders.length > 0" class="folder-design-view__folder-header")
       div(class="folder-design-view__expand-icon-container"
@@ -151,7 +169,36 @@ export default Vue.extend({
       isFolderNameEditing: false,
       editableFolderName: '',
       menuItems: designUtils.makeNormalMenuItems(),
-      isFolderMenuOpen: false
+      isFolderMenuOpen: false,
+      isSortMenuOpen: false,
+      sortByField: 'name',
+      sortByDescending: false,
+      sortMenuItems: [
+        {
+          icon: 'chevron-duo-left',
+          style: 'transform: rotate(-90deg)',
+          text: '名稱 ( 遞增 )',
+          payload: ['name', false]
+        },
+        {
+          icon: 'chevron-duo-left',
+          style: 'transform: rotate(90deg)',
+          text: '名稱 ( 遞減 )',
+          payload: ['name', true]
+        },
+        {
+          icon: 'clock',
+          style: '',
+          text: '修改日期 ( 新到舊 )',
+          payload: ['time', true]
+        },
+        {
+          icon: 'clock',
+          style: '',
+          text: '修改日期 ( 舊到新 )',
+          payload: ['time', false]
+        }
+      ]
     }
   },
   directives: {
@@ -189,12 +236,12 @@ export default Vue.extend({
     },
     designs(): IDesign[] {
       const designs = generalUtils.deepCopy(this.folder.designs)
-      designUtils.sortDesignsBy(designs, 'name', false)
+      designUtils.sortDesignsBy(designs, this.sortByField, this.sortByDescending)
       return designs
     },
     subFolders(): IFolder[] {
       const subFolders = generalUtils.deepCopy(this.folder.subFolders)
-      designUtils.sortFoldersBy(subFolders, 'name', false)
+      designUtils.sortFoldersBy(subFolders, this.sortByField, this.sortByDescending)
       return subFolders
     },
     favoriteIds(): string[] {
@@ -291,10 +338,17 @@ export default Vue.extend({
     handleNewFolder() {
       designUtils.addNewFolder(this.folders, this.path)
     },
+    handleSortByClick(payload: [string, boolean]) {
+      this.sortByField = payload[0]
+      this.sortByDescending = payload[1]
+    },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         this.handleFolderNameEditEnd()
       }
+    },
+    checkSortSelected(payload: [string, boolean]) {
+      return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
     toggleFoldersExpansion() {
       this.foldersExpanded = !this.foldersExpanded
@@ -316,8 +370,14 @@ export default Vue.extend({
     toggleFolderMenu() {
       this.isFolderMenuOpen = !this.isFolderMenuOpen
     },
+    toggleSortMenu() {
+      this.isSortMenuOpen = !this.isSortMenuOpen
+    },
     closeFolderMenu() {
       this.isFolderMenuOpen = false
+    },
+    closeSortMenu() {
+      this.isSortMenuOpen = false
     },
     selectDesign(design: IDesign) {
       this.$emit('selectDesign', {
@@ -460,7 +520,6 @@ export default Vue.extend({
       }
       &__text {
         margin-left: 8px;
-        height: 16px;
         > span {
           width: 143px;
           display: block;
@@ -516,6 +575,7 @@ export default Vue.extend({
     }
   }
   &__sort-by {
+    position: relative;
     cursor: pointer;
     gap: 5px;
     padding: 0px 10px;
@@ -531,6 +591,59 @@ export default Vue.extend({
       border-color: setColor(blue-1);
       .header-sort {
         color: setColor(blue-1);
+      }
+    }
+    &__menu {
+      position: absolute;
+      width: 178px;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      > div {
+        position: relative;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        &:hover {
+          background-color: setColor(gray-5);
+        }
+        > .sort-menu-icon {
+          margin-left: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 15px;
+          height: 15px;
+        }
+        > .sort-menu-text{
+          height: 16px;
+          display: flex;
+          align-items: center;
+          > span {
+            font-family: NotoSansTC;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 16px;
+            letter-spacing: 0.03em;
+            color: setColor(gray-2);
+          }
+        }
+        > .sort-menu-right {
+          position: absolute;
+          right: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 15px;
+          height: 15px;
+        }
       }
     }
   }

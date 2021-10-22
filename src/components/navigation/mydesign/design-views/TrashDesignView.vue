@@ -97,12 +97,12 @@ export default Vue.extend({
     }),
     allDesigns(): [string[], IDesign][] {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
-      designUtils.sortDesignsBy(designs, 'name', false)
+      designUtils.sortDesignsBy(designs, 'time', true)
       return designs.map((item) => [item.path, item.design])
     },
     allFolders(): [string[], IFolder][] {
       const folders = generalUtils.deepCopy(this.trashFolders) as IPathedFolder[]
-      designUtils.sortFoldersBy(folders, 'name', false)
+      designUtils.sortFoldersBy(folders, 'time', true)
       return folders.map((item) => [item.parents, item.folder])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {

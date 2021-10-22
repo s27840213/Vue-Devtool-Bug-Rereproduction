@@ -62,7 +62,7 @@ export default Vue.extend({
     },
     allDesigns() {
       const designs = designUtils.getAllDesigns(this.folders)
-      designUtils.sortDesignsBy(designs, 'name', false)
+      designUtils.sortDesignsBy(designs, 'time', true)
       return designs.map((item) => [item.path, item.design])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {

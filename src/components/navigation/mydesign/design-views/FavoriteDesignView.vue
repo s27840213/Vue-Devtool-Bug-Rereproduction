@@ -63,7 +63,7 @@ export default Vue.extend({
     allDesigns() {
       let designs = generalUtils.deepCopy(this.favoriteDesigns) as IPathedDesign[]
       designs = designUtils.removeDeleted(designs)
-      designUtils.sortDesignsBy(designs, 'name', false)
+      designUtils.sortDesignsBy(designs, 'time', true)
       return designs.map((item) => [item.path, item.design])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
