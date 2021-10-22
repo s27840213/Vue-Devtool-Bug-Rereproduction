@@ -71,7 +71,19 @@ const routes: Array<RouteConfig> = [
   {
     path: '/mydesign',
     name: 'MyDesign',
-    component: MyDesign
+    component: MyDesign,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        if (!store.getters['user/isLogin']) {
+          next({ name: 'Login', query: { redirect: to.fullPath } })
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
   {
     path: '/',
