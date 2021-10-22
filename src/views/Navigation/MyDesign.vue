@@ -440,97 +440,117 @@ export default Vue.extend({
   z-index: 1000;
 }
 
-.delete-all-message {
-  width: 243px;
-  height: 158px;
-  background-color: white;
-  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
-  border-radius: 2px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  &__img {
-    height: 57px;
-  }
-  &__text {
+$messageTypes: delete-all, delete-folder, delete-forever;
+
+@each $messageType in $messageTypes {
+  .#{$messageType}-message {
+    background-color: white;
+    box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+    border-radius: 2px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 26px;
-    > span {
-      font-family: NotoSansTC;
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 26px;
-      color: setColor(gray-2);
+    &__img {
+      height: 57px;
     }
-  }
-  &__buttons {
-    margin-top: 8px;
-    width: 137px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > div {
-      width: 63.39px;
-      height: 25px;
-      border-radius: 6px;
+    &__text {
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      height: 26px;
+      > span {
+        font-family: NotoSansTC;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 26px;
+        color: setColor(gray-2);
+      }
+    }
+    &__description {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 12px;
       > span {
         font-family: NotoSansTC;
         font-weight: 400;
         font-size: 12px;
-        line-height: 25px;
+        line-height: 12px;
+        color: setColor(gray-3);
       }
     }
-  }
-  &__cancel {
-    background-color: setColor(gray-4);
-    &:hover {
-      background-color: setColor(red-2);
-      > span {
-        color: white;
-      }
-      & ~ .delete-all-message__confirm {
-        background-color: setColor(gray-4);
+    &__buttons {
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      > div {
+        height: 25px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
         > span {
-          color: white;
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 25px;
         }
       }
     }
-    > span {
-      display: block;
-      letter-spacing: 0.32em;
-      text-indent: 0.32em;
-      color: black;
+    &__cancel {
+      background-color: setColor(gray-4);
+      &:hover {
+        background-color: setColor(red-2);
+        > span {
+          color: white;
+        }
+        & ~ div {
+          background-color: setColor(gray-4);
+          > span {
+            color: white;
+          }
+        }
+      }
+      > span {
+        display: block;
+        letter-spacing: 0.32em;
+        text-indent: 0.32em;
+        color: black;
+      }
+    }
+    &__confirm {
+      background-color: setColor(red-1);
+      &:hover {
+        background-color: setColor(red-2);
+      }
+      > span {
+        display: block;
+        letter-spacing: 0.32em;
+        text-indent: 0.32em;
+        color: white;
+      }
     }
   }
-  &__confirm {
-    background-color: setColor(red-1);
-    &:hover {
-      background-color: setColor(red-2);
-    }
-    > span {
-      display: block;
-      letter-spacing: 0.32em;
-      text-indent: 0.32em;
-      color: white;
+}
+
+.delete-all-message {
+  width: 243px;
+  height: 158px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  &__buttons {
+    margin-top: 8px;
+    width: 137px;
+    > div {
+      width: 63.39px;
     }
   }
 }
 
 .delete-folder-message {
   width: 349px;
-  background-color: white;
-  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
-  border-radius: 2px;
-  display: flex;
   gap: 16px;
   &__img {
     margin-top: 14px;
@@ -541,15 +561,11 @@ export default Vue.extend({
   &__text {
     display: flex;
     flex-direction: column;
+    height: unset;
     > span {
       text-align: left;
       width: 240px;
       display: block;
-      font-family: NotoSansTC;
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 26px;
-      color: setColor(gray-2);
       letter-spacing: 0.115em;
       margin-left: 3px;
       &.first-line {
@@ -561,57 +577,8 @@ export default Vue.extend({
     margin-top: 17px;
     margin-bottom: 37px;
     width: 183px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     > div {
       width: 84.67px;
-      height: 25px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      > span {
-        font-family: NotoSansTC;
-        font-weight: 400;
-        font-size: 12px;
-        line-height: 25px;
-      }
-    }
-  }
-  &__cancel {
-    background-color: setColor(gray-4);
-    &:hover {
-      background-color: setColor(red-2);
-      > span {
-        color: white;
-      }
-      & ~ .delete-folder-message__confirm {
-        background-color: setColor(gray-4);
-        > span {
-          color: white;
-        }
-      }
-    }
-    > span {
-      display: block;
-      letter-spacing: 0.32em;
-      text-indent: 0.32em;
-      color: black;
-    }
-  }
-  &__confirm {
-    background-color: setColor(red-1);
-    &:hover {
-      background-color: setColor(red-2);
-    }
-    > span {
-      display: block;
-      letter-spacing: 0.32em;
-      text-indent: 0.32em;
-      color: white;
     }
   }
 }
@@ -619,97 +586,29 @@ export default Vue.extend({
 .delete-forever-message {
   width: 259px;
   height: 174px;
-  background-color: white;
-  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
-  border-radius: 2px;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  &__img {
-    height: 57px;
-  }
-  &__text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 26px;
-    > span {
-      font-family: NotoSansTC;
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 26px;
-      color: setColor(gray-2);
-    }
-  }
-  &__description {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 12px;
-    > span {
-      font-family: NotoSansTC;
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 12px;
-      color: setColor(gray-3);
-    }
-  }
   &__buttons {
     margin-top: 14px;
     width: 201px;
     height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     > div {
       width: 93px;
       height: 30px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      > span {
-        font-family: NotoSansTC;
-        font-weight: 400;
-        font-size: 12px;
-        line-height: 25px;
-      }
     }
   }
   &__cancel {
-    background-color: setColor(gray-4);
-    &:hover {
-      background-color: setColor(red-2);
-      > span {
-        color: white;
-      }
-      & ~ .delete-forever-message__confirm {
-        background-color: setColor(gray-4);
-        > span {
-          color: white;
-        }
-      }
-    }
     > span {
-      display: block;
       letter-spacing: 1.21em;
       text-indent: 1.21em;
-      color: black;
     }
   }
   &__confirm {
-    background-color: setColor(red-1);
-    &:hover {
-      background-color: setColor(red-2);
-    }
     > span {
-      display: block;
       letter-spacing: 0.305em;
       text-indent: 0.305em;
-      color: white;
     }
   }
 }
