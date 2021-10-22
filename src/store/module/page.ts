@@ -3,12 +3,14 @@ import { floor } from 'lodash'
 
 interface IPageState {
     isShowPagePreview: boolean,
-    pagesPerRow: number
+    pagesPerRow: number,
+    focusPageIndex: number
 }
 
 const getDefaultState = (): IPageState => ({
   isShowPagePreview: false,
-  pagesPerRow: floor((window.screen.width - 130) / 180)
+  pagesPerRow: floor((window.screen.width - 130) / 180),
+  focusPageIndex: 0
 })
 
 const state = getDefaultState()
@@ -27,6 +29,9 @@ const mutations: MutationTree<IPageState> = {
   },
   SET_PagesPerRow(state: IPageState, pagesPerRow: number) {
     state.pagesPerRow = pagesPerRow
+  },
+  SET_focusPage(state: IPageState, index: number) {
+    state.focusPageIndex = index
   }
 }
 
