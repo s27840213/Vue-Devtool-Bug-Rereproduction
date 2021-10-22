@@ -7,12 +7,12 @@
       div(class="editor-view__canvas"
           ref="canvas"
           @mousedown.left.self="outerClick($event)")
-        nu-page(v-for="(page,index) in filterByBackgroundImageControl(pages)"
-                :ref="`page-${nonFilteredIndex(index)}`"
-                :key="`page-${nonFilteredIndex(index)}`"
-                :pageIndex="nonFilteredIndex(index)"
-                :style="{'z-index': `${pageNum-nonFilteredIndex(index)}`}"
-                :config="page" :index="nonFilteredIndex(index)")
+        nu-page(v-for="(page,index) in pages"
+                :ref="`page-${index}`"
+                :key="`page-${index}`"
+                :pageIndex="index"
+                :style="{'z-index': `${getPageZIndex(index)}`}"
+                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       template(v-if="showRuler")
@@ -135,7 +135,15 @@ export default Vue.extend({
       showRuler: 'getShowRuler'
     }),
     isBackgroundImageControl(): boolean {
-      return (this.pages as IPage[]).some(page => page.backgroundImage.config.imgControl)
+      const pages = this.pages as IPage[]
+      let res = false
+      pages.forEach((page, index) => {
+        if (page.backgroundImage.config.imgControl) {
+          res = true
+          this.backgroundControllingPageIndex = index
+        }
+      })
+      return res
     },
     pageNum(): number {
       return this.pages.length
@@ -270,26 +278,12 @@ export default Vue.extend({
         })
       }, 0)
     },
-    filterByBackgroundImageControl(pages: IPage[]): IPage[] {
+    getPageZIndex(index: number) {
       if (this.isBackgroundImageControl) {
-        let res: IPage | undefined
-        pages.forEach((page, index) => {
-          if (page.backgroundImage.config.imgControl) {
-            res = page
-            this.backgroundControllingPageIndex = index
-          }
-        })
-        if (res) {
-          return [res]
-        } else {
-          return []
-        }
+        return this.backgroundControllingPageIndex === index ? 1 : 0
       } else {
-        return pages
+        return this.pageNum - index
       }
-    },
-    nonFilteredIndex(index: number): number {
-      return this.isBackgroundImageControl ? this.backgroundControllingPageIndex : index
     },
     dragStartV(e: MouseEvent) {
       RulerUtils.setIsDragging(true)

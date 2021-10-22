@@ -133,6 +133,9 @@
           nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
           div(:style="backgroundContorlClipStyles()")
             nu-image(:config="config.backgroundImage.config")
+        div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+            class="dim-background"
+            :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 </template>
 
 <script lang="ts">
@@ -176,7 +179,8 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    pageScaleRatio: Number
+    pageScaleRatio: Number,
+    isAnyBackgroundImageControl: Boolean
   },
   components: {
     NuImage,
@@ -509,7 +513,8 @@ export default Vue.extend({
 
 .background-control {
   position: absolute;
-  transform: translateZ(1000px);
+  // transform: translateZ(1000px);
+  z-index: 1000;
   background-color: rgba(0, 0, 0, 0.6);
   color: white;
 }
