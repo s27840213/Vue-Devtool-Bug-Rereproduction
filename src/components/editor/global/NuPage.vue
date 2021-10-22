@@ -55,22 +55,6 @@
         div(class="overflow-container"
             :style="styles()")
           div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
-            div(class="snap-area")
-              div(v-for="line in closestSnaplines.v"
-                class="snap-area__line snap-area__line--vr"
-                :style="snapLineStyles('v', line)")
-              div(v-for="line in closestSnaplines.h"
-                class="snap-area__line snap-area__line--hr"
-                :style="snapLineStyles('h', line)")
-              template(v-if="isShowGuideline")
-                div(v-for="(line,index) in guidelines.v"
-                  class="snap-area__line snap-area__line--vr"
-                  :style="snapLineStyles('v', line,true)"
-                  @mouseover="showGuideline(line,'v',index)")
-                div(v-for="(line,index) in guidelines.h"
-                  class="snap-area__line snap-area__line--hr"
-                  :style="snapLineStyles('h', line,true)"
-                  @mouseover="showGuideline(line,'h',index)")
             div(:class="['page-content']"
                 :style="styles('content')"
                 ref="page-content"
@@ -94,6 +78,22 @@
           class="page-highlighter"
           :style="styles()")
         div(class="page-control" :style="styles('control')")
+          div(class="snap-area")
+            div(v-for="line in closestSnaplines.v"
+              class="snap-area__line snap-area__line--vr"
+              :style="snapLineStyles('v', line)")
+            div(v-for="line in closestSnaplines.h"
+              class="snap-area__line snap-area__line--hr"
+              :style="snapLineStyles('h', line)")
+            template(v-if="isShowGuideline")
+              div(v-for="(line,index) in guidelines.v"
+                class="snap-area__line snap-area__line--vr"
+                :style="snapLineStyles('v', line,true)"
+                @mouseover="showGuideline(line,'v',index)")
+              div(v-for="(line,index) in guidelines.h"
+                class="snap-area__line snap-area__line--hr"
+                :style="snapLineStyles('h', line,true)"
+                @mouseover="showGuideline(line,'h',index)")
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
@@ -291,13 +291,13 @@ export default Vue.extend({
       return dir === 'v' ? {
         height: `${this.config.height}px`,
         width: `${GeneralUtils.fixSize(1)}px`,
-        transform: `translate3d(${pos}px,0,3000px)`,
+        transform: `translate3d(${pos}px,0,50px)`,
         'pointer-events': isGuideline ? 'auto' : 'none'
       }
         : {
           width: `${this.config.width}px`,
           height: `${GeneralUtils.fixSize(1)}px`,
-          transform: `translate3d(0,${pos}px,3000px)`,
+          transform: `translate3d(0,${pos}px,50px)`,
           'pointer-events': isGuideline ? 'auto' : 'none'
         }
     },
@@ -474,7 +474,6 @@ export default Vue.extend({
     position: absolute;
     top: 0;
     left: 0;
-    z-index: setZindex(coordinate);
     background-color: setColor("blue-1");
     &::before {
       content: "";
