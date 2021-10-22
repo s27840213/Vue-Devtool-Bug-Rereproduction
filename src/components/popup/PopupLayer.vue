@@ -385,22 +385,26 @@ export default Vue.extend({
     },
     setBackgroundImage() {
       const image = this.currSelectedInfo.layers[0] as IImage
-      image.styles.width = image.styles.imgWidth
-      image.styles.height = image.styles.imgHeight
-      image.styles.initWidth = image.styles.imgWidth
-      image.styles.initHeight = image.styles.imgHeight
-      image.styles.imgX = 0
-      image.styles.imgY = 0
-      const pageIndex = this.currSelectedInfo.pageIndex
-      this._setBackgroundImage({
-        pageIndex: pageIndex,
-        config: image
+      imageUtils.getImageSize(imageUtils.getSrc(image), image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
+        image.styles.imgWidth = imgWidth
+        image.styles.imgHeight = imgHeight
+        image.styles.width = imgWidth
+        image.styles.height = imgHeight
+        image.styles.initWidth = imgWidth
+        image.styles.initHeight = imgHeight
+        image.styles.imgX = 0
+        image.styles.imgY = 0
+        const pageIndex = this.currSelectedInfo.pageIndex
+        this._setBackgroundImage({
+          pageIndex: pageIndex,
+          config: image
+        })
+        const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
+        pageUtils.updateBackgroundImageSize(pageIndex, width, height)
+        pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+        pageUtils.updateBackgroundImageMode(pageIndex, true)
+        ShortcutUtils.del()
       })
-      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
-      pageUtils.updateBackgroundImageSize(pageIndex, width, height)
-      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      pageUtils.updateBackgroundImageMode(pageIndex, true)
-      ShortcutUtils.del()
     },
     closePopup() {
       popupUtils.closePopup()
