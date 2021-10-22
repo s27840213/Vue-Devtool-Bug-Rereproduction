@@ -24,7 +24,7 @@ div(style="position:relative;")
           div(v-if="!mailValid" class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          div(class="disp-flex flex-between")
+          div(class="flex flex-between")
             span(class="label-mid") Password
             btn(:type="'icon'" class="text-gray-3 body-2 forgot-pwd" @click.native="onForgotClicked()") Forgot your password
           property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
@@ -54,10 +54,10 @@ div(style="position:relative;")
           input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
         div(v-if="!mailValid || emailResponseError" class="invalid-message")
           span {{ mailErrorMessage }}
-      div(class="disp-flex" style="justify-content: center;")
+      div(class="flex" style="justify-content: center;")
         btn(:type="'primary-mid'" class="btn-shadow body-1" style="width: 50%;"
         @click.native="onSendEmailClicked()") Send email
-      div(class="disp-flex" style="justify-content: center;")
+      div(class="flex" style="justify-content: center;")
         btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow" style="width: 50%;"
         @click.native="onBackClicked()") Back to login
     div(v-if="currentPageIndex === 2" class="login")
@@ -72,11 +72,11 @@ div(style="position:relative;")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(v-if="resendAvailable" class="disp-flex flex-between align-center"
+      div(v-if="resendAvailable" class="flex flex-between align-center"
       style="height:30px; margin-bottom: 0;")
         span didn't receive email?
         btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
-      div(v-else class="disp-flex align-center text-gray-3"
+      div(v-else class="flex align-center text-gray-3"
       style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
     div(v-if="currentPageIndex === 3" class="login")
@@ -91,17 +91,17 @@ div(style="position:relative;")
             svg-icon(class="pointer"
             :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(class="invalid-message")
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
             span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
             span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
-          div(class="disp-flex align-center")
+          div(class="flex align-center")
             svg-icon(class="pointer"
             :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
             :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
@@ -115,7 +115,7 @@ div(style="position:relative;")
             :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(v-if="!confirmPasswordValid" class="invalid-message")
             span {{ confirmErrorMessage }}
-        div(class="mt-20 disp-flex" style="justify-content: center;")
+        div(class="mt-20 flex" style="justify-content: center;")
           btn(:type="'primary-mid'" class="btn-shadow"  style="width: 50%;"
           @click.native="onResetDoneClicked()") Done
   spinner(v-if="isLoading")
@@ -292,7 +292,7 @@ export default Vue.extend({
       } catch (error) {
       }
     },
-    onSignupClicked () {
+    onSignupClicked() {
       if (this.redirect) {
         this.$router.push({ name: 'SignUp', query: { redirect: this.redirect } })
       } else {
@@ -469,13 +469,13 @@ export default Vue.extend({
       }
       const redirectUri = window.location.href.split('?')[0]
       window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-      'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-      'include_granted_scopes=true&' +
-      'response_type=code&' +
-      'prompt=select_account&' +
-      `state=${stateStr}&` +
-      `redirect_uri=${redirectUri}&` +
-      'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
+        'include_granted_scopes=true&' +
+        'response_type=code&' +
+        'prompt=select_account&' +
+        `state=${stateStr}&` +
+        `redirect_uri=${redirectUri}&` +
+        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
     }
   }
 })

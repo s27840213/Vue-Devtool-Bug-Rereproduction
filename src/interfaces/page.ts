@@ -7,7 +7,7 @@ export interface IBackgroundImage {
   newDisplayMode?: boolean
 }
 export interface IPage {
-  [index: string]: number | string | Array<IShape | IText | IImage | IGroup | IFrame> | Array<string> | IBackgroundImage,
+  [index: string]: unknown,
   width: number,
   height: number,
   backgroundColor: string,
@@ -15,5 +15,10 @@ export interface IPage {
   name: string,
   layers: Array<IShape | IText | IImage | IGroup | IFrame>,
   documentColor: Array<string>,
-  designId: string
+  designId: string,
+  guidelines: {
+    [index: string]: Array<number>,
+    v: Array<number>,
+    h: Array<number>
+  }
 }

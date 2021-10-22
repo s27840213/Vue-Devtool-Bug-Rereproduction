@@ -7,6 +7,9 @@
         v-model="pageName"
         @focus="ShortcutUtils.deselect()")
       div(v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        svg-icon(class="pointer btn-line-template"
+          :iconName="'line-template'" :iconWidth="`${24}px`" :iconColor="'gray-3'"
+          @click.native="openLineTemplatePopup()")
         svg-icon(class="pointer"
           :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
@@ -55,11 +58,20 @@
             div(class="snap-area")
               div(v-for="line in closestSnaplines.v"
                 class="snap-area__line snap-area__line--vr"
-                :style="snapLineStyles('v', line.pos)")
+                :style="snapLineStyles('v', line)")
               div(v-for="line in closestSnaplines.h"
                 class="snap-area__line snap-area__line--hr"
-                :style="snapLineStyles('h', line.pos)")
-            div(:class="['page-content', `.nu-page-${pageIndex}`]"
+                :style="snapLineStyles('h', line)")
+              template(v-if="isShowGuideline")
+                div(v-for="(line,index) in guidelines.v"
+                  class="snap-area__line snap-area__line--vr"
+                  :style="snapLineStyles('v', line,true)"
+                  @mouseover="showGuideline(line,'v',index)")
+                div(v-for="(line,index) in guidelines.h"
+                  class="snap-area__line snap-area__line--hr"
+                  :style="snapLineStyles('h', line,true)"
+                  @mouseover="showGuideline(line,'h',index)")
+            div(:class="['page-content']"
                 :style="styles('content')"
                 ref="page-content"
                 @drop="onDrop"
@@ -131,16 +143,16 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
-import ControlUtils from '@/utils/controlUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import PageUtils from '@/utils/pageUtils'
-import background from '@/store/module/background'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
+import rulerUtils from '@/utils/rulerUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   data() {
@@ -155,8 +167,8 @@ export default Vue.extend({
       coordinateHeight: 0,
       snapUtils: new SnapUtils(this.pageIndex),
       closestSnaplines: {
-        v: [] as Array<ISnapline>,
-        h: [] as Array<ISnapline>
+        v: [] as Array<number>,
+        h: [] as Array<number>
       },
       GeneralUtils
     }
@@ -225,6 +237,20 @@ export default Vue.extend({
     },
     isBackgroundImageControl(): boolean {
       return this.config.backgroundImage.config.imgControl
+    },
+    guidelines(): { [index: string]: Array<number> } {
+      return (this.config as IPage).guidelines
+    },
+    isShowGuideline(): boolean {
+      return rulerUtils.showGuideline
+    }
+  },
+  watch: {
+    guidelines: {
+      handler() {
+        this.getClosestSnaplines()
+      },
+      deep: true
     }
   },
   methods: {
@@ -234,7 +260,8 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _deletePage: 'DELETE_page',
+      deleteGuideline: 'DELETE_guideline'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -256,9 +283,19 @@ export default Vue.extend({
         height: `${this.config.height * (this.scaleRatio / 100)}px`
       }
     },
-    snapLineStyles(dir: string, pos: number) {
-      return dir === 'v' ? { height: `${this.config.height}px`, transform: `translate3d(${pos}px,0,3000px)` }
-        : { width: `${this.config.width}px`, transform: `translate3d(0,${pos}px,3000px)` }
+    snapLineStyles(dir: string, pos: number, isGuideline?: string) {
+      return dir === 'v' ? {
+        height: `${this.config.height}px`,
+        width: `${GeneralUtils.fixSize(1)}px`,
+        transform: `translate3d(${pos}px,0,3000px)`,
+        'pointer-events': isGuideline ? 'auto' : 'none'
+      }
+        : {
+          width: `${this.config.width}px`,
+          height: `${GeneralUtils.fixSize(1)}px`,
+          transform: `translate3d(0,${pos}px,3000px)`,
+          'pointer-events': isGuideline ? 'auto' : 'none'
+        }
     },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex)
@@ -301,8 +338,8 @@ export default Vue.extend({
       this.coordinate.style.height = `${this.coordinateHeight}px`
     },
     getClosestSnaplines() {
-      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v]
-      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h]
+      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
+      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
     },
     clearSnap(): void {
       this.snapUtils.clear()
@@ -313,51 +350,7 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     addPage() {
-      this._addPage({
-        width: 1080,
-        height: 1080,
-        backgroundColor: '#ffffff',
-        backgroundImage: {
-          config: {
-            type: 'image',
-            src: 'none',
-            clipPath: '',
-            active: false,
-            shown: false,
-            locked: false,
-            moved: false,
-            imgControl: false,
-            isClipper: false,
-            dragging: false,
-            designId: '',
-            styles: {
-              x: 0,
-              y: 0,
-              scale: 1,
-              scaleX: 0,
-              scaleY: 0,
-              rotate: 0,
-              width: 0,
-              height: 0,
-              initWidth: 0,
-              initHeight: 0,
-              imgX: 0,
-              imgY: 0,
-              imgWidth: 0,
-              imgHeight: 0,
-              zindex: -1,
-              opacity: 100
-            }
-          },
-          posX: -1,
-          posY: -1
-        },
-        name: 'Default Page',
-        layers: [
-        ],
-        documentColor: [],
-        designId: ''
-      })
+      this._addPage(PageUtils.newPage({}))
     },
     deletePage() {
       GroupUtils.deselect()
@@ -380,6 +373,20 @@ export default Vue.extend({
         clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
         'pointer-events': 'none'
       }
+    },
+    showGuideline(pos: number, type: string, index: number) {
+      if (!rulerUtils.isDragging) {
+        this.deleteGuideline({
+          index,
+          type
+        })
+        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+      }
+    },
+    openLineTemplatePopup() {
+      popupUtils.openPopup('line-template', {
+        posX: 'right'
+      })
     }
   }
 })
@@ -403,9 +410,6 @@ export default Vue.extend({
   > input {
     background-color: transparent;
   }
-  > div {
-    height: 18px;
-  }
 }
 .pages-wrapper {
   position: relative;
@@ -428,7 +432,7 @@ export default Vue.extend({
  */
 .overflow-container {
   position: relative;
-  clip-path: polygon(0 0, 100% 0%, 100% 100%, 0% 100%);
+  overflow: hidden;
 }
 
 .page-content {
@@ -467,12 +471,22 @@ export default Vue.extend({
     top: 0;
     left: 0;
     z-index: setZindex(coordinate);
-    background-color: blue;
-    &--vr {
-      width: 1px;
+    background-color: setColor("blue-1");
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
     }
-    &--hr {
-      height: 1px;
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
     }
   }
 }

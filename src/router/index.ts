@@ -4,13 +4,14 @@ import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
 import Home from '../views/Home.vue'
+import Pricing from '../views/Pricing.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
+    path: '/editor',
     name: 'Editor',
     component: Editor,
     // eslint-disable-next-line space-before-function-paren
@@ -68,7 +69,7 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
-    path: '/home',
+    path: '/',
     name: 'Home',
     component: Home,
     // eslint-disable-next-line space-before-function-paren
@@ -84,6 +85,19 @@ const routes: Array<RouteConfig> = [
             uploadUtils.getDesign(type, designId)
           }
         }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: '/pricing',
+    name: 'Pricing',
+    component: Pricing,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        next()
       } catch (error) {
         console.log(error)
       }

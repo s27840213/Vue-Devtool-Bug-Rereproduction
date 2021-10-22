@@ -196,10 +196,10 @@
 // seed warehouse panel transition
 .fade-up {
   &-leave-active {
-    animation: fade-up 0.5s;
+    animation: fade-up 0.15s;
   }
   &-enter-active {
-    animation: fade-up 0.3s reverse;
+    animation: fade-up 0.25s reverse;
   }
 }
 @keyframes fade-up {

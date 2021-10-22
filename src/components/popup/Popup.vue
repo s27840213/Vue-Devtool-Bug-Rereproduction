@@ -12,6 +12,9 @@ import PopupAlign from '@/components/popup/PopupAlign.vue'
 import PopupLayer from '@/components/popup/PopupLayer.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupFlip from '@/components/popup/PopupFlip.vue'
+import PopupFile from '@/components/popup/PopupFile.vue'
+import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import { mapActions, mapGetters } from 'vuex'
 import { IPopupComponent } from '@/interfaces/popup'
@@ -24,7 +27,10 @@ export default Vue.extend({
     PopupAlign,
     PopupPage,
     PopupFlip,
-    PopupSlider
+    PopupSlider,
+    PopupFile,
+    PopupLineTemplate,
+    PopupGuideline
   },
   directives: {
     clickOutside: vClickOutside.directive

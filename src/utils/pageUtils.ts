@@ -1,8 +1,104 @@
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import GeneralUtils from './generalUtils'
 
 class PageUtils {
+  get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get getPage() { return store.getters.getPage }
+  get lastSelectedPageIndex(): number {
+    return store.getters.getLastSelectedPageIndex
+  }
+
+  get currActivePageIndex(): number {
+    return store.getters.getCurrActivePageIndex
+  }
+
+  get currFocusPageIndex() {
+    return this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+  }
+
+  get currFocusPage(): IPage {
+    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+    return this.getPage(targetIndex)
+  }
+
+  get pageRect(): { [index: string]: number } {
+    const { left, top, bottom, right } = document.getElementsByClassName(`nu-page-${this.currFocusPageIndex}`)[0].getBoundingClientRect()
+    return {
+      left,
+      top,
+      bottom,
+      right
+    }
+  }
+
+  newPage(pageData: Partial<IPage>) {
+    const defaultPage = {
+      width: 1080,
+      height: 1080,
+      backgroundColor: '#ffffff',
+      backgroundImage: {
+        config: {
+          type: 'image',
+          src: 'none',
+          clipPath: '',
+          active: false,
+          shown: false,
+          locked: false,
+          moved: false,
+          imgControl: false,
+          isClipper: false,
+          dragging: false,
+          designId: '',
+          styles: {
+            x: 0,
+            y: 0,
+            scale: 1,
+            scaleX: 0,
+            scaleY: 0,
+            rotate: 0,
+            width: 0,
+            height: 0,
+            initWidth: 0,
+            initHeight: 0,
+            imgX: 0,
+            imgY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            zindex: -1,
+            opacity: 100
+          }
+        },
+        posX: -1,
+        posY: -1
+      },
+      name: 'Default Page',
+      layers: [
+      ],
+      documentColor: [],
+      designId: '',
+      guidelines: {
+        v: [],
+        h: []
+      }
+    }
+    return Object.assign(defaultPage, pageData)
+  }
+
+  newPages(pages: Array<IPage>) {
+    return pages.map((page: IPage) => {
+      return this.newPage(page)
+    })
+  }
+
+  setPages(pages = [this.newPage({})]) {
+    console.log('set pages')
+    console.log(pages)
+    store.commit('SET_pages', pages)
+  }
+
   activeMostCentralPage(): number {
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       return {

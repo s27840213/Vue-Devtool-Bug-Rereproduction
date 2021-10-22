@@ -1,4 +1,7 @@
+import store from '@/store'
 class GeneralUtils {
+  get scaleRatio() { return store.getters.getPageScaleRatio }
+
   deepCopy(el: unknown) {
     return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
   }
@@ -67,6 +70,10 @@ class GeneralUtils {
     document.execCommand('copy')
     el.remove()
     return Promise.resolve()
+  }
+
+  fixSize(size: number) {
+    return size * (100 / this.scaleRatio)
   }
 
   // log(params: string, data: any = '') {
