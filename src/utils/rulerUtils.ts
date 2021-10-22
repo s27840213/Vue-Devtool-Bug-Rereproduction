@@ -1,7 +1,7 @@
 import store from '@/store'
+import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
 import pageUtils from './pageUtils'
-
 interface ITemplateSetting {
   v: Array<number>
   h: Array<number>
@@ -24,7 +24,11 @@ class RulerUtils {
 
   event: any
   eventHash: { [index: string]: (pagePos: number, pos: number, type: string) => void }
-  templateSettings: Array<ITemplateSetting>
+  templates: {
+    type1: Array<ITemplateSetting>,
+    type2: Array<ITemplateSetting>
+  }
+
   splitUnitMap: {
     xxs: number,
     xs: number,
@@ -56,52 +60,60 @@ class RulerUtils {
       l: 50,
       xl: 25
     }
-    this.templateSettings = [
-      {
-        v: [],
-        h: []
-      },
-      {
-        v: [50],
-        h: []
-      },
-      {
-        v: [],
-        h: [50]
-      },
-      {
-        v: [],
-        h: [33.33, 66.66]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [],
-        h: [50, 75]
-      },
-      {
-        v: [33.33, 66.66],
-        h: [50]
-      },
-      {
-        v: [33.33, 66.66],
-        h: [33.33, 66.66]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [50],
-        h: [33.33, 66.66]
-      }
-    ]
+    this.templates = {
+      type1: [
+        {
+          v: [],
+          h: []
+        },
+        {
+          v: [50],
+          h: []
+        },
+        {
+          v: [],
+          h: [50]
+        },
+        {
+          v: [],
+          h: [33.33, 66.66]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [],
+          h: [50, 75]
+        },
+        {
+          v: [33.33, 66.66],
+          h: [50]
+        },
+        {
+          v: [33.33, 66.66],
+          h: [33.33, 66.66]
+        }
+      ],
+      type2: [
+        {
+          v: [33.33, 66.66],
+          h: [33.33, 66.66]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [50],
+          h: [33.33, 66.66]
+        }
+      ]
+    }
   }
 
   on(type: string, callback: (pagePos: number, pos: number, type: string) => void) {
@@ -197,10 +209,10 @@ class RulerUtils {
     this.deleteGuideline(index, type)
   }
 
-  addLineTemplate(index: number) {
+  addLineTemplate(index: number, type: LineTemplatesType) {
     this.clearGuidelines()
     this.setShowGuideline(true)
-    const targetTemplate = this.templateSettings[index]
+    const targetTemplate = this.templates[type][index]
     const v = targetTemplate.v.map((pos: number) => {
       return this.currFocusPage.width * (pos / 100)
     })
