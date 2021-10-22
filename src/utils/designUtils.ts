@@ -67,12 +67,15 @@ class DesignUtils {
       }
     ]
     for (let i = 0; i < 15; i++) {
+      const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
       template[0].subFolders[0].designs.push({
         name: `Name${i + 1}`,
         width: 1200,
         height: 1200,
         id: `${generalUtils.generateAssetId()}`,
-        thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`)
+        thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
+        createdTime: time,
+        lastUpdatedTime: time
       })
     }
     return template
@@ -235,23 +238,41 @@ class DesignUtils {
     return res
   }
 
-  sortByNamePathed(designs: IPathedDesign[]) {
-    designs.sort((a, b) => {
-      return a.design.name.localeCompare(b.design.name)
-    })
-  }
-
-  sortByNameNonPathed(designs: IDesign[]) {
-    designs.sort((a, b) => {
-      return a.name.localeCompare(b.name)
-    })
-  }
-
-  sortByName(designs: IDesign[] | IPathedDesign[]) {
+  sortByName(designs: IDesign[] | IPathedDesign[], descending: boolean) {
+    const modifier = descending ? -1 : 1
     if (this.checkIfPathed(designs)) {
-      this.sortByNamePathed(designs as IPathedDesign[])
+      const target = designs as IPathedDesign[]
+      target.sort((a, b) => {
+        return a.design.name.localeCompare(b.design.name) * modifier
+      })
     } else {
-      this.sortByNameNonPathed(designs as IDesign[])
+      const target = designs as IDesign[]
+      target.sort((a, b) => {
+        return a.name.localeCompare(b.name) * modifier
+      })
+    }
+  }
+
+  sortByTime(designs: IDesign[] | IPathedDesign[], descending: boolean) {
+    const modifier = descending ? -1 : 1
+    if (this.checkIfPathed(designs)) {
+      const target = designs as IPathedDesign[]
+      target.sort((a, b) => {
+        return (a.design.lastUpdatedTime - b.design.lastUpdatedTime) * modifier
+      })
+    } else {
+      const target = designs as IDesign[]
+      target.sort((a, b) => {
+        return (a.lastUpdatedTime - b.lastUpdatedTime) * modifier
+      })
+    }
+  }
+
+  sortBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
+    if (field === 'name') {
+      this.sortByName(designs, descending)
+    } else {
+      this.sortByTime(designs, descending)
     }
   }
 

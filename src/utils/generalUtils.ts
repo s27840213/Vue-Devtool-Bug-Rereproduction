@@ -35,6 +35,10 @@ class GeneralUtils {
     return result
   }
 
+  generateRandomTime(start: Date, end: Date) {
+    return start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  }
+
   formatStr(str: string, len: number) {
     if (str.length === len) {
       return str

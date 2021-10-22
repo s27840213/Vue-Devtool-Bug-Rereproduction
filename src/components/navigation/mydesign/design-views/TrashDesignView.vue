@@ -97,7 +97,7 @@ export default Vue.extend({
     }),
     allDesigns(): [string[], IDesign][] {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
-      designUtils.sortByName(designs)
+      designUtils.sortByName(designs, false)
       return designs.map((item) => [item.path, item.design])
     },
     allFolders(): [string[], IFolder][] {

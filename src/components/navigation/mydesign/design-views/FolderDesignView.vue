@@ -188,7 +188,7 @@ export default Vue.extend({
     },
     designs(): IDesign[] {
       const designs = generalUtils.deepCopy(this.folder.designs)
-      designUtils.sortByName(designs)
+      designUtils.sortByName(designs, false)
       return designs
     },
     favoriteIds(): string[] {

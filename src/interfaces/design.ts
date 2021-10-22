@@ -3,7 +3,9 @@ export interface IDesign {
   width: number,
   height: number,
   id: string,
-  thumbnail: string
+  thumbnail: string,
+  createdTime: number,
+  lastUpdatedTime: number
 }
 
 export interface IFolder {
