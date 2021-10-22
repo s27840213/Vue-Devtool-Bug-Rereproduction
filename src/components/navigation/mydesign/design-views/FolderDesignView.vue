@@ -125,6 +125,7 @@
                       iconColor="gray-2")
     div(v-if="isEmpty" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+      span(class="folder-design-view__empty__text") 此資料夾是空的
 </template>
 
 <script lang="ts">
@@ -580,12 +581,22 @@ export default Vue.extend({
   }
   &__empty {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 35px;
     width: calc(100% - 120px);
     height: calc(100% - 270px);
     &__img {
       filter: grayscale(100%);
+    }
+    &__text {
+      display: block;
+      font-family: NotoSansTC;
+      font-weight: 400;
+      font-size: 30px;
+      line-height: 30px;
+      color: setColor(gray-3);
     }
   }
 }
