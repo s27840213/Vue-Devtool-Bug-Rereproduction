@@ -1,6 +1,22 @@
 import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import store from '@/store'
 import generalUtils from './generalUtils'
+
+const FIELD_MAPPER: {[key: string]: (item: IDesign | IFolder) => any} = {
+  name: (item: IDesign | IFolder): string => item.name,
+  time: (item: IDesign | IFolder): number => item.lastUpdatedTime
+}
+
+const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => number} = {
+  name: (a: string, b: string, descending: boolean): number => {
+    const modifier = descending ? -1 : 1
+    return a.localeCompare(b) * modifier
+  },
+  time: (a: number, b: number, descending: boolean): number => {
+    const modifier = descending ? -1 : 1
+    return (a - b) * modifier
+  }
+}
 class DesignUtils {
   newFolder(name: string, author: string): IFolder {
     const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
@@ -206,41 +222,31 @@ class DesignUtils {
     return res
   }
 
-  sortByName(designs: IDesign[] | IPathedDesign[], descending: boolean) {
-    const modifier = descending ? -1 : 1
+  sortDesignsBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
     if (this.checkIfPathed(designs)) {
       const target = designs as IPathedDesign[]
       target.sort((a, b) => {
-        return a.design.name.localeCompare(b.design.name) * modifier
+        return COMP_MAPPER[field](FIELD_MAPPER[field](a.design), FIELD_MAPPER[field](b.design), descending)
       })
     } else {
       const target = designs as IDesign[]
       target.sort((a, b) => {
-        return a.name.localeCompare(b.name) * modifier
+        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
       })
     }
   }
 
-  sortByTime(designs: IDesign[] | IPathedDesign[], descending: boolean) {
-    const modifier = descending ? -1 : 1
-    if (this.checkIfPathed(designs)) {
-      const target = designs as IPathedDesign[]
+  sortFoldersBy(folders: IFolder[] | IPathedFolder[], field: string, descending: boolean) {
+    if (this.checkIfPathed(folders)) {
+      const target = folders as IPathedFolder[]
       target.sort((a, b) => {
-        return (a.design.lastUpdatedTime - b.design.lastUpdatedTime) * modifier
+        return COMP_MAPPER[field](FIELD_MAPPER[field](a.folder), FIELD_MAPPER[field](b.folder), descending)
       })
     } else {
-      const target = designs as IDesign[]
+      const target = folders as IFolder[]
       target.sort((a, b) => {
-        return (a.lastUpdatedTime - b.lastUpdatedTime) * modifier
+        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
       })
-    }
-  }
-
-  sortBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
-    if (field === 'name') {
-      this.sortByName(designs, descending)
-    } else {
-      this.sortByTime(designs, descending)
     }
   }
 
@@ -249,7 +255,7 @@ class DesignUtils {
     return designs.filter(design => !(deletedDesignIds.includes(design.design.id)))
   }
 
-  checkIfPathed(designs: IDesign[] | IPathedDesign[]) { // if empty, return true
+  checkIfPathed(designs: IDesign[] | IPathedDesign[] | IFolder[] | IPathedFolder[]): boolean { // if empty, return true
     return (designs.length === 0) || ('path' in designs[0])
   }
 

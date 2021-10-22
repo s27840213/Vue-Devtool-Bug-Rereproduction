@@ -72,7 +72,7 @@
                   iconColor="gray-2")
           span(class="header-sort") 排序方式
     div(class="horizontal-rule")
-    div(v-if="folder.subFolders.length > 0" class="folder-design-view__folder-header")
+    div(v-if="subFolders.length > 0" class="folder-design-view__folder-header")
       div(class="folder-design-view__expand-icon-container"
           @click="toggleFoldersExpansion")
         svg-icon(:style="foldersExpansionIconStyles()"
@@ -82,8 +82,8 @@
                 iconColor="gray-2")
       div(class="folder-design-view__folder-title")
         span 資料夾
-    div(v-if="foldersExpanded && folder.subFolders.length > 0" class="folder-design-view__folders")
-      folder-item(v-for="subFolder in folder.subFolders"
+    div(v-if="foldersExpanded && subFolders.length > 0" class="folder-design-view__folders")
+      folder-item(v-for="subFolder in subFolders"
                   :path="path"
                   :name="subFolder.name"
                   @goto="handleGotoFolder(subFolder.name)")
@@ -189,8 +189,13 @@ export default Vue.extend({
     },
     designs(): IDesign[] {
       const designs = generalUtils.deepCopy(this.folder.designs)
-      designUtils.sortByName(designs, false)
+      designUtils.sortDesignsBy(designs, 'name', false)
       return designs
+    },
+    subFolders(): IFolder[] {
+      const subFolders = generalUtils.deepCopy(this.folder.subFolders)
+      designUtils.sortFoldersBy(subFolders, 'name', false)
+      return subFolders
     },
     favoriteIds(): string[] {
       return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
