@@ -132,7 +132,7 @@
                   @select="selectDesign(design)"
                   @deselect="deselectDesign(design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, checkFavorite(design.id))")
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
             div(class="design-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -163,10 +163,6 @@ export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
-  },
-  destroyed() {
-    hintUtils.unbind(this.$refs.more as HTMLElement, '顯示更多', 500)
-    hintUtils.unbind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
   },
   components: {
     FolderItem,
@@ -331,8 +327,8 @@ export default Vue.extend({
       })
       this.setCurrentSelectedFolder(`f:${[...this.parents, this.editableFolderName].join('/')}`)
     },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
-      designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
+      designUtils.dispatchDesignMenuAction(icon, path, design)
       if (icon === 'trash') {
         this.$emit('deleteDesign', design)
       }

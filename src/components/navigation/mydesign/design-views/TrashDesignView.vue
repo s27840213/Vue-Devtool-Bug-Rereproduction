@@ -49,7 +49,7 @@
                   :undraggable="true"
                   :menuItemNum="menuItemSlots.length")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, false)")
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
             div(class="design-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -118,10 +118,10 @@ export default Vue.extend({
     designsExpansionIconStyles() {
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
       if (icon === 'trash') icon = 'delete'
       if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
-      designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+      designUtils.dispatchDesignMenuAction(icon, path, design)
     },
     toggleFoldersExpansion() {
       this.foldersExpanded = !this.foldersExpanded

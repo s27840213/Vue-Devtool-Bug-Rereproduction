@@ -17,7 +17,7 @@
                   @select="selectDesign(path, design)"
                   @deselect="deselectDesign(path, design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design, checkFavorite(design.id))")
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
             div(class="design-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -44,7 +44,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      menuItems: designUtils.makeNormalMenuItems()
+      menuItems: designUtils.makeNormalMenuItems().slice(1) // remove duplicate
     }
   },
   watch: {
@@ -90,8 +90,8 @@ export default Vue.extend({
     checkSelected(id: string): boolean {
       return !!this.selectedDesigns[id]
     },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
-      designUtils.dispatchDesignMenuAction(icon, path, design, isInFavorites)
+    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
+      designUtils.dispatchDesignMenuAction(icon, path, design)
       if (icon === 'trash') {
         this.$emit('deleteDesign', design)
       }

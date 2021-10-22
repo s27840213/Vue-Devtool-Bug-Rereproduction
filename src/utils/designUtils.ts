@@ -286,7 +286,7 @@ class DesignUtils {
     }
   }
 
-  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign, isInFavorites: boolean) {
+  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign) {
     switch (icon) {
       case 'copy': {
         const newId = generalUtils.generateAssetId()
@@ -297,12 +297,6 @@ class DesignUtils {
           path,
           design: newDesign
         })
-        if (isInFavorites) {
-          store.commit('design/UPDATE_addToFavorite', {
-            path,
-            design: newDesign
-          })
-        }
         break
       }
       case 'trash': {
