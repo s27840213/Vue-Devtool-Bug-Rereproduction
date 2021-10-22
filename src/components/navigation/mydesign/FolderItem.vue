@@ -93,6 +93,12 @@ export default Vue.extend({
       font-size: 14px;
       font-weight: 400;
       color: setColor(gray-1);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      overflow: hidden;
     }
   }
 }
