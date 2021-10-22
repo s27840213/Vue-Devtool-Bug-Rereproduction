@@ -1,7 +1,7 @@
 <template lang="pug">
   div(v-if="!isGroup" class="function-panel p-20")
     panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-    panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked"
+    panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
       @openFontsPanel="openFontsPanel()"
       v-on="$listeners")
     panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")

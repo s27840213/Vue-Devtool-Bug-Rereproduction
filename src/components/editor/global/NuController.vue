@@ -52,6 +52,8 @@
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="config.type === 'tmp' ? false : contentEditable"
+              @focus="onTextFocus()"
+              @blur="onTextBlur()"
               @compositionstart="isComposing = true"
               @compositionend="composingEnd"
               @keydown="onKeyDown"
@@ -1214,6 +1216,14 @@ export default Vue.extend({
       const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
     },
+    onTextFocus() {
+      console.log('on text focus')
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+    },
+    onTextBlur() {
+      console.log('on text blur')
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+    },
     onTyping(e: KeyboardEvent, isComposing: boolean) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
@@ -1370,7 +1380,7 @@ export default Vue.extend({
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
-      popupUtils.openPopup('layer', { event })
+      popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any
@@ -1457,6 +1467,9 @@ export default Vue.extend({
     onFrameMouseUp(clipIndex: number) {
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image') {
+        const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+        this.clipedImgBuff.splice(buffIndex, 1)
+
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])

@@ -7,12 +7,13 @@
           :style="styles('')"
           @dblclick="onDblClick()"
           @click.left.stop="onClickEvent($event)")
-        svg(class="full-width" v-if="config.type === 'image' && config.isFrame" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+        svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+            :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
               :style="frameClipStyles()"
-              @drop="onFrameDrop()"
-              @dragenter="onDrageEnter()"
-              @dragleave="onDragLeave()")
+              @drop="()=>{ this.$emit('onFrameDrop') }"
+              @dragenter="()=>{ this.$emit('onFrameDragenter') }"
+              @dragleave="()=>{ this.$emit('onFrameDragleave') }")
         //- template(v-if="config.type === 'text' && config.active")
         //-   div(:style="textScaleStyle()")
         //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -159,7 +160,7 @@ export default Vue.extend({
     frameClipStyles() {
       return {
         fill: '#00000000',
-        stroke: this.isActive ? '#7190CC' : 'none',
+        stroke: this.isActive ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
         strokeWidth: `${5 * (100 / this.scaleRatio)}px`
       }
     },
@@ -216,7 +217,7 @@ export default Vue.extend({
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline,
+        outline: 'none',
         'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
@@ -285,7 +286,6 @@ export default Vue.extend({
           if (range) {
             const startContainer = range.startContainer
             if (Number.isNaN(parseInt(startContainer?.parentElement?.dataset.sindex as string)) || Number.isNaN(parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string))) {
-              console.log('NaN')
               // e.preventDefault()
               // return
             }
@@ -511,26 +511,6 @@ export default Vue.extend({
         return
       }
       this.$emit('dblSubController', this.layerIndex)
-    },
-    onDrageEnter() {
-      this.$emit('onFrameDragenter', this.layerIndex)
-    },
-    onDragLeave() {
-      // const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-      // clips[this.layerIndex].srcObj = {
-      //   ...this.clipedImgBuff
-      // }
-      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      // this.clipedImgBuff = {
-      //   type: '',
-      //   userId: '',
-      //   assetId: ''
-      // }
-      // console.log(this.clipedImgBuff)
-      this.$emit('onFrameDragleave', this.layerIndex)
-    },
-    onFrameDrop() {
-      this.$emit('onFrameDrop')
     }
   }
 })

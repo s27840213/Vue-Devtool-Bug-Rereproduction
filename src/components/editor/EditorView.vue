@@ -26,6 +26,7 @@ import ControlUtils from '@/utils/controlUtils'
 import PageUtils from '@/utils/pageUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { IPage } from '@/interfaces/page'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   data() {
@@ -68,6 +69,10 @@ export default Vue.extend({
     },
     pageNum(): number {
       return this.pages.length
+    },
+    isTyping(): boolean {
+      return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
+        .some(l => l.type === 'text' && l.isTyping)
     }
   },
   methods: {
@@ -84,6 +89,7 @@ export default Vue.extend({
       PageUtils.activeMostCentralPage()
     },
     selectStart(e: MouseEvent) {
+      if (this.isTyping) return
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
