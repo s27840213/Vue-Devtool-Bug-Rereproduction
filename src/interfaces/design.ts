@@ -10,6 +10,9 @@ export interface IDesign {
 
 export interface IFolder {
   name: string,
+  author: string,
+  createdTime: number,
+  lastUpdatedTime: number,
   isExpanded: boolean,
   isSelected: boolean,
   subFolders: IFolder[],

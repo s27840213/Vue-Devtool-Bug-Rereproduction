@@ -2,69 +2,37 @@ import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/des
 import store from '@/store'
 import generalUtils from './generalUtils'
 class DesignUtils {
+  newFolder(name: string, author: string): IFolder {
+    const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+    return {
+      name,
+      author,
+      createdTime: time,
+      lastUpdatedTime: time,
+      isExpanded: false,
+      isSelected: false,
+      designs: [],
+      subFolders: []
+    }
+  }
+
+  newFolders(fullpath: string, author: string): IFolder {
+    const path = fullpath.split('/')
+    const res = this.newFolder(path[0], author)
+    let currentFolder = res
+    for (let i = 1; i < path.length; i++) {
+      currentFolder.subFolders.push(this.newFolder(path[i], author))
+      currentFolder = currentFolder.subFolders[0]
+    }
+    return res
+  }
+
   makeDesignsForTesting(): IFolder[] {
-    const template: IFolder[] = [
-      {
-        name: '$ROOT$',
-        isExpanded: false,
-        isSelected: false,
-        designs: [],
-        subFolders: [
-          {
-            name: 'Toby',
-            isExpanded: false,
-            isSelected: false,
-            designs: [],
-            subFolders: [
-              {
-                name: '素材1',
-                isExpanded: false,
-                isSelected: false,
-                designs: [],
-                subFolders: []
-              },
-              {
-                name: '素材2',
-                isExpanded: false,
-                isSelected: false,
-                designs: [],
-                subFolders: [
-                  {
-                    name: '材質3',
-                    isExpanded: false,
-                    isSelected: false,
-                    designs: [],
-                    subFolders: [
-                      {
-                        name: '材質4',
-                        isExpanded: false,
-                        isSelected: false,
-                        designs: [],
-                        subFolders: [
-                          {
-                            name: '材質5',
-                            isExpanded: false,
-                            isSelected: false,
-                            designs: [],
-                            subFolders: []
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            name: '日本行銷',
-            isExpanded: false,
-            isSelected: false,
-            designs: [],
-            subFolders: []
-          }
-        ]
-      }
+    const template: IFolder[] = []
+    template[0] = this.newFolder('$ROOT$', 'SYSTEM')
+    template[0].subFolders = [
+      this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
+      this.newFolder('日本行銷', 'Daniel')
     ]
     for (let i = 0; i < 15; i++) {
       const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())

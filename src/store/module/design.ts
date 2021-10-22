@@ -19,16 +19,7 @@ const getDefaultState = (): IDesignSidebarState => ({
   folders: [],
   favoriteDesigns: [],
   trashDesigns: [],
-  trashFolders: [{
-    parents: ['$ROOT$'],
-    folder: {
-      name: 'test',
-      isExpanded: false,
-      isSelected: false,
-      designs: [],
-      subFolders: []
-    }
-  }],
+  trashFolders: [],
   draggingDesign: undefined,
   selectedDesigns: {}
 })
