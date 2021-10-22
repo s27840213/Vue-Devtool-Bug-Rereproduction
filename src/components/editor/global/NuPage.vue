@@ -380,7 +380,7 @@ export default Vue.extend({
           index,
           type
         })
-        rulerUtils.event.emit('showGuideline', rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
       }
     },
     openLineTemplatePopup() {

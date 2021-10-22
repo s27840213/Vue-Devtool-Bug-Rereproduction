@@ -1,11 +1,13 @@
 <template lang="pug">
-div(class="ruler-hr pointer")
+div(class="ruler-hr"
+    :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}")
   div(class="ruler-hr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount.count" class="ruler-hr__line ruler-hr__line--int")
+    div(v-for="i in rulerLineCount.count" class="ruler-hr__block ruler-hr__block--int")
       span(class="ruler-hr__number") {{(i-1)*SPLIT_UNIT}}
-    div(v-if="rulerLineCount.float > 0" class="ruler-hr__line ruler-hr__line--float")
+      div(v-for="i in 5" class="ruler-hr__line")
+    div(v-if="rulerLineCount.float > 0" class="ruler-hr__block ruler-hr__block--float")
       span(class="ruler-hr__number") {{rulerLineCount.count * SPLIT_UNIT}}
 </template>
 
@@ -42,8 +44,6 @@ export default Vue.extend({
       return this.getPage(targetIndex)
     },
     rulerBodyStyles(): { [index: string]: number | string } {
-      console.log(this.rulerLineCount.float)
-      console.log(this.SPLIT_UNIT * this.rulerLineCount.float)
       return {
         width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
         height: `${this.RULER_SIZE}px`,
@@ -97,7 +97,10 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: 1fr;
   }
-  &__line {
+  &__block {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-end;
     position: relative;
     height: 100%;
     &--int {
@@ -117,6 +120,11 @@ export default Vue.extend({
     top: 20%;
     font-size: 2px;
     transform: scale(0.8);
+  }
+
+  &__line {
+    height: 6px;
+    border-right: 1px solid setColor(gray-3);
   }
 }
 </style>

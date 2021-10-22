@@ -23,7 +23,7 @@ class RulerUtils {
   get showGuideline() { return store.getters.getShowGuideline }
 
   event: any
-  eventHash: { [index: string]: (pos: number, type: string) => void }
+  eventHash: { [index: string]: (pagePos: number, pos: number, type: string) => void }
   templateSettings: Array<ITemplateSetting>
   splitUnitMap: {
     xxs: number,
@@ -104,7 +104,7 @@ class RulerUtils {
     ]
   }
 
-  on(type: string, callback: (pos: number, type: string) => void) {
+  on(type: string, callback: (pagePos: number, pos: number, type: string) => void) {
     // replace origin event
     if (this.eventHash[type]) {
       this.event.off(type, this.eventHash[type])

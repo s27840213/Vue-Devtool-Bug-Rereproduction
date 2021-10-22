@@ -6,7 +6,7 @@ div(class="popup-file")
     span {{pageSize.w}}像素 x {{pageSize.h}}像素
   div(class="popup-file__item")
     span 保存
-  div(class="popup-file__item")
+  div(class="popup-file__item" @click="newDesign()")
     span 建立新設計
   hr(class="popup-file__hr")
   div(class="popup-file__item popup-file__preference flex flex-between"
@@ -66,6 +66,10 @@ export default Vue.extend({
     },
     toggleGuideline() {
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
+    },
+    newDesign() {
+      pageUtils.setPages()
+      this.closePopup()
     }
   }
 })

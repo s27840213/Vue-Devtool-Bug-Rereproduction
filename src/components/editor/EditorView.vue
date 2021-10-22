@@ -28,15 +28,18 @@
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartV($event)"
+        @mousemove.stop="setTranslateOfPos($event,'v')"
         @mouseout.stop="closeGuidelineV()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--v") {{rulerVPos}}
+        div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
+          span {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartH($event)"
+        @mousemove.stop="setTranslateOfPos($event,'h')"
         @mouseout.stop="closeGuidelineH()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--h")
+        div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
           span {{rulerHPos}}
 </template>
 
@@ -94,11 +97,12 @@ export default Vue.extend({
     })
     document.addEventListener('blur', this.detectBlur, true)
 
-    RulerUtils.on('showGuideline', (pos: number, type: string) => {
+    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
       switch (type) {
         case 'v': {
           this.isShowGuidelineV = true
+          this.rulerVPos = Math.trunc(pagePos)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -107,6 +111,7 @@ export default Vue.extend({
         }
         case 'h': {
           this.isShowGuidelineH = true
+          this.rulerHPos = Math.trunc(pagePos)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -352,6 +357,12 @@ export default Vue.extend({
         this.isShowGuidelineH = false
         RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
       }
+    },
+    setTranslateOfPos(event: MouseEvent, type: string) {
+      const target = (type === 'v' ? this.$refs.guidelinePosV : this.$refs.guidelinePosH) as HTMLElement
+      const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
+      const pos = MouseUtils.getMouseRelPoint(event, guideline)
+      target.style.transform = type === 'v' ? `translate(0px,${pos.y}px)` : `translate(${pos.x}px,0px)`
     },
     openGuidelinePopup(event: MouseEvent) {
       popupUtils.openPopup('guideline', { event })

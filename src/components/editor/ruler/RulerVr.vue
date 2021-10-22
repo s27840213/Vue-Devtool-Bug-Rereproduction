@@ -1,11 +1,13 @@
 <template lang="pug">
-div(class="ruler-vr pointer")
+div(class="ruler-vr"
+    :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}")
   div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount.count" class="ruler-vr__line ruler-vr__line--int")
+    div(v-for="i in rulerLineCount.count" class="ruler-vr__block ruler-vr__block--int")
       span(class="ruler-vr__number") {{(i-1)*SPLIT_UNIT}}
-    div(v-if="rulerLineCount.float > 0" class="ruler-vr__line ruler-vr__line--float")
+      div(v-for="i in 5" class="ruler-vr__line")
+    div(v-if="rulerLineCount.float > 0" class="ruler-vr__block ruler-vr__block--float")
       span(class="ruler-vr__number") {{rulerLineCount.count * SPLIT_UNIT}}
 </template>
 
@@ -96,8 +98,12 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: 1fr;
   }
-  &__line {
+  &__block {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-end;
     width: 100%;
     &--int {
       &:nth-child(1) {
@@ -115,8 +121,13 @@ export default Vue.extend({
     top: 0;
     left: 20%;
     font-size: 2px;
-    transform: scale(0.8);
+    transform: scale(0.8) rotate(180deg);
     writing-mode: vertical-lr;
+  }
+
+  &__line {
+    width: 6px;
+    border-bottom: 1px solid setColor(gray-3);
   }
 }
 </style>
