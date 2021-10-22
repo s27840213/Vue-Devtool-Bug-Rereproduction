@@ -300,18 +300,12 @@ class DesignUtils {
         break
       }
       case 'trash': {
-        store.commit('design/UPDATE_addToTrash', {
-          path,
-          design
-        })
-        store.commit('design/UPDATE_deleteDesign', {
-          path,
-          design
-        })
+        store.commit('design/UPDATE_addToTrash', { path, design })
+        store.commit('design/UPDATE_deleteDesign', { path, design })
         break
       }
       case 'reduction': {
-        this.recover(design.id)
+        this.recover({ path, design })
         break
       }
     }
@@ -333,46 +327,32 @@ class DesignUtils {
     })
   }
 
-  deleteFolder(parents: string[], folder: IFolder) {
-    store.commit('design/UPDATE_addFolderToTrash', {
-      parents,
-      folder
-    })
-    store.commit('design/UPDATE_deleteFolder', {
-      parents,
-      folder
-    })
+  deleteFolder(pathedFolder: IPathedFolder) {
+    store.commit('design/UPDATE_addFolderToTrash', pathedFolder)
+    store.commit('design/UPDATE_deleteFolder', pathedFolder)
   }
 
-  recover(id: string) {
+  deleteForever(pathedDesign: IPathedDesign) {
+    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  }
+
+  recover(pathedDesign: IPathedDesign) {
     const folders = store.getters['design/getFolders'] as IFolder[]
-    const trashDesigns = store.getters['design/getTrashDesigns'] as IPathedDesign[]
-    const index = trashDesigns.findIndex(pathedDesign => pathedDesign.design.id === id)
-    const pathedDesign = trashDesigns[index]
     const folder = this.search(folders, pathedDesign.path)
     if (folder) {
-      store.commit('design/UPDATE_addDesign', {
-        path: pathedDesign.path,
-        design: pathedDesign.design
-      })
+      store.commit('design/UPDATE_addDesign', pathedDesign)
     } else {
       store.commit('design/UPDATE_addDesign', {
         path: ['$ROOT$'],
         design: pathedDesign.design
       })
     }
-    store.commit('design/UPDATE_removeFromTrash', {
-      path: pathedDesign.path,
-      design: pathedDesign.design
-    })
+    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
   }
 
   removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {
     for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_removeFromFavorite', {
-        path: pathedDesign.path,
-        design: pathedDesign.design
-      })
+      store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
     }
   }
 
@@ -380,23 +360,14 @@ class DesignUtils {
     const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     for (const pathedDesign of pathedDesigns) {
       if (favoriteDesignIds.includes(pathedDesign.design.id)) continue
-      store.commit('design/UPDATE_addToFavorite', {
-        path: pathedDesign.path,
-        design: pathedDesign.design
-      })
+      store.commit('design/UPDATE_addToFavorite', pathedDesign)
     }
   }
 
   deleteAll(pathedDesigns: IPathedDesign[]) {
     for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_addToTrash', {
-        path: pathedDesign.path,
-        design: pathedDesign.design
-      })
-      store.commit('design/UPDATE_deleteDesign', {
-        path: pathedDesign.path,
-        design: pathedDesign.design
-      })
+      store.commit('design/UPDATE_addToTrash', pathedDesign)
+      store.commit('design/UPDATE_deleteDesign', pathedDesign)
     }
   }
 

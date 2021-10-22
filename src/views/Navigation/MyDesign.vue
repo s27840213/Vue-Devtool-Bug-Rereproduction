@@ -37,7 +37,8 @@
                   @deselectDesign="handleDeselectDesign"
                   @clearSelection="handleClearSelection"
                   @recoverDesign="handleRecoverDesign"
-                  @deleteFolder="handleDeleteFolder")
+                  @deleteFolder="handleDeleteFolder"
+                  @deleteForever="handleDeleteForever")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
@@ -53,18 +54,18 @@
               div(class="my-design__message__text")
                 span {{ recoveredDirectory }}
     transition(name="scale-fade")
-      div(v-if="isShowDeleteAllMessage" class="dim-background" @click="closeDeleteAllMessage")
+      div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
           div(class="delete-all-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-all-message__text")
             span 確定要刪除這些設計？
           div(class="delete-all-message__buttons")
-            div(class="delete-all-message__cancel" @click="closeDeleteAllMessage")
-              span 取 消
+            div(class="delete-all-message__cancel" @click="closeConfirmMessage")
+              span 取消
             div(class="delete-all-message__confirm" @click="deleteAllConfirmed")
-              span 刪 除
-      div(v-if="isShowDeleteFolderMessage" class="dim-background" @click="closeDeleteFolderMessage")
+              span 刪除
+      div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-folder-message")
           div(class="delete-folder-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
@@ -73,10 +74,23 @@
               span(class="first-line") 此資料夾含有多項設計/資料夾
               span 是否要全部刪除？
             div(class="delete-folder-message__buttons")
-              div(class="delete-folder-message__cancel" @click="closeDeleteFolderMessage")
-                span 取 消
+              div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
+                span 取消
               div(class="delete-folder-message__confirm" @click="deleteFolder(folderToBeDeleted)")
-                span 刪 除
+                span 刪除
+      div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
+        div(class="delete-forever-message")
+          div(class="delete-forever-message__img")
+            img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
+          div(class="delete-forever-message__text")
+            span 確定要永久刪除？
+          div(class="delete-forever-message__description")
+            span 將立即刪除此檔案，無法還原此步驟。
+          div(class="delete-forever-message__buttons")
+            div(class="delete-forever-message__cancel" @click="closeConfirmMessage")
+              span 取消
+            div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
+              span 永久刪除
 </template>
 
 <script lang="ts">
@@ -104,16 +118,16 @@ export default Vue.extend({
   data() {
     return {
       deletedDesignThumbnail: require('@/assets/img/svg/frame.svg'),
-      deletedDesignQueue: [] as IDesign[],
-      waitingRecovery: '',
+      deletedDesignQueue: [] as IPathedDesign[],
+      waitingRecovery: undefined as IPathedDesign | undefined,
       messageTimer: -1,
       isShowDeleteMessage: false,
       recoveredDirectory: '我所有的設計',
       recoveredDesignQueue: [] as IPathedDesign[],
       isShowRecoverMessage: false,
-      isShowDeleteAllMessage: false,
       folderToBeDeleted: undefined as IPathedFolder | undefined,
-      isShowDeleteFolderMessage: false
+      designToBeDeletedForever: undefined as IPathedDesign | undefined,
+      confirmMessage: ''
     }
   },
   computed: {
@@ -159,10 +173,10 @@ export default Vue.extend({
       return { 'background-image': `url(${this.deletedDesignThumbnail})` }
     },
     showDeleteMessage() {
-      const design = this.deletedDesignQueue[0]
-      if (design) {
-        this.deletedDesignThumbnail = design.thumbnail
-        this.waitingRecovery = design.id
+      const pathedDesign = this.deletedDesignQueue[0]
+      if (pathedDesign) {
+        this.deletedDesignThumbnail = pathedDesign.design.thumbnail
+        this.waitingRecovery = pathedDesign
         this.isShowDeleteMessage = true
         this.messageTimer = setTimeout(() => {
           this.isShowDeleteMessage = false
@@ -174,9 +188,9 @@ export default Vue.extend({
       }
     },
     showRecoverMessage() {
-      const design = this.recoveredDesignQueue[0]
-      if (design) {
-        this.recoveredDirectory = designUtils.checkRecoveredDirectory(this.folders, design.path)
+      const pathedDesign = this.recoveredDesignQueue[0]
+      if (pathedDesign) {
+        this.recoveredDirectory = designUtils.checkRecoveredDirectory(this.folders, pathedDesign.path)
         this.isShowRecoverMessage = true
         setTimeout(() => {
           this.isShowRecoverMessage = false
@@ -187,7 +201,7 @@ export default Vue.extend({
         }, 5000)
       }
     },
-    handleDeleteDesign(design: IDesign) {
+    handleDeleteDesign(design: IPathedDesign) {
       this.deletedDesignQueue.push(design)
       if (this.deletedDesignQueue.length === 1) {
         this.showDeleteMessage()
@@ -203,7 +217,7 @@ export default Vue.extend({
       this.clearSelection()
     },
     handleRecoverDesign(pathedDesign: IPathedDesign) {
-      if (pathedDesign.design.id === this.waitingRecovery) {
+      if (pathedDesign.design.id === this.waitingRecovery?.design.id) {
         clearTimeout(this.messageTimer)
         this.isShowDeleteMessage = false
         setTimeout(() => {
@@ -222,11 +236,15 @@ export default Vue.extend({
         this.deleteFolder(pathedFolder)
       } else {
         this.folderToBeDeleted = pathedFolder
-        this.isShowDeleteFolderMessage = true
+        this.confirmMessage = 'delete-folder'
       }
     },
+    handleDeleteForever(payload: IPathedDesign) {
+      this.designToBeDeletedForever = payload
+      this.confirmMessage = 'delete-forever'
+    },
     deleteFolder(pathedFolder: IPathedFolder) {
-      designUtils.deleteFolder(pathedFolder.parents, pathedFolder.folder)
+      designUtils.deleteFolder(pathedFolder)
       if (pathedFolder.parents.length > 1) {
         this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
       } else {
@@ -234,13 +252,15 @@ export default Vue.extend({
       }
     },
     recover() {
-      clearTimeout(this.messageTimer)
-      designUtils.recover(this.waitingRecovery)
-      this.isShowDeleteMessage = false
-      setTimeout(() => {
-        this.deletedDesignQueue.shift()
-        this.showDeleteMessage()
-      }, 500)
+      if (this.waitingRecovery) {
+        clearTimeout(this.messageTimer)
+        designUtils.recover(this.waitingRecovery)
+        this.isShowDeleteMessage = false
+        setTimeout(() => {
+          this.deletedDesignQueue.shift()
+          this.showDeleteMessage()
+        }, 500)
+      }
     },
     toggleAllFavorite() {
       if (designUtils.checkAllInFavorite(Object.values(this.selectedDesigns))) {
@@ -250,16 +270,18 @@ export default Vue.extend({
       }
     },
     deleteAll() {
-      this.isShowDeleteAllMessage = true
+      this.confirmMessage = 'delete-all'
     },
     deleteAllConfirmed() {
       designUtils.deleteAll(Object.values(this.selectedDesigns))
     },
-    closeDeleteAllMessage() {
-      this.isShowDeleteAllMessage = false
+    deleteForeverConfirmed() {
+      if (this.designToBeDeletedForever) {
+        designUtils.deleteForever(this.designToBeDeletedForever)
+      }
     },
-    closeDeleteFolderMessage() {
-      this.isShowDeleteFolderMessage = false
+    closeConfirmMessage() {
+      this.confirmMessage = ''
       this.folderToBeDeleted = undefined
     }
   }
@@ -483,6 +505,9 @@ export default Vue.extend({
       }
     }
     > span {
+      display: block;
+      letter-spacing: 0.32em;
+      text-indent: 0.32em;
       color: black;
     }
   }
@@ -492,6 +517,9 @@ export default Vue.extend({
       background-color: setColor(red-2);
     }
     > span {
+      display: block;
+      letter-spacing: 0.32em;
+      text-indent: 0.32em;
       color: white;
     }
   }
@@ -568,6 +596,9 @@ export default Vue.extend({
       }
     }
     > span {
+      display: block;
+      letter-spacing: 0.32em;
+      text-indent: 0.32em;
       color: black;
     }
   }
@@ -577,6 +608,107 @@ export default Vue.extend({
       background-color: setColor(red-2);
     }
     > span {
+      display: block;
+      letter-spacing: 0.32em;
+      text-indent: 0.32em;
+      color: white;
+    }
+  }
+}
+
+.delete-forever-message {
+  width: 259px;
+  height: 174px;
+  background-color: white;
+  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  &__img {
+    height: 57px;
+  }
+  &__text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    > span {
+      font-family: NotoSansTC;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 26px;
+      color: setColor(gray-2);
+    }
+  }
+  &__description {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12px;
+    > span {
+      font-family: NotoSansTC;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 12px;
+      color: setColor(gray-3);
+    }
+  }
+  &__buttons {
+    margin-top: 14px;
+    width: 201px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    > div {
+      width: 93px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: NotoSansTC;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 25px;
+      }
+    }
+  }
+  &__cancel {
+    background-color: setColor(gray-4);
+    &:hover {
+      background-color: setColor(red-2);
+      > span {
+        color: white;
+      }
+      & ~ .delete-forever-message__confirm {
+        background-color: setColor(gray-4);
+        > span {
+          color: white;
+        }
+      }
+    }
+    > span {
+      display: block;
+      letter-spacing: 1.21em;
+      text-indent: 1.21em;
+      color: black;
+    }
+  }
+  &__confirm {
+    background-color: setColor(red-1);
+    &:hover {
+      background-color: setColor(red-2);
+    }
+    > span {
+      display: block;
+      letter-spacing: 0.305em;
+      text-indent: 0.305em;
       color: white;
     }
   }

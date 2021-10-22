@@ -119,7 +119,10 @@ export default Vue.extend({
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
-      if (icon === 'trash') icon = 'delete'
+      if (icon === 'trash') {
+        this.$emit('deleteForever', { path, design })
+        return
+      }
       if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
       designUtils.dispatchDesignMenuAction(icon, path, design)
     },
