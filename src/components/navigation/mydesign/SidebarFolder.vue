@@ -131,7 +131,6 @@ export default Vue.extend({
     },
     handleDrop() {
       this.isDraggedOver = false
-      if (this.folder.isSelected) return
       if (this.isDragged) return
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
@@ -144,6 +143,7 @@ export default Vue.extend({
       } else if (this.draggingType === 'folder') {
         const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
         if (!folder) return
+        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
         designUtils.moveFolder(folder, parents, [...(this.parents as string[]), this.folder.name as string])
         if (folder.isSelected) {
           this.setCurrentSelectedFolder(`f:${[...(this.parents as string[]), this.folder.name as string, folder.name].join('/')}`)
