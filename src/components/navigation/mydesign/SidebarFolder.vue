@@ -24,7 +24,8 @@
           style="pointer-events: none")
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]")
+    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]"
+                  @moveItem="handleMoveItem")
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div(class="nav-folder-0")
         svg-icon(iconName="folder"
@@ -37,7 +38,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -132,23 +133,39 @@ export default Vue.extend({
     handleDrop() {
       this.isDraggedOver = false
       if (this.isDragged) return
+      const destination = [...(this.parents as string[]), this.folder.name as string]
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
         if (!design) return
         if (this.isMultiSelected && this.selectedDesigns[design.id]) {
-          designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.parents as string[]), this.folder.name as string])
+          designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+          this.$emit('moveItem', {
+            type: 'multi',
+            data: { path: destination, design }
+          })
         } else {
-          designUtils.move(design, path, [...(this.parents as string[]), this.folder.name as string])
+          designUtils.move(design, path, destination)
+          this.$emit('moveItem', {
+            type: 'design',
+            data: { path: destination, design }
+          })
         }
       } else if (this.draggingType === 'folder') {
         const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
         if (!folder) return
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
-        designUtils.moveFolder(folder, parents, [...(this.parents as string[]), this.folder.name as string])
+        designUtils.moveFolder(folder, parents, destination)
         if (folder.isSelected) {
-          this.setCurrentSelectedFolder(`f:${[...(this.parents as string[]), this.folder.name as string, folder.name].join('/')}`)
+          this.setCurrentSelectedFolder(`f:${[...destination, folder.name].join('/')}`)
         }
+        this.$emit('moveItem', {
+          type: 'folder',
+          data: { parents: destination, folder }
+        })
       }
+    },
+    handleMoveItem(item: IQueueItem) {
+      this.$emit('moveItem', item)
     },
     toggleExpansion() {
       // const pseudoSelectInfo = `f:${[...this.parents, this.folder.name].join('/')}`

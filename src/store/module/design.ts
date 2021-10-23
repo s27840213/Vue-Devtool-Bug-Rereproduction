@@ -10,7 +10,7 @@ interface IDesignSidebarState {
   favoriteDesigns: IPathedDesign[],
   trashDesigns: IPathedDesign[],
   trashFolders: IPathedFolder[],
-  draggingType: string,
+  draggingType: 'design' | 'folder' | '',
   draggingDesign: IPathedDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
   selectedDesigns: {[key: string]: IPathedDesign}

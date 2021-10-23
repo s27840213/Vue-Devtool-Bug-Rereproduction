@@ -118,19 +118,32 @@ export default Vue.extend({
       this.isMouseOver = false
       if (this.undroppable) return
       if (this.isDragged) return
+      const destination = [...(this.path as string[]), this.config.name as string]
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
         if (!design) return
         if (this.isMultiSelected && this.selectedDesigns[design.id]) {
-          designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.path as string[]), this.config.name as string])
+          designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+          this.$emit('moveItem', {
+            type: 'multi',
+            data: { path: destination, design }
+          })
         } else {
-          designUtils.move(design, path, [...(this.path as string[]), this.config.name as string])
+          designUtils.move(design, path, destination)
+          this.$emit('moveItem', {
+            type: 'design',
+            data: { path: destination, design }
+          })
         }
       } else if (this.draggingType === 'folder') {
         const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
         if (!folder) return
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.path as string[], folder: this.config as IFolder })) return
-        designUtils.moveFolder(folder, parents, [...(this.path as string[]), this.config.name as string])
+        designUtils.moveFolder(folder, parents, destination)
+        this.$emit('moveItem', {
+          type: 'folder',
+          data: { parents: destination, folder }
+        })
       }
     }
   }

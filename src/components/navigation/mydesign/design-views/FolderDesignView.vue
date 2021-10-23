@@ -107,7 +107,8 @@
       folder-item(v-for="subFolder in subFolders"
                   :path="path"
                   :config="subFolder"
-                  @goto="handleGotoFolder(subFolder.name)")
+                  @goto="handleGotoFolder(subFolder.name)"
+                  @moveItem="handleMoveItem")
     div(v-if="designs.length > 0" class="folder-design-view__design-header")
       div(class="folder-design-view__expand-icon-container"
           @click="toggleDesignsExpansion")
@@ -152,7 +153,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
@@ -349,6 +350,9 @@ export default Vue.extend({
     handleSortByClick(payload: [string, boolean]) {
       this.sortByField = payload[0]
       this.sortByDescending = payload[1]
+    },
+    handleMoveItem(item: IQueueItem) {
+      this.$emit('moveItem', item)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

@@ -30,7 +30,8 @@
                   :path="parents"
                   :config="folder"
                   :undraggable="true"
-                  :undroppable="true")
+                  :undroppable="true"
+                  @moveItem="handleMoveItem")
     div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
       div(class="trash-design-view__expand-icon-container"
           @click="toggleDesignsExpansion")
@@ -67,7 +68,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
 import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
@@ -126,6 +127,9 @@ export default Vue.extend({
       }
       if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
       designUtils.dispatchDesignMenuAction(icon, path, design)
+    },
+    handleMoveItem(item: IQueueItem) {
+      this.$emit('moveItem', item)
     },
     toggleFoldersExpansion() {
       this.foldersExpanded = !this.foldersExpanded

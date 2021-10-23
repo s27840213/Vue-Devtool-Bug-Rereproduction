@@ -27,3 +27,8 @@ export interface IPathedFolder {
   parents: string[],
   folder: IFolder
 }
+
+export interface IQueueItem {
+  type: 'design' | 'folder' | 'multi',
+  data: IPathedDesign | IPathedFolder
+}

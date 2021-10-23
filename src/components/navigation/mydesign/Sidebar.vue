@@ -21,7 +21,8 @@
               iconColor="white"
               iconWidth="20px")
           div(class="nav-item__text") 我的最愛
-        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]")
+        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
+                      @moveItem="handleMoveItem")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 't')}"
             :style="draggedOverStyles('t')"
             @dragenter="handleDragEnter('t')"
@@ -41,7 +42,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/navigation/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
-import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
@@ -116,6 +117,7 @@ export default Vue.extend({
       }
     },
     handleDrop(type: string) {
+      const destination = [this.ROOT]
       switch (type) {
         case 'a':
           this.isAllDraggedOver = false
@@ -123,17 +125,29 @@ export default Vue.extend({
             const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
             if (!design) return
             if (this.isMultiSelected && this.selectedDesigns[design.id]) {
-              designUtils.moveAll(Object.values(this.selectedDesigns), [this.ROOT])
+              designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+              this.$emit('moveItem', {
+                type: 'multi',
+                data: { path: destination, design }
+              })
             } else {
-              designUtils.move(design, path, [this.ROOT])
+              designUtils.move(design, path, destination)
+              this.$emit('moveItem', {
+                type: 'design',
+                data: { path: destination, design }
+              })
             }
           } else if (this.draggingType === 'folder') {
             const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
             if (!folder) return
-            designUtils.moveFolder(folder, parents, [this.ROOT])
+            designUtils.moveFolder(folder, parents, destination)
             if (folder.isSelected) {
               this.setCurrentSelectedFolder(`f:${this.ROOT}/${folder.name}`)
             }
+            this.$emit('moveItem', {
+              type: 'folder',
+              data: { parents: destination, folder }
+            })
           }
           break
         case 't':
@@ -157,6 +171,9 @@ export default Vue.extend({
           }
           break
       }
+    },
+    handleMoveItem(item: IQueueItem) {
+      this.$emit('moveItem', item)
     }
   }
 })

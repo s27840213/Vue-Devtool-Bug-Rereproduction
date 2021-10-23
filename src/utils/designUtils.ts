@@ -20,6 +20,7 @@ const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => numb
 
 class DesignUtils {
   ROOT = '$ROOT$'
+  ROOT_DISPLAY = '我所有的設計'
 
   newFolder(name: string, author: string, randomTime = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
@@ -289,9 +290,9 @@ class DesignUtils {
   checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
     const targetFolder = this.search(folders, path)
     if (targetFolder) {
-      return targetFolder.name === this.ROOT ? '我所有的設計' : targetFolder.name
+      return targetFolder.name === this.ROOT ? this.ROOT_DISPLAY : targetFolder.name
     } else {
-      return '我所有的設計'
+      return this.ROOT_DISPLAY
     }
   }
 

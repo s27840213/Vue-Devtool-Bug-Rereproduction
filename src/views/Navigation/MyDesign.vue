@@ -4,7 +4,8 @@
     div(class="my-design__content")
       sidebar(@deleteDesign="handleDeleteDesign"
               @deleteFolder="handleDeleteFolder"
-              @deleteAll="deleteAll")
+              @deleteAll="deleteAll"
+              @moveItem="handleMoveItem")
       section(class="my-design__design-view")
         transition(name="slide-down-fade")
           div(v-if="isMultiSelected" class="my-design__multi")
@@ -40,11 +41,12 @@
                   @clearSelection="handleClearSelection"
                   @recoverDesign="handleRecoverDesign"
                   @deleteFolder="handleDeleteFolder"
+                  @moveItem="handleMoveItem"
                   @deleteForever="handleDeleteForever")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
-              div(class="my-design__message__img" :style="messageImageStyles()")
+              div(class="my-design__message__img" :style="messageImageStyles(deletedDesignThumbnail)")
               div(class="my-design__message__text")
                 span 設計已移至垃圾桶
               div(class="my-design__message__button" @click="recover")
@@ -52,9 +54,12 @@
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span 設計已移至
+                span {{ `設計已移至 ${recoveredDirectory}` }}
+          transition(name="slide-fade")
+            div(v-if="isShowMoveMessage" class="my-design__message")
+              div(class="my-design__message__img" :style="moveMessageImageStyles()")
               div(class="my-design__message__text")
-                span {{ recoveredDirectory }}
+                span {{ `${movedItemName()}已移至 ${moveDestName()}` }}
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
@@ -104,7 +109,7 @@ import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesi
 import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
-import { IDesign, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -124,9 +129,11 @@ export default Vue.extend({
       waitingRecovery: undefined as IPathedDesign | undefined,
       messageTimer: -1,
       isShowDeleteMessage: false,
-      recoveredDirectory: '我所有的設計',
+      recoveredDirectory: designUtils.ROOT_DISPLAY,
       recoveredDesignQueue: [] as IPathedDesign[],
       isShowRecoverMessage: false,
+      movedQueue: [] as IQueueItem[],
+      isShowMoveMessage: false,
       folderToBeDeleted: undefined as IPathedFolder | undefined,
       designToBeDeletedForever: undefined as IPathedDesign | undefined,
       confirmMessage: ''
@@ -171,8 +178,34 @@ export default Vue.extend({
       clearSelection: 'UPDATE_clearSelection',
       setCurrentSelectedFolder: 'SET_currSelectedFolder'
     }),
-    messageImageStyles() {
-      return { 'background-image': `url(${this.deletedDesignThumbnail})` }
+    messageImageStyles(url : string) {
+      return { 'background-image': `url(${url})` }
+    },
+    moveMessageImageStyles() {
+      const item = this.movedQueue[0]
+      if (item.type === 'design') {
+        return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
+      } else {
+        return { display: 'none' }
+      }
+    },
+    movedItemName(): string {
+      const item = this.movedQueue[0]
+      if (item.type === 'multi') {
+        return '多項設計'
+      } else if (item.type === 'design') {
+        return '設計'
+      } else {
+        return (item.data as IPathedFolder).folder.name + ' '
+      }
+    },
+    moveDestName(): string {
+      const item = this.movedQueue[0]
+      if (item.type === 'multi' || item.type === 'design') {
+        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
+      } else {
+        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedFolder).parents)
+      }
     },
     showDeleteMessage() {
       const pathedDesign = this.deletedDesignQueue[0]
@@ -199,6 +232,19 @@ export default Vue.extend({
           setTimeout(() => {
             this.recoveredDesignQueue.shift()
             this.showRecoverMessage()
+          }, 1000)
+        }, 5000)
+      }
+    },
+    showMoveMessage() {
+      const item = this.movedQueue[0]
+      if (item) {
+        this.isShowMoveMessage = true
+        setTimeout(() => {
+          this.isShowMoveMessage = false
+          setTimeout(() => {
+            this.movedQueue.shift()
+            this.showMoveMessage()
           }, 1000)
         }, 5000)
       }
@@ -230,6 +276,12 @@ export default Vue.extend({
       this.recoveredDesignQueue.push(pathedDesign)
       if (this.recoveredDesignQueue.length === 1) {
         this.showRecoverMessage()
+      }
+    },
+    handleMoveItem(item: IQueueItem) {
+      this.movedQueue.push(item)
+      if (this.movedQueue.length === 1) {
+        this.showMoveMessage()
       }
     },
     handleDeleteFolder(payload: {pathedFolder: IPathedFolder, empty: boolean}) {
