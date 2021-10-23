@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -129,6 +129,7 @@ export default Vue.extend({
       } else if (this.draggingType === 'folder') {
         const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
         if (!folder) return
+        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.path as string[], folder: this.config as IFolder })) return
         designUtils.moveFolder(folder, parents, [...(this.path as string[]), this.config.name as string])
       }
     }

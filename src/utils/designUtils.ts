@@ -292,6 +292,12 @@ class DesignUtils {
     }
   }
 
+  isParentOrEqual(a: IPathedFolder, b: IPathedFolder): boolean {
+    const aFullPath = [...a.parents, a.folder.name].join('/')
+    const bFullPath = [...b.parents, b.folder.name].join('/')
+    return bFullPath.startsWith(aFullPath)
+  }
+
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign) {
     switch (icon) {
       case 'copy': {
