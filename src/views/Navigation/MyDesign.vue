@@ -2,7 +2,9 @@
   div(class="my-design")
     nu-header
     div(class="my-design__content")
-      sidebar
+      sidebar(@deleteDesign="handleDeleteDesign"
+              @deleteFolder="handleDeleteFolder"
+              @deleteAll="deleteAll")
       section(class="my-design__design-view")
         transition(name="slide-down-fade")
           div(v-if="isMultiSelected" class="my-design__multi")

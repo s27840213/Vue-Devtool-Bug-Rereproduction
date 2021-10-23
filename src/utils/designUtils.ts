@@ -17,7 +17,10 @@ const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => numb
     return (a - b) * modifier
   }
 }
+
 class DesignUtils {
+  ROOT = '$ROOT$'
+
   newFolder(name: string, author: string, randomTime = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
@@ -45,7 +48,7 @@ class DesignUtils {
 
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
-    template[0] = this.newFolder('$ROOT$', 'SYSTEM', true)
+    template[0] = this.newFolder(this.ROOT, 'SYSTEM', true)
     template[0].subFolders = [
       this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
       this.newFolder('日本行銷', 'Daniel', true)
@@ -286,7 +289,7 @@ class DesignUtils {
   checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
     const targetFolder = this.search(folders, path)
     if (targetFolder) {
-      return targetFolder.name === '$ROOT$' ? '我所有的設計' : targetFolder.name
+      return targetFolder.name === this.ROOT ? '我所有的設計' : targetFolder.name
     } else {
       return '我所有的設計'
     }
@@ -312,8 +315,7 @@ class DesignUtils {
         break
       }
       case 'trash': {
-        store.commit('design/UPDATE_addToTrash', { path, design })
-        store.commit('design/UPDATE_deleteDesign', { path, design })
+        this.delete({ path, design })
         break
       }
       case 'reduction': {
@@ -348,6 +350,11 @@ class DesignUtils {
     store.commit('design/UPDATE_removeFromTrash', pathedDesign)
   }
 
+  delete(pathedDesign: IPathedDesign) {
+    store.commit('design/UPDATE_addToTrash', pathedDesign)
+    store.commit('design/UPDATE_deleteDesign', pathedDesign)
+  }
+
   recover(pathedDesign: IPathedDesign) {
     const folders = store.getters['design/getFolders'] as IFolder[]
     const folder = this.search(folders, pathedDesign.path)
@@ -355,7 +362,7 @@ class DesignUtils {
       store.commit('design/UPDATE_addDesign', pathedDesign)
     } else {
       store.commit('design/UPDATE_addDesign', {
-        path: ['$ROOT$'],
+        path: [this.ROOT],
         design: pathedDesign.design
       })
     }

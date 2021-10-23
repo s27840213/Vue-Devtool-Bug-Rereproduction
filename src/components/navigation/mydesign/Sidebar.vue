@@ -3,31 +3,45 @@
     div(class="nav")
       div(class="nav-container")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'a')}"
+            :style="draggedOverStyles('a')"
+            @dragenter="handleDragEnter('a')"
+            @dragleave="handleDragLeave('a')"
+            @dragover.prevent
+            @drop="handleDrop('a')"
             @click="handleSelection('a')")
           svg-icon(iconName="all"
               iconColor="white"
-              iconWidth="20px")
-          div(class="nav-item__text") 我所有設計
+              iconWidth="20px"
+              style="pointer-events: none")
+          div(class="nav-item__text"
+              style="pointer-events: none") 我所有設計
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'h')}"
             @click="handleSelection('h')")
           svg-icon(iconName="heart"
               iconColor="white"
               iconWidth="20px")
           div(class="nav-item__text") 我的最愛
-        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="['$ROOT$']")
+        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 't')}"
+            :style="draggedOverStyles('t')"
+            @dragenter="handleDragEnter('t')"
+            @dragleave="handleDragLeave('t')"
+            @dragover.prevent
+            @drop="handleDrop('t')"
             @click="handleSelection('t')")
           svg-icon(iconName="trash"
               iconColor="white"
-              iconWidth="20px")
-          div(class="nav-item__text") 垃圾桶
+              iconWidth="20px"
+              style="pointer-events: none")
+          div(class="nav-item__text"
+              style="pointer-events: none") 垃圾桶
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/navigation/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
-import { IFolder } from '@/interfaces/design'
+import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
@@ -36,11 +50,28 @@ export default Vue.extend({
   mounted() {
     this.setFolders(designUtils.makeDesignsForTesting())
   },
+  data() {
+    return {
+      ROOT: designUtils.ROOT,
+      isAllDraggedOver: false,
+      isTrashDraggedOver: false
+    }
+  },
   computed: {
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
+      draggingType: 'getDraggingType',
+      draggingDesign: 'getDraggingDesign',
+      draggingFolder: 'getDraggingFolder',
+      selectedDesigns: 'getSelectedDesigns',
       folders: 'getFolders'
     }),
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
+    isMultiSelected(): boolean {
+      return this.selectedNum > 1
+    },
     realFolders(): IFolder[] {
       if (this.folders.length > 0) {
         return this.folders[0].subFolders
@@ -53,8 +84,79 @@ export default Vue.extend({
       setCurrentSelectedFolder: 'SET_currSelectedFolder',
       setFolders: 'SET_folders'
     }),
+    draggedOverStyles(type: string) {
+      switch (type) {
+        case 'a':
+          return (this.isAllDraggedOver && this.currentSelectedFolder !== 'a') ? { 'background-color': '#2C2F43' } : {}
+        case 't':
+          return (this.isTrashDraggedOver && this.currentSelectedFolder !== 't') ? { 'background-color': '#2C2F43' } : {}
+      }
+    },
     handleSelection(selection: string) {
       this.setCurrentSelectedFolder(selection)
+    },
+    handleDragEnter(type: string) {
+      switch (type) {
+        case 'a':
+          this.isAllDraggedOver = true
+          break
+        case 't':
+          this.isTrashDraggedOver = true
+          break
+      }
+    },
+    handleDragLeave(type: string) {
+      switch (type) {
+        case 'a':
+          this.isAllDraggedOver = false
+          break
+        case 't':
+          this.isTrashDraggedOver = false
+          break
+      }
+    },
+    handleDrop(type: string) {
+      switch (type) {
+        case 'a':
+          this.isAllDraggedOver = false
+          if (this.draggingType === 'design') {
+            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            if (!design) return
+            if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+              designUtils.moveAll(Object.values(this.selectedDesigns), [this.ROOT])
+            } else {
+              designUtils.move(design, path, [this.ROOT])
+            }
+          } else if (this.draggingType === 'folder') {
+            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
+            if (!folder) return
+            designUtils.moveFolder(folder, parents, [this.ROOT])
+            if (folder.isSelected) {
+              this.setCurrentSelectedFolder(`f:${this.ROOT}/${folder.name}`)
+            }
+          }
+          break
+        case 't':
+          this.isTrashDraggedOver = false
+          if (this.draggingType === 'design') {
+            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            if (!design) return
+            if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+              this.$emit('deleteAll')
+            } else {
+              designUtils.delete({ path, design })
+              this.$emit('deleteDesign', { path, design })
+            }
+          } else if (this.draggingType === 'folder') {
+            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
+            if (!folder) return
+            this.$emit('deleteFolder', {
+              pathedFolder: { parents, folder },
+              empty: folder.designs.length + folder.subFolders.length === 0
+            })
+          }
+          break
+      }
     }
   }
 })
