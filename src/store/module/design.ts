@@ -1,4 +1,4 @@
-import { IDesign, IDraggingDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import { GetterTree, MutationTree } from 'vuex'
@@ -10,7 +10,9 @@ interface IDesignSidebarState {
   favoriteDesigns: IPathedDesign[],
   trashDesigns: IPathedDesign[],
   trashFolders: IPathedFolder[],
-  draggingDesign: IDraggingDesign | undefined,
+  draggingType: string,
+  draggingDesign: IPathedDesign | undefined,
+  draggingFolder: IPathedFolder | undefined,
   selectedDesigns: {[key: string]: IPathedDesign}
 }
 
@@ -20,6 +22,8 @@ const getDefaultState = (): IDesignSidebarState => ({
   favoriteDesigns: [],
   trashDesigns: [],
   trashFolders: [],
+  draggingType: '',
+  draggingFolder: undefined,
   draggingDesign: undefined,
   selectedDesigns: {}
 })
@@ -41,7 +45,13 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   getTrashFolders(state: IDesignSidebarState): IPathedFolder[] {
     return state.trashFolders
   },
-  getDraggingDesign(state: IDesignSidebarState): IDraggingDesign | undefined {
+  getDraggingType(state: IDesignSidebarState): string {
+    return state.draggingType
+  },
+  getDraggingFolder(state: IDesignSidebarState): IPathedFolder | undefined {
+    return state.draggingFolder
+  },
+  getDraggingDesign(state: IDesignSidebarState): IPathedDesign | undefined {
     return state.draggingDesign
   },
   getSelectedDesigns(state: IDesignSidebarState): {[key: string]: IPathedDesign} {
@@ -66,7 +76,20 @@ const mutations: MutationTree<IDesignSidebarState> = {
   SET_folders(state: IDesignSidebarState, folders: IFolder[]) {
     state.folders = folders
   },
-  SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IDraggingDesign | undefined) {
+  SET_draggingFolder(state: IDesignSidebarState, draggingFolder: IPathedFolder | undefined) {
+    if (draggingFolder) {
+      state.draggingType = 'folder'
+    } else {
+      state.draggingType = ''
+    }
+    state.draggingFolder = draggingFolder
+  },
+  SET_draggingDesign(state: IDesignSidebarState, draggingDesign: IPathedDesign | undefined) {
+    if (draggingDesign) {
+      state.draggingType = 'design'
+    } else {
+      state.draggingType = ''
+    }
     state.draggingDesign = draggingDesign
   },
   UPDATE_addToFavorite(state: IDesignSidebarState, pathedDesign: IPathedDesign) {

@@ -25,7 +25,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { IFolder, IPathedDesign } from '@/interfaces/design'
+import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -45,7 +45,9 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       currentSelectedFolder: 'getCurrSelectedFolder',
+      draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
+      draggingFolder: 'getDraggingFolder',
       selectedDesigns: 'getSelectedDesigns'
     }),
     selectedNum(): number {
@@ -93,12 +95,18 @@ export default Vue.extend({
     handleDrop() {
       this.isDraggedOver = false
       if (this.folder.isSelected) return
-      const { path = [], id = '' } = this.draggingDesign ?? {}
-      if (id === '') return
-      if (this.isMultiSelected && this.selectedDesigns[id]) {
-        designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.parents as string[]), this.folder.name as string])
-      } else {
-        designUtils.move(id, path, [...(this.parents as string[]), this.folder.name as string])
+      if (this.draggingType === 'design') {
+        const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+        if (!design) return
+        if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+          designUtils.moveAll(Object.values(this.selectedDesigns), [...(this.parents as string[]), this.folder.name as string])
+        } else {
+          designUtils.move(design, path, [...(this.parents as string[]), this.folder.name as string])
+        }
+      } else if (this.draggingType === 'folder') {
+        const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
+        if (!folder) return
+        designUtils.moveFolder(folder, parents, [...(this.parents as string[]), this.folder.name as string])
       }
     }
   }

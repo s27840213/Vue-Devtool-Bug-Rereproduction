@@ -28,7 +28,8 @@
     div(v-if="foldersExpanded && allFolders.length > 0" class="trash-design-view__folders")
       folder-item(v-for="[parents, folder] in allFolders"
                   :path="parents"
-                  :name="folder.name"
+                  :config="folder"
+                  :undraggable="true"
                   :undroppable="true")
     div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
       div(class="trash-design-view__expand-icon-container"

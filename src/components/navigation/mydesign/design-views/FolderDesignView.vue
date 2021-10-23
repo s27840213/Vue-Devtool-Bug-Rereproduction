@@ -106,7 +106,7 @@
     div(v-if="foldersExpanded && subFolders.length > 0" class="folder-design-view__folders")
       folder-item(v-for="subFolder in subFolders"
                   :path="path"
-                  :name="subFolder.name"
+                  :config="subFolder"
                   @goto="handleGotoFolder(subFolder.name)")
     div(v-if="designs.length > 0" class="folder-design-view__design-header")
       div(class="folder-design-view__expand-icon-container"

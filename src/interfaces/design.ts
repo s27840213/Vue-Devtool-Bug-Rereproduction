@@ -19,11 +19,6 @@ export interface IFolder {
   designs: IDesign[]
 }
 
-export interface IDraggingDesign {
-  path: string[],
-  id: string
-}
-
 export interface IPathedDesign {
   design: IDesign,
   path: string[]

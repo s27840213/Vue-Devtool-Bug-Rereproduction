@@ -203,7 +203,7 @@ export default Vue.extend({
       target.style.opacity = '0'
       this.setDraggingDesign({
         path: this.path,
-        id: this.config.id
+        design: this.config
       })
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },

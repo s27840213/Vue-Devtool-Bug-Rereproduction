@@ -162,34 +162,40 @@ class DesignUtils {
     }
   }
 
-  move(id: string, source: string[], destination: string[]) {
+  move(design: IDesign, source: string[], destination: string[]) {
     // if move to current folder, skip moving
     if (generalUtils.arrayCompare<string>(source, destination)) return
-    const folders = store.getters['design/getFolders']
-    const sourceFolder = this.search(folders, source)
-    if (!sourceFolder) {
-      console.log('source path doesn\'t exist')
-      return
-    }
-    const designIndex = sourceFolder.designs.findIndex(design => design.id === id)
-    if (designIndex === -1) {
-      console.log('source design doesn\'t exist')
-      return
-    }
-    const design = sourceFolder.designs[designIndex]
-    sourceFolder.designs.splice(designIndex, 1)
-
-    const destFolder = this.search(folders, destination)
-    if (!destFolder) {
-      console.log('destination path doesn\'t exist')
-      return
-    }
-    destFolder.designs.push(design)
-    store.commit('design/SET_folders', folders)
+    store.commit('design/UPDATE_deleteDesign', {
+      path: source,
+      design
+    })
+    store.commit('design/UPDATE_addDesign', {
+      path: destination,
+      design
+    })
     store.commit('design/UPDATE_path', {
-      id,
+      id: design.id,
       path: destination
     })
+  }
+
+  moveFolder(folder: IFolder, source: string[], destination: string[]) {
+    // if move to current folder, skip moving
+    if (generalUtils.arrayCompare<string>(source, destination)) return
+    store.commit('design/UPDATE_deleteFolder', {
+      parents: source,
+      folder
+    })
+    store.commit('design/UPDATE_addFolder', {
+      parents: destination,
+      folder
+    })
+    for (const design of folder.designs) {
+      store.commit('design/UPDATE_path', {
+        id: design.id,
+        path: [...destination, folder.name]
+      })
+    }
   }
 
   getAllDesigns(folders: IFolder[]): IPathedDesign[] {
@@ -373,7 +379,7 @@ class DesignUtils {
 
   moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
     for (const pathedDesign of pathedDesigns) {
-      this.move(pathedDesign.design.id, pathedDesign.path, destination)
+      this.move(pathedDesign.design, pathedDesign.path, destination)
     }
   }
 }
