@@ -23,8 +23,12 @@
                 iconColor="gray-2")
             div(class="menu-item-text")
               span {{ menuItem.text }}
-    div(class="page-preview-page-title")
+    div(v-if="title === 'bottom'"
+      class="page-preview-page-title")
       span(:style="{'color': focusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+    div(v-if="title === 'icon'"
+      class="page-preview-page-icon")
+      span {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -36,7 +40,8 @@ import GroupUtils from '@/utils/groupUtils'
 export default Vue.extend({
   props: {
     index: Number,
-    pagename: String
+    pagename: String,
+    title: String
   },
   data() {
     return {
@@ -92,7 +97,6 @@ export default Vue.extend({
       this._setCurrActivePageIndex(this.index)
     },
     handleMenuAction(icon: string) {
-      console.log('d', this.index)
       this.closeMenu()
       let page = null
       switch (icon) {
@@ -127,8 +131,8 @@ export default Vue.extend({
 .page-preview-page {
   display: flex;
   flex-direction: column;
-  width: 150px;
-  height: 180px;
+  position: relative;
+  width: 140px;
   transition: 0.25s ease-in-out;
 
   &-content {
@@ -137,6 +141,7 @@ export default Vue.extend({
     height: 150px;
     background: rgb(242, 255, 228);
     border-radius: 5px;
+    border: 5px solid #ffffff00;
 
     &-more {
       position: absolute;
@@ -202,23 +207,25 @@ export default Vue.extend({
     height: 30px;
     font-size: 16px;
   }
-  &-last {
+  &-icon {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 20px;
+    height: 20px;
+    background: black;
+    color: white;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 150px;
-    background: setColor(gray-4);
-
-    > button {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-    }
+    font-size: 13px;
+    font-weight: 600;
   }
 }
 
 .focused {
-  border: 3px solid setColor(blue-1);
+  border: 5px solid setColor(blue-1);
   color: setColor(blue-1);
 }
 </style>

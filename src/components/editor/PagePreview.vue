@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="page-preview")
-    template(v-for="(page, idx) in getPages" style="display: flex; flex-direction: row;")
+    template(v-for="(page, idx) in getPages")
         page-preview-plus(:index="idx" last=false)
-        page-preview-page(:index="idx" :pagename="page.name")
+        page-preview-page(:index="idx" :pagename="page.name" title="bottom")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
                         :index="idx+1" last=false)
     page-preview-plus(:index="getPages.length" last=true)
@@ -76,6 +76,7 @@ export default Vue.extend({
       align-items: center;
       height: 150px;
       background: setColor(gray-4);
+      border: 5px solid #ffffff00;
 
       > button {
         position: absolute;
