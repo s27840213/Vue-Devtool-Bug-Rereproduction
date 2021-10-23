@@ -43,7 +43,7 @@
           div(class="home-content-feature-text")
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'"
-            class="rounded" @click.native="goMakeClicked()") 開 始 製 作
+            class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg")
         div
           template(v-for="tag in tags")
