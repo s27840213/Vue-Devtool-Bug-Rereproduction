@@ -29,14 +29,15 @@
           span {{ ' ' }}
         span(class="folder-design-view__path__node") {{ folder.name }}
       div(class="folder-design-view__actions")
-        div(ref="more"
-            class="folder-design-view__more"
+        div(class="folder-design-view__more"
             @click="toggleFolderMenu"
             v-click-outside="closeFolderMenu")
-          svg-icon(class="header-icon"
-                  iconName="more_horizontal"
-                  iconWidth="18px"
-                  iconColor="gray-2")
+          div(ref="more"
+              class="folder-design-view__more__icon")
+            svg-icon(class="header-icon"
+                    iconName="more_horizontal"
+                    iconWidth="18px"
+                    iconColor="gray-2")
           div(v-if="isFolderMenuOpen"
               class="folder-design-view__more__menu"
               @click.stop)
@@ -500,6 +501,13 @@ export default Vue.extend({
   }
   &__more {
     position: relative;
+    &__icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     &__menu {
       position: absolute;
       width: 159px;
