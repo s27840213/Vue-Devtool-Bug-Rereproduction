@@ -152,11 +152,11 @@ export default Vue.extend({
   }
   &__name {
     width: 63px;
-    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     > span {
+      text-align: center;
       font-family: Mulish;
       font-size: 14px;
       font-weight: 400;
@@ -195,12 +195,14 @@ export default Vue.extend({
   }
   &__name {
     width: 63px;
-    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
     > span {
+      text-align: center;
       font-family: Mulish;
       font-size: 14px;
       font-weight: 400;
