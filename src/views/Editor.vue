@@ -119,7 +119,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     z-index: setZindex("pages-preview");
-    background: setColor(gray-5);
+    background: setColor(gray-6);
   }
 }
 
