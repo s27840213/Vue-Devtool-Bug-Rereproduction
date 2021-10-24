@@ -9,7 +9,7 @@ div(class="page-preview")
     div(class="page-preview-page-last pointer"
       @click="addPage()")
       svg-icon(class="pb-5"
-        :iconColor="'gray-3'"
+        :iconColor="'gray-2'"
         :iconName="'plus-origin'"
         :iconWidth="'50px'")
 </template>
@@ -38,6 +38,8 @@ export default Vue.extend({
     })
   },
   mounted() {
+    this.screenWidth = document.body.clientWidth - 130
+    this._setPagesPerRow(floor(this.screenWidth / 180))
     window.addEventListener('resize', () => {
       this.screenWidth = document.body.clientWidth - 130
       this._setPagesPerRow(floor(this.screenWidth / 180))
@@ -63,20 +65,19 @@ export default Vue.extend({
     grid-row-gap: 20px;
     padding: 30px 0;
 
-    &-group {
-        position: relative;
-        display: inline-flex;
-        height: 180px;
-        margin-top: 30px 0;
-    }
-
     &-page-last {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 150px;
       background: setColor(gray-4);
+      border-radius: 5px;
       border: 5px solid #ffffff00;
+      transition: 0.25s ease-in-out;
+
+      &:hover {
+        background: setColor(gray-3);
+      }
 
       > button {
         position: absolute;
