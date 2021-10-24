@@ -1,8 +1,13 @@
 <template lang="pug">
   div(v-if="last" class="page-preview-plus-last")
   div(v-else class="page-preview-plus"
-  @mouseover="pageMoveTo($event)" @mouseout="pageMoveBack($event)")
-    div(class="page-preview-plus-wrapper pointer"
+  @mouseover="pageMoveTo($event, 'mouse')"
+  @mouseout="pageMoveBack($event)"
+  @dragover="pageMoveTo($event, 'drag')"
+  @dragleave="pageMoveBack($event)"
+  @drop="handlePageDrop()")
+    div(v-if="actionType === 'mouse'"
+      class="page-preview-plus-wrapper pointer"
       @click="addPage(index)")
         svg-icon(class="pb-5"
             :iconColor="'blue-1'"
@@ -10,53 +15,90 @@
             :iconWidth="'18px'")
         span 新增
         span 頁面
+    div(v-if="actionType === 'drag'"
+      class="page-preview-plus-drag")
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
     index: Number,
     last: Boolean
   },
+  data() {
+    return {
+      actionType: ''
+    }
+  },
   computed: {
     ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getPage: 'getPage',
       getPagesPerRow: 'page/getPagesPerRow'
     })
   },
   methods: {
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
-      _setFocusPage: 'page/SET_focusPage'
+      _deletePage: 'DELETE_page',
+      _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    pageMoveTo($event: any) {
-      const prev = $event.currentTarget.previousElementSibling
+    pageMoveTo($event: any, type: string) {
+      const target = $event.currentTarget as HTMLElement
+      const prev = target.previousElementSibling as HTMLElement
       if (prev) {
         prev.style.transform = 'translate(-15px)'
       }
-      const next = $event.currentTarget.nextElementSibling
+      const next = target.nextElementSibling as HTMLElement
       if (next) {
         next.style.transform = 'translate(15px)'
       }
+
+      target.style.opacity = '1'
+      this.actionType = type
     },
     pageMoveBack($event: any) {
-      const prev = $event.currentTarget.previousElementSibling
+      const target = $event.currentTarget as HTMLElement
+      const prev = target.previousElementSibling as HTMLElement
       if (prev) {
         prev.style.transform = ''
       }
-      const next = $event.currentTarget.nextElementSibling
+      const next = target.nextElementSibling as HTMLElement
       if (next) {
         next.style.transform = ''
       }
+
+      target.style.opacity = '0'
+    },
+    handlePageDrop() {
+      // move selected to index: copy and delete origin one
+      if (this.lastSelectedPageIndex + 1 === this.index) {
+        return
+      }
+      const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
+      page.name += ' (copy)'
+      page.designId = ''
+      this._deletePage(this.lastSelectedPageIndex)
+      this._addPageToPos({
+        newPage: page,
+        pos: this.index
+      })
+      GroupUtils.deselect()
+      this._setLastSelectedPageIndex(this.index)
+      this._setCurrActivePageIndex(this.index)
     },
     addPage(position: number) {
       this._addPageToPos({
         newPage: pageUtils.newPage({}),
         pos: position
       })
-      this._setFocusPage(position)
+      this._setLastSelectedPageIndex(position)
     }
   }
 })
@@ -67,14 +109,9 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 180px;
+    height: 190px;
     width: 30px;
-    opacity: 0;
-    transition: 0.25s;
-
-    &:hover {
-      opacity: 1;
-    }
+    transition: 0.25s ease-in-out;
 
     &-wrapper {
       position: absolute;
@@ -85,11 +122,16 @@ export default Vue.extend({
       width: 40px;
       height: 70px;
       font-size: 10px;
-      background: setColor(gray-4);
+      background: setColor(gray-5);
     }
 
     &-last {
       opacity: 0;
+    }
+
+    &-drag {
+      height: 190px;
+      border-right: 5px solid setColor(blue-1);
     }
 }
 </style>

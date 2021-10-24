@@ -1,8 +1,11 @@
 <template lang="pug">
   div(class="page-preview-page")
     div(class="page-preview-page-content pointer"
-      :class="{'focused': focusPageIndex === index}"
+      :class="{'focused': lastSelectedPageIndex === index}"
       @click="clickPage()"
+      draggable="true",
+      @dragstart="handleDragStart"
+      @dragend="handleDragEnd"
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave")
       div(v-if="isMouseOver"
@@ -23,12 +26,12 @@
                 iconColor="gray-2")
             div(class="menu-item-text")
               span {{ menuItem.text }}
+      div(v-if="type === 'panel'"
+        class="page-preview-page-icon")
+        span {{index+1}}
     div(v-if="type === 'full'"
-      class="page-preview-page-title")
-      span(:style="{'color': focusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
-    div(v-if="type === 'panel'"
-      class="page-preview-page-icon")
-      span {{index+1}}
+      class="page-preview-page-title pt-5")
+      span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -67,6 +70,7 @@ export default Vue.extend({
       'focusPageIndex'
     ]),
     ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getPage: 'getPage',
       getPages: 'getPages'
     })
@@ -75,7 +79,6 @@ export default Vue.extend({
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
-      _setFocusPage: 'page/SET_focusPage',
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
@@ -92,13 +95,24 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
-      this._setFocusPage(this.index)
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
         const currentPage = document.getElementsByClassName('nu-page')[this.index] as HTMLElement
         currentPage.scrollIntoView()
       }
+    },
+    handleDragStart() {
+      this._setLastSelectedPageIndex(this.index)
+      this._setCurrActivePageIndex(this.index)
+      this.isMouseOver = false
+      document.addEventListener('dragover', this.preventDefaultDragOver, false)
+    },
+    handleDragEnd() {
+      document.removeEventListener('dragover', this.preventDefaultDragOver, false)
+    },
+    preventDefaultDragOver(e: DragEvent) {
+      e.preventDefault()
     },
     handleMenuAction(icon: string) {
       this.closeMenu()
@@ -113,14 +127,12 @@ export default Vue.extend({
             pos: this.index + 1
           })
           GroupUtils.deselect()
-          this._setFocusPage(this.index + 1)
           this._setLastSelectedPageIndex(this.index + 1)
           this._setCurrActivePageIndex(this.index + 1)
           break
         case 'trash':
           GroupUtils.deselect()
           this._deletePage(this.index)
-          this._setFocusPage(this.index - 1)
           this._setLastSelectedPageIndex(this.index - 1)
           this._setCurrActivePageIndex(this.index - 1)
           break
@@ -142,7 +154,7 @@ export default Vue.extend({
   &-content {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: 140px;
     background: rgb(242, 255, 228);
     border-radius: 5px;
     border: 5px solid #ffffff00;
@@ -210,6 +222,8 @@ export default Vue.extend({
     width: 100%;
     height: 30px;
     font-size: 16px;
+    font-family: Mulish;
+    font-weight: bold;
   }
   &-icon {
     position: absolute;
