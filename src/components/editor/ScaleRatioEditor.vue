@@ -42,16 +42,17 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      _setFocusPage: 'page/SET_focusPage'
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
     },
     setIsShowPagePreview(show: boolean) {
-      console.log('function in progress...')
-      // this._setFocusPage(this.lastSelectedPageIndex)
-      // this._setIsShowPagePreview(show)
+      this._setIsShowPagePreview(show)
+      if (!show) {
+        const currentPage = document.getElementsByClassName('nu-page')[this.lastSelectedPageIndex] as HTMLElement
+        currentPage.scrollIntoView()
+      }
     }
   }
 })
