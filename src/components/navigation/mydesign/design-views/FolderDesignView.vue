@@ -727,9 +727,6 @@ export default Vue.extend({
     gap: 35px;
     width: calc(100% - 120px);
     height: calc(100% - 270px);
-    &__img {
-      filter: grayscale(100%);
-    }
     &__text {
       display: block;
       font-family: NotoSansTC;
