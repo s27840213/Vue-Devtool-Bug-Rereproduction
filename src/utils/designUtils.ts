@@ -352,6 +352,7 @@ class DesignUtils {
   }
 
   deleteForever(pathedDesign: IPathedDesign) {
+    store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
     store.commit('design/UPDATE_removeFromTrash', pathedDesign)
   }
 
