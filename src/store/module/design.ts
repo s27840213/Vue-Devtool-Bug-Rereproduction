@@ -115,7 +115,7 @@ const mutations: MutationTree<IDesignSidebarState> = {
   },
   UPDATE_removeFolderFromTrash(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
     const index = state.trashFolders.findIndex(pathedFolder1 => {
-      return generalUtils.arrayCompare<string>(pathedFolder1.parents, pathedFolder.parents) && pathedFolder1.folder.name === pathedFolder.folder.name
+      return designUtils.isFolderEqual(pathedFolder1, pathedFolder)
     })
     if (index >= 0) {
       state.trashFolders.splice(index, 1)

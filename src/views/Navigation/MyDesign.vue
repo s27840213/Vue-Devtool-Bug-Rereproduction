@@ -2,7 +2,7 @@
   div(class="my-design")
     nu-header
     div(class="my-design__content")
-      sidebar(@deleteDesign="handleDeleteDesign"
+      sidebar(@deleteItem="handleDeleteItem"
               @deleteFolder="handleDeleteFolder"
               @deleteAll="deleteAll"
               @moveItem="handleMoveItem")
@@ -35,31 +35,31 @@
                         iconColor="gray-2")
         component(:is="mydesignView"
                   class="design-view"
-                  @deleteDesign="handleDeleteDesign"
+                  @deleteItem="handleDeleteItem"
                   @selectDesign="handleSelectDesign"
                   @deselectDesign="handleDeselectDesign"
                   @clearSelection="handleClearSelection"
-                  @recoverDesign="handleRecoverDesign"
+                  @recoverItem="handleRecoverItem"
                   @deleteFolder="handleDeleteFolder"
                   @moveItem="handleMoveItem"
                   @deleteForever="handleDeleteForever")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
-              div(class="my-design__message__img" :style="messageImageStyles(deletedDesignThumbnail)")
+              div(class="my-design__message__img" :style="messageImageStyles(deletedQueue[0])")
               div(class="my-design__message__text")
-                span 設計已移至垃圾桶
+                span {{ `${messageItemName(deletedQueue[0])}已移至垃圾桶` }}
               div(class="my-design__message__button" @click="recover")
                 span 復原
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span {{ `設計已移至 ${recoveredDirectory}` }}
+                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0])}` }}
           transition(name="slide-fade")
             div(v-if="isShowMoveMessage" class="my-design__message")
-              div(class="my-design__message__img" :style="moveMessageImageStyles()")
+              div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
-                span {{ `${movedItemName()}已移至 ${moveDestName()}` }}
+                span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
@@ -111,6 +111,7 @@ import TrashDesignView from '@/components/navigation/mydesign/design-views/Trash
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
 import { IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -124,13 +125,10 @@ export default Vue.extend({
   },
   data() {
     return {
-      deletedDesignThumbnail: require('@/assets/img/svg/frame.svg'),
-      deletedDesignQueue: [] as IPathedDesign[],
-      waitingRecovery: undefined as IPathedDesign | undefined,
+      deletedQueue: [] as IQueueItem[],
       messageTimer: -1,
       isShowDeleteMessage: false,
-      recoveredDirectory: designUtils.ROOT_DISPLAY,
-      recoveredDesignQueue: [] as IPathedDesign[],
+      recoveredQueue: [] as IQueueItem[],
       isShowRecoverMessage: false,
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
@@ -178,19 +176,14 @@ export default Vue.extend({
       clearSelection: 'UPDATE_clearSelection',
       setCurrentSelectedFolder: 'SET_currSelectedFolder'
     }),
-    messageImageStyles(url : string) {
-      return { 'background-image': `url(${url})` }
-    },
-    moveMessageImageStyles() {
-      const item = this.movedQueue[0]
+    messageImageStyles(item: IQueueItem) {
       if (item.type === 'design') {
         return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
       } else {
         return { display: 'none' }
       }
     },
-    movedItemName(): string {
-      const item = this.movedQueue[0]
+    messageItemName(item: IQueueItem): string {
       if (item.type === 'multi') {
         return '多項設計'
       } else if (item.type === 'design') {
@@ -199,8 +192,7 @@ export default Vue.extend({
         return (item.data as IPathedFolder).folder.name + ' '
       }
     },
-    moveDestName(): string {
-      const item = this.movedQueue[0]
+    messageDestName(item: IQueueItem): string {
       if (item.type === 'multi' || item.type === 'design') {
         return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
       } else {
@@ -208,29 +200,26 @@ export default Vue.extend({
       }
     },
     showDeleteMessage() {
-      const pathedDesign = this.deletedDesignQueue[0]
-      if (pathedDesign) {
-        this.deletedDesignThumbnail = pathedDesign.design.thumbnail
-        this.waitingRecovery = pathedDesign
+      const item = this.deletedQueue[0]
+      if (item) {
         this.isShowDeleteMessage = true
         this.messageTimer = setTimeout(() => {
           this.isShowDeleteMessage = false
           setTimeout(() => {
-            this.deletedDesignQueue.shift()
+            this.deletedQueue.shift()
             this.showDeleteMessage()
           }, 1000)
         }, 5000)
       }
     },
     showRecoverMessage() {
-      const pathedDesign = this.recoveredDesignQueue[0]
-      if (pathedDesign) {
-        this.recoveredDirectory = designUtils.checkRecoveredDirectory(this.folders, pathedDesign.path)
+      const item = this.recoveredQueue[0]
+      if (item) {
         this.isShowRecoverMessage = true
         setTimeout(() => {
           this.isShowRecoverMessage = false
           setTimeout(() => {
-            this.recoveredDesignQueue.shift()
+            this.recoveredQueue.shift()
             this.showRecoverMessage()
           }, 1000)
         }, 5000)
@@ -249,12 +238,6 @@ export default Vue.extend({
         }, 5000)
       }
     },
-    handleDeleteDesign(design: IPathedDesign) {
-      this.deletedDesignQueue.push(design)
-      if (this.deletedDesignQueue.length === 1) {
-        this.showDeleteMessage()
-      }
-    },
     handleSelectDesign(pathedDesign: IPathedDesign) {
       this.addToSelection(pathedDesign)
     },
@@ -264,17 +247,35 @@ export default Vue.extend({
     handleClearSelection() {
       this.clearSelection()
     },
-    handleRecoverDesign(pathedDesign: IPathedDesign) {
-      if (pathedDesign.design.id === this.waitingRecovery?.design.id) {
+    handleDeleteItem(item: IQueueItem) {
+      this.deletedQueue.push(item)
+      if (this.deletedQueue.length === 1) {
+        this.showDeleteMessage()
+      }
+    },
+    checkRecoveredItemShowing(item: IQueueItem): boolean {
+      const currentShowing = this.deletedQueue[0]
+      if (!currentShowing) return false
+      if (item.type !== currentShowing.type) return false
+      if (item.type === 'design') {
+        return (item.data as IPathedDesign).design.id === (this.deletedQueue[0].data as IPathedDesign).design.id
+      }
+      if (item.type === 'folder') {
+        return designUtils.isFolderEqual(item.data as IPathedFolder, currentShowing.data as IPathedFolder)
+      }
+      return false
+    },
+    handleRecoverItem(item: IQueueItem) {
+      if (this.checkRecoveredItemShowing(item)) {
         clearTimeout(this.messageTimer)
         this.isShowDeleteMessage = false
         setTimeout(() => {
-          this.deletedDesignQueue.shift()
+          this.deletedQueue.shift()
           this.showDeleteMessage()
         }, 500)
       }
-      this.recoveredDesignQueue.push(pathedDesign)
-      if (this.recoveredDesignQueue.length === 1) {
+      this.recoveredQueue.push(item)
+      if (this.recoveredQueue.length === 1) {
         this.showRecoverMessage()
       }
     },
@@ -288,6 +289,10 @@ export default Vue.extend({
       const { pathedFolder, empty } = payload
       if (empty) {
         this.deleteFolder(pathedFolder)
+        this.handleDeleteItem({
+          type: 'folder',
+          data: pathedFolder
+        })
       } else {
         this.folderToBeDeleted = pathedFolder
         this.confirmMessage = 'delete-folder'
@@ -306,12 +311,18 @@ export default Vue.extend({
       }
     },
     recover() {
-      if (this.waitingRecovery) {
+      const item = this.deletedQueue[0]
+      if (item) {
         clearTimeout(this.messageTimer)
-        designUtils.recover(this.waitingRecovery)
+        if (item.type === 'design') {
+          designUtils.recover(item.data as IPathedDesign)
+        }
+        if (item.type === 'folder') {
+          designUtils.recoverFolder(item.data as IPathedFolder)
+        }
         this.isShowDeleteMessage = false
         setTimeout(() => {
-          this.deletedDesignQueue.shift()
+          this.deletedQueue.shift()
           this.showDeleteMessage()
         }, 500)
       }

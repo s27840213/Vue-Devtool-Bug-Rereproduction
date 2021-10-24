@@ -159,7 +159,10 @@ export default Vue.extend({
               this.$emit('deleteAll')
             } else {
               designUtils.delete({ path, design })
-              this.$emit('deleteDesign', { path, design })
+              this.$emit('deleteItem', {
+                type: 'design',
+                data: { path, design }
+              })
             }
           } else if (this.draggingType === 'folder') {
             const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}

@@ -125,7 +125,12 @@ export default Vue.extend({
         this.$emit('deleteForever', { path, design })
         return
       }
-      if (icon === 'reduction') this.$emit('recoverDesign', { path, design })
+      if (icon === 'reduction') {
+        this.$emit('recoverItem', {
+          type: 'design',
+          data: { path, design }
+        })
+      }
       designUtils.dispatchDesignMenuAction(icon, path, design)
     },
     handleMoveItem(item: IQueueItem) {

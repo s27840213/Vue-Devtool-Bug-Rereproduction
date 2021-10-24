@@ -302,6 +302,10 @@ class DesignUtils {
     return bFullPath.startsWith(aFullPath)
   }
 
+  isFolderEqual(a: IPathedFolder, b: IPathedFolder): boolean {
+    return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.name === b.folder.name
+  }
+
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign) {
     switch (icon) {
       case 'copy': {
@@ -368,6 +372,20 @@ class DesignUtils {
       })
     }
     store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  }
+
+  recoverFolder(pathedFolder: IPathedFolder) {
+    const folders = store.getters['design/getFolders'] as IFolder[]
+    const folder = this.search(folders, pathedFolder.parents)
+    if (folder) {
+      store.commit('design/UPDATE_addFolder', pathedFolder)
+    } else {
+      store.commit('design/UPDATE_addFolder', {
+        parents: [this.ROOT],
+        folder: pathedFolder.folder
+      })
+    }
+    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
   }
 
   removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {
