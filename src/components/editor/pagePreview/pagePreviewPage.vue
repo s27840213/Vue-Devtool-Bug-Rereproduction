@@ -137,6 +137,7 @@ export default Vue.extend({
     height: 150px;
     background: rgb(242, 255, 228);
     border-radius: 5px;
+
     &-more {
       position: absolute;
       right: 8px;

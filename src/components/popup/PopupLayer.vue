@@ -61,16 +61,6 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{detachImage().text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="isFrame")
-      div(class="popup-layer__item"
-          @click="detachImage.action")
-        svg-icon(
-          class="pointer"
-          :iconName="detachImage.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{detachImage.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     hr(v-if="inAdminMode && isLogin" class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`popup-layer__shortcut-${index}`"

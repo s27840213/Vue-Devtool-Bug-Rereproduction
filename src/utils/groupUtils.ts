@@ -217,7 +217,6 @@ class GroupUtils {
   }
 
   deselect() {
-    console.log('deselect')
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
       if (store.getters.getCurrSelectedLayers.length === 1) {

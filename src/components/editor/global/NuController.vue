@@ -15,7 +15,6 @@
           @mousedown.left="moveStart"
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
-          @keydown="ShortcutUtils.delFrameImg()"
           @dblclick="onDblClick")
         svg(v-if="getLayerType === 'frame'" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
@@ -1401,7 +1400,6 @@ export default Vue.extend({
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
-      console.log(this.config)
     },
     dblSubController(targetIndex: number) {
       let updateSubLayerProps = null as any

@@ -5,7 +5,6 @@
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles('')"
-          @drop="onDrop($event)"
           @dblclick="onDblClick()"
           @click.left.stop="onClickEvent($event)")
         svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
@@ -512,26 +511,6 @@ export default Vue.extend({
         return
       }
       this.$emit('dblSubController', this.layerIndex)
-    },
-    onDrageEnter() {
-      this.$emit('onFrameDragenter', this.layerIndex)
-    },
-    onDragLeave() {
-      // const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-      // clips[this.layerIndex].srcObj = {
-      //   ...this.clipedImgBuff
-      // }
-      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      // this.clipedImgBuff = {
-      //   type: '',
-      //   userId: '',
-      //   assetId: ''
-      // }
-      // console.log(this.clipedImgBuff)
-      this.$emit('onFrameDragleave', this.layerIndex)
-    },
-    onFrameDrop() {
-      this.$emit('onFrameDrop')
     }
   }
 })
