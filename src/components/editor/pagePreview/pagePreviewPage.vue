@@ -23,10 +23,10 @@
                 iconColor="gray-2")
             div(class="menu-item-text")
               span {{ menuItem.text }}
-    div(v-if="title === 'bottom'"
+    div(v-if="type === 'full'"
       class="page-preview-page-title")
       span(:style="{'color': focusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
-    div(v-if="title === 'icon'"
+    div(v-if="type === 'panel'"
       class="page-preview-page-icon")
       span {{index+1}}
 </template>
@@ -39,9 +39,9 @@ import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
+    type: String,
     index: Number,
-    pagename: String,
-    title: String
+    pagename: String
   },
   data() {
     return {
@@ -95,6 +95,10 @@ export default Vue.extend({
       this._setFocusPage(this.index)
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
+      if (this.type === 'panel') {
+        const currentPage = document.getElementsByClassName('nu-page')[this.index] as HTMLElement
+        currentPage.scrollIntoView()
+      }
     },
     handleMenuAction(icon: string) {
       this.closeMenu()

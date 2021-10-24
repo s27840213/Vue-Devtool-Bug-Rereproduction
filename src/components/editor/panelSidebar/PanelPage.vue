@@ -9,7 +9,7 @@
         @click.native="addPage(focusPageIndex+1)") 新 增 頁 面
     div(class="panel-page-items pb-20 px-25")
       template(v-for="(page, idx) in getPages")
-        page-preview-page(:index="idx" :pagename="page.name" title="icon")
+        page-preview-page(:index="idx" :pagename="page.name" type="panel")
 </template>
 
 <script lang="ts">
