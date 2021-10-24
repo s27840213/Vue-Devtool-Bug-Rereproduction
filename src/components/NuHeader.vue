@@ -87,7 +87,7 @@ export default Vue.extend({
       // Temporary setting ----
       } else if (pageName === '/toturial' || pageName === '/faq') {
         window.location.href = 'https://www.facebook.com/vivipictw'
-      } else if (pageName === '/' || pageName === '/pricing') {
+      } else if (pageName === '/' || pageName === '/pricing' || pageName === '/mydesign') {
         this.$router.push({ path: pageName })
       } else {
         // this.$router.push({ path: pageName })

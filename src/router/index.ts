@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
+import MyDesign from '../views/Navigation/MyDesign.vue'
 import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
 import store from '@/store'
@@ -63,6 +64,23 @@ const routes: Array<RouteConfig> = [
       try {
         if (store.getters['user/isLogin']) {
           next({ path: from.query.redirect as string || '/' })
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: '/mydesign',
+    name: 'MyDesign',
+    component: MyDesign,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        if (!store.getters['user/isLogin']) {
+          next({ name: 'Login', query: { redirect: to.fullPath } })
         } else {
           next()
         }
