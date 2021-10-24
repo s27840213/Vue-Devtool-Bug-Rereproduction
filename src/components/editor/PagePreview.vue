@@ -69,7 +69,7 @@ export default Vue.extend({
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 150px;
+      height: 140px;
       background: setColor(gray-4);
       border-radius: 5px;
       border: 5px solid #ffffff00;
@@ -77,12 +77,6 @@ export default Vue.extend({
 
       &:hover {
         background: setColor(gray-3);
-      }
-
-      > button {
-        position: absolute;
-        width: 150px;
-        height: 150px;
       }
     }
 }

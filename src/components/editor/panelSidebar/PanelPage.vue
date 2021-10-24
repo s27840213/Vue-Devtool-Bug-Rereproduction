@@ -4,29 +4,39 @@
         :iconName="'new-page'"
         :iconWidth="'15px'"
         :type="'gray-sm'"
-        class="rounded m-25"
+        class="rounded mt-30 mb-20 mx-25"
         style="padding: 5px 30px;"
         @click.native="addPage(lastSelectedPageIndex+1)") 新 增 頁 面
     div(class="panel-page-items pb-20 px-25")
       template(v-for="(page, idx) in getPages")
+        panel-page-plus(:index="idx" last=false
+          :class="{'pt-10': idx === 0}")
         page-preview-page(:index="idx" :pagename="page.name" type="panel")
+        panel-page-plus(v-if="idx+1 === getPageCount"
+                        :index="idx+1" last=false)
+
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPage from '@/components/editor/pagePreview/pagePreviewPage.vue'
+import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
-    PagePreviewPage
+    PagePreviewPage,
+    PanelPagePlus
   },
   computed: {
     ...mapGetters({
       getPages: 'getPages',
       lastSelectedPageIndex: 'getLastSelectedPageIndex'
-    })
+    }),
+    getPageCount(): number {
+      return this.getPages.length
+    }
   },
   methods: {
     ...mapMutations({
@@ -57,9 +67,9 @@ export default Vue.extend({
 
   &-items {
     display: grid;
-    row-gap: 20px;
     box-sizing: border-box;
     overflow-y: scroll;
+    overflow-x: hidden;
     scrollbar-width: thin;
     &::-webkit-scrollbar {
       width: 10px;

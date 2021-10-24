@@ -33,7 +33,6 @@ const actions: ActionTree<IHomeTemplateState, unknown> = {
   async getTagContent({ commit }, { keyword }) {
     const { locale } = state
     try {
-      console.log('vuex getTagContent', keyword)
       const { data } = await list.getTemplate({
         locale,
         keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,

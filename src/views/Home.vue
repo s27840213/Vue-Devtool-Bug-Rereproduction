@@ -173,9 +173,6 @@ export default Vue.extend({
       }
     }, 4000)
 
-    const a = await this.getApiResponse
-    console.log('getApiResponse', a)
-
     let keyword = this.tagString.replaceAll(',', ' ')
     this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword })
@@ -204,7 +201,6 @@ export default Vue.extend({
     },
     featureItemClicked (idx: number) {
       this.featureSelected = idx
-      console.log(idx)
     }
   }
 })
