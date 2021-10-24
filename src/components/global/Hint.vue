@@ -39,9 +39,14 @@ export default Vue.extend({
   }
   &__body {
     color: setColor(white);
-    background-color: setColor(gray-1);
+    background-color: setColor(gray-2);
     padding: 4px 8px;
-    border-radius: 5px;
+    border-radius: 3px;
+    > span {
+      font-family: Mulish;
+      font-size: 12px;
+      display: block;
+    }
   }
 }
 </style>

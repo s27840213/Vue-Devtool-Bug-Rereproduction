@@ -17,6 +17,7 @@ import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
+import design from '@/store/module/design'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
 import groupUtils from '@/utils/groupUtils'
@@ -684,6 +685,7 @@ export default new Vuex.Store({
     background,
     modal,
     popup,
+    design,
     page,
     homeTemplate
   }

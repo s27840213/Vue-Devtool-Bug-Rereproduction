@@ -35,6 +35,10 @@ class GeneralUtils {
     return result
   }
 
+  generateRandomTime(start: Date, end: Date) {
+    return start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  }
+
   formatStr(str: string, len: number) {
     if (str.length === len) {
       return str
@@ -70,6 +74,14 @@ class GeneralUtils {
     document.execCommand('copy')
     el.remove()
     return Promise.resolve()
+  }
+
+  arrayCompare<T>(a: T[], b: T[]): boolean {
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false
+    }
+    return true
   }
 
   fixSize(size: number) {
