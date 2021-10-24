@@ -7,12 +7,12 @@
       div(class="editor-view__canvas"
           ref="canvas"
           @mousedown.left.self="outerClick($event)")
-        nu-page(v-for="(page,index) in filterByBackgroundImageControl(pages)"
-                :ref="`page-${nonFilteredIndex(index)}`"
-                :key="`page-${nonFilteredIndex(index)}`"
-                :pageIndex="nonFilteredIndex(index)"
-                :style="{'z-index': `${pageNum-nonFilteredIndex(index)}`}"
-                :config="page" :index="nonFilteredIndex(index)")
+        nu-page(v-for="(page,index) in pages"
+                :ref="`page-${index}`"
+                :key="`page-${index}`"
+                :pageIndex="index"
+                :style="{'z-index': `${getPageZIndex(index)}`}"
+                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       template(v-if="showRuler")
@@ -26,15 +26,18 @@
     div(class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartV($event)"
         @mouseout.stop="closeGuidelineV()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--v") {{rulerVPos}}
+        div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
+          span {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
         @mousedown.stop="dragStartH($event)"
         @mouseout.stop="closeGuidelineH()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--h")
+        div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
           span {{rulerHPos}}
 </template>
 
@@ -48,6 +51,7 @@ import ControlUtils from '@/utils/controlUtils'
 import PageUtils from '@/utils/pageUtils'
 import RulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
@@ -92,11 +96,12 @@ export default Vue.extend({
     })
     document.addEventListener('blur', this.detectBlur, true)
 
-    RulerUtils.on('showGuideline', (pos: number, type: string) => {
+    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
       switch (type) {
         case 'v': {
           this.isShowGuidelineV = true
+          this.rulerVPos = Math.trunc(pagePos)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -105,6 +110,7 @@ export default Vue.extend({
         }
         case 'h': {
           this.isShowGuidelineH = true
+          this.rulerHPos = Math.trunc(pagePos)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -127,10 +133,22 @@ export default Vue.extend({
       showRuler: 'getShowRuler'
     }),
     isBackgroundImageControl(): boolean {
-      return (this.pages as IPage[]).some(page => page.backgroundImage.config.imgControl)
+      const pages = this.pages as IPage[]
+      let res = false
+      pages.forEach((page, index) => {
+        if (page.backgroundImage.config.imgControl) {
+          res = true
+          this.backgroundControllingPageIndex = index
+        }
+      })
+      return res
     },
     pageNum(): number {
       return this.pages.length
+    },
+    isTyping(): boolean {
+      return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
+        .some(l => l.type === 'text' && l.isTyping)
     },
     currFocusPage(): IPage {
       return this.PageUtils.currFocusPage
@@ -153,6 +171,7 @@ export default Vue.extend({
       PageUtils.activeMostCentralPage()
     },
     selectStart(e: MouseEvent) {
+      if (this.isTyping) return
       if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -257,26 +276,12 @@ export default Vue.extend({
         })
       }, 0)
     },
-    filterByBackgroundImageControl(pages: IPage[]): IPage[] {
+    getPageZIndex(index: number) {
       if (this.isBackgroundImageControl) {
-        let res: IPage | undefined
-        pages.forEach((page, index) => {
-          if (page.backgroundImage.config.imgControl) {
-            res = page
-            this.backgroundControllingPageIndex = index
-          }
-        })
-        if (res) {
-          return [res]
-        } else {
-          return []
-        }
+        return this.backgroundControllingPageIndex === index ? 1 : 0
       } else {
-        return pages
+        return this.pageNum - index
       }
-    },
-    nonFilteredIndex(index: number): number {
-      return this.isBackgroundImageControl ? this.backgroundControllingPageIndex : index
     },
     dragStartV(e: MouseEvent) {
       RulerUtils.setIsDragging(true)
@@ -293,10 +298,9 @@ export default Vue.extend({
     },
     dragEndV(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (!this.mapGuidelineToPage('v').outOfPage) {
-        this.closeGuidelineV()
+      if (this.mapGuidelineToPage('v').outOfPage) {
+        this.isShowGuidelineV = false
       }
-      this.isShowGuidelineV = false
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingV)
         document.documentElement.removeEventListener('scroll', this.scrollUpdate)
@@ -328,10 +332,9 @@ export default Vue.extend({
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (!this.mapGuidelineToPage('h').outOfPage) {
-        this.closeGuidelineH()
+      if (this.mapGuidelineToPage('h').outOfPage) {
+        this.isShowGuidelineH = false
       }
-      this.isShowGuidelineV = false
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingH)
         document.documentElement.removeEventListener('scroll', this.scrollUpdate)
@@ -352,6 +355,12 @@ export default Vue.extend({
         this.isShowGuidelineH = false
         RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
       }
+    },
+    setTranslateOfPos(event: MouseEvent, type: string) {
+      const target = (type === 'v' ? this.$refs.guidelinePosV : this.$refs.guidelinePosH) as HTMLElement
+      const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
+      const pos = MouseUtils.getMouseRelPoint(event, guideline)
+      target.style.transform = type === 'v' ? `translate(0px,${pos.y}px)` : `translate(${pos.x}px,0px)`
     },
     openGuidelinePopup(event: MouseEvent) {
       popupUtils.openPopup('guideline', { event })
@@ -451,7 +460,7 @@ $REULER_SIZE: 25px;
     border-top: 1px solid setColor(blue-1);
     width: 100%;
     height: 0px;
-    cursor: "@/assets/icon/ruler/ruler-v.svg";
+    cursor: "/assets/icon/ruler/ruler-v.svg";
     &::before {
       content: "";
       position: absolute;
@@ -501,7 +510,7 @@ $REULER_SIZE: 25px;
   grid-area: corner-block;
   width: $REULER_SIZE;
   height: $REULER_SIZE;
-  background: red;
+  background: #dfe1e7;
 }
 
 .dim-background {

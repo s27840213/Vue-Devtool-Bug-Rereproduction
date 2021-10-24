@@ -96,6 +96,11 @@ export enum LayerType {
   'nu-group'
 }
 
+export enum LineTemplatesType {
+  type1 = 'type1',
+  type2 = 'type2'
+}
+
 export interface ISpecLayerData {
   pageIndex: number,
   layerIndex: number,

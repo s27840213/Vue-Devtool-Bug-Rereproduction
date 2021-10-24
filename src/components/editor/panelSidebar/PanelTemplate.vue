@@ -110,8 +110,15 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    await this.getCategories()
-    this.getContent()
+    const queryString = new URLSearchParams(window.location.search)
+    const keyword = queryString.get('search')
+    if (keyword) {
+      this.getTagContent({ keyword })
+      window.history.replaceState({}, document.title, window.location.pathname)
+    } else {
+      await this.getCategories()
+      this.getContent()
+    }
   },
   destroyed() {
     this.resetContent()

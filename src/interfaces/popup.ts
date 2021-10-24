@@ -3,7 +3,8 @@ export interface IPopupProps {
   posX: string,
   posY: string,
   target: string,
-  style: string
+  style: string,
+  layerIndex: number
 }
 
 export interface IPopupComponent {

@@ -6,31 +6,45 @@
       div(class="text-gray-3")
         span line推播支援
       div
-        div(v-for="(template,index) in templates"
-            :key="`popup-${index}`"
-            class="popup-line-template__item"
-            @click="addLineTemplate(index)")
-          svg-icon(
-            class="pointer"
-            :iconName="template"
-            :iconWidth="'60px'"
-            :iconColor="'gray-1'")
-    //- hr(v-if="layerNum >=3" class="popup-line-template__hr")
+        div(class="popup-line-template__grid")
+          div(v-for="(template,index) in lineTemplate1"
+              :key="`line-template-1-${index}`"
+              class="popup-line-template__item"
+              @click="addLineTemplate(index,LineTemplatesType.type1)")
+            svg-icon(
+              class="popup-line-template__icon pointer"
+              :iconName="template"
+              :iconWidth="'60px'"
+              :iconColor="'gray-1'")
+        hr(class="popup-line-template__hr")
+        div(class="popup-line-template__grid")
+          div(v-for="(template,index) in lineTemplate2"
+              :key="`line-template-2-${index}`"
+              class="popup-line-template__item"
+              @click="addLineTemplate(index,LineTemplatesType.type2)")
+            svg-icon(
+              class="popup-line-template__icon pointer"
+              :iconName="template"
+              :iconWidth="'65px'"
+              :iconColor="'gray-1'")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import rulerUtils from '@/utils/rulerUtils'
 import popupUtils from '@/utils/popupUtils'
+import { LineTemplatesType } from '@/store/types'
 
 export default Vue.extend({
   data() {
     return {
       MappingUtils,
-      templates: [] as Array<string>
+      lineTemplate1: [] as Array<string>,
+      lineTemplate2: [] as Array<string>,
+      LineTemplatesType
     }
   },
   computed: {
@@ -42,15 +56,17 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.templates = this.mappingIcons('lineTemplate')
-    console.log(this.templates)
+    const tmp = this.mappingIcons('lineTemplate')
+    this.lineTemplate1 = tmp.slice(0, 8)
+    this.lineTemplate2 = tmp.slice(8)
   },
   methods: {
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
     },
-    addLineTemplate(index: number) {
-      rulerUtils.addLineTemplate(index)
+    addLineTemplate(index: number, type: LineTemplatesType) {
+      console.log(type)
+      rulerUtils.addLineTemplate(index, type)
       popupUtils.closePopup()
     }
   }
@@ -60,48 +76,65 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .popup-line-template {
   padding: 0.375rem 0.625rem;
+  border-radius: 50%;
   &__group {
     // heading
     > div:nth-child(1) {
       display: flex;
       justify-content: center;
-      margin-bottom: 0.2rem;
+      margin-bottom: 4px;
+      > span {
+        letter-spacing: 0.655em;
+        padding-left: 0.655em;
+        text-align: center;
+      }
+      > span {
+        letter-spacing: 0.655em;
+        padding-left: 0.655em;
+        text-align: center;
+      }
     }
     > div:nth-child(2) {
       display: flex;
       justify-content: flex-start;
-      margin-bottom: 0.4rem;
+      margin-left: 16px;
       > span {
         font-size: 0.65rem;
       }
     }
     > div:nth-child(3) {
-      display: grid;
-      grid-auto-rows: auto;
-      grid-template-columns: repeat(4, 1fr);
-      column-gap: 0.5rem;
-      row-gap: 0.5rem;
-      > div {
-        display: flex;
-        flex-direction: column;
-      }
+      display: flex;
+      flex-direction: column;
     }
+  }
+
+  &__grid {
+    display: grid;
+    grid-auto-rows: auto;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 1.25rem;
+    row-gap: 1.875rem;
+    padding: 1rem 0;
   }
 
   &__item {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.1s ease-in;
-    padding: 0.125rem 0.125rem;
-    border-radius: 0.25rem;
-    box-sizing: border-box;
+  }
+  &__icon::v-deep {
+    stroke: #969bab;
+    transition: stroke 0.1s ease-in, stroke-width 0.1s ease-in;
     &:hover {
-      background-color: setColor(blue-3, 0.5);
+      stroke: setColor(blue-1);
+      stroke-width: 2px;
     }
-    &:active {
-      background-color: setColor(blue-1, 0.5);
-    }
+  }
+  &__hr {
+    margin: 0.375rem 0;
+    border: none;
+    border-bottom: 1px solid setColor(gray-4);
+    width: 100%;
   }
 }
 </style>

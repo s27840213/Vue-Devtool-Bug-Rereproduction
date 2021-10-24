@@ -12,7 +12,7 @@
           div(class="subtitle-1 pb-20"
           style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
           btn(:type="'primary-mid'"
-            class="rounded" @click.native="goMakeClicked()") 開 始 製 作
+            class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
         //- img(:src="require('@/assets/img/png/homepage_video_img.png')")
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
@@ -40,17 +40,29 @@
         div(class="home-content-feature-content")
           div(class="home-content-feature-img")
             img(:src="require('@/assets/img/png/home-video.png')")
-          div(class="home-content-feature-text body-1")
+          div(class="home-content-feature-text")
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'"
             class="rounded" @click.native="goMakeClicked()") 開 始 製 作
-      div(class="home-content-title label-lg") #萬聖節  #母嬰  #雙十一  #特價
+      div(class="home-content-title label-lg")
+        div
+          template(v-for="tag in tags")
+            span(class="pointer mr-20"
+            @click="goToPage('Editor', tag)") {{'#' + tag}}
+        span(class="pointer body-1 more"
+        @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
       div(class="home-content-template")
         scroll-list(:list="tagTemplateList")
-      div(class="home-content-title label-lg") 熱門模板
+      div(class="home-content-title label-lg")
+        span 熱門模板
+        span(class="pointer body-1"
+        @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
       div(class="home-content-template")
         scroll-list(:list="popularTemplateList")
-      div(class="home-content-title label-lg") 最新模板
+      div(class="home-content-title label-lg")
+        span 最新模板
+        span(class="pointer body-1"
+        @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
       div(class="home-content-template")
         scroll-list(:list="latestTemplateList")
     nu-footer
@@ -113,7 +125,7 @@ export default Vue.extend({
         {
           name: '1',
           title: '限時免費試用！',
-          content: '內容1'
+          content: ''
         },
         {
           name: '2',
@@ -123,21 +135,22 @@ export default Vue.extend({
         {
           name: '3',
           title: '專為瞬息萬變的電商而生',
-          content: '內容3'
+          content: '使用符合臺灣人口味的模板，快速製作出你心目中的電商圖片'
         },
         {
           name: '4',
           title: 'LINE 行銷嘛欸通',
-          content: '內容4'
+          content: '不只是 Facebook 和 Instagram，包含電商商品、官網用圖，甚至是 LINE 推播圖片也一應俱全'
         },
         {
           name: '5',
           title: '提供精美素材媒體庫',
-          content: '內容5'
+          content: 'Vivipic 擁有你在設計路上需要的必要素材。超過 200 萬張的可商用圖庫、定期新增的插圖素材、背景、圖示等等。'
         }
       ],
-      featureSelected: 1,
-      tagString: '#萬聖節#母嬰#雙十一#特價',
+      featureSelected: 0,
+      tagString: '萬聖節,母嬰,雙十一,特價',
+      tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
       latestTemplateList: []
@@ -152,12 +165,19 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    // await this.getCategories()
-    // await this.getTagContent('母嬰')
+    window.setInterval(() => {
+      if (this.featureSelected === this.featureList.length - 1) {
+        this.featureSelected = 0
+      } else {
+        this.featureSelected++
+      }
+    }, 4000)
+
     const a = await this.getApiResponse
     console.log('getApiResponse', a)
 
-    let keyword = '萬聖節 母嬰 雙十一 特價'
+    let keyword = this.tagString.replaceAll(',', ' ')
+    this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
@@ -175,8 +195,12 @@ export default Vue.extend({
         'getTagContent'
       ]
     ),
-    goMakeClicked () {
-      this.$router.push({ name: 'Editor' })
+    goToPage(pageName: string, queryString = '') {
+      if (queryString) {
+        this.$router.push({ name: pageName, query: { search: queryString } })
+      } else {
+        this.$router.push({ name: pageName })
+      }
     },
     featureItemClicked (idx: number) {
       this.featureSelected = idx
@@ -201,8 +225,14 @@ export default Vue.extend({
   padding-bottom: 100px;
 
   &-title {
+    display: flex;
+    justify-content: space-between;
     text-align: left;
-    padding: 4vw 0 1.5vw 10vw;
+    padding: 4vw 10vw 1.5vw 10vw;
+
+    .more {
+      white-space: nowrap;
+    }
   }
   &-video {
     display: flex;
@@ -315,7 +345,10 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      width: 35%;
+      width: 30%;
+      font-size: 18px;
+      line-height: 40px;
+      font-weight: 400;
       text-align: left;
       padding-left: 5vw;
 
@@ -341,7 +374,7 @@ export default Vue.extend({
   display: grid;
   column-gap: 30px;
   grid-template-columns: auto;
-  justify-content: start;
+  justify-content: center;
   grid-auto-flow: column;
   scroll-behavior: smooth;
   overflow-x: scroll;

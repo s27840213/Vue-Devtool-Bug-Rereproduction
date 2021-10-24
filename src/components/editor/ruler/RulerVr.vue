@@ -1,13 +1,20 @@
 <template lang="pug">
-div(class="ruler-vr pointer")
+div(class="ruler-vr"
+    :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}")
   div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
+    div(v-for="i in rulerLineCount.count" class="ruler-vr__block ruler-vr__block--int")
+      span(class="ruler-vr__number") {{(i-1)*SPLIT_UNIT}}
+      div(v-for="i in 5" class="ruler-vr__line")
+    div(v-if="rulerLineCount.float > 0" class="ruler-vr__block ruler-vr__block--float")
+      span(class="ruler-vr__number") {{rulerLineCount.count * SPLIT_UNIT}}
 </template>
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import rulerUtils from '@/utils/rulerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -40,9 +47,20 @@ export default Vue.extend({
       return {
         width: `${this.RULER_SIZE}px`,
         height: `${this.currFocusPage.height * (this.pageScaleRatio / 100)}px`,
-        backgroundColor: '#969BAB',
-        transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`
+        transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`,
+        'grid-template-rows': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`
+
       }
+    },
+    rulerLineCount(): { count: number, float: number } {
+      const lineCount = (pageUtils.currFocusPage.height / this.SPLIT_UNIT).toFixed(2).split('.')
+      return {
+        count: parseInt(lineCount[0]),
+        float: parseFloat(`0.${lineCount[1]}`)
+      }
+    },
+    SPLIT_UNIT(): number {
+      return rulerUtils.mapSplitUnit()
     }
   },
   mounted() {
@@ -58,7 +76,9 @@ export default Vue.extend({
   },
   methods: {
     calcRulerBodyOffset(): void {
-      this.rulerBodyOffset = pageUtils.pageRect.top - this.canvasRect.top + this.editorView.scrollTop
+      this.$nextTick(() => {
+        this.rulerBodyOffset = pageUtils.pageRect.top - this.canvasRect.top + this.editorView.scrollTop
+      })
     }
   }
 })
@@ -71,7 +91,43 @@ export default Vue.extend({
   grid-area: vr-rulers;
   top: 0px;
   left: 0px;
-  background-color: setColor(gray-4);
   overflow: hidden;
+  box-sizing: border-box;
+  background-color: setColor(gray-4, 0.5);
+  &__body {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  &__block {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-end;
+    width: 100%;
+    &--int {
+      &:nth-child(1) {
+        border-top: 1px solid setColor(gray-3);
+      }
+      border-bottom: 1px solid setColor(gray-3);
+    }
+
+    &--float {
+    }
+  }
+
+  &__number {
+    position: absolute;
+    top: 0;
+    left: 20%;
+    font-size: 2px;
+    transform: scale(0.8) rotate(180deg);
+    writing-mode: vertical-lr;
+  }
+
+  &__line {
+    width: 6px;
+    border-bottom: 1px solid setColor(gray-3);
+  }
 }
 </style>

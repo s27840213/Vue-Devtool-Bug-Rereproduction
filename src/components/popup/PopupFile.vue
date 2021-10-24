@@ -6,26 +6,19 @@ div(class="popup-file")
     span {{pageSize.w}}像素 x {{pageSize.h}}像素
   div(class="popup-file__item")
     span 保存
-  div(class="popup-file__item")
+  div(class="popup-file__item" @click="newDesign()")
     span 建立新設計
   hr(class="popup-file__hr")
-  div(class="popup-file__item popup-file__preference flex flex-between"
-      @click="showPrefSetting()")
-    span 偏好設定
-    svg-icon(
-      class="pointer"
-      :iconName="'chevron-right'"
-      :iconWidth="'12px'"
-      :iconColor="'gray-1'")
-    div(v-if="showPreference" class="popup-file__preference-item")
-      div(class="popup-file__item" @click="togglerRuler()")
-        span 尺規
-      //- div(class="popup-file__item text-gray-3")
-      //-   span 刪除此參考線
-      div(class="popup-file__item" @click="clearGuideline()")
-        span 刪除所有參考線
-      div(class="popup-file__item" @click="toggleGuideline()")
-        span {{showGuideline ?'隱藏所有參考線':'顯示所有參考線'}}
+  div(class="popup-file__item " @click="togglerRuler()")
+    span 顯示尺規
+    svg-icon(v-if="isShownRuler" class="pointer"
+      :iconName="'done'"
+      :iconColor="'gray-2'"
+      :iconWidth="'14px'")
+  div(class="popup-file__item" @click="toggleGuideline()")
+    span {{showGuideline ?'隱藏所有參考線':'顯示所有參考線'}}
+  div(class="popup-file__item" @click="clearGuideline()")
+    span 刪除所有參考線
 </template>
 
 <script lang="ts">
@@ -49,6 +42,9 @@ export default Vue.extend({
     },
     showGuideline(): boolean {
       return rulerUtils.showGuideline
+    },
+    isShownRuler() {
+      return rulerUtils.showRuler
     }
   },
   methods: {
@@ -66,6 +62,10 @@ export default Vue.extend({
     },
     toggleGuideline() {
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
+    },
+    newDesign() {
+      pageUtils.setPages()
+      this.closePopup()
     }
   }
 })
@@ -79,19 +79,22 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   z-index: setZindex("dropdowns");
-  border: 1px solid setColor(gray-4);
-  box-shadow: 0px 0px 7px setColor(gray-1, 0.25);
+  padding: 0.125rem 0;
   &__item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     transition: background-color 0.1s ease-in;
-    padding: 0.25rem 0.725rem;
+    padding: 0.35rem 1.5rem;
     border-radius: 0.25rem;
     position: relative;
     > span {
       font-size: 0.75rem;
     }
-    &:not(.popup-file__preference) {
+    &:nth-child(1) {
+      font-weight: bold;
+    }
+    &:nth-child(n + 3) {
       &:hover {
         background-color: setColor(blue-3, 0.5);
       }

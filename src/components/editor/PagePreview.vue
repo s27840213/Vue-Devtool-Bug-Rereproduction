@@ -2,17 +2,23 @@
 div(class="page-preview")
     template(v-for="(page, idx) in getPages" style="display: flex; flex-direction: row;")
         page-preview-plus(:index="idx" last=false)
-        page-preview-page(:pagename="page.name")
+        page-preview-page(:index="idx" :pagename="page.name")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
-                        :index="idx" last=false)
+                        :index="idx+1" last=false)
     page-preview-plus(:index="getPages.length" last=true)
-    page-preview-page(pagename="last")
+    div(class="page-preview-page-last pointer"
+      @click="addPage()")
+      svg-icon(class="pb-5"
+        :iconColor="'gray-3'"
+        :iconName="'plus-origin'"
+        :iconWidth="'50px'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPage from '@/components/editor/pagePreview/pagePreviewPage.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/pagePreviewPlus.vue'
+import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 
 export default Vue.extend({
@@ -39,15 +45,18 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
+      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow'
-    })
+    }),
+    addPage() {
+      this._addPage(pageUtils.newPage({}))
+    }
   }
 })
 </script>
 <style lang="scss" scoped>
 .page-preview {
     display: grid;
-    align-items: center;
     justify-content: center;
     width: calc(100% - 100px);
     grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
@@ -60,5 +69,20 @@ export default Vue.extend({
         height: 180px;
         margin-top: 30px 0;
     }
+
+    &-page-last {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 150px;
+      background: setColor(gray-4);
+
+      > button {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+      }
+    }
 }
+
 </style>

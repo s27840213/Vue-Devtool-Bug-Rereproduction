@@ -29,7 +29,6 @@ import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import font from '@/store/module/font'
 import FontFaceObserver from 'fontfaceobserver'
 
 export default Vue.extend({
@@ -125,7 +124,7 @@ export default Vue.extend({
          */
         if (this.config.isTyping) return
         this.$nextTick(() => {
-          this.updateLayerSize()
+          TextUtils.updateLayerSize(this.config, this.subLayerIndex)
         })
       },
       deep: true
@@ -150,18 +149,6 @@ export default Vue.extend({
       return {
         writingMode: this.config.styles.writingMode,
         opacity
-      }
-    },
-    updateLayerSize() {
-      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-      } else {
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
-          const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
-        }
       }
     },
     getFontUrl(fontID: string): string {

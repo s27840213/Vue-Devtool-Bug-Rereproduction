@@ -3,18 +3,19 @@
     div(v-if="prevIcon"
         class="scroll-list-move scroll-list-move-left"
         @click="handlePrev")
-        div(class="scroll-list-icon")
-          svg-icon(iconName="arrow-left" iconWidth="40px" iconColor="gray-1")
+        div
+          svg-icon(iconName="chevron-left" iconWidth="40px" iconColor="gray-3")
     div(v-if="nextIcon"
         class="scroll-list-move scroll-list-move-right"
         @click="handleNext")
-        div(class="scroll-list-icon")
-          svg-icon(iconName="arrow-right" iconWidth="40px" iconColor="gray-1")
+        div
+          svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
     div(class="scroll-list-items" @scroll="handleScroll" ref="items")
       div(v-for="item, idx in list" class="scroll-list-item")
         img(class="pointer"
         draggable="true"
         :src="`https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+        @click="goToPage('Editor')"
         @error="handleNotFound")
 </template>
 <script lang="ts">
@@ -39,6 +40,9 @@ export default Vue.extend({
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
     },
     handleNext () {
       const { scrollLeft, offsetWidth } = this.items

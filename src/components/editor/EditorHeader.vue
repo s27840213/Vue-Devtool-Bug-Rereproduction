@@ -1,15 +1,11 @@
 <template lang="pug">
   div(class="editor-header")
     div(class="body-2")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'" style="height: 50px;")
-      div(class="subtitle-2 text-gray-2 pointer" @click="setPages()") New Design
-      //- div(class="subtitle-2 text-gray-2" @click="setModalOpen(true)") File
-      //- div(class="subtitle-2 text-gray-2") Resize
+      svg-icon(class="pointer" style="height: 50px;"
+      :iconName="'logo'" :iconWidth="'100px'"
+      @click.native="goToPage('Home')")
       div(class="btn-file" @click="openFIlePopup()")
         span 檔案
-      div
-        span 調整尺寸
       div
         div(style="height: 25px; border-right: solid #474A57 1px;")
       svg-icon(:class="{'pointer': !isInFirstStep}"
@@ -131,6 +127,9 @@ export default Vue.extend({
     },
     openFIlePopup() {
       popupUtils.openPopup('file')
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
     }
   }
 })

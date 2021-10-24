@@ -6,6 +6,7 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
+import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import TemplateUtils from './templateUtils'
@@ -25,11 +26,6 @@ class TextUtils {
 
   isArrowKey(e: KeyboardEvent): boolean {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
-  }
-
-  updateLayerSize() {
-    const textHW = this.getTextHW(this.getCurrLayer)
-    ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, 1)
   }
 
   getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
@@ -328,6 +324,19 @@ class TextUtils {
     }
     document.body.removeChild(body)
     return textHW
+  }
+
+  updateLayerSize(config: IText, subLayerIndex = -1) {
+    const textHW = this.getTextHW(config, config.widthLimit)
+    if (subLayerIndex === -1) {
+      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, config.styles.scale)
+    } else {
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      if (subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+        const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
+    }
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {

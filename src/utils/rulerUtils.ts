@@ -1,7 +1,7 @@
 import store from '@/store'
+import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
 import pageUtils from './pageUtils'
-
 interface ITemplateSetting {
   v: Array<number>
   h: Array<number>
@@ -23,8 +23,21 @@ class RulerUtils {
   get showGuideline() { return store.getters.getShowGuideline }
 
   event: any
-  eventHash: { [index: string]: (pos: number, type: string) => void }
-  templateSettings: Array<ITemplateSetting>
+  eventHash: { [index: string]: (pagePos: number, pos: number, type: string) => void }
+  templates: {
+    type1: Array<ITemplateSetting>,
+    type2: Array<ITemplateSetting>
+  }
+
+  splitUnitMap: {
+    xxs: number,
+    xs: number,
+    s: number,
+    m: number,
+    l: number,
+    xl: number
+  }
+
   isDragging: boolean
   lastMapedInfo: {
     type: string,
@@ -39,55 +52,71 @@ class RulerUtils {
       index: -1
     }
     this.isDragging = false
-    this.templateSettings = [
-      {
-        v: [],
-        h: []
-      },
-      {
-        v: [50],
-        h: []
-      },
-      {
-        v: [],
-        h: [50]
-      },
-      {
-        v: [],
-        h: [33.33, 66.66]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [],
-        h: [50, 75]
-      },
-      {
-        v: [33.33, 66.66],
-        h: [50]
-      },
-      {
-        v: [33.33, 66.66],
-        h: [33.33, 66.66]
-      },
-      {
-        v: [50],
-        h: [50]
-      },
-      {
-        v: [50],
-        h: [33.33, 66.66]
-      }
-    ]
+    this.splitUnitMap = {
+      xxs: 250,
+      xs: 200,
+      s: 150,
+      m: 100,
+      l: 50,
+      xl: 25
+    }
+    this.templates = {
+      type1: [
+        {
+          v: [],
+          h: []
+        },
+        {
+          v: [50],
+          h: []
+        },
+        {
+          v: [],
+          h: [50]
+        },
+        {
+          v: [],
+          h: [33.33, 66.66]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [],
+          h: [50, 75]
+        },
+        {
+          v: [33.33, 66.66],
+          h: [50]
+        },
+        {
+          v: [33.33, 66.66],
+          h: [33.33, 66.66]
+        }
+      ],
+      type2: [
+        {
+          v: [33.33, 66.66],
+          h: [33.33, 66.66]
+        },
+        {
+          v: [50],
+          h: [50]
+        },
+        {
+          v: [50],
+          h: [33.33, 66.66]
+        }
+      ]
+    }
   }
 
-  on(type: string, callback: (pos: number, type: string) => void) {
+  on(type: string, callback: (pagePos: number, pos: number, type: string) => void) {
     // replace origin event
     if (this.eventHash[type]) {
       this.event.off(type, this.eventHash[type])
@@ -180,10 +209,10 @@ class RulerUtils {
     this.deleteGuideline(index, type)
   }
 
-  addLineTemplate(index: number) {
+  addLineTemplate(index: number, type: LineTemplatesType) {
     this.clearGuidelines()
     this.setShowGuideline(true)
-    const targetTemplate = this.templateSettings[index]
+    const targetTemplate = this.templates[type][index]
     const v = targetTemplate.v.map((pos: number) => {
       return this.currFocusPage.width * (pos / 100)
     })
@@ -197,6 +226,22 @@ class RulerUtils {
     h.forEach((pos: number) => {
       this.addGuidelineToPage(pos, 'h')
     })
+  }
+
+  mapSplitUnit() {
+    if (this.scaleRatio < 30) {
+      return this.splitUnitMap.xxs
+    } else if (this.scaleRatio < 30) {
+      return this.splitUnitMap.xs
+    } else if (this.scaleRatio < 80) {
+      return this.splitUnitMap.s
+    } else if (this.scaleRatio < 150) {
+      return this.splitUnitMap.m
+    } else if (this.scaleRatio < 350) {
+      return this.splitUnitMap.l
+    } else {
+      return this.splitUnitMap.xl
+    }
   }
 }
 

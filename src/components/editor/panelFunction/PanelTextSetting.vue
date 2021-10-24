@@ -332,20 +332,20 @@ export default Vue.extend({
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
       const interval = setInterval(() => {
-        const endTime = new Date().getTime()
-        if (endTime - startTime > 500) {
+        if (new Date().getTime() - startTime > 500) {
           this.fontSizeSteppingHandler(step)
+          TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
         }
       }, tickInterval)
       const onmouseup = () => {
-        const endTime = new Date().getTime()
-        if (endTime - startTime < 500) {
+        if (new Date().getTime() - startTime < 500) {
           this.fontSizeSteppingHandler(step)
         }
         clearInterval(interval)
         StepsUtils.record()
         window.removeEventListener('onmouseup', onmouseup)
       }
+      TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
       window.addEventListener('mouseup', onmouseup)
     },
     fontSizeSteppingHandler(step: number) {

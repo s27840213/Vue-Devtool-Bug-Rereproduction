@@ -43,13 +43,23 @@
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     template(v-if="isImage")
       div(class="popup-layer__item"
-          @click="updateImageAsFrame.action")
+          @click="updateImageAsFrame().action")
         svg-icon(
           class="pointer"
-          :iconName="updateImageAsFrame.icon"
+          :iconName="updateImageAsFrame().icon"
           :iconWidth="'16px'"
           :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{updateImageAsFrame.text}}
+        span(class="ml-10 body-2") {{updateImageAsFrame().text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+    template(v-if="isFrame")
+      div(class="popup-layer__item"
+          @click="detachImage().action()")
+        svg-icon(
+          class="pointer"
+          :iconName="detachImage().icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{detachImage().text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
     template(v-if="isFrame")
       div(class="popup-layer__item"
@@ -126,6 +136,8 @@ import zindexUtils from '@/utils/zindexUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
+import { Layer } from 'konva/types/Layer'
+import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
 
 export default Vue.extend({
   data() {
@@ -152,6 +164,7 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState('popup', ['popupComponent']),
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -218,86 +231,12 @@ export default Vue.extend({
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
         }
       }
-    },
-    detachImage(): any {
-      const currLayer = layerUtils.getCurrLayer as IFrame
-      let idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
-      if (idx === -1) {
-        idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
-      }
-
-      return {
-        icon: 'copy',
-        text: 'Detach Image',
-        shortcutText: '',
-        action: () => {
-          if (idx !== -1) {
-            const clips = generalUtils.deepCopy(currLayer.clips)
-            const srcObj = {
-              ...clips[idx].srcObj
-            }
-            clips[idx].srcObj = {
-              type: 'frame',
-              userId: '',
-              assetId: ''
-            }
-            const { width, height } = clips[idx].styles
-            layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { clips })
-            layerUtils.addLayers(layerUtils.pageIndex, [layerFactary.newImage({
-              srcObj,
-              styles: {
-                x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
-                y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
-                width,
-                height
-              }
-            })])
-          }
-        }
-      }
-    },
-    updateImageAsFrame(): any {
-      return {
-        icon: 'copy',
-        text: 'Update image as Frame',
-        shortcutText: '',
-        action: () => {
-          const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage
-          if (currLayer.type === 'image') {
-            const { width, height, x, y } = currLayer.styles
-            const { designId } = currLayer
-            const layerIndex = layerUtils.layerIndex
-            const pageIndex = layerUtils.pageIndex
-            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0 })
-
-            const newFrame = layerFactary.newFrame({
-              designId,
-              styles: {
-                initWidth: width,
-                initHeight: height,
-                width,
-                height,
-                x,
-                y
-              },
-              clips: [{
-                ...currLayer,
-                clipPath: `M0,0h${width}v${height}h${-width}z`,
-                isFrameImg: true
-              }]
-            } as unknown as IFrame)
-            layerUtils.deleteLayer(layerIndex)
-            layerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
-            zindexUtils.reassignZindex(pageIndex)
-            uploadUtils.updateTemplate()
-          }
-        }
-      }
     }
   },
   methods: {
     ...mapMutations({
-      _setBackgroundImage: 'SET_backgroundImage'
+      _setBackgroundImage: 'SET_backgroundImage',
+      set_popupComponent: 'SET_popupComponent'
     }),
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
@@ -373,24 +312,109 @@ export default Vue.extend({
         }
       ]
     },
+    detachImage(): any {
+      const layerIndex = this.popupComponent.properties.layerIndex ?? -1
+      const currLayer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IFrame
+      let idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
+      if (idx === -1) {
+        if (layerIndex !== layerUtils.layerIndex) {
+          return
+        } else {
+          idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
+        }
+      }
+
+      return {
+        icon: 'copy',
+        text: 'Detach Image',
+        shortcutText: '',
+        action: () => {
+          if (idx !== -1) {
+            const clips = generalUtils.deepCopy(currLayer.clips)
+            const srcObj = {
+              ...clips[idx].srcObj
+            }
+            clips[idx].srcObj = {
+              type: 'frame',
+              userId: '',
+              assetId: ''
+            }
+            const { width, height } = clips[idx].styles
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { clips })
+            layerUtils.addLayers(layerUtils.pageIndex, [layerFactary.newImage({
+              srcObj,
+              styles: {
+                x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
+                y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
+                width,
+                height
+              }
+            })])
+          }
+          this.set_popupComponent({ layerIndex: -1 })
+        }
+      }
+    },
+    updateImageAsFrame(): any {
+      return {
+        icon: 'copy',
+        text: 'Update image as Frame',
+        shortcutText: '',
+        action: () => {
+          const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage
+          if (currLayer.type === 'image') {
+            const { width, height, x, y } = currLayer.styles
+            const { designId } = currLayer
+            const layerIndex = layerUtils.layerIndex
+            const pageIndex = layerUtils.pageIndex
+            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0 })
+
+            const newFrame = layerFactary.newFrame({
+              designId,
+              styles: {
+                initWidth: width,
+                initHeight: height,
+                width,
+                height,
+                x,
+                y
+              },
+              clips: [{
+                ...currLayer,
+                clipPath: `M0,0h${width}v${height}h${-width}z`,
+                isFrameImg: true
+              }]
+            } as unknown as IFrame)
+            layerUtils.deleteLayer(layerIndex)
+            layerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
+            zindexUtils.reassignZindex(pageIndex)
+            uploadUtils.updateTemplate()
+          }
+        }
+      }
+    },
     setBackgroundImage() {
       const image = this.currSelectedInfo.layers[0] as IImage
-      image.styles.width = image.styles.imgWidth
-      image.styles.height = image.styles.imgHeight
-      image.styles.initWidth = image.styles.imgWidth
-      image.styles.initHeight = image.styles.imgHeight
-      image.styles.imgX = 0
-      image.styles.imgY = 0
-      const pageIndex = this.currSelectedInfo.pageIndex
-      this._setBackgroundImage({
-        pageIndex: pageIndex,
-        config: image
+      imageUtils.getImageSize(imageUtils.getSrc(image), image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
+        image.styles.imgWidth = imgWidth
+        image.styles.imgHeight = imgHeight
+        image.styles.width = imgWidth
+        image.styles.height = imgHeight
+        image.styles.initWidth = imgWidth
+        image.styles.initHeight = imgHeight
+        image.styles.imgX = 0
+        image.styles.imgY = 0
+        const pageIndex = this.currSelectedInfo.pageIndex
+        this._setBackgroundImage({
+          pageIndex: pageIndex,
+          config: image
+        })
+        const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
+        pageUtils.updateBackgroundImageSize(pageIndex, width, height)
+        pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+        pageUtils.updateBackgroundImageMode(pageIndex, true)
+        ShortcutUtils.del()
       })
-      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
-      pageUtils.updateBackgroundImageSize(pageIndex, width, height)
-      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      pageUtils.updateBackgroundImageMode(pageIndex, true)
-      ShortcutUtils.del()
     },
     closePopup() {
       popupUtils.closePopup()

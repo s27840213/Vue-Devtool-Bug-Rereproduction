@@ -5,9 +5,9 @@
         :iconWidth="'100px'" style="height: 50px;")
     div(class="body-2")
       div
-        btn(@click.native="goToPage('/home')"
+        btn(@click.native="goToPage('/')"
           style="padding: 5px;" :type="'icon-mid-body'"
-          :class="{'text-blue-1': currentPage === '/home'}") 建立設計
+          :class="{'text-blue-1': currentPage === '/'}") 建立設計
       div
         btn(@click.native="goToPage('/template')"
           style="padding: 5px;" :type="'icon-mid-body'"
@@ -87,7 +87,7 @@ export default Vue.extend({
       // Temporary setting ----
       } else if (pageName === '/toturial' || pageName === '/faq') {
         window.location.href = 'https://www.facebook.com/vivipictw'
-      } else if (pageName === '/mydesign') {
+      } else if (pageName === '/' || pageName === '/pricing' || pageName === '/mydesign') {
         this.$router.push({ path: pageName })
       } else {
         // this.$router.push({ path: pageName })
