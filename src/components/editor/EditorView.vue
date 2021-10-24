@@ -130,7 +130,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       pageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
-      showRuler: 'getShowRuler'
+      showRuler: 'getShowRuler',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -270,7 +271,7 @@ export default Vue.extend({
       // or we just put the function in this callback function, the activeElement will always get 'BODY'
       setTimeout(() => {
         this.$nextTick(() => {
-          if (document.activeElement?.tagName === 'BODY') {
+          if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
             this.geCurrActivePageIndex === -1 ? PageUtils.activeMostCentralPage() : PageUtils.activeCurrActivePage()
           }
         })

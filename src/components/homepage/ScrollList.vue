@@ -13,7 +13,6 @@
     div(class="scroll-list-items" @scroll="handleScroll" ref="items")
       div(v-for="item, idx in list" class="scroll-list-item")
         img(class="pointer"
-        draggable="true"
         :src="`https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
         @click="goToPage('Editor')"
         @error="handleNotFound")
