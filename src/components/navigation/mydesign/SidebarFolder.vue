@@ -188,7 +188,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @function paddingForLevel($level) {
-  @return 10px 10px 10px 25px * $level + 18px;
+  @return 10px 10px 10px 25px * $level + 33px;
 }
 
 @function fontWeightForLevel($level) {

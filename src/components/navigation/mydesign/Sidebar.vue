@@ -2,6 +2,14 @@
   div(class="sidebar")
     div(class="nav")
       div(class="nav-container")
+        div(class="nav-item-new-folder")
+          div(class="nav-item-new-folder__container"
+              @click="handleNewFolder")
+            div(class="nav-item-new-folder__icon")
+              svg-icon(iconName="plus-origin"
+                  iconColor="gray-4"
+                  iconWidth="18px")
+            div(class="nav-item-new-folder__text") 新建資料夾
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'a')}"
             :style="draggedOverStyles('a')"
             @dragenter="handleDragEnter('a')"
@@ -177,6 +185,9 @@ export default Vue.extend({
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
+    },
+    handleNewFolder() {
+      designUtils.addNewFolder(this.folders, [designUtils.ROOT])
     }
   }
 })
@@ -195,14 +206,14 @@ export default Vue.extend({
 }
 
 .nav-container {
-  margin-top: 135px;
+  margin-top: 78px;
   min-width: 100%;
   width: fit-content;
 }
 
 .nav-item {
   grid-template-columns: 20px auto;
-  padding: 10px 10px 10px 16px;
+  padding: 10px 10px 10px 32px;
   width: 100%;
   display: grid;
   grid-column-gap: 10px;
@@ -218,6 +229,57 @@ export default Vue.extend({
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 2.5px;
+  }
+}
+
+.nav-item-new-folder {
+  padding: 0px 67px 0px 18px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  &:hover {
+    .nav-item-new-folder {
+      &__container {
+        border-color: white;
+      }
+      &__icon {
+        svg {
+          color: white;
+        }
+      }
+      &__text {
+        color: white;
+      }
+    }
+  }
+  &__container {
+    grid-template-columns: 20px auto;
+    padding: 10px 18px 10px 13px;
+    width: 100%;
+    display: grid;
+    grid-column-gap: 10px;
+    align-items: center;
+    box-sizing: border-box;
+    border: 1px solid setColor(gray-3);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  &__icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__text {
+    font-family: 'NotoSansTC';
+    text-align: left;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    color: setColor(gray-4);
   }
 }
 </style>
