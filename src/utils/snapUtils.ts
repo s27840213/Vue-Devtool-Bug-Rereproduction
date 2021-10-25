@@ -184,23 +184,27 @@ class SnapUtils {
     }
   }
 
-  getClosestSnapAngle(markerIndex: number, point: number[], multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET): { lineLength: number, lineAngle: number } {
+  getClosestSnapAngle(angle: number, multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET) {
+    const quotient = Math.floor(angle / multipleOf)
+    let candidateAngle = quotient * multipleOf
+    if ((angle - candidateAngle) > multipleOf / 2) {
+      candidateAngle += multipleOf
+    }
+    if (Math.abs(angle - candidateAngle) < allowedOffset) {
+      this.closestSnapAngle = candidateAngle % 360
+    } else {
+      this.closestSnapAngle = -1
+    }
+  }
+
+  getClosestSnapLineAngle(markerIndex: number, point: number[], multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET): { lineLength: number, lineAngle: number } {
     const { xDiff, yDiff, width, height } = shapeUtils.lineDimension(point)
     let lineAngle = (Math.atan2(yDiff, xDiff) / Math.PI * 180 + 360) % 360
     const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
     if (markerIndex === 0) {
       lineAngle = (lineAngle + 180) % 360
     }
-    const quotient = Math.floor(lineAngle / multipleOf)
-    let candidateAngle = quotient * multipleOf
-    if ((lineAngle - candidateAngle) > multipleOf / 2) {
-      candidateAngle += multipleOf
-    }
-    if (Math.abs(lineAngle - candidateAngle) < allowedOffset) {
-      this.closestSnapAngle = candidateAngle % 360
-    } else {
-      this.closestSnapAngle = -1
-    }
+    this.getClosestSnapAngle(lineAngle, multipleOf, allowedOffset)
     return {
       lineLength: hypotenuse,
       lineAngle: lineAngle
@@ -281,8 +285,16 @@ class SnapUtils {
     return offset
   }
 
-  calAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): { newPoint: number[], lineLength: number, lineAngle: number } {
-    const { lineLength, lineAngle } = this.getClosestSnapAngle(markerIndex, point, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : undefined)
+  calAngleSnap(angle: number, forcedSnapFor15Deg = false): number {
+    this.getClosestSnapAngle(angle, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : 2)
+    if (this.closestSnapAngle >= 0) {
+      return this.closestSnapAngle
+    }
+    return angle
+  }
+
+  calLineAngleSnap(markerIndex: number, point: number[], forcedSnapFor15Deg = false): { newPoint: number[], lineLength: number, lineAngle: number } {
+    const { lineLength, lineAngle } = this.getClosestSnapLineAngle(markerIndex, point, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : undefined)
     if (this.closestSnapAngle >= 0) {
       const referenceCoordinates = point.slice((1 - markerIndex) * 2, (1 - markerIndex) * 2 + 2)
       const xDiff = lineLength * Math.cos(this.closestSnapAngle / 180 * Math.PI)

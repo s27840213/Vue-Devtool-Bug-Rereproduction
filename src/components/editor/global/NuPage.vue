@@ -97,7 +97,7 @@
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
-              :key="`controller-${layer.id}`"
+              :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
               :layerIndex="index"
               :pageIndex="pageIndex"
               :config="layer"

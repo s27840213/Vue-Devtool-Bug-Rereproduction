@@ -351,8 +351,6 @@ class ShapeUtils {
   }
 
   pointPreprocess(point: number[], markerWidth: number[], trimWidth: boolean[], scale: number, linecap: string, trimOffset: number[]): number[] {
-    console.log(trimOffset)
-    console.log(this.lineDimension(point))
     const { width, height, baseDegree } = this.lineDimension(point)
     const [startTrimOffset, endTrimOffset] = trimOffset
     const cosine = Math.cos(baseDegree)

@@ -156,6 +156,7 @@ import popupUtils from '@/utils/popupUtils'
 import { config } from 'vue/types/umd'
 import objects from '@/store/module/objects'
 import { isBuffer } from 'lodash'
+import snapUtils from '@/utils/snapUtils'
 
 export default Vue.extend({
   props: {
@@ -176,6 +177,7 @@ export default Vue.extend({
       lineLength: 0,
       lineAngle: 0,
       initialPos: { x: 0, y: 0 },
+      initialRotate: 0,
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
       initCoordinate: { x: 0, y: 0 },
@@ -873,7 +875,7 @@ export default Vue.extend({
       const copiedPoint: number[] = Array.from(this.config.point)
       copiedPoint[markerIndex * 2] = this.initCoordinate.x + dx
       copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
-      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint, event.shiftKey)
+      const { newPoint, lineLength, lineAngle } = this.snapUtils.calLineAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
@@ -1069,6 +1071,7 @@ export default Vue.extend({
       }
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.initialRotate = this.getLayerRotate
 
       window.addEventListener('mousemove', this.rotating)
       window.addEventListener('mouseup', this.rotateEnd)
@@ -1094,8 +1097,8 @@ export default Vue.extend({
         if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
           angle *= -1
         }
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        angle += this.getLayerRotate % 360
+        angle += this.initialRotate % 360
+        angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
       }
     },
