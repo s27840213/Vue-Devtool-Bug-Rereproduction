@@ -2,13 +2,7 @@ import type * as Api from '@/interfaces/api'
 import Axios from 'axios'
 
 const options = {
-  baseURL: `${process.env.VUE_APP_UNSPLASH_BASE_URL}`,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'Accept-Version': 'v1',
-    Authorization: `Client-ID ${process.env.VUE_APP_UNSPLASH_ACCESS_KEY}`
-  }
+  baseURL: `${process.env.VUE_APP_UNSPLASH_BASE_URL}`
 }
 
 const axios = Axios.create(options)
@@ -35,7 +29,8 @@ export default {
       page: params.page || 1,
       per_page: params.perPage,
       order_by: 'popular',
-      lang: 'zh-TW'
+      lang: 'zh-TW',
+      client_id: process.env.VUE_APP_UNSPLASH_ACCESS_KEY
     }
     const { data } = await axios.request<Api.IUnsplashPhoto[]>({
       url: '/photos',
@@ -50,7 +45,8 @@ export default {
       per_page: params.perPage,
       query: params.query || 'random',
       order_by: params.orderBy || 'relevant',
-      lang: 'zh-TW'
+      lang: 'zh-TW',
+      client_id: process.env.VUE_APP_UNSPLASH_ACCESS_KEY
     }
     if (REGEX_JAPANESE.test(params.query)) {
       searchParams.lang = 'ja'
