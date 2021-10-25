@@ -21,11 +21,11 @@ class HintUtils {
     this.showHint = false
   }
 
-  bind(el: HTMLElement, hint: string) {
+  bind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.addEventListener('mouseenter', () => {
       this.timerId = setTimeout(() => {
         this.openHint(el, hint)
-      }, 300)
+      }, timeInterval)
     })
     el.addEventListener('mouseleave', () => {
       this.closeHint()
@@ -33,11 +33,11 @@ class HintUtils {
     })
   }
 
-  unbind(el: HTMLElement, hint: string) {
+  unbind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.removeEventListener('mouseenter', () => {
       this.timerId = setTimeout(() => {
         this.openHint(el, hint)
-      }, 300)
+      }, timeInterval)
     })
     el.removeEventListener('mouseleave', () => {
       clearTimeout(this.timerId)
@@ -51,7 +51,7 @@ class HintUtils {
       const el = document.querySelector('.hint') as HTMLElement
       const [width, height] = [el.offsetWidth, el.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
-      const { left, bottom } = target?.getBoundingClientRect() as DOMRect
+      const { left, bottom, width: targetWidth, height: targetHeight } = target?.getBoundingClientRect() as DOMRect
       let xDiff = 0
       let yDiff = 0
 
@@ -65,7 +65,7 @@ class HintUtils {
         yDiff = (bottom + height) - vh
       }
 
-      el.style.transform = `translate3d(${posX - (width / 4) - xDiff}px, ${posY - yDiff + 5}px,0)`
+      el.style.transform = `translate3d(${posX - ((width - targetWidth) / 2) - xDiff}px, ${posY - yDiff + 5}px,0)`
     })
   }
 }

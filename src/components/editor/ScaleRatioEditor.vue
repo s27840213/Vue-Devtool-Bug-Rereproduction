@@ -1,6 +1,8 @@
 <template lang="pug">
   div(class="scale-ratio-editor")
-    input(ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01" v-model="ratioInPercent"
+    input(ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
+      v-model="ratioInPercent"
+      :disabled="isShowPagePreview"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
       v-ratio-change)
     div(class="scale-ratio-editor__percentage lead-2")
@@ -22,7 +24,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      lastSelectedPageIndex: 'getLastSelectedPageIndex'
     }),
     ratioInPercent: {
       get(): number {
@@ -45,8 +48,11 @@ export default Vue.extend({
       this._setScaleRatio(ratio)
     },
     setIsShowPagePreview(show: boolean) {
-      console.log('function in progress...')
-      // this._setIsShowPagePreview(show)
+      this._setIsShowPagePreview(show)
+      if (!show) {
+        const currentPage = document.getElementsByClassName('nu-page')[this.lastSelectedPageIndex] as HTMLElement
+        currentPage.scrollIntoView()
+      }
     }
   }
 })

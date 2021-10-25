@@ -1,35 +1,144 @@
 <template lang="pug">
   div(class="page-preview-page")
-    div(v-if="pagename === 'last'" class="page-preview-page-last")
-        btn(@click.native="addPage()" :type="'icon-mid-body'")
+    div(class="page-preview-page-content pointer"
+      :class="{'focused': lastSelectedPageIndex === index}"
+      @click="clickPage()"
+      draggable="true",
+      @dragstart="handleDragStart"
+      @dragend="handleDragEnd"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave")
+      div(v-if="isMouseOver"
+        class="page-preview-page-content-more"
+        @click="toggleMenu()")
         svg-icon(class="pb-5"
-            :iconColor="'gray-3'"
-            :iconName="'plus-origin'"
-            :iconWidth="'50px'")
-    div(v-else class="page-preview-page-content")
-        div(class="page-preview-page-content-more")
-                svg-icon(class="pointer pb-5"
-                :iconName="'more_horizontal'"
-                :iconWidth="'25px'")
-    div(v-if="pagename !== 'last'" class="page-preview-page-title")
-        span {{pagename}}
+          :iconName="'more_horizontal'"
+          :iconWidth="'25px'")
+      div(v-if="isMenuOpen"
+        class="menu"
+        v-click-outside="closeMenu")
+        template(v-for="menuItem in menuItems")
+          div(class="menu-item"
+            @click="handleMenuAction(menuItem.icon)")
+            div(class="menu-item-icon")
+              svg-icon(:iconName="menuItem.icon"
+                iconWidth="15px"
+                iconColor="gray-2")
+            div(class="menu-item-text")
+              span {{ menuItem.text }}
+      div(v-if="type === 'panel'"
+        class="page-preview-page-icon")
+        span {{index+1}}
+    div(v-if="type === 'full'"
+      class="page-preview-page-title pt-5")
+      span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
-import pageUtils from '@/utils/pageUtils'
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
+import GeneralUtils from '@/utils/generalUtils'
+import GroupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
+    type: String,
+    index: Number,
     pagename: String
+  },
+  data() {
+    return {
+      menuItems: [
+        {
+          icon: 'copy',
+          text: '複製'
+        },
+        {
+          icon: 'trash',
+          text: '刪除'
+        }
+      ],
+      isMouseOver: false,
+      isMenuOpen: false
+    }
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
+  computed: {
+    ...mapState('page', [
+      'focusPageIndex'
+    ]),
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getPage: 'getPage',
+      getPages: 'getPages'
+    })
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _addPageToPos: 'ADD_pageToPos',
+      _deletePage: 'DELETE_page',
+      _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    addPage() {
-      this._addPage(pageUtils.newPage({}))
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen
+    },
+    closeMenu() {
+      this.isMenuOpen = false
+    },
+    handleMouseEnter() {
+      this.isMouseOver = true
+    },
+    handleMouseLeave() {
+      this.isMouseOver = false
+    },
+    clickPage() {
+      this._setLastSelectedPageIndex(this.index)
+      this._setCurrActivePageIndex(this.index)
+      if (this.type === 'panel') {
+        const currentPage = document.getElementsByClassName('nu-page')[this.index] as HTMLElement
+        currentPage.scrollIntoView()
+      }
+    },
+    handleDragStart() {
+      this._setLastSelectedPageIndex(this.index)
+      this._setCurrActivePageIndex(this.index)
+      this.isMouseOver = false
+      document.addEventListener('dragover', this.preventDefaultDragOver, false)
+    },
+    handleDragEnd() {
+      document.removeEventListener('dragover', this.preventDefaultDragOver, false)
+    },
+    preventDefaultDragOver(e: DragEvent) {
+      e.preventDefault()
+    },
+    handleMenuAction(icon: string) {
+      this.closeMenu()
+      let page = null
+      switch (icon) {
+        case 'copy':
+          page = GeneralUtils.deepCopy(this.getPage(this.index))
+          page.name += ' (copy)'
+          page.designId = ''
+          this._addPageToPos({
+            newPage: page,
+            pos: this.index + 1
+          })
+          GroupUtils.deselect()
+          this._setLastSelectedPageIndex(this.index + 1)
+          this._setCurrActivePageIndex(this.index + 1)
+          break
+        case 'trash':
+          GroupUtils.deselect()
+          this._deletePage(this.index)
+          this._setLastSelectedPageIndex(this.index - 1)
+          this._setCurrActivePageIndex(this.index - 1)
+          break
+        default:
+          break
+      }
     }
   }
 })
@@ -38,25 +147,72 @@ export default Vue.extend({
 .page-preview-page {
   display: flex;
   flex-direction: column;
-  width: 150px;
-  height: 180px;
+  position: relative;
+  width: 140px;
   transition: 0.25s ease-in-out;
 
   &-content {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: 140px;
     background: rgb(242, 255, 228);
     border-radius: 5px;
+    border: 5px solid #ffffff00;
+
     &-more {
       position: absolute;
       right: 8px;
       top: 5px;
-      opacity: 0;
     }
 
-    &:hover > &-more {
-      opacity: 1;
+    .menu {
+      position: absolute;
+      width: 120px;
+      box-sizing: border-box;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+      right: 8px;
+      top: 35px;
+    }
+
+    .menu-item {
+      position: relative;
+      width: 100%;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      gap: 10px;
+      cursor: pointer;
+      &:hover {
+        background-color: setColor(blue-3);
+      }
+
+      &-icon {
+        margin-left: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &-text {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+
+        > span {
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 12px;
+          color: setColor(gray-2);
+        }
+      }
     }
   }
   &-title {
@@ -66,19 +222,28 @@ export default Vue.extend({
     width: 100%;
     height: 30px;
     font-size: 16px;
+    font-family: Mulish;
+    font-weight: bold;
   }
-  &-last {
+  &-icon {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 20px;
+    height: 20px;
+    background: black;
+    color: white;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 150px;
-    background: setColor(gray-4);
-
-    > button {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-    }
+    font-size: 13px;
+    font-weight: 600;
   }
+}
+
+.focused {
+  border: 5px solid setColor(blue-1);
+  color: setColor(blue-1);
 }
 </style>

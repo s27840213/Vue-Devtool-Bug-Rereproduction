@@ -1,8 +1,9 @@
 <template lang="pug">
   div(class="editor-header")
     div(class="body-2")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'" style="height: 50px;")
+      svg-icon(class="pointer" style="height: 50px;"
+      :iconName="'logo'" :iconWidth="'100px'"
+      @click.native="goToPage('Home')")
       div(class="btn-file" @click="openFIlePopup()")
         span 檔案
       div
@@ -19,7 +20,7 @@
         @click.native="ShortcutUtils.redo()")
     div(class="body-2")
       span 我的設計 / 新增檔案名稱
-    div(class="body-2")
+    div(class="body-2 relative")
       div(v-if="!isLogin")
         span 若要儲存設計，請
         a(:href="`/signup?redirect=${path}`") 註冊
@@ -47,7 +48,12 @@
         :iconName="'download'"
         :iconWidth="'15px'"
         :type="'primary-sm'"
-        class="rounded" style="padding: 5px 40px;") 下 載
+        class="rounded"
+        style="padding: 5px 40px;"
+        @click.native="download = true") 下 載
+      popup-download(v-if="download"
+        class="editor-header__download"
+        @close="() => (download = false)")
       //- img(:src="require('@/assets/img/svg/avatar.svg')")
 </template>
 
@@ -61,13 +67,18 @@ import { mapState, mapMutations } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 export default Vue.extend({
   data() {
     return {
       ShortcutUtils,
-      StepsUtils
+      StepsUtils,
+      download: false
     }
+  },
+  components: {
+    PopupDownload
   },
   computed: {
     ...mapState('user', [
@@ -126,6 +137,9 @@ export default Vue.extend({
     },
     openFIlePopup() {
       popupUtils.openPopup('file')
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
     }
   }
 })
@@ -172,6 +186,13 @@ export default Vue.extend({
       align-items: center;
       margin-right: 40px;
     }
+  }
+  &__download {
+    position: absolute;
+    top: 100%;
+    margin-top: 12px;
+    right: 0;
+    width: 210px;
   }
 }
 </style>

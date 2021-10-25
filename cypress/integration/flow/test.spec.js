@@ -5,16 +5,17 @@ const sizes = [
 
 describe('Flow: Image, Text, Group', () => {
   it('visit page', () => {
-    cy.visit('http://localhost:8080/')
+    cy.visit('http://localhost:8080/editor')
   })
 
   sizes.forEach(size => {
     const btnText = `${size.width}x${size.height} px`
     describe(`format ${btnText}`, () => {
       it('add new design', () => {
-        cy.contains('New Design')
+        cy.get('.btn-file')
           .click()
-        cy.contains('Templates')
+        cy.get('.popup-file__item')
+          .contains('建立新設計')
           .click()
       })
 

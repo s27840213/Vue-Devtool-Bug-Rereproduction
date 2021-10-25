@@ -43,8 +43,14 @@
           div(class="home-content-feature-text")
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'"
-            class="rounded" @click.native="goMakeClicked()") 開 始 製 作
-      div(class="home-content-title label-lg") #萬聖節  #母嬰  #雙十一  #特價
+            class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
+      div(class="home-content-title label-lg")
+        div
+          template(v-for="tag in tags")
+            span(class="pointer mr-20"
+            @click="goToPage('Editor', tag)") {{'#' + tag}}
+        span(class="pointer body-1 more"
+        @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
       div(class="home-content-template")
         scroll-list(:list="tagTemplateList")
       div(class="home-content-title label-lg")
@@ -143,7 +149,8 @@ export default Vue.extend({
         }
       ],
       featureSelected: 0,
-      tagString: '#萬聖節#母嬰#雙十一#特價',
+      tagString: '萬聖節,母嬰,雙十一,特價',
+      tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
       latestTemplateList: []
@@ -166,10 +173,8 @@ export default Vue.extend({
       }
     }, 4000)
 
-    const a = await this.getApiResponse
-    console.log('getApiResponse', a)
-
-    let keyword = '萬聖節 母嬰 雙十一 特價'
+    let keyword = this.tagString.replaceAll(',', ' ')
+    this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
@@ -196,7 +201,6 @@ export default Vue.extend({
     },
     featureItemClicked (idx: number) {
       this.featureSelected = idx
-      console.log(idx)
     }
   }
 })
@@ -221,6 +225,10 @@ export default Vue.extend({
     justify-content: space-between;
     text-align: left;
     padding: 4vw 10vw 1.5vw 10vw;
+
+    .more {
+      white-space: nowrap;
+    }
   }
   &-video {
     display: flex;

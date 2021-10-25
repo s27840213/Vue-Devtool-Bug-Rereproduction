@@ -21,6 +21,7 @@ import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import Hint from '@/components/global/Hint.vue'
+import Dropdown from '@/components/global/Dropdown.vue'
 
 Vue.component('svg-icon', SvgIcon)
 Vue.component('tmp-images', TmpImages)
@@ -29,6 +30,7 @@ Vue.component('tmp-svg', TmpSvg)
 Vue.component('tmp-files', TmpFiles)
 Vue.component('btn', Btn)
 Vue.component('property-bar', PropertyBar)
+Vue.component('dropdown', Dropdown)
 Vue.component('nu-page', NuPage)
 Vue.component('nu-image', NuImage)
 Vue.component('nu-layer', NuLayer)

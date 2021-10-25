@@ -12,9 +12,13 @@
             :iconWidth="'30px'")
           div(class="nav-item-text body-2"
             :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
-      div(class="nav-setting")
-        svg-icon(:iconName="'settings'"
-          :iconColor="'gray-3'" :iconWidth="'30px'")
+      div(class="nav-setting"
+        @click="toggleNavPage()")
+        svg-icon(:iconName="'navPage'"
+          :iconColor="showPagePanel ? 'blue-1' : 'gray-3'"
+          :iconWidth="'30px'")
+        div(class="nav-item-text body-3"
+        :class="showPagePanel ? 'text-blue-1' : 'text-gray-3'") 導覽頁
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -41,15 +45,22 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      showPagePanel: 'page/isShowPagePanel'
     })
   },
   methods: {
     ...mapMutations({
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
+      this.setShowPagePanel(false)
+    },
+    toggleNavPage() {
+      this.setCurrSidebarPanel(-1)
+      this.setShowPagePanel(!this.showPagePanel)
     }
   }
 })

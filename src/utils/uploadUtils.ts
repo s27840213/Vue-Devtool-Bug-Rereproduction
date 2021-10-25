@@ -476,6 +476,15 @@ class UploadUtils {
     }
   }
 
+  async getExport(designId: string, teamId: string, background: string) {
+    const fileName = background === '0' ? 'page.json' : 'page_trans.json'
+    const response = await fetch(`https://template.vivipic.com/admin/${teamId}/export/${designId}/${fileName}`)
+    response.json().then(async (pages) => {
+      await ShapeUtils.addComputableInfo(pages[0].layers[0])
+      store.commit('SET_pages', pages)
+    })
+  }
+
   removeComputableInfo(layer: ILayer) {
     if (layer.type === 'shape') {
       switch (layer.category) {
@@ -646,6 +655,33 @@ class UploadUtils {
           styles: styleFilter(styles)
         }
       }
+    }
+  }
+
+  uploadExportJSON(exportId: string) {
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_map.fields[key])
+    })
+
+    formData.append('key', `${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
+    // only for template
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
+    const xhr = new XMLHttpRequest()
+    // console.log(this.loginOutput)
+    const pagesJSON = store.getters.getPages
+    const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
+
+    xhr.open('POST', this.loginOutput.upload_map.url, true)
+    xhr.send(formData)
+    xhr.onload = function () {
+      // console.log(this)
     }
   }
 }

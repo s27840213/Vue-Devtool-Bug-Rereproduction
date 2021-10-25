@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211021"
+  version: "20211022"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -559,10 +559,11 @@ definitions:
       - $ref: "#/definitions/apiCommonResponse"
       - type: object
         properties:
-          id:
+          url:
             type: string
-            description: id for export file (${path}/${id}) and polling json
-              (${path}/${id}.json)
+            description: "url for polling json. The polling json has two keys: flag
+              indicates export result (0 for success, 1 for fail), and url
+              indicates the url for export result (zip or pdf)."
   reprocessDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -819,10 +820,17 @@ definitions:
         properties:
           type:
             type: string
-            description: "design type: background, font, svg, template, or text"
+            description: "design type: background, font, svg, template, text, or layout"
           design_id:
             type: string
-            description: design id selected by user
+            description: design id selected by user, fill '-1' for layout case with
+              non-empty custom width/height
+          width:
+            type: number
+            description: custom width for layout
+          height:
+            type: number
+            description: custom height for layout
   verifyVcodeInput:
     type: object
     required:

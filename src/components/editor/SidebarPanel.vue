@@ -4,9 +4,14 @@
       class="p-10 border-box"
       :style="panelStyles()"
       :is="panelComponents[currPanel]")
-    img(class="btn-pack"
+    img(v-if="currPanel >= 0"
+      class="btn-pack"
       :src="require('@/assets/img/svg/pack-up.svg')"
       @click="togglePanel()")
+    component(v-if="showPagePanel"
+      class="border-box"
+      style="width: 200px;"
+      is="panel-page")
 </template>
 
 <script lang="ts">
@@ -19,6 +24,7 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
 import PanelPexels from '@/components/editor/panelSidebar/PanelPexels.vue'
+import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import { mapGetters } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
@@ -32,7 +38,8 @@ export default Vue.extend({
     PanelText,
     PanelFile,
     PanelBrand,
-    PanelPexels // for testing purposes
+    PanelPexels, // for testing purposes
+    PanelPage
   },
   data() {
     return {
@@ -57,7 +64,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      showPagePanel: 'page/isShowPagePanel'
     })
   },
   methods: {
