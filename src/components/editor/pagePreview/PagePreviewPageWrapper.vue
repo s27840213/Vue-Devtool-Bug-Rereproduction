@@ -1,13 +1,18 @@
 <template lang="pug">
   div(class="page-preview-page")
     div(class="page-preview-page-content pointer"
-      :class="{'focused': lastSelectedPageIndex === index}"
+      :style="styles()"
       @click="clickPage()"
       draggable="true",
       @dragstart="handleDragStart"
       @dragend="handleDragEnd"
       @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave")
+      @mouseleave="handleMouseLeave"
+      ref="content")
+      page-content(:style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
+      div(class="page-preview-page__highlighter"
+        :class="{'focused': lastSelectedPageIndex === index}"
+        :style="hightlighterStyles()")
       div(v-if="isMouseOver"
         class="page-preview-page-content-more"
         @click="toggleMenu()")
@@ -39,12 +44,20 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import PageContent from '@/components/editor/page/PageContent.vue'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
+  components: {
+    PageContent
+  },
   props: {
     type: String,
     index: Number,
-    pagename: String
+    config: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -59,7 +72,8 @@ export default Vue.extend({
         }
       ],
       isMouseOver: false,
-      isMenuOpen: false
+      isMenuOpen: false,
+      contentWidth: 0
     }
   },
   directives: {
@@ -71,11 +85,32 @@ export default Vue.extend({
     ]),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getPage: 'getPage',
-      getPages: 'getPages'
-    })
+      getPage: 'getPage'
+    }),
+    scaleRatio(): number {
+      return this.contentWidth / (this.config as IPage).width
+    },
+    contentScaleStyles(): { [index: string]: string } {
+      return {
+        transform: `scale(${this.scaleRatio})`
+      }
+    }
+  },
+  mounted() {
+    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
   },
   methods: {
+    styles() {
+      return {
+        height: `${this.config.height * this.scaleRatio}px`
+      }
+    },
+    hightlighterStyles() {
+      return {
+        width: `${this.contentWidth}px`,
+        height: `${this.config.height * this.scaleRatio}px`
+      }
+    },
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
@@ -99,7 +134,9 @@ export default Vue.extend({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
         const currentPage = document.getElementsByClassName('nu-page')[this.index] as HTMLElement
-        currentPage.scrollIntoView()
+        currentPage.scrollIntoView({
+          behavior: 'smooth'
+        })
       }
     },
     handleDragStart() {
@@ -148,16 +185,14 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   position: relative;
-  width: 140px;
   transition: 0.25s ease-in-out;
+  max-width: 100%;
 
   &-content {
     position: relative;
-    width: 100%;
-    height: 140px;
     background: rgb(242, 255, 228);
-    border-radius: 5px;
-    border: 5px solid #ffffff00;
+    box-sizing: border-box;
+    transform-origin: 0 0;
 
     &-more {
       position: absolute;
@@ -215,6 +250,11 @@ export default Vue.extend({
       }
     }
   }
+  &__highlighter {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
   &-title {
     display: flex;
     justify-content: center;
@@ -243,7 +283,8 @@ export default Vue.extend({
 }
 
 .focused {
-  border: 5px solid setColor(blue-1);
+  outline: 5px solid setColor(blue-1);
   color: setColor(blue-1);
+  box-sizing: border-box;
 }
 </style>

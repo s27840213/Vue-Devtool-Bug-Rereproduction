@@ -6,15 +6,25 @@
         type="text"
         v-model="pageName"
         @focus="ShortcutUtils.deselect()")
-      div(v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
-        svg-icon(class="pointer btn-line-template"
-          :iconName="'line-template'" :iconWidth="`${24}px`" :iconColor="'gray-3'"
+      div(class="nu-page__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        svg-icon(class="pointer btn-line-template mr-15"
+          :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()")
-        svg-icon(class="pointer"
-          :iconName="'plus'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
+        svg-icon(class="pointer mr-5"
+          :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+          @click.native="")
+        svg-icon(class="pointer mr-15"
+          :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+          @click.native="")
+        svg-icon(class="pointer mr-10"
+          :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
         svg-icon(class="pointer"
-          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${14}px`" :iconColor="'gray-3'"
+          :class="[{'mr-10': getPageCount > 1}]"
+          :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="duplicatePage()")
+        svg-icon(class="pointer"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -50,31 +60,12 @@
         @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
         @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
         @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
+        @mouseover="togglePageHighlighter(true)"
+        @mouseleave="togglePageHighlighter(false)"
         tabindex="0")
       div(class="scale-container relative" :style="`transform: scale(${scaleRatio/100})`")
-        div(class="overflow-container"
-            :style="styles()")
-          div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
-            div(:class="['page-content']"
-                :style="styles('content')"
-                ref="page-content"
-                @drop="onDrop"
-                @dragover.prevent,
-                @dragenter.prevent
-                @click.right.stop="onRightClick"
-                @click.left.self="pageClickHandler()"
-                @dblclick="pageDblClickHandler()"
-                @mouseover="togglePageHighlighter(true)"
-                @mouseout="togglePageHighlighter(false)")
-              nu-layer(v-for="(layer,index) in config.layers"
-                :key="layer.id"
-                :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
-                :data-index="`${index}`"
-                :data-pindex="`${pageIndex}`"
-                :layerIndex="index"
-                :pageIndex="pageIndex"
-                :config="layer")
-        div(v-if="pageIsHover"
+        page-content(:config="config" :pageIndex="pageIndex")
+        div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
           class="page-highlighter"
           :style="styles()")
         div(class="page-control" :style="styles('control')")
@@ -105,10 +96,14 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
+          div(v-if="currActivePageIndex === pageIndex"
+              class="page-resizer"
+              ref="pageResizer"
+              @mousedown.left.stop="pageResizeStart($event)")
+            div(class="page-resizer__resizer-bar")
         div(v-if="ImageUtils.isImgControl"
             class="dim-background"
-            :style="styles('control')"
-            ref="page-content")
+            :style="styles('control')")
           template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
             nu-layer(:layerIndex="currSubSelectedInfo.index"
               :pageIndex="pageIndex"
@@ -142,6 +137,7 @@
 import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame } from '@/interfaces/layer'
+import PageContent from '@/components/editor/page/PageContent.vue'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -158,8 +154,18 @@ import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
+  components: {
+    NuImage,
+    NuBackgroundController,
+    PageContent
+  },
   data() {
     return {
+      initialAbsPos: { x: 0, y: 0 },
+      initialRelPos: { x: 0, y: 0 },
+      currentAbsPos: { x: 0, y: 0 },
+      currentRelPos: { x: 0, y: 0 },
+      initialPageHeight: 0,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -180,21 +186,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean
-  },
-  components: {
-    NuImage,
-    NuBackgroundController
+    isAnyBackgroundImageControl: Boolean,
+    editorView: HTMLElement
   },
   mounted() {
-    this.coordinate = this.$refs.coordinate as HTMLElement
-    const pageContent = this.$refs['page-content'] as HTMLElement
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    pageContent.addEventListener('contextmenu', (e: MouseEvent) => {
-      e.preventDefault()
-    }, false)
+    this.initialPageHeight = (this.config as IPage).height
   },
   computed: {
     ...mapGetters({
@@ -202,10 +198,11 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
-      getCurrActivePageIndex: 'getCurrActivePageIndex',
+      currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
+      getPage: 'getPage',
       getLayer: 'getLayer'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
@@ -247,6 +244,9 @@ export default Vue.extend({
     },
     isShowGuideline(): boolean {
       return rulerUtils.showGuideline
+    },
+    currFocusPageIndex(): number {
+      return PageUtils.currFocusPageIndex
     }
   },
   watch: {
@@ -362,6 +362,15 @@ export default Vue.extend({
       this.setCurrActivePageIndex(this.pageIndex - 1)
       this._deletePage(this.pageIndex)
     },
+    duplicatePage() {
+      const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
+      page.name += ' (copy)'
+      page.designId = ''
+      PageUtils.addPageToPos(page, this.pageIndex + 1)
+      GroupUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex + 1)
+      this.setCurrActivePageIndex(this.pageIndex + 1)
+    },
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage
       return {
@@ -391,6 +400,37 @@ export default Vue.extend({
       popupUtils.openPopup('line-template', {
         posX: 'right'
       })
+    },
+    scrollUpdate() {
+      console.log(this.currentAbsPos.x, this.currentAbsPos.y)
+      const event = new MouseEvent('mousemove', {
+        clientX: this.currentAbsPos.x,
+        clientY: this.currentAbsPos.y
+      })
+      document.documentElement.dispatchEvent(event)
+    },
+    pageResizeStart(e: MouseEvent) {
+      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+      this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      document.documentElement.addEventListener('mousemove', this.pageResizing)
+      this.editorView.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
+    },
+    pageResizing(e: MouseEvent) {
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+      const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * 100 / (this.scaleRatio)
+      PageUtils.updatePageProps({
+        height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
+      })
+    },
+    pageResizeEnd(e: MouseEvent) {
+      this.initialPageHeight = (this.config as IPage).height
+      this.$nextTick(() => {
+        document.documentElement.removeEventListener('mousemove', this.pageResizing)
+        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
+      })
     }
   }
 })
@@ -402,25 +442,27 @@ export default Vue.extend({
   margin: 15px auto;
   transform-style: preserve-3d;
   user-select: none;
+
+  &__icons {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .page-title {
   display: flex;
   justify-content: space-between;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transform: translate3d(0, 0, 10000px);
   > input {
+    min-width: 40px;
     background-color: transparent;
+    text-overflow: ellipsis;
   }
 }
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
-  &:focus {
-    outline: 1px solid setColor(blue-2);
-  }
 }
 .scale-container {
   width: 0px;
@@ -449,7 +491,7 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  outline: 2px solid setColor(blue-2, 0.5);
+  outline: 5px solid setColor(blue-1, 0.5);
   box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
@@ -461,6 +503,24 @@ export default Vue.extend({
   // this css property will prevent the page-control div from blocking all the event of page-content
   transform-style: preserve-3d;
   pointer-events: none;
+}
+
+.page-resizer {
+  @include flexCenter();
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  pointer-events: auto;
+  background-color: setColor(blue-1, 0.5);
+  width: 100%;
+  height: 20px;
+  cursor: row-resize;
+  transform: translate3d(0, 0, 1000px);
+  &__resizer-bar {
+    width: 100px;
+    height: 70%;
+    background-color: setColor(white);
+  }
 }
 
 .snap-area {

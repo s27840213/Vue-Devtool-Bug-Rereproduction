@@ -93,6 +93,13 @@ class PageUtils {
     })
   }
 
+  addPageToPos(newPage: IPage, pos: number) {
+    store.commit('ADD_pageToPos', {
+      newPage,
+      pos
+    })
+  }
+
   setPages(pages = [this.newPage({})]) {
     console.log('set pages')
     console.log(pages)
@@ -177,6 +184,13 @@ class PageUtils {
     store.commit('SET_backgroundImageMode', {
       pageIndex: pageIndex,
       newDisplayMode: mode
+    })
+  }
+
+  updatePageProps(props: { [index: string]: unknown }): void {
+    store.commit('UPDATE_pageProps', {
+      pageIndex: this.currFocusPageIndex,
+      props
     })
   }
 }
