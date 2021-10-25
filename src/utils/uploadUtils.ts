@@ -672,7 +672,6 @@ class UploadUtils {
     // console.log(this.loginOutput)
     setInterval(() => {
       const pagesJSON = store.getters.getPages
-      console.log(JSON.stringify(pagesJSON))
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
