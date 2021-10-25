@@ -99,6 +99,23 @@ class DesignUtils {
     ]
   }
 
+  makeFavoriteMenuItems(): {icon: string, text: string, extendable?: boolean}[] {
+    return [
+      {
+        icon: 'share-alt',
+        text: '分享'
+      },
+      {
+        icon: 'download',
+        text: '下載'
+      },
+      {
+        icon: 'trash',
+        text: '刪除'
+      }
+    ]
+  }
+
   makeTrashMenuItems(): {icon: string, text: string}[] {
     return [
       {

@@ -15,13 +15,8 @@
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
       span(class="page-setting__apply__text") 調 整 尺 寸
-    //- div(class="page-setting__hr horizontal-rule")
-    //- div(class="page-setting-row page-setting__suggestion text-gray-2 pointer relative"
-    //-     @click="toggleSuggestion()")
-    //-   span(class="page-setting__suggestion__text") 常用尺寸
-    //-   svg-icon(class="page-setting__suggestion__icon" :style="dropDownStyles()"
-    //-       iconName="drop-down" iconWidth="10px" iconHeight="5px" iconColor="gray-2")
-    div(v-if="panelOpened"
+    transition(name="slide-fade")
+      div(v-if="panelOpened"
         class="page-setting__suggestion-panel")
         img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
         div(class="page-setting__suggestion-panel__body")
@@ -58,28 +53,33 @@
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
           div(class="page-setting__suggestion-panel__body-row first-row")
             span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 最近使用
-          div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row")
+          div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+          div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row pointer"
+              @click="selectFormat(`recent-${index}`)")
             radio-btn(class="page-setting__suggestion-panel__body__radio"
                       :isSelected="selectedFormat === `recent-${index}`",
                       :formatKey="`recent-${index}`",
                       @select="selectFormat")
-            span(class="page-setting__suggestion-panel__body__recently body-3 pointer"
-                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'"
-                  @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
+            span(class="page-setting__suggestion-panel__body__typical-name body-4"
+                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
+            span(class="page-setting__suggestion-panel__body__typical-size body-4"
+                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
           div(class="page-setting__suggestion-panel__body-row first-row")
             span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 常用尺寸
-          div(v-for="[id, format] in Array.from(formatList)" class="page-setting__suggestion-panel__body-row")
+          div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+          div(v-for="(format, index) in formatList" class="page-setting__suggestion-panel__body-row pointer"
+              @click="selectFormat(`preset-${index}`)")
             radio-btn(class="page-setting__suggestion-panel__body__radio"
-                      :isSelected="selectedFormat === `preset-${format.id}`",
-                      :formatKey="`preset-${format.id}`",
+                      :isSelected="selectedFormat === `preset-${index}`",
+                      :formatKey="`preset-${index}`",
                       @select="selectFormat")
-            span(class="page-setting__suggestion-panel__body__typical-name body-4 pointer"
-                  :class="selectedFormat === `preset-${format.id}` ? 'text-blue-1' : 'text-white'"
-                  @click="selectFormat(`preset-${format.id}`)") {{ format.name }}
-            span(class="page-setting__suggestion-panel__body__typical-size body-4 pointer"
-                  :class="selectedFormat === `preset-${format.id}` ? 'text-blue-1' : 'text-white'"
-                  @click="selectFormat(`preset-${format.id}`)") {{ format.size }}
+            span(class="page-setting__suggestion-panel__body__typical-name body-4"
+                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
+            span(class="page-setting__suggestion-panel__body__typical-size body-4"
+                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
           div(class="page-setting__suggestion-panel__body__buttons")
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
@@ -141,12 +141,15 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import StepsUtils from '@/utils/stepsUtils'
 import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import { IListServiceContentData } from '@/interfaces/api'
+import { ILayout } from '@/interfaces/layout'
+import listApi from '@/apis/list'
 
 export default Vue.extend({
   components: {
@@ -154,88 +157,18 @@ export default Vue.extend({
     RadioBtn
   },
   mounted() {
-    const formatPresets = [
-      {
-        id: '0',
-        name: 'Facebook',
-        width: 1080,
-        height: 1080,
-        size: '1080x1080'
-      },
-      {
-        id: '1',
-        name: 'Instagram',
-        width: 1080,
-        height: 1080,
-        size: '1080x1080'
-      },
-      {
-        id: '2',
-        name: 'IG 限時動態',
-        width: 1080,
-        height: 1920,
-        size: '1080x1920 (9:16)'
-      },
-      {
-        id: '3',
-        name: 'Line',
-        width: 1040,
-        height: 1040,
-        size: '1040x1040'
-      },
-      {
-        id: '4',
-        name: '電商-商品圖',
-        width: 1080,
-        height: 1080,
-        size: '1080x1080'
-      },
-      {
-        id: '5',
-        name: '電商-Banner',
-        width: 2000,
-        height: 1000,
-        size: '2000x1000 (2:1)'
-      }
-    ]
-    for (const format of formatPresets) {
-      this.formatList.set(format.id, format)
-    }
+    this.fetchLayouts()
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
   },
   data() {
     return {
-      formatList: new Map(),
-      recentlyUsed: [
-        {
-          type: 'preset',
-          id: '0'
-        },
-        {
-          type: 'preset',
-          id: '4'
-        },
-        {
-          type: 'custom',
-          id: '0',
-          width: 1080,
-          height: 720
-        },
-        {
-          type: 'custom',
-          id: '1',
-          width: 1200,
-          height: 1200
-        },
-        {
-          type: 'preset',
-          id: '2'
-        }
-      ],
+      formatList: [] as ILayout[],
+      recentlyUsed: [] as ILayout[],
       selectedFormat: '',
       pageWidth: '' as string | number,
       pageHeight: '' as string | number,
+      isLayoutReady: false,
       isLocked: true,
       panelOpened: false,
       isLoading: false,
@@ -275,12 +208,21 @@ export default Vue.extend({
     currentPageHeight: function (newVal) {
       this.pageWidth = this.currentPageWidth
       this.pageHeight = newVal
+    },
+    isPanelOpen: function (newVal) {
+      if (!newVal) this.fetchLayouts()
     }
   },
   computed: {
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState(
+      'layouts',
+      [
+        'categories'
+      ]
+    ),
     ...mapGetters({
       getPage: 'getPage',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
@@ -316,30 +258,33 @@ export default Vue.extend({
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    getSelectedFormat(): { id: string, width: number, height: number } | undefined {
+    ...mapActions('layouts',
+      [
+        'getCategories'
+      ]
+    ),
+    getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number }
+        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
-        if (format.type === 'preset') {
-          return this.formatList.get(format.id)
-        } else {
-          return { id: format.id, width: format.width as number, height: format.height as number }
-        }
+        return format
       } else if (this.selectedFormat.startsWith('preset')) {
-        const [type, id] = this.selectedFormat.split('-')
-        return this.formatList.get(id)
+        const [type, index] = this.selectedFormat.split('-')
+        const format = this.formatList[parseInt(index)]
+        return format
       } else {
         return undefined
       }
     },
     applySelectedFormat() {
       const format = this.getSelectedFormat()
-      if (format) {
-        this.resizePage(format)
-      }
+      if (!format) return
+      this.resizePage(format)
+      listApi.addDesign(format.id, 'layout', format)
+      this.recentlyUsed.unshift(format)
     },
     copyAndApplySelectedFormat() {
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
@@ -355,7 +300,7 @@ export default Vue.extend({
       this.setCurrActivePageIndex(this.lastSelectedPageIndex + 1)
       this.applySelectedFormat()
     },
-    resizePage(format: { id: string, width: number, height: number }) {
+    resizePage(format: { width: number, height: number }) {
       ResizeUtils.resizePage(this.lastSelectedPageIndex, this.getPage(this.lastSelectedPageIndex), format)
       this.updatePageProps({
         pageIndex: this.lastSelectedPageIndex,
@@ -379,14 +324,6 @@ export default Vue.extend({
     },
     dropDownStyles() {
       return this.panelOpened ? { transform: 'translateX(-50%) rotate(180deg)' } : {}
-    },
-    makeFormatString(format: { type: string, width?: number, height?: number, id: string }) {
-      if (format.type === 'preset') {
-        const presetFormat = this.formatList.get(format.id)
-        return `${presetFormat.name} ${presetFormat.size}`
-      } else {
-        return `${format.width} x ${format.height}`
-      }
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
@@ -470,6 +407,34 @@ export default Vue.extend({
         .then(() => {
           this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
+    },
+    fetchLayouts() {
+      this.isLayoutReady = false
+      this.formatList = []
+      this.recentlyUsed = []
+      this.getCategories().then(async () => {
+        for (const category of this.categories as IListServiceContentData[]) {
+          if (category.title === '常用尺寸') {
+            this.formatList = category.list.map(item => ({
+              id: item.id,
+              width: item.width ?? 0,
+              height: item.height ?? 0,
+              title: item.title ?? '',
+              description: item.description ?? ''
+            }))
+          }
+          if (category.title === '最近使用') {
+            this.recentlyUsed = category.list.map(item => ({
+              id: item.id,
+              width: item.width ?? 0,
+              height: item.height ?? 0,
+              title: item.title ?? '',
+              description: item.description ?? ''
+            }))
+          }
+        }
+        this.isLayoutReady = true
+      })
     }
   }
 })
@@ -576,6 +541,12 @@ export default Vue.extend({
         margin-top: 15px;
         margin-right: 10px;
         align-items: center;
+        &-center {
+          margin-top: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
         &.first-row {
           margin-top: 0px;
         }
@@ -690,5 +661,14 @@ export default Vue.extend({
   &__check {
     width: 10%;
   }
+}
+
+.slide-fade-enter-active, .slide-fade-leave-active  {
+  transition: .3s ease;
+}
+
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 </style>

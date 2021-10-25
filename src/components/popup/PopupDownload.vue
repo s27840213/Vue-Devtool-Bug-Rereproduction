@@ -31,7 +31,7 @@
             type="text"
             v-model.number="selectedTypeQuality")
         input(class="popup-download__range-input"
-          v-model="selected.quality"
+          v-model.number="selected.quality"
           max="100"
           min="1"
           v-ratio-change
@@ -57,7 +57,9 @@
       hr(class="popup-download__hr my-15")
       download-check-button(type="checkbox"
         class="mb-20"
-        label="儲存上一步設定")
+        label="儲存上一步設定"
+        :default-checked="saveSubmission"
+        @change="({ checked }) => handleSubmission(checked)")
     div
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
@@ -81,6 +83,8 @@ import DownloadPageSelection from '@/components/download/DownloadPageSelection.v
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 
+const submission = `${process.env.VUE_APP_VERSION}::download_submission`
+
 export default Vue.extend({
   components: {
     DownloadCheckButton,
@@ -91,18 +95,20 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   data () {
+    const { selectedTypeVal, ...prevSubmission } = JSON.parse(localStorage.getItem(submission) || '{}')
     return {
+      saveSubmission: !!selectedTypeVal,
       polling: false,
       exportId: '',
-      selected: DownloadUtil.getTypeAttrs('png'),
+      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
       rangeType: 'all',
       pageRange: [] as number[],
-      selectedTypeVal: 'png',
+      selectedTypeVal: selectedTypeVal || 'png',
       scaleOptions: [0.5, 1, 1.5, 2, 2.5, 3],
       typeOptions: [
         { value: 'png', name: 'PNG', desc: '品質影像：高 - 適用於透明底圖', tag: '建議' },
-        { value: 'jpg', name: 'JPG', desc: '品質影像：一般。' },
-        { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
+        { value: 'jpg', name: 'JPG', desc: '品質影像：一般。' }
+        // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
         // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
@@ -161,6 +167,9 @@ export default Vue.extend({
         .map((status: boolean, idx: number) => status ? idx : -1)
         .filter(idx => idx >= 0)
     },
+    handleSubmission (checked: boolean) {
+      this.saveSubmission = checked
+    },
     async handleDownload () {
       this.polling = true
       const {
@@ -168,10 +177,14 @@ export default Vue.extend({
         selected,
         pageRange,
         rangeType,
-        selectedTypeVal
+        selectedTypeVal,
+        saveSubmission
       } = this
 
-      const { flag, url } = await DownloadUtil.getFileUrl({
+      saveSubmission
+        ? localStorage.setItem(submission, JSON.stringify({ ...selected, selectedTypeVal }))
+        : localStorage.removeItem(submission)
+      const { flag, url, msg } = await DownloadUtil.getFileUrl({
         exportId,
         teamId: '',
         format: selectedTypeVal,
@@ -180,6 +193,9 @@ export default Vue.extend({
       })
       if (flag === 0 && url) {
         DownloadUtil.downloadByUrl(url)
+      }
+      if (flag === 1 && msg) {
+        this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
       }
       this.$emit('close')
     }

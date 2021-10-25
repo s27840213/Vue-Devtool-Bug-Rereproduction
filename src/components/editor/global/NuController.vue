@@ -16,7 +16,7 @@
           @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           @dblclick="onDblClick")
-        svg(v-if="getLayerType === 'frame'" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+        svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-for="(clip, index) in config.clips"
             v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
             :style="frameClipStyles(clip, index)"
@@ -76,10 +76,12 @@
                 :data-pindex="pIndex"
                 :key="p.id",
                 :style="textStyles(p.styles)")
-                span(v-for="(span, sIndex) in p.spans" class="text__span"
-                  :data-sindex="sIndex"
-                  :key="span.id",
-                  :style="textStyles(span.styles)") {{ span.text }}
+                template(v-for="(span, sIndex) in p.spans")
+                  span(v-if="span.text" class="text__span"
+                    :data-sindex="sIndex"
+                    :key="span.id",
+                    :style="textStyles(span.styles)") {{ span.text }}
+                  br(v-else)
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="lockIconStyles"
@@ -151,11 +153,8 @@ import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { Layer } from 'konva/types/Layer'
 import popupUtils from '@/utils/popupUtils'
-import { config } from 'vue/types/umd'
-import objects from '@/store/module/objects'
-import { isBuffer } from 'lodash'
+import color from '@/store/module/color'
 
 export default Vue.extend({
   props: {
@@ -176,6 +175,7 @@ export default Vue.extend({
       lineLength: 0,
       lineAngle: 0,
       initialPos: { x: 0, y: 0 },
+      initialRotate: 0,
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
       initCoordinate: { x: 0, y: 0 },
@@ -188,11 +188,11 @@ export default Vue.extend({
       isComposing: false,
       isSnapping: false,
       contentEditable: true,
-      clipedImgBuff: [] as Array<{
+      clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string, userId: string }
-      }>,
+      },
       subControlerIndexs: []
     }
   },
@@ -321,7 +321,6 @@ export default Vue.extend({
         this.$store.commit('text/SET_default')
         TextPropUtils.updateTextPropsState()
       }
-      this.clipedImgBuff = []
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
@@ -366,8 +365,6 @@ export default Vue.extend({
             height,
             scale
           }))
-          // initWidth,
-          // initHeight,
         }
       })
     },
@@ -873,7 +870,7 @@ export default Vue.extend({
       const copiedPoint: number[] = Array.from(this.config.point)
       copiedPoint[markerIndex * 2] = this.initCoordinate.x + dx
       copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
-      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint, event.shiftKey)
+      const { newPoint, lineLength, lineAngle } = this.snapUtils.calLineAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
@@ -1069,6 +1066,7 @@ export default Vue.extend({
       }
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.initialRotate = this.getLayerRotate
 
       window.addEventListener('mousemove', this.rotating)
       window.addEventListener('mouseup', this.rotateEnd)
@@ -1094,8 +1092,8 @@ export default Vue.extend({
         if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
           angle *= -1
         }
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        angle += this.getLayerRotate % 360
+        angle += this.initialRotate % 360
+        angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
       }
     },
@@ -1147,6 +1145,7 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
+      console.log('click')
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
@@ -1170,17 +1169,25 @@ export default Vue.extend({
           const range = sel.getRangeAt(0)
           if (range) {
             const startContainer = range.startContainer
-            // TODO: deletion at the begining of the text cause bug.
-            start.pIndex = parseInt(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-            start.sIndex = parseInt(startContainer?.parentElement?.dataset.sindex as string)
-            // start.offset = sel.anchorOffset
-            TextUtils.updateSelection(start, start)
+            if (startContainer.nodeName === 'DIV') {
+              start.pIndex = 0
+              start.sIndex = 0
+            } else if (startContainer.nodeName === 'BR') {
+              start.pIndex = +(startContainer?.parentElement?.dataset.pindex as string)
+              start.sIndex = 0
+              start.offset = 1
+            } else {
+              // start.sIndex = +(startContainer?.parentElement?.dataset.sindex as string)
+              // start.pIndex = +(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
+              Object.assign(start, this.sel.start)
+            }
+            TextUtils.updateSelection(start, TextUtils.getNullSel())
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
               if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
-                return
+                // return
               } else {
                 if (e.key === 'Backspace' || e.key === ' ') {
                   e.stopPropagation()
@@ -1217,21 +1224,14 @@ export default Vue.extend({
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
     },
     onTextFocus() {
-      console.log('on text focus')
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
-      console.log('on text blur')
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
     },
     onTyping(e: KeyboardEvent, isComposing: boolean) {
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
-        /**
-         * All text is been deleted, the first node of the paragraph will be 'BR'
-         */
-        if ((this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR') return
-
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
         if (e.key !== 'Enter' && e.key !== 'Backspace') {
@@ -1271,10 +1271,15 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+          console.log(paragraphs)
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
+          // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
+            // console.log('after Render !!!!')
+            observer.disconnect()
+            const text = this.$refs.text as HTMLElement
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
             if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
@@ -1306,10 +1311,21 @@ export default Vue.extend({
               } else if (TextUtils.isEmptyText(this.config)) {
                 [pIndex, sIndex, offset] = [0, 0, 0]
               }
-
               if (!Number.isNaN(pIndex)) {
                 const range = new Range()
-                range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+                if (text.childNodes[pIndex].firstChild?.nodeName === 'SPAN') {
+                  try {
+                    range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
+                  } catch {
+                    throw new Error('can not focus at text node of SPAN at: (' + pIndex + ', ' + sIndex + ')')
+                  }
+                } else if (text.childNodes[pIndex].firstChild?.nodeName === 'BR') {
+                  try {
+                    range.setStart(text.childNodes[pIndex].firstChild as Node, 0)
+                  } catch {
+                    throw new Error('can not focus at text node of BR at: ' + pIndex)
+                  }
+                }
                 sel.removeAllRanges()
                 sel.addRange(range)
               }
@@ -1423,7 +1439,10 @@ export default Vue.extend({
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        this.clipedImgBuff.push({
+        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+        // this.clipedImgBuff.shift()
+        // this.clipedImgBuff = {}
+        this.clipedImgBuff = {
           index: clipIndex,
           srcObj: {
             ...clips[clipIndex].srcObj
@@ -1434,7 +1453,7 @@ export default Vue.extend({
             imgWidth: clips[clipIndex].styles.imgWidth,
             imgHeight: clips[clipIndex].styles.imgHeight
           }
-        })
+        }
         Object.assign(clips[clipIndex].srcObj, currLayer.srcObj)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
@@ -1457,9 +1476,9 @@ export default Vue.extend({
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
-        const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-        Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff[buffIndex].srcObj)
-        Object.assign(clips[clipIndex].styles, this.clipedImgBuff[buffIndex].styles)
+        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+        Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff.srcObj)
+        Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
 
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
       }
@@ -1467,8 +1486,8 @@ export default Vue.extend({
     onFrameMouseUp(clipIndex: number) {
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image') {
-        const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-        this.clipedImgBuff.splice(buffIndex, 1)
+        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+        // this.clipedImgBuff.splice(buffIndex, 1)
 
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
@@ -1478,9 +1497,12 @@ export default Vue.extend({
     },
     onFrameDragEnter(clipIndex: number) {
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (this.currDraggedPhoto.srcObj.type && !this.clipedImgBuff.some(buff => buff.index === clipIndex)) {
+      if (this.currDraggedPhoto.srcObj.type) {
+        // this.clipedImgBuff.some(buff => buff.index === clipIndex)
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        this.clipedImgBuff.push({
+        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+        // this.clipedImgBuff.splice(buffIndex, 1)
+        this.clipedImgBuff = {
           index: clipIndex,
           srcObj: {
             ...clips[clipIndex].srcObj
@@ -1491,7 +1513,7 @@ export default Vue.extend({
             imgWidth: clips[clipIndex].styles.imgWidth,
             imgHeight: clips[clipIndex].styles.imgHeight
           }
-        })
+        }
         Object.assign(clips[clipIndex].srcObj, this.currDraggedPhoto.srcObj)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
 
@@ -1510,16 +1532,17 @@ export default Vue.extend({
     },
     onFrameDragLeave(clipIndex: number) {
       const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-      const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-      Object.assign(clips[clipIndex].styles, this.clipedImgBuff[buffIndex].styles)
-      Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff[buffIndex].srcObj)
+      // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+      Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
+      Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff.srcObj)
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      this.clipedImgBuff.splice(buffIndex, 1)
+      // this.clipedImgBuff.splice(buffIndex, 1)
     },
     onFrameDrop(clipIndex: number) {
-      const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-      this.clipedImgBuff.splice(buffIndex, 1)
+      // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
+      // this.clipedImgBuff.splice(buffIndex, 1)
+      StepsUtils.record()
     }
   }
 })

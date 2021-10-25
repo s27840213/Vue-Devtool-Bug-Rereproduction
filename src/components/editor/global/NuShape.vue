@@ -81,7 +81,7 @@ export default Vue.extend({
           await shapeUtils.addComputableInfo(this.config)
         }
         const transText = shapeUtils.markerTransFormatter(this.config.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
-        this.transNode = shapeUtils
+        this.transNode = shapeUtils.addStyleTag(transText)
         break
       }
       case 'E': {

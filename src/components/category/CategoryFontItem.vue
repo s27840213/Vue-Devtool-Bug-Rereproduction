@@ -33,6 +33,9 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore'])
   },
+  mounted() {
+    console.log(this.item)
+  },
   methods: {
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')

@@ -9,6 +9,7 @@ import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import stepsUtils from './stepsUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -16,9 +17,9 @@ class LayerUtils {
   get pageIndex() { return store.getters.getLastSelectedPageIndex }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): ILayer { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage() { return store.getters.getPage }
-  get getLayer(): (pageIndex: number, layerIndex: number) => ILayer {
+  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
     return store.getters.getLayer
   }
 
@@ -32,6 +33,7 @@ class LayerUtils {
     store.commit('SET_lastSelectedPageIndex', pageIndex)
     FocusUtils.focusElement(`.nu-page-${pageIndex}`, false)
     GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
+    stepsUtils.record()
   }
 
   addLayersToPos(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, pos: number) {

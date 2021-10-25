@@ -9,6 +9,7 @@ import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
 import StepsUtils from './stepsUtils'
+import { dropWhile } from 'lodash'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -548,14 +549,6 @@ class TextPropUtils {
       case 'textAlign':
         origin = config.paragraphs[start.pIndex].styles.align
         break
-      // case 'fontSize':
-      //   for (const p of config.paragraphs) {
-      //     for (const span of p.spans) {
-      //       span.styles.size *= config.styles.scale
-      //     }
-      //   }
-      //   origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles.size
-      //   break
       default:
         if (Object.keys(fontPropsMap).includes(prop)) {
           const i = Object.keys(fontPropsMap).indexOf(prop)

@@ -12,21 +12,32 @@
             div(class="my-design__multi__container")
               div(class="my-design__multi__number")
                 span {{ `選取 ${selectedNum}` }}
-              div(class="my-design__multi__actions")
-                div(class="my-design__multi__icon"
+              div(class="my-design__multi__actions relative")
+                div(ref="tgFav"
+                    class="my-design__multi__icon"
                     @click="toggleAllFavorite")
                   svg-icon(iconName="heart"
                           iconWidth="21px"
                           iconColor="gray-2")
-                div(class="my-design__multi__icon")
+                div(ref="mvFolder"
+                    v-if="mydesignView !== 'favorite-design-view'"
+                    class="my-design__multi__icon")
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
-                div(class="my-design__multi__icon"
+                div(ref="delDesign"
+                    class="my-design__multi__icon"
+                    @mouseenter="handleFavDelMouseOver(true)"
+                    @mouseleave="handleFavDelMouseOver(false)"
                     @click="deleteAll")
                   svg-icon(iconName="trash"
                           iconWidth="21px"
                           iconColor="gray-2")
+                transition(name="slide-fade-img")
+                  img(v-if="isFavDelMouseOver" class="my-design__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
+                transition(name="slide-fade-text")
+                  div(v-if="isFavDelMouseOver" class="my-design__info__text")
+                    span 刪除後會將原始檔案一併移除。
               div(class="my-design__multi__close"
                   @click="handleClearSelection")
                 svg-icon(iconName="close-large"
@@ -111,6 +122,7 @@ import TrashDesignView from '@/components/navigation/mydesign/design-views/Trash
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
 import { IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -133,7 +145,8 @@ export default Vue.extend({
       isShowMoveMessage: false,
       folderToBeDeleted: undefined as IPathedFolder | undefined,
       designToBeDeletedForever: undefined as IPathedDesign | undefined,
-      confirmMessage: ''
+      confirmMessage: '',
+      isFavDelMouseOver: false
     }
   },
   computed: {
@@ -166,6 +179,17 @@ export default Vue.extend({
   watch: {
     currentSelectedFolder() {
       this.handleClearSelection()
+    },
+    isMultiSelected(newVal) {
+      if (newVal) {
+        this.$nextTick(() => {
+          hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
+          if (this.mydesignView !== 'favorite-design-view') {
+            hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+          }
+          hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
+        })
+      }
     }
   },
   methods: {
@@ -276,6 +300,9 @@ export default Vue.extend({
       this.designToBeDeletedForever = payload
       this.confirmMessage = 'delete-forever'
     },
+    handleFavDelMouseOver(val: boolean) {
+      this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
+    },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
       const currentShowing = this.deletedQueue[0]
       if (!currentShowing) return false
@@ -315,7 +342,7 @@ export default Vue.extend({
       }
     },
     toggleAllFavorite() {
-      if (designUtils.checkAllInFavorite(Object.values(this.selectedDesigns))) {
+      if (this.mydesignView === 'favorite-design-view') {
         designUtils.removeAllFromFavorite(Object.values(this.selectedDesigns))
       } else {
         designUtils.addAllToFavorite(Object.values(this.selectedDesigns))
@@ -391,11 +418,10 @@ export default Vue.extend({
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      width: 129px;
       height: 21px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 33px;
     }
     &__icon {
       width: 21px;
@@ -404,6 +430,9 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      &:hover {
+        background-color: setColor(gray-4);
+      }
     }
     &__close {
       width: 11px;
@@ -470,6 +499,38 @@ export default Vue.extend({
         line-height: 25px;
         color: setColor(gray-2);
         letter-spacing: 0.205em;
+      }
+    }
+  }
+  &__info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    &__arrow {
+      position: absolute;
+      left: calc(100% + 2px);
+      width: 10.39px;
+      height: 14.5px;
+    }
+    &__text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: calc(100% + 11px);
+      padding: 0px 8px;
+      height: 28px;
+      background-color: setColor(gray-2);
+      border-radius: 5px;
+      > span {
+        font-family: Mulish;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 28px;
+        white-space: nowrap;
+        color: white;
       }
     }
   }
@@ -694,5 +755,22 @@ $messageTypes: delete-all, delete-folder, delete-forever;
 .scale-fade-enter, .scale-fade-leave-to {
   opacity: 0;
   transform: scale(0.8);
+}
+
+.slide-fade-img, .slide-fade-text {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+}
+
+.slide-fade-img-enter, .slide-fade-img-leave-to {
+  left: 100%
+}
+
+.slide-fade-text-enter, .slide-fade-text-leave-to {
+  left: calc(100% + 9px);
 }
 </style>

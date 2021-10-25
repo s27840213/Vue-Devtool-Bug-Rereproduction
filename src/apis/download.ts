@@ -26,13 +26,10 @@ class DownloadService {
   }
 
   getFileUrl (url: string) {
-    let maxTime = 5
     axios.interceptors.response.use(undefined, (error: AxiosError) => {
       const { config, response } = error
       const isExportUrl = /export\/(\w+)\/(\w+).json/g.test(config.url || '')
-      if (isExportUrl && response?.status === 404 && maxTime > 0) {
-        maxTime -= 1
-        console.log(`time: ${5 - maxTime}`)
+      if (isExportUrl && response?.status === 404) {
         return new Promise(resolve => {
           setTimeout(() => resolve(axios(config)), 3000)
         })

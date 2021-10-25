@@ -22,7 +22,15 @@
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="copy-notification"
+        div(class="notification copy"
+          v-html="item.text")
+    notifications(group="error"
+      position="top center"
+      width="300px"
+      :max="1"
+      :duration="5000")
+      template(v-slot:body="{ item }")
+        div(class="notification error"
           v-html="item.text")
 </template>
 
@@ -160,13 +168,18 @@ export default Vue.extend({
   z-index: 999;
 }
 
-.copy-notification {
+.notification {
   padding: 5px;
   text-align: center;
   color: setColor(white);
-  background-color: setColor(blue-2);
   margin: 5px 5px 0 0;
   border-radius: 5px;
+  &.copy {
+    background-color: setColor(blue-2);
+  }
+  &.error {
+    background-color: setColor(red-2);
+  }
 }
 
 // .vc-chrome-toggle-btn {

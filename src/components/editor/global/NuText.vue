@@ -9,11 +9,13 @@
           :subLayerIndex="subLayerIndex")
         p(v-else
           v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-          :key="pIndex",
+          :key="p.id",
           :style="styles(p.styles)")
-          span(v-for="(span, sIndex) in p.spans" class="nu-text__span"
-            :key="sIndex",
-            :style="styles(span.styles)") {{ span.text }}
+          template(v-for="(span, sIndex) in p.spans")
+            span(v-if="span.text" class="nu-text__span"
+              :key="span.id",
+              :style="styles(span.styles)") {{ span.text }}
+            br(v-else)
 </template>
 
 <script lang="ts">
