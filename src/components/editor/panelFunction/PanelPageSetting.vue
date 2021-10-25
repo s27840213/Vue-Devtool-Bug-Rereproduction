@@ -15,13 +15,8 @@
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
       span(class="page-setting__apply__text") 調 整 尺 寸
-    //- div(class="page-setting__hr horizontal-rule")
-    //- div(class="page-setting-row page-setting__suggestion text-gray-2 pointer relative"
-    //-     @click="toggleSuggestion()")
-    //-   span(class="page-setting__suggestion__text") 常用尺寸
-    //-   svg-icon(class="page-setting__suggestion__icon" :style="dropDownStyles()"
-    //-       iconName="drop-down" iconWidth="10px" iconHeight="5px" iconColor="gray-2")
-    div(v-if="panelOpened"
+    transition(name="slide-fade")
+      div(v-if="panelOpened"
         class="page-setting__suggestion-panel")
         img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
         div(class="page-setting__suggestion-panel__body")
@@ -690,5 +685,14 @@ export default Vue.extend({
   &__check {
     width: 10%;
   }
+}
+
+.slide-fade-enter-active, .slide-fade-leave-active  {
+  transition: .3s ease;
+}
+
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 </style>
