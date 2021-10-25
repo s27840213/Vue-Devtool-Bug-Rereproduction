@@ -670,21 +670,19 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
     // console.log(this.loginOutput)
-    setInterval(() => {
-      const pagesJSON = store.getters.getPages
-      const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
-      if (formData.has('file')) {
-        formData.set('file', blob)
-      } else {
-        formData.append('file', blob)
-      }
+    const pagesJSON = store.getters.getPages
+    const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
 
-      xhr.open('POST', this.loginOutput.upload_map.url, true)
-      xhr.send(formData)
-      xhr.onload = function () {
-        // console.log(this)
-      }
-    }, 5000)
+    xhr.open('POST', this.loginOutput.upload_map.url, true)
+    xhr.send(formData)
+    xhr.onload = function () {
+      // console.log(this)
+    }
   }
 }
 
