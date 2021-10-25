@@ -44,7 +44,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      menuItems: designUtils.makeNormalMenuItems().slice(1) // remove duplicate
+      menuItems: designUtils.makeFavoriteMenuItems()
     }
   },
   watch: {
