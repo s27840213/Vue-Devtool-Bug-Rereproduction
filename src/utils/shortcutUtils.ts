@@ -11,7 +11,7 @@ import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
 import { Layer } from 'konva/types/Layer'
-import FrameUtils from './frameUtils'
+import frameUtils from './frameUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -120,7 +120,7 @@ class ShortcutHandler {
     if (sel && sel.rangeCount !== 0) {
       const selPos = TextUtils.getSelection()?.start as ISelection
       const selEnd = TextUtils.getSelection()?.end as ISelection
-      const paragraphs = GeneralUtils.deepCopy((TextUtils.getCurrLayer as IText).paragraphs) as IParagraph[]
+      const paragraphs = GeneralUtils.deepCopy((LayerUtils.getCurrLayer as IText).paragraphs) as IParagraph[]
 
       if (TextUtils.isSel(selEnd)) {
         /**
@@ -208,7 +208,7 @@ class ShortcutHandler {
             spans: spanBuff
           })
         }
-        TextUtils.updateTextParagraphs(TextUtils.pageIndex, TextUtils.layerIndex, paragraphs)
+        TextUtils.updateTextParagraphs(LayerUtils.pageIndex, LayerUtils.layerIndex, paragraphs)
         Vue.nextTick(() => {
           if (textArr.length !== 1) {
             selFinalPos.sIndex = paragraphs[selFinalPos.pIndex].spans.length - 1
@@ -222,14 +222,14 @@ class ShortcutHandler {
   }
 
   textSelectAll(layerIndex?: number) {
-    const text = document.getElementById(`text-${layerIndex ?? TextUtils.layerIndex}`) as HTMLElement
+    const text = document.getElementById(`text-${layerIndex ?? LayerUtils.layerIndex}`) as HTMLElement
     const sel = window.getSelection()
     const range = new Range()
     if (sel) {
       range.selectNodeContents(text)
       sel.removeAllRanges()
       sel.addRange(range)
-      const config = TextUtils.getCurrLayer as IText
+      const config = LayerUtils.getCurrLayer as IText
 
       const pIndex = config.paragraphs.length - 1
       const sIndex = config.paragraphs[pIndex].spans.length - 1
@@ -249,7 +249,11 @@ class ShortcutHandler {
         GroupUtils.reset()
         return
       }
-      const clips = GeneralUtils.deepCopy(currLayer.clips)
+      const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
+      if (clips[idx].imgControl) {
+        frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
+        return
+      }
       clips[idx].srcObj = {
         type: 'frame',
         assetId: '',

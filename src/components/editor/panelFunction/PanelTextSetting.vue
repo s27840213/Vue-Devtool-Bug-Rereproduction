@@ -122,7 +122,6 @@ import GroupUtils from '@/utils/groupUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
-import { parse } from 'uuid'
 
 export default Vue.extend({
   components: {
