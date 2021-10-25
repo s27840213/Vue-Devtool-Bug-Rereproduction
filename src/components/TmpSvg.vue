@@ -17,12 +17,6 @@ import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import { mapGetters } from 'vuex'
-import tmpJSON from '@/svgJSON/full-config.json'
-import tmpJSON2 from '@/svgJSON/full-config2.json'
-import tmpJSON3 from '@/svgJSON/full-config3.json'
-import tmpJSON4 from '@/svgJSON/full-config4.json'
-import tmpJSON5 from '@/svgJSON/full-config5.json'
-import tmpJSON6 from '@/svgJSON/full-config6.json'
 import { ISvg } from '@/interfaces/shape'
 
 export default Vue.extend({
@@ -62,7 +56,8 @@ export default Vue.extend({
       pageSize: 'getPageSize'
     }),
     contents(): ISvg[] {
-      return (tmpJSON as ISvg[]).concat(tmpJSON2).concat(tmpJSON3).concat(tmpJSON4).concat(tmpJSON5).concat(tmpJSON6)
+      // return (tmpJSON as ISvg[]).concat(tmpJSON2).concat(tmpJSON3).concat(tmpJSON4).concat(tmpJSON5).concat(tmpJSON6)
+      return []
     }
   },
   methods: {

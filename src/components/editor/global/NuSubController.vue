@@ -11,9 +11,9 @@
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
               :style="frameClipStyles()"
-              @drop="()=>{ this.$emit('onFrameDrop') }"
-              @dragenter="()=>{ this.$emit('onFrameDragenter') }"
-              @dragleave="()=>{ this.$emit('onFrameDragleave') }")
+              @drop="onFrameDrop()"
+              @dragenter="onDrageEnter()"
+              @dragleave="onDragLeave()")
         //- template(v-if="config.type === 'text' && config.active")
         //-   div(:style="textScaleStyle()")
         //-     div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
@@ -511,6 +511,21 @@ export default Vue.extend({
         return
       }
       this.$emit('dblSubController', this.layerIndex)
+    },
+    onDrageEnter() {
+      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+        this.$emit('onFrameDragenter', this.layerIndex)
+      }
+    },
+    onDragLeave() {
+      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+        this.$emit('onFrameDragleave', this.layerIndex)
+      }
+    },
+    onFrameDrop() {
+      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+        this.$emit('onFrameDrop')
+      }
     }
   }
 })

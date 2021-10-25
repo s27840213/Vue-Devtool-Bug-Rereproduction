@@ -43,7 +43,7 @@
         span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
     template(v-if="isImage")
       div(class="popup-layer__item"
-          @click="updateImageAsFrame().action")
+          @click="updateImageAsFrame().action()")
         svg-icon(
           class="pointer"
           :iconName="updateImageAsFrame().icon"

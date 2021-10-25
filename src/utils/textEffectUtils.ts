@@ -58,7 +58,7 @@ class Controller {
   }
 
   getSpecSubTextLayer (index: number): IText {
-    const currLayer = TextUtils.getCurrLayer
+    const currLayer = LayerUtils.getCurrLayer
     const multiLayers = currLayer && currLayer.layers as any[]
     return multiLayers && multiLayers[index]
   }

@@ -119,39 +119,3 @@ export default {
   state,
   mutations
 } as ModuleTree<ITextState>
-
-// name: 'sans-serif',
-// face: 'sans-serif'
-// },
-// {
-// name: 'Manrop',
-// face: 'Manrop'
-// },
-// {
-// name: 'Lobster',
-// face: 'Lobster'
-// },
-// {
-// name: '思源黑體',
-// face: 'NotoSansTC'
-// },
-// {
-// name: '標楷體',
-// face: 'cwTeXKai'
-// },
-// {
-// name: '獅尾四季春',
-// face: 'SweiSpringCJKtc-Regular'
-// },
-// {
-// name: '裝甲明朝',
-// face: 'SoukouMincho'
-// },
-// {
-// name: '瀨戶字體',
-// face: 'SetoFont'
-// },
-// {
-// name: '思源柔體',
-// face: 'GenJyuuGothicX-P-Regular'
-// }

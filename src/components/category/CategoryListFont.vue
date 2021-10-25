@@ -12,9 +12,6 @@ export default Vue.extend({
   props: {
     title: String,
     list: Array
-  },
-  mounted() {
-    console.log(this.list)
   }
 })
 
