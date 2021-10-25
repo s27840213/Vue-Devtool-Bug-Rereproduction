@@ -11,11 +11,21 @@
         div
           svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
     div(class="scroll-list-items" @scroll="handleScroll" ref="items")
-      div(v-for="item, idx in list" class="scroll-list-item")
-        img(class="pointer"
-        :src="`https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
-        @click="goToPage('Editor')"
-        @error="handleNotFound")
+      div(v-if="type === 'size'"
+        class="pointer scroll-list-plus")
+        img(:src="require('@/assets/img/png/plus-origin.png')"
+          @click="goToPage('Editor')")
+        div(class="pt-10 body-1") 自訂尺寸
+      div(v-for="item, idx in list" class="scroll-list-item pt-10"
+        :class="{'pb-70': type === 'size'}")
+        img(class="pointer item-image"
+          :src="item.id ? `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}` : require(`@/assets/img/svg/home-size/${item.name}.svg`)"
+          @click="goToPage('Editor')"
+          @error="handleNotFound")
+        div(v-if="type === 'size'"
+          class="pt-10 body-1") {{item.title}}
+        div(v-if="type === 'size'"
+          class="pt-2 body-2 text-gray-2") {{item.size}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -23,7 +33,8 @@ import Vue from 'vue'
 
 export default Vue.extend({
   props: {
-    list: Array
+    list: Array,
+    type: String
   },
   data () {
     return {
@@ -74,6 +85,7 @@ export default Vue.extend({
     column-gap: 30px;
     grid-template-columns: auto;
     justify-content: start;
+    align-items: center;
     grid-auto-flow: column;
     scroll-behavior: smooth;
     overflow-x: scroll;
@@ -85,9 +97,32 @@ export default Vue.extend({
     }
   }
 
+  &-plus {
+    width: 100px;
+    text-align: center;
+
+    @media(min-width: 976px) {
+      width: 140px;
+    }
+    @media(min-width: 1260px) {
+      width: 170px;
+    }
+    @media(min-width: 1560px) {
+      width: 200px;
+    }
+
+    > img:hover {
+      transition: all .2s ease-in-out;
+      box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
+      transform: translate(0, -10px);
+    }
+  }
+
   &-item {
     width: 100px;
     height: 100px;
+    text-align: center;
+
     @media(min-width: 976px) {
       width: 140px;
       height: 140px;
@@ -101,9 +136,19 @@ export default Vue.extend({
       height: 200px;
     }
 
-    > img {
-      width: 100%;
+    .item-image {
+      border-radius: 10px;
       height: 100%;
+
+      &:hover {
+        transition: all .2s ease-in-out;
+        box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
+        transform: translate(0, -10px);
+      }
+    }
+
+    &-title {
+      padding-top: 10px;
     }
   }
 
