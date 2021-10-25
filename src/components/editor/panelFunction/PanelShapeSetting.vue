@@ -276,8 +276,7 @@ export default Vue.extend({
     ...mapState(
       'markers',
       [
-        'categories',
-        'pending'
+        'categories'
       ]
     ),
     opacity(): string | number {

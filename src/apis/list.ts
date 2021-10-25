@@ -51,11 +51,12 @@ class ListService {
     return this.getList(params)
   }
 
-  addDesign (id: string, type: string) {
+  addDesign (id: string, type: string, params: IListServiceParams = {}) {
     const data = {
       token: authToken().token,
       type,
-      design_id: id
+      design_id: id,
+      ...params
     }
     if (!data.token) return
     return axios.request<IListServiceResponse>({
@@ -67,6 +68,11 @@ class ListService {
 
   getMarker (params: IListServiceParams) {
     params.type = 'marker'
+    return this.getList(params)
+  }
+
+  getLayout (params: IListServiceParams) {
+    params.type = 'layout'
     return this.getList(params)
   }
 }

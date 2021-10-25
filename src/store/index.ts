@@ -12,6 +12,7 @@ import text from '@/store/text'
 import objects from '@/store/module/objects'
 import markers from '@/store/module/markers'
 import templates from '@/store/module/templates'
+import layouts from '@/store/module/layouts'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
@@ -681,6 +682,7 @@ export default new Vuex.Store({
     objects,
     markers,
     templates,
+    layouts,
     textStock,
     background,
     modal,
