@@ -1,8 +1,11 @@
 <template lang="pug">
   div(class="nu-header")
     div(class="body-2")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'" style="height: 50px;")
+      svg-icon(class="pointer"
+        :iconName="'logo'"
+        :iconWidth="'100px'"
+        style="height: 50px;"
+        @click.native="goToPage('/')")
     div(class="body-2")
       div
         btn(@click.native="goToPage('/')"
