@@ -84,8 +84,6 @@ export default Vue.extend({
       const moveFront = indexFrom < indexTo
       const newPos = moveFront ? indexTo - 1 : indexTo
       const page = GeneralUtils.deepCopy(this.getPage(indexFrom))
-      page.name += ' (copy)'
-      page.designId = ''
       this._deletePage(indexFrom)
       this._addPageToPos({
         newPage: page,
