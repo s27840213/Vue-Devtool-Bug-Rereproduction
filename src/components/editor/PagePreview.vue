@@ -2,7 +2,7 @@
 div(class="page-preview")
     template(v-for="(page, idx) in getPages")
         page-preview-plus(:index="idx" last=false)
-        page-preview-page(:index="idx" :pagename="page.name" type="full")
+        page-preview-page-wrapper(:index="idx" type="full" :config="page")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
                         :index="idx+1" last=false)
     page-preview-plus(:index="getPages.length" last=true)
@@ -16,8 +16,8 @@ div(class="page-preview")
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import PagePreviewPage from '@/components/editor/pagePreview/pagePreviewPage.vue'
-import PagePreviewPlus from '@/components/editor/pagePreview/pagePreviewPlus.vue'
+import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
+import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 
@@ -28,7 +28,7 @@ export default Vue.extend({
     }
   },
   components: {
-    PagePreviewPage,
+    PagePreviewPageWrapper,
     PagePreviewPlus
   },
   computed: {
@@ -58,27 +58,27 @@ export default Vue.extend({
 </script>
 <style lang="scss" scoped>
 .page-preview {
-    display: grid;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  width: calc(100% - 100px);
+  grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
+  grid-row-gap: 20px;
+  padding: 30px 0;
+
+  &-page-last {
+    display: flex;
     justify-content: center;
-    width: calc(100% - 100px);
-    grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
-    grid-row-gap: 20px;
-    padding: 30px 0;
+    align-items: center;
+    height: 140px;
+    background: setColor(gray-4);
+    border-radius: 5px;
+    border: 5px solid #ffffff00;
+    transition: 0.25s ease-in-out;
 
-    &-page-last {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 140px;
-      background: setColor(gray-4);
-      border-radius: 5px;
-      border: 5px solid #ffffff00;
-      transition: 0.25s ease-in-out;
-
-      &:hover {
-        background: setColor(gray-3);
-      }
+    &:hover {
+      background: setColor(gray-3);
     }
+  }
 }
-
 </style>

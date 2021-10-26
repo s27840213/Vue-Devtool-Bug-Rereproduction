@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-      @mousedown.left="selectStart($event)" @scroll="scrollUpdate($event)"
+      @mousedown.left="selectStart($event)"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
@@ -11,6 +11,7 @@
                 :ref="`page-${index}`"
                 :key="`page-${index}`"
                 :pageIndex="index"
+                :editorView="editorView"
                 :style="{'z-index': `${getPageZIndex(index)}`}"
                 :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
@@ -179,7 +180,7 @@ export default Vue.extend({
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
       document.documentElement.addEventListener('mousemove', this.selecting)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
       document.documentElement.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
@@ -225,7 +226,8 @@ export default Vue.extend({
        */
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+
+        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
@@ -289,7 +291,7 @@ export default Vue.extend({
       this.isShowGuidelineV = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       document.documentElement.addEventListener('mousemove', this.draggingV)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
       document.documentElement.addEventListener('mouseup', this.dragEndV)
     },
     draggingV(e: MouseEvent) {
@@ -304,7 +306,8 @@ export default Vue.extend({
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingV)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+
+        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.dragEndV)
       })
     },
@@ -323,7 +326,7 @@ export default Vue.extend({
       this.isShowGuidelineH = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       document.documentElement.addEventListener('mousemove', this.draggingH)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
       document.documentElement.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
@@ -338,7 +341,8 @@ export default Vue.extend({
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingH)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+
+        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.dragEndH)
       })
     },

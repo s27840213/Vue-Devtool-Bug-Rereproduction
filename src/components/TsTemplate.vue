@@ -96,7 +96,7 @@ export default Vue.extend({
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView)
       document.documentElement.addEventListener('mousemove', this.selecting)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate)
+      document.getElementsByClassName('editor-view')[0].addEventListener('scroll', this.scrollUpdate)
       document.documentElement.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
@@ -118,7 +118,7 @@ export default Vue.extend({
         clientY: this.currentAbsPos.y
       })
       document.documentElement.dispatchEvent(event)
-
+      console.log('update')
       if (this.geCurrActivePageIndex === -1) {
         PageUtils.activeMostCentralPage()
       }
@@ -133,7 +133,7 @@ export default Vue.extend({
        */
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
+        document.getElementsByClassName('editor-view')[0].removeEventListener('scroll', this.scrollUpdate)
         document.documentElement.removeEventListener('mouseup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
