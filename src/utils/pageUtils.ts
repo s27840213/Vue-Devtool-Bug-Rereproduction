@@ -107,29 +107,36 @@ class PageUtils {
   }
 
   activeMostCentralPage(): number {
+    console.log('active most central page')
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
+      const rect = (page as HTMLElement).getBoundingClientRect()
       return {
-        top: (page as HTMLElement).getBoundingClientRect().top,
-        bottom: (page as HTMLElement).getBoundingClientRect().bottom
+        top: rect.top,
+        bottom: rect.bottom
       }
     })
     const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
     if (container === undefined) {
       return -1
     }
-    const centerLinePos = (container.getBoundingClientRect().bottom - container.getBoundingClientRect().top) / 2
+    const containerRect = container.getBoundingClientRect()
+    const centerLinePos = (containerRect.bottom - containerRect.top) / 2
 
     let targetIndex = -1
     let minDistance = Number.MAX_SAFE_INTEGER
 
-    pages.forEach((page: { top: number, bottom: number }, index: number) => {
-      const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
-      if (minDistance > dist) {
+    pages.some((page: { top: number, bottom: number }, index: number) => {
+      if (page.top < centerLinePos && page.bottom > centerLinePos) {
         targetIndex = index
-        minDistance = dist
+        return true
+      } else {
+        const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
+        if (minDistance > dist) {
+          targetIndex = index
+          minDistance = dist
+        }
       }
     })
-
     FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     store.commit('SET_lastSelectedPageIndex', targetIndex)
     return targetIndex
@@ -138,6 +145,13 @@ class PageUtils {
   activeCurrActivePage(): void {
     const currActivePageIndex = store.getters.getCurrActivePageIndex
     FocusUtils.focusElement(`.nu-page-${currActivePageIndex}`, true)
+  }
+
+  scrollIntoPage(pageIndex: number): void {
+    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
+    currentPage.scrollIntoView({
+      behavior: 'smooth'
+    })
   }
 
   updateSpecPage(index: number, json: any): void {

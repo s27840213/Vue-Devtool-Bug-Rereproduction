@@ -342,7 +342,6 @@ export default Vue.extend({
     this.isControlling = false
     this.setCursorStyle('default')
     this.setMoving(false)
-    StepsUtils.record()
   },
   methods: {
     ...mapMutations({
@@ -1276,7 +1275,7 @@ export default Vue.extend({
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
-          // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
+            // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
             // console.log('after Render !!!!')
             observer.disconnect()
             const text = this.$refs.text as HTMLElement

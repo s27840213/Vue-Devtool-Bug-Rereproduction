@@ -14,7 +14,6 @@
         page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="page")
         panel-page-plus(v-if="idx+1 === getPageCount"
                         :index="idx+1" last=false)
-
 </template>
 
 <script lang="ts">

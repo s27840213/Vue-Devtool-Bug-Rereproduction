@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="nu-page"
+      :style="pageMarginStyles"
       ref="page")
-    div(class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+    div(v-if="!inPagePanel" class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       input(class="text-gray-3"
         type="text"
         v-model="pageName"
@@ -25,6 +26,25 @@
           @click.native="duplicatePage()")
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="deletePage()")
+    div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+      div(class="page-bar__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        div(class="body-2")
+          span {{pageIndex}}
+        svg-icon(class="pointer mt-10"
+          :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+          @click.native="")
+        svg-icon(class="pointer mt-10"
+          :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+          @click.native="")
+        svg-icon(class="pointer mt-15"
+          :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="addPage()")
+        svg-icon(class="pointer mt-10"
+          :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="duplicatePage()")
+        svg-icon(class="pointer mt-10"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -76,7 +96,7 @@
             div(v-for="line in closestSnaplines.h"
               class="snap-area__line snap-area__line--hr"
               :style="snapLineStyles('h', line)")
-            template(v-if="isShowGuideline")
+            template(v-if="isShowGuideline && !inPagePanel")
               div(v-for="(line,index) in guidelines.v"
                 class="snap-area__line snap-area__line--vr"
                 :style="snapLineStyles('v', line,true)"
@@ -152,6 +172,7 @@ import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
+import { SidebarPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -203,7 +224,8 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
       getPage: 'getPage',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      currPanel: 'getCurrSidebarPanelType'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
@@ -247,6 +269,14 @@ export default Vue.extend({
     },
     currFocusPageIndex(): number {
       return PageUtils.currFocusPageIndex
+    },
+    inPagePanel(): boolean {
+      return SidebarPanelType.page === this.currPanel
+    },
+    pageMarginStyles(): { [index: string]: string } {
+      return {
+        margin: this.inPagePanel ? '0px auto' : '15px auto'
+      }
     }
   },
   watch: {
@@ -439,7 +469,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-page {
   position: relative;
-  margin: 15px auto;
   transform-style: preserve-3d;
   user-select: none;
 
@@ -458,6 +487,19 @@ export default Vue.extend({
     min-width: 40px;
     background-color: transparent;
     text-overflow: ellipsis;
+  }
+}
+
+.page-bar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translate3d(calc(100% + 10px), 0, 0);
+  &__icons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 .pages-wrapper {
@@ -491,7 +533,7 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  outline: 5px solid setColor(blue-1, 0.5);
+  border: 5px solid setColor(blue-1, 0.5);
   box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
