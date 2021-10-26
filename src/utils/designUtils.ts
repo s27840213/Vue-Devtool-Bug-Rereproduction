@@ -352,6 +352,8 @@ class DesignUtils {
         const newDesign = generalUtils.deepCopy(design)
         newDesign.id = newId
         newDesign.name += ' 的副本'
+        newDesign.createdTime = Date.now()
+        newDesign.lastUpdatedTime = newDesign.createdTime
         store.commit('design/UPDATE_addDesign', {
           path,
           design: newDesign
