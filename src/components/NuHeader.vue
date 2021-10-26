@@ -20,10 +20,6 @@
           style="padding: 5px;" :type="'icon-mid-body'"
           :class="{'text-blue-1': currentPage === '/toturial'}") 使用教學
       div
-        btn(@click.native="goToPage('/pricing')"
-          style="padding: 5px;" :type="'icon-mid-body'"
-          :class="{'text-blue-1': currentPage === '/pricing'}") 價格方案
-      div
         btn(@click.native="goToPage('/faq')"
           style="padding: 5px;" :type="'icon-mid-body'"
           :class="{'text-blue-1': currentPage === '/faq'}") 常見問題

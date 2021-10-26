@@ -117,19 +117,6 @@ const routes: Array<RouteConfig> = [
         console.log(error)
       }
     }
-  },
-  {
-    path: '/pricing',
-    name: 'Pricing',
-    component: Pricing,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        next()
-      } catch (error) {
-        console.log(error)
-      }
-    }
   }
 ]
 
