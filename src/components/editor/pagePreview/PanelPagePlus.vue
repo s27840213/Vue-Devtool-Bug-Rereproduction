@@ -18,7 +18,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapState, mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -76,20 +76,22 @@ export default Vue.extend({
     },
     handlePageDrop() {
       // move selected to index: copy and delete origin one
-      if (this.lastSelectedPageIndex + 1 === this.index) {
+      const indexFrom = this.lastSelectedPageIndex
+      const indexTo = this.index
+      if (indexFrom === indexTo || indexFrom + 1 === indexTo) {
         return
       }
-      const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
-      page.name += ' (copy)'
-      page.designId = ''
-      this._deletePage(this.lastSelectedPageIndex)
+      const moveFront = indexFrom < indexTo
+      const newPos = moveFront ? indexTo - 1 : indexTo
+      const page = GeneralUtils.deepCopy(this.getPage(indexFrom))
+      this._deletePage(indexFrom)
       this._addPageToPos({
         newPage: page,
-        pos: this.index
+        pos: newPos
       })
       GroupUtils.deselect()
-      this._setLastSelectedPageIndex(this.index)
-      this._setCurrActivePageIndex(this.index)
+      this._setLastSelectedPageIndex(indexTo)
+      this._setCurrActivePageIndex(indexTo)
     },
     addPage(position: number) {
       this._addPageToPos({
