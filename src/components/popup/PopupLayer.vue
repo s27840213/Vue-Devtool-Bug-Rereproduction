@@ -392,6 +392,7 @@ export default Vue.extend({
         image.styles.height = imgHeight
         image.styles.initWidth = imgWidth
         image.styles.initHeight = imgHeight
+        image.styles.rotate = 0
         image.styles.imgX = 0
         image.styles.imgY = 0
         const pageIndex = this.currSelectedInfo.pageIndex

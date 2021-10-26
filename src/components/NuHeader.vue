@@ -1,8 +1,11 @@
 <template lang="pug">
   div(class="nu-header")
     div(class="body-2")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'" style="height: 50px;")
+      svg-icon(class="pointer"
+        :iconName="'logo'"
+        :iconWidth="'100px'"
+        style="height: 50px;"
+        @click.native="goToPage('/')")
     div(class="body-2")
       div
         btn(@click.native="goToPage('/')"
@@ -16,10 +19,6 @@
         btn(@click.native="goToPage('/toturial')"
           style="padding: 5px;" :type="'icon-mid-body'"
           :class="{'text-blue-1': currentPage === '/toturial'}") 使用教學
-      div
-        btn(@click.native="goToPage('/pricing')"
-          style="padding: 5px;" :type="'icon-mid-body'"
-          :class="{'text-blue-1': currentPage === '/pricing'}") 價格方案
       div
         btn(@click.native="goToPage('/faq')"
           style="padding: 5px;" :type="'icon-mid-body'"

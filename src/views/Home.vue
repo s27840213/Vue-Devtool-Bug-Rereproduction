@@ -16,13 +16,7 @@
         //- img(:src="require('@/assets/img/png/homepage_video_img.png')")
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
-        div
-          img(:src="require('@/assets/img/png/plus-origin.png')")
-          div(class="pt-10 body-1") 自訂尺寸
-        div(v-for="item in sizeList")
-          img(:src="require(`@/assets/img/svg/home-size/${item.name}.svg`)")
-          div(class="pt-10 body-1") {{item.title}}
-          div(class="pt-2 body-2 text-gray-2") {{item.size}}
+        scroll-list(:list="sizeList" type='size')
       div(class="home-content-plaque")
         img(:src="require('@/assets/img/png/home-plaque.png')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
@@ -52,19 +46,19 @@
         span(class="pointer body-1 more"
         @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
       div(class="home-content-template")
-        scroll-list(:list="tagTemplateList")
+        scroll-list(:list="tagTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
         @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
       div(class="home-content-template")
-        scroll-list(:list="popularTemplateList")
+        scroll-list(:list="popularTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
         @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
       div(class="home-content-template")
-        scroll-list(:list="latestTemplateList")
+        scroll-list(:list="latestTemplateList" type='template')
     nu-footer
 </template>
 
@@ -259,26 +253,7 @@ export default Vue.extend({
     }
   }
   &-size {
-    display: grid;
-    align-items: center;
-    column-gap: 50px;
-    grid-template-columns: auto;
-    justify-content: start;
-    grid-auto-flow: column;
-    scroll-behavior: smooth;
-    overflow: scroll;
-    text-align: left;
-    padding: 0 12vw;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    > div {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    padding: 0 10%;
   }
   &-plaque {
     display: flex;

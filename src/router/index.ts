@@ -8,6 +8,7 @@ import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
+import { SidebarPanelType } from '@/store/types'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -29,6 +30,12 @@ const routes: Array<RouteConfig> = [
             uploadUtils.getExport(designId, teamId, background)
           } else if (type && designId) {
             uploadUtils.getDesign(type, designId)
+          }
+        }
+        if (urlParams.has('panel_index')) {
+          const panelIndex = +(urlParams.get('panel_index') || 0)
+          if (panelIndex in SidebarPanelType) {
+            store.commit('SET_currSidebarPanelType', panelIndex)
           }
         }
       } catch (error) {
@@ -106,19 +113,6 @@ const routes: Array<RouteConfig> = [
             uploadUtils.getDesign(type, designId)
           }
         }
-      } catch (error) {
-        console.log(error)
-      }
-    }
-  },
-  {
-    path: '/pricing',
-    name: 'Pricing',
-    component: Pricing,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        next()
       } catch (error) {
         console.log(error)
       }

@@ -66,9 +66,6 @@ export default Vue.extend({
 
   &-items {
     width: 100%;
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: minmax(0, 1fr);
     box-sizing: border-box;
     overflow-y: scroll;
     overflow-x: hidden;
