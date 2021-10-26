@@ -270,6 +270,20 @@ class DesignUtils {
     return res
   }
 
+  expandAll(folders: IFolder[]): IFolder[] {
+    const nodes = [...folders]
+    while (nodes.length > 0) {
+      const node = nodes.shift()
+      if (node) {
+        node.isExpanded = true
+        for (const subFolder of node.subFolders) {
+          nodes.push(subFolder)
+        }
+      }
+    }
+    return folders
+  }
+
   sortDesignsBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
     if (this.checkIfPathed(designs)) {
       const target = designs as IPathedDesign[]

@@ -21,10 +21,34 @@
                           iconColor="gray-2")
                 div(ref="mvFolder"
                     v-if="mydesignView !== 'favorite-design-view'"
-                    class="my-design__multi__icon")
+                    class="my-design__multi__icon"
+                    @click="isMoveToFolderPanelOpen = true")
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
+                div(v-if="isMoveToFolderPanelOpen"
+                    class="my-design__multi__change-folder"
+                    v-click-outside="() => { isMoveToFolderPanelOpen = false }")
+                  div(class="my-design__multi__change-folder__container")
+                    div(class="my-design__multi__change-folder__header")
+                      div(class="my-design__multi__change-folder__title")
+                        span 移至資料夾
+                      div(class="my-design__multi__change-folder__hr")
+                    div(class="my-design__multi__change-folder__folders")
+                      structure-folder(v-for="folder in copiedFolders"
+                                      :folder="folder"
+                                      :parents="[]"
+                                      :level="0"
+                                      @moveToFolderSelect="handleMoveToFolderSelect"
+                                      @moveToFolderExpand="handleMoveToFolderExpand")
+                    div(class="my-design__multi__change-folder__footer")
+                      div(class="my-design__multi__change-folder__buttons")
+                        div(class="my-design__multi__change-folder__cancel")
+                          span 取消
+                        div(class="my-design__multi__change-folder__confirm"
+                            :class="{'disabled': moveToFolderSelectInfo === ''}"
+                            @click="handleMoveToFolder")
+                          span 移至資料夾
                 div(ref="delDesign"
                     class="my-design__multi__icon"
                     @mouseenter="handleFavDelMouseOver(true)"
@@ -114,15 +138,18 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
 import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
-import { IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import StructureFolder from '@/components/navigation/mydesign/StructureFolder.vue'
+import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -132,7 +159,11 @@ export default Vue.extend({
     AllDesignView,
     FavoriteDesignView,
     TrashDesignView,
-    FolderDesignView
+    FolderDesignView,
+    StructureFolder
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -146,7 +177,10 @@ export default Vue.extend({
       folderToBeDeleted: undefined as IPathedFolder | undefined,
       designToBeDeletedForever: undefined as IPathedDesign | undefined,
       confirmMessage: '',
-      isFavDelMouseOver: false
+      isFavDelMouseOver: false,
+      isMoveToFolderPanelOpen: false,
+      copiedFolders: [] as IFolder[],
+      moveToFolderSelectInfo: ''
     }
   },
   computed: {
@@ -189,6 +223,11 @@ export default Vue.extend({
           }
           hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
         })
+      }
+    },
+    isMoveToFolderPanelOpen(newVal) {
+      if (newVal) {
+        this.copiedFolders = designUtils.expandAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
       }
     }
   },
@@ -254,7 +293,10 @@ export default Vue.extend({
       this.removeFromSelection(pathedDesign)
     },
     handleClearSelection() {
-      this.clearSelection()
+      this.isMoveToFolderPanelOpen = false
+      this.$nextTick(() => {
+        this.clearSelection()
+      })
     },
     handlePushItem(item: IQueueItem, queue: IQueueItem[], messageShower: () => void, beforePush?: (item: IQueueItem) => void) {
       if (beforePush) {
@@ -302,6 +344,29 @@ export default Vue.extend({
     },
     handleFavDelMouseOver(val: boolean) {
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
+    },
+    handleMoveToFolderSelect(selectInfo: string) {
+      designUtils.deselect(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
+      this.moveToFolderSelectInfo = selectInfo
+      designUtils.select(this.copiedFolders, 'f:' + selectInfo)
+    },
+    handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
+      const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
+      if (targetFolder) {
+        targetFolder.isExpanded = !targetFolder.isExpanded
+      }
+    },
+    handleMoveToFolder() {
+      const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
+      designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+      const pathedDesign = (Object.values(this.selectedDesigns) as IPathedDesign[])[0]
+      this.handleMoveItem({
+        type: 'multi',
+        data: {
+          path: destination,
+          design: pathedDesign.design
+        }
+      })
     },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
       const currentShowing = this.deletedQueue[0]
@@ -422,6 +487,123 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       gap: 33px;
+    }
+    &__change-folder {
+      position: absolute;
+      top: calc(100% + 11px);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: white;
+      width: 415px;
+      height: 209px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
+      border-radius: 3px;
+      &__container {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow-y: scroll;
+      }
+      &__header {
+        position: sticky;
+        top: 0;
+        background-color: white;
+        display: flex;
+        height: 43px;
+        flex-direction: column;
+        align-items: center;
+      }
+      &__title {
+        margin-top: 11px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        > span {
+          font-family: 'SFProDisplay';
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 20px;
+          letter-spacing: 2px;
+          text-indent: 2px;
+          display: block;
+          color: setColor(gray-2);
+        }
+      }
+      &__hr {
+        margin-top: 10px;
+        width: 365.5px;
+        height: 2px;
+        background-color: setColor(gray-4);
+      }
+      &__folders {
+        width: 100%;
+        min-height: calc(100% - 101px);
+      }
+      &__footer {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        display: flex;
+        height: 58px;
+        flex-direction: column;
+        align-items: center;
+      }
+      &__buttons {
+        width: 170px;
+        height: 25px;
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+      &__cancel {
+        width: 68px;
+        height: 25px;
+        background-color: setColor(gray-4);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        > span {
+          font-family: SF Pro Display;
+          font-size: 12px;
+          line-height: 25px;
+          letter-spacing: 0.875em;
+          text-indent: 0.875em;
+          display: block;
+          color: setColor(gray-2);
+        }
+      }
+      &__confirm {
+        width: 95px;
+        height: 25px;
+        background-color: setColor(blue-1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        > span {
+          font-family: SF Pro Display;
+          font-size: 12px;
+          line-height: 25px;
+          display: block;
+          color: white;
+        }
+        &.disabled {
+          background-color: setColor(gray-4);
+          cursor: not-allowed;
+          > span {
+            color: setColor(gray-2);
+          }
+        }
+      }
     }
     &__icon {
       width: 21px;
