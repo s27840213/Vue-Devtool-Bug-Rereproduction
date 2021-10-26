@@ -150,7 +150,7 @@ export default Vue.extend({
             if (!folder) return
             designUtils.moveFolder(folder, parents, destination)
             if (folder.isSelected) {
-              this.setCurrentSelectedFolder(`f:${this.ROOT}/${folder.name}`)
+              this.setCurrentSelectedFolder(`f:${this.ROOT}/${folder.id}`)
             }
             this.$emit('moveItem', {
               type: 'folder',
@@ -187,7 +187,7 @@ export default Vue.extend({
       this.$emit('moveItem', item)
     },
     handleNewFolder() {
-      designUtils.addNewFolder(this.folders, [designUtils.ROOT])
+      designUtils.addNewFolder([designUtils.ROOT])
     }
   }
 })

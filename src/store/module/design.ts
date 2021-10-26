@@ -99,6 +99,7 @@ const mutations: MutationTree<IDesignSidebarState> = {
     state.trashDesigns.push(pathedDesign)
   },
   UPDATE_addFolderToTrash(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    pathedFolder.folder.isSelected = false
     state.trashFolders.push(pathedFolder)
   },
   UPDATE_removeFromFavorite(state: IDesignSidebarState, pathedDesign: IPathedDesign) {

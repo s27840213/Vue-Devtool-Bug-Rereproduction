@@ -107,7 +107,7 @@
       folder-item(v-for="subFolder in subFolders"
                   :path="path"
                   :config="subFolder"
-                  @goto="handleGotoFolder(subFolder.name)"
+                  @goto="handleGotoFolder(subFolder.id)"
                   @moveItem="handleMoveItem")
     div(v-if="designs.length > 0" class="folder-design-view__design-header")
       div(class="folder-design-view__expand-icon-container"
@@ -241,7 +241,8 @@ export default Vue.extend({
       return path.slice(0, path.length - 1)
     },
     shownParents(): string[] {
-      return this.parents.slice(1)
+      const parentNames = designUtils.getFolderNames(this.folders, this.parents)
+      return parentNames.slice(1)
     },
     designs(): IDesign[] {
       const designs = generalUtils.deepCopy(this.folder.designs)
@@ -296,12 +297,12 @@ export default Vue.extend({
       const selectedParents = this.parents.slice(0, index + 1)
       this.setCurrentSelectedFolder(`f:${selectedParents.join('/')}`)
     },
-    handleGotoFolder(name: string) {
+    handleGotoFolder(id: string) {
       this.setExpand({
         path: this.path,
         isExpanded: true
       })
-      this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${name}`)
+      this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${id}`)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true
@@ -322,12 +323,11 @@ export default Vue.extend({
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
-      if (designUtils.checkExistingFolderName(this.folders, this.parents, this.editableFolderName)) return
+      // TODO: check if name is more than 64 characters
       this.setFolderName({
         path: this.path,
         newFolderName: this.editableFolderName
       })
-      this.setCurrentSelectedFolder(`f:${[...this.parents, this.editableFolderName].join('/')}`)
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
       designUtils.dispatchDesignMenuAction(icon, path, design)
@@ -348,7 +348,7 @@ export default Vue.extend({
       })
     },
     handleNewFolder() {
-      designUtils.addNewFolder(this.folders, this.path)
+      designUtils.addNewFolder(this.path)
     },
     handleSortByClick(payload: [string, boolean]) {
       this.sortByField = payload[0]

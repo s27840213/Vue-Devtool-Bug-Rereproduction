@@ -317,7 +317,7 @@ export default Vue.extend({
     },
     deleteFolder(pathedFolder: IPathedFolder) {
       designUtils.deleteFolder(pathedFolder)
-      if (this.currentSelectedFolder !== `f:${[...pathedFolder.parents, pathedFolder.folder.name].join('/')}`) return
+      if (this.currentSelectedFolder !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
       if (pathedFolder.parents.length > 1) {
         this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
       } else {

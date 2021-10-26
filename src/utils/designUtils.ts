@@ -22,9 +22,10 @@ class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = '我所有的設計'
 
-  newFolder(name: string, author: string, randomTime = false): IFolder {
+  newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
+      id: isROOT ? this.ROOT : generalUtils.generateAssetId(),
       name,
       author,
       createdTime: time,
@@ -49,7 +50,7 @@ class DesignUtils {
 
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
-    template[0] = this.newFolder(this.ROOT, 'SYSTEM', true)
+    template[0] = this.newFolder(this.ROOT, 'SYSTEM', true, true)
     template[0].subFolders = [
       this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
       this.newFolder('日本行銷', 'Daniel', true)
@@ -60,7 +61,7 @@ class DesignUtils {
         name: `Name${i + 1}`,
         width: 1200,
         height: 1200,
-        id: `${generalUtils.generateAssetId()}`,
+        id: generalUtils.generateAssetId(),
         thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
         createdTime: time,
         lastUpdatedTime: time
@@ -71,6 +72,14 @@ class DesignUtils {
 
   makePath(selectInfo: string): string[] {
     return selectInfo.substring(2).split('/')
+  }
+
+  appendPath(parents: string[], folder: IFolder): string[] {
+    return [...parents, folder.id]
+  }
+
+  createPath(pathedFolder: IPathedFolder): string[] {
+    return this.appendPath(pathedFolder.parents, pathedFolder.folder)
   }
 
   makeNormalMenuItems(): {icon: string, text: string, extendable?: boolean}[] {
@@ -129,17 +138,17 @@ class DesignUtils {
     ]
   }
 
-  findFolder(folders: IFolder[], name: string): IFolder | undefined {
+  findFolder(folders: IFolder[], id: string): IFolder | undefined {
     for (const folder of folders) {
-      if (folder.name === name) {
+      if (folder.id === id) {
         return folder
       }
     }
   }
 
-  findFolders(folders: IFolder[], name: string): IFolder[] {
+  findFolders(folders: IFolder[], id: string): IFolder[] {
     for (const folder of folders) {
-      if (folder.name === name) {
+      if (folder.id === id) {
         return folder.subFolders
       }
     }
@@ -148,13 +157,13 @@ class DesignUtils {
 
   search(folders: IFolder[], path: string[]): IFolder | undefined {
     const parents = path.slice(0, path.length - 1)
-    const name = path[path.length - 1]
+    const id = path[path.length - 1]
 
     let currentFolders = folders
     for (const parent of parents) {
       currentFolders = this.findFolders(currentFolders, parent)
     }
-    return this.findFolder(currentFolders, name)
+    return this.findFolder(currentFolders, id)
   }
 
   goTo(folders: IFolder[], path: string[]): IFolder[] {
@@ -163,6 +172,18 @@ class DesignUtils {
       currentFolders = this.findFolders(currentFolders, node)
     }
     return currentFolders
+  }
+
+  getFolderNames(folders: IFolder[], path: string[]): string[] {
+    const res = []
+    let currentFolders = folders
+    for (const node of path) {
+      const currentFolder = this.findFolder(currentFolders, node)
+      if (!currentFolder) break
+      res.push(currentFolder.name)
+      currentFolders = currentFolder.subFolders
+    }
+    return res
   }
 
   deselect(folders: IFolder[], selectInfo: string) {
@@ -234,13 +255,13 @@ class DesignUtils {
         const { parents, folder } = node
         for (const design of folder.designs) {
           res.push({
-            path: [...parents, folder.name],
+            path: this.createPath(node),
             design
           })
         }
         for (const subFolder of folder.subFolders) {
           nodes.push({
-            parents: [...parents, folder.name],
+            parents: this.createPath(node),
             folder: subFolder
           })
         }
@@ -286,19 +307,6 @@ class DesignUtils {
     return (designs.length === 0) || ('path' in designs[0])
   }
 
-  checkExistingFolderName(folders: IFolder[], parents: string[], name: string) {
-    const subFolders = this.goTo(folders, parents)
-    return subFolders.some(folder => folder.name === name)
-  }
-
-  checkExistingDesignName(folder: IFolder[], path: string[], name: string) {
-    const targetFolder = this.search(folder, path)
-    if (targetFolder) {
-      return targetFolder.designs.some(design => design.name === name)
-    }
-    return false
-  }
-
   checkAllInFavorite(pathedDesigns: IPathedDesign[]): boolean {
     const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
     return !pathedDesigns.some(pathedDesign => !favoriteDesignIds.includes(pathedDesign.design.id))
@@ -314,13 +322,13 @@ class DesignUtils {
   }
 
   isParentOrEqual(a: IPathedFolder, b: IPathedFolder): boolean {
-    const aFullPath = [...a.parents, a.folder.name].join('/')
-    const bFullPath = [...b.parents, b.folder.name].join('/')
+    const aFullPath = this.createPath(a).join('/')
+    const bFullPath = this.createPath(b).join('/')
     return bFullPath.startsWith(aFullPath)
   }
 
   isFolderEqual(a: IPathedFolder, b: IPathedFolder): boolean {
-    return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.name === b.folder.name
+    return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
   }
 
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign) {
@@ -347,19 +355,10 @@ class DesignUtils {
     }
   }
 
-  addNewFolder(folders: IFolder[], path: string[]) {
-    const newFolderNamePrefix = '新增資料夾'
-    let newFolderName = newFolderNamePrefix
-    let postfixCounter = 1
-    const targetFolder = this.search(folders, path)
-    if (!targetFolder) return
-    while (targetFolder.subFolders.some(folder => folder.name === newFolderName)) {
-      postfixCounter++
-      newFolderName = `${newFolderNamePrefix}${postfixCounter}`
-    }
+  addNewFolder(path: string[]) {
     store.commit('design/UPDATE_addFolder', {
       parents: path,
-      folder: this.newFolder(newFolderName, 'Daniel')
+      folder: this.newFolder('新增資料夾', 'Daniel') // TODO: use usernames instead
     })
   }
 
