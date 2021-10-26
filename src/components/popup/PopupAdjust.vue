@@ -1,17 +1,18 @@
 <template lang="pug">
-  div(class="popup-adjust")
+  div(class="popup-adjust p-10")
     div(class="popup-adjust__field"
       v-for="field in fields"
       :key="field.name")
-      div(class="popup-adjust__label") {{ field.label }}
-      input(class="popup-adjust__range-input"
-        :value="currLayerAdjust[field.name] || 0"
-        :max="field.max"
-        :min="field.min"
-        :name="field.name"
-        @input="handleField"
-        type="range")
-      input(class="popup-adjust__text body-2 text-gray-2"
+      div(class="popup-adjust__label")
+        div {{ field.label }}
+        input(class="popup-adjust__range-input"
+          :value="currLayerAdjust[field.name] || 0"
+          :max="field.max"
+          :min="field.min"
+          :name="field.name"
+          @input="handleField"
+          type="range")
+      input(class="popup-adjust__text body-2 text-gray-2 ml-10"
         type="text"
         :name="field.name"
         @input="handleField"
@@ -114,11 +115,10 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .popup-adjust {
-  padding: 18px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  row-gap: 10px;
+  row-gap: 5px;
   box-sizing: border-box;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
   &__field {
@@ -136,6 +136,8 @@ export default Vue.extend({
     color: setColor(gray-2);
     border-radius: 0.25rem;
     width: 30px;
+    height: 25px;
+    align-self: flex-end;
   }
 
   &__range-input {
@@ -143,8 +145,9 @@ export default Vue.extend({
     appearance: none;
     outline: none;
     background: none;
-    width: 100px;
-    margin: 0 15px;
+    width: 100%;
+    height: 20px;
+    margin: 0;
     &::-webkit-slider-runnable-track {
       height: 2px;
       background-color: #d9dbe1;
