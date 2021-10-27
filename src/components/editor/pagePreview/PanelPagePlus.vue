@@ -109,7 +109,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 120px;
+    width: 100%;
     height: 30px;
     transition: 0.1s;
 
