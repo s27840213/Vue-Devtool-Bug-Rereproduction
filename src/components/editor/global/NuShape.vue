@@ -184,7 +184,6 @@ export default Vue.extend({
     'config.vSize': {
       handler: function(newVal) {
         if (this.config.category === 'E') {
-          // const dimensions = shapeUtils.basicShapeDimensionIncludingStroke(newVal, this.config.size[0], this.config.shapeType)
           Object.assign(this.config.styles, { width: newVal[0], height: newVal[1], initWidth: newVal[0], initHeight: newVal[1] })
         }
       },
@@ -294,10 +293,8 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        // width: `${this.config.styles.initWidth}px`,
-        // height: `${this.config.styles.initHeight}px`
-        width: `${this.config.vSize[0] + this.config.pDiff[0]}px`,
-        height: `${this.config.vSize[1] + this.config.pDiff[1]}px`
+        width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
+        height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
       }
     },
     getFilterTemplate(): string {
