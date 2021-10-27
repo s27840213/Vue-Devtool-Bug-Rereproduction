@@ -55,7 +55,8 @@
                   @deleteFolder="handleDeleteFolder"
                   @moveItem="handleMoveItem"
                   @deleteForever="handleDeleteForever"
-                  @moveDesignToFolder="handleMoveDesignToFolder")
+                  @moveDesignToFolder="handleMoveDesignToFolder"
+                  @downloadDesign="handleDownloadDesign")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
@@ -136,6 +137,10 @@
               span 取消
             div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
               span 永久刪除
+      div(v-if="confirmMessage === 'download'" class="dim-background")
+        popup-download(class="my-design__download"
+          :useExternelJSON="true"
+          @close="closeConfirmMessage")
     div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
@@ -150,6 +155,7 @@ import FavoriteDesignView from '@/components/navigation/mydesign/design-views/Fa
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
 import StructureFolder from '@/components/navigation/mydesign/StructureFolder.vue'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
 import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
@@ -164,7 +170,8 @@ export default Vue.extend({
     FavoriteDesignView,
     TrashDesignView,
     FolderDesignView,
-    StructureFolder
+    StructureFolder,
+    PopupDownload
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -393,6 +400,10 @@ export default Vue.extend({
       this.isMovingSingleToFolder = true
       this.isMoveToFolderPanelOpen = true
     },
+    handleDownloadDesign(pathedDesign: IPathedDesign) {
+      this.designBuffer = pathedDesign
+      this.confirmMessage = 'download'
+    },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
       const currentShowing = this.deletedQueue[0]
       if (!currentShowing) return false
@@ -610,6 +621,7 @@ export default Vue.extend({
     &.centered {
       z-index: 1001;
       top: 50%;
+      left: calc(50% - 120px);
       transform: translate(-50%, -50%);
     }
     &__container {
@@ -748,6 +760,9 @@ export default Vue.extend({
         color: white;
       }
     }
+  }
+  &__download {
+    width: 210px;
   }
 }
 

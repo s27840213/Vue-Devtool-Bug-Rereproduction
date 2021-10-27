@@ -94,6 +94,9 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  props: {
+    useExternelJSON: Boolean
+  },
   data () {
     const { selectedTypeVal, ...prevSubmission } = JSON.parse(localStorage.getItem(submission) || '{}')
     return {
@@ -139,6 +142,7 @@ export default Vue.extend({
   },
   mounted () {
     this.exportId = GeneralUtils.generateAssetId()
+    if (this.useExternelJSON) return
     uploadUtils.uploadExportJSON(this.exportId)
   },
   watch: {

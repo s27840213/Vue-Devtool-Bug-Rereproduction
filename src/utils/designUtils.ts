@@ -393,6 +393,12 @@ class DesignUtils {
           payload: { path, design }
         }
       }
+      case 'download': {
+        return {
+          event: 'downloadDesign',
+          payload: { path, design }
+        }
+      }
     }
   }
 
