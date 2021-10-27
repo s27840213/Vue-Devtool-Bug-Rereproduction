@@ -27,7 +27,6 @@
                 iconColor="gray-2")
         div(class="dragged-folder__name")
           span {{ config.name }}
-        //- div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
 </template>
 
 <script lang="ts">
@@ -118,7 +117,7 @@ export default Vue.extend({
       this.isMouseOver = false
       if (this.undroppable) return
       if (this.isDragged) return
-      const destination = [...(this.path as string[]), this.config.name as string]
+      const destination = designUtils.appendPath(this.path as string[], this.config as IFolder)
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
         if (!design) return

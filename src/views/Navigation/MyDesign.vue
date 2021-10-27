@@ -21,7 +21,8 @@
                           iconColor="gray-2")
                 div(ref="mvFolder"
                     v-if="mydesignView !== 'favorite-design-view'"
-                    class="my-design__multi__icon")
+                    class="my-design__multi__icon"
+                    @click="isMoveToFolderPanelOpen = true")
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
@@ -53,7 +54,9 @@
                   @recoverItem="handleRecoverItem"
                   @deleteFolder="handleDeleteFolder"
                   @moveItem="handleMoveItem"
-                  @deleteForever="handleDeleteForever")
+                  @deleteForever="handleDeleteForever"
+                  @moveDesignToFolder="handleMoveDesignToFolder"
+                  @downloadDesign="handleDownloadDesign")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
@@ -71,6 +74,31 @@
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
                 span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
+        div(v-if="isMoveToFolderPanelOpen"
+            class="my-design__change-folder"
+            :class="{centered: isMovingSingleToFolder}"
+            v-click-outside="() => { isMoveToFolderPanelOpen = false }")
+          div(class="my-design__change-folder__container")
+            div(class="my-design__change-folder__header")
+              div(class="my-design__change-folder__title")
+                span 移至資料夾
+              div(class="my-design__change-folder__hr")
+            div(class="my-design__change-folder__folders")
+              structure-folder(v-for="folder in copiedFolders"
+                              :folder="folder"
+                              :parents="[]"
+                              :level="0"
+                              @moveToFolderSelect="handleMoveToFolderSelect"
+                              @moveToFolderExpand="handleMoveToFolderExpand")
+            div(class="my-design__change-folder__footer")
+              div(class="my-design__change-folder__buttons")
+                div(class="my-design__change-folder__cancel"
+                    @click="isMoveToFolderPanelOpen = false")
+                  span 取消
+                div(class="my-design__change-folder__confirm"
+                    :class="{'disabled': moveToFolderSelectInfo === ''}"
+                    @click="handleMoveToFolder")
+                  span 移至資料夾
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
@@ -94,7 +122,7 @@
             div(class="delete-folder-message__buttons")
               div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
                 span 取消
-              div(class="delete-folder-message__confirm" @click="deleteFolder(folderToBeDeleted)")
+              div(class="delete-folder-message__confirm" @click="deleteFolder(folderBuffer)")
                 span 刪除
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-forever-message")
@@ -109,20 +137,29 @@
               span 取消
             div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
               span 永久刪除
+      div(v-if="confirmMessage === 'download'" class="dim-background")
+        popup-download(class="my-design__download"
+          :useExternelJSON="true"
+          @close="closeConfirmMessage")
+    div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
 import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
 import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
-import { IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import StructureFolder from '@/components/navigation/mydesign/StructureFolder.vue'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
+import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -132,7 +169,12 @@ export default Vue.extend({
     AllDesignView,
     FavoriteDesignView,
     TrashDesignView,
-    FolderDesignView
+    FolderDesignView,
+    StructureFolder,
+    PopupDownload
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -143,10 +185,14 @@ export default Vue.extend({
       isShowRecoverMessage: false,
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
-      folderToBeDeleted: undefined as IPathedFolder | undefined,
-      designToBeDeletedForever: undefined as IPathedDesign | undefined,
+      folderBuffer: undefined as IPathedFolder | undefined,
+      designBuffer: undefined as IPathedDesign | undefined,
       confirmMessage: '',
-      isFavDelMouseOver: false
+      isFavDelMouseOver: false,
+      isMoveToFolderPanelOpen: false,
+      copiedFolders: [] as IFolder[],
+      moveToFolderSelectInfo: '',
+      isMovingSingleToFolder: false
     }
   },
   computed: {
@@ -189,6 +235,15 @@ export default Vue.extend({
           }
           hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
         })
+      }
+    },
+    isMoveToFolderPanelOpen(newVal) {
+      if (newVal) {
+        this.copiedFolders = designUtils.foldAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
+      } else {
+        this.copiedFolders = []
+        this.designBuffer = undefined
+        this.isMovingSingleToFolder = false
       }
     }
   },
@@ -254,7 +309,10 @@ export default Vue.extend({
       this.removeFromSelection(pathedDesign)
     },
     handleClearSelection() {
-      this.clearSelection()
+      this.isMoveToFolderPanelOpen = false
+      this.$nextTick(() => {
+        this.clearSelection()
+      })
     },
     handlePushItem(item: IQueueItem, queue: IQueueItem[], messageShower: () => void, beforePush?: (item: IQueueItem) => void) {
       if (beforePush) {
@@ -292,16 +350,59 @@ export default Vue.extend({
           data: pathedFolder
         })
       } else {
-        this.folderToBeDeleted = pathedFolder
+        this.folderBuffer = pathedFolder
         this.confirmMessage = 'delete-folder'
       }
     },
     handleDeleteForever(payload: IPathedDesign) {
-      this.designToBeDeletedForever = payload
+      this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
     handleFavDelMouseOver(val: boolean) {
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
+    },
+    handleMoveToFolderSelect(selectInfo: string) {
+      designUtils.deselect(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
+      this.moveToFolderSelectInfo = selectInfo
+      designUtils.select(this.copiedFolders, 'f:' + selectInfo)
+    },
+    handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
+      const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
+      if (targetFolder) {
+        targetFolder.isExpanded = !targetFolder.isExpanded
+      }
+    },
+    handleMoveToFolder() {
+      const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
+      if (this.isMovingSingleToFolder && this.designBuffer) {
+        const { path, design } = this.designBuffer
+        designUtils.move(design, path, destination)
+        this.handleMoveItem({
+          type: 'design',
+          data: {
+            path: destination,
+            design
+          }
+        })
+      } else {
+        designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+        this.handleMoveItem({
+          type: 'multi',
+          data: {
+            path: destination,
+            design: (Object.values(this.selectedDesigns) as IPathedDesign[])[0].design
+          }
+        })
+      }
+    },
+    handleMoveDesignToFolder(pathedDesign: IPathedDesign) {
+      this.designBuffer = pathedDesign
+      this.isMovingSingleToFolder = true
+      this.isMoveToFolderPanelOpen = true
+    },
+    handleDownloadDesign(pathedDesign: IPathedDesign) {
+      this.designBuffer = pathedDesign
+      this.confirmMessage = 'download'
     },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
       const currentShowing = this.deletedQueue[0]
@@ -317,7 +418,7 @@ export default Vue.extend({
     },
     deleteFolder(pathedFolder: IPathedFolder) {
       designUtils.deleteFolder(pathedFolder)
-      if (this.currentSelectedFolder !== `f:${[...pathedFolder.parents, pathedFolder.folder.name].join('/')}`) return
+      if (this.currentSelectedFolder !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
       if (pathedFolder.parents.length > 1) {
         this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
       } else {
@@ -355,13 +456,14 @@ export default Vue.extend({
       designUtils.deleteAll(Object.values(this.selectedDesigns))
     },
     deleteForeverConfirmed() {
-      if (this.designToBeDeletedForever) {
-        designUtils.deleteForever(this.designToBeDeletedForever)
+      if (this.designBuffer) {
+        designUtils.deleteForever(this.designBuffer)
       }
     },
     closeConfirmMessage() {
       this.confirmMessage = ''
-      this.folderToBeDeleted = undefined
+      this.folderBuffer = undefined
+      this.designBuffer = undefined
     }
   }
 })
@@ -502,6 +604,131 @@ export default Vue.extend({
       }
     }
   }
+  &__change-folder {
+    z-index: 1;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    width: 415px;
+    height: 627px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
+    border-radius: 3px;
+    &.centered {
+      z-index: 1001;
+      top: 50%;
+      left: calc(50% - 120px);
+      transform: translate(-50%, -50%);
+    }
+    &__container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      border-radius: 3px;
+      overflow-y: auto;
+    }
+    &__header {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      display: flex;
+      height: 43px;
+      flex-direction: column;
+      align-items: center;
+    }
+    &__title {
+      margin-top: 11px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      > span {
+        font-family: 'SFProDisplay';
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: 2px;
+        text-indent: 2px;
+        display: block;
+        color: setColor(gray-2);
+      }
+    }
+    &__hr {
+      margin-top: 10px;
+      width: 365.5px;
+      height: 2px;
+      background-color: setColor(gray-4);
+    }
+    &__folders {
+      width: 100%;
+      min-height: calc(100% - 101px);
+    }
+    &__footer {
+      position: sticky;
+      bottom: 0;
+      background-color: white;
+      display: flex;
+      height: 58px;
+      flex-direction: column;
+      align-items: center;
+    }
+    &__buttons {
+      width: 170px;
+      height: 25px;
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    &__cancel {
+      width: 68px;
+      height: 25px;
+      background-color: setColor(gray-4);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: SF Pro Display;
+        font-size: 12px;
+        line-height: 25px;
+        letter-spacing: 0.875em;
+        text-indent: 0.875em;
+        display: block;
+        color: setColor(gray-2);
+      }
+    }
+    &__confirm {
+      width: 95px;
+      height: 25px;
+      background-color: setColor(blue-1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: SF Pro Display;
+        font-size: 12px;
+        line-height: 25px;
+        display: block;
+        color: white;
+      }
+      &.disabled {
+        background-color: setColor(gray-4);
+        cursor: not-allowed;
+        > span {
+          color: setColor(gray-2);
+        }
+      }
+    }
+  }
   &__info {
     display: flex;
     align-items: center;
@@ -533,6 +760,9 @@ export default Vue.extend({
         color: white;
       }
     }
+  }
+  &__download {
+    width: 210px;
   }
 }
 

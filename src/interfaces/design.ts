@@ -1,14 +1,15 @@
 export interface IDesign {
+  id: string,
   name: string,
   width: number,
   height: number,
-  id: string,
   thumbnail: string,
   createdTime: number,
   lastUpdatedTime: number
 }
 
 export interface IFolder {
+  id: string,
   name: string,
   author: string,
   createdTime: number,

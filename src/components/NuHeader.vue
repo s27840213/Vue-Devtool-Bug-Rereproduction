@@ -30,6 +30,7 @@
     div(class="body-2")
       div(style="width: 180px;")
         search-bar(
+        style="height: 28px; background-color: white; border-radius: 4px;"
         placeholder="搜 尋")
       div(v-if="!isLogin")
         btn(@click.native="goToPage('/login')"

@@ -249,7 +249,6 @@ export default Vue.extend({
       this.isNameEditing = false
       this.isNameMouseOver = false
       if (this.editableName === '' || this.editableName === this.config.name) return
-      // if (designUtils.checkExistingDesignName(this.folders, this.path as string[], this.editableName)) return
       this.setDesignName({
         path: this.path,
         id: this.config.id,

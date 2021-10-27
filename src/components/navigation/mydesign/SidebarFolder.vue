@@ -24,7 +24,7 @@
           style="pointer-events: none")
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.name]"
+    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
                   @moveItem="handleMoveItem")
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div(class="nav-folder-0")
@@ -122,7 +122,7 @@ export default Vue.extend({
       e.preventDefault()
     },
     handleSelection() {
-      this.setCurrentSelectedFolder(`f:${[...this.parents, this.folder.name].join('/')}`)
+      this.setCurrentSelectedFolder(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
     },
     handleDragEnter() {
       this.isDraggedOver = true
@@ -133,7 +133,7 @@ export default Vue.extend({
     handleDrop() {
       this.isDraggedOver = false
       if (this.isDragged) return
-      const destination = [...(this.parents as string[]), this.folder.name as string]
+      const destination = designUtils.appendPath(this.parents as string[], this.folder as IFolder)
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
         if (!design) return
@@ -156,7 +156,7 @@ export default Vue.extend({
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
         designUtils.moveFolder(folder, parents, destination)
         if (folder.isSelected) {
-          this.setCurrentSelectedFolder(`f:${[...destination, folder.name].join('/')}`)
+          this.setCurrentSelectedFolder(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
         }
         this.$emit('moveItem', {
           type: 'folder',
@@ -168,10 +168,8 @@ export default Vue.extend({
       this.$emit('moveItem', item)
     },
     toggleExpansion() {
-      // const pseudoSelectInfo = `f:${[...this.parents, this.folder.name].join('/')}`
-      // if (this.currentSelectedFolder.startsWith(pseudoSelectInfo) && this.currentSelectedFolder !== pseudoSelectInfo) return
       this.setExpand({
-        path: [...this.parents, this.folder.name],
+        path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
         isExpanded: !this.folder.isExpanded
       })
     },
