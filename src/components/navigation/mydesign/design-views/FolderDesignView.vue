@@ -330,12 +330,10 @@ export default Vue.extend({
       })
     },
     handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
-      designUtils.dispatchDesignMenuAction(icon, path, design)
-      if (icon === 'trash') {
-        this.$emit('deleteItem', {
-          type: 'design',
-          data: { path, design }
-        })
+      const extraEvent = designUtils.dispatchDesignMenuAction(icon, path, design)
+      if (extraEvent) {
+        const { event, payload } = extraEvent
+        this.$emit(event, payload)
       }
     },
     handleDeleteFolder() {

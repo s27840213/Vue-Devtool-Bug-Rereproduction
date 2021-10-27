@@ -54,7 +54,8 @@
                   @recoverItem="handleRecoverItem"
                   @deleteFolder="handleDeleteFolder"
                   @moveItem="handleMoveItem"
-                  @deleteForever="handleDeleteForever")
+                  @deleteForever="handleDeleteForever"
+                  @moveDesignToFolder="handleMoveDesignToFolder")
         div(class="my-design__message-stack")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
@@ -74,6 +75,7 @@
                 span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
         div(v-if="isMoveToFolderPanelOpen"
             class="my-design__change-folder"
+            :class="{centered: isMovingSingleToFolder}"
             v-click-outside="() => { isMoveToFolderPanelOpen = false }")
           div(class="my-design__change-folder__container")
             div(class="my-design__change-folder__header")
@@ -119,7 +121,7 @@
             div(class="delete-folder-message__buttons")
               div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
                 span 取消
-              div(class="delete-folder-message__confirm" @click="deleteFolder(folderToBeDeleted)")
+              div(class="delete-folder-message__confirm" @click="deleteFolder(folderBuffer)")
                 span 刪除
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-forever-message")
@@ -134,6 +136,7 @@
               span 取消
             div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
               span 永久刪除
+    div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
 <script lang="ts">
@@ -175,13 +178,14 @@ export default Vue.extend({
       isShowRecoverMessage: false,
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
-      folderToBeDeleted: undefined as IPathedFolder | undefined,
-      designToBeDeletedForever: undefined as IPathedDesign | undefined,
+      folderBuffer: undefined as IPathedFolder | undefined,
+      designBuffer: undefined as IPathedDesign | undefined,
       confirmMessage: '',
       isFavDelMouseOver: false,
       isMoveToFolderPanelOpen: false,
       copiedFolders: [] as IFolder[],
-      moveToFolderSelectInfo: ''
+      moveToFolderSelectInfo: '',
+      isMovingSingleToFolder: false
     }
   },
   computed: {
@@ -229,6 +233,10 @@ export default Vue.extend({
     isMoveToFolderPanelOpen(newVal) {
       if (newVal) {
         this.copiedFolders = designUtils.foldAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
+      } else {
+        this.copiedFolders = []
+        this.designBuffer = undefined
+        this.isMovingSingleToFolder = false
       }
     }
   },
@@ -335,12 +343,12 @@ export default Vue.extend({
           data: pathedFolder
         })
       } else {
-        this.folderToBeDeleted = pathedFolder
+        this.folderBuffer = pathedFolder
         this.confirmMessage = 'delete-folder'
       }
     },
     handleDeleteForever(payload: IPathedDesign) {
-      this.designToBeDeletedForever = payload
+      this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
     handleFavDelMouseOver(val: boolean) {
@@ -359,15 +367,31 @@ export default Vue.extend({
     },
     handleMoveToFolder() {
       const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
-      designUtils.moveAll(Object.values(this.selectedDesigns), destination)
-      const pathedDesign = (Object.values(this.selectedDesigns) as IPathedDesign[])[0]
-      this.handleMoveItem({
-        type: 'multi',
-        data: {
-          path: destination,
-          design: pathedDesign.design
-        }
-      })
+      if (this.isMovingSingleToFolder && this.designBuffer) {
+        const { path, design } = this.designBuffer
+        designUtils.move(design, path, destination)
+        this.handleMoveItem({
+          type: 'design',
+          data: {
+            path: destination,
+            design
+          }
+        })
+      } else {
+        designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+        this.handleMoveItem({
+          type: 'multi',
+          data: {
+            path: destination,
+            design: (Object.values(this.selectedDesigns) as IPathedDesign[])[0].design
+          }
+        })
+      }
+    },
+    handleMoveDesignToFolder(pathedDesign: IPathedDesign) {
+      this.designBuffer = pathedDesign
+      this.isMovingSingleToFolder = true
+      this.isMoveToFolderPanelOpen = true
     },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
       const currentShowing = this.deletedQueue[0]
@@ -421,13 +445,14 @@ export default Vue.extend({
       designUtils.deleteAll(Object.values(this.selectedDesigns))
     },
     deleteForeverConfirmed() {
-      if (this.designToBeDeletedForever) {
-        designUtils.deleteForever(this.designToBeDeletedForever)
+      if (this.designBuffer) {
+        designUtils.deleteForever(this.designBuffer)
       }
     },
     closeConfirmMessage() {
       this.confirmMessage = ''
-      this.folderToBeDeleted = undefined
+      this.folderBuffer = undefined
+      this.designBuffer = undefined
     }
   }
 })
@@ -569,7 +594,7 @@ export default Vue.extend({
     }
   }
   &__change-folder {
-    z-index: 1000;
+    z-index: 1;
     position: absolute;
     top: 50px;
     left: 50%;
@@ -582,11 +607,17 @@ export default Vue.extend({
     align-items: center;
     box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
     border-radius: 3px;
+    &.centered {
+      z-index: 1001;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
     &__container {
       position: relative;
       height: 100%;
       width: 100%;
-      overflow-y: scroll;
+      border-radius: 3px;
+      overflow-y: auto;
     }
     &__header {
       position: sticky;

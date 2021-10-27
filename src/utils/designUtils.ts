@@ -346,7 +346,7 @@ class DesignUtils {
     return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
   }
 
-  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign) {
+  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign): { event: string, payload: any } | undefined {
     switch (icon) {
       case 'copy': {
         const newId = generalUtils.generateAssetId()
@@ -359,15 +359,39 @@ class DesignUtils {
           path,
           design: newDesign
         })
-        break
+        return
       }
       case 'trash': {
         this.delete({ path, design })
-        break
+        return {
+          event: 'deleteItem',
+          payload: {
+            type: 'design',
+            data: { path, design }
+          }
+        }
+      }
+      case 'delete': {
+        return {
+          event: 'deleteForever',
+          payload: { path, design }
+        }
       }
       case 'reduction': {
         this.recover({ path, design })
-        break
+        return {
+          event: 'recoverItem',
+          payload: {
+            type: 'design',
+            data: { path, design }
+          }
+        }
+      }
+      case 'folder': {
+        return {
+          event: 'moveDesignToFolder',
+          payload: { path, design }
+        }
       }
     }
   }
