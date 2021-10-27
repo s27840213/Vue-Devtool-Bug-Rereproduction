@@ -14,7 +14,6 @@
         page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="page")
         panel-page-plus(v-if="idx+1 === getPageCount"
                         :index="idx+1" last=false)
-
 </template>
 
 <script lang="ts">
@@ -67,9 +66,6 @@ export default Vue.extend({
 
   &-items {
     width: 100%;
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: minmax(0, 1fr);
     box-sizing: border-box;
     overflow-y: scroll;
     overflow-x: hidden;

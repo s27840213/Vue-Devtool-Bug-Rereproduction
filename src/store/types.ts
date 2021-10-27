@@ -60,7 +60,9 @@ export enum SidebarPanelType {
   bg,
   text,
   file,
-  brand
+  brand,
+  pexels,
+  page
 }
 
 export enum FunctionPanelType {

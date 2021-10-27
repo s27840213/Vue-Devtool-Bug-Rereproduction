@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="nu-page"
+      :style="pageMarginStyles"
       ref="page")
-    div(class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+    div(v-if="!inPagePanel" class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
       input(class="text-gray-3"
         type="text"
         v-model="pageName"
@@ -25,6 +26,25 @@
           @click.native="duplicatePage()")
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="deletePage()")
+    div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+      div(class="page-bar__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        div(class="body-2")
+          span {{pageIndex + 1}}
+        svg-icon(class="pointer mt-10"
+          :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+          @click.native="")
+        svg-icon(class="pointer mt-10"
+          :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+          @click.native="")
+        svg-icon(class="pointer mt-15"
+          :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="addPage()")
+        svg-icon(class="pointer mt-10"
+          :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="duplicatePage()")
+        svg-icon(class="pointer mt-10"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -65,26 +85,7 @@
         tabindex="0")
       div(class="scale-container relative" :style="`transform: scale(${scaleRatio/100})`")
         page-content(:config="config" :pageIndex="pageIndex")
-        div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
-          class="page-highlighter"
-          :style="styles()")
         div(class="page-control" :style="styles('control')")
-          div(class="snap-area")
-            div(v-for="line in closestSnaplines.v"
-              class="snap-area__line snap-area__line--vr"
-              :style="snapLineStyles('v', line)")
-            div(v-for="line in closestSnaplines.h"
-              class="snap-area__line snap-area__line--hr"
-              :style="snapLineStyles('h', line)")
-            template(v-if="isShowGuideline")
-              div(v-for="(line,index) in guidelines.v"
-                class="snap-area__line snap-area__line--vr"
-                :style="snapLineStyles('v', line,true)"
-                @mouseover="showGuideline(line,'v',index)")
-              div(v-for="(line,index) in guidelines.h"
-                class="snap-area__line snap-area__line--hr"
-                :style="snapLineStyles('h', line,true)"
-                @mouseover="showGuideline(line,'h',index)")
           template(v-for="(layer, index) in config.layers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
               data-identifier="controller"
@@ -96,12 +97,7 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-          div(v-if="currActivePageIndex === pageIndex"
-              class="page-resizer"
-              ref="pageResizer"
-              @mousedown.left.stop="pageResizeStart($event)")
-            div(class="page-resizer__resizer-bar")
-        div(v-if="ImageUtils.isImgControl"
+        div(v-if="ImageUtils.isImgControl(pageIndex)"
             class="dim-background"
             :style="styles('control')")
           template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
@@ -131,6 +127,34 @@
         div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
             class="dim-background"
             :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+    div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+      class="page-highlighter"
+      :style="wrapperStyles()")
+    div(v-if="(currActivePageIndex === pageIndex && inPagePanel)"
+        class="page-resizer"
+        ref="pageResizer"
+        @mousedown.left.stop="pageResizeStart($event)"
+        @mouseenter="toggleResizerHint(true)"
+        @mouseleave="toggleResizerHint(false)")
+      div(class="page-resizer__resizer-bar")
+      div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
+    div(class="snap-area"
+      :style="wrapperStyles()")
+      div(v-for="line in closestSnaplines.v"
+        class="snap-area__line snap-area__line--vr"
+        :style="snapLineStyles('v', line)")
+      div(v-for="line in closestSnaplines.h"
+        class="snap-area__line snap-area__line--hr"
+        :style="snapLineStyles('h', line)")
+      template(v-if="isShowGuideline && !inPagePanel")
+        div(v-for="(line,index) in guidelines.v"
+          class="snap-area__line snap-area__line--vr"
+          :style="snapLineStyles('v', line,true)"
+          @mouseover="showGuideline(line,'v',index)")
+        div(v-for="(line,index) in guidelines.h"
+          class="snap-area__line snap-area__line--hr"
+          :style="snapLineStyles('h', line,true)"
+          @mouseover="showGuideline(line,'h',index)")
 </template>
 
 <script lang="ts">
@@ -152,6 +176,7 @@ import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
+import { SidebarPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -165,7 +190,12 @@ export default Vue.extend({
       initialRelPos: { x: 0, y: 0 },
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
+      isShownScrollBar: false,
+      tmpYDiff: 0,
+      tmpToTop: false,
       initialPageHeight: 0,
+      isShownResizerHint: false,
+      isResizingPage: false,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -183,7 +213,7 @@ export default Vue.extend({
     }
   },
   props: {
-    config: Object,
+    config: Object as () => IPage,
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
@@ -191,6 +221,7 @@ export default Vue.extend({
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
+    this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
   },
   computed: {
     ...mapGetters({
@@ -203,10 +234,13 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
       getPage: 'getPage',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      currPanel: 'getCurrSidebarPanelType'
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
+      console.log(this.pageIndex)
+      console.log(this.currSelectedIndex)
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },
     getCurrSubSelectedLayer(): ILayer | undefined {
@@ -247,6 +281,14 @@ export default Vue.extend({
     },
     currFocusPageIndex(): number {
       return PageUtils.currFocusPageIndex
+    },
+    inPagePanel(): boolean {
+      return SidebarPanelType.page === this.currPanel
+    },
+    pageMarginStyles(): { [index: string]: string } {
+      return {
+        margin: this.inPagePanel ? '0px auto' : '25px auto'
+      }
     }
   },
   watch: {
@@ -288,15 +330,16 @@ export default Vue.extend({
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
+      pos = pos * (this.scaleRatio / 100)
       return dir === 'v' ? {
-        height: `${this.config.height}px`,
-        width: `${GeneralUtils.fixSize(1)}px`,
+        height: '100%',
+        width: '1px',
         transform: `translate3d(${pos}px,0,50px)`,
         'pointer-events': isGuideline ? 'auto' : 'none'
       }
         : {
-          width: `${this.config.width}px`,
-          height: `${GeneralUtils.fixSize(1)}px`,
+          width: '100%',
+          height: '1px',
           transform: `translate3d(0,${pos}px,50px)`,
           'pointer-events': isGuideline ? 'auto' : 'none'
         }
@@ -312,6 +355,9 @@ export default Vue.extend({
     },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
+    },
+    toggleResizerHint(isHover: boolean): void {
+      this.isShownResizerHint = isHover
     },
     pageClickHandler(): void {
       GroupUtils.deselect()
@@ -402,14 +448,51 @@ export default Vue.extend({
       })
     },
     scrollUpdate() {
-      console.log(this.currentAbsPos.x, this.currentAbsPos.y)
       const event = new MouseEvent('mousemove', {
         clientX: this.currentAbsPos.x,
         clientY: this.currentAbsPos.y
       })
       document.documentElement.dispatchEvent(event)
     },
+    // wheelUpdate() {
+    //   console.log('wheel')
+    //   const event = new MouseEvent('mousemove', {
+    //     clientX: this.currentAbsPos.x,
+    //     clientY: this.currentAbsPos.y
+    //   })
+    //   document.documentElement.dispatchEvent(event)
+    // },
+    // pageResizeStart(e: MouseEvent) {
+    //   this.isResizingPage = true
+    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+    //   this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+    //   document.documentElement.addEventListener('mousemove', this.pageResizing)
+    //   this.editorView.addEventListener('wheel', this.wheelUpdate, { capture: true })
+    //   document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
+    // },
+    // pageResizing(e: MouseEvent) {
+    //   this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+    //   this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+    //   const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
+    //   const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
+    //   PageUtils.updatePageProps({
+    //     height: Math.max(this.config.height + yDiff, 20)
+    //   })
+    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+    // },
+    // pageResizeEnd(e: MouseEvent) {
+    //   this.isResizingPage = false
+    //   PageUtils.updatePageProps({
+    //     height: this.config.height
+    //   })
+    //   this.$nextTick(() => {
+    //     document.documentElement.removeEventListener('mousemove', this.pageResizing)
+    //     this.editorView.removeEventListener('wheel', this.wheelUpdate, { capture: true })
+    //     document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
+    //   })
+    // },
     pageResizeStart(e: MouseEvent) {
+      this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       document.documentElement.addEventListener('mousemove', this.pageResizing)
@@ -417,15 +500,46 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
     },
     pageResizing(e: MouseEvent) {
+      // this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      // const tmpRelPos = GeneralUtils.deepCopy(this.currentRelPos)
+      // this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+      // const toTop = (this.currentRelPos.y - tmpRelPos.y) < 0
+      // const sameDirecion = this.tmpToTop === toTop
+      // const multiplier = !this.isShownScrollbar ? 2 : 1
+      // let yDiff = 0
+      // // meetBreakPoint ? toTop ? this.tempYDiff : (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
+      // const targetYDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
+      // if (toTop) {
+      //   yDiff = sameDirecion ? Math.min(this.tmpYDiff, targetYDiff) : targetYDiff
+      // } else {
+      //   yDiff = sameDirecion ? Math.max(this.tmpYDiff, targetYDiff) : targetYDiff
+      // }
+      // this.tmpYDiff = yDiff
+
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-      const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * 100 / (this.scaleRatio)
-      PageUtils.updatePageProps({
-        height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
-      })
+      const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
+
+      if (isShownScrollbar === this.isShownScrollBar) {
+        const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
+        const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
+        PageUtils.updatePageProps({
+          height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
+        })
+      } else {
+        this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+        this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+        this.initialPageHeight = (this.config as IPage).height
+      }
+
+      this.isShownScrollBar = isShownScrollbar
     },
     pageResizeEnd(e: MouseEvent) {
       this.initialPageHeight = (this.config as IPage).height
+      this.isResizingPage = false
+      PageUtils.updatePageProps({
+        height: Math.round(this.config.height)
+      })
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.pageResizing)
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
@@ -439,7 +553,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-page {
   position: relative;
-  margin: 15px auto;
   transform-style: preserve-3d;
   user-select: none;
 
@@ -450,14 +563,30 @@ export default Vue.extend({
 }
 
 .page-title {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   justify-content: space-between;
   white-space: nowrap;
-  transform: translate3d(0, 0, 10000px);
+  transform: translate3d(0, -100%, 2000px);
   > input {
     min-width: 40px;
     background-color: transparent;
     text-overflow: ellipsis;
+  }
+}
+
+.page-bar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translate3d(calc(100% + 10px), 0, 0);
+  &__icons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 .pages-wrapper {
@@ -491,7 +620,7 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  outline: 5px solid setColor(blue-1, 0.5);
+  border: 2px solid setColor(blue-1, 0.5);
   box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
@@ -513,13 +642,26 @@ export default Vue.extend({
   pointer-events: auto;
   background-color: setColor(blue-1, 0.5);
   width: 100%;
-  height: 20px;
+  height: 1rem;
   cursor: row-resize;
   transform: translate3d(0, 0, 1000px);
   &__resizer-bar {
-    width: 100px;
-    height: 70%;
+    width: 60px;
+    height: 50%;
     background-color: setColor(white);
+    border-radius: 15px;
+  }
+  &__hint {
+    position: absolute;
+    top: calc(-100% - 15px);
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    color: setColor(white);
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background: setColor(gray-2);
   }
 }
 

@@ -5,7 +5,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFrame, IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
@@ -75,6 +75,23 @@ class ShortcutHandler {
           break
         case 'shape':
           (layer as IShape).className = ShapeUtils.classGenerator()
+          break
+        case 'group':
+          (layer as IGroup).layers
+            .forEach(l => {
+              if (l.type === 'shape') {
+                l.className = ShapeUtils.classGenerator()
+              }
+            })
+          break
+        case 'tmp':
+          (layer as IGroup).layers
+            .forEach(l => {
+              if (l.type === 'shape') {
+                l.className = ShapeUtils.classGenerator()
+              }
+            })
+          break
       }
       return layer
     })

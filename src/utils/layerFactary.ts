@@ -226,8 +226,8 @@ class LayerFactary {
         rotate: styles.rotate as number ?? 1,
         width: styles.width,
         height: styles.height,
-        initWidth: styles.width,
-        initHeight: styles.height,
+        initWidth: styles.initWidth ?? styles.width,
+        initHeight: styles.initHeight ?? styles.height,
         zindex: -1,
         opacity: 100,
         horizontalFlip: styles.horizontalFlip as boolean || false,
@@ -318,7 +318,6 @@ class LayerFactary {
       if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
         config.layers[layerIndex].needFetch = true
       }
-      console.log(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config

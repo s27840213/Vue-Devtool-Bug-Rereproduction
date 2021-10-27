@@ -8,10 +8,6 @@
       class="btn-pack"
       :src="require('@/assets/img/svg/pack-up.svg')"
       @click="togglePanel()")
-    component(v-if="showPagePanel"
-      class="border-box"
-      style="width: 200px;"
-      is="panel-page")
 </template>
 
 <script lang="ts">
@@ -53,6 +49,7 @@ export default Vue.extend({
         'panel-file',
         'panel-brand',
         'panel-pexels',
+        'panel-page',
         'panel-group',
         'panel-text-setting',
         'panel-color-picker',
@@ -64,8 +61,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType',
-      showPagePanel: 'page/isShowPagePanel'
+      currPanel: 'getCurrSidebarPanelType'
     })
   },
   methods: {
@@ -74,7 +70,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: '320px'
+        width: this.currPanel === SidebarPanelType.page ? '200px' : '320px'
       }
     }
   }
@@ -90,7 +86,7 @@ export default Vue.extend({
 }
 
 .btn-pack {
-  width: 25px;
+  width: 15px;
   position: absolute;
   top: 50%;
   right: 0;

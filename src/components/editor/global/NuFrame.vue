@@ -80,7 +80,7 @@ export default Vue.extend({
         // height: `${this.config.styles.height}px`
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        pointerEvents: ImageUtils.isImgControl ? 'none' : 'initial'
+        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
       }
     }
   }
