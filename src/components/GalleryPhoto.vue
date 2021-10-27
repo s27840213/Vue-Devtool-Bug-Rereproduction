@@ -30,6 +30,7 @@ import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -46,7 +47,7 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
-      pageSize: 'getPageSize',
+      getPageSize: 'getPageSize',
       getLayers: 'getLayers',
       checkedAssets: 'user/getCheckedAssets'
     }),
@@ -55,6 +56,9 @@ export default Vue.extend({
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
+    },
+    pageSize(): { width: number, height: number } {
+      return this.getPageSize(pageUtils.currFocusPageIndex)
     }
   },
   methods: {

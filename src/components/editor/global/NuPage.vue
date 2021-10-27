@@ -406,13 +406,14 @@ export default Vue.extend({
       this._deletePage(this.pageIndex)
     },
     duplicatePage() {
+      GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.name += ' (copy)'
       page.designId = ''
       PageUtils.addPageToPos(page, this.pageIndex + 1)
-      GroupUtils.deselect()
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
+      PageUtils.scrollIntoPage(this.pageIndex + 1)
     },
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage
@@ -578,7 +579,7 @@ export default Vue.extend({
   position: absolute;
   right: 0;
   top: 0;
-  transform: translate3d(calc(100% + 10px), 0, 0);
+  transform: translate3d(calc(100% + 10px), 0, 2000px);
   &__icons {
     display: flex;
     flex-direction: column;

@@ -196,9 +196,11 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.designId
   },
   getPageSize(state: IEditorState) {
-    return {
-      width: state.pages[0].width,
-      height: state.pages[0].height
+    return (pageIndex: number): { width: number, height: number } => {
+      return {
+        width: state.pages[pageIndex].width,
+        height: state.pages[pageIndex].height
+      }
     }
   },
   getCurrSidebarPanelType(state: IEditorState): number {

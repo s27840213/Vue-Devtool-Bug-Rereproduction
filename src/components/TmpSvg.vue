@@ -18,6 +18,7 @@ import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import { mapGetters } from 'vuex'
 import { ISvg } from '@/interfaces/shape'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -53,11 +54,14 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
-      pageSize: 'getPageSize'
+      getPageSize: 'getPageSize'
     }),
     contents(): ISvg[] {
       // return (tmpJSON as ISvg[]).concat(tmpJSON2).concat(tmpJSON3).concat(tmpJSON4).concat(tmpJSON5).concat(tmpJSON6)
       return []
+    },
+    pageSize(): { width: number, height: number } {
+      return this.getPageSize(pageUtils.currFocusPageIndex)
     }
   },
   methods: {
