@@ -484,8 +484,8 @@ class UploadUtils {
     if (![designId, teamId].every(Boolean)) return
 
     const response = await fetch(`https://template.vivipic.com/admin/${teamId}/export/${designId}/${fileName}`)
-    response.json().then(async (pages) => {
-      await ShapeUtils.addComputableInfo(pages[0].layers[0])
+    response.json().then(async (json) => {
+      const pages = Array.isArray(json) ? json : json.pages
       store.commit('SET_pages', pages)
     })
   }
