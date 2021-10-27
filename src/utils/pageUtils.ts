@@ -101,13 +101,10 @@ class PageUtils {
   }
 
   setPages(pages = [this.newPage({})]) {
-    console.log('set pages')
-    console.log(pages)
     store.commit('SET_pages', pages)
   }
 
   activeMostCentralPage(): number {
-    console.log('active most central page')
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       const rect = (page as HTMLElement).getBoundingClientRect()
       return {

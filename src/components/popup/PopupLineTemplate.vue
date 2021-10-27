@@ -65,7 +65,6 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     addLineTemplate(index: number, type: LineTemplatesType) {
-      console.log(type)
       rulerUtils.addLineTemplate(index, type)
       popupUtils.closePopup()
     }

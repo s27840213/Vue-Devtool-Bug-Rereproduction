@@ -130,7 +130,6 @@ class ImageUtils {
 
   setImgControlDefault() {
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
-    console.log(currLayer)
     switch (currLayer.type) {
       case 'image':
         LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })

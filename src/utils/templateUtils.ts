@@ -18,7 +18,6 @@ class TemplateUtils {
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
-    console.log(GeneralUtils.deepCopy(json))
     if (!json) { return }
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {

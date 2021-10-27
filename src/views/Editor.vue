@@ -8,7 +8,7 @@
         div(class="content__main")
           div(class="content__editor")
             editor-view
-            scale-ratio-editor
+            scale-ratio-editor(:style="scaleRatioEditorPos")
         div(class="content__panel")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
@@ -29,7 +29,7 @@ import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { FunctionPanelType } from '@/store/types'
+import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 
 export default Vue.extend({
   name: 'Editor',
@@ -52,10 +52,22 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      currPanel: 'getCurrSidebarPanelType'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+    },
+    inPagePanel(): boolean {
+      return SidebarPanelType.page === this.currPanel
+    },
+    scaleRatioEditorPos(): { [index: string]: string } {
+      return this.inPagePanel ? {
+        right: '2rem'
+      } : {
+        left: '50%',
+        transform: 'translateX(-50%)'
+      }
     }
   },
   methods: {
@@ -125,9 +137,7 @@ export default Vue.extend({
 
 .scale-ratio-editor::v-deep {
   position: absolute;
-  left: 50%;
   bottom: 30px;
-  transform: translateX(-50%);
   z-index: setZindex("scale-ratio-editor");
 }
 </style>

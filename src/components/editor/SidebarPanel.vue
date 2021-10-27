@@ -86,7 +86,7 @@ export default Vue.extend({
 }
 
 .btn-pack {
-  width: 25px;
+  width: 15px;
   position: absolute;
   top: 50%;
   right: 0;
