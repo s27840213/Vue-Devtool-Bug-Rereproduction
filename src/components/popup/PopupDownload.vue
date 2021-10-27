@@ -63,7 +63,7 @@
     div
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
-        @click.native="handleDownload")
+        @click.native="handleSubmit")
         svg-icon(v-if="polling"
           class="align-middle"
           iconName="loading"
@@ -99,6 +99,7 @@ export default Vue.extend({
     return {
       saveSubmission: !!selectedTypeVal,
       polling: false,
+      functionQueue: [] as Array<() => void>,
       exportId: '',
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
       rangeType: 'all',
@@ -138,12 +139,21 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.exportId = GeneralUtils.generateAssetId()
-    uploadUtils.uploadExportJSON(this.exportId)
+    const id = GeneralUtils.generateAssetId()
+    uploadUtils.uploadExportJSON(id)
+      .then(() => {
+        this.exportId = id
+      })
   },
   watch: {
     selectedType (type) {
       type && (this.selected = DownloadUtil.getTypeAttrs(type.value))
+    },
+    exportId (id) {
+      if (id) {
+        const func = this.functionQueue.shift()
+        typeof func === 'function' && func()
+      }
     }
   },
   methods: {
@@ -169,6 +179,10 @@ export default Vue.extend({
     },
     handleSubmission (checked: boolean) {
       this.saveSubmission = checked
+    },
+    handleSubmit () {
+      this.polling = true
+      this.exportId ? this.handleDownload() : (this.functionQueue = [this.handleDownload])
     },
     async handleDownload () {
       this.polling = true

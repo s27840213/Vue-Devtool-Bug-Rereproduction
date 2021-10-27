@@ -25,9 +25,7 @@ const routes: Array<RouteConfig> = [
           const type = urlParams.get('type')
           const designId = urlParams.get('design_id')
           if (type === 'export' && designId) {
-            const teamId = urlParams.get('team_id') || ''
-            const background = urlParams.get('background') || '0'
-            uploadUtils.getExport(designId, teamId, background)
+            uploadUtils.getExport(urlParams)
           } else if (type && designId) {
             uploadUtils.getDesign(type, designId)
           }
