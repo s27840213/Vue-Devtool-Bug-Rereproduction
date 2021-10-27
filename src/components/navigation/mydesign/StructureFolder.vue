@@ -12,7 +12,7 @@
             :style="expandIconStyles()")
       svg-icon(iconName="folder"
           iconColor="gray-2"
-          iconWidth="14px"
+          iconWidth="15px"
           style="pointer-events: none")
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none")
@@ -64,7 +64,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @function paddingForLevel($level) {
-  @return 10px 10px 10px 21px * $level + 26px;
+  @return 0px 10px 0px 21px * $level + 26px;
 }
 
 $maxLevels: 5;
