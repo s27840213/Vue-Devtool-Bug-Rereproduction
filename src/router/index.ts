@@ -8,7 +8,7 @@ import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { editorRouteHandler } from './handler'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -17,29 +17,7 @@ const routes: Array<RouteConfig> = [
     name: 'Editor',
     component: Editor,
     // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        next()
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('type') && urlParams.has('design_id')) {
-          const type = urlParams.get('type')
-          const designId = urlParams.get('design_id')
-          if (type === 'export' && designId) {
-            uploadUtils.getExport(urlParams)
-          } else if (type && designId) {
-            uploadUtils.getDesign(type, designId)
-          }
-        }
-        if (urlParams.has('panel_index')) {
-          const panelIndex = +(urlParams.get('panel_index') || 0)
-          if (panelIndex in SidebarPanelType) {
-            store.commit('SET_currSidebarPanelType', panelIndex)
-          }
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
+    beforeEnter: editorRouteHandler
   },
   {
     path: '/signup',
