@@ -177,7 +177,7 @@ export default Vue.extend({
         }
       }
     },
-    draggedImageStyles(): {[key: string]: string} {
+    draggedImageStyles(): { [key: string]: string } {
       if (this.isDragged) {
         return {
           left: `${this.draggedImageCoordinate.x}px`,
@@ -188,7 +188,7 @@ export default Vue.extend({
         return {}
       }
     },
-    draggedImageStackStyles(): {[key: string]: string} {
+    draggedImageStackStyles(): { [key: string]: string } {
       if (this.isDragged) {
         return {
           width: `${this.imgWidth}px`,
@@ -329,7 +329,7 @@ export default Vue.extend({
     background-color: white;
     left: 10px;
     top: 12px;
-    border: 1px solid #969BAB;
+    border: 1px solid #969bab;
     box-sizing: border-box;
     cursor: pointer;
   }
@@ -412,7 +412,7 @@ export default Vue.extend({
         display: flex;
         align-items: center;
         justify-content: center;
-        transform: translateY(-50%)
+        transform: translateY(-50%);
       }
     }
   }

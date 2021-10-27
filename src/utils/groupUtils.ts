@@ -170,7 +170,6 @@ class GroupUtils {
     } else { // when we already have selected layers
       if (store.getters.getCurrSelectedLayers.length === 1) {
         const indexs = [this.currSelectedInfo.index, ...layerIndexs]
-        console.log(indexs)
         this.deselect()
         const layers = MappingUtils.mappingLayers(pageIndex, indexs)
         const tmpStyles = calcTmpProps(layers)

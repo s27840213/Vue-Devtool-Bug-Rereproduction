@@ -11,22 +11,21 @@
       template(v-for="(page, idx) in getPages")
         panel-page-plus(:index="idx" last=false
           :class="{'pt-10': idx === 0}")
-        page-preview-page(:index="idx" :pagename="page.name" type="panel")
+        page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="page")
         panel-page-plus(v-if="idx+1 === getPageCount"
                         :index="idx+1" last=false)
-
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import PagePreviewPage from '@/components/editor/pagePreview/pagePreviewPage.vue'
+import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
-    PagePreviewPage,
+    PagePreviewPageWrapper,
     PanelPagePlus
   },
   computed: {
@@ -66,7 +65,7 @@ export default Vue.extend({
   }
 
   &-items {
-    display: grid;
+    width: 100%;
     box-sizing: border-box;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -88,7 +87,5 @@ export default Vue.extend({
       }
     }
   }
-
 }
-
 </style>

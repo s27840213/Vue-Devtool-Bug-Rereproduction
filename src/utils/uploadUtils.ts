@@ -54,7 +54,6 @@ class UploadUtils {
       formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
       // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
-      console.log(this.userId)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
 
@@ -119,7 +118,6 @@ class UploadUtils {
 
   uploadLayer(type: string) {
     const targetBucket = type === 'shape' ? 'svg' : type
-    console.log(targetBucket)
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
@@ -191,7 +189,6 @@ class UploadUtils {
 
   updateLayer(type: string) {
     const targetBucket = type === 'shape' ? 'svg' : type
-    console.log(targetBucket)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const designId = currSelectedInfo.layers[0].designId
 

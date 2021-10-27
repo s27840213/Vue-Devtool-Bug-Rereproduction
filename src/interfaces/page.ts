@@ -4,7 +4,8 @@ export interface IBackgroundImage {
   config: IImage,
   posX: number,
   posY: number,
-  newDisplayMode?: boolean
+  newDisplayMode?: boolean,
+  src?: string // will be remove in the future
 }
 export interface IPage {
   [index: string]: unknown,

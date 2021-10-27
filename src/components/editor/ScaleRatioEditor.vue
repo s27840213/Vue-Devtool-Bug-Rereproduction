@@ -51,7 +51,9 @@ export default Vue.extend({
       this._setIsShowPagePreview(show)
       if (!show) {
         const currentPage = document.getElementsByClassName('nu-page')[this.lastSelectedPageIndex] as HTMLElement
-        currentPage.scrollIntoView()
+        currentPage.scrollIntoView({
+          behavior: 'smooth'
+        })
       }
     }
   }

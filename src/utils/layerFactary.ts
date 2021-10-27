@@ -318,7 +318,6 @@ class LayerFactary {
       if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
         config.layers[layerIndex].needFetch = true
       }
-      console.log(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     return config

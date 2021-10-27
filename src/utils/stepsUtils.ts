@@ -6,6 +6,7 @@ import { IStep } from '@/interfaces/steps'
 import TextPropUtils from './textPropUtils'
 import Vue from 'vue'
 import { FunctionPanelType } from '@/store/types'
+import pageUtils from './pageUtils'
 
 const MAX_STORAGE_COUNT = 20
 class StepsUtils {
@@ -18,7 +19,6 @@ class StepsUtils {
   }
 
   record() {
-    console.log('record')
     const pages = GeneralUtils.deepCopy(store.getters.getPages)
     // Watch out! The deep cody method we use won't work on Set/Map object
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
@@ -46,7 +46,11 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
+    GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
+    if (pageIndex >= 0) {
+      pageUtils.scrollIntoPage(pageIndex)
+    }
     if (this.currStep > 0) {
       Vue.nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
@@ -64,7 +68,11 @@ class StepsUtils {
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.set(0, this.steps[this.currStep].currSelectedInfo.index, GeneralUtils.deepCopy(this.steps[this.currStep].currSelectedInfo.layers))
+    const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
+    GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
+    if (pageIndex >= 0) {
+      pageUtils.scrollIntoPage(pageIndex)
+    }
     Vue.nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()

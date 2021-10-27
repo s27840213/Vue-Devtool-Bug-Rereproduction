@@ -32,6 +32,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .hint {
   position: absolute;
+  pointer-events: none;
   &__content {
     display: flex;
     flex-direction: column;

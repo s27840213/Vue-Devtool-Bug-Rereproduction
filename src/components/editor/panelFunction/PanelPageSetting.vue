@@ -16,7 +16,7 @@
         @click="toggleSuggestionPanel()")
       span(class="page-setting__apply__text") 調 整 尺 寸
     transition(name="slide-fade")
-      div(v-if="panelOpened"
+      div(v-if="isPanelOpen"
         class="page-setting__suggestion-panel")
         img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
         div(class="page-setting__suggestion-panel__body")
@@ -61,10 +61,9 @@
                       :isSelected="selectedFormat === `recent-${index}`",
                       :formatKey="`recent-${index}`",
                       @select="selectFormat")
-            span(class="page-setting__suggestion-panel__body__typical-name body-4"
-                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
-            span(class="page-setting__suggestion-panel__body__typical-size body-4"
-                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
+            span(class="page-setting__suggestion-panel__body__recently body-3 pointer"
+                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'"
+                  @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
           div(class="page-setting__suggestion-panel__body-row first-row")
             span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 常用尺寸
@@ -170,7 +169,7 @@ export default Vue.extend({
       pageHeight: '' as string | number,
       isLayoutReady: false,
       isLocked: true,
-      panelOpened: false,
+      isPanelOpen: false,
       isLoading: false,
       needUpdate: false,
       updateChecked: false,
@@ -284,13 +283,16 @@ export default Vue.extend({
       if (!format) return
       this.resizePage(format)
       listApi.addDesign(format.id, 'layout', format)
+      const index = this.recentlyUsed.findIndex((recent) => {
+        return format.id === recent.id && format.width === recent.width && format.height === recent.height
+      })
+      this.recentlyUsed.splice(index, 1)
       this.recentlyUsed.unshift(format)
     },
     copyAndApplySelectedFormat() {
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.name += ' (copy)'
       page.designId = ''
-      console.log(page)
       this.addPageToPos({
         newPage: page,
         pos: this.lastSelectedPageIndex + 1
@@ -309,21 +311,26 @@ export default Vue.extend({
           height: format.height
         }
       })
-      this.pageWidth = ''
-      this.pageHeight = ''
       StepsUtils.record()
     },
     toggleLock() {
       this.isLocked = !this.isLocked
     },
     setSuggestionPanel(opened: boolean) {
-      this.panelOpened = opened
+      this.isPanelOpen = opened
     },
     toggleSuggestionPanel() {
-      this.setSuggestionPanel(!this.panelOpened)
+      this.setSuggestionPanel(!this.isPanelOpen)
     },
     dropDownStyles() {
-      return this.panelOpened ? { transform: 'translateX(-50%) rotate(180deg)' } : {}
+      return this.isPanelOpen ? { transform: 'translateX(-50%) rotate(180deg)' } : {}
+    },
+    makeFormatString(format: ILayout) {
+      if (format.id !== '') {
+        return `${format.title} ${format.description}`
+      } else {
+        return `${format.width} x ${format.height}`
+      }
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
@@ -412,7 +419,7 @@ export default Vue.extend({
       this.isLayoutReady = false
       this.formatList = []
       this.recentlyUsed = []
-      this.getCategories().then(async () => {
+      this.getCategories().then(() => {
         for (const category of this.categories as IListServiceContentData[]) {
           if (category.title === '常用尺寸') {
             this.formatList = category.list.map(item => ({

@@ -1,8 +1,15 @@
 <template lang="pug">
   keep-alive
     div(class="nu-controller" ref="self")
-      div(class="nu-controller__line-hint" :style="lineHintStyles()" v-if="isLineEndMoving")
-        | {{ Math.round(lineLength) + ' | ' + Math.round(lineAngle) % 360  + '°' }}
+      div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
+        | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
+      div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
+        div(class="nu-controller__object-hint__icon")
+          svg-icon(iconName="angle"
+                  iconWidth="12px"
+                  iconColor="gray-2")
+        div(class="nu-controller__object-hint__text")
+          span {{ Math.round(hintAngle) % 360 }}
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -173,10 +180,12 @@ export default Vue.extend({
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isLineEndMoving: false,
-      lineHintTranslation: { x: 0, y: 0 },
-      lineLength: 0,
-      lineAngle: 0,
+      isRotating: false,
+      hintTranslation: { x: 0, y: 0 },
+      hintLength: 0,
+      hintAngle: 0,
       initialPos: { x: 0, y: 0 },
+      initialRotate: 0,
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
       initCoordinate: { x: 0, y: 0 },
@@ -343,7 +352,6 @@ export default Vue.extend({
     this.isControlling = false
     this.setCursorStyle('default')
     this.setMoving(false)
-    StepsUtils.record()
   },
   methods: {
     ...mapMutations({
@@ -530,8 +538,8 @@ export default Vue.extend({
         strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
-    lineHintStyles() {
-      return `transform: translate(${this.lineHintTranslation.x}px, ${this.lineHintTranslation.y}px) scale(${100 / this.scaleRatio})`
+    hintStyles() {
+      return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
       const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
@@ -844,6 +852,13 @@ export default Vue.extend({
       this.isControlling = true
       this.isLineEndMoving = true
 
+      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
+      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintLength = (Math.atan2(yDiff, xDiff) / Math.PI * 180 + 360) % 360
+      this.hintAngle = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
+
       const quadrant = shapeUtils.getLineQuadrant(this.config.point)
       const markerIndex = Number((event.target as HTMLElement).getAttribute('marker-index'))
 
@@ -871,13 +886,13 @@ export default Vue.extend({
       const copiedPoint: number[] = Array.from(this.config.point)
       copiedPoint[markerIndex * 2] = this.initCoordinate.x + dx
       copiedPoint[markerIndex * 2 + 1] = this.initCoordinate.y + dy
-      const { newPoint, lineLength, lineAngle } = this.snapUtils.calAngleSnap(markerIndex, copiedPoint, event.shiftKey)
+      const { newPoint, lineLength, lineAngle } = this.snapUtils.calLineAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.lineHintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
-      this.lineLength = lineLength
-      this.lineAngle = lineAngle
+      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintLength = lineLength
+      this.hintAngle = lineAngle
 
       const trans = ControlUtils.getTranslateCompensationForLine(markerIndex, this.initReferencePoint, this.config.styles, (this.config.size ?? [1])[0], newPoint)
 
@@ -1057,6 +1072,7 @@ export default Vue.extend({
     },
     rotateStart(event: MouseEvent) {
       this.setCursorStyle('move')
+      this.isRotating = true
       this.isControlling = true
 
       const body = this.$refs.body as HTMLElement
@@ -1067,6 +1083,12 @@ export default Vue.extend({
       }
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      this.initialRotate = this.getLayerRotate
+
+      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintAngle = (this.initialRotate + 360) % 360
 
       window.addEventListener('mousemove', this.rotating)
       window.addEventListener('mouseup', this.rotateEnd)
@@ -1092,12 +1114,19 @@ export default Vue.extend({
         if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
           angle *= -1
         }
-        this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        angle += this.getLayerRotate % 360
+        angle += this.initialRotate % 360
+        angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
+
+        const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+        const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintAngle = angle
+
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
       }
     },
     rotateEnd() {
+      this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('default')
@@ -1276,6 +1305,8 @@ export default Vue.extend({
           this.textSizeRefresh(this.config)
           console.log('pindex: ' + pIndex + ' sIndex: ' + sIndex)
           this.$nextTick(() => {
+            // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
+            // console.log('after Render !!!!')
             observer.disconnect()
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
@@ -1553,11 +1584,39 @@ export default Vue.extend({
   &__line-hint {
     position: absolute;
     z-index: 9;
-    background-color: map-get($colors, gray-1);
+    background-color: setColor(gray-1);
     border-radius: 5px;
-    color: map-get($colors, white);
+    color: white;
     padding: 5px 10px;
     font-size: 14px;
+  }
+  &__object-hint {
+    position: absolute;
+    z-index: 9;
+    background-color: white;
+    width: 56px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid setColor(gray-4);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    &__icon {
+      margin-left: 5px;
+      width: 12px;
+      height: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__text {
+      margin-right: 5px;
+      font-family: Mulish;
+      font-weight: 400;
+      font-size: 14px;
+      color: setColor(gray-2);
+    }
   }
   &__content {
     display: flex;

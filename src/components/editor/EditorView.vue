@@ -171,13 +171,13 @@ export default Vue.extend({
       this.setCurrActivePageIndex(-1)
       PageUtils.setBackgroundImageControlDefault()
       PageUtils.activeMostCentralPage()
-      if (imageUtils.isImgControl) {
+      if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
     },
     selectStart(e: MouseEvent) {
       if (this.isTyping) return
-      if (imageUtils.isImgControl) {
+      if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
