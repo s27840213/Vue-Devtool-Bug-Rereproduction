@@ -4,7 +4,7 @@
   @mouseout="pageMoveBack($event)"
   @dragover="pageMoveTo($event, 'drag')"
   @dragleave="pageMoveBack($event)"
-  @drop="handlePageDrop()")
+  @drop="handlePageDrop($event)")
     div(v-if="actionType === 'mouse'"
       class="panel-page-plus-wrapper pointer"
       @click="addPage(index)")
@@ -74,7 +74,10 @@ export default Vue.extend({
 
       target.style.opacity = '0'
     },
-    handlePageDrop() {
+    handlePageDrop($event: any) {
+      this.actionType = ''
+      this.pageMoveBack($event)
+
       // move selected to index: copy and delete origin one
       const indexFrom = this.lastSelectedPageIndex
       const indexTo = this.index
