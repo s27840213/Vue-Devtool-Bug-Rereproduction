@@ -9,12 +9,11 @@
     div(v-if="actionType === 'mouse'"
       class="page-preview-plus-wrapper pointer"
       @click="addPage(index)")
-        svg-icon(class="pb-5"
+        svg-icon(class="py-10"
             :iconColor="'blue-1'"
             :iconName="'plus-origin'"
             :iconWidth="'18px'")
-        span 新增
-        span 頁面
+        span 新增頁面
     div(v-if="actionType === 'drag'"
       class="page-preview-plus-drag")
 </template>
@@ -122,9 +121,14 @@ export default Vue.extend({
       align-items: center;
       flex-direction: column;
       width: 40px;
-      height: 70px;
-      font-size: 10px;
+      height: 60px;
+      font-size: 12px;
       background: setColor(gray-5);
+
+      > span {
+        white-space: nowrap;
+        transform: scale(0.7);
+      }
     }
 
     &-last {

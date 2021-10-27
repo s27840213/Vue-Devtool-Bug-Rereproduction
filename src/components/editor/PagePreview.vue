@@ -11,7 +11,7 @@ div(class="page-preview")
       svg-icon(class="pb-5"
         :iconColor="'gray-2'"
         :iconName="'plus-origin'"
-        :iconWidth="'50px'")
+        :iconWidth="'25px'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -75,6 +75,7 @@ export default Vue.extend({
     border-radius: 5px;
     border: 5px solid #ffffff00;
     transition: 0.25s ease-in-out;
+    margin-bottom: 30px;
 
     &:hover {
       background: setColor(gray-3);

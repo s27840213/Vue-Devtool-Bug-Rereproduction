@@ -5,7 +5,7 @@
         :iconWidth="'15px'"
         :type="'gray-sm'"
         class="rounded mt-30 mb-20 mx-25"
-        style="padding: 5px 30px;"
+        style="padding: 5px 0;"
         @click.native="addPage(lastSelectedPageIndex+1)") 新 增 頁 面
     div(class="panel-page-items pb-20 px-25")
       template(v-for="(page, idx) in getPages")
