@@ -24,8 +24,10 @@ export default Vue.extend({
         ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0,0h${width}v${height}h${-width}z`) : ''
       switch (type) {
         case 'shape':
-          width = `${initWidth}px`
-          height = `${initHeight}px`
+          // width = `${initWidth}px`
+          // height = `${initHeight}px`
+          width = `${this.config.vSize[0] + this.config.pDiff[0]}px`
+          height = `${this.config.vSize[1] + this.config.pDiff[1]}px`
           break
         default:
           width = `${width / scale}px`

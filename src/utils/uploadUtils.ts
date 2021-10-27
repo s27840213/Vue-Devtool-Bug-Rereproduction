@@ -590,14 +590,21 @@ class UploadUtils {
             return shape
           default: {
             const { type, designId, pDiff, ratio, color, styles, category } = shape
-            return {
-              type,
-              category,
-              designId,
-              pDiff,
-              ratio,
-              color,
-              styles: styleFilter(styles)
+            if (designId) {
+              return {
+                type,
+                category,
+                designId,
+                pDiff,
+                ratio,
+                color,
+                styles: styleFilter(styles)
+              }
+            } else {
+              // for downward compatible reason record the entire shape info
+              return {
+                ...shape
+              }
             }
           }
         }

@@ -1475,7 +1475,7 @@ export default Vue.extend({
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },
     onFrameMouseEnter(clipIndex: number) {
-      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl) {
+      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl()) {
         return
       }
       const currLayer = LayerUtils.getCurrLayer as IImage

@@ -169,6 +169,7 @@ class TextPropUtils {
       offset: 0
     }
     if (!sel && !TextUtils.isSel(selStart) && !TextUtils.isSel(selEnd)) {
+      console.log('1')
       /**
        * If there is no selection given by either the window or the input params,
        * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
@@ -177,9 +178,12 @@ class TextPropUtils {
       end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
     } else if (TextUtils.isSel(selStart) || TextUtils.isSel(selEnd)) {
+      console.log('2')
       Object.assign(start, selStart)
       Object.assign(end, selEnd)
     } else if (sel) {
+      console.log(sel.div)
+      console.log('3')
       Object.assign(start, sel.start)
       Object.assign(end, sel.end)
     } else {
@@ -598,6 +602,8 @@ class TextPropUtils {
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
     if (!TextUtils.isSel(end)) {
+      console.log(start.pIndex)
+      console.log(start.sIndex)
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {

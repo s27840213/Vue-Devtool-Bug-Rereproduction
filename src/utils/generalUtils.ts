@@ -58,6 +58,7 @@ class GeneralUtils {
   }
 
   isValidHexColor(value: string) {
+    value = value.toUpperCase()
     return value.match(/^#[0-9A-F]{6}$/)
   }
 

@@ -30,6 +30,7 @@ import { mapMutations } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   props: {
@@ -95,6 +96,9 @@ export default Vue.extend({
         sel.empty()
         sel.removeAllRanges()
       }
+    },
+    onRightClick(event: MouseEvent) {
+      popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
       if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {

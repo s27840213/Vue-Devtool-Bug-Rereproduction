@@ -12,6 +12,7 @@ import TextPropUtils from '@/utils/textPropUtils'
 import TemplateUtils from './templateUtils'
 import StepsUtils from './stepsUtils'
 import { safeJoin } from '@sentry/browser/node_modules/@sentry/utils'
+import { Layer } from 'konva/types/Layer'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -410,8 +411,11 @@ class TextUtils {
       ControlUtils.updateLayerSize(LayerUtils.pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {
       LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-      if (subLayerIndex === (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup).layers.length - 1) {
-        const { width, height } = calcTmpProps((LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup).layers)
+      const currLayer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup
+      if (subLayerIndex === currLayer.layers.length - 1) {
+        let { width, height } = calcTmpProps(currLayer.layers)
+        width *= currLayer.styles.scale
+        height *= currLayer.styles.scale
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, { width, height })
       }
     }

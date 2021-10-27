@@ -294,8 +294,10 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        // width: `${this.config.styles.initWidth}px`,
+        // height: `${this.config.styles.initHeight}px`
+        width: `${this.config.vSize[0] + this.config.pDiff[0]}px`,
+        height: `${this.config.vSize[1] + this.config.pDiff[1]}px`
       }
     },
     getFilterTemplate(): string {

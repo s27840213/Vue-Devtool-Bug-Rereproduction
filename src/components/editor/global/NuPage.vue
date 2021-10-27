@@ -396,9 +396,6 @@ export default Vue.extend({
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
     },
-    onRightClick(event: MouseEvent) {
-      popupUtils.openPopup('page', { event })
-    },
     addPage() {
       this._addPage(PageUtils.newPage({}))
     },

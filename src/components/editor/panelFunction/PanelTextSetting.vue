@@ -27,7 +27,8 @@
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10 overflow-hidden")
-          input(class="body-2 text-gray-2 record-selection" v-model.lazy="props.color" @click="handleColorModal")
+          input(class="body-2 text-gray-2 record-selection"  ref="input-color" v-model.lazy="props.color"
+          @click="handleColorModal")
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
@@ -210,10 +211,22 @@ export default Vue.extend({
     openFontsPanel() {
       this.$emit('openFontsPanel')
     },
+    inputColor(input: Event) {
+      const target = input.target as HTMLInputElement
+      if (GeneralUtils.isValidHexColor(target.value)) {
+        target.value = target.value.toUpperCase()
+        console.log(target.value)
+        this.handleColorUpdate(target.value)
+      }
+    },
     handleColorModal() {
       // this.openColorPicker = !this.openColorPicker
       colorUtils.setCurrEvent(ColorEventType.text)
       colorUtils.setCurrColor(this.props.color)
+
+      const input = this.$refs['input-color'] as HTMLInputElement
+      input.focus()
+      input.select()
 
       this.$emit('toggleColorPanel', true)
       if (!this.openColorPicker) {
