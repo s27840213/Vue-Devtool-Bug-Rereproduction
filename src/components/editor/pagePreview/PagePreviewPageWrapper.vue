@@ -34,6 +34,7 @@
       div(v-if="type === 'panel'"
         class="page-preview-page-icon")
         span {{index+1}}
+    div(class="page-preview-page__background")
     div(v-if="type === 'full'"
       class="page-preview-page-title pt-5")
       span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
@@ -73,6 +74,7 @@ export default Vue.extend({
       ],
       isMouseOver: false,
       isMenuOpen: false,
+      isDragged: false,
       contentWidth: 0
     }
   },
@@ -140,9 +142,15 @@ export default Vue.extend({
       }
     },
     handleDragStart(e: DragEvent) {
+      this.isDragged = true
+      this.isMouseOver = false
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
-      this.isMouseOver = false
+
+      const target = e.target as HTMLElement
+      setTimeout(function() {
+        target.style.visibility = 'hidden'
+      }, 0)
 
       if (!e.dataTransfer) return
       e.dataTransfer.effectAllowed = 'move'
@@ -150,7 +158,14 @@ export default Vue.extend({
 
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
-    handleDragEnd() {
+    handleDragEnd(e: DragEvent) {
+      this.isDragged = false
+
+      const target = e.target as HTMLElement
+      setTimeout(function() {
+        target.style.visibility = 'visible'
+      }, 0)
+
       document.removeEventListener('dragover', this.preventDefaultDragOver, false)
     },
     preventDefaultDragOver(e: DragEvent) {
@@ -195,7 +210,6 @@ export default Vue.extend({
 
   &-content {
     position: relative;
-    background: rgb(242, 255, 228);
     box-sizing: border-box;
     transform-origin: 0 0;
 
@@ -269,6 +283,7 @@ export default Vue.extend({
     font-size: 16px;
     font-family: Mulish;
     font-weight: bold;
+    background: setColor(gray-6);
   }
   &-icon {
     position: absolute;
@@ -285,6 +300,16 @@ export default Vue.extend({
     font-size: 13px;
     font-weight: 600;
   }
+
+  &__background {
+    // display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: setColor(gray-3);
+    z-index: -1;
+  }
+
 }
 
 .focused {
