@@ -26,29 +26,6 @@
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
-                div(v-if="isMoveToFolderPanelOpen"
-                    class="my-design__multi__change-folder"
-                    v-click-outside="() => { isMoveToFolderPanelOpen = false }")
-                  div(class="my-design__multi__change-folder__container")
-                    div(class="my-design__multi__change-folder__header")
-                      div(class="my-design__multi__change-folder__title")
-                        span 移至資料夾
-                      div(class="my-design__multi__change-folder__hr")
-                    div(class="my-design__multi__change-folder__folders")
-                      structure-folder(v-for="folder in copiedFolders"
-                                      :folder="folder"
-                                      :parents="[]"
-                                      :level="0"
-                                      @moveToFolderSelect="handleMoveToFolderSelect"
-                                      @moveToFolderExpand="handleMoveToFolderExpand")
-                    div(class="my-design__multi__change-folder__footer")
-                      div(class="my-design__multi__change-folder__buttons")
-                        div(class="my-design__multi__change-folder__cancel")
-                          span 取消
-                        div(class="my-design__multi__change-folder__confirm"
-                            :class="{'disabled': moveToFolderSelectInfo === ''}"
-                            @click="handleMoveToFolder")
-                          span 移至資料夾
                 div(ref="delDesign"
                     class="my-design__multi__icon"
                     @mouseenter="handleFavDelMouseOver(true)"
@@ -95,6 +72,30 @@
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
                 span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
+        div(v-if="isMoveToFolderPanelOpen"
+            class="my-design__change-folder"
+            v-click-outside="() => { isMoveToFolderPanelOpen = false }")
+          div(class="my-design__change-folder__container")
+            div(class="my-design__change-folder__header")
+              div(class="my-design__change-folder__title")
+                span 移至資料夾
+              div(class="my-design__change-folder__hr")
+            div(class="my-design__change-folder__folders")
+              structure-folder(v-for="folder in copiedFolders"
+                              :folder="folder"
+                              :parents="[]"
+                              :level="0"
+                              @moveToFolderSelect="handleMoveToFolderSelect"
+                              @moveToFolderExpand="handleMoveToFolderExpand")
+            div(class="my-design__change-folder__footer")
+              div(class="my-design__change-folder__buttons")
+                div(class="my-design__change-folder__cancel"
+                    @click="isMoveToFolderPanelOpen = false")
+                  span 取消
+                div(class="my-design__change-folder__confirm"
+                    :class="{'disabled': moveToFolderSelectInfo === ''}"
+                    @click="handleMoveToFolder")
+                  span 移至資料夾
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
@@ -227,7 +228,7 @@ export default Vue.extend({
     },
     isMoveToFolderPanelOpen(newVal) {
       if (newVal) {
-        this.copiedFolders = designUtils.expandAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
+        this.copiedFolders = designUtils.foldAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
       }
     }
   },
@@ -488,123 +489,6 @@ export default Vue.extend({
       align-items: center;
       gap: 33px;
     }
-    &__change-folder {
-      position: absolute;
-      top: calc(100% + 11px);
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: white;
-      width: 415px;
-      height: 209px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
-      border-radius: 3px;
-      &__container {
-        position: relative;
-        height: 100%;
-        width: 100%;
-        overflow-y: scroll;
-      }
-      &__header {
-        position: sticky;
-        top: 0;
-        background-color: white;
-        display: flex;
-        height: 43px;
-        flex-direction: column;
-        align-items: center;
-      }
-      &__title {
-        margin-top: 11px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        > span {
-          font-family: 'SFProDisplay';
-          font-size: 14px;
-          font-weight: 700;
-          line-height: 20px;
-          letter-spacing: 2px;
-          text-indent: 2px;
-          display: block;
-          color: setColor(gray-2);
-        }
-      }
-      &__hr {
-        margin-top: 10px;
-        width: 365.5px;
-        height: 2px;
-        background-color: setColor(gray-4);
-      }
-      &__folders {
-        width: 100%;
-        min-height: calc(100% - 101px);
-      }
-      &__footer {
-        position: sticky;
-        bottom: 0;
-        background-color: white;
-        display: flex;
-        height: 58px;
-        flex-direction: column;
-        align-items: center;
-      }
-      &__buttons {
-        width: 170px;
-        height: 25px;
-        margin-top: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-      }
-      &__cancel {
-        width: 68px;
-        height: 25px;
-        background-color: setColor(gray-4);
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        > span {
-          font-family: SF Pro Display;
-          font-size: 12px;
-          line-height: 25px;
-          letter-spacing: 0.875em;
-          text-indent: 0.875em;
-          display: block;
-          color: setColor(gray-2);
-        }
-      }
-      &__confirm {
-        width: 95px;
-        height: 25px;
-        background-color: setColor(blue-1);
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        > span {
-          font-family: SF Pro Display;
-          font-size: 12px;
-          line-height: 25px;
-          display: block;
-          color: white;
-        }
-        &.disabled {
-          background-color: setColor(gray-4);
-          cursor: not-allowed;
-          > span {
-            color: setColor(gray-2);
-          }
-        }
-      }
-    }
     &__icon {
       width: 21px;
       height: 21px;
@@ -681,6 +565,124 @@ export default Vue.extend({
         line-height: 25px;
         color: setColor(gray-2);
         letter-spacing: 0.205em;
+      }
+    }
+  }
+  &__change-folder {
+    z-index: 1000;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    width: 415px;
+    height: 627px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
+    border-radius: 3px;
+    &__container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      overflow-y: scroll;
+    }
+    &__header {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      display: flex;
+      height: 43px;
+      flex-direction: column;
+      align-items: center;
+    }
+    &__title {
+      margin-top: 11px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      > span {
+        font-family: 'SFProDisplay';
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: 2px;
+        text-indent: 2px;
+        display: block;
+        color: setColor(gray-2);
+      }
+    }
+    &__hr {
+      margin-top: 10px;
+      width: 365.5px;
+      height: 2px;
+      background-color: setColor(gray-4);
+    }
+    &__folders {
+      width: 100%;
+      min-height: calc(100% - 101px);
+    }
+    &__footer {
+      position: sticky;
+      bottom: 0;
+      background-color: white;
+      display: flex;
+      height: 58px;
+      flex-direction: column;
+      align-items: center;
+    }
+    &__buttons {
+      width: 170px;
+      height: 25px;
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    &__cancel {
+      width: 68px;
+      height: 25px;
+      background-color: setColor(gray-4);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: SF Pro Display;
+        font-size: 12px;
+        line-height: 25px;
+        letter-spacing: 0.875em;
+        text-indent: 0.875em;
+        display: block;
+        color: setColor(gray-2);
+      }
+    }
+    &__confirm {
+      width: 95px;
+      height: 25px;
+      background-color: setColor(blue-1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      > span {
+        font-family: SF Pro Display;
+        font-size: 12px;
+        line-height: 25px;
+        display: block;
+        color: white;
+      }
+      &.disabled {
+        background-color: setColor(gray-4);
+        cursor: not-allowed;
+        > span {
+          color: setColor(gray-2);
+        }
       }
     }
   }

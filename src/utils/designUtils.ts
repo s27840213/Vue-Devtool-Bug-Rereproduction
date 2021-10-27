@@ -271,12 +271,12 @@ class DesignUtils {
     return res
   }
 
-  expandAll(folders: IFolder[]): IFolder[] {
+  foldAll(folders: IFolder[]): IFolder[] {
     const nodes = [...folders]
     while (nodes.length > 0) {
       const node = nodes.shift()
       if (node) {
-        node.isExpanded = true
+        node.isExpanded = false
         for (const subFolder of node.subFolders) {
           nodes.push(subFolder)
         }
