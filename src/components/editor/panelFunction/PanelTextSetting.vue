@@ -250,6 +250,9 @@ export default Vue.extend({
         }
       }
       TextPropUtils.updateTextPropsState({ color })
+      if (!TextUtils.isSel(this.sel.end)) {
+        TextUtils.focus(this.sel.start, this.sel.end)
+      }
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -419,9 +422,9 @@ export default Vue.extend({
     },
     textRangeRecorder(e: MouseEvent) {
       if ((e.target as HTMLElement).classList.contains('record-selection')) {
-        console.log('text range recorded!')
         const sel = TextUtils.getSelection()
         TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
+        console.log('text range recorded: (p: ' + sel?.start.pIndex + ', s: ' + sel?.start.sIndex + ', offset: ' + sel?.start.offset + ')')
       }
     },
     setSize(e: Event) {

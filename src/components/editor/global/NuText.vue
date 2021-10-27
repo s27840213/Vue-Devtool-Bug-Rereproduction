@@ -22,7 +22,7 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IParagraph, IText } from '@/interfaces/layer'
+import { IText } from '@/interfaces/layer'
 import { IFont } from '@/interfaces/text'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
@@ -126,7 +126,7 @@ export default Vue.extend({
          */
         if (this.config.isTyping) return
         this.$nextTick(() => {
-          TextUtils.updateLayerSize(this.config, this.subLayerIndex)
+          TextUtils.updateLayerSize(this.config, this.layerIndex, this.subLayerIndex)
         })
       },
       deep: true

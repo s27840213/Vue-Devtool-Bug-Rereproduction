@@ -51,7 +51,7 @@
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
               class="text__body"
-              :contenteditable="config.type === 'tmp' ? false : contentEditable"
+              :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
               @focus="onTextFocus()"
               @blur="onTextBlur()"
               @compositionstart="isComposing = true"
@@ -81,7 +81,9 @@
                     :data-sindex="sIndex"
                     :key="span.id",
                     :style="textStyles(span.styles)") {{ span.text }}
-                  br(v-else)
+                  br(v-else
+                  :key="span.id"
+                  :data-sindex="sIndex")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="lockIconStyles"
@@ -303,8 +305,8 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
       }
       if (this.getLayerType === 'text' && !val) {
-        const text = this.$refs.text as HTMLElement
-        if (text && text.childNodes[0].childNodes[0].nodeName !== 'SPAN') {
+        const { paragraphs } = this.config as IText
+        if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
           LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
           return
         }
@@ -1143,7 +1145,7 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      console.log('click')
+      console.log('text controller clicked')
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
@@ -1216,7 +1218,7 @@ export default Vue.extend({
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
       if (start) {
-        TextUtils.updateSelection(start, start)
+        TextUtils.updateSelection(start, TextUtils.getNullSel())
       }
       const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
@@ -1269,19 +1271,30 @@ export default Vue.extend({
           this.textSizeRefresh(config)
         } else {
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          console.log(paragraphs)
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
+          console.log('pindex: ' + pIndex + ' sIndex: ' + sIndex)
           this.$nextTick(() => {
-          // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
-            // console.log('after Render !!!!')
             observer.disconnect()
-            const text = this.$refs.text as HTMLElement
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
-            if (text.childNodes.length > (this.config as IText).paragraphs.length && text.lastChild) {
-              text.removeChild(text.lastChild)
+            /**
+             * TODO: For some reason while hit Enter the text block, the browser would
+             * produce extra <p>, the following could temporarily fix this problem
+             * p.s. not sure if this is a bug of vue
+             */
+            if (text.childNodes.length !== (this.config as IText).paragraphs.length) {
+              let isRemoved = false
+              for (const p of text.childNodes) {
+                const span = p.firstChild
+                if (span?.nodeName === 'SPAN' && span.firstChild?.nodeName !== '#text') {
+                  text.removeChild(p)
+                  isRemoved = true
+                  break
+                }
+              }
+              if (!isRemoved && text.lastChild) text.removeChild(text.lastChild)
             }
             const sel = window.getSelection()
             if (sel) {
@@ -1329,9 +1342,7 @@ export default Vue.extend({
               }
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
-            if (e.key !== 'Enter' && (e.key === 'Backspace' && paragraphs[pIndex].spans[sIndex].text === '')) {
-              TextPropUtils.updateTextPropsState()
-            }
+            TextPropUtils.updateTextPropsState()
           })
         }
       }
@@ -1388,6 +1399,9 @@ export default Vue.extend({
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return
+      if (this.currSelectedInfo.index < 0) {
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
@@ -1437,9 +1451,6 @@ export default Vue.extend({
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-        // this.clipedImgBuff.shift()
-        // this.clipedImgBuff = {}
         this.clipedImgBuff = {
           index: clipIndex,
           srcObj: {
@@ -1474,7 +1485,6 @@ export default Vue.extend({
       if (currLayer && currLayer.type === 'image' && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
-        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
         Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff.srcObj)
         Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
 
@@ -1484,9 +1494,6 @@ export default Vue.extend({
     onFrameMouseUp(clipIndex: number) {
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === 'image') {
-        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-        // this.clipedImgBuff.splice(buffIndex, 1)
-
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
@@ -1496,10 +1503,7 @@ export default Vue.extend({
     onFrameDragEnter(clipIndex: number) {
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (this.currDraggedPhoto.srcObj.type) {
-        // this.clipedImgBuff.some(buff => buff.index === clipIndex)
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-        // this.clipedImgBuff.splice(buffIndex, 1)
         this.clipedImgBuff = {
           index: clipIndex,
           srcObj: {
@@ -1529,17 +1533,14 @@ export default Vue.extend({
       }
     },
     onFrameDragLeave(clipIndex: number) {
-      const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-      // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-      Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
-      Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff.srcObj)
-
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      // this.clipedImgBuff.splice(buffIndex, 1)
+      if (this.currDraggedPhoto.srcObj.type) {
+        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
+        Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
+        Object.assign(clips[clipIndex].srcObj, this.clipedImgBuff.srcObj)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+      }
     },
     onFrameDrop(clipIndex: number) {
-      // const buffIndex = this.clipedImgBuff.findIndex(buff => buff.index === clipIndex)
-      // this.clipedImgBuff.splice(buffIndex, 1)
       StepsUtils.record()
     }
   }

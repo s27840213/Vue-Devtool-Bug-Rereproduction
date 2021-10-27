@@ -46,21 +46,43 @@ class TextUtils {
         pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string)
       } as ISelection
 
-      /**
-       * case for the empty paragraph (only with <br> without any <span>)
-       */
-      if (range.startContainer.nodeName === 'P') {
-        start = {
-          pIndex: parseInt((range.startContainer as HTMLElement).dataset.pindex as string),
-          sIndex: 0,
-          offset: 1
+      let p = range.startContainer
+      while (p.nodeName !== 'P' && p.parentElement) {
+        p = p.parentElement
+      }
+      if (p.firstChild) {
+        const pChild = p.firstChild
+        switch (pChild.nodeName) {
+          case 'SPAN':
+            start = {
+              pIndex: +((p as HTMLElement).dataset.pindex as string) ?? NaN,
+              sIndex: +(range.startContainer.parentElement?.dataset.sindex as string) ?? NaN,
+              offset: range.startOffset as number
+            }
+            break
+          case 'BR':
+            start = {
+              pIndex: +((range.startContainer as HTMLElement).dataset.pindex as string),
+              sIndex: 0,
+              offset: 1
+            }
+            break
+          case '#text':
+            start = {
+              pIndex: +((p as HTMLElement).dataset.pindex as string) ?? NaN,
+              sIndex: 0,
+              offset: range.startOffset as number
+            }
+            break
+          default:
+            return {
+              div,
+              start: { ...store.state.text?.sel.start } as ISelection,
+              end: { ...store.state.text?.sel.end } as ISelection
+            }
         }
       } else {
-        start = {
-          pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string),
-          sIndex: parseInt(range.startContainer?.parentElement?.dataset.sindex as string),
-          offset: range.startOffset as number
-        }
+        throw new Error('wrong type node of the p.firstChild')
       }
 
       if (!div || (div as HTMLElement).id.match('text') === null || !this.isSel(start) ||
@@ -139,35 +161,10 @@ class TextUtils {
   }
 
   textParser(text: HTMLElement, config: IText): IParagraph[] {
+    console.log('in textParser process')
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
-    /**
-     * If the user use cmd+A select the whole text and delete them,
-     * the default befaviour of the browse is not working expectly as we desired.
-     * Below will make this default result to our desired format.
-     */
-    // if (ps[0].firstChild && ps[0].firstChild.nodeName !== 'SPAN') {
-    //   console.log('dddd')
-    //   const text = (() => {
-    //     let child = ps[0]
-    //     while (child.firstChild) {
-    //       child = child.firstChild
-    //     }
-    //     return child.textContent
-    //   })()
-
-    //   return [{
-    //     styles: Object.assign({}, config.paragraphs[0].styles),
-    //     spans: [{
-    //       styles: Object.assign({}, config.paragraphs[0].spans[0].styles),
-    //       text: text ?? '',
-    //       id: GeneralUtils.generateRandomString(8)
-    //     }],
-    //     id: GeneralUtils.generateRandomString(8)
-    //   }]
-    // }
-
     ps.forEach((p, pIndex) => {
       const spans: ISpan[] = []
       const spanStyleBuff = {} as ISpanStyle
@@ -221,6 +218,7 @@ class TextUtils {
               Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
             }
           } else if (pIndex === 0 && sIndex === 0) {
+            console.log('pindex = 0 sindex = 0')
             Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
           }
         }
@@ -253,11 +251,6 @@ class TextUtils {
       const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
       paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
     })
-    // paragraphs.forEach(p => {
-    //   if (p.spans.length === 1 && p.spans[0].text === '') {
-    //     p.spans[0].text = '\n'
-    //   }
-    // })
     return paragraphs
   }
 
@@ -275,6 +268,7 @@ class TextUtils {
   newPropsHandler(paragraphs: IParagraph[]): IParagraph[] {
     const sel = this.getSelection()
     if (sel && this.isSel(sel.start)) {
+      const { start, end } = sel
       const currPropsState = this.getCurrTextProps
       if (currPropsState && paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) {
         const isSameSpanStyles = (() => {
@@ -287,7 +281,7 @@ class TextUtils {
           return true
         })()
         if (!isSameSpanStyles) {
-          const selSpan = GeneralUtils.deepCopy(paragraphs[sel.start.pIndex].spans[sel.start.sIndex]) as ISpan
+          const selSpan = GeneralUtils.deepCopy(paragraphs[start.pIndex].spans[start.sIndex]) as ISpan
           const originSpanStyles = GeneralUtils.deepCopy(selSpan.styles)
           const newSpanStyles = Object.assign(GeneralUtils.deepCopy(selSpan.styles), {
             weight: currPropsState.weight,
@@ -295,19 +289,34 @@ class TextUtils {
             decoration: currPropsState.decoration,
             color: currPropsState.color
           })
-          paragraphs[sel.start.pIndex].spans[sel.start.sIndex].text = selSpan.text.slice(0, sel.start.offset - 1)
-          paragraphs[sel.start.pIndex].spans.splice(sel.start.sIndex + 1, 0, {
-            styles: newSpanStyles,
-            text: selSpan.text[sel.start.offset - 1]
-          })
-          if (selSpan.text.substr(sel.start.offset)) {
-            paragraphs[sel.start.pIndex].spans.splice(sel.start.sIndex + 2, 0, {
-              styles: originSpanStyles,
-              text: selSpan.text.substr(sel.start.offset)
+          paragraphs[start.pIndex].spans[start.sIndex].text = selSpan.text.slice(0, start.offset - 1)
+
+          console.log(start.offset)
+          if (start.sIndex === 0 && start.offset === 1) {
+            paragraphs[start.pIndex].spans.splice(0, 0, {
+              styles: newSpanStyles,
+              text: selSpan.text[0]
             })
+            if (selSpan.text.substr(start.offset)) {
+              paragraphs[start.pIndex].spans.splice(1, 0, {
+                styles: originSpanStyles,
+                text: selSpan.text.substr(1)
+              })
+            }
+          } else {
+            paragraphs[start.pIndex].spans.splice(start.sIndex + 1, 0, {
+              styles: newSpanStyles,
+              text: selSpan.text[start.offset - 1]
+            })
+            if (selSpan.text.substr(start.offset)) {
+              paragraphs[start.pIndex].spans.splice(start.sIndex + 2, 0, {
+                styles: originSpanStyles,
+                text: selSpan.text.substr(start.offset)
+              })
+            }
           }
-          Object.assign(sel.start, { sIndex: sel.start.sIndex + 1, offset: 1 })
-          this.updateSelection(sel.start, sel.end)
+          Object.assign(start, { sIndex: start.sIndex + 1, offset: 1 })
+          this.updateSelection(start, end)
         }
       }
     }
@@ -395,15 +404,15 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, subLayerIndex = -1) {
+  updateLayerSize(config: IText, layerIndex: number = LayerUtils.layerIndex, subLayerIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
-    if (subLayerIndex === -1) {
-      ControlUtils.updateLayerSize(LayerUtils.pageIndex, LayerUtils.layerIndex, textHW.width, textHW.height, config.styles.scale)
+    if (!subLayerIndex) {
+      ControlUtils.updateLayerSize(LayerUtils.pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {
-      LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-      if (subLayerIndex === (LayerUtils.getLayer(LayerUtils.pageIndex, LayerUtils.layerIndex) as IGroup).layers.length - 1) {
-        const { width, height } = calcTmpProps((LayerUtils.getLayer(LayerUtils.pageIndex, LayerUtils.layerIndex) as IGroup).layers)
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { width, height })
+      LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      if (subLayerIndex === (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup).layers.length - 1) {
+        const { width, height } = calcTmpProps((LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup).layers)
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, { width, height })
       }
     }
   }
@@ -461,12 +470,6 @@ class TextUtils {
     }
   }
 
-  // isBoldType (font: IFont): boolean {
-  //   const el = document.createElement('span')
-  //   el.textContent = 'AB CD'
-  //   const width = c
-  // }
-
   getParagraphSize(config: IText): Array<number> {
     const sizeArr = []
     for (const p of config.paragraphs) {
@@ -482,6 +485,7 @@ class TextUtils {
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
+    // console.log(GeneralUtils.deepCopy(paragraphs))
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,

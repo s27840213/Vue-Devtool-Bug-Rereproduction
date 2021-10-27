@@ -55,6 +55,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   components: {
@@ -170,10 +171,13 @@ export default Vue.extend({
       this.setCurrActivePageIndex(-1)
       PageUtils.setBackgroundImageControlDefault()
       PageUtils.activeMostCentralPage()
+      if (imageUtils.isImgControl) {
+        ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+      }
     },
     selectStart(e: MouseEvent) {
       if (this.isTyping) return
-      if (this.lastSelectedLayerIndex >= 0 && this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.types.has('image')) {
+      if (imageUtils.isImgControl) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)

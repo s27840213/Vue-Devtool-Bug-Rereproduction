@@ -5,11 +5,12 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
+import { Layer } from 'konva/types/Layer'
 
 class ImageUtils {
-  get isImgControl(): boolean {
-    const currLayer = LayerUtils.getCurrLayer
-    if (currLayer) {
+  isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
+    if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
+      const currLayer = LayerUtils.getCurrLayer
       switch (currLayer.type) {
         case 'image':
           return (currLayer as IImage).imgControl

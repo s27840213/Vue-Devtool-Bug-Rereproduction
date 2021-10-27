@@ -122,7 +122,7 @@ class PageUtils {
         minDistance = dist
       }
     })
-
+    console.log(`.nu-page-${targetIndex}`)
     FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     store.commit('SET_lastSelectedPageIndex', targetIndex)
     return targetIndex

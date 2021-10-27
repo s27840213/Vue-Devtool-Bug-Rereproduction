@@ -105,7 +105,7 @@
               @setFocus="setFocus()"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-        div(v-if="ImageUtils.isImgControl"
+        div(v-if="ImageUtils.isImgControl(pageIndex)"
             class="dim-background"
             :style="styles('control')"
             ref="page-content")
@@ -210,6 +210,8 @@ export default Vue.extend({
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
+      console.log(this.pageIndex)
+      console.log(this.currSelectedIndex)
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },
     getCurrSubSelectedLayer(): ILayer | undefined {
