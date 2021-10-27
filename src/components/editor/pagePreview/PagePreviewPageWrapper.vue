@@ -139,10 +139,15 @@ export default Vue.extend({
         })
       }
     },
-    handleDragStart() {
+    handleDragStart(e: DragEvent) {
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       this.isMouseOver = false
+
+      if (!e.dataTransfer) return
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.dropEffect = 'move'
+
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
     handleDragEnd() {
