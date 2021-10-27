@@ -224,6 +224,7 @@ class DesignUtils {
   moveFolder(folder: IFolder, source: string[], destination: string[]) {
     // if move to current folder, skip moving
     if (generalUtils.arrayCompare<string>(source, destination)) return
+    console.log(folder, source, destination)
     store.commit('design/UPDATE_deleteFolder', {
       parents: source,
       folder
@@ -235,7 +236,7 @@ class DesignUtils {
     for (const design of folder.designs) {
       store.commit('design/UPDATE_path', {
         id: design.id,
-        path: [...destination, folder.name]
+        path: this.appendPath(destination, folder)
       })
     }
   }
