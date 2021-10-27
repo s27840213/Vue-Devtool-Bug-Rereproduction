@@ -110,9 +110,10 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 190px;
+    height: 160px;
     width: 30px;
     transition: 0.25s ease-in-out;
+    padding-bottom: 30px;
 
     &-wrapper {
       position: absolute;
