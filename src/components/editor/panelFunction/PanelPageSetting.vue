@@ -161,6 +161,7 @@ import GroupUtils from '@/utils/groupUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
+import { Itheme } from '@/interfaces/theme'
 
 export default Vue.extend({
   components: {
@@ -200,7 +201,7 @@ export default Vue.extend({
         height: '' as string,
         theme_ids: '' as string
       },
-      themeList: [] as any
+      themeList: [] as Itheme[]
     }
   },
   watch: {
@@ -465,9 +466,6 @@ export default Vue.extend({
     isDisabled(themeWidth: string, themeHeight: string) {
       const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
-      console.log('W H', themeWidth, themeHeight)
-      console.log('themeAspectRatio', themeAspectRatio)
-      console.log('templateAspectRatio', templateAspectRatio)
 
       if (themeAspectRatio === templateAspectRatio) {
         return false
