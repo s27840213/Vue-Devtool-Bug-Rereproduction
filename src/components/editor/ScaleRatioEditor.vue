@@ -9,8 +9,8 @@
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(class="pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
-      :iconName="gridIcon" :iconColor="'gray-2'" iconWidth="16px")
+    svg-icon(class="page-preview pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
+      :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
 </template>
 
 <script lang="ts">
@@ -34,9 +34,6 @@ export default Vue.extend({
       set(val: number): void {
         this.setScaleRatio(Math.round(val * 100))
       }
-    },
-    gridIcon(): string {
-      return `grid${this.isShowPagePreview ? '-selected' : ''}`
     }
   },
   methods: {
@@ -77,9 +74,15 @@ export default Vue.extend({
       outline: none;
     }
   }
-  &__percentage {
+  【 &__percentage {
     // border: 1px solid setColor(gray-2, 0.3);
     width: 2.5rem;
+  }
+}
+
+.page-preview {
+  &:hover {
+    background-color: #d9dbe1;
   }
 }
 </style>
