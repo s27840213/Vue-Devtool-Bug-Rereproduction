@@ -19,25 +19,30 @@ const getDefaultState = (): IHomeTemplateState => ({
 
 const state = getDefaultState()
 const getters: GetterTree<IHomeTemplateState, unknown> = {
-  async getApiResponse() {
-    const locale = 'tw'
-    const { data } = await list.getTemplate({ locale, keyword: 'aa', listAll: 1 })
-    return data
-  },
   getPagesPerRow(state: IHomeTemplateState) {
     return state.pagesPerRow
   }
 }
 
 const actions: ActionTree<IHomeTemplateState, unknown> = {
-  async getTagContent({ commit }, { keyword }) {
+  async getThemeList({ commit }) {
+    const { locale } = state
+    try {
+      const { data } = await list.getTheme({
+        locale
+      })
+      return Promise.resolve(data)
+    } catch (error) {
+      captureException(error)
+    }
+  },
+  async getTagContent({ commit }, { keyword, theme }) {
     const { locale } = state
     try {
       const { data } = await list.getTemplate({
         locale,
         keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
-        listAll: 1,
-        aspect: 'square'
+        theme: theme
       })
       return Promise.resolve(data)
     } catch (error) {
