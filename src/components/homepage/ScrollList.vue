@@ -11,25 +11,24 @@
         div
           svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
     div(class="scroll-list-items" @scroll="handleScroll" ref="items")
-      div(v-if="type === 'size'"
+      div(v-if="type === 'theme'"
         class="pointer scroll-list-plus")
         img(:src="require('@/assets/img/png/plus-origin.png')"
           @click="goToPage('Editor')")
         div(class="pt-10 body-1") 自訂尺寸
       div(v-for="item, idx in list" class="scroll-list-item pt-10"
-        :class="{'pb-70': type === 'size'}")
+        :class="{'pb-70': type === 'theme'}")
         img(class="pointer item-image"
-          :src="item.id ? `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}` : require(`@/assets/img/svg/home-size/${item.name}.svg`)"
+          :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
           @click="goToPage('Editor')"
           @error="handleNotFound")
-        div(v-if="type === 'size'"
+        div(v-if="type === 'theme'"
           class="pt-10 body-1") {{item.title}}
-        div(v-if="type === 'size'"
-          class="pt-2 body-2 text-gray-2") {{item.size}}
+        div(v-if="type === 'theme'"
+          class="pt-2 body-2 text-gray-2") {{item.description}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
-// import { mapMutations } from 'vuex'
 
 export default Vue.extend({
   props: {

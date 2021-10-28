@@ -15,7 +15,7 @@ class ListService {
       list_all: params.listAll,
       keyword: params.keyword,
       font_list: params.fontList,
-      aspect: params.aspect || ''
+      theme: params.theme
     }
 
     return axios.request<IListServiceResponse>({
@@ -73,6 +73,11 @@ class ListService {
 
   getLayout (params: IListServiceParams) {
     params.type = 'layout'
+    return this.getList(params)
+  }
+
+  getTheme (params: IListServiceParams) {
+    params.type = 'theme'
     return this.getList(params)
   }
 }

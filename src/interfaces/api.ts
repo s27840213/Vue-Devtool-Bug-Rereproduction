@@ -100,7 +100,7 @@ export interface ISearchPhotoParams {
 export interface IListServiceParams {
   token?: string
   locale?: string
-  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout'
+  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout' | 'theme'
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
@@ -108,6 +108,7 @@ export interface IListServiceParams {
   aspect?: string
   width?: number
   height?: number
+  theme?: string
 }
 
 export interface IListServiceContentDataItem {
