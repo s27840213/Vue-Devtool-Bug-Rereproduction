@@ -239,8 +239,6 @@ export default Vue.extend({
     }),
     ...mapState('user', ['downloadUrl', 'checkedAssets']),
     getCurrLayer(): ILayer {
-      console.log(this.pageIndex)
-      console.log(this.currSelectedIndex)
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },
     getCurrSubSelectedLayer(): ILayer | undefined {
@@ -401,8 +399,13 @@ export default Vue.extend({
     },
     deletePage() {
       GroupUtils.deselect()
-      this.setLastSelectedPageIndex(this.pageIndex - 1)
-      this.setCurrActivePageIndex(this.pageIndex - 1)
+      if (this.pages.length - 1 === this.pageIndex) {
+        this.setLastSelectedPageIndex(this.pageIndex - 1)
+        this.setCurrActivePageIndex(this.pageIndex - 1)
+      } else {
+        this.setLastSelectedPageIndex(this.pageIndex)
+        this.setCurrActivePageIndex(this.pageIndex)
+      }
       this._deletePage(this.pageIndex)
     },
     duplicatePage() {

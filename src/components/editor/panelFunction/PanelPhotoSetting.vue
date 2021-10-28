@@ -26,13 +26,14 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   data () {
     return {
       show: '',
       btns: [
-        { name: 'crop', label: '裁切', show: '' },
+        { name: 'crop', label: '裁切', show: 'crop' },
         { name: 'preset', label: '濾鏡', show: '' },
         { name: 'adjust', label: '調整', show: 'popup-adjust' },
         { name: 'remove-bg', label: '去背', show: '' }
@@ -60,6 +61,10 @@ export default Vue.extend({
     }),
     handleShow (name: string) {
       this.show = this.show.includes(name) ? '' : name
+      if (name === 'crop') {
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+        this.show = ''
+      }
     },
     handleOutside (event: PointerEvent) {
       this.show = ''

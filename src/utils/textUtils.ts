@@ -69,7 +69,7 @@ class TextUtils {
             break
           case 'BR':
             start = {
-              pIndex: +((range.startContainer as HTMLElement).dataset.pindex as string),
+              pIndex: +((p as HTMLElement).dataset.pindex as string),
               sIndex: 0,
               offset: 1
             }
@@ -177,7 +177,6 @@ class TextUtils {
   }
 
   textParser(text: HTMLElement, config: IText): IParagraph[] {
-    console.log('in textParser process')
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
@@ -208,7 +207,7 @@ class TextUtils {
           spanEl = span as HTMLElement
         }
 
-        const text = spanEl.innerText as string
+        const text = spanEl.textContent as string
         /**
          * If the span is the same without changed, skip parse it
          */
@@ -234,7 +233,6 @@ class TextUtils {
               Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
             }
           } else if (pIndex === 0 && sIndex === 0) {
-            console.log('pindex = 0 sindex = 0')
             Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
           }
         }
@@ -255,17 +253,26 @@ class TextUtils {
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
           spans[spans.length - 1].text += text
         } else {
-          spans.push({ text: text === '\n' ? '' : text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
+          spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
         }
         Object.assign(spanStyleBuff, spanStyle)
       }
-      const pEl = p as HTMLElement
-      const floatNum = /[+-]?\d+(\.\d+)?/
-      const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
-      const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
-      const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-      const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
-      paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
+      for (let i = 0; i < spans.length; i++) {
+        if (!spans[i].text && spans.length !== 1) {
+          spans.splice(i, 1)
+          i--
+        }
+      }
+
+      if (spans.length) {
+        const pEl = p as HTMLElement
+        const floatNum = /[+-]?\d+(\.\d+)?/
+        const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
+        const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
+        const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+        const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
+        paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
+      }
     })
     return paragraphs
   }
@@ -307,7 +314,6 @@ class TextUtils {
           })
           paragraphs[start.pIndex].spans[start.sIndex].text = selSpan.text.slice(0, start.offset - 1)
 
-          console.log(start.offset)
           if (start.sIndex === 0 && start.offset === 1) {
             paragraphs[start.pIndex].spans.splice(0, 0, {
               styles: newSpanStyles,
@@ -420,18 +426,18 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, layerIndex: number = LayerUtils.layerIndex, subLayerIndex: number | undefined = undefined) {
+  updateLayerSize(config: IText, pageIndex: number = LayerUtils.pageIndex, layerIndex: number = LayerUtils.layerIndex, subLayerIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
     if (!subLayerIndex) {
-      ControlUtils.updateLayerSize(LayerUtils.pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
+      ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {
-      LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-      const currLayer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
       if (subLayerIndex === currLayer.layers.length - 1) {
         let { width, height } = calcTmpProps(currLayer.layers)
         width *= currLayer.styles.scale
         height *= currLayer.styles.scale
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, { width, height })
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
       }
     }
   }
@@ -504,7 +510,6 @@ class TextUtils {
   }
 
   updateTextParagraphs(pageIndex: number, layerIndex: number, paragraphs: IParagraph[]) {
-    // console.log(GeneralUtils.deepCopy(paragraphs))
     store.commit('UPDATE_textProps', {
       pageIndex,
       layerIndex,
