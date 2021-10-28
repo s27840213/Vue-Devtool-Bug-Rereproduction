@@ -54,20 +54,8 @@ export default Vue.extend({
       FileUtils
     }
   },
-  async mounted() {
-    console.warn('start loading')
-    await this.getCategories()
-    const testFonts = [...this.list].splice(0, 35)
-    console.log(testFonts)
-    let index = 1
-    testFonts.forEach(item => {
-      if (!item.list) return
-      console.log(this.getFontUrl(item))
-      const newFont = new FontFace(`${index++}`, this.getFontUrl(item.list[0].id))
-      newFont.load().then(() => {
-        console.warn('load finished')
-      })
-    })
+  mounted() {
+    this.getCategories()
   },
   computed: {
     ...mapState(

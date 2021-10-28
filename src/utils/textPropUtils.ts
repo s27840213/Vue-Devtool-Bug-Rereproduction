@@ -696,6 +696,8 @@ class TextPropUtils {
   spanStylesTransformer(span: ISpan | undefined, prop: { [key: string]: string | number }): ISpanStyle {
     const spanStyles = {
       font: span ? span.styles.font : '',
+      type: span ? span.styles.type : 'public',
+      userId: span ? span.styles.userId : '',
       weight: span ? span.styles.weight : '',
       size: span ? span.styles.size : NaN,
       decoration: span ? span.styles.decoration : '',

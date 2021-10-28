@@ -47,6 +47,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters } from 'vuex'
 import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -60,6 +61,13 @@ export default Vue.extend({
     return {
       vcoConfig: {
         handler: () => {
+          const sel = window.getSelection()
+          if (sel && sel.rangeCount) {
+            const target = sel?.getRangeAt(0).startContainer
+            if (target && target instanceof HTMLElement && target.classList.contains('input-color')) {
+              return
+            }
+          }
           this.$emit('toggleColorPanel', false)
         },
         middleware: null as unknown,

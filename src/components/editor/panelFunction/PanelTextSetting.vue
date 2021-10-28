@@ -27,8 +27,9 @@
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10 overflow-hidden")
-          button(class="text-setting__range-input-button" @click="handleColorModal")
-            input(class="body-2 text-gray-2 record-selection" type="text" ref="input-color" :value="props.color")
+          button(class="text-setting__range-input-button input-color" @click="handleColorModal")
+            input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
+            :value="props.color" @change="inputColor")
             //-  v-model.lazy="props.color v-model.lazy="props.color
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh"
