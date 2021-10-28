@@ -13,10 +13,9 @@
           style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
           btn(:type="'primary-mid'"
             class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
-        //- img(:src="require('@/assets/img/png/homepage_video_img.png')")
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
-        scroll-list(:list="sizeList" type='size')
+        scroll-list(:list="themeList" type='theme')
       div(class="home-content-plaque")
         img(:src="require('@/assets/img/png/home-plaque.png')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
@@ -68,6 +67,7 @@ import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
+import { Itheme } from '@/interfaces/theme'
 
 export default Vue.extend({
   name: 'Home',
@@ -78,43 +78,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      sizeList: [
-        {
-          name: 'fb',
-          title: 'Facebook',
-          size: '1080 x 1080'
-        },
-        {
-          name: 'ig-post',
-          title: 'IG 貼文',
-          size: '1080 x 1080'
-        },
-        {
-          name: 'ig-story',
-          title: 'IG 限時動態',
-          size: '9:16'
-        },
-        {
-          name: 'line-broadcast',
-          title: 'Line 推播',
-          size: '1040 x 1040'
-        },
-        {
-          name: 'eco-product',
-          title: '電商商品圖',
-          size: '1080 x 1080'
-        },
-        {
-          name: 'eco-banner',
-          title: '電商 Banner',
-          size: '2000 x 1000 (2:1)'
-        },
-        {
-          name: 'eco-detail',
-          title: '電商詳情頁',
-          size: '1000 x 不限'
-        }
-      ],
+      themeList: [] as Itheme[],
       featureList: [
         {
           name: '1',
@@ -143,7 +107,7 @@ export default Vue.extend({
         }
       ],
       featureSelected: 0,
-      tagString: '萬聖節,母嬰,雙十一,特價',
+      tagString: 'IG,母嬰,雙十一,特價',
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
@@ -167,22 +131,34 @@ export default Vue.extend({
       }
     }, 4000)
 
+    const response = await this.getThemeList()
+    this.themeList = response.data.content
+
+    const squareTheme = [] as number[]
+    this.themeList.forEach((theme: Itheme) => {
+      if (theme.width / theme.height === 1) {
+        squareTheme.push(theme.id)
+      }
+    })
+    const theme = squareTheme.join(',')
+
     let keyword = this.tagString.replaceAll(',', ' ')
     this.tags = this.tagString.split(',')
-    const tagTemplate = await this.getTagContent({ keyword })
+    const tagTemplate = await this.getTagContent({ keyword, theme })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
     keyword = 'locale::tw;;order_by::popular'
-    const popularTemplate = await this.getTagContent({ keyword })
+    const popularTemplate = await this.getTagContent({ keyword, theme })
     this.popularTemplateList = popularTemplate.data.content[0].list
 
     keyword = 'locale::tw;;order_by::time'
-    const latestTemplate = await this.getTagContent({ keyword })
+    const latestTemplate = await this.getTagContent({ keyword, theme })
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
   methods: {
     ...mapActions('homeTemplate',
       [
+        'getThemeList',
         'getTagContent'
       ]
     ),
