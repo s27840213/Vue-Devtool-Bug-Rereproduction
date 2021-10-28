@@ -325,7 +325,7 @@ class AssetUtils {
           body: 'isBody'
         } as { [key: string]: string }
         const field = fieldMap[type]
-        const textLayer = GeneralUtils.deepCopy(jsonData)
+        const textLayer = GeneralUtils.deepCopy(jsonData.default)
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
       })

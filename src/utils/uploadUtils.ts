@@ -518,49 +518,51 @@ class UploadUtils {
     }
   }
 
-  private layerInfoFilter(layer: ILayer): any {
-    const styleFilter = (styles: any, type = 'general') => {
-      const general = {
-        x: styles.x,
-        y: styles.y,
-        width: styles.width,
-        height: styles.height,
-        scale: styles.scale,
-        scaleX: styles.scaleX,
-        scaleY: styles.scaleY,
-        rotate: styles.rotate,
-        zindex: styles.zindex,
-        opacity: styles.opacity,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
-      }
-      switch (type) {
-        case 'image':
-          if (general.scale !== 1) {
-            general.width = styles.imgWidth
-            general.height = styles.imgHeight
-            general.scale = 1
-          }
-          return {
-            ...general,
-            imgX: styles.imgX,
-            imgY: styles.imgY,
-            imgWidth: styles.imgWidth,
-            imgHeight: styles.imgHeight
-          }
-        case 'text':
-          return {
-            ...general,
-            writingMode: styles.writingMode,
-            align: styles.align,
-            textShape: styles.textShape,
-            textEffect: styles.textEffect
-          }
-        default:
-          return general
-      }
+  private styleFilter (styles: any, type = 'general') {
+    const general = {
+      x: styles.x,
+      y: styles.y,
+      width: styles.width,
+      height: styles.height,
+      scale: styles.scale,
+      scaleX: styles.scaleX,
+      scaleY: styles.scaleY,
+      rotate: styles.rotate,
+      zindex: styles.zindex,
+      opacity: styles.opacity,
+      horizontalFlip: styles.horizontalFlip,
+      verticalFlip: styles.verticalFlip
     }
+    switch (type) {
+      case 'image':
+        if (general.scale !== 1) {
+          general.width = styles.imgWidth
+          general.height = styles.imgHeight
+          general.scale = 1
+        }
+        return {
+          ...general,
+          imgX: styles.imgX,
+          imgY: styles.imgY,
+          imgWidth: styles.imgWidth,
+          imgHeight: styles.imgHeight
+        }
+      case 'text':
+        return {
+          ...general,
+          writingMode: styles.writingMode,
+          align: styles.align,
+          textShape: styles.textShape,
+          textEffect: styles.textEffect,
+          type: styles.type,
+          userId: styles.userId
+        }
+      default:
+        return general
+    }
+  }
 
+  private layerInfoFilter(layer: ILayer): any {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
@@ -568,7 +570,7 @@ class UploadUtils {
         return {
           type,
           srcObj,
-          styles: styleFilter(styles, 'image')
+          styles: this.styleFilter(styles, 'image')
         }
       }
       case 'shape': {
@@ -606,7 +608,7 @@ class UploadUtils {
                 pDiff,
                 ratio,
                 color,
-                styles: styleFilter(styles)
+                styles: this.styleFilter(styles)
               }
             } else {
               // for downward compatible reason record the entire shape info
@@ -629,7 +631,7 @@ class UploadUtils {
               return {
                 ...this.layerInfoFilter(img),
                 isFrameImg,
-                styles: styleFilter(img.styles, 'image')
+                styles: this.styleFilter(img.styles, 'image')
               }
             })
           ],
@@ -639,7 +641,7 @@ class UploadUtils {
           decorationTop: decorationTop ? {
             color: decorationTop.color
           } : undefined,
-          styles: styleFilter(styles)
+          styles: this.styleFilter(styles)
         }
       }
       case 'text': {
@@ -650,7 +652,7 @@ class UploadUtils {
           widthLimit,
           isEdited,
           paragraphs: paragraphs,
-          styles: styleFilter(styles, 'text')
+          styles: this.styleFilter(styles, 'text')
         }
       }
       case 'group': {
@@ -664,7 +666,7 @@ class UploadUtils {
         return {
           type,
           layers: filteredLayers,
-          styles: styleFilter(styles)
+          styles: this.styleFilter(styles)
         }
       }
     }

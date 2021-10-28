@@ -16,6 +16,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import pageUtils from '@/utils/pageUtils'
+
 export default Vue.extend({
   data() {
     return {
@@ -47,10 +49,7 @@ export default Vue.extend({
     setIsShowPagePreview(show: boolean) {
       this._setIsShowPagePreview(show)
       if (!show) {
-        const currentPage = document.getElementsByClassName('nu-page')[this.lastSelectedPageIndex] as HTMLElement
-        currentPage.scrollIntoView({
-          behavior: 'smooth'
-        })
+        pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
       }
     }
   }

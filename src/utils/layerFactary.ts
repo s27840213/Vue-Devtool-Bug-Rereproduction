@@ -191,6 +191,8 @@ class LayerFactary {
               styles: {
                 opacity: 1,
                 font: 'normal',
+                type: 'public',
+                userId: '',
                 weight: 'normal',
                 color: '#000000',
                 size: 72,

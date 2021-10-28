@@ -1,6 +1,6 @@
 import { SrcObj } from './gallery'
 
-export const jsonVer = '1.0.0'
+export const jsonVer = '1.0.1'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
@@ -53,6 +53,8 @@ export interface IParagraphStyle {
 export interface ISpanStyle {
   [key: string]: number | string | undefined,
   font: string,
+  type: string,
+  userId: string,
   weight: string,
   color: string,
   size: number,

@@ -27,8 +27,10 @@
           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
         div(class="full-width text-left ml-10 overflow-hidden")
-          input(class="body-2 text-gray-2 record-selection"  ref="input-color" v-model.lazy="props.color"
-          @click="handleColorModal")
+          button(class="text-setting__range-input-button input-color" @click="handleColorModal")
+            input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
+            :value="props.color" @change="inputColor")
+            //-  v-model.lazy="props.color v-model.lazy="props.color
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
@@ -215,7 +217,6 @@ export default Vue.extend({
       const target = input.target as HTMLInputElement
       if (GeneralUtils.isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
-        console.log(target.value)
         this.handleColorUpdate(target.value)
       }
     },
@@ -229,19 +230,14 @@ export default Vue.extend({
       input.select()
 
       this.$emit('toggleColorPanel', true)
-      if (!this.openColorPicker) {
-        TextUtils.focus(this.sel.start, this.sel.end)
-      }
-      StepsUtils.record()
+      // if (!this.openColorPicker) {
+      //   TextUtils.focus(this.sel.start, this.sel.end)
+      // }
+      // StepsUtils.record()
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-
-      const nan = {
-        pIndex: NaN,
-        sIndex: NaN,
-        offset: NaN
-      }
+      const nan = TextUtils.getNullSel()
       if (this.currSelectedInfo.layers.length === 1) {
         const isSelCollapse = (() => {
           for (const [k, v] of Object.entries(this.sel.start)) {
@@ -436,8 +432,9 @@ export default Vue.extend({
     textRangeRecorder(e: MouseEvent) {
       if ((e.target as HTMLElement).classList.contains('record-selection')) {
         const sel = TextUtils.getSelection()
-        TextUtils.updateSelection(sel?.start ?? TextUtils.getNullSel(), sel?.end ?? TextUtils.getNullSel())
-        console.log('text range recorded: (p: ' + sel?.start.pIndex + ', s: ' + sel?.start.sIndex + ', offset: ' + sel?.start.offset + ')')
+        const start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+        const end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+        TextUtils.updateSelection(start, end)
       }
     },
     setSize(e: Event) {

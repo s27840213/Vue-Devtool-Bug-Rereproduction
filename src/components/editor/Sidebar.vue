@@ -24,6 +24,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -45,15 +46,23 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     })
   },
   methods: {
     ...mapMutations({
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
+
+      if (this.isShowPagePreview) {
+        this._setIsShowPagePreview(false)
+        pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
+      }
     }
   }
 })

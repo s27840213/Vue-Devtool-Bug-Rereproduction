@@ -9,10 +9,7 @@ import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
-import TemplateUtils from './templateUtils'
-import StepsUtils from './stepsUtils'
-import { safeJoin } from '@sentry/browser/node_modules/@sentry/utils'
-import { Layer } from 'konva/types/Layer'
+import { instrumentOutgoingRequests } from '@sentry/tracing/dist/browser'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -30,17 +27,26 @@ class TextUtils {
 
     const range = sel?.getRangeAt(0)
     if (range) {
-      let div = range.commonAncestorContainer
+      /**
+       * The div of this function only returns the Text-Body of the controller text
+       * which means the other selection ranged in the web will not be considered in here
+       * the controller text body would hold a class-tag, such as `text-${layerIndex}` as an identity
+       */
+      let div: undefined | Node = range.commonAncestorContainer
       const isTextBody = (div: HTMLElement) => {
         try {
-          return !div.id.match('text')
+          return (div instanceof HTMLElement) && div.id.match('text')
         } catch {
           throw new Error('select range with wrong element!')
         }
       }
 
-      while (div?.parentNode && (div?.nodeName !== 'DIV' || isTextBody(div as HTMLElement))) {
-        div = div?.parentNode
+      while (div.parentNode && (div.nodeName !== 'DIV' || !isTextBody(div as HTMLElement))) {
+        div = div.parentNode
+      }
+
+      if (!isTextBody(div as HTMLElement)) {
+        div = undefined
       }
 
       let start = {
@@ -76,11 +82,11 @@ class TextUtils {
             }
             break
           default:
-            return {
+            return div ? {
               div,
               start: { ...store.state.text?.sel.start } as ISelection,
               end: { ...store.state.text?.sel.end } as ISelection
-            }
+            } : undefined
         }
       } else {
         throw new Error('wrong type node of the p.firstChild')
@@ -90,10 +96,14 @@ class TextUtils {
         !range || !range.startContainer || !range.endContainer) return undefined
 
       const isRanged = window.getSelection()?.toString() !== ''
-      const end = {
+      let end = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
         sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
         offset: isRanged ? range?.endOffset as number : NaN
+      }
+
+      if (this.startEqualEnd(start, end)) {
+        end = this.getNullSel()
       }
 
       return {
@@ -102,6 +112,11 @@ class TextUtils {
         end
       }
     }
+  }
+
+  startEqualEnd (start: ISelection, end: ISelection) {
+    return (Object.keys(start) as Array<(keyof ISelection)>)
+      .every((k: (keyof ISelection)) => start[k] === end[k])
   }
 
   focus(start?: ISelection, end?: ISelection, async = false) {
@@ -505,6 +520,9 @@ class TextUtils {
   }
 
   updateSelection(start: ISelection, end: ISelection) {
+    if (this.startEqualEnd(start, end)) {
+      end = this.getNullSel()
+    }
     store.commit('text/UPDATE_selection', {
       start,
       end

@@ -168,26 +168,38 @@ class TextPropUtils {
       sIndex: 0,
       offset: 0
     }
-    if (!sel && !TextUtils.isSel(selStart) && !TextUtils.isSel(selEnd)) {
-      console.log('1')
-      /**
-       * If there is no selection given by either the window or the input params,
-       * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
-       */
+    // if (!sel && !TextUtils.isSel(selStart) && !TextUtils.isSel(selEnd)) {
+    //   console.log('1')
+    //   /**
+    //    * If there is no selection given by either the window or the input params,
+    //    * the start will be (0, 0, 0) and the end will be the (last p, last s, at the last offset)
+    //    */
+    //   end.pIndex = config.paragraphs.length - 1
+    //   end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
+    //   end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
+    // } else if (TextUtils.isSel(selStart) || TextUtils.isSel(selEnd)) {
+    //   console.log('2')
+    //   Object.assign(start, selStart)
+    //   Object.assign(end, selEnd)
+    // } else if (sel) {
+    //   console.log(sel.div)
+    //   console.log('3')
+    //   Object.assign(start, sel.start)
+    //   Object.assign(end, sel.end)
+    // } else {
+    //   return
+    // }
+
+    if (TextUtils.isSel(selStart) || TextUtils.isSel(selEnd)) {
+      Object.assign(start, selStart)
+      Object.assign(end, selEnd)
+    } else if (TextUtils.isSel(this.getCurrSel?.start)) {
+      Object.assign(start, this.getCurrSel?.start)
+      Object.assign(end, this.getCurrSel?.end)
+    } else {
       end.pIndex = config.paragraphs.length - 1
       end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-    } else if (TextUtils.isSel(selStart) || TextUtils.isSel(selEnd)) {
-      console.log('2')
-      Object.assign(start, selStart)
-      Object.assign(end, selEnd)
-    } else if (sel) {
-      console.log(sel.div)
-      console.log('3')
-      Object.assign(start, sel.start)
-      Object.assign(end, sel.end)
-    } else {
-      return
     }
 
     let isStartContainerDivided = true
@@ -510,7 +522,8 @@ class TextPropUtils {
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
-    const sel = TextUtils.isSel(store.state.text?.sel.start) ? store.state.text?.sel : TextUtils.getSelection()
+    const sel = TextUtils.isSel(store.state.text?.sel.start)
+      ? GeneralUtils.deepCopy(store.state.text?.sel) as { start: ISelection, end: ISelection } : TextUtils.getSelection()
     // If layer is assigned, means the current selected layer is a group/tmp layer
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     let start
@@ -683,6 +696,8 @@ class TextPropUtils {
   spanStylesTransformer(span: ISpan | undefined, prop: { [key: string]: string | number }): ISpanStyle {
     const spanStyles = {
       font: span ? span.styles.font : '',
+      type: span ? span.styles.type : 'public',
+      userId: span ? span.styles.userId : '',
       weight: span ? span.styles.weight : '',
       size: span ? span.styles.size : NaN,
       decoration: span ? span.styles.decoration : '',
