@@ -16,7 +16,8 @@ class PageUtils {
   }
 
   get currFocusPageIndex() {
-    return this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+    const { pageIndex } = this.currSelectedInfo
+    return pageIndex > 0 ? pageIndex : this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
   }
 
   get currFocusPage(): IPage {
@@ -140,8 +141,7 @@ class PageUtils {
   }
 
   activeCurrActivePage(): void {
-    const currActivePageIndex = store.getters.getCurrActivePageIndex
-    FocusUtils.focusElement(`.nu-page-${currActivePageIndex}`, true)
+    FocusUtils.focusElement(`.nu-page-${this.currFocusPageIndex}`, true)
   }
 
   scrollIntoPage(pageIndex: number): void {

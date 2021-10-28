@@ -127,6 +127,7 @@ export default Vue.extend({
   position: relative;
   background-color: setColor(sidebar-panel);
   width: 100%;
+  height: 100%;
   z-index: setZindex(color-panel);
   box-sizing: border-box;
   &__btn {
@@ -159,7 +160,8 @@ export default Vue.extend({
   &__add-color {
     width: 100%;
     height: 100%;
-    background-image: url("~@/assets/img/svg/addColor.svg");
+    background-image: url("~@/assets/img/svg/addColor.png");
+    background-size: cover;
   }
 
   &__color {

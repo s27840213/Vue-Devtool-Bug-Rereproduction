@@ -9,7 +9,8 @@
           div(class="content__editor")
             editor-view
             scale-ratio-editor(:style="scaleRatioEditorPos")
-        div(class="content__panel")
+        div(class="content__panel"
+            :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
             color-panel(v-if="isColorPanelOpen"
@@ -68,6 +69,13 @@ export default Vue.extend({
         left: '50%',
         transform: 'translateX(-50%)'
       }
+    },
+    contentPanelStyles(): { [index: string]: string } {
+      return this.isColorPanelOpen ? {
+        'grid-template-rows': '0.2fr 0.8fr'
+      } : {
+        'grid-template-rows': '1fr'
+      }
     }
   },
   methods: {
@@ -121,8 +129,8 @@ export default Vue.extend({
   &__panel {
     position: relative;
     width: 100%;
+    height: 100%;
     display: grid;
-    grid-template-rows: 1fr auto;
     grid-template-columns: 1fr;
   }
 
