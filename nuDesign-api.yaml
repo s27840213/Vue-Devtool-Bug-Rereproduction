@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211026"
+  version: "20211028"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -807,9 +807,6 @@ definitions:
           group_id:
             type: string
             description: group id
-          aspect:
-            type: string
-            description: limit aspect type for return templates
           theme:
             type: string
             description: limit theme_id(s) for return templaytes (separated by comma for
