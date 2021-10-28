@@ -1174,7 +1174,6 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      console.log('text controller clicked')
       if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
@@ -1372,7 +1371,7 @@ export default Vue.extend({
                 sel.addRange(range)
               }
             }
-            TextUtils.updateSelection({ pIndex, sIndex, offset }, { pIndex: NaN, sIndex: NaN, offset: NaN })
+            TextUtils.updateSelection({ pIndex, sIndex, offset }, TextUtils.getNullSel())
             TextPropUtils.updateTextPropsState()
           })
         }

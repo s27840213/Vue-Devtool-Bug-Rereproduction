@@ -32,6 +32,7 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import TemplateUtils from '@/utils/templateUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import FontFaceObserver from 'fontfaceobserver'
+import font from '@/store/module/font'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -49,29 +50,25 @@ export default Vue.extend({
   async created() {
     const fontStore = this.fontStore as Array<IFont>
     let isLoadedFont = false
-    const fontArr: string[] = []
+    const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
         const spanFont = span.styles.font
         if (!fontStore.some(font => font.face === spanFont)) {
           isLoadedFont = true
           const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
-          const promise = () => {
-            return new Promise<void>((resolve) => {
-              newFont.load().then(newFont => {
+          promises.push(new Promise<void>((resolve) => {
+            newFont.load()
+              .then(newFont => {
                 document.fonts.add(newFont)
-                fontArr.push(spanFont)
-                TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
                 resolve()
               })
-            })
-          }
-          await promise()
+          }))
+          TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
         }
       }
     }
-    const promises = [...fontArr]
-      .map(font => (new FontFaceObserver(font)).load(null, 10000))
+
     await Promise
       .all(promises)
 

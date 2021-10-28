@@ -9,10 +9,6 @@ import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
-import TemplateUtils from './templateUtils'
-import StepsUtils from './stepsUtils'
-import { safeJoin } from '@sentry/browser/node_modules/@sentry/utils'
-import { Layer } from 'konva/types/Layer'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -90,10 +86,14 @@ class TextUtils {
         !range || !range.startContainer || !range.endContainer) return undefined
 
       const isRanged = window.getSelection()?.toString() !== ''
-      const end = {
+      let end = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
         sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
         offset: isRanged ? range?.endOffset as number : NaN
+      }
+
+      if (this.startEqualEnd(start, end)) {
+        end = this.getNullSel()
       }
 
       return {
@@ -102,6 +102,11 @@ class TextUtils {
         end
       }
     }
+  }
+
+  startEqualEnd (start: ISelection, end: ISelection) {
+    return (Object.keys(start) as Array<(keyof ISelection)>)
+      .every((k: (keyof ISelection)) => start[k] === end[k])
   }
 
   focus(start?: ISelection, end?: ISelection, async = false) {
@@ -505,6 +510,9 @@ class TextUtils {
   }
 
   updateSelection(start: ISelection, end: ISelection) {
+    if (this.startEqualEnd(start, end)) {
+      end = this.getNullSel()
+    }
     store.commit('text/UPDATE_selection', {
       start,
       end
