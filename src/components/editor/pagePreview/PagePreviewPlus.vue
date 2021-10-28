@@ -5,16 +5,15 @@
   @mouseout="pageMoveBack($event)"
   @dragover="pageMoveTo($event, 'drag')"
   @dragleave="pageMoveBack($event)"
-  @drop="handlePageDrop()")
+  @drop="handlePageDrop($event)")
     div(v-if="actionType === 'mouse'"
       class="page-preview-plus-wrapper pointer"
       @click="addPage(index)")
-        svg-icon(class="pb-5"
+        svg-icon(class="py-10"
             :iconColor="'blue-1'"
             :iconName="'plus-origin'"
             :iconWidth="'18px'")
-        span 新增
-        span 頁面
+        span 新增頁面
     div(v-if="actionType === 'drag'"
       class="page-preview-plus-drag")
 </template>
@@ -76,7 +75,10 @@ export default Vue.extend({
 
       target.style.opacity = '0'
     },
-    handlePageDrop() {
+    handlePageDrop($event: any) {
+      this.actionType = ''
+      this.pageMoveBack($event)
+
       // move selected to index: copy and delete origin one
       const indexFrom = this.lastSelectedPageIndex
       const indexTo = this.index
@@ -111,9 +113,10 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 190px;
+    height: 160px;
     width: 30px;
     transition: 0.25s ease-in-out;
+    padding-bottom: 30px;
 
     &-wrapper {
       position: absolute;
@@ -122,9 +125,14 @@ export default Vue.extend({
       align-items: center;
       flex-direction: column;
       width: 40px;
-      height: 70px;
-      font-size: 10px;
+      height: 60px;
+      font-size: 12px;
       background: setColor(gray-5);
+
+      > span {
+        white-space: nowrap;
+        transform: scale(0.7);
+      }
     }
 
     &-last {

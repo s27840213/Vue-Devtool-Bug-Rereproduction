@@ -296,7 +296,7 @@ class ShapeUtils {
     }
   }
 
-  lineCenterRotate(point: number[], angle: number, scale: number): {
+  lineCenterRotate(point: number[], angle: number, scale: number, angleDiff = true): {
     point: number[], realWidth: number, realHeight: number, dx: number, dy: number
   } {
     const { width, height, xDiff, yDiff, baseDegree } = this.lineDimension(point)
@@ -306,7 +306,8 @@ class ShapeUtils {
     const oldWidth = width + 2 * oldDx + 2
     const oldHeight = height + 2 * oldDy + 2
     const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-    const { point: newPoint, realWidth, realHeight } = this.computePointForAngle(hypotenuse, (oldRad / Math.PI * 180 + angle) % 360, scale)
+    const newAngle = angleDiff ? (oldRad / Math.PI * 180 + angle) % 360 : angle
+    const { point: newPoint, realWidth, realHeight } = this.computePointForAngle(hypotenuse, newAngle, scale)
     return {
       point: newPoint,
       realWidth,

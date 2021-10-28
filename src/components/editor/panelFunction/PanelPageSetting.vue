@@ -89,7 +89,8 @@
                 @click="copyAndApplySelectedFormat")
               span(class="page-setting__suggestion-panel__body__button__text") 複製並調整尺寸
     div(class="page-setting__footer")
-    div(v-if="inAdminMode")
+    div(v-if="inAdminMode"
+      class="template-information")
       span(class="text-gray-1 label-lg") Template Information
       div(class="template-information__content")
         div(class="template-information__line" style="background: #eee;")
@@ -112,6 +113,17 @@
           span(class="body-1") 語系
           select(class="template-information__select" v-model="templateInfo.locale")
             option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        div(class="template-information__line")
+          span(class="body-1") Theme_ids
+        div(class="theme-wrapper")
+          div(v-for="(item, idx) in themeList"
+          class="pt-5 theme-option")
+            input(type="checkbox"
+              class="theme-option__check"
+              :disabled="isDisabled(item.width, item.height)"
+              v-model="templateThemes[item.id]")
+            span(class="body-1") {{item.title}}
+            span(class="body-2 text-gray-2") {{item.description}}
         div
           span tags_tw
         div
@@ -175,6 +187,7 @@ export default Vue.extend({
       updateChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
       currentKeyId: '',
+      imgRandQuery: '',
       templateInfo: {
         key_id: '' as string,
         author: '' as string,
@@ -182,9 +195,12 @@ export default Vue.extend({
         tags_tw: '' as string,
         tags_us: '' as string,
         tags_jp: '' as string,
-        locale: '' as string
+        locale: '' as string,
+        width: '' as string,
+        height: '' as string,
+        theme_ids: '' as string
       },
-      imgRandQuery: ''
+      themeList: [] as any
     }
   },
   watch: {
@@ -196,8 +212,12 @@ export default Vue.extend({
         tags_tw: '',
         tags_us: '',
         tags_jp: '',
-        locale: ''
+        locale: '',
+        width: '',
+        height: '',
+        theme_ids: ''
       }
+      this.themeList = []
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
     currentPageWidth: function (newVal) {
@@ -248,6 +268,14 @@ export default Vue.extend({
     },
     key_id(): string {
       return this.getPage(this.lastSelectedPageIndex).designId
+    },
+    templateThemes(): boolean[] {
+      const themes = this.templateInfo.theme_ids.split(',')
+      const templateThemes = [] as boolean[]
+      themes.forEach((item) => {
+        templateThemes[parseInt(item)] = true
+      })
+      return templateThemes
     }
   },
   methods: {
@@ -373,6 +401,7 @@ export default Vue.extend({
       if (res.data.flag === 0) {
         this.templateInfo = res.data.data
         this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+        this.themeList = res.data.data.themeList
       } else {
         this.$notify({ group: 'copy', text: '找不到模板資料' })
       }
@@ -380,6 +409,21 @@ export default Vue.extend({
       this.isLoading = false
     },
     async updateDataClicked() {
+      // handle theme_ids
+      let themeIds = ''
+      if (this.templateThemes.length === 1 && this.templateThemes[0]) {
+        // theme_ids unset
+        themeIds = '0'
+      } else {
+        const arr = [] as string[]
+        this.templateThemes.forEach((item, idx) => {
+          if (item && idx !== 0) {
+            arr.push(String(idx))
+          }
+        })
+        themeIds = arr.join()
+      }
+
       this.isLoading = true
       if (!this.templateInfo.key_id) {
         this.isLoading = false
@@ -395,13 +439,16 @@ export default Vue.extend({
         locale: this.templateInfo.locale,
         tags_tw: this.templateInfo.tags_tw,
         tags_us: this.templateInfo.tags_us,
-        tags_jp: this.templateInfo.tags_jp
+        tags_jp: this.templateInfo.tags_jp,
+        theme_ids: themeIds
       }
       const res = await designApis.updateTemplateInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
         this.$notify({ group: 'copy', text: '模板資料更新成功' })
         this.templateInfo = res.data.data
         this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+      } else {
+        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.updateChecked = false
       this.isLoading = false
@@ -414,6 +461,15 @@ export default Vue.extend({
         .then(() => {
           this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
+    },
+    isDisabled(themeWidth: string | number, themeHeight: string | number) {
+      if (themeWidth !== this.templateInfo.width && themeWidth !== 0) {
+        return true
+      } else if (themeHeight !== this.templateInfo.height && themeHeight !== 0) {
+        return true
+      } else {
+        return false
+      }
     },
     fetchLayouts() {
       this.isLayoutReady = false
@@ -667,6 +723,22 @@ export default Vue.extend({
   }
   &__check {
     width: 10%;
+  }
+
+  .theme-wrapper {
+    border: 1px #000 solid;
+    border-radius: 5px;
+    padding: 5px 0;
+  }
+
+  .theme-option {
+    display: grid;
+    align-items: center;
+    grid-auto-flow: column;
+    grid-template-columns: 40px 100px auto;
+    &__check {
+      margin: auto 0;
+    }
   }
 }
 

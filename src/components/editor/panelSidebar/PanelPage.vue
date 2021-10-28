@@ -4,10 +4,10 @@
         :iconName="'new-page'"
         :iconWidth="'15px'"
         :type="'gray-sm'"
-        class="rounded mt-30 mb-20 mx-25"
-        style="padding: 5px 30px;"
+        class="rounded my-20 mx-25"
+        style="padding: 5px 0;"
         @click.native="addPage(lastSelectedPageIndex+1)") 新 增 頁 面
-    div(class="panel-page-items pb-20 px-25")
+    div(class="panel-page-items")
       template(v-for="(page, idx) in getPages")
         panel-page-plus(:index="idx" last=false
           :class="{'pt-10': idx === 0}")
@@ -65,22 +65,26 @@ export default Vue.extend({
   }
 
   &-items {
-    width: 100%;
+    margin-right: -10px;
     box-sizing: border-box;
     overflow-y: scroll;
     overflow-x: hidden;
     scrollbar-width: thin;
+    padding: 0 20px 20px 20px;
+
     &::-webkit-scrollbar {
       width: 10px;
       height: 10px;
       background-color: unset;
     }
+
     &::-webkit-scrollbar-thumb {
       border-radius: 5px;
       visibility: hidden;
       background-color: #d9dbe1;
       border: 3px solid #2c2f43;
     }
+
     &:hover {
       &::-webkit-scrollbar-thumb {
         visibility: visible;

@@ -36,7 +36,6 @@ export default Vue.extend({
       currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      pageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio'
     }),
     currFocusPage(): IPage {

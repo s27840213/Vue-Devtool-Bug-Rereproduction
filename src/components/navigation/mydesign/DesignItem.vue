@@ -205,6 +205,11 @@ export default Vue.extend({
         path: this.path,
         design: this.config
       })
+
+      if (!e.dataTransfer) return
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.dropEffect = 'move'
+
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
     handleDragging(e: DragEvent) {

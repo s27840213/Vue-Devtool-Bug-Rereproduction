@@ -23,7 +23,7 @@ export async function editorRouteHandler (_to: Route, _from: Route, next: Naviga
     if (headless === '1') {
       store.commit('SET_currSidebarPanelType', -1)
     } else {
-      require('@/assets/scss/components/tmpFonts.scss')
+      (() => import('@/assets/scss/components/tmpFonts.scss'))()
     }
   } catch (error) {
     console.log(error)

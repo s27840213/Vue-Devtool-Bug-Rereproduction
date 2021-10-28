@@ -123,13 +123,18 @@
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
-          div(class="control-point__mover-wrapper"
+          div(class="control-point__line-controller-wrapper"
               v-if="isLine"
               :style="`transform: scale(${100/scaleRatio})`")
             img(class="control-point__mover"
               :src="require('@/assets/img/svg/move.svg')"
-              :style='moverStyles()'
+              :style='lineControlPointStyles()'
               @mousedown.left.stop="moveStart")
+            svg-icon(class="control-point__rotater"
+              :iconName="'rotate'" :iconWidth="`${20}px`"
+              :style='lineControlPointStyles()'
+              :src="require('@/assets/img/svg/rotate.svg')"
+              @mousedown.native.left.stop="lineRotateStart")
           div(class="control-point__rotater-wrapper"
               v-else
               :style="`transform: scale(${100/scaleRatio})`")
@@ -493,7 +498,7 @@ export default Vue.extend({
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
-    moverStyles() {
+    lineControlPointStyles() {
       const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
       const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
       return {
@@ -1134,6 +1139,74 @@ export default Vue.extend({
       window.removeEventListener('mouseup', this.rotateEnd)
       this.$emit('setFocus')
     },
+    lineRotateStart(event: MouseEvent) {
+      this.setCursorStyle('move')
+      this.isRotating = true
+      this.isControlling = true
+
+      const body = this.$refs.body as HTMLElement
+      const rect = body.getBoundingClientRect()
+      this.center = {
+        x: rect.left + rect.width / 2 - window.pageXOffset,
+        y: rect.top + rect.height / 2 - window.pageYOffset
+      }
+
+      this.initialPos = MouseUtils.getMouseAbsPoint(event)
+      const { yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
+      this.initialRotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
+
+      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintAngle = (this.initialRotate + 360) % 360
+
+      window.addEventListener('mousemove', this.lineRotating)
+      window.addEventListener('mouseup', this.lineRotateEnd)
+    },
+    lineRotating(event: MouseEvent) {
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+      const vectA = {
+        x: this.initialPos.x - this.center.x,
+        y: this.initialPos.y - this.center.y
+      }
+      const vectB = {
+        x: event.clientX - this.center.x,
+        y: event.clientY - this.center.y
+      }
+      const lineA = ControlUtils.getLength(vectA)
+      const lineB = ControlUtils.getLength(vectB)
+      const ADotB = vectA.x * vectB.x + vectA.y * vectB.y
+
+      let angle = Math.round(Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI)
+      if (angle) {
+        if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
+          angle *= -1
+        }
+        angle += this.initialRotate % 360
+        angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
+
+        const { point, dx, dy } = shapeUtils.lineCenterRotate(this.config.point, angle, this.config.size?.[0] ?? 1, false)
+
+        const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+        const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintAngle = angle
+
+        ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, point)
+        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, this.config.styles.x + dx, this.config.styles.y + dy)
+      }
+    },
+    lineRotateEnd() {
+      this.isRotating = false
+      this.isControlling = false
+      StepsUtils.record()
+      this.setCursorStyle('default')
+      window.removeEventListener('mousemove', this.lineRotating)
+      window.removeEventListener('mouseup', this.lineRotateEnd)
+      this.$emit('setFocus')
+    },
     cursorStyles(index: number, rotateAngle: number) {
       switch (this.getLayerType) {
         case 'text':
@@ -1688,7 +1761,7 @@ export default Vue.extend({
   &__rotater {
     @include widget-point;
   }
-  &__mover-wrapper {
+  &__line-controller-wrapper {
     @include widget-point-wrapper;
   }
   &__mover {

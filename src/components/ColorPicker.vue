@@ -147,7 +147,6 @@ export default Vue.extend({
       return str
     },
     updateHex(val: any) {
-      console.log(val)
       this.color = val.hex
     },
     onPaste(event: ClipboardEvent) {
