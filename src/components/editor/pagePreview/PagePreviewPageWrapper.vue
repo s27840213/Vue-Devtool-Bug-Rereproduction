@@ -47,6 +47,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -135,10 +136,7 @@ export default Vue.extend({
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
-        const currentPage = document.getElementsByClassName('nu-page')[this.index] as HTMLElement
-        currentPage.scrollIntoView({
-          behavior: 'smooth'
-        })
+        pageUtils.scrollIntoPage(this.index)
       }
     },
     handleDragStart(e: DragEvent) {
