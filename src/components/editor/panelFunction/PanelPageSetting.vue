@@ -462,13 +462,20 @@ export default Vue.extend({
           this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
-    isDisabled(themeWidth: string | number, themeHeight: string | number) {
-      if (themeWidth !== this.templateInfo.width && themeWidth !== 0) {
-        return true
-      } else if (themeHeight !== this.templateInfo.height && themeHeight !== 0) {
-        return true
-      } else {
+    isDisabled(themeWidth: string, themeHeight: string) {
+      const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
+      const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
+      console.log('W H', themeWidth, themeHeight)
+      console.log('themeAspectRatio', themeAspectRatio)
+      console.log('templateAspectRatio', templateAspectRatio)
+
+      if (themeAspectRatio === templateAspectRatio) {
         return false
+      } else if ((themeWidth === this.templateInfo.width || themeWidth === '0') &&
+                    (themeHeight === this.templateInfo.height || themeHeight === '0')) {
+        return false
+      } else {
+        return true
       }
     },
     fetchLayouts() {
