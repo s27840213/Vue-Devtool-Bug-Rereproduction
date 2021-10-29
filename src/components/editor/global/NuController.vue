@@ -212,7 +212,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -672,15 +671,16 @@ export default Vue.extend({
             this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
           }
         }
-        if (this.getLayerType === 'text' && (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) && !this.isLocked) {
-          this.contentEditable = false
+        if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+          StepsUtils.record()
+          if (this.getLayerType === 'text') {
+            this.contentEditable = false
+          }
         }
         this.isControlling = false
         this.setCursorStyle('default')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
-
-        StepsUtils.record()
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
@@ -1375,10 +1375,8 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
-          console.log('pindex: ' + pIndex + ' sIndex: ' + sIndex)
           this.$nextTick(() => {
             // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
-            // console.log('after Render !!!!')
             observer.disconnect()
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
