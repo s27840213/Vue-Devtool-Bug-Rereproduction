@@ -11,12 +11,12 @@
       :iconName="'more_horizontal'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
-    img(:src="inFilePanel ? photo.urls.prev : photo.urls.thumb",
+    img(:src="previewSrc",
       draggable="true",
       class="gallery-photo__img pointer"
-      @dragstart="dragStart($event,photo)"
+      @dragstart="dragStart($event, photo)"
       @dragend="dragEnd"
-      @click="hasCheckedAssets ? modifyCheckedAssets(photo.id) :addImage(photo)")
+      @click="hasCheckedAssets ? modifyCheckedAssets(photo.id) : addImage(photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
       div(class="gallery-photo__progress-bar"
@@ -35,6 +35,7 @@ import pageUtils from '@/utils/pageUtils'
 export default Vue.extend({
   props: {
     photo: Object,
+    vendor: String,
     inFilePanel: {
       type: Boolean,
       default: false
@@ -59,6 +60,22 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(pageUtils.currFocusPageIndex)
+    },
+    previewSrc(): string {
+      const { inFilePanel, photo, vendor } = this
+      if (inFilePanel || photo.urls) return photo.urls.prev || photo.urls.thumb
+      const data = {
+        srcObj: { type: vendor, userId: '', assetId: photo.id }
+      } as IImage
+      return ImageUtils.getSrc(data, 200)
+    },
+    fullSrc(): string {
+      const { inFilePanel, photo, vendor } = this
+      if (inFilePanel || photo.urls) return photo.urls.full
+      const data = {
+        srcObj: { type: vendor, userId: '', assetId: photo.id }
+      } as IImage
+      return ImageUtils.getSrc(data, photo.width)
     }
   },
   methods: {
@@ -76,8 +93,8 @@ export default Vue.extend({
       const width = photo.width / 20
       const height = photo.height / 20
       const rect = (e.target as Element).getBoundingClientRect()
-      const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
-      const type = ImageUtils.getSrcType(photo.urls.full)
+      const src = this.fullSrc
+      const type = ImageUtils.getSrcType(this.fullSrc)
       const data = {
         type: 'image',
         // @/assets/img/svg/img-tmp.svg
@@ -125,7 +142,7 @@ export default Vue.extend({
         const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
         const allLayers = this.getLayers(this.lastSelectedPageIndex)
         const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-          const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+          const src = this.fullSrc
           const type = ImageUtils.getSrcType(src)
           const assetId = ImageUtils.getAssetId(src, type)
 
@@ -134,7 +151,7 @@ export default Vue.extend({
 
         const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
         const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
-        const src = this.inFilePanel ? photo.urls.full : photo.urls.regular
+        const src = this.fullSrc
         AssetUtils.addImage(
           src,
           {
@@ -145,10 +162,11 @@ export default Vue.extend({
       }
     },
     showPhotoInfo(evt: Event) {
-      const { user = {}, tags, vendor } = this.photo
+      const { vendor } = this
+      const { info = {}, tags } = this.photo
       this._x({
-        userName: user.name || '',
-        userLink: user.link || '',
+        userName: info.user?.name ?? '',
+        userLink: info.user?.link ?? '',
         vendor,
         tags
       })

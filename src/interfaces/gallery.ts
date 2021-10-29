@@ -7,6 +7,7 @@ export interface Urls {
 }
 
 export interface RawImage {
+  id?: string,
   width: number,
   height: number
 }

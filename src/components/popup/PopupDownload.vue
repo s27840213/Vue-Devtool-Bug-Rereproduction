@@ -25,11 +25,12 @@
         span 倍
       div(v-if="'quality' in selected"
         class="flex items-center mb-10")
-        span 品質
-        property-bar(class="w-50 mr-5 ml-15")
-          input(class="px-0"
-            type="text"
-            v-model.number="selectedTypeQuality")
+        div(class="flex items-center full-width mb-5")
+          span 品質
+          property-bar(class="w-60 ml-15")
+            input(class="px-0"
+              type="text"
+              v-model.number="selectedTypeQuality")
         input(class="popup-download__range-input"
           v-model.number="selected.quality"
           max="100"

@@ -2,39 +2,58 @@
   div(class="panel-photo")
     search-bar(class="mb-15"
       placeholder="input keywords..."
+      clear
       @search="handleSearch")
     div(v-if="!pending && !list.length"
-      class="text-white") Sorry, we couldn't find any photos for "{{ query }}".
-    tmp-images(v-else
+      class="text-white") Sorry, we couldn't find any photos for "{{ keyword }}".
+    image-gallery(v-else
+      :images="list"
+      vendor="unsplash"
       @loadMore="handleLoadMore")
+      template(#pending)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
+import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import photo from '@/store/module/photo'
+
+const moduleName = 'unsplash'
 
 export default Vue.extend({
   components: {
-    SearchBar
+    SearchBar,
+    ImageGallery
   },
   computed: {
-    ...mapState('photos', [
-      'query',
+    ...mapState(moduleName, [
+      'keyword',
       'list',
       'pending'
     ])
   },
   created () {
+    this.$store.registerModule(moduleName, photo)
+  },
+  mounted () {
     this.handleSearch()
+  },
+  destroyed () {
+    this.$store.unregisterModule(moduleName)
   },
   methods: {
     async handleSearch (keyword?: string) {
-      await this.$store.commit('photos/SET_STATE', { list: [] })
-      this.$store.dispatch('photos/getPhotosFromUnsplash', { query: keyword })
+      await this.$store.commit(`${moduleName}/SET_STATE`, { list: [] })
+      this.$store.dispatch(`${moduleName}/getPhotos`, { keyword })
     },
     handleLoadMore () {
-      !this.pending && this.$store.dispatch('photos/getMorePhotosFromUnsplash')
+      !this.pending && this.$store.dispatch(`${moduleName}/getMorePhotos`)
     }
   }
 })
