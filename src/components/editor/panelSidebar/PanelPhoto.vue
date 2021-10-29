@@ -11,7 +11,7 @@
       vendor="unsplash"
       @loadMore="handleLoadMore")
       template(#pending)
-        div(class="text-center")
+        div(v-if="pending" class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")

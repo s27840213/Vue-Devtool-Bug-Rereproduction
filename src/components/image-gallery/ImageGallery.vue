@@ -61,12 +61,16 @@ export default Vue.extend({
           sentinel: false,
           size: row[0].preview.height + this.margin
         }))
-      const lastRow = rows.splice(-1)[0]
-      this.prevLastRow = (lastRow ? lastRow.list : []) as any
+      if (rows.length > 1) {
+        const lastRow = rows.splice(-1)[0]
+        this.prevLastRow = (lastRow ? lastRow.list : []) as any
+      } else {
+        this.prevLastRow = []
+      }
       if (rows.length) {
         rows[0].sentinel = true
+        this.rows = this.rows.concat(rows as any)
       }
-      this.rows = this.rows.concat(rows as any)
     }
   },
   methods: {
