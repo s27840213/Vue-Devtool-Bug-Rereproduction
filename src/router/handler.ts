@@ -25,7 +25,7 @@ export async function editorRouteHandler (_to: Route, _from: Route, next: Naviga
       store.commit('SET_currSidebarPanelType', -1)
       fetch(`https://${url}`)
         .then(response => response.json())
-        .then(assetUtils.addTemplate)
+        .then(json => { assetUtils.addTemplate(json) })
     } else {
       (() => import('@/assets/scss/components/tmpFonts.scss'))()
     }
