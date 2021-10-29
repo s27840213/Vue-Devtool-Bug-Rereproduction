@@ -21,7 +21,7 @@
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{pageUpdateMenu.text}}
         span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
-    template(v-if="inAdminMode && isLogin && (isText || isShape)")
+    template(v-if="inAdminMode && isLogin && (isText || isShape || isTextGroup)")
       div(class="popup-layer__item"
           @click="uploadMenu.action")
         svg-icon(
@@ -178,10 +178,10 @@ export default Vue.extend({
       return [...this.currSelectedInfo.types]
     },
     isText(): boolean {
-      return this.getType.includes('text')
+      return this.getType.includes('text') && this.currSelectedInfo.layer.length === 1
     },
     isShape(): boolean {
-      return this.getType.includes('shape')
+      return this.getType.includes('shape') && this.currSelectedInfo.layer.length === 1
     },
     isImage(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
@@ -198,7 +198,11 @@ export default Vue.extend({
         text: `Upload ${this.getType[0]}`,
         shortcutText: '',
         action: () => {
-          uploadUtils.uploadLayer(this.getType[0])
+          if (!this.isTextGroup) {
+            uploadUtils.uploadLayer(this.getType[0])
+          } else {
+            uploadUtils.uploadLayer('text')
+          }
         }
       }
     },
@@ -220,6 +224,17 @@ export default Vue.extend({
         action: () => {
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
         }
+      }
+    },
+    isTextGroup(): boolean {
+      console.log(this.isGroup)
+      if (this.isGroup) {
+        const typeSet = layerUtils.getGroupLayerTypes()
+        console.log(typeSet)
+        console.log(typeSet.has('text'), typeSet.size === 1)
+        return typeSet.has('text') && typeSet.size === 1
+      } else {
+        return false
       }
     }
   },
