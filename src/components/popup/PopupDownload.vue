@@ -203,20 +203,34 @@ export default Vue.extend({
       saveSubmission
         ? localStorage.setItem(submission, JSON.stringify({ ...selected, selectedTypeVal }))
         : localStorage.removeItem(submission)
-      const { flag, url, msg } = await DownloadUtil.getFileUrl({
-        exportId,
-        teamId: '',
-        format: selectedTypeVal,
-        pageIndex: rangeType === 'all' ? undefined : pageRange.join(','),
-        ...selected
-      })
-      if (flag === 0 && url) {
-        DownloadUtil.downloadByUrl(url)
+      DownloadUtil
+        .getFileUrl({
+          exportId,
+          teamId: '',
+          format: selectedTypeVal,
+          pageIndex: rangeType === 'all' ? undefined : pageRange.join(','),
+          ...selected
+        })
+        .then(this.handleDownloadProgress)
+    },
+    handleDownloadProgress (response: any) {
+      const { flag, url, msg, progress } = response
+      switch (flag) {
+        case 0:
+          DownloadUtil.downloadByUrl(url)
+          this.$emit('close')
+          break
+        case 1:
+          this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
+          this.$emit('close')
+          break
+        case 2:
+          console.log('progress: ', progress)
+          DownloadUtil
+            .getFileStatus(url)
+            .then(this.handleDownloadProgress)
+          break
       }
-      if (flag === 1 && msg) {
-        this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
-      }
-      this.$emit('close')
     }
   }
 })

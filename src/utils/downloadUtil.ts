@@ -32,12 +32,22 @@ class DownloadUtil {
   async getFileUrl (params: IDownloadServiceParams) {
     params.teamId = params.teamId || this.userId
     try {
-      const { data: fileStatus } = await download.createFile(params)
-      const { data: fileResult } = await download.getFileUrl(fileStatus.url)
+      const { data } = await download.createFile(params)
+      const fileResult = await this.getFileStatus(data.url)
       return fileResult
     } catch (error) {
-      console.log('checkExportStatus error: ', error)
-      return { flag: 0, url: '' }
+      console.log('getFileUrl error: ', error)
+      return { flag: 1, url: '' }
+    }
+  }
+
+  async getFileStatus (url: string) {
+    try {
+      const { data: fileResult } = await download.getFileUrl(url)
+      return fileResult
+    } catch (error) {
+      console.log('getFileStatus error: ', error)
+      return { flag: 1, url: '' }
     }
   }
 
