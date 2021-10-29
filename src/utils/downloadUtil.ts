@@ -32,8 +32,9 @@ class DownloadUtil {
   async getFileUrl (params: IDownloadServiceParams) {
     params.teamId = params.teamId || this.userId
     try {
-      const { data } = await download.createFile(params)
-      const fileResult = await this.getFileStatus(data.url)
+      const { data: { url } } = await download.createFile(params)
+      if (!url) { throw new Error('Could not get the json url') }
+      const fileResult = await this.getFileStatus(url)
       return fileResult
     } catch (error) {
       console.log('getFileUrl error: ', error)
@@ -44,6 +45,9 @@ class DownloadUtil {
   async getFileStatus (url: string) {
     try {
       const { data: fileResult } = await download.getFileUrl(url)
+      if (fileResult.flag === 2 && !fileResult.url) {
+        fileResult.url = url
+      }
       return fileResult
     } catch (error) {
       console.log('getFileStatus error: ', error)
