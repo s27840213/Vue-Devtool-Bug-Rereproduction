@@ -226,13 +226,11 @@ export default Vue.extend({
         }
       }
     },
+    // the group which contain at least one text, but it can contain other type of layer
     isTextGroup(): boolean {
-      console.log(this.isGroup)
       if (this.isGroup) {
         const typeSet = layerUtils.getGroupLayerTypes()
-        console.log(typeSet)
-        console.log(typeSet.has('text'), typeSet.size === 1)
-        return typeSet.has('text') && typeSet.size === 1
+        return typeSet.has('text')
       } else {
         return false
       }

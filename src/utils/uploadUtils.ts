@@ -518,7 +518,7 @@ class UploadUtils {
     }
   }
 
-  private styleFilter (styles: any, type = 'general') {
+  private styleFilter(styles: any, type = 'general') {
     const general = {
       x: styles.x,
       y: styles.y,
