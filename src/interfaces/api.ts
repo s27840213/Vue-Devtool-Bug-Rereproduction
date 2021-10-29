@@ -164,3 +164,50 @@ export interface IUserImageContentData {
   height: number,
   id: string
 }
+
+export interface IPhotoServiceParams {
+  token?: string
+  locale?: string
+  type?: 'unsplash' | 'pexels'
+  keyword?: string
+  pageIndex?: number
+}
+
+export interface IPhotoServiceResponse {
+  data: IPhotoServiceData
+  flag: number
+}
+
+export interface IPhotoServiceData {
+  host: string
+  preview: string
+  data: string
+  content: IPhotoServiceDataContent[]
+  next_page: number
+}
+
+export interface IPhotoServiceDataContent {
+  title: string
+  list: IPhotoItem[]
+}
+
+export interface IPhotoItem {
+  id: string
+  type: number
+  ver: number
+  width: number
+  height: number
+  color: string[]
+  tags: string[]
+  info: IPhotoItemInfo
+}
+
+export interface IPhotoItemInfo {
+  description: string
+  user: IPhotoUserInfo
+}
+
+export interface IPhotoUserInfo {
+  name: string
+  link: string
+}
