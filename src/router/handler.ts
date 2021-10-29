@@ -1,5 +1,6 @@
 import { Route, NavigationGuardNext } from 'vue-router'
 import uploadUtils from '@/utils/uploadUtils'
+import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 
@@ -10,7 +11,7 @@ export async function editorRouteHandler (_to: Route, _from: Route, next: Naviga
     const type = urlParams.get('type')
     const designId = urlParams.get('design_id')
     const panelIndex = urlParams.get('panel_index')
-    const headless = urlParams.get('headless')
+    const url = urlParams.get('url')
 
     if (type && designId) {
       type === 'export'
@@ -20,8 +21,11 @@ export async function editorRouteHandler (_to: Route, _from: Route, next: Naviga
     if (panelIndex && +panelIndex in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', +panelIndex)
     }
-    if (headless === '1') {
+    if (url) {
       store.commit('SET_currSidebarPanelType', -1)
+      fetch(`https://${url}`)
+        .then(response => response.json())
+        .then(assetUtils.addTemplate)
     } else {
       (() => import('@/assets/scss/components/tmpFonts.scss'))()
     }
