@@ -2,6 +2,8 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
+      @wheel="handleWheel"
+      @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
@@ -386,6 +388,13 @@ export default Vue.extend({
     },
     openGuidelinePopup(event: MouseEvent) {
       popupUtils.openPopup('guideline', { event })
+    },
+    handleWheel(e: WheelEvent) {
+      if (e.metaKey || e.ctrlKey) {
+        e.preventDefault()
+        const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
+        this.setPageScaleRatio(Math.min(Math.max(Math.round(ratio), 10), 500))
+      }
     }
   }
 })
