@@ -122,6 +122,19 @@ export default Vue.extend({
       }
     })
   },
+  watch: {
+    pageScaleRatio() {
+      const editor = this.$refs.editorView as HTMLElement
+      const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
+      const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
+      const oldScrollWidth = editor.scrollWidth
+      const oldScrollHeight = editor.scrollHeight
+      this.$nextTick(() => {
+        editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
+        editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
+      })
+    }
+  },
   computed: {
     ...mapGetters({
       pages: 'getPages',
