@@ -498,8 +498,8 @@ export default Vue.extend({
       }
     },
     lineControlPointStyles() {
-      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
-      const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      const { angle } = shapeUtils.lineDimension(this.config.point)
+      const degree = angle / Math.PI * 180
       return {
         transform: `rotate(${-degree}deg)`
       }
@@ -857,18 +857,18 @@ export default Vue.extend({
       this.isControlling = true
       this.isLineEndMoving = true
 
-      const { xDiff, yDiff } = shapeUtils.lineDimension(this.config.point)
-      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
-      this.hintLength = (Math.atan2(yDiff, xDiff) / Math.PI * 180 + 360) % 360
-      this.hintAngle = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
-
       const quadrant = shapeUtils.getLineQuadrant(this.config.point)
       const markerIndex = Number((event.target as HTMLElement).getAttribute('marker-index'))
 
       this.initMarkerIndex = markerIndex
       this.initCoordinate = { x: this.config.point[markerIndex * 2], y: this.config.point[markerIndex * 2 + 1] }
+
+      const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
+      const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
+      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
+      this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
 
       const quadrantByMarkerIndex = (markerIndex === 0) ? (quadrant - 1 + 2) % 4 + 1 : quadrant
       this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
@@ -1152,8 +1152,8 @@ export default Vue.extend({
       }
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      const { yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
-      this.initialRotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      const { angle } = shapeUtils.lineDimension(this.config.point)
+      this.initialRotate = angle / Math.PI * 180
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
