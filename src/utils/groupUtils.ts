@@ -415,6 +415,8 @@ class GroupUtils {
         layer.styles.y = shiftY
       }
 
+      const tmpOffset = { x: layer.styles.x + layer.styles.width / 2, y: layer.styles.y + layer.styles.height / 2 }
+
       // map to original coordinate system
       layer.styles.x += tmpLayer.styles.x
       layer.styles.y += tmpLayer.styles.y
@@ -435,6 +437,52 @@ class GroupUtils {
         layer.styles.y += dy
       } else {
         layer.styles.rotate = (layer.styles.rotate + tmpLayer.styles.rotate) % 360
+      }
+
+      const rotateRad = tmpLayer.styles.rotate / 180 * Math.PI
+
+      if (tmpLayer.styles.horizontalFlip) {
+        const offset = tmpLayer.styles.width - 2 * tmpOffset.x
+        const [dx, dy] = [offset * Math.cos(rotateRad), offset * Math.sin(rotateRad)]
+        layer.styles.x += dx
+        layer.styles.y += dy
+        if (layer.type === 'shape' && layer.category === 'D') {
+          const shapeLayer = layer as IShape
+          const { angle } = ShapeUtils.lineDimension(shapeLayer.point ?? [])
+          const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate(shapeLayer.point ?? [], (180 - (angle / Math.PI * 180) + 2 * tmpLayer.styles.rotate), shapeLayer.size?.[0] ?? 1, false)
+          layer.point = point
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.x += dx
+          layer.styles.y += dy
+        } else {
+          layer.styles.horizontalFlip = !layer.styles.horizontalFlip
+          layer.styles.rotate = 360 - layer.styles.rotate + 2 * tmpLayer.styles.rotate
+        }
+      }
+
+      if (tmpLayer.styles.verticalFlip) {
+        const offset = tmpLayer.styles.height - 2 * tmpOffset.y
+        const [dx, dy] = [-offset * Math.sin(rotateRad), offset * Math.cos(rotateRad)]
+        layer.styles.x += dx
+        layer.styles.y += dy
+        if (layer.type === 'shape' && layer.category === 'D') {
+          const shapeLayer = layer as IShape
+          const { angle } = ShapeUtils.lineDimension(shapeLayer.point ?? [])
+          const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate(shapeLayer.point ?? [], (360 - (angle / Math.PI * 180) + 2 * tmpLayer.styles.rotate), shapeLayer.size?.[0] ?? 1, false)
+          layer.point = point
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.x += dx
+          layer.styles.y += dy
+        } else {
+          layer.styles.verticalFlip = !layer.styles.verticalFlip
+          layer.styles.rotate = 360 - layer.styles.rotate + 2 * tmpLayer.styles.rotate
+        }
       }
 
       layer.shown = false
@@ -525,6 +573,8 @@ class GroupUtils {
         layer.styles.y = shiftY
       }
 
+      const tmpOffset = { x: layer.styles.x + layer.styles.width / 2, y: layer.styles.y + layer.styles.height / 2 }
+
       // map to original coordinate system
       layer.styles.x += groupLayer.styles.x
       layer.styles.y += groupLayer.styles.y
@@ -545,6 +595,52 @@ class GroupUtils {
         layer.styles.y += dy
       } else {
         layer.styles.rotate = (layer.styles.rotate + groupLayer.styles.rotate) % 360
+      }
+
+      const rotateRad = groupLayer.styles.rotate / 180 * Math.PI
+
+      if (groupLayer.styles.horizontalFlip) {
+        const offset = groupLayer.styles.width - 2 * tmpOffset.x
+        const [dx, dy] = [offset * Math.cos(rotateRad), offset * Math.sin(rotateRad)]
+        layer.styles.x += dx
+        layer.styles.y += dy
+        if (layer.type === 'shape' && layer.category === 'D') {
+          const shapeLayer = layer as IShape
+          const { angle } = ShapeUtils.lineDimension(shapeLayer.point ?? [])
+          const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate(shapeLayer.point ?? [], (180 - (angle / Math.PI * 180) + 2 * groupLayer.styles.rotate), shapeLayer.size?.[0] ?? 1, false)
+          layer.point = point
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.x += dx
+          layer.styles.y += dy
+        } else {
+          layer.styles.horizontalFlip = !layer.styles.horizontalFlip
+          layer.styles.rotate = 360 - layer.styles.rotate + 2 * groupLayer.styles.rotate
+        }
+      }
+
+      if (groupLayer.styles.verticalFlip) {
+        const offset = groupLayer.styles.height - 2 * tmpOffset.y
+        const [dx, dy] = [-offset * Math.sin(rotateRad), offset * Math.cos(rotateRad)]
+        layer.styles.x += dx
+        layer.styles.y += dy
+        if (layer.type === 'shape' && layer.category === 'D') {
+          const shapeLayer = layer as IShape
+          const { angle } = ShapeUtils.lineDimension(shapeLayer.point ?? [])
+          const { point, realWidth, realHeight, dx, dy } = ShapeUtils.lineCenterRotate(shapeLayer.point ?? [], (360 - (angle / Math.PI * 180) + 2 * groupLayer.styles.rotate), shapeLayer.size?.[0] ?? 1, false)
+          layer.point = point
+          layer.styles.width = realWidth
+          layer.styles.height = realHeight
+          layer.styles.initWidth = realWidth
+          layer.styles.initHeight = realHeight
+          layer.styles.x += dx
+          layer.styles.y += dy
+        } else {
+          layer.styles.verticalFlip = !layer.styles.verticalFlip
+          layer.styles.rotate = 360 - layer.styles.rotate + 2 * groupLayer.styles.rotate
+        }
       }
 
       layer.shown = false
