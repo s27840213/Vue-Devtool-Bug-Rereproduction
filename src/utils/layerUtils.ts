@@ -251,6 +251,15 @@ class LayerUtils {
       styles: { initWidth: layer.styles.width }
     })
   }
+
+  getGroupLayerTypes(): Set<string> {
+    const { layers, types } = this.currSelectedInfo
+    if (layers.length !== 1 || !types.has('group')) {
+      return new Set<string>()
+    } else {
+      return GroupUtils.calcType((layers[0] as IGroup).layers)
+    }
+  }
 }
 
 const layerUtils = new LayerUtils()

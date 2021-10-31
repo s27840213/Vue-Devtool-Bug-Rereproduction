@@ -35,7 +35,7 @@
       btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") 位置對齊
-      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isFlipDisabled}"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditing}"
         @click.native="openFlipPopup") 翻轉
 </template>
 
@@ -113,7 +113,6 @@ export default Vue.extend({
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
-      if (this.isFlipDisabled) return
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {

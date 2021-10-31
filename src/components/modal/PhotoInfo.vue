@@ -15,7 +15,7 @@
         @mousedown.prevent) {{ info.vendor }}
     div(v-if="info.tags && info.tags.length"
       class="photo-info__tags")
-      span tag: {{ info.tags.join(',') }}
+      span tag: {{ info.tags.join(', ') }}
     div(class="photo-info__action")
       svg-icon(:iconName="'folder'",
         :iconColor="'gray-2'",

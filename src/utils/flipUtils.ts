@@ -16,39 +16,32 @@ class FlipUtils {
     }
   }
 
-  applyFlip(currSelectedInfo: any, updateStyle: {[key: string]: boolean}) {
-    const layer = currSelectedInfo.layers[0]
+  applyFlip(pageIndex: number, layerIndex: number, layer: any, updateStyle: {[key: string]: boolean}) {
     if (layer.type === 'shape' && layer.category === 'D') {
       const { horizontalFlip, verticalFlip } = this.checkKey(updateStyle)
       const point = ShapeUtils.flipLine(layer.point, horizontalFlip, verticalFlip)
-      ControlUtils.updateShapeLinePoint(currSelectedInfo.pageIndex, currSelectedInfo.index, point)
+      ControlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
     } else {
-      LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, updateStyle)
+      LayerUtils.updateLayerStyles(pageIndex, layerIndex, updateStyle)
     }
   }
 
   horizontalFlip() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
 
-    if (!this.isGroup(currSelectedInfo)) {
-      if (currSelectedInfo.layers.length === 1) {
-        this.applyFlip(currSelectedInfo, {
-          horizontalFlip: !currSelectedInfo.layers[0].styles.horizontalFlip
-        })
-      }
-    }
+    this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
+      horizontalFlip: !layer.styles.horizontalFlip
+    })
   }
 
   verticalFlip() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
 
-    if (!this.isGroup(currSelectedInfo)) {
-      if (currSelectedInfo.layers.length === 1) {
-        this.applyFlip(currSelectedInfo, {
-          verticalFlip: !currSelectedInfo.layers[0].styles.verticalFlip
-        })
-      }
-    }
+    this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
+      verticalFlip: !layer.styles.verticalFlip
+    })
   }
 }
 

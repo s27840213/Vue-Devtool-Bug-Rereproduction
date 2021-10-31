@@ -306,7 +306,7 @@ class ShapeUtils {
     const oldWidth = width + 2 * oldDx + 2
     const oldHeight = height + 2 * oldDy + 2
     const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-    const newAngle = angleDiff ? (oldRad / Math.PI * 180 + angle) % 360 : angle
+    const newAngle = angleDiff ? (oldRad / Math.PI * 180 + angle) % 360 : angle % 360
     const { point: newPoint, realWidth, realHeight } = this.computePointForAngle(hypotenuse, newAngle, scale)
     return {
       point: newPoint,
@@ -442,13 +442,14 @@ class ShapeUtils {
     return [...startPoint, ...endPoint]
   }
 
-  lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number, baseDegree: number} {
+  lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number, baseDegree: number, angle: number} {
     const xDiff = point[2] - point[0]
     const yDiff = point[3] - point[1]
     const width = Math.abs(xDiff)
     const height = Math.abs(yDiff)
     const baseDegree = Math.atan2(height, width)
-    return { xDiff, yDiff, width, height, baseDegree }
+    const angle = Math.atan2(yDiff, xDiff)
+    return { xDiff, yDiff, width, height, baseDegree, angle }
   }
 
   updatedDimensions(point: number[], scale: number, styles: {width: number, height: number, initWidth: number, initHeight: number}):

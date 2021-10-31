@@ -172,6 +172,7 @@ import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import PageUtils from '@/utils/pageUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
@@ -395,7 +396,12 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     addPage() {
-      this._addPage(PageUtils.newPage({}))
+      // this._addPage(PageUtils.newPage({}))
+      StepsUtils.record()
+      PageUtils.addPageToPos(PageUtils.newPage({}), this.pageIndex + 1)
+      this.setLastSelectedPageIndex(this.pageIndex + 1)
+      this.setCurrActivePageIndex(this.pageIndex + 1)
+      this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
     },
     deletePage() {
       GroupUtils.deselect()
@@ -409,6 +415,7 @@ export default Vue.extend({
       this._deletePage(this.pageIndex)
     },
     duplicatePage() {
+      StepsUtils.record()
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.name += ' (copy)'
@@ -416,7 +423,7 @@ export default Vue.extend({
       PageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
-      PageUtils.scrollIntoPage(this.pageIndex + 1)
+      this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
     },
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage

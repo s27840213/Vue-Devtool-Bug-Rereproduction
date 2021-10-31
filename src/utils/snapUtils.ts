@@ -198,9 +198,9 @@ class SnapUtils {
   }
 
   getClosestSnapLineAngle(markerIndex: number, point: number[], multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET): { lineLength: number, lineAngle: number } {
-    const { xDiff, yDiff, width, height } = shapeUtils.lineDimension(point)
-    let lineAngle = (Math.atan2(yDiff, xDiff) / Math.PI * 180 + 360) % 360
-    const hypotenuse = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+    const { angle, xDiff, yDiff } = shapeUtils.lineDimension(point)
+    let lineAngle = (angle / Math.PI * 180 + 360) % 360
+    const hypotenuse = Math.sqrt(Math.pow(yDiff, 2) + Math.pow(xDiff, 2))
     if (markerIndex === 0) {
       lineAngle = (lineAngle + 180) % 360
     }

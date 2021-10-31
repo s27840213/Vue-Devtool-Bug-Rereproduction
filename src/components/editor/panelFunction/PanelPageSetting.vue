@@ -158,6 +158,7 @@ import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import PageUtils from '@/utils/pageUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
@@ -307,7 +308,10 @@ export default Vue.extend({
         return undefined
       }
     },
-    applySelectedFormat() {
+    applySelectedFormat(record = true) {
+      if (record) {
+        StepsUtils.record()
+      }
       const format = this.getSelectedFormat()
       if (!format) return
       this.resizePage(format)
@@ -319,6 +323,7 @@ export default Vue.extend({
       this.recentlyUsed.unshift(format)
     },
     copyAndApplySelectedFormat() {
+      StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.name += ' (copy)'
       page.designId = ''
@@ -329,7 +334,8 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setLastSelectedPageIndex(this.lastSelectedPageIndex + 1)
       this.setCurrActivePageIndex(this.lastSelectedPageIndex + 1)
-      this.applySelectedFormat()
+      this.applySelectedFormat(false)
+      this.$nextTick(() => { PageUtils.scrollIntoPage(this.lastSelectedPageIndex) })
     },
     resizePage(format: { width: number, height: number }) {
       ResizeUtils.resizePage(this.lastSelectedPageIndex, this.getPage(this.lastSelectedPageIndex), format)
@@ -340,7 +346,6 @@ export default Vue.extend({
           height: format.height
         }
       })
-      StepsUtils.record()
     },
     toggleLock() {
       this.isLocked = !this.isLocked

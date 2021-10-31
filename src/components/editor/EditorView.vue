@@ -2,6 +2,8 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
+      @wheel="handleWheel"
+      @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
@@ -121,6 +123,19 @@ export default Vue.extend({
         }
       }
     })
+  },
+  watch: {
+    pageScaleRatio() {
+      const editor = this.$refs.editorView as HTMLElement
+      const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
+      const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
+      const oldScrollWidth = editor.scrollWidth
+      const oldScrollHeight = editor.scrollHeight
+      this.$nextTick(() => {
+        editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
+        editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
+      })
+    }
   },
   computed: {
     ...mapGetters({
@@ -373,6 +388,13 @@ export default Vue.extend({
     },
     openGuidelinePopup(event: MouseEvent) {
       popupUtils.openPopup('guideline', { event })
+    },
+    handleWheel(e: WheelEvent) {
+      if (e.metaKey || e.ctrlKey) {
+        e.preventDefault()
+        const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
+        this.setPageScaleRatio(Math.min(Math.max(Math.round(ratio), 10), 500))
+      }
     }
   }
 })

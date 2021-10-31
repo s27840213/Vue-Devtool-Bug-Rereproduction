@@ -24,7 +24,8 @@ export interface IDownloadServiceParams {
 }
 
 export interface IDownloadServiceResponse {
-  url: string
   flag: number
+  url?: string
   msg?: string
+  progress?: number
 }
