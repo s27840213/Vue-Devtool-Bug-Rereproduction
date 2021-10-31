@@ -211,26 +211,32 @@ class TextUtils {
         /**
          * If the span is the same without changed, skip parse it
          */
-        if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
-          if (TextPropUtils.isSameSpanStyles(config.paragraphs[pIndex].spans[sIndex].styles, spanStyleBuff)) {
-            spans[spans.length - 1].text += text
-          } else {
-            spans.push(config.paragraphs[pIndex].spans[sIndex])
-          }
-          Object.assign(spanStyleBuff, config.paragraphs[pIndex].spans[sIndex].styles)
-          continue
-        }
-        /**
-         *  If the span and p are deleted as empty string, the style of the span will be removed by the browser
-         *  below detecting this situation and use the style of the last span of previous p to replace it.
-         */
+        // if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
+        //   if (TextPropUtils.isSameSpanStyles(config.paragraphs[pIndex].spans[sIndex].styles, spanStyleBuff)) {
+        //     spans[spans.length - 1].text += text
+        //   } else {
+        //     spans.push(config.paragraphs[pIndex].spans[sIndex])
+        //   }
+        //   Object.assign(spanStyleBuff, config.paragraphs[pIndex].spans[sIndex].styles)
+        //   continue
+        // }
+
         let spanStyle = {} as ISpanStyle
         if (!spanEl.style.fontFamily) {
+          console.log(pIndex)
           if (pIndex > 0) {
             const leng = div.childNodes[pIndex - 1].childNodes.length
             spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-            if (spanEl.nodeName !== 'SPAN') {
+            // if (spanEl.nodeName !== 'SPAN') {
+            // Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
+            // }
+            if (ps.length > config.paragraphs.length) {
+              console.warn('sssss')
+              console.log(pIndex)
+              console.log(spanEl.nodeName)
               Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
+            } else {
+              Object.assign(spanStyle, config.paragraphs[pIndex].spans[0].styles)
             }
           } else if (pIndex === 0 && sIndex === 0) {
             Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
@@ -248,6 +254,10 @@ class TextUtils {
             color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
             opacity: parseInt(spanEl.style.opacity)
           } as ISpanStyle
+        }
+
+        if (pIndex === 2) {
+          console.log(GeneralUtils.deepCopy(spanStyle))
         }
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
@@ -428,8 +438,9 @@ class TextUtils {
 
   updateLayerSize(config: IText, pageIndex: number = LayerUtils.pageIndex, layerIndex: number = LayerUtils.layerIndex, subLayerIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
-    if (!subLayerIndex) {
+    if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
+      const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     } else {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup

@@ -3,7 +3,6 @@ import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import ZindexUtils from './zindexUtils'
-import { init } from '@sentry/browser'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -57,9 +56,16 @@ class LayerFactary {
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
+    /**
+     * used for some old template, that img might have rotate angle
+     * here the rotate should be deleted and the rotation number be handled by the frame iteself
+     */
+    let rotate
 
     if (clips.length && !clips[0].isFrameImg) {
       clips.forEach(img => {
+        rotate = img.styles.rotate
+        img.styles.rotate = 0
         const imgConfig = {
           isFrame: true,
           clipPath: img.clipPath,
@@ -114,7 +120,7 @@ class LayerFactary {
         scale: styles.scale ?? 1,
         scaleX: styles.scaleX ?? 1,
         scaleY: styles.scaleY ?? 1,
-        rotate: 0,
+        rotate: rotate ?? (styles.rotate ?? 0),
         width: width,
         height: height,
         initWidth: initWidth,
@@ -148,7 +154,7 @@ class LayerFactary {
     }
   }
 
-  newText(config: any): IText {
+  newText(config: Partial<IText>): IText {
     const basicConfig = {
       type: 'text',
       id: GeneralUtils.generateRandomString(8),
@@ -169,10 +175,10 @@ class LayerFactary {
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
-        width: config.styles.width ? config.styles.width : 0,
-        height: config.styles.width ? config.styles.width : 0,
-        initWidth: config.styles.width ? config.styles.width : 0,
-        initHeight: config.styles.height ? config.styles.height : 0,
+        width: config.styles?.width ? config.styles.width : 0,
+        height: config.styles?.width ? config.styles.width : 0,
+        initWidth: config.styles?.width ? config.styles.width : 0,
+        initHeight: config.styles?.height ? config.styles.height : 0,
         zindex: -1,
         writingMode: 'initial',
         align: 'center',
@@ -206,6 +212,24 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
+
+    if (config.paragraphs) {
+      config.paragraphs.forEach((p, pidx) => {
+        for (let i = 0; i < p.spans.length; i++) {
+          if (typeof p.spans[i] === 'undefined' || (!p.spans[i].text && p.spans.length !== 1)) {
+            console.warn('some empty span detected', pidx, i)
+            p.spans.splice(i, 1)
+            i--
+            continue
+          }
+          if (p.spans[i].text.includes('\n')) {
+            console.warn('some /n detected:', p.spans[i].text)
+            p.spans[i].text.replace('\n', '')
+          }
+        }
+      })
+    }
+
     return Object.assign(basicConfig, config)
   }
 

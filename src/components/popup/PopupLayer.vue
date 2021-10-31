@@ -128,6 +128,7 @@ import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { Layer } from 'konva/types/Layer'
 import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data() {
@@ -303,45 +304,23 @@ export default Vue.extend({
       ]
     },
     detachImage(): any {
-      const layerIndex = this.popupComponent.properties.layerIndex ?? -1
-      const currLayer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IFrame
-      let idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
-      if (idx === -1) {
-        if (layerIndex !== layerUtils.layerIndex) {
-          return
-        } else {
-          idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
-        }
-      }
+      // const layerIndex = this.popupComponent.properties.layerIndex ?? -1
+      // const currLayer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IFrame
+      // let idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
+      // if (idx === -1) {
+      //   if (layerIndex !== layerUtils.layerIndex) {
+      //     return
+      //   } else {
+      //     idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
+      //   }
+      // }
 
       return {
         icon: 'copy',
         text: 'Detach Image',
         shortcutText: '',
         action: () => {
-          if (idx !== -1) {
-            const clips = generalUtils.deepCopy(currLayer.clips)
-            const srcObj = {
-              ...clips[idx].srcObj
-            }
-            clips[idx].srcObj = {
-              type: 'frame',
-              userId: '',
-              assetId: ''
-            }
-            const { width, height } = clips[idx].styles
-            layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { clips })
-            layerUtils.addLayers(layerUtils.pageIndex, [layerFactary.newImage({
-              srcObj,
-              styles: {
-                x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
-                y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
-                width,
-                height
-              }
-            })])
-          }
-          this.set_popupComponent({ layerIndex: -1 })
+          frameUtils.detachImage(this.popupComponent.properties.layerIndex ?? -1)
         }
       }
     },

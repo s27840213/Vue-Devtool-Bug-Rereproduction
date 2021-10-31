@@ -8,9 +8,9 @@ import ZindexUtils from '@/utils/zindexUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import FrameUtils from './frameUtils'
 import ShapeUtils from './shapeUtils'
 import ImageUtils from './imageUtils'
+import stepsUtils from './stepsUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -89,6 +89,7 @@ class GroupUtils {
 
     if (this.currSelectedInfo.types.has('group')) {
       this.ungroupInnerGroup()
+      stepsUtils.record()
     }
 
     const tmpPageIndex = currSelectedInfo.pageIndex
@@ -102,6 +103,7 @@ class GroupUtils {
     this.reset()
     this.select(tmpPageIndex, [tmpIndex])
     ZindexUtils.reassignZindex(tmpPageIndex)
+    stepsUtils.record()
   }
 
   ungroup() {

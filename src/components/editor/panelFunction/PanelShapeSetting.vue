@@ -201,19 +201,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      colorPresets: [
-        '#000000',
-        '#FFFFFF',
-        '#F2994A',
-        '#F2C94C',
-        '#219653',
-        '#BB6BD9',
-        '#EB5757',
-        '#2F80ED',
-        '#2D9CDB',
-        '#56CCF2',
-        '#FF0000'
-      ],
+      colorPresets: [],
       fieldRange: {
         opacity: { min: 0, max: 100 },
         lineWidth: { min: 1, max: 100 }

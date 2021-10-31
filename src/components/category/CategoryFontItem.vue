@@ -8,10 +8,15 @@
       img(class="category-fonts__item"
         :src="`${host}/${item.id}/${preview2}`"
         @error="handleNotFound")
-    div(v-if="props.font === item.id" class="category-fonts__done-icon")
-      svg-icon(:iconName="'done'"
-        :iconColor="'gray-2'"
-        :iconWidth="'25px'")
+    div(class="category-fonts__icon")
+      svg-icon(v-if="props.font === item.id && !pending"
+        iconName="done"
+        iconColor="gray-2"
+        iconWidth="25px")
+      svg-icon(v-else-if="pending"
+        iconName="loading"
+        iconColor="gray-1"
+        iconWidth="20px")
 </template>
 
 <script lang="ts">
@@ -30,11 +35,13 @@ export default Vue.extend({
     preview2: String,
     item: Object
   },
+  data() {
+    return {
+      pending: false
+    }
+  },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore'])
-  },
-  mounted() {
-    console.log(this.item)
   },
   methods: {
     handleNotFound(event: Event) {
@@ -43,6 +50,7 @@ export default Vue.extend({
     async setFont() {
       const fontStore = this.fontStore as Array<IFont>
       if (!fontStore.some(font => font.face === this.item.id)) {
+        this.pending = true
         const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
         const promise = () => {
           return new Promise<void>((resolve) => {
@@ -50,6 +58,7 @@ export default Vue.extend({
               document.fonts.add(newFont)
               TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
               StepsUtils.record()
+              this.pending = false
               resolve()
             })
           })
@@ -82,7 +91,7 @@ export default Vue.extend({
     height: 25px;
     object-fit: contain;
     }
-    &__done-icon {
+    &__icon {
       position: absolute;
       right: 0;
     }

@@ -10,6 +10,7 @@ import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
+import Vue from 'vue'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -33,7 +34,15 @@ class LayerUtils {
     store.commit('SET_lastSelectedPageIndex', pageIndex)
     FocusUtils.focusElement(`.nu-page-${pageIndex}`, false)
     GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
-    stepsUtils.record()
+
+    /**
+     * For some existing layers, those active layers might have some props need to be initialized after deactive
+     * e.g. text-layer: the editing props need to be set to false after deactive
+     * Hence, this kind of initilization should be done before conducting a step-record.
+     */
+    Vue.nextTick(() => {
+      stepsUtils.record()
+    })
   }
 
   addLayersToPos(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, pos: number) {
@@ -48,6 +57,7 @@ class LayerUtils {
     store.commit('DELETE_selectedLayer')
     ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)
     TemplateUtils.updateTextInfoTarget()
+    stepsUtils.record()
   }
 
   deleteLayer(index: number) {

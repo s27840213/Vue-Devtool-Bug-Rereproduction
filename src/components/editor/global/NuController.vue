@@ -212,6 +212,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -273,7 +274,9 @@ export default Vue.extend({
       return this.config.styles.scale
     },
     isTextEditing(): boolean {
-      return !this.isControlling && this.contentEditable
+      // return !this.isControlling && this.contentEditable
+      // @Test
+      return !this.isControlling
     },
     isDragging(): boolean {
       return this.config.dragging
@@ -315,7 +318,11 @@ export default Vue.extend({
     },
     isActive(val) {
       if (!val) {
+        this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
+        if (this.getLayerType === 'text') {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
+        }
       }
       if (this.getLayerType === 'text' && !val) {
         const { paragraphs } = this.config as IText
@@ -1377,7 +1384,6 @@ export default Vue.extend({
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
             // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
-            observer.disconnect()
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
             /**

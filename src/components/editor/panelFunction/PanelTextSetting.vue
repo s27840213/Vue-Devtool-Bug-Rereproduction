@@ -354,7 +354,7 @@ export default Vue.extend({
         }
         clearInterval(interval)
         StepsUtils.record()
-        window.removeEventListener('onmouseup', onmouseup)
+        window.removeEventListener('mouseup', onmouseup)
       }
       TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
       window.addEventListener('mouseup', onmouseup)

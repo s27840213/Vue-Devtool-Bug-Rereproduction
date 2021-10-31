@@ -15,6 +15,7 @@ import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
 import uploadUtils from './uploadUtils'
+import stepsUtils from './stepsUtils'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -99,6 +100,7 @@ class AssetUtils {
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     this.updateBackground(json).then((json) => {
       PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+      stepsUtils.record()
     })
   }
 

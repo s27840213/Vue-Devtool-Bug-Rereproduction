@@ -3,6 +3,9 @@ import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame } from '@/interfaces/layer'
+import { NumericDictionaryIteratee } from 'lodash'
+import layerFactary from './layerFactary'
+import generalUtils from './generalUtils'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -34,6 +37,41 @@ class FrameUtils {
         updateFrameLayer()
       }
     )
+  }
+
+  detachImage(layerIndex: number) {
+    const currLayer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IFrame
+    let idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
+    if (idx === -1) {
+      if (layerIndex !== LayerUtils.layerIndex) {
+        return
+      } else {
+        idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
+      }
+    }
+    if (idx !== -1) {
+      const clips = generalUtils.deepCopy(currLayer.clips)
+      const srcObj = {
+        ...clips[idx].srcObj
+      }
+      clips[idx].srcObj = {
+        type: 'frame',
+        userId: '',
+        assetId: ''
+      }
+      const { imgWidth, imgHeight, width, height } = clips[idx].styles
+      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
+      LayerUtils.addLayers(LayerUtils.pageIndex, [layerFactary.newImage({
+        srcObj,
+        styles: {
+          x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
+          y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
+          width: imgWidth,
+          height: imgHeight
+        }
+      })])
+    }
+    store.commit('SET_popupComponent', { layerIndex: -1 })
   }
 
   updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
