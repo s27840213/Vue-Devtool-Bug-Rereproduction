@@ -19,6 +19,7 @@ export default Vue.extend({
   },
   created() {
     const { type } = this.config.srcObj
+    if (type === 'background') return
     fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre')))
     fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))
   },
@@ -33,6 +34,7 @@ export default Vue.extend({
     },
     width() {
       const { type } = this.config.srcObj
+      if (type === 'background') return
       fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'pre')))
       fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'next')))
     }

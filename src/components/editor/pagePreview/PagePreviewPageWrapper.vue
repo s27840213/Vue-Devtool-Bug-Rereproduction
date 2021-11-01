@@ -175,7 +175,7 @@ export default Vue.extend({
       switch (icon) {
         case 'copy':
           page = GeneralUtils.deepCopy(this.getPage(this.index))
-          page.name += ' (copy)'
+          page.name = ''
           page.designId = ''
           this._addPageToPos({
             newPage: page,
@@ -210,6 +210,7 @@ export default Vue.extend({
     position: relative;
     box-sizing: border-box;
     transform-origin: 0 0;
+    z-index: 1;
 
     &-more {
       position: absolute;
@@ -311,7 +312,7 @@ export default Vue.extend({
 }
 
 .focused {
-  outline: 5px solid setColor(blue-1);
+  border: 3px solid setColor(blue-1);
   color: setColor(blue-1);
   box-sizing: border-box;
 }

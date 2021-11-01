@@ -31,6 +31,7 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {
@@ -103,6 +104,7 @@ export default Vue.extend({
     pageDblClickHandler(): void {
       if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        stepsUtils.record()
       }
     }
   }

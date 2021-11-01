@@ -62,6 +62,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -181,6 +182,7 @@ export default Vue.extend({
         pageIndex: this.lastSelectedPageIndex,
         color: color
       })
+      stepsUtils.record()
     },
     async handleSearch(keyword: string) {
       this.resetContent()

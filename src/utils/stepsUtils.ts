@@ -17,10 +17,12 @@ class StepsUtils {
     return popupUtils.isPopupOpen
   }
 
+  timers: { [key: string]: number }
   constructor() {
     this.steps = []
     this.currStep = -1
     this.MAX_STORAGE_COUNT = 20
+    this.timers = {}
   }
 
   record() {
@@ -67,6 +69,16 @@ class StepsUtils {
         }
       })
     }
+  }
+
+  delayedRecord(key: string, interval = 300) {
+    if (this.timers[key]) {
+      clearTimeout(this.timers[key])
+      delete this.timers[key]
+    }
+    this.timers[key] = setTimeout(() => {
+      this.record()
+    }, interval)
   }
 
   redo() {

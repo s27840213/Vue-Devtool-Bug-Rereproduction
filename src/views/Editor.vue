@@ -138,6 +138,7 @@ export default Vue.extend({
     position: absolute;
     width: 100%;
     height: 100%;
+    overflow-y: scroll;
     z-index: setZindex("pages-preview");
     background: setColor(gray-6);
   }
