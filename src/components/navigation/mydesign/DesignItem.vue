@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="design-item")
-    div(class="design-item__block"
+    div(class="design-item__block pointer"
       :style="blockStyles()"
       :draggable="!undraggable"
       @dragstart="handleDragStart"

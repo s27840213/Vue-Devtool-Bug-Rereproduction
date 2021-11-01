@@ -3,7 +3,7 @@
     div(class="logo")
     div(class="nav")
       div(class="nav-container")
-        div(class="nav-item"
+        div(class="nav-item pointer"
           v-for="(item,index) in navItem" :key="`icon-${index}`"
           :class="currPanel === index ? 'bg-nav-active' : 'none'"
           @click="switchNav(index)")
@@ -12,7 +12,7 @@
             :iconWidth="'30px'")
           div(class="nav-item-text body-2"
             :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
-      div(class="nav-setting"
+      div(class="nav-setting pointer"
         @click="switchNav(SidebarPanelType.page)")
         svg-icon(:iconName="'navPage'"
           :iconColor="currPanel=== SidebarPanelType.page? 'blue-1' : 'gray-3'"
