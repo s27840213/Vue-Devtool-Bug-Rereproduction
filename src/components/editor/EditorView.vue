@@ -84,7 +84,8 @@ export default Vue.extend({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
-      scrollListener: null as unknown
+      scrollListener: null as unknown,
+      from: -1
     }
   },
   mounted() {
@@ -100,12 +101,15 @@ export default Vue.extend({
     })
     document.addEventListener('blur', this.detectBlur, true)
 
-    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string) => {
+    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string, from?: number) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
+      if (from) {
+        this.from = from
+      }
       switch (type) {
         case 'v': {
           this.isShowGuidelineV = true
-          this.rulerVPos = Math.trunc(pagePos)
+          this.rulerVPos = Math.round(pagePos)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -114,7 +118,7 @@ export default Vue.extend({
         }
         case 'h': {
           this.isShowGuidelineH = true
-          this.rulerHPos = Math.trunc(pagePos)
+          this.rulerHPos = Math.round(pagePos)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -372,7 +376,9 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      return RulerUtils.mapGuidelineToPage(guideline, type)
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      this.from = -1
+      return result
     },
     closeGuidelineH() {
       if (!this.isDragging) {

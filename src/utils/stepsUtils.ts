@@ -7,11 +7,16 @@ import TextPropUtils from './textPropUtils'
 import Vue from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
+import popupUtils from './popupUtils'
 
 class StepsUtils {
   steps: Array<IStep>
   currStep: number
   MAX_STORAGE_COUNT: number
+  get isPopupOpen(): boolean {
+    return popupUtils.isPopupOpen
+  }
+
   constructor() {
     this.steps = []
     this.currStep = -1
@@ -25,7 +30,6 @@ class StepsUtils {
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-
     if (this.currStep < 0) {
       this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep++
@@ -43,13 +47,17 @@ class StepsUtils {
     if (this.steps.length === 0 || this.currStep === 0) {
       return
     }
+    console.log(this.isPopupOpen)
+    if (this.isPopupOpen) {
+      popupUtils.closePopup()
+    }
     this.currStep--
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
     GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
-    if (pageIndex >= 0) {
+    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
     if (this.currStep > 0) {
@@ -65,13 +73,16 @@ class StepsUtils {
     if (this.currStep === this.steps.length - 1) {
       return
     }
+    if (this.isPopupOpen) {
+      popupUtils.closePopup()
+    }
     this.currStep++
     store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
     GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
-    if (pageIndex >= 0) {
+    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
     Vue.nextTick(() => {
@@ -83,6 +94,7 @@ class StepsUtils {
 
   reset() {
     this.steps = []
+    this.currStep = -1
   }
 }
 
