@@ -425,7 +425,7 @@ export default Vue.extend({
       StepsUtils.record()
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
-      page.name += ' (copy)'
+      page.name = ''
       page.designId = ''
       PageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)

@@ -75,7 +75,7 @@ class PageUtils {
         posX: -1,
         posY: -1
       },
-      name: 'Default Page',
+      name: '',
       layers: [
       ],
       documentColor: [],
