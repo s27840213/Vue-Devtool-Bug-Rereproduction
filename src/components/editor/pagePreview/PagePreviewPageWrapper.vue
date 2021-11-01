@@ -175,7 +175,6 @@ export default Vue.extend({
       switch (icon) {
         case 'copy':
           page = GeneralUtils.deepCopy(this.getPage(this.index))
-          page.name = ''
           page.designId = ''
           this._addPageToPos({
             newPage: page,
