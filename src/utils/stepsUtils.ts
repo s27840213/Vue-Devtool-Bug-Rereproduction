@@ -8,14 +8,14 @@ import Vue from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
 
-const MAX_STORAGE_COUNT = 20
 class StepsUtils {
   steps: Array<IStep>
   currStep: number
-
+  MAX_STORAGE_COUNT: number
   constructor() {
     this.steps = []
     this.currStep = -1
+    this.MAX_STORAGE_COUNT = 20
   }
 
   record() {
@@ -31,7 +31,7 @@ class StepsUtils {
       this.currStep++
     } else {
       this.steps.length = this.currStep + 1
-      if (this.steps.length === MAX_STORAGE_COUNT) {
+      if (this.steps.length === this.MAX_STORAGE_COUNT) {
         this.steps.shift()
       }
       this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
