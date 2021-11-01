@@ -2,12 +2,18 @@
   div(class="nu-page"
       :style="pageMarginStyles"
       ref="page")
-    div(v-if="!inPagePanel" class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
-      input(class="text-gray-3"
+    div(v-if="!inPagePanel"
+      class="page-title text-left pb-10"
+      :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+      span(class="pr-10") 第 {{pageIndex+1}} 頁
+      input(
         type="text"
         v-model="pageName"
-        @focus="ShortcutUtils.deselect()")
-      div(class="nu-page__icons" v-if="!isBackgroundImageControl")
+        placeholder="新增頁面標題"
+        @focus="pageNameFocused()"
+        @blur="stepRecord()")
+      div(class="nu-page__icons"
+        v-if="!isBackgroundImageControl")
         svg-icon(class="pointer btn-line-template mr-15"
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
@@ -556,6 +562,13 @@ export default Vue.extend({
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
       })
+    },
+    pageNameFocused() {
+      ShortcutUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex)
+    },
+    stepRecord() {
+      StepsUtils.record()
     }
   }
 })
@@ -581,10 +594,26 @@ export default Vue.extend({
   justify-content: space-between;
   white-space: nowrap;
   transform: translate3d(0, -100%, 2000px);
+  > span {
+    font-size: 14px;
+  }
   > input {
     min-width: 40px;
     background-color: transparent;
     text-overflow: ellipsis;
+
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: setColor(gray-3);
+      opacity: 1; /* Firefox */
+    }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color: setColor(gray-3);
+    }
+
+    ::-ms-input-placeholder { /* Microsoft Edge */
+      color: setColor(gray-3);
+    }
   }
 }
 
