@@ -63,7 +63,7 @@ export default Vue.extend({
   align-items: center;
   width: calc(100% - 100px);
   grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
-  grid-row-gap: 20px;
+  grid-row-gap: 60px;
   padding: 30px 0;
   margin-bottom: 50px;
 
@@ -76,7 +76,6 @@ export default Vue.extend({
     border-radius: 5px;
     border: 5px solid #ffffff00;
     transition: 0.25s ease-in-out;
-    margin-bottom: 30px;
 
     &:hover {
       background: setColor(gray-3);

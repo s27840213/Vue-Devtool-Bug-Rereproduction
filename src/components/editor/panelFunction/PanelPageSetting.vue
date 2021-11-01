@@ -325,7 +325,6 @@ export default Vue.extend({
     copyAndApplySelectedFormat() {
       StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
-      page.name = ''
       page.designId = ''
       this.addPageToPos({
         newPage: page,

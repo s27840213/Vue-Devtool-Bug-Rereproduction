@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="page-preview-page")
+  div(class="page-preview-page"
+    :class="{'full-height': type === 'full'}")
     div(class="page-preview-page-content pointer"
       :style="styles()"
       @click="clickPage()"
@@ -19,7 +20,7 @@
         svg-icon(class="pb-5"
           :iconName="'more_horizontal'"
           :iconWidth="'25px'")
-      div(v-if="isMenuOpen"
+      div(v-if="isMenuOpen && lastSelectedPageIndex === index"
         class="menu"
         v-click-outside="closeMenu")
         template(v-for="menuItem in menuItems")
@@ -34,9 +35,10 @@
       div(v-if="type === 'panel'"
         class="page-preview-page-icon")
         span {{index+1}}
-    div(class="page-preview-page__background")
+    div(class="page-preview-page__background"
+      :style="styles()")
     div(v-if="type === 'full'"
-      class="page-preview-page-title pt-5")
+      class="page-preview-page-title")
       span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
@@ -66,7 +68,7 @@ export default Vue.extend({
       menuItems: [
         {
           icon: 'copy',
-          text: '複製'
+          text: '建立副本'
         },
         {
           icon: 'trash',
@@ -175,7 +177,6 @@ export default Vue.extend({
       switch (icon) {
         case 'copy':
           page = GeneralUtils.deepCopy(this.getPage(this.index))
-          page.name = ''
           page.designId = ''
           this._addPageToPos({
             newPage: page,
@@ -202,6 +203,7 @@ export default Vue.extend({
 .page-preview-page {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   position: relative;
   transition: 0.25s ease-in-out;
   max-width: 100%;
@@ -220,7 +222,7 @@ export default Vue.extend({
 
     .menu {
       position: absolute;
-      width: 120px;
+      width: 100px;
       box-sizing: border-box;
       border-radius: 2px;
       display: flex;
@@ -236,7 +238,7 @@ export default Vue.extend({
     .menu-item {
       position: relative;
       width: 100%;
-      height: 35px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: start;
@@ -259,9 +261,8 @@ export default Vue.extend({
         justify-content: start;
 
         > span {
-          font-family: NotoSansTC;
           font-weight: 400;
-          font-size: 14px;
+          font-size: 12px;
           line-height: 12px;
           color: setColor(gray-2);
         }
@@ -274,6 +275,8 @@ export default Vue.extend({
     left: 0;
   }
   &-title {
+    position: absolute;
+    bottom: -30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -282,7 +285,6 @@ export default Vue.extend({
     font-size: 16px;
     font-family: Mulish;
     font-weight: bold;
-    background: setColor(gray-6);
   }
   &-icon {
     position: absolute;
@@ -304,7 +306,6 @@ export default Vue.extend({
     // display: none;
     position: absolute;
     width: 100%;
-    height: 100%;
     background: setColor(gray-3);
     z-index: -1;
   }
