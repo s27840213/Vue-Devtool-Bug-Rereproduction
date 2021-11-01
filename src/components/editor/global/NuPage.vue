@@ -7,8 +7,9 @@
         type="text"
         v-model="pageName"
         @focus="ShortcutUtils.deselect()")
-      div(class="nu-page__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+      div(class="nu-page__icons" v-if="!isBackgroundImageControl")
         svg-icon(class="pointer btn-line-template mr-15"
+          :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()")
         svg-icon(class="pointer mr-5"
@@ -28,7 +29,7 @@
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
-      div(class="page-bar__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+      div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
         svg-icon(class="pointer mt-10"
@@ -451,7 +452,9 @@ export default Vue.extend({
       }
     },
     openLineTemplatePopup() {
+      this.pageClickHandler()
       popupUtils.openPopup('line-template', {
+        target: `.btn-line-template[pageIndex="${this.pageIndex}"]`,
         posX: 'right'
       })
     },

@@ -106,8 +106,7 @@ class PopupUtils {
       align: '.btn-align',
       flip: '.btn-flip',
       slider: '.btn-opacity',
-      file: '.btn-file',
-      'line-template': '.btn-line-template'
+      file: '.btn-file'
     }
     const onMousePos = ['layer', 'page', 'guideline']
     store.dispatch('popup/openPopup', {
