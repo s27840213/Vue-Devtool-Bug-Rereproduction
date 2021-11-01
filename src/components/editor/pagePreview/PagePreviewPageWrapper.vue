@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="page-preview-page")
+  div(class="page-preview-page"
+    :class="{'full-height': type === 'full'}")
     div(class="page-preview-page-content pointer"
       :style="styles()"
       @click="clickPage()"
@@ -34,9 +35,10 @@
       div(v-if="type === 'panel'"
         class="page-preview-page-icon")
         span {{index+1}}
-    div(class="page-preview-page__background")
+    div(class="page-preview-page__background"
+      :style="styles()")
     div(v-if="type === 'full'"
-      class="page-preview-page-title pt-5")
+      class="page-preview-page-title")
       span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
@@ -201,6 +203,7 @@ export default Vue.extend({
 .page-preview-page {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   position: relative;
   transition: 0.25s ease-in-out;
   max-width: 100%;
@@ -258,7 +261,6 @@ export default Vue.extend({
         justify-content: start;
 
         > span {
-          font-family: NotoSansTC;
           font-weight: 400;
           font-size: 14px;
           line-height: 12px;
@@ -273,6 +275,8 @@ export default Vue.extend({
     left: 0;
   }
   &-title {
+    position: absolute;
+    bottom: -30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -281,7 +285,6 @@ export default Vue.extend({
     font-size: 16px;
     font-family: Mulish;
     font-weight: bold;
-    background: setColor(gray-6);
   }
   &-icon {
     position: absolute;
@@ -303,7 +306,6 @@ export default Vue.extend({
     // display: none;
     position: absolute;
     width: 100%;
-    height: 100%;
     background: setColor(gray-3);
     z-index: -1;
   }
