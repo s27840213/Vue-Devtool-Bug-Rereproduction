@@ -141,7 +141,7 @@ export default Vue.extend({
 
     &-drag {
       height: 190px;
-      border-right: 5px solid setColor(blue-1);
+      border-right: 3px solid setColor(blue-1);
     }
 }
 </style>
