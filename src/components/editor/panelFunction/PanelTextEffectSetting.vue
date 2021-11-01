@@ -22,12 +22,14 @@
             :min="fieldRange[field].min"
             :name="field"
             @input="handleEffectUpdate"
+            @mouseup="recordChange"
             v-ratio-change
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textEffect[field]"
             :name="field"
             @change="handleEffectUpdate"
+            @blur="recordChange"
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
@@ -61,12 +63,14 @@
             :min="fieldRange[field].min"
             :name="field"
             @input="handleEffectUpdate"
+            @mouseup="recordChange"
             v-ratio-change
             type="range")
           input(class="text-effect-setting__value-input"
             :value="currentStyle.textEffect[field]"
             :name="field"
             @change="handleEffectUpdate"
+            @blur="recordChange"
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
@@ -108,6 +112,7 @@
             :value="currentStyle.textShape[field]"
             :name="field"
             @change="handleShapeUpdate"
+            @blur="recordChange"
             type="number")
 </template>
 
@@ -119,6 +124,7 @@ import TextShapeUtils from '@/utils/textShapeUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -206,9 +212,11 @@ export default Vue.extend({
     },
     onEffectClick(effectName: string): void {
       TextEffectUtils.setTextEffect(effectName)
+      this.recordChange()
     },
     onShapeClick(shapeName: string): void {
       TextShapeUtils.setTextShape(shapeName)
+      this.recordChange()
     },
     handleEffectUpdate(event: Event): void {
       const { currentEffect, fieldRange } = this
@@ -233,10 +241,15 @@ export default Vue.extend({
     handleShapeStatus(focus: boolean): void {
       const { currentShape } = this
       TextShapeUtils.setTextShape(currentShape, { focus })
+      !focus && this.recordChange()
     },
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       TextEffectUtils.setTextEffect(currentEffect, { color })
+      this.recordChange()
+    },
+    recordChange () {
+      stepsUtils.record()
     }
   }
 })

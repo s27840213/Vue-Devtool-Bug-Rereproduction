@@ -11,11 +11,13 @@
           :min="field.min"
           :name="field.name"
           @input="handleField"
+          @mouseup="handleChangeStop"
           type="range")
       input(class="popup-adjust__text body-2 text-gray-2 ml-10"
         type="text"
         :name="field.name"
         @input="handleField"
+        @blur="handleChangeStop"
         :value="currLayerAdjust[field.name] || 0")
 </template>
 
@@ -24,6 +26,7 @@ import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data () {
@@ -91,10 +94,13 @@ export default Vue.extend({
         }
         return null
       })
-      return imageLayers.find(l => !!l)
+      return { ...imageLayers.find(l => !!l) }
     },
     currLayerAdjust (): any {
-      return this.currLayer.styles.adjust || {}
+      return this.fields.reduce((prev, curr) => {
+        prev[curr.name] = this.currLayer.styles.adjust[curr.name] || 0
+        return prev
+      }, {} as any)
     }
   },
   methods: {
@@ -108,6 +114,9 @@ export default Vue.extend({
         pageIndex: this.getCurrSelectedPageIndex,
         layerIndex: this.getCurrSelectedIndex
       })
+    },
+    handleChangeStop () {
+      stepsUtils.record()
     }
   }
 })
