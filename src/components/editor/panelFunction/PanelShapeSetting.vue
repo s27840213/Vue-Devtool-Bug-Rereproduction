@@ -187,6 +187,7 @@ import { ColorEventType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -446,6 +447,7 @@ export default Vue.extend({
       this.openValueSelector = modalName
     },
     setColor(newColor: string, index: number) {
+      stepsUtils.record()
       const { currLayer } = this
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
@@ -467,6 +469,7 @@ export default Vue.extend({
     setOpacity(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (GeneralUtils.isValidInt(value)) {
+        stepsUtils.record()
         value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
         const { currLayer } = this
         if (currLayer.type === 'tmp' || currLayer.type === 'group') {
@@ -481,6 +484,7 @@ export default Vue.extend({
       }
     },
     setLineWidth(value: number) {
+      stepsUtils.delayedRecord('lineWidth')
       const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
       const { currLayer } = this
       const { point, styles, size } = (currLayer as IShape)
@@ -502,6 +506,7 @@ export default Vue.extend({
       }
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
+      stepsUtils.record()
       if (index === 0) {
         this.handleLineDash(value)
       } else {
@@ -524,6 +529,7 @@ export default Vue.extend({
       )
     },
     handleBasicShapeFilledUpdate(index: number, filled: number) {
+      stepsUtils.record()
       LayerUtils.updateLayerProps(
         this.lastSelectedPageIndex,
         this.currSelectedIndex,
@@ -531,6 +537,7 @@ export default Vue.extend({
       )
     },
     handleBasicShapeCorRadPercentUpdate(value: number) {
+      stepsUtils.delayedRecord('cornerRadius')
       const corRadPercentage = value
       const { vSize, size, shapeType } = (this.currLayer as IShape)
       const newSize = Array.from(size ?? [])
@@ -544,6 +551,7 @@ export default Vue.extend({
       )
     },
     handleStartMarkerUpdate(index: number, value: string) {
+      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
@@ -566,6 +574,7 @@ export default Vue.extend({
       )
     },
     handleEndMarkerUpdate(index: number, value: string) {
+      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
