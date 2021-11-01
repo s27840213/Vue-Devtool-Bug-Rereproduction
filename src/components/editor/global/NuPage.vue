@@ -397,12 +397,11 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     addPage() {
-      // this._addPage(PageUtils.newPage({}))
-      StepsUtils.record()
       PageUtils.addPageToPos(PageUtils.newPage({}), this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      StepsUtils.record()
     },
     deletePage() {
       GroupUtils.deselect()
@@ -414,9 +413,9 @@ export default Vue.extend({
         this.setCurrActivePageIndex(this.pageIndex)
       }
       this._deletePage(this.pageIndex)
+      StepsUtils.record()
     },
     duplicatePage() {
-      StepsUtils.record()
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.name += ' (copy)'
@@ -425,6 +424,7 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      StepsUtils.record()
     },
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage

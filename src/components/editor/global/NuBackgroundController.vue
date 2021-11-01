@@ -24,6 +24,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
 import PageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {
@@ -155,7 +156,6 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.pageIndex)
     },
     moving(event: MouseEvent) {
-      console.log(this.getPageScale)
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
@@ -194,6 +194,7 @@ export default Vue.extend({
       }
     },
     moveEnd() {
+      stepsUtils.record()
       this.setCursorStyle('default')
       window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -297,6 +298,7 @@ export default Vue.extend({
     },
     scaleEnd() {
       this.isControlling = false
+      stepsUtils.record()
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.scaling, false)
       window.removeEventListener('mouseup', this.scaleEnd, false)
