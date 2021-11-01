@@ -133,13 +133,6 @@
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div 導圓角
-    div(class="relative")
-      property-bar(class="shape-setting__property-bar")
-        button(class="shape-setting__range-input-button" @click="handleSliderModal('opacity')")
-          input(class="body-2 text-gray-2 record-selection" ref="input-opacity" type="text"
-                :value="opacity" @change="setOpacity")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
     div(class="shape-setting__colors")
       div(v-if="isGrouped"
         class="shape-setting__color"
@@ -204,7 +197,6 @@ export default Vue.extend({
     return {
       colorPresets: [],
       fieldRange: {
-        opacity: { min: 0, max: 100 },
         lineWidth: { min: 1, max: 100 }
       },
       corRadEvent: PopupSliderEventType.cornerRadius,
@@ -268,15 +260,6 @@ export default Vue.extend({
         'categories'
       ]
     ),
-    opacity(): string | number {
-      const { currLayer } = this
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const layers = [...(currLayer as IGroup).layers]
-        return new Set(layers.map((l: ILayer) => l.styles.opacity)).size === 1 ? layers[0].styles.opacity : '--'
-      } else {
-        return currLayer.styles.opacity
-      }
-    },
     /**
      * This parameter means if current layer is a group/tmp and contains at least 2 of more
      * IShape that the color-list of them only has one entry.
@@ -421,14 +404,6 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
     },
-    handleSliderModal(modalName = '') {
-      this.openSliderBar = modalName
-      if (modalName === 'opacity') {
-        const input = this.$refs[`input-${modalName}`] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
       popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
@@ -464,23 +439,6 @@ export default Vue.extend({
           record.value = index
         }
         LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
-      }
-    },
-    setOpacity(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (GeneralUtils.isValidInt(value)) {
-        stepsUtils.record()
-        value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
-        const { currLayer } = this
-        if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-          LayerUtils.updateAllGroupStyles({ opacity: value })
-        } else {
-          LayerUtils.updateLayerStyles(
-            this.lastSelectedPageIndex,
-            this.currSelectedIndex,
-            { opacity: value }
-          )
-        }
       }
     },
     setLineWidth(value: number) {
