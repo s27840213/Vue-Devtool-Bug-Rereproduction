@@ -20,7 +20,7 @@
         svg-icon(class="pb-5"
           :iconName="'more_horizontal'"
           :iconWidth="'25px'")
-      div(v-if="isMenuOpen"
+      div(v-if="isMenuOpen && lastSelectedPageIndex === index"
         class="menu"
         v-click-outside="closeMenu")
         template(v-for="menuItem in menuItems")
@@ -68,7 +68,7 @@ export default Vue.extend({
       menuItems: [
         {
           icon: 'copy',
-          text: '複製'
+          text: '建立副本'
         },
         {
           icon: 'trash',
@@ -222,7 +222,7 @@ export default Vue.extend({
 
     .menu {
       position: absolute;
-      width: 120px;
+      width: 100px;
       box-sizing: border-box;
       border-radius: 2px;
       display: flex;
@@ -238,7 +238,7 @@ export default Vue.extend({
     .menu-item {
       position: relative;
       width: 100%;
-      height: 35px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: start;
@@ -262,7 +262,7 @@ export default Vue.extend({
 
         > span {
           font-weight: 400;
-          font-size: 14px;
+          font-size: 12px;
           line-height: 12px;
           color: setColor(gray-2);
         }
