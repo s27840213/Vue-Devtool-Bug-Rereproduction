@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="folder-item")
+  div(class="folder-item relative")
     div(class="folder-item__block"
         :class="isMouseOver ? 'block-over' : 'block'"
         :draggable="!undraggable"
@@ -16,8 +16,20 @@
               iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
-    div(class="folder-item__name")
-      span {{ config.name }}
+    div(class="folder-item__name"
+        :folderid="config.id"
+        v-click-outside="handleNameEditEnd")
+      input(ref="name"
+            v-if="isNameEditing"
+            v-model="editableName"
+            @change="handleNameEditEnd"
+            @keyup="checkNameEnter")
+      span(v-else
+          @dblclick="handleNameEditStart"
+          @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
+    transition(name="fade")
+      div(v-if="isShowHint" class="folder-item__name-hint")
+        span 不可超過64個字元，請縮減名稱。
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div
         div(class="dragged-folder__icon")
@@ -30,10 +42,11 @@
 </template>
 
 <script lang="ts">
-import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
+import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
@@ -42,10 +55,17 @@ export default Vue.extend({
     undraggable: Boolean,
     undroppable: Boolean
   },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   data() {
     return {
       isDragged: false,
       isMouseOver: false,
+      isNameEditing: false,
+      editableName: '',
+      isShowHint: false,
+      messageTimer: -1,
       draggedFolderCoordinate: { x: 0, y: 0 }
     }
   },
@@ -65,7 +85,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingFolder: 'SET_draggingFolder'
+      setDraggingFolder: 'SET_draggingFolder',
+      setFolderName: 'UPDATE_folderName'
     }),
     emitGoto() {
       this.$emit('goto')
@@ -149,6 +170,38 @@ export default Vue.extend({
           data: { parents: destination, folder }
         })
       }
+    },
+    handleNameEditStart() {
+      this.editableName = this.config.name
+      this.isNameEditing = true
+      this.$nextTick(() => {
+        const nameInput = this.$refs.name as HTMLInputElement
+        nameInput.focus()
+      })
+    },
+    handleNameEditEnd() {
+      this.isNameEditing = false
+      if (this.editableName === '' || this.editableName === this.config.name) return
+      this.setFolderName({
+        path: designUtils.appendPath(this.path as string[], this.config),
+        newFolderName: this.editableName
+      })
+    },
+    checkNameEnter(e: KeyboardEvent) {
+      if (e.key === 'Enter') {
+        this.handleNameEditEnd()
+      }
+      if (this.editableName.length > 64) {
+        this.editableName = this.editableName.substring(0, 64)
+        if (this.messageTimer) {
+          clearTimeout(this.messageTimer)
+        }
+        this.isShowHint = true
+        this.messageTimer = setTimeout(() => {
+          this.isShowHint = false
+          this.messageTimer = -1
+        }, 3000)
+      }
     }
   }
 })
@@ -169,8 +222,9 @@ export default Vue.extend({
   }
   &__name {
     width: 63px;
+    height: 40px;
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: center;
     > span {
       text-align: center;
@@ -184,6 +238,43 @@ export default Vue.extend({
       overflow-wrap: break-word;
       word-break: break-all;
       overflow: hidden;
+    }
+    > input {
+      width: 108px;
+      text-align: center;
+      font-family: Mulish;
+      font-size: 14px;
+      font-weight: 400;
+      color: setColor(gray-1);
+      padding: 0 5px;
+      background-color: setColor(gray-5);
+      border: 1px solid setColor(gray-4);
+      box-sizing: border-box;
+      border-radius: 2px;
+    }
+  }
+  &__name-hint {
+    position: absolute;
+    display: flex;
+    left: 50%;
+    bottom: -10px;
+    transform: translate(-50%, 100%);
+    width: 208.8px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    background-color: setColor(red-1);
+    border-radius: 2px;
+    padding: 2px 8px;
+    > span {
+      font-family: "SFProDisplay";
+      font-weight: 400;
+      font-size: 10px;
+      line-height: 20px;
+      display: block;
+      letter-spacing: 0.12em;
+      text-indent: 0.12em;
+      color: white;
     }
   }
 }
@@ -241,5 +332,14 @@ export default Vue.extend({
 .block-over {
   border: none;
   background-color: setColor(gray-5);
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 </style>

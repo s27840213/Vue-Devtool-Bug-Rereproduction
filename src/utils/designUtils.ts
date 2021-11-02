@@ -402,11 +402,13 @@ class DesignUtils {
     }
   }
 
-  addNewFolder(path: string[]) {
+  addNewFolder(path: string[]): string {
+    const folder = this.newFolder('未命名資料夾', 'Daniel') // TODO: use usernames instead
     store.commit('design/UPDATE_addFolder', {
       parents: path,
-      folder: this.newFolder('新增資料夾', 'Daniel') // TODO: use usernames instead
+      folder
     })
+    return folder.id
   }
 
   deleteFolder(pathedFolder: IPathedFolder) {

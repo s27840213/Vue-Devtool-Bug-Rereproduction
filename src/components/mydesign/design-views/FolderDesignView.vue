@@ -346,7 +346,13 @@ export default Vue.extend({
       })
     },
     handleNewFolder() {
-      designUtils.addNewFolder(this.path)
+      const folderId = designUtils.addNewFolder(this.path)
+      this.$nextTick(() => {
+        const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
+        if (folderItemName) {
+          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('dblclick')) }, 0)
+        }
+      })
     },
     handleSortByClick(payload: [string, boolean]) {
       this.sortByField = payload[0]
@@ -698,7 +704,7 @@ export default Vue.extend({
   }
   &__folders {
     display: flex;
-    gap: 30px;
+    gap: 40px;
     margin-bottom: 45px;
   }
   &__designs {
