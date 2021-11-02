@@ -48,7 +48,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import SidebarFolder from '@/components/navigation/mydesign/SidebarFolder.vue'
+import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
 import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 

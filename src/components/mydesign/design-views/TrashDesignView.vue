@@ -70,8 +70,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
-import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
+import FolderItem from '@/components/mydesign/FolderItem.vue'
+import DesignItem from '@/components/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
