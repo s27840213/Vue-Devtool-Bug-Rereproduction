@@ -103,6 +103,17 @@ class GroupUtils {
     this.reset()
     this.select(tmpPageIndex, [tmpIndex])
     ZindexUtils.reassignZindex(tmpPageIndex)
+
+    const group = LayerUtils.getLayer(tmpPageIndex, tmpIndex) as IGroup
+    group.layers
+      .forEach((l, idx) => {
+        if (l.type === 'text' && l.widthLimit === -1) {
+          const { width, height, writingMode } = l.styles
+          LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
+            widthLimit: (writingMode as string).includes('vertical') ? height : width
+          })
+        }
+      })
     stepsUtils.record()
   }
 

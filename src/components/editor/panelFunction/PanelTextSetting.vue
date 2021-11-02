@@ -111,7 +111,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { ILayer, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -237,8 +237,10 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
+      const currLayer = LayerUtils.getCurrLayer
+      console.log(currLayer)
       const nan = TextUtils.getNullSel()
-      if (this.currSelectedInfo.layers.length === 1) {
+      if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
         const isSelCollapse = (() => {
           for (const [k, v] of Object.entries(this.sel.start)) {
             if (this.sel.end[k] !== v) return false
@@ -249,8 +251,9 @@ export default Vue.extend({
           TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
         })
       } else {
-        for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
-          const layer = this.currSelectedInfo.layers[i]
+        const primaryLayer = currLayer as IGroup
+        for (let i = 0; i < primaryLayer.layers.length; i++) {
+          const layer = primaryLayer.layers[i]
           if (layer.type === 'text') {
             window.requestAnimationFrame(() => {
               TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
