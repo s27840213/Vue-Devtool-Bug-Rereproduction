@@ -436,7 +436,8 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, pageIndex: number = LayerUtils.pageIndex, layerIndex: number = LayerUtils.layerIndex, subLayerIndex: number | undefined = undefined) {
+  updateLayerSize(config: IText, pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex,
+    subLayerIndex: number | undefined = undefined, targetIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
     if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
@@ -444,7 +445,7 @@ class TextUtils {
     } else {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
-      if (subLayerIndex === currLayer.layers.length - 1) {
+      if (subLayerIndex === (targetIndex ?? currLayer.layers.length - 1)) {
         let { width, height } = calcTmpProps(currLayer.layers)
         width *= currLayer.styles.scale
         height *= currLayer.styles.scale

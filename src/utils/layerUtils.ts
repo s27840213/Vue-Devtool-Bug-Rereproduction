@@ -135,7 +135,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] | IParagraph[]}) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,

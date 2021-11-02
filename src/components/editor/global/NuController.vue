@@ -54,7 +54,7 @@
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && config.active")
-          div(class="text__wrapper" :style="textWrapperStyle()")
+          div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
               :style="textBodyStyle()"
               class="text__body"
@@ -322,23 +322,22 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
+          const { paragraphs } = this.config as IText
+          if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
+            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
+            return
+          }
+
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+            editing: false
+          })
+          if (this.currSelectedInfo.layers.length <= 1 && !this.isLocked) {
+            this.contentEditable = false
+            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+          }
         }
       }
-      if (this.getLayerType === 'text' && !val) {
-        const { paragraphs } = this.config as IText
-        if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
-          LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-          return
-        }
-
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          editing: false
-        })
-        if (this.currSelectedInfo.layers.length <= 1 && !this.isLocked) {
-          this.contentEditable = false
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-        }
-      } else if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
+      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
         this.$store.commit('text/SET_default')
         TextPropUtils.updateTextPropsState()
       }
@@ -557,37 +556,46 @@ export default Vue.extend({
       if (!this.isLocked) {
         e.stopPropagation()
       }
-      if (this.getLayerType === 'image') {
-        this.setMoving(true)
-      }
-      this.initTranslate = this.getLayerPos
-      if (this.getLayerType === 'text') {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          dragging: true
-        })
-        if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-          return
-        } else if (!this.isActive) {
-          let targetIndex = this.layerIndex
-          if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
-            GroupUtils.deselect()
-            targetIndex = this.config.styles.zindex - 1
-            this.setLastSelectedPageIndex(this.pageIndex)
-            this.setLastSelectedLayerIndex(this.layerIndex)
+      switch (this.getLayerType) {
+        case 'image':
+          this.setMoving(true)
+          break
+        case 'text': {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+            dragging: true
+          })
+          if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+            return
+          } else if (!this.isActive) {
+            let targetIndex = this.layerIndex
+            if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
+              GroupUtils.deselect()
+              targetIndex = this.config.styles.zindex - 1
+              this.setLastSelectedPageIndex(this.pageIndex)
+              this.setLastSelectedLayerIndex(this.layerIndex)
+            }
+            if (this.pageIndex === this.lastSelectedPageIndex) {
+              GroupUtils.select(this.pageIndex, [targetIndex])
+            }
+            if (!this.config.locked) {
+              this.isControlling = true
+              this.initialPos = MouseUtils.getMouseAbsPoint(e)
+              window.addEventListener('mouseup', this.moveEnd)
+              window.addEventListener('mousemove', this.moving)
+            }
+            return
           }
-          if (this.pageIndex === this.lastSelectedPageIndex) {
-            GroupUtils.select(this.pageIndex, [targetIndex])
-          }
-          if (!this.config.locked) {
-            this.isControlling = true
-            this.initialPos = MouseUtils.getMouseAbsPoint(e)
-            window.addEventListener('mouseup', this.moveEnd)
-            window.addEventListener('mousemove', this.moving)
-          }
-          return
+          this.contentEditable = true
+          break
         }
-        this.contentEditable = true
+        case 'group':
+          if ((this.config as IGroup).layers
+            .some(l => l.type === 'text' && l.isTyping)) {
+            return
+          }
       }
+
+      this.initTranslate = this.getLayerPos
       if (!this.config.locked && !inSelectionMode) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
@@ -1777,11 +1785,11 @@ export default Vue.extend({
 }
 
 .text {
-  &__p {
+  p {
     // margin: 0.5em;
     margin: 0;
   }
-  &__span {
+  span {
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
