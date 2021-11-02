@@ -30,7 +30,8 @@
               iconWidth="20px")
           div(class="nav-item__text") 我的最愛
         sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
-                      @moveItem="handleMoveItem")
+                      @moveItem="handleMoveItem"
+                      @showHint="handleShowHint")
         div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 't')}"
             :style="draggedOverStyles('t')"
             @dragenter="handleDragEnter('t')"
@@ -44,6 +45,19 @@
               style="pointer-events: none")
           div(class="nav-item__text"
               style="pointer-events: none") 垃圾桶
+        transition(name="fade")
+          svg-icon(v-if="isShowHint"
+                  class="nav-item__name-hint-arrow"
+                  :style="hintArrowStyles()"
+                  iconName="arrow-up"
+                  iconWidth="13.76px"
+                  iconHeight="9.79px"
+                  iconColor="red-1")
+        transition(name="fade")
+          div(v-if="isShowHint"
+              class="nav-item__name-hint-text"
+              :style="hintTextStyles()")
+            span 不可超過64個字元，請縮減名稱。
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -62,6 +76,9 @@ export default Vue.extend({
   data() {
     return {
       ROOT: designUtils.ROOT,
+      isShowHint: true,
+      messageTimer: -1,
+      hintTopBase: 0,
       isAllDraggedOver: false,
       isTrashDraggedOver: false
     }
@@ -100,6 +117,12 @@ export default Vue.extend({
         case 't':
           return (this.isTrashDraggedOver && this.currentSelectedFolder !== 't') ? { 'background-color': '#2C2F43' } : {}
       }
+    },
+    hintArrowStyles() {
+      return { top: `${this.hintTopBase + 2}px` }
+    },
+    hintTextStyles() {
+      return { top: `${this.hintTopBase + 8}px` }
     },
     handleSelection(selection: string) {
       this.setCurrentSelectedFolder(selection)
@@ -186,8 +209,27 @@ export default Vue.extend({
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
+    handleShowHint(folderId: string) {
+      const sidebarFolder = document.querySelector(`.nav-folder[folderid="${folderId}"]`) as HTMLElement
+      const rect = sidebarFolder.getBoundingClientRect()
+      this.hintTopBase = rect.top + rect.height
+      if (this.messageTimer) {
+        clearTimeout(this.messageTimer)
+      }
+      this.isShowHint = true
+      this.messageTimer = setTimeout(() => {
+        this.isShowHint = false
+        this.messageTimer = -1
+      }, 3000)
+    },
     handleNewFolder() {
-      designUtils.addNewFolder([designUtils.ROOT])
+      const folderId = designUtils.addNewFolder([designUtils.ROOT])
+      this.$nextTick(() => {
+        const folderItemName = document.querySelector(`.nav-folder[folderid="${folderId}"]`)
+        if (folderItemName) {
+          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('contextmenu')) }, 0)
+        }
+      })
     }
   }
 })
@@ -196,7 +238,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .sidebar {
   @include size(240px, 100%);
-  background-color: setColor(nav);
+  background-color: setColor(nav-design);
   z-index: setZindex(sidebar);
 }
 
@@ -229,6 +271,34 @@ export default Vue.extend({
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 2.5px;
+  }
+  &__name-hint-arrow {
+    position: fixed;
+    left: 112.8px;
+    z-index: 1000;
+  }
+  &__name-hint-text {
+    position: fixed;
+    display: flex;
+    left: 8px;
+    width: 208.8px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    background-color: setColor(red-1);
+    border-radius: 2px;
+    padding: 2px 8px;
+    z-index: 1000;
+    > span {
+      font-family: "SFProDisplay";
+      font-weight: 400;
+      font-size: 10px;
+      line-height: 20px;
+      display: block;
+      letter-spacing: 0.12em;
+      text-indent: 0.12em;
+      color: white;
+    }
   }
 }
 
@@ -280,6 +350,15 @@ export default Vue.extend({
     font-size: 14px;
     font-weight: 700;
     color: setColor(gray-4);
+  }
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
   }
 }
 </style>
