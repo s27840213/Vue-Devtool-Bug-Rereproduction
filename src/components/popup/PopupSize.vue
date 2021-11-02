@@ -1,0 +1,255 @@
+<template lang="pug">
+  div(class="popup-size"
+    v-click-outside="closePopup")
+    div(class="popup-size__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click.native="closePopup()")
+    div(class="label-mid pb-20") 自 訂 尺 寸
+    div(class="popup-size__body-row")
+      div(class="popup-size__body__custom")
+        property-bar(class="popup-size__body__custom__box border-gray-3")
+          input(class="body-3" type="number" min="0"
+            placeholder="請輸入寬度"
+            :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
+            :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
+          span(class="body-4 text-gray-3") W
+        svg-icon(class="pointer px-10"
+          :disabled="isLockDisabled"
+          :iconName="isLocked ? 'lock' : 'unlock'"
+          iconWidth="15px" :iconColor="!isLockDisabled ? 'black' : 'gray-3'"
+          @click.native="toggleLock()")
+        property-bar(class="popup-size__body__custom__box border-gray-3")
+          input(class="body-3" type="number" min="0"
+            placeholder="請輸入高度"
+            :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
+            :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
+          span(class="body-4 text-gray-3") H
+    div(v-if="isLogin && recentlyUsed.length > 0")
+      div(class="popup-size__body__hr")
+      div(class="label-mid text-left") 最 近 使 用
+      div(v-if="!isLayoutReady"
+        class="popup-size__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-0")
+      div(v-for="(format, index) in recentlyUsed"
+        class="popup-size__body-row pointer"
+        @click="selectFormat(`recent-${index}`)")
+        radio-btn(class="popup-size__body__radio pr-10"
+          circleColor="gray-3"
+          :isSelected="selectedFormat === `recent-${index}`",
+          :formatKey="`recent-${index}`",
+          @select="selectFormat")
+        span(class="popup-size__body__recently body-2 pointer"
+          :class="selectedFormat === `recent-${index}` ? 'text-black' : 'text-gray-3'"
+          @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
+    div(class="popup-size__body__button")
+      btn(:type="'primary-sm'" class="rounded my-5 full-width pointer"
+        @click.native="onConfirmClicked()") 確 認
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import vClickOutside from 'v-click-outside'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import { ILayout } from '@/interfaces/layout'
+import { IListServiceContentData } from '@/interfaces/api'
+
+export default Vue.extend({
+  components: {
+    RadioBtn
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
+  data () {
+    return {
+      recentlyUsed: [] as ILayout[],
+      selectedFormat: 'custom',
+      pageWidth: '' as string | number,
+      pageHeight: '' as string | number,
+      isLayoutReady: false,
+      aspectRatio: 1,
+      isLocked: true
+    }
+  },
+  computed: {
+    ...mapState(
+      'layouts',
+      [
+        'categories'
+      ]
+    ),
+    isLockDisabled () {
+      if (this.selectedFormat === 'custom' && this.pageWidth > 0 && this.pageHeight > 0) {
+        return false
+      } else {
+        return true
+      }
+    }
+  },
+  mounted () {
+    this.fetchLayouts()
+  },
+  methods: {
+    ...mapGetters({
+      isLogin: 'user/isLogin'
+    }),
+    ...mapActions('layouts',
+      [
+        'getCategories'
+      ]
+    ),
+    toggleLock() {
+      this.isLocked = !this.isLocked
+      if (this.isLocked) {
+        this.aspectRatio = (this.pageWidth as number) / (this.pageHeight as number)
+      }
+    },
+    makeFormatString(format: ILayout) {
+      if (format.id !== '') {
+        return `${format.title} ${format.description}`
+      } else {
+        return `${format.width} x ${format.height}`
+      }
+    },
+    setPageWidth(event: Event) {
+      const value = (event.target as HTMLInputElement).value
+      this.pageWidth = value
+      this.selectedFormat = 'custom'
+      if (this.isLocked) {
+        if (value === '') {
+          this.pageHeight = ''
+        } else {
+          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
+        }
+      }
+    },
+    setPageHeight(event: Event) {
+      const value = (event.target as HTMLInputElement).value
+      this.pageHeight = value
+      this.selectedFormat = 'custom'
+      if (this.isLocked) {
+        if (value === '') {
+          this.pageWidth = ''
+        } else {
+          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
+        }
+      }
+    },
+    selectFormat(key: string) {
+      this.selectedFormat = key
+    },
+    fetchLayouts() {
+      this.isLayoutReady = false
+      this.recentlyUsed = []
+      this.getCategories().then(() => {
+        for (const category of this.categories as IListServiceContentData[]) {
+          if (category.title === '最近使用') {
+            this.recentlyUsed = category.list.map(item => ({
+              id: item.id,
+              width: item.width ?? 0,
+              height: item.height ?? 0,
+              title: item.title ?? '',
+              description: item.description ?? ''
+            }))
+          }
+        }
+        if (this.isLogin() && this.recentlyUsed.length > 0) {
+          this.selectedFormat = 'recent-0'
+        } else {
+          this.selectedFormat = 'custom'
+          this.pageWidth = '1080'
+          this.pageHeight = '1080'
+        }
+        this.isLayoutReady = true
+      })
+    },
+    closePopup() {
+      this.$emit('close')
+    },
+    onConfirmClicked() {
+      console.log('confirm')
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  .popup-size {
+    position: relative;
+    width: 500px;
+    display: grid;
+    grid-template-columns: 1fr;
+    box-sizing: border-box;
+    border-radius: 5px;
+    box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+    background-color: setColor(white);
+    padding: 20px 50px;
+
+    &__body {
+      &-row {
+        display: flex;
+        justify-content: start;
+        width: 87%;
+        margin-left: auto;
+        margin-top: 15px;
+        margin-right: 10px;
+        align-items: center;
+        &-center {
+          margin-top: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      &__custom {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-rows: auto;
+        column-gap: 5px;
+        align-items: center;
+        width: 85%;
+        &__box {
+          height: 26px;
+          box-sizing: border-box;
+          padding: 5px 5px;
+          & input {
+            line-height: 16px;
+            background-color: transparent;
+          }
+          &.border-blue-1 {
+            @extend .border-blue-1;
+          }
+          &.border-white {
+            @extend .border-white;
+          }
+        }
+      }
+
+      &__hr {
+        width: 100%;
+        height: 1px;
+        background: setColor(gray-4);
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 0;
+      }
+
+      &__button {
+        margin: 0 auto;
+        width: 60%;
+        padding-top: 30px;
+      }
+    }
+
+    &__close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  }
+</style>
