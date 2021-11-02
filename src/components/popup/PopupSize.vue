@@ -8,7 +8,8 @@
     div(class="label-mid pb-20") 自 訂 尺 寸
     div(class="popup-size__body-row")
       div(class="popup-size__body__custom")
-        property-bar(class="popup-size__body__custom__box border-gray-3")
+        property-bar(class="popup-size__body__custom__box"
+          :class="widthValid ? '' : 'input-invalid'")
           input(class="body-3" type="number" min="0"
             placeholder="請輸入寬度"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
@@ -19,12 +20,15 @@
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="15px" :iconColor="!isLockDisabled ? 'black' : 'gray-3'"
           @click.native="toggleLock()")
-        property-bar(class="popup-size__body__custom__box border-gray-3")
+        property-bar(class="popup-size__body__custom__box"
+          :class="heightValid ? '' : 'input-invalid'")
           input(class="body-3" type="number" min="0"
             placeholder="請輸入高度"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
             :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
           span(class="body-4 text-gray-3") H
+    div(v-if="!widthValid || !heightValid"
+      class="popup-size__body-row text-red body-2") {{errorMsg}}
     div(v-if="isLogin && recentlyUsed.length > 0")
       div(class="popup-size__body__hr")
       div(class="label-mid text-left") 最 近 使 用
@@ -68,8 +72,10 @@ export default Vue.extend({
       selectedFormat: 'custom',
       pageWidth: '' as string | number,
       pageHeight: '' as string | number,
-      isLayoutReady: false,
+      errorMsg: '',
       aspectRatio: 1,
+      isLayoutReady: false,
+      isConfirmClicked: false,
       isLocked: true
     }
   },
@@ -80,6 +86,24 @@ export default Vue.extend({
         'categories'
       ]
     ),
+    widthValid(): boolean {
+      if (!this.isConfirmClicked) {
+        return true
+      } else if (this.pageWidth === '0' || this.pageWidth === '') {
+        return false
+      } else {
+        return true
+      }
+    },
+    heightValid(): boolean {
+      if (!this.isConfirmClicked) {
+        return true
+      } else if (this.pageHeight === '0' || this.pageHeight === '') {
+        return false
+      } else {
+        return true
+      }
+    },
     isLockDisabled () {
       if (this.selectedFormat === 'custom' && this.pageWidth > 0 && this.pageHeight > 0) {
         return false
@@ -170,6 +194,10 @@ export default Vue.extend({
     },
     onConfirmClicked() {
       console.log('confirm')
+      this.isConfirmClicked = true
+      if (!this.widthValid || !this.heightValid) {
+        this.errorMsg = '請輸入大於 0 的數字'
+      }
     }
   }
 })
@@ -252,4 +280,8 @@ export default Vue.extend({
       right: 20px;
     }
   }
+
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+}
 </style>
