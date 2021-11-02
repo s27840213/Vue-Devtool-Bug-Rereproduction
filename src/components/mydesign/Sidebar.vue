@@ -233,7 +233,7 @@ export default Vue.extend({
 }
 
 .nav-item-new-folder {
-  padding: 0px 67px 0px 18px;
+  padding-left: 18px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -257,7 +257,7 @@ export default Vue.extend({
   &__container {
     grid-template-columns: 20px auto;
     padding: 10px 18px 10px 13px;
-    width: 100%;
+    width: 171px;
     display: grid;
     grid-column-gap: 10px;
     align-items: center;
