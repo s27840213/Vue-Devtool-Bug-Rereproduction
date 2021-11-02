@@ -12,6 +12,9 @@
             svg-icon(iconName="pen"
                     iconWidth="20px"
                     iconColor="gray-3")
+          transition(name="fade")
+            div(v-if="isShowHint" class="folder-design-view__folder-name-hint")
+              span 不可超過64個字元，請縮減名稱。
         button(v-else
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
@@ -177,6 +180,8 @@ export default Vue.extend({
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
       editableFolderName: '',
+      isShowHint: false,
+      messageTimer: -1,
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
@@ -365,6 +370,17 @@ export default Vue.extend({
       if (e.key === 'Enter') {
         this.handleFolderNameEditEnd()
       }
+      if (this.editableFolderName.length > 64) {
+        this.editableFolderName = this.editableFolderName.substring(0, 64)
+        if (this.messageTimer) {
+          clearTimeout(this.messageTimer)
+        }
+        this.isShowHint = true
+        this.messageTimer = setTimeout(() => {
+          this.isShowHint = false
+          this.messageTimer = -1
+        }, 3000)
+      }
     },
     checkSortSelected(payload: [string, boolean]) {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
@@ -456,6 +472,7 @@ export default Vue.extend({
         }
       }
       > div {
+        position: relative;
         display: flex;
         align-items: center;
         width: 321px;
@@ -479,6 +496,30 @@ export default Vue.extend({
           color: inherit;
         }
       }
+    }
+  }
+  &__folder-name-hint {
+    position: absolute;
+    display: flex;
+    right: -16px;
+    top: 50%;
+    transform: translate(100%, -50%);
+    width: 208.8px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    background-color: setColor(red-1);
+    border-radius: 2px;
+    padding: 2px 8px;
+    > span {
+      font-family: "SFProDisplay";
+      font-weight: 400;
+      font-size: 10px;
+      line-height: 20px;
+      display: block;
+      letter-spacing: 0.12em;
+      text-indent: 0.12em;
+      color: white;
     }
   }
   &__toolbar {
@@ -764,5 +805,14 @@ export default Vue.extend({
   width: calc(100% - 120px);
   margin-top: 24px;
   margin-bottom: 38px;
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 </style>
