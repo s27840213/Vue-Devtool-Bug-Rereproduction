@@ -68,8 +68,7 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
-      deleteGuideline: 'DELETE_guideline'
+      _deletePage: 'DELETE_page'
     }),
     onDrop(e: DragEvent) {
       mouseUtils.onDrop(e, this.pageIndex)

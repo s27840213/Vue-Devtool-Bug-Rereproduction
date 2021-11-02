@@ -632,10 +632,10 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string }) {
-    const { pos, type } = updateInfo
+  ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string, pageIndex?: number }) {
+    const { pos, type, pageIndex } = updateInfo
     const { pages } = state
-    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    const currFocusPageIndex = pageIndex !== undefined ? pageIndex : pageUtils.currFocusPageIndex
     switch (type) {
       case 'v': {
         pages[currFocusPageIndex].guidelines.v.push(pos)
@@ -647,11 +647,10 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
   },
-  DELETE_guideline(state: IEditorState, updateInfo: { index: number, type: string }) {
-    const { index, type } = updateInfo
+  DELETE_guideline(state: IEditorState, updateInfo: { pageIndex: number, index: number, type: string }) {
+    const { pageIndex, index, type } = updateInfo
     const { pages } = state
-    const currFocusPageIndex = pageUtils.currFocusPageIndex
-    pages[currFocusPageIndex].guidelines[type].splice(index, 1)
+    pages[pageIndex].guidelines[type].splice(index, 1)
   },
   CLEAR_guideline(state: IEditorState) {
     const { pages } = state

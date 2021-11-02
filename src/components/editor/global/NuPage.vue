@@ -143,6 +143,8 @@
         @mousedown.left.stop="pageResizeStart($event)"
         @mouseenter="toggleResizerHint(true)"
         @mouseleave="toggleResizerHint(false)")
+      svg-icon(class="page-resizer__resizer-bar"
+        :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
       div(class="page-resizer__resizer-bar")
       div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
     div(class="snap-area"
@@ -312,8 +314,7 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
-      deleteGuideline: 'DELETE_guideline'
+      _deletePage: 'DELETE_page'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -449,10 +450,10 @@ export default Vue.extend({
     },
     showGuideline(pos: number, type: string, index: number) {
       if (!rulerUtils.isDragging) {
-        this.deleteGuideline({
+        rulerUtils.deleteGuideline(
           index,
-          type
-        })
+          type,
+          this.pageIndex)
         rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
       }
     },
@@ -601,16 +602,19 @@ export default Vue.extend({
     background-color: transparent;
     text-overflow: ellipsis;
 
-    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    ::placeholder {
+      /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: setColor(gray-3);
       opacity: 1; /* Firefox */
     }
 
-    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    :-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
       color: setColor(gray-3);
     }
 
-    ::-ms-input-placeholder { /* Microsoft Edge */
+    ::-ms-input-placeholder {
+      /* Microsoft Edge */
       color: setColor(gray-3);
     }
   }
@@ -631,6 +635,10 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
+
+  :focus {
+    outline: none;
+  }
 }
 .scale-container {
   width: 0px;
@@ -659,7 +667,7 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  border: 2px solid setColor(blue-1, 0.5);
+  border: 2px solid setColor(blue-2);
   box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
@@ -679,17 +687,11 @@ export default Vue.extend({
   bottom: 0px;
   left: 0px;
   pointer-events: auto;
-  background-color: setColor(blue-1, 0.5);
+  background-color: setColor(blue-2);
   width: 100%;
   height: 1rem;
   cursor: row-resize;
   transform: translate3d(0, 0, 1000px);
-  &__resizer-bar {
-    width: 60px;
-    height: 50%;
-    background-color: setColor(white);
-    border-radius: 15px;
-  }
   &__hint {
     position: absolute;
     top: calc(-100% - 15px);

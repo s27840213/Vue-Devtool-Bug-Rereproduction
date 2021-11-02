@@ -103,7 +103,7 @@ export default Vue.extend({
 
     RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string, from?: number) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
-      if (from) {
+      if (from !== undefined) {
         this.from = from
       }
       switch (type) {
@@ -342,7 +342,12 @@ export default Vue.extend({
     closeGuidelineV() {
       if (!this.isDragging) {
         this.isShowGuidelineV = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+        if (this.from !== -1) {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v', this.from)
+        } else {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+        }
+        this.from = -1
       }
     },
     dragStartH(e: MouseEvent) {
@@ -377,13 +382,17 @@ export default Vue.extend({
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
       const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
-      this.from = -1
       return result
     },
     closeGuidelineH() {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+        if (this.from !== -1) {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h', this.from)
+        } else {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+        }
+        this.from = -1
       }
     },
     setTranslateOfPos(event: MouseEvent, type: string) {

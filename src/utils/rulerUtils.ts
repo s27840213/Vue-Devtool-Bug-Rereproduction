@@ -42,7 +42,8 @@ class RulerUtils {
   isDragging: boolean
   lastMapedInfo: {
     type: string,
-    index: number
+    index: number,
+    pageIndex: number
   }
 
   constructor() {
@@ -50,7 +51,8 @@ class RulerUtils {
     this.eventHash = {}
     this.lastMapedInfo = {
       type: 'v',
-      index: -1
+      index: -1,
+      pageIndex: -1
     }
     this.isDragging = false
     this.splitUnitMap = {
@@ -130,7 +132,7 @@ class RulerUtils {
   mapGuidelineToPage(guildline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
     const guildlineRect = guildline.getBoundingClientRect()
     const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
-    const targetPage: IPage = from === -1 ? pageUtils.getPage(targetPageIndex) : this.currFocusPage
+    const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
 
     switch (type) {
       case 'v': {
@@ -176,12 +178,15 @@ class RulerUtils {
     return -1
   }
 
-  addGuidelineToPage(pos: number, type: string) {
+  addGuidelineToPage(pos: number, type: string, pageIndex?: number) {
     this.lastMapedInfo.index = this.currFocusPageGuidelineNum[type]
     this.lastMapedInfo.type = type
+    this.lastMapedInfo.pageIndex = pageIndex !== undefined ? pageIndex : pageUtils.currFocusPageIndex
+    const targetPageindex = pageIndex !== undefined ? pageIndex : pageUtils.currFocusPageIndex
     store.commit('ADD_guideline', {
       pos,
-      type
+      type,
+      pageIndex: targetPageindex
     })
   }
 
@@ -201,16 +206,17 @@ class RulerUtils {
     this.isDragging = bool
   }
 
-  deleteGuideline(index: number, type: string) {
+  deleteGuideline(index: number, type: string, pageIndex: number) {
     store.commit('DELETE_guideline', {
       index,
-      type
+      type,
+      pageIndex
     })
   }
 
   deleteLastMapedGuideline() {
-    const { index, type } = this.lastMapedInfo
-    this.deleteGuideline(index, type)
+    const { index, type, pageIndex } = this.lastMapedInfo
+    this.deleteGuideline(index, type, pageIndex)
   }
 
   addLineTemplate(index: number, type: LineTemplatesType) {
