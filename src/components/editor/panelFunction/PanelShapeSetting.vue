@@ -442,7 +442,6 @@ export default Vue.extend({
       }
     },
     setLineWidth(value: number) {
-      stepsUtils.delayedRecord('lineWidth')
       const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
       const { currLayer } = this
       const { point, styles, size } = (currLayer as IShape)
@@ -495,7 +494,6 @@ export default Vue.extend({
       )
     },
     handleBasicShapeCorRadPercentUpdate(value: number) {
-      stepsUtils.delayedRecord('cornerRadius')
       const corRadPercentage = value
       const { vSize, size, shapeType } = (this.currLayer as IShape)
       const newSize = Array.from(size ?? [])

@@ -12,8 +12,8 @@ interface ISliderConfig {
 }
 
 class PopupUtils {
-  get isPopupOpen(): boolean { return store.getters['popup/isPopupOpen'] }
-  get popupComponent(): IPopupComponent { return store.getters['popup/popupComponent'] }
+  get isPopupOpen(): boolean { return store.getters['popup/getIsPopupOpen'] }
+  get popupComponent(): IPopupComponent { return store.getters['popup/getPopupComponent'] }
   event: any
   eventHash: { [index: string]: (value: number) => void }
   currEvent: string

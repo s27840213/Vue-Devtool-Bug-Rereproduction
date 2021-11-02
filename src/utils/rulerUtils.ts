@@ -1,3 +1,4 @@
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
@@ -23,7 +24,7 @@ class RulerUtils {
   get showGuideline() { return store.getters.getShowGuideline }
 
   event: any
-  eventHash: { [index: string]: (pagePos: number, pos: number, type: string) => void }
+  eventHash: { [index: string]: (pagePos: number, pos: number, type: string, from?: number) => void }
   templates: {
     type1: Array<ITemplateSetting>,
     type2: Array<ITemplateSetting>
@@ -41,7 +42,8 @@ class RulerUtils {
   isDragging: boolean
   lastMapedInfo: {
     type: string,
-    index: number
+    index: number,
+    pageIndex: number
   }
 
   constructor() {
@@ -49,7 +51,8 @@ class RulerUtils {
     this.eventHash = {}
     this.lastMapedInfo = {
       type: 'v',
-      index: -1
+      index: -1,
+      pageIndex: -1
     }
     this.isDragging = false
     this.splitUnitMap = {
@@ -116,7 +119,7 @@ class RulerUtils {
     }
   }
 
-  on(type: string, callback: (pagePos: number, pos: number, type: string) => void) {
+  on(type: string, callback: (pagePos: number, pos: number, type: string, from?: number) => void) {
     // replace origin event
     if (this.eventHash[type]) {
       this.event.off(type, this.eventHash[type])
@@ -126,24 +129,27 @@ class RulerUtils {
     this.eventHash[type] = callback
   }
 
-  mapGuidelineToPage(guildline: HTMLElement, type: string): { pos: number, outOfPage: boolean } {
+  mapGuidelineToPage(guildline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
     const guildlineRect = guildline.getBoundingClientRect()
+    const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
+    const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
+
     switch (type) {
       case 'v': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
         const mapResult = (guildlineRect.left - pageRect.left) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > this.currFocusPage.width
+          outOfPage: mapResult < 0 || mapResult > targetPage.width
         }
         break
       }
       case 'h': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
         const mapResult = (guildlineRect.top - pageRect.top) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > this.currFocusPage.height
+          outOfPage: mapResult < 0 || mapResult > targetPage.height
         }
         break
       }
@@ -154,16 +160,16 @@ class RulerUtils {
     }
   }
 
-  mapSnaplineToGuidelineArea(pos: number, type: string): number {
+  mapSnaplineToGuidelineArea(pos: number, type: string, pageIndex: number): number {
     switch (type) {
       case 'v': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.left
         return mapResult
         break
       }
       case 'h': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageUtils.currFocusPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.top
         return mapResult
         break
@@ -172,12 +178,15 @@ class RulerUtils {
     return -1
   }
 
-  addGuidelineToPage(pos: number, type: string) {
+  addGuidelineToPage(pos: number, type: string, pageIndex?: number) {
     this.lastMapedInfo.index = this.currFocusPageGuidelineNum[type]
     this.lastMapedInfo.type = type
+    this.lastMapedInfo.pageIndex = pageIndex !== undefined ? pageIndex : pageUtils.currFocusPageIndex
+    const targetPageindex = pageIndex !== undefined ? pageIndex : pageUtils.currFocusPageIndex
     store.commit('ADD_guideline', {
       pos,
-      type
+      type,
+      pageIndex: targetPageindex
     })
   }
 
@@ -197,16 +206,17 @@ class RulerUtils {
     this.isDragging = bool
   }
 
-  deleteGuideline(index: number, type: string) {
+  deleteGuideline(index: number, type: string, pageIndex: number) {
     store.commit('DELETE_guideline', {
       index,
-      type
+      type,
+      pageIndex
     })
   }
 
   deleteLastMapedGuideline() {
-    const { index, type } = this.lastMapedInfo
-    this.deleteGuideline(index, type)
+    const { index, type, pageIndex } = this.lastMapedInfo
+    this.deleteGuideline(index, type, pageIndex)
   }
 
   addLineTemplate(index: number, type: LineTemplatesType) {

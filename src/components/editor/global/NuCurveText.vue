@@ -1,6 +1,6 @@
 <template lang="pug">
   p(class="nu-text__p" ref="curveText" :style="pStyle")
-    span(v-if="focus"  class="nu-text__curve" :style="curveStyle")
+    span(v-if="focus"  class="nu-text__circle" :style="circleStyle")
       svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-text__span"
@@ -31,10 +31,11 @@ export default Vue.extend({
       minHeight: 0,
       area: {
         width,
-        height
-      },
-      y,
-      x: x + (width / 2)
+        height,
+        top: y,
+        bottom: y,
+        left: x + (width / 2)
+      }
     }
   },
   mounted () {
@@ -85,7 +86,7 @@ export default Vue.extend({
         minWidth: `${area.width / config.styles.scale}px`
       }
     },
-    curveStyle(): any {
+    circleStyle(): any {
       const { bend, minHeight, scaleRatio } = this
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as any
@@ -116,11 +117,10 @@ export default Vue.extend({
   },
   watch: {
     dragging(curr, prev) {
-      const { y, x, width } = this.config.styles
-      const { bend, area, minHeight } = this
+      const { x, width } = this.config.styles
       if (prev && !curr) {
-        this.y = bend < 0 ? y + area.height - minHeight : y
-        this.x = x + width / 2
+        this.resetLimitY()
+        this.area.left = x + width / 2
       }
     },
     bend() {
@@ -154,24 +154,17 @@ export default Vue.extend({
         )
       const areaWidth = Math.abs(maxX + minX) * 1.3 * scale
       const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
-      this.area = {
-        width: areaWidth,
-        height: areaHeight
-      }
+      this.area.width = areaWidth
+      this.area.height = areaHeight
       this.handleCurveTextUpdate({
         styles: { width: areaWidth, height: areaHeight },
         props: areaWidth > width ? { widthLimit: areaWidth } : {}
       })
     },
     rePosition() {
-      const { scale } = this.config.styles
-      const { width: areaWidth, height: areaHeight } = this.area
-      let y = this.y
-      const x = this.x - (areaWidth / 2)
-      if (this.bend < 0) {
-        y = this.y + (this.minHeight * scale) - areaHeight
-      }
-
+      const { top, bottom, left, width: areaWidth, height: areaHeight } = this.area
+      const y = this.bend >= 0 ? top : bottom - areaHeight
+      const x = left - (areaWidth / 2)
       this.handleCurveTextUpdate({
         styles: { y, x }
       })
@@ -206,11 +199,7 @@ export default Vue.extend({
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
           this.calcArea()
-          if (firstInit) {
-            this.y = +bend < 0 ? this.y + this.area.height - minHeight : this.y
-          } else {
-            this.rePosition()
-          }
+          firstInit ? this.resetLimitY() : this.rePosition()
         })
       } else {
         this.transforms = []
@@ -226,6 +215,12 @@ export default Vue.extend({
         styles,
         props
       })
+    },
+    resetLimitY () {
+      const { config, bend } = this
+      const { y } = config.styles
+      this.area.bottom = bend >= 0 ? y + this.minHeight : y + this.area.height
+      this.area.top = bend >= 0 ? y : this.area.bottom - this.minHeight
     }
   }
 })
@@ -242,7 +237,7 @@ export default Vue.extend({
     align-items: center;
     position: relative;
   }
-  &__curve {
+  &__circle {
     border: 1px solid rgba(212, 9, 70, 0.5);
     border-radius: 50%;
     position: absolute;

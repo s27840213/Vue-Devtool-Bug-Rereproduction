@@ -15,7 +15,8 @@
                 :pageIndex="index"
                 :editorView="editorView"
                 :style="{'z-index': `${getPageZIndex(index)}`}"
-                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl")
+                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       template(v-if="showRuler")
@@ -84,7 +85,8 @@ export default Vue.extend({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
-      scrollListener: null as unknown
+      scrollListener: null as unknown,
+      from: -1
     }
   },
   mounted() {
@@ -100,12 +102,15 @@ export default Vue.extend({
     })
     document.addEventListener('blur', this.detectBlur, true)
 
-    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string) => {
+    RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string, from?: number) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
+      if (from !== undefined) {
+        this.from = from
+      }
       switch (type) {
         case 'v': {
           this.isShowGuidelineV = true
-          this.rulerVPos = Math.trunc(pagePos)
+          this.rulerVPos = Math.round(pagePos)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -114,7 +119,7 @@ export default Vue.extend({
         }
         case 'h': {
           this.isShowGuidelineH = true
-          this.rulerHPos = Math.trunc(pagePos)
+          this.rulerHPos = Math.round(pagePos)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -324,6 +329,8 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('v').outOfPage) {
         this.isShowGuidelineV = false
+      } else {
+        StepsUtils.record()
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingV)
@@ -338,7 +345,12 @@ export default Vue.extend({
     closeGuidelineV() {
       if (!this.isDragging) {
         this.isShowGuidelineV = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+        if (this.from !== -1) {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v', this.from)
+        } else {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+        }
+        this.from = -1
       }
     },
     dragStartH(e: MouseEvent) {
@@ -358,6 +370,8 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('h').outOfPage) {
         this.isShowGuidelineH = false
+      } else {
+        StepsUtils.record()
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingH)
@@ -372,12 +386,18 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      return RulerUtils.mapGuidelineToPage(guideline, type)
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      return result
     },
     closeGuidelineH() {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
-        RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+        if (this.from !== -1) {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h', this.from)
+        } else {
+          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+        }
+        this.from = -1
       }
     },
     setTranslateOfPos(event: MouseEvent, type: string) {
@@ -395,6 +415,10 @@ export default Vue.extend({
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
         this.setPageScaleRatio(Math.min(Math.max(Math.round(ratio), 10), 500))
       }
+    },
+    handleStepChange() {
+      this.isShowGuidelineV = false
+      this.isShowGuidelineH = false
     }
   }
 })

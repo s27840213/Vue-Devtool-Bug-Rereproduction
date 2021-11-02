@@ -53,6 +53,11 @@ class LayerUtils {
     })
   }
 
+  /**
+   * Using this function if you want to remove the layer from the page, and affect the order or undo/redo stack
+   * If not, DON'T use this function or it will create an extra record point or affect the layer order. Just use the function deleteLayer()
+   */
+
   deleteSelectedLayer() {
     store.commit('DELETE_selectedLayer')
     ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)

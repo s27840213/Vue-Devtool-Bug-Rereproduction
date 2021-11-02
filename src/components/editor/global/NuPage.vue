@@ -71,10 +71,10 @@
         @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
         @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
         @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-        @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-        @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-        @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+        @keydown.ctrl.90.exact.stop.prevent.self="undo()"
+        @keydown.meta.90.exact.stop.prevent.self="undo()"
+        @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
+        @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
         @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
         @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
         @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
@@ -143,6 +143,8 @@
         @mousedown.left.stop="pageResizeStart($event)"
         @mouseenter="toggleResizerHint(true)"
         @mouseleave="toggleResizerHint(false)")
+      svg-icon(class="page-resizer__resizer-bar"
+        :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
       div(class="page-resizer__resizer-bar")
       div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
     div(class="snap-area"
@@ -312,8 +314,7 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
-      deleteGuideline: 'DELETE_guideline'
+      _deletePage: 'DELETE_page'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -449,11 +450,11 @@ export default Vue.extend({
     },
     showGuideline(pos: number, type: string, index: number) {
       if (!rulerUtils.isDragging) {
-        this.deleteGuideline({
+        rulerUtils.deleteGuideline(
           index,
-          type
-        })
-        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type), type)
+          type,
+          this.pageIndex)
+        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
       }
     },
     openLineTemplatePopup() {
@@ -470,44 +471,8 @@ export default Vue.extend({
       })
       document.documentElement.dispatchEvent(event)
     },
-    // wheelUpdate() {
-    //   console.log('wheel')
-    //   const event = new MouseEvent('mousemove', {
-    //     clientX: this.currentAbsPos.x,
-    //     clientY: this.currentAbsPos.y
-    //   })
-    //   document.documentElement.dispatchEvent(event)
-    // },
-    // pageResizeStart(e: MouseEvent) {
-    //   this.isResizingPage = true
-    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    //   this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-    //   document.documentElement.addEventListener('mousemove', this.pageResizing)
-    //   this.editorView.addEventListener('wheel', this.wheelUpdate, { capture: true })
-    //   document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
-    // },
-    // pageResizing(e: MouseEvent) {
-    //   this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-    //   this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    //   const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
-    //   const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-    //   PageUtils.updatePageProps({
-    //     height: Math.max(this.config.height + yDiff, 20)
-    //   })
-    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    // },
-    // pageResizeEnd(e: MouseEvent) {
-    //   this.isResizingPage = false
-    //   PageUtils.updatePageProps({
-    //     height: this.config.height
-    //   })
-    //   this.$nextTick(() => {
-    //     document.documentElement.removeEventListener('mousemove', this.pageResizing)
-    //     this.editorView.removeEventListener('wheel', this.wheelUpdate, { capture: true })
-    //     document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
-    //   })
-    // },
     pageResizeStart(e: MouseEvent) {
+      this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
@@ -516,22 +481,6 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
     },
     pageResizing(e: MouseEvent) {
-      // this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      // const tmpRelPos = GeneralUtils.deepCopy(this.currentRelPos)
-      // this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-      // const toTop = (this.currentRelPos.y - tmpRelPos.y) < 0
-      // const sameDirecion = this.tmpToTop === toTop
-      // const multiplier = !this.isShownScrollbar ? 2 : 1
-      // let yDiff = 0
-      // // meetBreakPoint ? toTop ? this.tempYDiff : (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-      // const targetYDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-      // if (toTop) {
-      //   yDiff = sameDirecion ? Math.min(this.tmpYDiff, targetYDiff) : targetYDiff
-      // } else {
-      //   yDiff = sameDirecion ? Math.max(this.tmpYDiff, targetYDiff) : targetYDiff
-      // }
-      // this.tmpYDiff = yDiff
-
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
@@ -556,6 +505,7 @@ export default Vue.extend({
       PageUtils.updatePageProps({
         height: Math.round(this.config.height)
       })
+      StepsUtils.record()
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.pageResizing)
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
@@ -568,6 +518,14 @@ export default Vue.extend({
     },
     stepRecord() {
       StepsUtils.record()
+    },
+    undo() {
+      ShortcutUtils.undo()
+      this.$emit('stepChange')
+    },
+    redo() {
+      ShortcutUtils.redo()
+      this.$emit('stepChange')
     }
   }
 })
@@ -601,16 +559,19 @@ export default Vue.extend({
     background-color: transparent;
     text-overflow: ellipsis;
 
-    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    ::placeholder {
+      /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: setColor(gray-3);
       opacity: 1; /* Firefox */
     }
 
-    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    :-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
       color: setColor(gray-3);
     }
 
-    ::-ms-input-placeholder { /* Microsoft Edge */
+    ::-ms-input-placeholder {
+      /* Microsoft Edge */
       color: setColor(gray-3);
     }
   }
@@ -631,6 +592,10 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
+
+  :focus {
+    outline: none;
+  }
 }
 .scale-container {
   width: 0px;
@@ -659,7 +624,7 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  border: 2px solid setColor(blue-1, 0.5);
+  border: 2px solid setColor(blue-2);
   box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
@@ -679,17 +644,11 @@ export default Vue.extend({
   bottom: 0px;
   left: 0px;
   pointer-events: auto;
-  background-color: setColor(blue-1, 0.5);
+  background-color: setColor(blue-2);
   width: 100%;
   height: 1rem;
   cursor: row-resize;
   transform: translate3d(0, 0, 1000px);
-  &__resizer-bar {
-    width: 60px;
-    height: 50%;
-    background-color: setColor(white);
-    border-radius: 15px;
-  }
   &__hint {
     position: absolute;
     top: calc(-100% - 15px);

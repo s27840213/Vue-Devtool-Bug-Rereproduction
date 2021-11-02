@@ -5,6 +5,7 @@ import OrderUtils from './orderUtils'
 import layerUtils from './layerUtils'
 import popupUtils from './popupUtils'
 import flipUtils from './flipUtils'
+import stepsUtils from './stepsUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -63,26 +64,32 @@ class MappingUtils {
     switch (icon) {
       case 'left-align': {
         AlignUtils.leftAlign()
+        stepsUtils.record()
         break
       }
       case 'center-horizontally': {
         AlignUtils.centerHrAlign()
+        stepsUtils.record()
         break
       }
       case 'right-align': {
         AlignUtils.rightAlign()
+        stepsUtils.record()
         break
       }
       case 'top-align': {
         AlignUtils.topAlign()
+        stepsUtils.record()
         break
       }
       case 'center-vertically': {
         AlignUtils.centerVrAlign()
+        stepsUtils.record()
         break
       }
       case 'bottom-align': {
         AlignUtils.bottomAlign()
+        stepsUtils.record()
         break
       }
       case 'layers-front': {
@@ -99,10 +106,12 @@ class MappingUtils {
       }
       case 'distribute-vertically': {
         AlignUtils.distribueVr()
+        stepsUtils.record()
         break
       }
       case 'distribute-horizontally': {
         AlignUtils.distribueHr()
+        stepsUtils.record()
         break
       }
       case 'layers-alt': {
@@ -112,6 +121,7 @@ class MappingUtils {
       case 'copy': {
         ShortcutUtils.copy()
         ShortcutUtils.paste()
+        stepsUtils.record()
         break
       }
       case 'unlock': {
@@ -119,6 +129,7 @@ class MappingUtils {
         const currSelectedIndex = store.getters.getCurrSelectedIndex
         const isLocked = store.getters.getLayer(currSelecteInfo.pageIndex, currSelecteInfo.index).locked
         layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: !isLocked })
+        stepsUtils.record()
         break
       }
       case 'trash': {
@@ -127,10 +138,12 @@ class MappingUtils {
       }
       case 'flip-h': {
         flipUtils.horizontalFlip()
+        stepsUtils.record()
         break
       }
       case 'flip-v': {
         flipUtils.verticalFlip()
+        stepsUtils.record()
         break
       }
     }
