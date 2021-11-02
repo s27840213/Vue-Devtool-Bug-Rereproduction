@@ -15,7 +15,8 @@
                 :pageIndex="index"
                 :editorView="editorView"
                 :style="{'z-index': `${getPageZIndex(index)}`}"
-                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl")
+                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       template(v-if="showRuler")
@@ -328,6 +329,8 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('v').outOfPage) {
         this.isShowGuidelineV = false
+      } else {
+        StepsUtils.record()
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingV)
@@ -367,6 +370,8 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('h').outOfPage) {
         this.isShowGuidelineH = false
+      } else {
+        StepsUtils.record()
       }
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.draggingH)
@@ -410,6 +415,10 @@ export default Vue.extend({
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
         this.setPageScaleRatio(Math.min(Math.max(Math.round(ratio), 10), 500))
       }
+    },
+    handleStepChange() {
+      this.isShowGuidelineV = false
+      this.isShowGuidelineH = false
     }
   }
 })

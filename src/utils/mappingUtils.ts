@@ -138,10 +138,12 @@ class MappingUtils {
       }
       case 'flip-h': {
         flipUtils.horizontalFlip()
+        stepsUtils.record()
         break
       }
       case 'flip-v': {
         flipUtils.verticalFlip()
+        stepsUtils.record()
         break
       }
     }

@@ -71,10 +71,10 @@
         @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
         @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
         @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-        @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-        @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-        @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+        @keydown.ctrl.90.exact.stop.prevent.self="undo()"
+        @keydown.meta.90.exact.stop.prevent.self="undo()"
+        @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
+        @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
         @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
         @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
         @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
@@ -471,44 +471,8 @@ export default Vue.extend({
       })
       document.documentElement.dispatchEvent(event)
     },
-    // wheelUpdate() {
-    //   console.log('wheel')
-    //   const event = new MouseEvent('mousemove', {
-    //     clientX: this.currentAbsPos.x,
-    //     clientY: this.currentAbsPos.y
-    //   })
-    //   document.documentElement.dispatchEvent(event)
-    // },
-    // pageResizeStart(e: MouseEvent) {
-    //   this.isResizingPage = true
-    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    //   this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-    //   document.documentElement.addEventListener('mousemove', this.pageResizing)
-    //   this.editorView.addEventListener('wheel', this.wheelUpdate, { capture: true })
-    //   document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
-    // },
-    // pageResizing(e: MouseEvent) {
-    //   this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-    //   this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    //   const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
-    //   const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-    //   PageUtils.updatePageProps({
-    //     height: Math.max(this.config.height + yDiff, 20)
-    //   })
-    //   this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-    // },
-    // pageResizeEnd(e: MouseEvent) {
-    //   this.isResizingPage = false
-    //   PageUtils.updatePageProps({
-    //     height: this.config.height
-    //   })
-    //   this.$nextTick(() => {
-    //     document.documentElement.removeEventListener('mousemove', this.pageResizing)
-    //     this.editorView.removeEventListener('wheel', this.wheelUpdate, { capture: true })
-    //     document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
-    //   })
-    // },
     pageResizeStart(e: MouseEvent) {
+      this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
@@ -517,22 +481,6 @@ export default Vue.extend({
       document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
     },
     pageResizing(e: MouseEvent) {
-      // this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      // const tmpRelPos = GeneralUtils.deepCopy(this.currentRelPos)
-      // this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-      // const toTop = (this.currentRelPos.y - tmpRelPos.y) < 0
-      // const sameDirecion = this.tmpToTop === toTop
-      // const multiplier = !this.isShownScrollbar ? 2 : 1
-      // let yDiff = 0
-      // // meetBreakPoint ? toTop ? this.tempYDiff : (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-      // const targetYDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-      // if (toTop) {
-      //   yDiff = sameDirecion ? Math.min(this.tmpYDiff, targetYDiff) : targetYDiff
-      // } else {
-      //   yDiff = sameDirecion ? Math.max(this.tmpYDiff, targetYDiff) : targetYDiff
-      // }
-      // this.tmpYDiff = yDiff
-
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
@@ -557,6 +505,7 @@ export default Vue.extend({
       PageUtils.updatePageProps({
         height: Math.round(this.config.height)
       })
+      StepsUtils.record()
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.pageResizing)
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
@@ -569,6 +518,14 @@ export default Vue.extend({
     },
     stepRecord() {
       StepsUtils.record()
+    },
+    undo() {
+      ShortcutUtils.undo()
+      this.$emit('stepChange')
+    },
+    redo() {
+      ShortcutUtils.redo()
+      this.$emit('stepChange')
     }
   }
 })

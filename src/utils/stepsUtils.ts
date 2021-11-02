@@ -49,7 +49,6 @@ class StepsUtils {
     if (this.steps.length === 0 || this.currStep === 0) {
       return
     }
-    console.log(this.isPopupOpen)
     if (this.isPopupOpen) {
       popupUtils.closePopup()
     }
