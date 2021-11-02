@@ -159,7 +159,7 @@ export default Vue.extend({
         case 'URL':
           return 'url("' + spanStyles.fontUrl + '")'
       }
-      return ''
+      return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     }
   }
 })
