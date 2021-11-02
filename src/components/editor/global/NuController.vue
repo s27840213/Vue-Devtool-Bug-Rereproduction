@@ -1527,23 +1527,25 @@ export default Vue.extend({
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any
+      let layers = null as any
       switch (this.getLayerType) {
         case 'group':
           updateSubLayerProps = LayerUtils.updateSubLayerProps
+          layers = (LayerUtils.getCurrLayer as IGroup).layers
           break
         case 'frame':
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
+          layers = (LayerUtils.getCurrLayer as IFrame).clips
       }
 
       if (this.currSubSelectedInfo.index !== -1) {
-        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
-        const currLayer = LayerUtils.getCurrLayer as IGroup
-        currLayer.layers.forEach((l, idx) => {
+        for (let idx = 0; idx < layers.length; idx++) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
           if (this.currSubSelectedInfo.type === 'image') {
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
-        })
+        }
+        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
         // if (this.currSubSelectedInfo.type === 'image') {
         //   updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
         // }
