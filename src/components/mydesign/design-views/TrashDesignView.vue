@@ -49,7 +49,12 @@
                   :config="design"
                   :favorable="false"
                   :undraggable="true"
-                  :menuItemNum="menuItemSlots.length")
+                  :isSelected="checkSelected(design.id)"
+                  :isAnySelected="isAnySelected"
+                  :isMultiSelected="isMultiSelected"
+                  :menuItemNum="menuItemSlots.length"
+                  @select="selectDesign(path, design)"
+                  @deselect="deselectDesign(path, design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
             div(class="design-menu-item__icon")
@@ -109,6 +114,15 @@ export default Vue.extend({
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
+    },
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
+    isAnySelected(): boolean {
+      return this.selectedNum > 0
+    },
+    isMultiSelected(): boolean {
+      return this.selectedNum > 1
     }
   },
   methods: {
@@ -142,6 +156,21 @@ export default Vue.extend({
     },
     closeInfo() {
       this.isInfoOpen = false
+    },
+    checkSelected(id: string): boolean {
+      return !!this.selectedDesigns[id]
+    },
+    selectDesign(path: string[], design: IDesign) {
+      this.$emit('selectDesign', {
+        path,
+        design
+      })
+    },
+    deselectDesign(path: string[], design: IDesign) {
+      this.$emit('deselectDesign', {
+        path,
+        design
+      })
     }
   }
 })

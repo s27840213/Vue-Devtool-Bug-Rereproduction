@@ -204,43 +204,6 @@ class DesignUtils {
     }
   }
 
-  move(design: IDesign, source: string[], destination: string[]) {
-    // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    store.commit('design/UPDATE_deleteDesign', {
-      path: source,
-      design
-    })
-    store.commit('design/UPDATE_addDesign', {
-      path: destination,
-      design
-    })
-    store.commit('design/UPDATE_path', {
-      id: design.id,
-      path: destination
-    })
-  }
-
-  moveFolder(folder: IFolder, source: string[], destination: string[]) {
-    // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    console.log(folder, source, destination)
-    store.commit('design/UPDATE_deleteFolder', {
-      parents: source,
-      folder
-    })
-    store.commit('design/UPDATE_addFolder', {
-      parents: destination,
-      folder
-    })
-    for (const design of folder.designs) {
-      store.commit('design/UPDATE_path', {
-        id: design.id,
-        path: this.appendPath(destination, folder)
-      })
-    }
-  }
-
   getAllDesigns(folders: IFolder[]): IPathedDesign[] {
     const nodes: IPathedFolder[] = []
     for (const folder of folders) {
@@ -411,6 +374,61 @@ class DesignUtils {
     return folder.id
   }
 
+  move(design: IDesign, source: string[], destination: string[]) {
+    // if move to current folder, skip moving
+    if (generalUtils.arrayCompare<string>(source, destination)) return
+    store.commit('design/UPDATE_deleteDesign', {
+      path: source,
+      design
+    })
+    store.commit('design/UPDATE_addDesign', {
+      path: destination,
+      design
+    })
+    store.commit('design/UPDATE_path', {
+      id: design.id,
+      path: destination
+    })
+  }
+
+  moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
+    for (const pathedDesign of pathedDesigns) {
+      this.move(pathedDesign.design, pathedDesign.path, destination)
+    }
+  }
+
+  moveFolder(folder: IFolder, source: string[], destination: string[]) {
+    // if move to current folder, skip moving
+    if (generalUtils.arrayCompare<string>(source, destination)) return
+    console.log(folder, source, destination)
+    store.commit('design/UPDATE_deleteFolder', {
+      parents: source,
+      folder
+    })
+    store.commit('design/UPDATE_addFolder', {
+      parents: destination,
+      folder
+    })
+    for (const design of folder.designs) {
+      store.commit('design/UPDATE_path', {
+        id: design.id,
+        path: this.appendPath(destination, folder)
+      })
+    }
+  }
+
+  delete(pathedDesign: IPathedDesign) {
+    store.commit('design/UPDATE_addToTrash', pathedDesign)
+    store.commit('design/UPDATE_deleteDesign', pathedDesign)
+  }
+
+  deleteAll(pathedDesigns: IPathedDesign[]) {
+    for (const pathedDesign of pathedDesigns) {
+      store.commit('design/UPDATE_addToTrash', pathedDesign)
+      store.commit('design/UPDATE_deleteDesign', pathedDesign)
+    }
+  }
+
   deleteFolder(pathedFolder: IPathedFolder) {
     store.commit('design/UPDATE_addFolderToTrash', pathedFolder)
     store.commit('design/UPDATE_deleteFolder', pathedFolder)
@@ -421,9 +439,10 @@ class DesignUtils {
     store.commit('design/UPDATE_removeFromTrash', pathedDesign)
   }
 
-  delete(pathedDesign: IPathedDesign) {
-    store.commit('design/UPDATE_addToTrash', pathedDesign)
-    store.commit('design/UPDATE_deleteDesign', pathedDesign)
+  deleteAllForever(pathedDesigns: IPathedDesign[]) {
+    for (const pathedDesign of pathedDesigns) {
+      this.deleteForever(pathedDesign)
+    }
   }
 
   recover(pathedDesign: IPathedDesign) {
@@ -438,6 +457,12 @@ class DesignUtils {
       })
     }
     store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  }
+
+  recoverAll(pathedDesigns: IPathedDesign[]) {
+    for (const pathedDesign of pathedDesigns) {
+      this.recover(pathedDesign)
+    }
   }
 
   recoverFolder(pathedFolder: IPathedFolder) {
@@ -465,19 +490,6 @@ class DesignUtils {
     for (const pathedDesign of pathedDesigns) {
       if (favoriteDesignIds.includes(pathedDesign.design.id)) continue
       store.commit('design/UPDATE_addToFavorite', pathedDesign)
-    }
-  }
-
-  deleteAll(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_addToTrash', pathedDesign)
-      store.commit('design/UPDATE_deleteDesign', pathedDesign)
-    }
-  }
-
-  moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.move(pathedDesign.design, pathedDesign.path, destination)
     }
   }
 }

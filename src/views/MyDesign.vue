@@ -14,19 +14,21 @@
                 span {{ `選取 ${selectedNum}` }}
               div(class="my-design__multi__actions relative")
                 div(ref="tgFav"
+                    v-if="mydesignView !== 'trash-design-view'"
                     class="my-design__multi__icon"
                     @click="toggleAllFavorite")
                   svg-icon(iconName="heart"
                           iconWidth="21px"
                           iconColor="gray-2")
                 div(ref="mvFolder"
-                    v-if="mydesignView !== 'favorite-design-view'"
+                    v-if="(mydesignView !== 'favorite-design-view') && (mydesignView !== 'trash-design-view')"
                     class="my-design__multi__icon"
                     @click="isMoveToFolderPanelOpen = true")
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
                 div(ref="delDesign"
+                    v-if="mydesignView !== 'trash-design-view'"
                     class="my-design__multi__icon"
                     @mouseenter="handleFavDelMouseOver(true)"
                     @mouseleave="handleFavDelMouseOver(false)"
@@ -39,6 +41,20 @@
                 transition(name="slide-fade-text")
                   div(v-if="isFavDelMouseOver" class="my-design__info__text")
                     span 刪除後會將原始檔案一併移除。
+                div(ref="recover"
+                    v-if="mydesignView === 'trash-design-view'"
+                    class="my-design__multi__icon"
+                    @click="recoverAll")
+                  svg-icon(iconName="reduction"
+                          iconWidth="21px"
+                          iconColor="gray-2")
+                div(ref="delForever"
+                    v-if="mydesignView === 'trash-design-view'"
+                    class="my-design__multi__icon"
+                    @click="deleteAllForever")
+                  svg-icon(iconName="trash"
+                          iconWidth="21px"
+                          iconColor="gray-2")
               div(class="my-design__multi__close"
                   @click="handleClearSelection")
                 svg-icon(iconName="close-large"
@@ -57,7 +73,7 @@
                   @deleteForever="handleDeleteForever"
                   @moveDesignToFolder="handleMoveDesignToFolder"
                   @downloadDesign="handleDownloadDesign")
-        div(class="my-design__message-stack")
+        div(class="my-design__message-stack" :style="stackStyles()")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(deletedQueue[0])")
@@ -229,11 +245,16 @@ export default Vue.extend({
     isMultiSelected(newVal) {
       if (newVal) {
         this.$nextTick(() => {
-          hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
-          if (this.mydesignView !== 'favorite-design-view') {
-            hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+          if (this.mydesignView === 'trash-design-view') {
+            hintUtils.bind(this.$refs.recover as HTMLElement, '還原', 500)
+            hintUtils.bind(this.$refs.delForever as HTMLElement, '永久刪除', 500)
+          } else {
+            hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
+            hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
+            if (this.mydesignView !== 'favorite-design-view') {
+              hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+            }
           }
-          hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
         })
       }
     },
@@ -254,6 +275,9 @@ export default Vue.extend({
       clearSelection: 'UPDATE_clearSelection',
       setCurrentSelectedFolder: 'SET_currSelectedFolder'
     }),
+    stackStyles() {
+      return { top: this.isMultiSelected ? '82px' : '27px' }
+    },
     messageImageStyles(item: IQueueItem) {
       if (item.type === 'design') {
         return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
@@ -452,12 +476,27 @@ export default Vue.extend({
     deleteAll() {
       this.confirmMessage = 'delete-all'
     },
+    recoverAll() {
+      const selectedDesigns = Object.values(this.selectedDesigns) as IPathedDesign[]
+      designUtils.recoverAll(selectedDesigns)
+      this.handleRecoverItem({
+        type: 'multi',
+        data: selectedDesigns[0]
+      })
+    },
+    deleteAllForever() {
+      this.confirmMessage = 'delete-forever'
+    },
     deleteAllConfirmed() {
       designUtils.deleteAll(Object.values(this.selectedDesigns))
     },
     deleteForeverConfirmed() {
       if (this.designBuffer) {
         designUtils.deleteForever(this.designBuffer)
+        return
+      }
+      if (this.isMultiSelected) {
+        designUtils.deleteAllForever(Object.values(this.selectedDesigns))
       }
     },
     closeConfirmMessage() {
@@ -548,7 +587,6 @@ export default Vue.extend({
   &__message-stack {
     position: absolute;
     left: 50%;
-    top: 27px;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -594,6 +632,7 @@ export default Vue.extend({
       height: 25px;
       background-color: setColor(blue-3);
       border-radius: 18px;
+      cursor: pointer;
       > span {
         font-family: NotoSansTC;
         font-weight: 700;
