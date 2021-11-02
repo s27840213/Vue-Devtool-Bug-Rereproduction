@@ -213,12 +213,12 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns'
     }),
     mydesignView(): string {
-      switch (this.currentSelectedFolder[0]) {
+      switch (this.currLocation[0]) {
         case 'a':
           return 'all-design-view'
         case 'h':
@@ -239,7 +239,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    currentSelectedFolder() {
+    currLocation() {
       this.handleClearSelection()
     },
     isMultiSelected(newVal) {
@@ -273,7 +273,7 @@ export default Vue.extend({
       addToSelection: 'UPDATE_addToSelection',
       removeFromSelection: 'UPDATE_removeFromSelection',
       clearSelection: 'UPDATE_clearSelection',
-      setCurrentSelectedFolder: 'SET_currSelectedFolder'
+      setCurrLocation: 'SET_currLocation'
     }),
     stackStyles() {
       return { top: this.isMultiSelected ? '82px' : '27px' }
@@ -386,9 +386,9 @@ export default Vue.extend({
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
     },
     handleMoveToFolderSelect(selectInfo: string) {
-      designUtils.deselect(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
+      designUtils.dislocateFrom(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
       this.moveToFolderSelectInfo = selectInfo
-      designUtils.select(this.copiedFolders, 'f:' + selectInfo)
+      designUtils.locateTo(this.copiedFolders, 'f:' + selectInfo)
     },
     handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
       const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
@@ -442,11 +442,11 @@ export default Vue.extend({
     },
     deleteFolder(pathedFolder: IPathedFolder) {
       designUtils.deleteFolder(pathedFolder)
-      if (this.currentSelectedFolder !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
+      if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
       if (pathedFolder.parents.length > 1) {
-        this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
+        this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
       } else {
-        this.setCurrentSelectedFolder('a')
+        this.setCurrLocation('a')
       }
     },
     recover() {

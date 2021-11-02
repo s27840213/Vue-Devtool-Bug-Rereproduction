@@ -222,7 +222,7 @@ export default Vue.extend({
     designs() {
       this.$emit('clearSelection')
     },
-    currentSelectedFolder() {
+    currLocation() {
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
@@ -230,13 +230,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       folders: 'getFolders',
       favoriteDesigns: 'getFavoriteDesigns',
       selectedDesigns: 'getSelectedDesigns'
     }),
     path(): string[] {
-      return designUtils.makePath(this.currentSelectedFolder)
+      return designUtils.makePath(this.currLocation)
     },
     folder(): IFolder {
       return designUtils.search(this.folders, this.path) as IFolder
@@ -280,7 +280,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
       addToFavorite: 'UPDATE_addToFavorite',
       removeFromFavorite: 'UPDATE_removeFromFavorite',
@@ -300,14 +300,14 @@ export default Vue.extend({
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
-      this.setCurrentSelectedFolder(`f:${selectedParents.join('/')}`)
+      this.setCurrLocation(`f:${selectedParents.join('/')}`)
     },
     handleGotoFolder(id: string) {
       this.setExpand({
         path: this.path,
         isExpanded: true
       })
-      this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${id}`)
+      this.setCurrLocation(`${this.currLocation}/${id}`)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true

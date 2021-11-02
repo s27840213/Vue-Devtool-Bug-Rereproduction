@@ -31,7 +31,7 @@ class DesignUtils {
       createdTime: time,
       lastUpdatedTime: time,
       isExpanded: false,
-      isSelected: false,
+      isCurrLocation: false,
       designs: [],
       subFolders: []
     }
@@ -186,20 +186,20 @@ class DesignUtils {
     return res
   }
 
-  deselect(folders: IFolder[], selectInfo: string) {
+  dislocateFrom(folders: IFolder[], selectInfo: string) {
     if (selectInfo.startsWith('f')) { // f:Toby/素材/材質
       const targetFolder = this.search(folders, this.makePath(selectInfo))
       if (targetFolder) {
-        targetFolder.isSelected = false
+        targetFolder.isCurrLocation = false
       }
     }
   }
 
-  select(folders: IFolder[], selectInfo: string) {
+  locateTo(folders: IFolder[], selectInfo: string) {
     if (selectInfo.startsWith('f')) { // f:Toby/素材/材質
       const targetFolder = this.search(folders, this.makePath(selectInfo))
       if (targetFolder) {
-        targetFolder.isSelected = true
+        targetFolder.isCurrLocation = true
       }
     }
   }
@@ -240,6 +240,7 @@ class DesignUtils {
       const node = nodes.shift()
       if (node) {
         node.isExpanded = false
+        node.isCurrLocation = false
         for (const subFolder of node.subFolders) {
           nodes.push(subFolder)
         }

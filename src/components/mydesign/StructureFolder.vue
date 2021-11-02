@@ -1,6 +1,6 @@
 <template lang="pug">
   section
-    div(:class="[`nav-folder-${level}`, {'bg-gray-5': folder.isSelected}]"
+    div(:class="[`nav-folder-${level}`, {'bg-gray-5': folder.isCurrLocation}]"
         @click="handleSelection")
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")

@@ -10,7 +10,7 @@
                   iconColor="gray-4"
                   iconWidth="18px")
             div(class="nav-item-new-folder__text") 新建資料夾
-        div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'a')}"
+        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'a')}"
             :style="draggedOverStyles('a')"
             @dragenter="handleDragEnter('a')"
             @dragleave="handleDragLeave('a')"
@@ -23,7 +23,7 @@
               style="pointer-events: none")
           div(class="nav-item__text"
               style="pointer-events: none") 我所有設計
-        div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 'h')}"
+        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'h')}"
             @click="handleSelection('h')")
           svg-icon(iconName="heart"
               iconColor="white"
@@ -32,7 +32,7 @@
         sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
                       @moveItem="handleMoveItem"
                       @showHint="handleShowHint")
-        div(class="nav-item" :class="{'bg-blue-1': (currentSelectedFolder === 't')}"
+        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 't')}"
             :style="draggedOverStyles('t')"
             @dragenter="handleDragEnter('t')"
             @dragleave="handleDragLeave('t')"
@@ -85,7 +85,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
       draggingFolder: 'getDraggingFolder',
@@ -107,15 +107,15 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setCurrLocation: 'SET_currLocation',
       setFolders: 'SET_folders'
     }),
     draggedOverStyles(type: string) {
       switch (type) {
         case 'a':
-          return (this.isAllDraggedOver && this.currentSelectedFolder !== 'a') ? { 'background-color': '#2C2F43' } : {}
+          return (this.isAllDraggedOver && this.currLocation !== 'a') ? { 'background-color': '#2C2F43' } : {}
         case 't':
-          return (this.isTrashDraggedOver && this.currentSelectedFolder !== 't') ? { 'background-color': '#2C2F43' } : {}
+          return (this.isTrashDraggedOver && this.currLocation !== 't') ? { 'background-color': '#2C2F43' } : {}
       }
     },
     hintArrowStyles() {
@@ -125,7 +125,7 @@ export default Vue.extend({
       return { top: `${this.hintTopBase + 8}px` }
     },
     handleSelection(selection: string) {
-      this.setCurrentSelectedFolder(selection)
+      this.setCurrLocation(selection)
     },
     handleDragEnter(type: string) {
       switch (type) {
@@ -172,8 +172,8 @@ export default Vue.extend({
             const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
             if (!folder) return
             designUtils.moveFolder(folder, parents, destination)
-            if (folder.isSelected) {
-              this.setCurrentSelectedFolder(`f:${this.ROOT}/${folder.id}`)
+            if (folder.isCurrLocation) {
+              this.setCurrLocation(`f:${this.ROOT}/${folder.id}`)
             }
             this.$emit('moveItem', {
               type: 'folder',

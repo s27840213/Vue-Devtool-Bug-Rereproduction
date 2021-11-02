@@ -15,7 +15,7 @@ export interface IFolder {
   createdTime: number,
   lastUpdatedTime: number,
   isExpanded: boolean,
-  isSelected: boolean,
+  isCurrLocation: boolean,
   subFolders: IFolder[],
   designs: IDesign[]
 }

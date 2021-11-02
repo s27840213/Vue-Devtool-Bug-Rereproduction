@@ -1,7 +1,7 @@
 <template lang="pug">
   section
     div(class="nav-folder"
-        :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isSelected}]"
+        :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isCurrLocation}]"
         :style="draggedOverStyles()"
         :draggable="!isNameEditing"
         :folderid="folder.id"
@@ -79,7 +79,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
       draggingFolder: 'getDraggingFolder',
@@ -94,7 +94,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
       setDraggingFolder: 'SET_draggingFolder',
       setFolderName: 'UPDATE_folderName'
@@ -103,7 +103,7 @@ export default Vue.extend({
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     draggedOverStyles() {
-      return (this.isDraggedOver && !this.folder.isSelected) ? { 'background-color': '#2C2F43' } : {}
+      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': '#2C2F43' } : {}
     },
     draggedFolderStyles(): {[key: string]: string} {
       if (this.isDragged) {
@@ -148,7 +148,7 @@ export default Vue.extend({
       e.preventDefault()
     },
     handleSelection() {
-      this.setCurrentSelectedFolder(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
+      this.setCurrLocation(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
     },
     handleDragEnter() {
       this.isDraggedOver = true
@@ -181,8 +181,8 @@ export default Vue.extend({
         if (!folder) return
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
         designUtils.moveFolder(folder, parents, destination)
-        if (folder.isSelected) {
-          this.setCurrentSelectedFolder(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
+        if (folder.isCurrLocation) {
+          this.setCurrLocation(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
         }
         this.$emit('moveItem', {
           type: 'folder',
