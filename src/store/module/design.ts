@@ -14,6 +14,7 @@ interface IDesignSidebarState {
   draggingDesign: IPathedDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
   selectedDesigns: {[key: string]: IPathedDesign}
+  selectedFolders: {[key: string]: IPathedFolder}
 }
 
 const getDefaultState = (): IDesignSidebarState => ({
@@ -25,7 +26,8 @@ const getDefaultState = (): IDesignSidebarState => ({
   draggingType: '',
   draggingFolder: undefined,
   draggingDesign: undefined,
-  selectedDesigns: {}
+  selectedDesigns: {},
+  selectedFolders: {}
 })
 
 const state = getDefaultState()
@@ -56,6 +58,9 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   },
   getSelectedDesigns(state: IDesignSidebarState): {[key: string]: IPathedDesign} {
     return state.selectedDesigns
+  },
+  getSelectedFolders(state: IDesignSidebarState): {[key: string]: IPathedFolder} {
+    return state.selectedFolders
   }
 }
 
@@ -183,8 +188,15 @@ const mutations: MutationTree<IDesignSidebarState> = {
   UPDATE_removeFromSelection(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
     Vue.delete(state.selectedDesigns, pathedDesign.design.id)
   },
+  UPDATE_addFolderToSelection(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    Vue.set(state.selectedFolders, pathedFolder.folder.id, pathedFolder)
+  },
+  UPDATE_removeFolderFromSelection(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    Vue.delete(state.selectedFolders, pathedFolder.folder.id)
+  },
   UPDATE_clearSelection(state: IDesignSidebarState) {
     state.selectedDesigns = {}
+    state.selectedFolders = {}
   }
 }
 

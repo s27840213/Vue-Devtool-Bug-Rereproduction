@@ -31,5 +31,5 @@ export interface IPathedFolder {
 
 export interface IQueueItem {
   type: 'design' | 'folder' | 'multi',
-  data: IPathedDesign | IPathedFolder
+  data: IPathedDesign | IPathedFolder | undefined
 }

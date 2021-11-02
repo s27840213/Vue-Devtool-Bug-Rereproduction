@@ -366,6 +366,27 @@ class DesignUtils {
     }
   }
 
+  dispatchFolderMenuAction(icon: string, parents: string[], folder: IFolder): { event: string, payload: any } | undefined {
+    switch (icon) {
+      case 'delete': {
+        return {
+          event: 'deleteFolderForever',
+          payload: { parents, folder }
+        }
+      }
+      case 'reduction': {
+        this.recoverFolder({ parents, folder })
+        return {
+          event: 'recoverItem',
+          payload: {
+            type: 'folder',
+            data: { parents, folder }
+          }
+        }
+      }
+    }
+  }
+
   addNewFolder(path: string[]): string {
     const folder = this.newFolder('未命名資料夾', 'Daniel') // TODO: use usernames instead
     store.commit('design/UPDATE_addFolder', {
@@ -446,6 +467,16 @@ class DesignUtils {
     }
   }
 
+  deleteFolderForever(pathedFolder: IPathedFolder) {
+    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  }
+
+  deleteAllFolderForever(pathedFolders: IPathedFolder[]) {
+    for (const pathedFolder of pathedFolders) {
+      this.deleteFolderForever(pathedFolder)
+    }
+  }
+
   recover(pathedDesign: IPathedDesign) {
     const folders = store.getters['design/getFolders'] as IFolder[]
     const folder = this.search(folders, pathedDesign.path)
@@ -478,6 +509,12 @@ class DesignUtils {
       })
     }
     store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  }
+
+  recoverAllFolder(pathedFolders: IPathedFolder[]) {
+    for (const pathedFolder of pathedFolders) {
+      this.recoverFolder(pathedFolder)
+    }
   }
 
   removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {

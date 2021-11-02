@@ -16,6 +16,28 @@
               iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
+      div(class="folder-item__controller")
+        div(class="folder-item__controller-content")
+          div(v-if="isSelected"
+            class="folder-item__checkbox-checked"
+            @click.stop="emitDeselect")
+            svg-icon(iconName="check-large"
+                    iconWidth="10px"
+                    iconHeight="8px"
+                    iconColor="white")
+          div(v-if="menuItems.length > 0 && !isSelected && (isMouseOver || isAnySelected)"
+            class="folder-item__checkbox"
+            @click.stop="emitSelect")
+          div(v-if="menuItems.length > 0 && isMouseOver"
+            class="folder-item__more"
+            @click.stop="toggleMenu()")
+            svg-icon(iconName="more_horizontal"
+                    iconWidth="24px"
+                    iconColor="gray-2")
+          div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
+              class="folder-item__menu"
+              v-click-outside="closeMenu")
+            slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
     div(class="folder-item__name"
         :folderid="config.id"
         v-click-outside="handleNameEditEnd")
@@ -52,8 +74,11 @@ export default Vue.extend({
   props: {
     path: Array,
     config: Object,
+    menuItemNum: Number,
     undraggable: Boolean,
-    undroppable: Boolean
+    undroppable: Boolean,
+    isAnySelected: Boolean,
+    isSelected: Boolean
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -63,6 +88,7 @@ export default Vue.extend({
       isDragged: false,
       isMouseOver: false,
       isNameEditing: false,
+      isMenuOpen: false,
       editableName: '',
       isShowHint: false,
       messageTimer: -1,
@@ -81,6 +107,9 @@ export default Vue.extend({
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    menuItems(): any[] {
+      return Array(this.menuItemNum ?? 0)
     }
   },
   methods: {
@@ -138,6 +167,7 @@ export default Vue.extend({
     },
     handleMouseLeave() {
       this.isMouseOver = false
+      this.isMenuOpen = false
     },
     handleDrop() {
       this.isMouseOver = false
@@ -202,6 +232,18 @@ export default Vue.extend({
           this.messageTimer = -1
         }, 3000)
       }
+    },
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen
+    },
+    closeMenu() {
+      this.isMenuOpen = false
+    },
+    emitSelect() {
+      this.$emit('select')
+    },
+    emitDeselect() {
+      this.$emit('deselect')
     }
   }
 })
@@ -219,6 +261,120 @@ export default Vue.extend({
     box-sizing: border-box;
     border-radius: 4px;
     cursor: pointer;
+  }
+  &__controller {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    &-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+  }
+  &__checkbox {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: white;
+    left: 6px;
+    top: 7px;
+    border: 1px solid #969bab;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  &__checkbox-checked {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: setColor(blue-1);
+    left: 6px;
+    top: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  &__more {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    right: 6px;
+    top: 7px;
+    cursor: pointer;
+  }
+  &__menu {
+    position: absolute;
+    width: 77px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+    left: 100%;
+    top: 7px;
+    z-index: 2;
+    & .folder-menu-item {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      gap: 5px;
+      padding: 6px 0;
+      cursor: pointer;
+      &:hover {
+        background-color: setColor(gray-5);
+      }
+      &__icon {
+        margin-left: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 10px;
+        height: 10px;
+      }
+      &__text {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        height: 12px;
+        transform: scale(0.8);
+        transform-origin: left;
+        > span {
+          font-family: NotoSansTC;
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 12px;
+          color: setColor(gray-2);
+        }
+      }
+      &__right {
+        position: absolute;
+        right: 3px;
+        top: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-50%);
+      }
+    }
   }
   &__name {
     width: 63px;

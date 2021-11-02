@@ -31,7 +31,24 @@
                   :config="folder"
                   :undraggable="true"
                   :undroppable="true"
-                  @moveItem="handleMoveItem")
+                  :isSelected="checkFolderSelected(folder.id)"
+                  :isAnySelected="isAnySelected"
+                  :menuItemNum="menuItemSlots.length"
+                  @moveItem="handleMoveItem"
+                  @select="selectFolder(parents, folder)"
+                  @deselect="deselectFolder(parents, folder)")
+        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, parents, folder)")
+            div(class="folder-menu-item__icon")
+              svg-icon(:iconName="menuItemSlot.icon"
+                      iconWidth="10px"
+                      iconColor="gray-2")
+            div(class="folder-menu-item__text")
+              span {{ menuItemSlot.text }}
+            div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
+              svg-icon(iconName="chevron-right"
+                      iconWidth="10px"
+                      iconColor="gray-2")
     div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
       div(class="trash-design-view__expand-icon-container"
           @click="toggleDesignsExpansion")
@@ -51,7 +68,6 @@
                   :undraggable="true"
                   :isSelected="checkSelected(design.id)"
                   :isAnySelected="isAnySelected"
-                  :isMultiSelected="isMultiSelected"
                   :menuItemNum="menuItemSlots.length"
                   @select="selectDesign(path, design)"
                   @deselect="deselectDesign(path, design)")
@@ -100,7 +116,8 @@ export default Vue.extend({
       folders: 'getFolders',
       trashDesigns: 'getTrashDesigns',
       trashFolders: 'getTrashFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      selectedFolders: 'getSelectedFolders'
     }),
     allDesigns(): [string[], IDesign][] {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
@@ -116,13 +133,18 @@ export default Vue.extend({
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     selectedNum(): number {
-      return Object.keys(this.selectedDesigns).length
+      return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
     isAnySelected(): boolean {
       return this.selectedNum > 0
+    }
+  },
+  watch: {
+    allDesigns() {
+      this.$emit('clearSelection')
     },
-    isMultiSelected(): boolean {
-      return this.selectedNum > 1
+    allFolders() {
+      this.$emit('clearSelection')
     }
   },
   methods: {
@@ -137,6 +159,14 @@ export default Vue.extend({
     handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
       if (icon === 'trash') icon = 'delete'
       const extraEvent = designUtils.dispatchDesignMenuAction(icon, path, design)
+      if (extraEvent) {
+        const { event, payload } = extraEvent
+        this.$emit(event, payload)
+      }
+    },
+    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
+      if (icon === 'trash') icon = 'delete'
+      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
       if (extraEvent) {
         const { event, payload } = extraEvent
         this.$emit(event, payload)
@@ -160,6 +190,9 @@ export default Vue.extend({
     checkSelected(id: string): boolean {
       return !!this.selectedDesigns[id]
     },
+    checkFolderSelected(id: string): boolean {
+      return !!this.selectedFolders[id]
+    },
     selectDesign(path: string[], design: IDesign) {
       this.$emit('selectDesign', {
         path,
@@ -170,6 +203,18 @@ export default Vue.extend({
       this.$emit('deselectDesign', {
         path,
         design
+      })
+    },
+    selectFolder(parents: string[], folder: IFolder) {
+      this.$emit('selectFolder', {
+        parents,
+        folder
+      })
+    },
+    deselectFolder(parents: string[], folder: IFolder) {
+      this.$emit('deselectFolder', {
+        parents,
+        folder
       })
     }
   }
