@@ -49,6 +49,7 @@ import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
 import { ILayer } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {
@@ -127,6 +128,7 @@ export default Vue.extend({
       if (value > 100) {
         value = 100
       }
+      stepsUtils.delayedRecord('opacity')
       if (!this.isGroup) {
         if (this.currSelectedInfo.layers.length === 1) {
           this.$store.commit('UPDATE_layerStyles', {

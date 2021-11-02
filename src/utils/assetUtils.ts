@@ -274,6 +274,7 @@ class AssetUtils {
       pageIndex: targetPageIndex,
       newDisplayMode: true
     })
+    stepsUtils.record()
   }
 
   async updateBackground(json: any): Promise<any> {

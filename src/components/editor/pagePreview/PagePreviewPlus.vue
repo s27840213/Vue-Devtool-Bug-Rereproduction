@@ -113,10 +113,9 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 160px;
+    height: 100%;
     width: 30px;
     transition: 0.25s ease-in-out;
-    padding-bottom: 30px;
 
     &-wrapper {
       position: absolute;
@@ -141,7 +140,7 @@ export default Vue.extend({
 
     &-drag {
       height: 190px;
-      border-right: 5px solid setColor(blue-1);
+      border-right: 3px solid setColor(blue-1);
     }
 }
 </style>

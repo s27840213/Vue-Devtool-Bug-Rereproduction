@@ -2,13 +2,20 @@
   div(class="nu-page"
       :style="pageMarginStyles"
       ref="page")
-    div(v-if="!inPagePanel" class="page-title text-left mb-5" :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
-      input(class="text-gray-3"
+    div(v-if="!inPagePanel"
+      class="page-title text-left pb-10"
+      :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+      span(class="pr-10") 第 {{pageIndex+1}} 頁
+      input(
         type="text"
         v-model="pageName"
-        @focus="ShortcutUtils.deselect()")
-      div(class="nu-page__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+        placeholder="新增頁面標題"
+        @focus="pageNameFocused()"
+        @blur="stepRecord()")
+      div(class="nu-page__icons"
+        v-if="!isBackgroundImageControl")
         svg-icon(class="pointer btn-line-template mr-15"
+          :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()")
         svg-icon(class="pointer mr-5"
@@ -28,7 +35,7 @@
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()")
     div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
-      div(class="page-bar__icons" v-if="(getLastSelectedPageIndex === pageIndex) && !isBackgroundImageControl")
+      div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
         svg-icon(class="pointer mt-10"
@@ -396,12 +403,11 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     addPage() {
-      // this._addPage(PageUtils.newPage({}))
-      StepsUtils.record()
       PageUtils.addPageToPos(PageUtils.newPage({}), this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      StepsUtils.record()
     },
     deletePage() {
       GroupUtils.deselect()
@@ -413,17 +419,17 @@ export default Vue.extend({
         this.setCurrActivePageIndex(this.pageIndex)
       }
       this._deletePage(this.pageIndex)
+      StepsUtils.record()
     },
     duplicatePage() {
-      StepsUtils.record()
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
-      page.name += ' (copy)'
       page.designId = ''
       PageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      StepsUtils.record()
     },
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage
@@ -451,7 +457,9 @@ export default Vue.extend({
       }
     },
     openLineTemplatePopup() {
+      this.pageClickHandler()
       popupUtils.openPopup('line-template', {
+        target: `.btn-line-template[pageIndex="${this.pageIndex}"]`,
         posX: 'right'
       })
     },
@@ -553,6 +561,13 @@ export default Vue.extend({
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
       })
+    },
+    pageNameFocused() {
+      ShortcutUtils.deselect()
+      this.setLastSelectedPageIndex(this.pageIndex)
+    },
+    stepRecord() {
+      StepsUtils.record()
     }
   }
 })
@@ -578,10 +593,26 @@ export default Vue.extend({
   justify-content: space-between;
   white-space: nowrap;
   transform: translate3d(0, -100%, 2000px);
+  > span {
+    font-size: 14px;
+  }
   > input {
     min-width: 40px;
     background-color: transparent;
     text-overflow: ellipsis;
+
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: setColor(gray-3);
+      opacity: 1; /* Firefox */
+    }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color: setColor(gray-3);
+    }
+
+    ::-ms-input-placeholder { /* Microsoft Edge */
+      color: setColor(gray-3);
+    }
   }
 }
 

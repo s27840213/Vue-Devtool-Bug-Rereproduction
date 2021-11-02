@@ -6,6 +6,14 @@ import store from '@/store'
 
 export async function editorRouteHandler (_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
   try {
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      next({ name: 'Home', query: { isMobile: 'true' } })
+      return
+    }
+    if (window.screen.height > window.screen.width) {
+      next({ name: 'Home', query: { isMobile: 'true' } })
+      return
+    }
     next()
     const urlParams = new URLSearchParams(window.location.search)
     const type = urlParams.get('type')

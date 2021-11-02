@@ -90,7 +90,7 @@ class MouseUtils {
       // if (layer.type === 'text') {
       //   TextUtils.updateTextPropsState()
       // }
-      StepsUtils.record()
+      // StepsUtils.record()
     }
   }
 

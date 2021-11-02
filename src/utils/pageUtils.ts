@@ -75,7 +75,7 @@ class PageUtils {
         posX: -1,
         posY: -1
       },
-      name: 'Default Page',
+      name: '',
       layers: [
       ],
       documentColor: [],
@@ -155,6 +155,9 @@ class PageUtils {
     const pages = store.getters.getPages
     const pagesTmp = GeneralUtils.deepCopy(pages)
     if (pagesTmp[index]) {
+      // keep original page name
+      const oriPageName = pagesTmp[index].name
+      json.name = oriPageName
       pagesTmp[index] = json
       store.commit('SET_pages', pagesTmp)
     }

@@ -179,10 +179,10 @@ export default Vue.extend({
       return [...this.currSelectedInfo.types]
     },
     isText(): boolean {
-      return this.getType.includes('text') && this.currSelectedInfo.layer.length === 1
+      return this.getType.includes('text') && this.currSelectedInfo.layers.length === 1
     },
     isShape(): boolean {
-      return this.getType.includes('shape') && this.currSelectedInfo.layer.length === 1
+      return this.getType.includes('shape') && this.currSelectedInfo.layers.length === 1
     },
     isImage(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
