@@ -56,6 +56,7 @@
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+              draggable="false"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
@@ -672,7 +673,6 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent) {
       if (this.getLayerType === 'image') {
-        // (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
         this.setMoving(false)
       }
       if (this.isActive) {
@@ -1536,10 +1536,17 @@ export default Vue.extend({
       }
 
       if (this.currSubSelectedInfo.index !== -1) {
-        updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
-        if (this.currSubSelectedInfo.type === 'image') {
-          updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
-        }
+        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
+        const currLayer = LayerUtils.getCurrLayer as IGroup
+        currLayer.layers.forEach((l, idx) => {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+          if (this.currSubSelectedInfo.type === 'image') {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
+          }
+        })
+        // if (this.currSubSelectedInfo.type === 'image') {
+        //   updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
+        // }
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
