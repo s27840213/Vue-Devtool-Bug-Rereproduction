@@ -18,6 +18,7 @@
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-sub-${primaryLayerIndex}_${layerIndex}`" spellcheck="false"
+              draggable="false"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="contentEditable"
@@ -100,6 +101,7 @@ export default Vue.extend({
   },
   mounted() {
     const body = this.$refs.body as HTMLElement
+    console.log(this.config)
     /**
      * Prevent the context menu from showing up when right click or Ctrl + left click on controller
      */
@@ -163,7 +165,6 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
-      console.log(val)
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {
@@ -251,12 +252,15 @@ export default Vue.extend({
     },
     onMousedown() {
       if (this.getLayerType === 'text') {
+        if (this.isActive && this.contentEditable) return
+        else if (this.isActive) {
+          this.contentEditable = true
+        }
         this.posDiff.x = this.getPrimaryLayer.styles.x
         this.posDiff.y = this.getPrimaryLayer.styles.y
-        this.contentEditable = true
-        document.addEventListener('mouseup', this.onMouseup)
-        this.isControlling = true
       }
+      document.addEventListener('mouseup', this.onMouseup)
+      this.isControlling = true
     },
     onMouseup() {
       if (this.getLayerType === 'text') {
@@ -265,9 +269,9 @@ export default Vue.extend({
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           this.contentEditable = false
         }
-        document.removeEventListener('mouseup', this.onMouseup)
-        this.isControlling = false
       }
+      document.removeEventListener('mouseup', this.onMouseup)
+      this.isControlling = false
     },
     styles(type: string) {
       const zindex = (type === 'control-point') || (this.isActive && this.getLayerType === 'text')
