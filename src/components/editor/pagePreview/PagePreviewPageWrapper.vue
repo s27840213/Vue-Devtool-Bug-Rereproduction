@@ -50,6 +50,7 @@ import GroupUtils from '@/utils/groupUtils'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -185,12 +186,14 @@ export default Vue.extend({
           GroupUtils.deselect()
           this._setLastSelectedPageIndex(this.index + 1)
           this._setCurrActivePageIndex(this.index + 1)
+          StepsUtils.record()
           break
         case 'trash':
           GroupUtils.deselect()
           this._deletePage(this.index)
           this._setLastSelectedPageIndex(this.index - 1)
           this._setCurrActivePageIndex(this.index - 1)
+          StepsUtils.record()
           break
         default:
           break
