@@ -118,14 +118,9 @@ class TextPropUtils {
             }
           }
         } else {
-          console.log(this.targetInfo.subLayerIndex)
-          console.log(selStart.pIndex)
-          console.log(selEnd.pIndex)
           this.spanPropertyHandler(propName, value, selStart, selEnd, this.targetInfo.subLayerIndex)
         }
       } else {
-        console.log(selStart.pIndex)
-        console.log(selEnd.pIndex)
         this.spanPropertyHandler(propName, value, selStart, selEnd)
       }
     }
@@ -196,6 +191,7 @@ class TextPropUtils {
       const i = Object.keys(fontPropsMap).indexOf(propName)
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
+      // prop = this.propIndicator(start, end, propName, value || '', config)
     }
     if (TextUtils.isSel(end)) {
       for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
@@ -307,6 +303,11 @@ class TextPropUtils {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       } else {
         TextUtils.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+        // LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, tmpLayerIndex,
+        //   {
+        //     paragraphs: config.paragraphs
+        //   }
+        // )
       }
     }
 
@@ -485,6 +486,7 @@ class TextPropUtils {
         }
       }
     }
+    this.updateTextPropsState()
   }
 
   /**
@@ -612,8 +614,6 @@ class TextPropUtils {
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
     if (!TextUtils.isSel(end)) {
-      console.log(start.pIndex)
-      console.log(start.sIndex)
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {

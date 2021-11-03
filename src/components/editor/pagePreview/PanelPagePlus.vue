@@ -22,6 +22,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import StepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {
@@ -95,6 +96,7 @@ export default Vue.extend({
       GroupUtils.deselect()
       this._setLastSelectedPageIndex(indexTo)
       this._setCurrActivePageIndex(indexTo)
+      StepsUtils.record()
     },
     addPage(position: number) {
       this._addPageToPos({
@@ -102,6 +104,7 @@ export default Vue.extend({
         pos: position
       })
       this._setLastSelectedPageIndex(position)
+      StepsUtils.record()
     }
   }
 })

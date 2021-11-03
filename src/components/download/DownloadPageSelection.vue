@@ -34,7 +34,7 @@ export default Vue.extend({
   },
   mounted () {
     const { pages } = this
-    const initialStatus = new Array(pages.length).fill(true)
+    const initialStatus = new Array(pages.length).fill(false)
     this.preSelected = [...initialStatus]
     this.handleLabel()
   },

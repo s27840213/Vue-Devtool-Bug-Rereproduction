@@ -317,17 +317,6 @@ export default Vue.extend({
       ]
     },
     detachImage(): any {
-      // const layerIndex = this.popupComponent.properties.layerIndex ?? -1
-      // const currLayer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IFrame
-      // let idx = currLayer.clips.length === 1 && currLayer.clips[0].srcObj.type !== 'frame' ? 0 : -1
-      // if (idx === -1) {
-      //   if (layerIndex !== layerUtils.layerIndex) {
-      //     return
-      //   } else {
-      //     idx = currLayer.clips.findIndex(img => img.active && img.srcObj.type !== 'frame')
-      //   }
-      // }
-
       return {
         icon: 'copy',
         text: 'Detach Image',
@@ -345,11 +334,11 @@ export default Vue.extend({
         action: () => {
           const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage
           if (currLayer.type === 'image') {
-            const { width, height, x, y } = currLayer.styles
+            const { width, height, x, y, rotate } = currLayer.styles
             const { designId } = currLayer
             const layerIndex = layerUtils.layerIndex
             const pageIndex = layerUtils.pageIndex
-            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0 })
+            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0, rotate: 0 })
 
             const newFrame = layerFactary.newFrame({
               designId,
@@ -358,6 +347,7 @@ export default Vue.extend({
                 initHeight: height,
                 width,
                 height,
+                rotate,
                 x,
                 y
               },

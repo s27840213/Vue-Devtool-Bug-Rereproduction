@@ -1301,6 +1301,11 @@ export default Vue.extend({
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
+              if (start.sIndex === 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
+                !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
+                start.pIndex -= 1
+                TextUtils.updateSelection(start, TextUtils.getNullSel())
+              }
               if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
                 // return
@@ -1397,7 +1402,6 @@ export default Vue.extend({
             /**
              * TODO: For some reason while hit Enter the text block, the browser would
              * produce extra <p>, the following could temporarily fix this problem
-             * p.s. not sure if this is a bug of vue
              */
             if (text.childNodes.length !== (this.config as IText).paragraphs.length) {
               let isRemoved = false
@@ -1439,6 +1443,9 @@ export default Vue.extend({
               }
               if (!Number.isNaN(pIndex)) {
                 const range = new Range()
+                console.log(pIndex)
+                console.log(sIndex)
+                console.log(offset)
                 if (text.childNodes[pIndex].firstChild?.nodeName === 'SPAN') {
                   try {
                     range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
