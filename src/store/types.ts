@@ -4,6 +4,7 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
 import { IAsset } from '@/interfaces/module'
 import { SrcObj } from '@/interfaces/gallery'
+import { IUserModule } from './module/user'
 
 /**
  * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
@@ -14,6 +15,7 @@ import { SrcObj } from '@/interfaces/gallery'
  */
 
 export interface IEditorState {
+  user?: IUserModule,
   text?: ITextState,
   pages: Array<IPage>,
   designId: string,

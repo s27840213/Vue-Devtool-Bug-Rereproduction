@@ -5,8 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { Layer } from 'konva/types/Layer'
-
+import { SrcObj } from '@/interfaces/gallery'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -54,26 +53,18 @@ class ImageUtils {
   }
 
   getSrcSize(type: string, width: number, preload = '') {
-    if (type === 'pexels' || type === 'unsplash') {
-      if (width < 540) {
-        return preload === 'next' ? 800 : 540
-      } else if (width < 800) {
-        if (preload === 'pre') {
-          return 540
-        } else if (preload === 'next') {
-          return 1080
-        } else return 800
-      } else if (width < 1080) {
-        if (preload === 'pre') {
-          return 800
-        } else if (preload === 'next') {
-          return 1600
-        } else return 1080
-      } else {
-        return preload === 'pre' ? 1080 : 1600
+    const sizeMap = store.state.user?.imgSizeMap
+    const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
+    if (sizeMap) {
+      let i = 0
+      while (width < sizeMap[i].size && i < sizeMap.length - 1) {
+        i++
       }
+      return preload
+        ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
+        : sizeMap[i][key]
     } else {
-      return 'full'
+      console.error('can not find image size map')
     }
   }
 
@@ -326,14 +317,6 @@ class ImageUtils {
         imgWidth,
         imgHeight
       }
-    })
-  }
-
-  updateImgSrc(pageIndex: number, layerIndex: number, srcObj: { type: string, userId: string, assetId: string }) {
-    store.commit('UPDATE_layerProps', {
-      pageIndex,
-      layerIndex,
-      srcObj
     })
   }
 

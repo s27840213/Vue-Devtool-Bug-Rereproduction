@@ -3,7 +3,6 @@
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
-        //- span(class="body-2 text-gray-2") {{ props.font }}
         img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")
         span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
         svg-icon(class="pointer"
@@ -51,58 +50,6 @@
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
-    //- div(class="text-setting__row5")
-    //-   div(class="relative")
-    //-     div(class="property-bar")
-    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('lineHeight')")
-    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-lineHeight"
-    //-               :value="props.lineHeight" @change="setHeight($event, true)")
-    //-       svg-icon(class="pointer"
-    //-         :iconName="'font-height'" :iconWidth="'25px'" :iconColor="'gray-2'")
-    //-     div(v-if="openSliderBar === 'lineHeight'"
-    //-         class="text-setting__range-input-wrapper"
-    //-         v-click-outside="handleSliderModal")
-    //-       input(class="text-setting__range-input"
-    //-         :value="props.lineHeight * 100"
-    //-         :max="fieldRange.lineHeight.max"
-    //-         :min="fieldRange.lineHeight.min"
-    //-         v-ratio-change
-    //-         type="range"
-    //-         @input="setHeight")
-    //-   div(class="relative")
-    //-     div(class="property-bar")
-    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('fontSpacing')")
-    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-fontSpacing"
-    //-               :value="props.fontSpacing" @change="setSpacing")
-    //-       svg-icon(class="pointer"
-    //-         :iconName="'font-spacing'" :iconWidth="'25px'" :iconColor="'gray-2'")
-    //-     div(v-if="openSliderBar === 'fontSpacing'"
-    //-         class="text-setting__range-input-wrapper"
-    //-         v-click-outside="handleSliderModal")
-    //-       input(class="text-setting__range-input"
-    //-         :value="props.fontSpacing"
-    //-         :max="fieldRange.fontSpacing.max"
-    //-         :min="fieldRange.fontSpacing.min"
-    //-         v-ratio-change
-    //-         type="range"
-    //-         @input="setSpacing")
-    //-   div(class="relative")
-    //-     div(class="property-bar")
-    //-       button(class="text-setting__range-input-button" @click="handleSliderModal('opacity')")
-    //-         input(class="body-2 text-gray-2 record-selection" type="text" ref="input-opacity"
-    //-               :value="props.opacity" @change="setOpacity")
-    //-       svg-icon(class="pointer"
-    //-         :iconName="'transparency'" :iconWidth="'25px'" :iconColor="'gray-2'")
-    //-     div(v-if="openSliderBar === 'opacity'"
-    //-         class="text-setting__range-input-wrapper right"
-    //-         v-click-outside="handleSliderModal")
-    //-       input(class="text-setting__range-input"
-    //-         :value="props.opacity"
-    //-         :max="fieldRange.opacity.max"
-    //-         :min="fieldRange.opacity.min"
-    //-         v-ratio-change
-    //-         type="range"
-    //-         @input="setOpacity")
 </template>
 
 <script lang="ts">

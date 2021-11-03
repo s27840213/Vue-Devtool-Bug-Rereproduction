@@ -29,7 +29,8 @@ export interface IUserModule {
   pending: boolean,
   images: Array<IAssetPhoto>,
   checkedAssets: Array<string>,
-  verUni: number
+  verUni: number,
+  imgSizeMap: Array<{[key: string]: string | number}>
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -58,7 +59,8 @@ const getDefaultState = (): IUserModule => ({
   pending: false,
   images: [],
   checkedAssets: [],
-  verUni: 0
+  verUni: 0,
+  imgSizeMap: []
 })
 
 const state = getDefaultState()
@@ -108,6 +110,7 @@ const mutations: MutationTree<IUserModule> = {
           (state[key] as any) = newState[key]
         }
       })
+    console.log(state)
   },
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, downloadUrl } = state
@@ -262,7 +265,8 @@ const actions: ActionTree<IUserModule, unknown> = {
         shortName: shortName,
         userId: data.data.user_id,
         role: data.data.role,
-        verUni: data.data.ver_uni
+        verUni: data.data.ver_uni,
+        imgSizeMap: data.data.image_size_map
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
