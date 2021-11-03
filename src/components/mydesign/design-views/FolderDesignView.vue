@@ -367,7 +367,7 @@ export default Vue.extend({
       this.$emit('moveItem', item)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
         this.handleFolderNameEditEnd()
       }
       if (this.editableFolderName.length > 64) {

@@ -218,7 +218,7 @@ export default Vue.extend({
       })
     },
     checkNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && this.editableName === this.config.name) {
         this.handleNameEditEnd()
       }
       if (this.editableName.length > 64) {
