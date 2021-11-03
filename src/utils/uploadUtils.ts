@@ -568,7 +568,6 @@ class UploadUtils {
       case 'image': {
         const image = layer as IImage
         const { type, srcObj, styles } = image
-        srcObj.userId = 'jpeg'
         return {
           type,
           srcObj,

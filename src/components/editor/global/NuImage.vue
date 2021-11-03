@@ -14,6 +14,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
+import { IImage } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -27,7 +28,8 @@ export default Vue.extend({
 
     const nextImg = new Image()
     nextImg.onerror = () => {
-      if (this.config.srcObj.type === 'pexels') {
+      if ((this.config as IImage).srcObj.type === 'pexels') {
+        console.log(this.config.srcObj.type)
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
         switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
           case 'group':
