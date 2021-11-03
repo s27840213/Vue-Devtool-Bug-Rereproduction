@@ -329,6 +329,14 @@ class ImageUtils {
     })
   }
 
+  updateImgSrc(pageIndex: number, layerIndex: number, srcObj: { type: string, userId: string, assetId: string }) {
+    store.commit('UPDATE_layerProps', {
+      pageIndex,
+      layerIndex,
+      srcObj
+    })
+  }
+
   async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image()

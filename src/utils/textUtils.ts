@@ -24,7 +24,6 @@ class TextUtils {
   getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) return
-
     const range = sel?.getRangeAt(0)
     if (range) {
       /**
@@ -94,7 +93,6 @@ class TextUtils {
 
       if (!div || (div as HTMLElement).id.match('text') === null || !this.isSel(start) ||
         !range || !range.startContainer || !range.endContainer) return undefined
-
       const isRanged = window.getSelection()?.toString() !== ''
       let end = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
@@ -223,7 +221,6 @@ class TextUtils {
 
         let spanStyle = {} as ISpanStyle
         if (!spanEl.style.fontFamily) {
-          console.log(pIndex)
           if (pIndex > 0) {
             const leng = div.childNodes[pIndex - 1].childNodes.length
             spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
@@ -231,9 +228,6 @@ class TextUtils {
             // Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
             // }
             if (ps.length > config.paragraphs.length) {
-              console.warn('sssss')
-              console.log(pIndex)
-              console.log(spanEl.nodeName)
               Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
             } else {
               Object.assign(spanStyle, config.paragraphs[pIndex].spans[0].styles)
@@ -254,10 +248,6 @@ class TextUtils {
             color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
             opacity: parseInt(spanEl.style.opacity)
           } as ISpanStyle
-        }
-
-        if (pIndex === 2) {
-          console.log(GeneralUtils.deepCopy(spanStyle))
         }
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
@@ -441,7 +431,6 @@ class TextUtils {
     const textHW = this.getTextHW(config, config.widthLimit)
     if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
-      const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     } else {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup

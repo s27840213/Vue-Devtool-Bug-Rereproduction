@@ -406,7 +406,8 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, layerIndex, layer } = updateInfo
     state.pages[pageIndex].layers.splice(layerIndex, 1, layer)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph
+    | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | { [key: string]: string } } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */

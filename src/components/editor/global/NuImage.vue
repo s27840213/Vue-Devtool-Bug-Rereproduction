@@ -15,13 +15,27 @@ import ImageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
-    config: Object
+    config: Object,
+    pageIndex: Number,
+    layerIndex: Number
   },
   created() {
     const { type } = this.config.srcObj
     if (type === 'background') return
+
     fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre')))
-    fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))
+      .then(response => {
+        if (response.status === 404 && this.config.srcObj.type === 'pexels') {
+          ImageUtils.updateImgSrc(this.pageIndex, this.layerIndex,
+            {
+              userId: 'jpeg',
+              ...this.config.srcObj
+            })
+        }
+      })
+      .then(() => {
+        fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))
+      })
   },
   data() {
     return {
