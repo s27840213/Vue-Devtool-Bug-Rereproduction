@@ -6,6 +6,7 @@ import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
+import TemplateCenter from '../views/TemplateCenter.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -71,6 +72,11 @@ const routes: Array<RouteConfig> = [
         console.log(error)
       }
     }
+  },
+  {
+    path: '/templates',
+    name: 'TemplateCenter',
+    component: TemplateCenter
   },
   {
     path: '/',
