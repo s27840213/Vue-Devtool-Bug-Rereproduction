@@ -229,6 +229,7 @@ export default Vue.extend({
     handleNameEditEnd() {
       this.isNameEditing = false
       if (this.editableName === '' || this.editableName === this.config.name) return
+      this.checkNameLength()
       this.setFolderName({
         path: designUtils.appendPath(this.path as string[], this.config),
         newFolderName: this.editableName
@@ -238,6 +239,9 @@ export default Vue.extend({
       if (e.key === 'Enter' && this.editableName === this.config.name) {
         this.handleNameEditEnd()
       }
+      this.checkNameLength()
+    },
+    checkNameLength() {
       if (this.editableName.length > 64) {
         this.editableName = this.editableName.substring(0, 64)
         if (this.messageTimer) {

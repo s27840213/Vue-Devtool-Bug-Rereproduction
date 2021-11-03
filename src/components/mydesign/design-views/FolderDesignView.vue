@@ -336,7 +336,7 @@ export default Vue.extend({
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
-      // TODO: check if name is more than 64 characters
+      this.checkNameLength()
       this.setFolderName({
         path: this.path,
         newFolderName: this.editableFolderName
@@ -378,6 +378,9 @@ export default Vue.extend({
       if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
         this.handleFolderNameEditEnd()
       }
+      this.checkNameLength()
+    },
+    checkNameLength() {
       if (this.editableFolderName.length > 64) {
         this.editableFolderName = this.editableFolderName.substring(0, 64)
         if (this.messageTimer) {
