@@ -114,10 +114,10 @@
               @mousedown.left.stop="scaleStart")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart($event)")
-            div(class="control-point__resize-bar"
+            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point__resize-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
-            div(class="control-point"
+            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
@@ -136,13 +136,18 @@
               :style='lineControlPointStyles()'
               :src="require('@/assets/img/svg/rotate.svg')"
               @mousedown.native.left.stop="lineRotateStart")
-          div(class="control-point__rotater-wrapper"
-              v-else
-              :style="`transform: scale(${100/scaleRatio})`")
-            svg-icon(class="control-point__rotater"
-              :iconName="'rotate'" :iconWidth="`${20}px`"
-              :src="require('@/assets/img/svg/rotate.svg')"
-              @mousedown.native.left.stop="rotateStart")
+          template(v-else)
+            div(class="control-point__controller-wrapper"
+                :style="`transform: scale(${100/scaleRatio})`")
+              img(class="control-point__mover"
+                v-if="getLayerWidth < 50 || getLayerHeight < 50"
+                :src="require('@/assets/img/svg/move.svg')"
+                @mousedown.left.stop="moveStart")
+              svg-icon(class="control-point__rotater"
+                :iconName="'rotate'" :iconWidth="`${20}px`"
+                :src="require('@/assets/img/svg/rotate.svg')"
+                @mousedown.native.left.stop="rotateStart")
+
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -389,12 +394,11 @@ export default Vue.extend({
       })
     },
     resizerBarStyles(resizer: IResizer) {
-      const resizerStyle = Object.assign({}, resizer)
-      const ControllerStyles = this.styles('')
+      const resizerStyle = { ...resizer }
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height ? `${parseInt(ControllerStyles.width) - 20}px` : resizerStyle.width,
-        height: resizerStyle.width > resizerStyle.height ? `${parseInt(ControllerStyles.height) - 20}px` : resizerStyle.height
+        width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
+        height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -758,7 +762,7 @@ export default Vue.extend({
         width = height * initWidth / initHeight
       }
       // The minimum size of the layer
-      if (width <= 20 || height <= 20) return
+      if (width <= 15 || height <= 15) return
 
       const offsetSize = {
         width: width - initWidth,
@@ -1788,6 +1792,10 @@ export default Vue.extend({
   }
   &__rotater {
     @include widget-point;
+  }
+  &__controller-wrapper {
+    @include widget-point-wrapper;
+    width: max-content;
   }
   &__line-controller-wrapper {
     @include widget-point-wrapper;

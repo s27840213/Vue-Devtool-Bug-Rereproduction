@@ -26,7 +26,7 @@ class StepsUtils {
   }
 
   record() {
-    console.trace()
+    // console.trace()
     const pages = GeneralUtils.deepCopy(store.getters.getPages)
     // Watch out! The deep cody method we use won't work on Set/Map object
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)

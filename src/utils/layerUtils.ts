@@ -11,6 +11,7 @@ import mouseUtils from './mouseUtils'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
 import Vue from 'vue'
+import { SrcObj } from '@/interfaces/gallery'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -135,7 +136,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] | IParagraph[]}) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,

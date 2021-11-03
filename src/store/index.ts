@@ -407,7 +407,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[pageIndex].layers.splice(layerIndex, 1, layer)
   },
   UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph
-    | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | { [key: string]: string } } }) {
+    | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | SrcObj } }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
@@ -417,7 +417,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph } }) {
+  UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
