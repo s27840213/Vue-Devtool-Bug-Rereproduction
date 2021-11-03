@@ -185,7 +185,6 @@ export default Vue.extend({
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
       const currLayer = LayerUtils.getCurrLayer
-      console.log(currLayer)
       const nan = TextUtils.getNullSel()
       if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
         const isSelCollapse = (() => {
