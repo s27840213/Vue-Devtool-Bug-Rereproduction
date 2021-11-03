@@ -28,9 +28,9 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage, size: string | number = -1) {
+  getSrc(config: IImage, size?: string | number) {
     const { type, userId, assetId } = config.srcObj || config.src_obj
-    if (size === -1) {
+    if (typeof size === 'undefined') {
       size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
     }
     switch (type) {
