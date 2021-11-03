@@ -31,7 +31,24 @@
                   :config="folder"
                   :undraggable="true"
                   :undroppable="true"
-                  @moveItem="handleMoveItem")
+                  :isSelected="checkFolderSelected(folder.id)"
+                  :isAnySelected="isAnySelected"
+                  :menuItemNum="menuItemSlots.length"
+                  @moveItem="handleMoveItem"
+                  @select="selectFolder(parents, folder)"
+                  @deselect="deselectFolder(parents, folder)")
+        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, parents, folder)")
+            div(class="folder-menu-item__icon")
+              svg-icon(:iconName="menuItemSlot.icon"
+                      iconWidth="10px"
+                      iconColor="gray-2")
+            div(class="folder-menu-item__text")
+              span {{ menuItemSlot.text }}
+            div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
+              svg-icon(iconName="chevron-right"
+                      iconWidth="10px"
+                      iconColor="gray-2")
     div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
       div(class="trash-design-view__expand-icon-container"
           @click="toggleDesignsExpansion")
@@ -49,7 +66,11 @@
                   :config="design"
                   :favorable="false"
                   :undraggable="true"
-                  :menuItemNum="menuItemSlots.length")
+                  :isSelected="checkSelected(design.id)"
+                  :isAnySelected="isAnySelected"
+                  :menuItemNum="menuItemSlots.length"
+                  @select="selectDesign(path, design)"
+                  @deselect="deselectDesign(path, design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
             div(class="design-menu-item__icon")
@@ -70,8 +91,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
-import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
+import FolderItem from '@/components/mydesign/FolderItem.vue'
+import DesignItem from '@/components/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
@@ -95,7 +116,8 @@ export default Vue.extend({
       folders: 'getFolders',
       trashDesigns: 'getTrashDesigns',
       trashFolders: 'getTrashFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      selectedFolders: 'getSelectedFolders'
     }),
     allDesigns(): [string[], IDesign][] {
       const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
@@ -109,6 +131,20 @@ export default Vue.extend({
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
+    },
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
+    },
+    isAnySelected(): boolean {
+      return this.selectedNum > 0
+    }
+  },
+  watch: {
+    allDesigns() {
+      this.$emit('clearSelection')
+    },
+    allFolders() {
+      this.$emit('clearSelection')
     }
   },
   methods: {
@@ -128,6 +164,14 @@ export default Vue.extend({
         this.$emit(event, payload)
       }
     },
+    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
+      if (icon === 'trash') icon = 'delete'
+      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
+      if (extraEvent) {
+        const { event, payload } = extraEvent
+        this.$emit(event, payload)
+      }
+    },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
@@ -142,6 +186,36 @@ export default Vue.extend({
     },
     closeInfo() {
       this.isInfoOpen = false
+    },
+    checkSelected(id: string): boolean {
+      return !!this.selectedDesigns[id]
+    },
+    checkFolderSelected(id: string): boolean {
+      return !!this.selectedFolders[id]
+    },
+    selectDesign(path: string[], design: IDesign) {
+      this.$emit('selectDesign', {
+        path,
+        design
+      })
+    },
+    deselectDesign(path: string[], design: IDesign) {
+      this.$emit('deselectDesign', {
+        path,
+        design
+      })
+    },
+    selectFolder(parents: string[], folder: IFolder) {
+      this.$emit('selectFolder', {
+        parents,
+        folder
+      })
+    },
+    deselectFolder(parents: string[], folder: IFolder) {
+      this.$emit('deselectFolder', {
+        parents,
+        folder
+      })
     }
   }
 })

@@ -12,6 +12,9 @@
             svg-icon(iconName="pen"
                     iconWidth="20px"
                     iconColor="gray-3")
+          transition(name="fade")
+            div(v-if="isShowHint" class="folder-design-view__folder-name-hint")
+              span 不可超過64個字元，請縮減名稱。
         button(v-else
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
@@ -156,8 +159,8 @@ import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import FolderItem from '@/components/navigation/mydesign/FolderItem.vue'
-import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
+import FolderItem from '@/components/mydesign/FolderItem.vue'
+import DesignItem from '@/components/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
 import hintUtils from '@/utils/hintUtils'
 
@@ -177,6 +180,8 @@ export default Vue.extend({
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
       editableFolderName: '',
+      isShowHint: false,
+      messageTimer: -1,
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
@@ -217,7 +222,7 @@ export default Vue.extend({
     designs() {
       this.$emit('clearSelection')
     },
-    currentSelectedFolder() {
+    currLocation() {
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
@@ -225,13 +230,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       folders: 'getFolders',
       favoriteDesigns: 'getFavoriteDesigns',
       selectedDesigns: 'getSelectedDesigns'
     }),
     path(): string[] {
-      return designUtils.makePath(this.currentSelectedFolder)
+      return designUtils.makePath(this.currLocation)
     },
     folder(): IFolder {
       return designUtils.search(this.folders, this.path) as IFolder
@@ -275,7 +280,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
       addToFavorite: 'UPDATE_addToFavorite',
       removeFromFavorite: 'UPDATE_removeFromFavorite',
@@ -295,14 +300,14 @@ export default Vue.extend({
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
-      this.setCurrentSelectedFolder(`f:${selectedParents.join('/')}`)
+      this.setCurrLocation(`f:${selectedParents.join('/')}`)
     },
     handleGotoFolder(id: string) {
       this.setExpand({
         path: this.path,
         isExpanded: true
       })
-      this.setCurrentSelectedFolder(`${this.currentSelectedFolder}/${id}`)
+      this.setCurrLocation(`${this.currLocation}/${id}`)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true
@@ -346,7 +351,13 @@ export default Vue.extend({
       })
     },
     handleNewFolder() {
-      designUtils.addNewFolder(this.path)
+      const folderId = designUtils.addNewFolder(this.path)
+      this.$nextTick(() => {
+        const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
+        if (folderItemName) {
+          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('dblclick')) }, 0)
+        }
+      })
     },
     handleSortByClick(payload: [string, boolean]) {
       this.sortByField = payload[0]
@@ -356,8 +367,19 @@ export default Vue.extend({
       this.$emit('moveItem', item)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
         this.handleFolderNameEditEnd()
+      }
+      if (this.editableFolderName.length > 64) {
+        this.editableFolderName = this.editableFolderName.substring(0, 64)
+        if (this.messageTimer) {
+          clearTimeout(this.messageTimer)
+        }
+        this.isShowHint = true
+        this.messageTimer = setTimeout(() => {
+          this.isShowHint = false
+          this.messageTimer = -1
+        }, 3000)
       }
     },
     checkSortSelected(payload: [string, boolean]) {
@@ -450,6 +472,7 @@ export default Vue.extend({
         }
       }
       > div {
+        position: relative;
         display: flex;
         align-items: center;
         width: 321px;
@@ -473,6 +496,30 @@ export default Vue.extend({
           color: inherit;
         }
       }
+    }
+  }
+  &__folder-name-hint {
+    position: absolute;
+    display: flex;
+    right: -16px;
+    top: 50%;
+    transform: translate(100%, -50%);
+    width: 208.8px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    background-color: setColor(red-1);
+    border-radius: 2px;
+    padding: 2px 8px;
+    > span {
+      font-family: "SFProDisplay";
+      font-weight: 400;
+      font-size: 10px;
+      line-height: 20px;
+      display: block;
+      letter-spacing: 0.12em;
+      text-indent: 0.12em;
+      color: white;
     }
   }
   &__toolbar {
@@ -698,7 +745,7 @@ export default Vue.extend({
   }
   &__folders {
     display: flex;
-    gap: 30px;
+    gap: 40px;
     margin-bottom: 45px;
   }
   &__designs {
@@ -758,5 +805,14 @@ export default Vue.extend({
   width: calc(100% - 120px);
   margin-top: 24px;
   margin-bottom: 38px;
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 </style>
