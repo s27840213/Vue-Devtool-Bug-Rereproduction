@@ -252,6 +252,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .folder-item {
   &__block {
+    position: relative;
     width: 63px;
     height: 63px;
     margin-bottom: 10px;
