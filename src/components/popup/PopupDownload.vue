@@ -24,7 +24,7 @@
           @select="option => handleUpdate('scale', option)") {{ selected.scale }}
         span 倍
       div(v-if="'quality' in selected"
-        class="flex items-center mb-10")
+        class="flex flex-column items-center mb-10")
         div(class="flex items-center full-width mb-5")
           span 品質
           property-bar(class="w-60 ml-15")
@@ -42,23 +42,30 @@
         download-check-button(type="radio"
           class="mb-10"
           group-name="range"
+          :label="`目前頁面（第${currentPageIndex + 1}頁）`"
+          value="current"
+          :default-checked="rangeType === 'current'"
+          @change="handleRangeType")
+        download-check-button(type="radio"
+          class="mb-10"
+          group-name="range"
           label="所有頁面"
           value="all"
           :default-checked="rangeType === 'all'"
-          @change="({ value }) => handleRangeType(value)")
+          @change="handleRangeType")
         div(class="flex items-center")
           download-check-button(type="radio"
             group-name="range"
             value="spec"
             label="範圍"
             :default-checked="rangeType === 'spec'"
-            @change="({ value }) => handleRangeType(value)")
+            @change="handleRangeType")
           download-page-selection(class="ml-5 w-75"
             @confirm="handleRangeConfirm")
       hr(class="popup-download__hr my-15")
       download-check-button(type="checkbox"
         class="mb-20"
-        label="儲存上一步設定"
+        label="儲存以上設定"
         :default-checked="saveSubmission"
         @change="({ checked }) => handleSubmission(checked)")
     div
@@ -96,17 +103,20 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   props: {
-    useExternelJSON: Boolean
+    useExternelJSON: Boolean,
+    pageIndex: Number
   },
   data () {
     const { selectedTypeVal, ...prevSubmission } = JSON.parse(localStorage.getItem(submission) || '{}')
+    const currentPageIndex = this.pageIndex || 0
     return {
+      currentPageIndex,
       saveSubmission: !!selectedTypeVal,
       polling: false,
       functionQueue: [] as Array<() => void>,
       exportId: '',
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
-      rangeType: 'all',
+      rangeType: 'current',
       pageRange: [] as number[],
       selectedTypeVal: selectedTypeVal || 'png',
       scaleOptions: [0.5, 1, 1.5, 2, 2.5, 3],
@@ -170,8 +180,9 @@ export default Vue.extend({
     handleSelectType (type: ITypeOption) {
       this.selectedTypeVal = type.value
     },
-    handleRangeType (type: string) {
-      this.rangeType = type
+    handleRangeType (data: { [key: string]: any }) {
+      const { value } = data
+      this.rangeType = value
     },
     handleUpdate (field: string, option: string | number) {
       Object.assign(this.selected, { [field]: option })
@@ -199,18 +210,23 @@ export default Vue.extend({
         selectedTypeVal,
         saveSubmission
       } = this
-
       saveSubmission
         ? localStorage.setItem(submission, JSON.stringify({ ...selected, selectedTypeVal }))
         : localStorage.removeItem(submission)
+
+      const fileInfo = {
+        exportId,
+        teamId: '',
+        format: selectedTypeVal,
+        ...selected
+      }
+
+      if (['spec', 'current'].includes(rangeType)) {
+        fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
+      }
+
       DownloadUtil
-        .getFileUrl({
-          exportId,
-          teamId: '',
-          format: selectedTypeVal,
-          pageIndex: rangeType === 'all' ? undefined : pageRange.join(','),
-          ...selected
-        })
+        .getFileUrl(fileInfo)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress (response: any) {
@@ -226,9 +242,11 @@ export default Vue.extend({
           break
         case 2:
           console.log('progress: ', progress)
-          DownloadUtil
-            .getFileStatus(url)
-            .then(this.handleDownloadProgress)
+          setTimeout(() => {
+            DownloadUtil
+              .getFileStatus(url)
+              .then(this.handleDownloadProgress)
+          }, 2000)
           break
       }
     }

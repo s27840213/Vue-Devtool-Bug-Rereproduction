@@ -14,7 +14,7 @@
       div(v-if="type === 'theme'"
         class="pointer scroll-list-plus")
         img(:src="require('@/assets/img/png/plus-origin.png')"
-          @click="goToPage('Editor')")
+          @click="openPopup()")
         div(class="pt-10 body-1") 自訂尺寸
       div(v-for="item, idx in list" class="scroll-list-item pt-10"
         :class="{'pb-70': type === 'theme'}")
@@ -70,6 +70,9 @@ export default Vue.extend({
       const { scrollWidth, offsetWidth } = this.items
       this.prevIcon = left > 0
       this.nextIcon = left < (scrollWidth - offsetWidth)
+    },
+    openPopup () {
+      this.$emit('openPopup')
     }
   }
 })

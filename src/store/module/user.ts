@@ -1,4 +1,5 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
 import { IAssetPhoto, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
@@ -243,6 +244,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
+      console.log('wwww')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const words = uname.split(' ')
@@ -252,6 +254,8 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else {
         shortName = (uname.substring(0, 2)).toUpperCase()
       }
+      Sentry.setTag('user_name', uname)
+      Sentry.setTag('user_id', data.data.user_id)
       commit('SET_STATE', {
         downloadUrl: data.data.download_url,
         uname: uname,
