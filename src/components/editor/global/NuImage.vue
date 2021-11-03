@@ -29,6 +29,7 @@ export default Vue.extend({
     const nextImg = new Image()
     nextImg.onerror = () => {
       if ((this.config as IImage).srcObj.type === 'pexels') {
+        console.log(this.config.srcObj.type)
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
         switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
           case 'group':
