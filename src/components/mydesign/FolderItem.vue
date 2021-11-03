@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="folder-item relative")
+  div(class="folder-item")
     div(class="folder-item__block"
         :class="isMouseOver ? 'block-over' : 'block'"
         :draggable="!undraggable"
@@ -38,7 +38,8 @@
               class="folder-item__menu"
               v-click-outside="closeMenu")
             slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-    div(class="folder-item__name"
+    div(ref="nameblock"
+        class="folder-item__name"
         :folderid="config.id"
         v-click-outside="handleNameEditEnd")
       input(ref="name"
