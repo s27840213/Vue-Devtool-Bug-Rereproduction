@@ -16,7 +16,6 @@
             :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
           span(class="body-4 text-gray-3") W
         svg-icon(class="pointer px-10"
-          :disabled="isLockDisabled"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="15px" :iconColor="!isLockDisabled ? 'black' : 'gray-3'"
           @click.native="toggleLock()")
@@ -76,7 +75,7 @@ export default Vue.extend({
       aspectRatio: 1,
       isLayoutReady: false,
       isConfirmClicked: false,
-      isLocked: true
+      isLocked: false
     }
   },
   computed: {
@@ -125,6 +124,9 @@ export default Vue.extend({
       ]
     ),
     toggleLock() {
+      if (this.isLockDisabled) {
+        return
+      }
       this.isLocked = !this.isLocked
       if (this.isLocked) {
         this.aspectRatio = (this.pageWidth as number) / (this.pageHeight as number)
