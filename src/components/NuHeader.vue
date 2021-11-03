@@ -5,10 +5,10 @@
         :iconName="'logo'"
         :iconWidth="'100px'"
         style="height: 50px;"
-        @click.native="goToPage('/')")
+        @click.native="goToPage('Home')")
     div(class="body-2")
       div
-        btn(@click.native="goToPage('/')"
+        btn(@click.native="goToPage('Home')"
           style="padding: 5px;" :type="'icon-mid-body'"
           :class="{'text-blue-1': currentPage === '/'}") 建立設計
       div
@@ -81,17 +81,18 @@ export default Vue.extend({
   methods: {
     goToPage(pageName = '' as string) {
       if (pageName === this.currentPage) {
-        this.$router.go(0)
+        // this.$router.go(0)
       } else if (pageName === '/login' || pageName === '/signup') {
         this.$router.push({ path: pageName, query: { redirect: this.$route.path } })
-      // Temporary setting ----
+        // Temporary setting ----
       } else if (pageName === '/toturial' || pageName === '/faq') {
         window.location.href = 'https://www.facebook.com/vivipictw'
-      } else if (pageName === '/' || pageName === '/pricing' || pageName === '/mydesign') {
-        this.$router.push({ path: pageName })
+      } else if (pageName === '/pricing' || pageName === '/mydesign') {
+        // this.$router.push({ path: pageName })MyDesign
+        this.$router.push({ name: 'MyDesign' })
       } else {
         // this.$router.push({ path: pageName })
-        this.$router.push({ name: 'Editor' })
+        this.$router.push({ name: 'Home' })
       }
       // ----------------------
     }

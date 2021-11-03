@@ -43,6 +43,7 @@ import { Chrome } from 'vue-color'
 import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
+import localeUtils from './utils/localeUtils'
 
 export default Vue.extend({
   components: {
@@ -69,7 +70,15 @@ export default Vue.extend({
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
       isModalOpen: 'modal/getModalOpen'
-    })
+    }),
+    currLocale(): string {
+      return localeUtils.currLocale()
+    }
+  },
+  watch: {
+    currLocale() {
+      console.log(this.$route.path)
+    }
   },
   methods: {
     ...mapMutations({

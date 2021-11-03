@@ -4,7 +4,7 @@ import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 
-export async function editorRouteHandler (_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
+export async function editorRouteHandler(_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
   try {
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       next({ name: 'Home', query: { isMobile: 'true' } })
