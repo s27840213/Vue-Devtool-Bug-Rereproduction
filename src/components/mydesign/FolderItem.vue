@@ -51,7 +51,7 @@
           @dblclick="handleNameEditStart"
           @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
     transition(name="fade")
-      div(v-if="isShowHint" class="folder-item__name-hint")
+      div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
         span 不可超過64個字元，請縮減名稱。
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div
@@ -113,6 +113,13 @@ export default Vue.extend({
       return Array(this.menuItemNum ?? 0)
     }
   },
+  watch: {
+    'config.name': {
+      handler: function(newVal) {
+        this.editableName = newVal
+      }
+    }
+  },
   methods: {
     ...mapMutations('design', {
       setDraggingFolder: 'SET_draggingFolder',
@@ -130,6 +137,15 @@ export default Vue.extend({
         }
       } else {
         return {}
+      }
+    },
+    hintStyles(): {[key: string]: string} {
+      const nameblock = (this.$refs.nameblock as HTMLElement)
+      if (nameblock) {
+        const rect = nameblock.getBoundingClientRect()
+        return { top: `${rect.top + rect.height + 10}px`, left: `${rect.left + rect.width / 2}px` }
+      } else {
+        return { top: '0', left: '0' }
       }
     },
     handleDragStart(e: DragEvent) {
@@ -412,11 +428,9 @@ export default Vue.extend({
     }
   }
   &__name-hint {
-    position: absolute;
+    position: fixed;
     display: flex;
-    left: 50%;
-    bottom: -10px;
-    transform: translate(-50%, 100%);
+    transform: translate(-50%);
     width: 208.8px;
     height: 20px;
     align-items: center;
@@ -424,6 +438,7 @@ export default Vue.extend({
     background-color: setColor(red-1);
     border-radius: 2px;
     padding: 2px 8px;
+    z-index: 1000;
     > span {
       font-family: "SFProDisplay";
       font-weight: 400;
