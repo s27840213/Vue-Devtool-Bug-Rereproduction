@@ -196,7 +196,7 @@ export default Vue.extend({
       }
     },
     passwordLengthValid(): boolean {
-      if (this.password.length >= 8 && this.password.length <= 18) {
+      if (this.password.length >= 8) {
         return true
       } else {
         return false
