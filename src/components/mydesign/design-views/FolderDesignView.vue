@@ -3,6 +3,7 @@
     div(class="folder-design-view__folder-name")
       span
         div(v-if="isFolderNameEditing"
+            class="input-container"
             v-click-outside="handleFolderNameEditEnd")
           input(ref="folderName"
                 v-model="editableFolderName"
@@ -12,9 +13,6 @@
             svg-icon(iconName="pen"
                     iconWidth="20px"
                     iconColor="gray-3")
-          transition(name="fade")
-            div(v-if="isShowHint" class="folder-design-view__folder-name-hint")
-              span 不可超過64個字元，請縮減名稱。
         button(v-else
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
@@ -24,6 +22,16 @@
                   iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
+        transition(name="fade")
+          svg-icon(v-if="isShowHint"
+                  class="folder-design-view__folder-name-hint-arrow"
+                  iconName="arrow-up"
+                  iconWidth="13.76px"
+                  iconHeight="9.79px"
+                  iconColor="red-1")
+        transition(name="fade")
+          div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
+            span 不可超過64個字元，請縮減名稱。
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in shownParents")
@@ -328,7 +336,7 @@ export default Vue.extend({
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
-      // TODO: check if name is more than 64 characters
+      this.checkNameLength()
       this.setFolderName({
         path: this.path,
         newFolderName: this.editableFolderName
@@ -370,6 +378,9 @@ export default Vue.extend({
       if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
         this.handleFolderNameEditEnd()
       }
+      this.checkNameLength()
+    },
+    checkNameLength() {
       if (this.editableFolderName.length > 64) {
         this.editableFolderName = this.editableFolderName.substring(0, 64)
         if (this.messageTimer) {
@@ -442,6 +453,7 @@ export default Vue.extend({
   &__folder-name {
     margin-top: 94px;
     > span {
+      position: relative;
       font-size: 24px;
       font-weight: 700;
       line-height: 40px;
@@ -471,8 +483,7 @@ export default Vue.extend({
           white-space: nowrap;
         }
       }
-      > div {
-        position: relative;
+      > div.input-container {
         display: flex;
         align-items: center;
         width: 321px;
@@ -498,12 +509,16 @@ export default Vue.extend({
       }
     }
   }
-  &__folder-name-hint {
+  &__folder-name-hint-arrow {
+    position: absolute;
+    left: 15px;
+    top: 45px;
+  }
+  &__folder-name-hint-text {
     position: absolute;
     display: flex;
-    right: -16px;
-    top: 50%;
-    transform: translate(100%, -50%);
+    left: 0px;
+    top: 51px;
     width: 208.8px;
     height: 20px;
     align-items: center;

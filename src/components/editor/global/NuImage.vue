@@ -25,7 +25,6 @@ export default Vue.extend({
   },
   created() {
     const { type } = this.config.srcObj
-    if (type === 'background') return
 
     const nextImg = new Image()
     nextImg.onerror = () => {
