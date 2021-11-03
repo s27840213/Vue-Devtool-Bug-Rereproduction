@@ -12,16 +12,44 @@
 import Vue from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import frameUtils from '@/utils/frameUtils'
+import { IImage } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
-    config: Object
+    config: Object,
+    pageIndex: Number,
+    layerIndex: Number,
+    subLayerIndex: Number
   },
   created() {
     const { type } = this.config.srcObj
-    if (type === 'background') return
-    fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre')))
-    fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next')))
+
+    const nextImg = new Image()
+    nextImg.onerror = () => {
+      if ((this.config as IImage).srcObj.type === 'pexels') {
+        console.log(this.config.srcObj.type)
+        const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
+        switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
+          case 'group':
+            layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+            break
+          case 'frame':
+            frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+            break
+          default:
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
+        }
+        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next'))
+      }
+    }
+    nextImg.onload = () => {
+      const preImg = new Image()
+      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre'))
+    }
+
+    nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next'))
   },
   data() {
     return {
@@ -35,8 +63,10 @@ export default Vue.extend({
     width() {
       const { type } = this.config.srcObj
       if (type === 'background') return
-      fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'pre')))
-      fetch(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'next')))
+      const preImg = new Image()
+      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'pre'))
+      const nextImg = new Image()
+      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'next'))
     }
   },
   components: { NuAdjustImage },

@@ -1,8 +1,10 @@
 <template lang="pug">
   section
-    div(:class="[`nav-folder-${level}`, {'bg-blue-1': folder.isSelected}]"
+    div(class="nav-folder"
+        :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isCurrLocation}]"
         :style="draggedOverStyles()"
-        :draggable="true"
+        :draggable="!isNameEditing"
+        :folderid="folder.id"
         @dragstart="handleDragStart"
         @drag="handleDragging"
         @dragend="handleDragEnd"
@@ -10,7 +12,8 @@
         @dragleave="handleDragLeave"
         @dragover.prevent
         @drop="handleDrop"
-        @click="handleSelection")
+        @click="handleSelection"
+        @click.right.prevent="handleNameEditStart")
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")
         svg-icon(class="nav-folder__expand-icon"
@@ -22,10 +25,21 @@
           iconColor="white"
           iconWidth="20px"
           style="pointer-events: none")
-      div(:class="`nav-folder-${level}__text`"
+      input(ref="name"
+            :class="`nav-folder-${level}__input`"
+            v-if="isNameEditing"
+            v-model="editableName"
+            v-click-outside="handleNameEditEnd"
+            @change="handleNameEditEnd"
+            @keyup="checkNameEnter"
+            @click.stop
+            @click.right.stop)
+      div(v-else
+          :class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
     sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
-                  @moveItem="handleMoveItem")
+                  @moveItem="handleMoveItem"
+                  @showHint="handleShowHint")
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div(class="nav-folder-0")
         svg-icon(iconName="folder"
@@ -38,6 +52,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
 import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
@@ -49,6 +64,8 @@ export default Vue.extend({
     return {
       isDragged: false,
       isDraggedOver: false,
+      isNameEditing: false,
+      editableName: '',
       draggedFolderCoordinate: { x: 0, y: 0 }
     }
   },
@@ -57,9 +74,12 @@ export default Vue.extend({
     parents: Array,
     level: Number
   },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
       draggingFolder: 'getDraggingFolder',
@@ -74,15 +94,16 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrentSelectedFolder: 'SET_currSelectedFolder',
+      setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
-      setDraggingFolder: 'SET_draggingFolder'
+      setDraggingFolder: 'SET_draggingFolder',
+      setFolderName: 'UPDATE_folderName'
     }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     draggedOverStyles() {
-      return (this.isDraggedOver && !this.folder.isSelected) ? { 'background-color': '#2C2F43' } : {}
+      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': '#2C2F43' } : {}
     },
     draggedFolderStyles(): {[key: string]: string} {
       if (this.isDragged) {
@@ -127,7 +148,7 @@ export default Vue.extend({
       e.preventDefault()
     },
     handleSelection() {
-      this.setCurrentSelectedFolder(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
+      this.setCurrLocation(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
     },
     handleDragEnter() {
       this.isDraggedOver = true
@@ -160,8 +181,8 @@ export default Vue.extend({
         if (!folder) return
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
         designUtils.moveFolder(folder, parents, destination)
-        if (folder.isSelected) {
-          this.setCurrentSelectedFolder(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
+        if (folder.isCurrLocation) {
+          this.setCurrLocation(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
         }
         this.$emit('moveItem', {
           type: 'folder',
@@ -171,6 +192,42 @@ export default Vue.extend({
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
+    },
+    handleNameEditStart() {
+      this.editableName = this.folder.name
+      this.isNameEditing = true
+      this.$nextTick(() => {
+        const nameInput = this.$refs.name as HTMLInputElement
+        const nav = document.querySelector('.nav') as HTMLElement
+        if (nav) {
+          nav.click()
+        }
+        nameInput.focus()
+      })
+    },
+    handleNameEditEnd() {
+      this.isNameEditing = false
+      if (this.editableName === '' || this.editableName === this.folder.name) return
+      this.checkNameLength()
+      this.setFolderName({
+        path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
+        newFolderName: this.editableName
+      })
+    },
+    handleShowHint(folderId: string) {
+      this.$emit('showHint', folderId)
+    },
+    checkNameEnter(e: KeyboardEvent) {
+      if (e.key === 'Enter' && this.editableName === this.folder.name) {
+        this.handleNameEditEnd()
+      }
+      this.checkNameLength()
+    },
+    checkNameLength() {
+      if (this.editableName.length > 64) {
+        this.editableName = this.editableName.substring(0, 64)
+        this.$emit('showHint', this.folder.id)
+      }
     },
     toggleExpansion() {
       this.setExpand({
@@ -191,7 +248,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @function paddingForLevel($level) {
-  @return 10px 10px 10px 25px * $level + 33px;
+  @return 0 10px 0 25px * $level + 33px;
 }
 
 @function fontWeightForLevel($level) {
@@ -208,6 +265,7 @@ $maxLevels: 5;
   .nav-folder-#{$i} {
     grid-template-columns: 15px 20px auto;
     padding: paddingForLevel($i);
+    height: 40px;
     width: 100%;
     display: grid;
     grid-column-gap: 10px;
@@ -217,7 +275,7 @@ $maxLevels: 5;
     margin-bottom: 10px;
     cursor: pointer;
     &__text {
-      font-family: 'NotoSansTC';
+      font-family: 'SFProDisplay';
       text-align: left;
       color: white;
       font-size: 14px;
@@ -225,18 +283,35 @@ $maxLevels: 5;
       letter-spacing: 2.5px;
       white-space: nowrap;
     }
+    &__input {
+      width: 144px;
+      padding: 4px 5px;
+      font-family: 'SFProDisplay';
+      text-align: left;
+      color: white;
+      font-size: 14px;
+      font-weight: fontWeightForLevel($i);
+      letter-spacing: 2.5px;
+      background-color: setColor(nav-input);
+      border: 1px solid #606A95;
+      box-sizing: border-box;
+      border-radius: 2px;
+    }
   }
 }
-.nav-folder__expand-icon-container {
+.nav-folder {
+  &__expand-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 15px;
   height: 15px;
+  }
+  &__expand-icon {
+    transition: 0.1s linear
+  }
 }
-.nav-folder__expand-icon {
-  transition: 0.1s linear
-}
+
 .dragged-folder {
   > .nav-folder-0 {
     grid-template-columns: 20px auto;
@@ -251,5 +326,14 @@ $maxLevels: 5;
   border-radius: 6px;
   background-color: setColor(nav);
   box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+}
+
+.fade {
+  &-enter-active, &-leave-active {
+    transition: .2s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 </style>

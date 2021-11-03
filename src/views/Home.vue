@@ -15,7 +15,8 @@
             class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
-        scroll-list(:list="themeList" type='theme')
+        scroll-list(:list="themeList" type='theme'
+          @openPopup="openPopup()")
       div(class="home-content-plaque")
         img(:src="require('@/assets/img/png/home-plaque.png')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
@@ -59,6 +60,9 @@
       div(class="home-content-template")
         scroll-list(:list="latestTemplateList" type='template')
     nu-footer
+    div(v-if="showSizePopup"
+      class="home__size")
+      popup-size(@close="closePopup()")
 </template>
 
 <script lang="ts">
@@ -67,6 +71,7 @@ import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
+import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 
 export default Vue.extend({
@@ -74,7 +79,8 @@ export default Vue.extend({
   components: {
     NuHeader,
     NuFooter,
-    ScrollList
+    ScrollList,
+    PopupSize
   },
   data() {
     return {
@@ -106,6 +112,7 @@ export default Vue.extend({
           content: 'Vivipic 擁有你在設計路上需要的必要素材。超過 200 萬張的可商用圖庫、定期新增的插圖素材、背景、圖示等等。'
         }
       ],
+      showSizePopup: false,
       featureSelected: 0,
       tagString: 'IG,母嬰,雙十一,特價',
       tags: [] as string[],
@@ -171,6 +178,12 @@ export default Vue.extend({
     },
     featureItemClicked (idx: number) {
       this.featureSelected = idx
+    },
+    openPopup() {
+      this.showSizePopup = true
+    },
+    closePopup() {
+      this.showSizePopup = false
     }
   }
 })
@@ -183,6 +196,19 @@ export default Vue.extend({
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
+
+  &__size {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000a1;
+    z-index: 999999;
+  }
 }
 .home-content {
   display: flex;

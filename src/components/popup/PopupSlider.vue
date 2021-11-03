@@ -6,15 +6,18 @@
       :max="max"
       :min="min"
       v-ratio-change
-      type="range")
+      type="range"
+      @mouseup="handleChangeStop")
     input(class="popup-slider__text body-2 text-gray-2"
       v-if="!noText"
       type="text"
-      v-model="value")
+      v-model="value"
+      @change="handleChangeStop")
 </template>
 
 <script lang="ts">
 import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -50,6 +53,11 @@ export default Vue.extend({
     },
     styles(): string {
       return this.noText ? 'grid-template-columns: 1fr; height: 26px' : 'grid-template-columns: 2.5fr 1fr;'
+    }
+  },
+  methods: {
+    handleChangeStop() {
+      stepsUtils.record()
     }
   }
 })

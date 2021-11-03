@@ -56,6 +56,7 @@
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+              draggable="false"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
@@ -113,10 +114,10 @@
               @mousedown.left.stop="scaleStart")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart($event)")
-            div(class="control-point__resize-bar"
+            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point__resize-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
-            div(class="control-point"
+            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
@@ -135,13 +136,18 @@
               :style='lineControlPointStyles()'
               :src="require('@/assets/img/svg/rotate.svg')"
               @mousedown.native.left.stop="lineRotateStart")
-          div(class="control-point__rotater-wrapper"
-              v-else
-              :style="`transform: scale(${100/scaleRatio})`")
-            svg-icon(class="control-point__rotater"
-              :iconName="'rotate'" :iconWidth="`${20}px`"
-              :src="require('@/assets/img/svg/rotate.svg')"
-              @mousedown.native.left.stop="rotateStart")
+          template(v-else)
+            div(class="control-point__controller-wrapper"
+                :style="`transform: scale(${100/scaleRatio})`")
+              img(class="control-point__mover"
+                v-if="getLayerWidth < 50 || getLayerHeight < 50"
+                :src="require('@/assets/img/svg/move.svg')"
+                @mousedown.left.stop="moveStart")
+              svg-icon(class="control-point__rotater"
+                :iconName="'rotate'" :iconWidth="`${20}px`"
+                :src="require('@/assets/img/svg/rotate.svg')"
+                @mousedown.native.left.stop="rotateStart")
+
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -388,12 +394,11 @@ export default Vue.extend({
       })
     },
     resizerBarStyles(resizer: IResizer) {
-      const resizerStyle = Object.assign({}, resizer)
-      const ControllerStyles = this.styles('')
+      const resizerStyle = { ...resizer }
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height ? `${parseInt(ControllerStyles.width) - 20}px` : resizerStyle.width,
-        height: resizerStyle.width > resizerStyle.height ? `${parseInt(ControllerStyles.height) - 20}px` : resizerStyle.height
+        width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
+        height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -672,7 +677,6 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent) {
       if (this.getLayerType === 'image') {
-        // (this.$refs.body as HTMLElement).style.pointerEvents = 'initial'
         this.setMoving(false)
       }
       if (this.isActive) {
@@ -758,7 +762,7 @@ export default Vue.extend({
         width = height * initWidth / initHeight
       }
       // The minimum size of the layer
-      if (width <= 20 || height <= 20) return
+      if (width <= 15 || height <= 15) return
 
       const offsetSize = {
         width: width - initWidth,
@@ -1301,6 +1305,11 @@ export default Vue.extend({
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
+              if (start.sIndex === 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
+                !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
+                start.pIndex -= 1
+                TextUtils.updateSelection(start, TextUtils.getNullSel())
+              }
               if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
                 // return
@@ -1397,7 +1406,6 @@ export default Vue.extend({
             /**
              * TODO: For some reason while hit Enter the text block, the browser would
              * produce extra <p>, the following could temporarily fix this problem
-             * p.s. not sure if this is a bug of vue
              */
             if (text.childNodes.length !== (this.config as IText).paragraphs.length) {
               let isRemoved = false
@@ -1439,6 +1447,9 @@ export default Vue.extend({
               }
               if (!Number.isNaN(pIndex)) {
                 const range = new Range()
+                console.log(pIndex)
+                console.log(sIndex)
+                console.log(offset)
                 if (text.childNodes[pIndex].firstChild?.nodeName === 'SPAN') {
                   try {
                     range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
@@ -1527,19 +1538,28 @@ export default Vue.extend({
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any
+      let layers = null as any
       switch (this.getLayerType) {
         case 'group':
           updateSubLayerProps = LayerUtils.updateSubLayerProps
+          layers = (LayerUtils.getCurrLayer as IGroup).layers
           break
         case 'frame':
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
+          layers = (LayerUtils.getCurrLayer as IFrame).clips
       }
 
       if (this.currSubSelectedInfo.index !== -1) {
-        updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
-        if (this.currSubSelectedInfo.type === 'image') {
-          updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
+        for (let idx = 0; idx < layers.length; idx++) {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+          if (this.currSubSelectedInfo.type === 'image') {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
+          }
         }
+        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
+        // if (this.currSubSelectedInfo.type === 'image') {
+        //   updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
+        // }
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
@@ -1772,6 +1792,10 @@ export default Vue.extend({
   }
   &__rotater {
     @include widget-point;
+  }
+  &__controller-wrapper {
+    @include widget-point-wrapper;
+    width: max-content;
   }
   &__line-controller-wrapper {
     @include widget-point-wrapper;

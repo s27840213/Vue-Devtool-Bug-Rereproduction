@@ -55,6 +55,7 @@
         @click.native="download = true") 下 載
       popup-download(v-if="download"
         class="editor-header__download"
+        :page-index="lastSelectedPageIndex"
         @close="() => (download = false)")
       //- img(:src="require('@/assets/img/svg/avatar.svg')")
 </template>
@@ -65,7 +66,7 @@ import FileUtils from '@/utils/fileUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ModalUtils from '@/utils/modalUtils'
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -86,6 +87,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapGetters({
+      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+    }),
     isInFirstStep(): boolean {
       return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
     },

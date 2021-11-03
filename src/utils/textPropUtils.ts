@@ -118,14 +118,9 @@ class TextPropUtils {
             }
           }
         } else {
-          console.log(this.targetInfo.subLayerIndex)
-          console.log(selStart.pIndex)
-          console.log(selEnd.pIndex)
           this.spanPropertyHandler(propName, value, selStart, selEnd, this.targetInfo.subLayerIndex)
         }
       } else {
-        console.log(selStart.pIndex)
-        console.log(selEnd.pIndex)
         this.spanPropertyHandler(propName, value, selStart, selEnd)
       }
     }
@@ -196,60 +191,10 @@ class TextPropUtils {
       const i = Object.keys(fontPropsMap).indexOf(propName)
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
+      // prop = this.propIndicator(start, end, propName, value || '', config)
     }
     if (TextUtils.isSel(end)) {
-      for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
-        const p = config.paragraphs[pIndex]
-        for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
-          const span = p.spans[sIndex]
-          const text = span.text
-          if (pIndex === start.pIndex && sIndex < start.sIndex) {
-            continue
-          } else if (pIndex === start.pIndex && sIndex === start.sIndex) {
-            span.text = text.substr(0, start.offset)
-
-            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-            newSpan.text = text.substr(start.offset, text.length)
-            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
-
-            config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, newSpan)
-            if (span.text === '') {
-              config.paragraphs[pIndex].spans.splice(sIndex, 1)
-              isStartContainerDivided = false
-            }
-
-            if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-              newSpan.text = text.substring(start.offset, end.offset)
-              const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-              thirdSpan.text = text.substr(end.offset)
-              Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
-              if (thirdSpan.text !== '') {
-                config.paragraphs[pIndex].spans.splice(isStartContainerDivided ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
-              }
-              end.offset -= start.offset
-              break
-            }
-            if (start.pIndex === end.pIndex && isStartContainerDivided) {
-              sIndex++
-              end.sIndex++
-            }
-          } else if (pIndex === end.pIndex && sIndex === end.sIndex) {
-            span.text = text.substr(end.offset)
-
-            const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
-            newSpan.text = text.substr(0, end.offset)
-            Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
-            if (span.text === '') {
-              config.paragraphs[pIndex].spans.splice(sIndex, 1, newSpan)
-            } else {
-              config.paragraphs[pIndex].spans.splice(sIndex, 0, newSpan)
-            }
-            break
-          } else if (pIndex < end.pIndex || (pIndex === end.pIndex && sIndex < end.sIndex)) {
-            Object.assign(span.styles, this.spanStylesTransformer(span, prop))
-          }
-        }
-      }
+      isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
@@ -260,46 +205,7 @@ class TextPropUtils {
       }
     } else if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      switch (propName) {
-        case 'fontSize':
-          styles.size = value as number
-          break
-        case 'fontFamily':
-          styles.font = value as string
-          break
-        case 'color':
-          this.updateTextPropsState({ color: value as string })
-          break
-        case 'bold': {
-          if (this.getCurrTextProps?.weight === 'bold') {
-            this.updateTextPropsState({ weight: 'normal' })
-            styles.weight = 'normal'
-          } else {
-            this.updateTextPropsState({ weight: 'bold' })
-            styles.weight = 'bold'
-          }
-          break
-        }
-        case 'italic': {
-          if (this.getCurrTextProps?.style === 'italic') {
-            this.updateTextPropsState({ style: 'normal' })
-            styles.style = 'normal'
-          } else {
-            this.updateTextPropsState({ style: 'italic' })
-            styles.style = 'italic'
-          }
-          break
-        }
-        case 'underline': {
-          if (this.getCurrTextProps?.decoration === 'underline') {
-            this.updateTextPropsState({ decoration: 'none' })
-            styles.decoration = 'none'
-          } else {
-            this.updateTextPropsState({ decoration: 'underline' })
-            styles.decoration = 'underline'
-          }
-        }
-      }
+      this.allTextHandler(styles, propName, value)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
@@ -307,6 +213,11 @@ class TextPropUtils {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       } else {
         TextUtils.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+        // LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, tmpLayerIndex,
+        //   {
+        //     paragraphs: config.paragraphs
+        //   }
+        // )
       }
     }
 
@@ -363,6 +274,106 @@ class TextPropUtils {
         }
       }
     })
+  }
+
+  rangedSelHandler (start: ISelection, end: ISelection, config: IText, prop: { [key: string]: string | number }): boolean {
+    let isStartContainerDivided = true
+    for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
+      const p = config.paragraphs[pIndex]
+      for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
+        const span = p.spans[sIndex]
+        const text = span.text
+        if (pIndex === start.pIndex && sIndex < start.sIndex) {
+          continue
+        } else if (pIndex === start.pIndex && sIndex === start.sIndex) {
+          span.text = text.substr(0, start.offset)
+
+          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+          newSpan.text = text.substr(start.offset, text.length)
+          Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
+
+          config.paragraphs[pIndex].spans.splice(sIndex + 1, 0, newSpan)
+          if (span.text === '') {
+            config.paragraphs[pIndex].spans.splice(sIndex, 1)
+            isStartContainerDivided = false
+          }
+
+          if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+            newSpan.text = text.substring(start.offset, end.offset)
+            const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+            thirdSpan.text = text.substr(end.offset)
+            Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
+            if (thirdSpan.text !== '') {
+              config.paragraphs[pIndex].spans.splice(isStartContainerDivided ? sIndex + 2 : sIndex + 1, 0, thirdSpan)
+            }
+            end.offset -= start.offset
+            break
+          }
+          if (start.pIndex === end.pIndex && isStartContainerDivided) {
+            sIndex++
+            end.sIndex++
+          }
+        } else if (pIndex === end.pIndex && sIndex === end.sIndex) {
+          span.text = text.substr(end.offset)
+
+          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+          newSpan.text = text.substr(0, end.offset)
+          Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
+          if (span.text === '') {
+            config.paragraphs[pIndex].spans.splice(sIndex, 1, newSpan)
+          } else {
+            config.paragraphs[pIndex].spans.splice(sIndex, 0, newSpan)
+          }
+          break
+        } else if (pIndex < end.pIndex || (pIndex === end.pIndex && sIndex < end.sIndex)) {
+          Object.assign(span.styles, this.spanStylesTransformer(span, prop))
+        }
+      }
+    }
+    return isStartContainerDivided
+  }
+
+  allTextHandler(styles: ISpanStyle, propName: string, value?: number | string) {
+    switch (propName) {
+      case 'fontSize':
+        styles.size = value as number
+        break
+      case 'fontFamily':
+        styles.font = value as string
+        break
+      case 'color':
+        this.updateTextPropsState({ color: value as string })
+        break
+      case 'bold': {
+        if (this.getCurrTextProps?.weight === 'bold') {
+          this.updateTextPropsState({ weight: 'normal' })
+          styles.weight = 'normal'
+        } else {
+          this.updateTextPropsState({ weight: 'bold' })
+          styles.weight = 'bold'
+        }
+        break
+      }
+      case 'italic': {
+        if (this.getCurrTextProps?.style === 'italic') {
+          this.updateTextPropsState({ style: 'normal' })
+          styles.style = 'normal'
+        } else {
+          this.updateTextPropsState({ style: 'italic' })
+          styles.style = 'italic'
+        }
+        break
+      }
+      case 'underline': {
+        if (this.getCurrTextProps?.decoration === 'underline') {
+          this.updateTextPropsState({ decoration: 'none' })
+          styles.decoration = 'none'
+        } else {
+          this.updateTextPropsState({ decoration: 'underline' })
+          styles.decoration = 'underline'
+        }
+      }
+    }
   }
 
   isSameSpanStyles(span: ISpanStyle, preSpan: ISpanStyle): boolean {
@@ -485,6 +496,7 @@ class TextPropUtils {
         }
       }
     }
+    this.updateTextPropsState()
   }
 
   /**
@@ -612,8 +624,6 @@ class TextPropUtils {
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
     if (!TextUtils.isSel(end)) {
-      console.log(start.pIndex)
-      console.log(start.sIndex)
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {
@@ -695,6 +705,7 @@ class TextPropUtils {
       font: span ? span.styles.font : '',
       type: span ? span.styles.type : 'public',
       userId: span ? span.styles.userId : '',
+      fontUrl: span ? span.styles.fontUrl : '',
       weight: span ? span.styles.weight : '',
       size: span ? span.styles.size : NaN,
       decoration: span ? span.styles.decoration : '',

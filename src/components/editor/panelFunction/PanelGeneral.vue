@@ -5,7 +5,7 @@
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
-      div(class="border-gray-4 p-5  btn-opacity"  v-hint="'透明度'")
+      div(class="border-gray-4 p-5 btn-opacity"  v-hint="'透明度'")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
@@ -128,7 +128,6 @@ export default Vue.extend({
       if (value > 100) {
         value = 100
       }
-      stepsUtils.delayedRecord('opacity')
       if (!this.isGroup) {
         if (this.currSelectedInfo.layers.length === 1) {
           this.$store.commit('UPDATE_layerStyles', {

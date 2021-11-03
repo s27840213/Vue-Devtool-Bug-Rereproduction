@@ -22,7 +22,7 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IText } from '@/interfaces/layer'
+import { ISpanStyle, IText } from '@/interfaces/layer'
 import { IFont } from '@/interfaces/text'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
@@ -53,10 +53,9 @@ export default Vue.extend({
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
-        const spanFont = span.styles.font
-        if (!fontStore.some(font => font.face === spanFont)) {
+        if (!fontStore.some(font => font.face === span.styles.font)) {
           isLoadedFont = true
-          const newFont = new FontFace(spanFont, this.getFontUrl(spanFont))
+          const newFont = new FontFace(span.styles.font, this.getFontUrl(span.styles))
           promises.push(new Promise<void>((resolve) => {
             newFont.load()
               .then(newFont => {
@@ -151,8 +150,16 @@ export default Vue.extend({
         opacity
       }
     },
-    getFontUrl(fontID: string): string {
-      return `url("https://template.vivipic.com/font/${fontID}/font")`
+    getFontUrl(spanStyles: ISpanStyle): string {
+      switch (spanStyles.type) {
+        case 'public':
+          return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+        case 'private':
+          return ''
+        case 'URL':
+          return 'url("' + spanStyles.fontUrl + '")'
+      }
+      return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     }
   }
 })

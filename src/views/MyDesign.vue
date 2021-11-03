@@ -14,19 +14,21 @@
                 span {{ `選取 ${selectedNum}` }}
               div(class="my-design__multi__actions relative")
                 div(ref="tgFav"
+                    v-if="mydesignView !== 'trash-design-view'"
                     class="my-design__multi__icon"
                     @click="toggleAllFavorite")
                   svg-icon(iconName="heart"
                           iconWidth="21px"
                           iconColor="gray-2")
                 div(ref="mvFolder"
-                    v-if="mydesignView !== 'favorite-design-view'"
+                    v-if="(mydesignView !== 'favorite-design-view') && (mydesignView !== 'trash-design-view')"
                     class="my-design__multi__icon"
                     @click="isMoveToFolderPanelOpen = true")
                   svg-icon(iconName="folder"
                           iconWidth="21px"
                           iconColor="gray-2")
                 div(ref="delDesign"
+                    v-if="mydesignView !== 'trash-design-view'"
                     class="my-design__multi__icon"
                     @mouseenter="handleFavDelMouseOver(true)"
                     @mouseleave="handleFavDelMouseOver(false)"
@@ -39,6 +41,20 @@
                 transition(name="slide-fade-text")
                   div(v-if="isFavDelMouseOver" class="my-design__info__text")
                     span 刪除後會將原始檔案一併移除。
+                div(ref="recover"
+                    v-if="mydesignView === 'trash-design-view'"
+                    class="my-design__multi__icon"
+                    @click="recoverAll")
+                  svg-icon(iconName="reduction"
+                          iconWidth="21px"
+                          iconColor="gray-2")
+                div(ref="delForever"
+                    v-if="mydesignView === 'trash-design-view'"
+                    class="my-design__multi__icon"
+                    @click="deleteAllForever")
+                  svg-icon(iconName="trash"
+                          iconWidth="21px"
+                          iconColor="gray-2")
               div(class="my-design__multi__close"
                   @click="handleClearSelection")
                 svg-icon(iconName="close-large"
@@ -50,14 +66,17 @@
                   @deleteItem="handleDeleteItem"
                   @selectDesign="handleSelectDesign"
                   @deselectDesign="handleDeselectDesign"
+                  @selectFolder="handleSelectFolder"
+                  @deselectFolder="handleDeselectFolder"
                   @clearSelection="handleClearSelection"
                   @recoverItem="handleRecoverItem"
                   @deleteFolder="handleDeleteFolder"
                   @moveItem="handleMoveItem"
                   @deleteForever="handleDeleteForever"
+                  @deleteFolderForever="handleDeleteFolderForever"
                   @moveDesignToFolder="handleMoveDesignToFolder"
                   @downloadDesign="handleDownloadDesign")
-        div(class="my-design__message-stack")
+        div(class="my-design__message-stack" :style="stackStyles()")
           transition(name="slide-fade")
             div(v-if="isShowDeleteMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(deletedQueue[0])")
@@ -68,7 +87,7 @@
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0])}` }}
+                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0], true)}` }}
           transition(name="slide-fade")
             div(v-if="isShowMoveMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
@@ -148,13 +167,13 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import Sidebar from '@/components/navigation/mydesign/Sidebar.vue'
+import Sidebar from '@/components/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
-import AllDesignView from '@/components/navigation/mydesign/design-views/AllDesignView.vue'
-import FavoriteDesignView from '@/components/navigation/mydesign/design-views/FavoriteDesignView.vue'
-import TrashDesignView from '@/components/navigation/mydesign/design-views/TrashDesignView.vue'
-import FolderDesignView from '@/components/navigation/mydesign/design-views/FolderDesignView.vue'
-import StructureFolder from '@/components/navigation/mydesign/StructureFolder.vue'
+import AllDesignView from '@/components/mydesign/design-views/AllDesignView.vue'
+import FavoriteDesignView from '@/components/mydesign/design-views/FavoriteDesignView.vue'
+import TrashDesignView from '@/components/mydesign/design-views/TrashDesignView.vue'
+import FolderDesignView from '@/components/mydesign/design-views/FolderDesignView.vue'
+import StructureFolder from '@/components/mydesign/StructureFolder.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -197,12 +216,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      currentSelectedFolder: 'getCurrSelectedFolder',
+      currLocation: 'getCurrLocation',
       folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      selectedFolders: 'getSelectedFolders'
     }),
     mydesignView(): string {
-      switch (this.currentSelectedFolder[0]) {
+      switch (this.currLocation[0]) {
         case 'a':
           return 'all-design-view'
         case 'h':
@@ -216,24 +236,29 @@ export default Vue.extend({
       }
     },
     selectedNum(): number {
-      return Object.keys(this.selectedDesigns).length
+      return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
     }
   },
   watch: {
-    currentSelectedFolder() {
+    currLocation() {
       this.handleClearSelection()
     },
     isMultiSelected(newVal) {
       if (newVal) {
         this.$nextTick(() => {
-          hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
-          if (this.mydesignView !== 'favorite-design-view') {
-            hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+          if (this.mydesignView === 'trash-design-view') {
+            hintUtils.bind(this.$refs.recover as HTMLElement, '還原', 500)
+            hintUtils.bind(this.$refs.delForever as HTMLElement, '永久刪除', 500)
+          } else {
+            hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
+            hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
+            if (this.mydesignView !== 'favorite-design-view') {
+              hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+            }
           }
-          hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
         })
       }
     },
@@ -251,9 +276,14 @@ export default Vue.extend({
     ...mapMutations('design', {
       addToSelection: 'UPDATE_addToSelection',
       removeFromSelection: 'UPDATE_removeFromSelection',
+      addFolderToSelection: 'UPDATE_addFolderToSelection',
+      removeFolderFromSelection: 'UPDATE_removeFolderFromSelection',
       clearSelection: 'UPDATE_clearSelection',
-      setCurrentSelectedFolder: 'SET_currSelectedFolder'
+      setCurrLocation: 'SET_currLocation'
     }),
+    stackStyles() {
+      return { top: this.isMultiSelected ? '82px' : '27px' }
+    },
     messageImageStyles(item: IQueueItem) {
       if (item.type === 'design') {
         return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
@@ -263,15 +293,17 @@ export default Vue.extend({
     },
     messageItemName(item: IQueueItem): string {
       if (item.type === 'multi') {
-        return '多項設計'
+        return '多項設計/資料夾'
       } else if (item.type === 'design') {
         return '設計'
       } else {
         return (item.data as IPathedFolder).folder.name + ' '
       }
     },
-    messageDestName(item: IQueueItem): string {
-      if (item.type === 'multi' || item.type === 'design') {
+    messageDestName(item: IQueueItem, isRecover = false): string {
+      if (item.type === 'multi') {
+        return isRecover ? '原資料夾' : designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
+      } else if (item.type === 'design') {
         return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
       } else {
         return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedFolder).parents)
@@ -307,6 +339,12 @@ export default Vue.extend({
     },
     handleDeselectDesign(pathedDesign: IPathedDesign) {
       this.removeFromSelection(pathedDesign)
+    },
+    handleSelectFolder(pathedFolder: IPathedFolder) {
+      this.addFolderToSelection(pathedFolder)
+    },
+    handleDeselectFolder(pathedFolder: IPathedFolder) {
+      this.removeFolderFromSelection(pathedFolder)
     },
     handleClearSelection() {
       this.isMoveToFolderPanelOpen = false
@@ -358,13 +396,17 @@ export default Vue.extend({
       this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
+    handleDeleteFolderForever(payload: IPathedFolder) {
+      this.folderBuffer = payload
+      this.confirmMessage = 'delete-forever'
+    },
     handleFavDelMouseOver(val: boolean) {
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
     },
     handleMoveToFolderSelect(selectInfo: string) {
-      designUtils.deselect(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
+      designUtils.dislocateFrom(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
       this.moveToFolderSelectInfo = selectInfo
-      designUtils.select(this.copiedFolders, 'f:' + selectInfo)
+      designUtils.locateTo(this.copiedFolders, 'f:' + selectInfo)
     },
     handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
       const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
@@ -384,6 +426,7 @@ export default Vue.extend({
             design
           }
         })
+        this.designBuffer = undefined
       } else {
         designUtils.moveAll(Object.values(this.selectedDesigns), destination)
         this.handleMoveItem({
@@ -418,11 +461,12 @@ export default Vue.extend({
     },
     deleteFolder(pathedFolder: IPathedFolder) {
       designUtils.deleteFolder(pathedFolder)
-      if (this.currentSelectedFolder !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
+      this.folderBuffer = undefined
+      if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
       if (pathedFolder.parents.length > 1) {
-        this.setCurrentSelectedFolder(`f:${pathedFolder.parents.join('/')}`)
+        this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
       } else {
-        this.setCurrentSelectedFolder('a')
+        this.setCurrLocation('a')
       }
     },
     recover() {
@@ -452,12 +496,36 @@ export default Vue.extend({
     deleteAll() {
       this.confirmMessage = 'delete-all'
     },
+    recoverAll() {
+      const selectedDesigns = Object.values(this.selectedDesigns) as IPathedDesign[]
+      const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
+      designUtils.recoverAll(selectedDesigns)
+      designUtils.recoverAllFolder(selectedFolders)
+      this.handleRecoverItem({
+        type: 'multi',
+        data: undefined
+      })
+    },
+    deleteAllForever() {
+      this.confirmMessage = 'delete-forever'
+    },
     deleteAllConfirmed() {
       designUtils.deleteAll(Object.values(this.selectedDesigns))
     },
     deleteForeverConfirmed() {
       if (this.designBuffer) {
         designUtils.deleteForever(this.designBuffer)
+        this.designBuffer = undefined
+        return
+      }
+      if (this.folderBuffer) {
+        designUtils.deleteFolderForever(this.folderBuffer)
+        this.folderBuffer = undefined
+        return
+      }
+      if (this.isMultiSelected) {
+        designUtils.deleteAllForever(Object.values(this.selectedDesigns))
+        designUtils.deleteAllFolderForever(Object.values(this.selectedFolders))
       }
     },
     closeConfirmMessage() {
@@ -548,7 +616,6 @@ export default Vue.extend({
   &__message-stack {
     position: absolute;
     left: 50%;
-    top: 27px;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -594,6 +661,7 @@ export default Vue.extend({
       height: 25px;
       background-color: setColor(blue-3);
       border-radius: 18px;
+      cursor: pointer;
       > span {
         font-family: NotoSansTC;
         font-weight: 700;

@@ -9,7 +9,8 @@
           @click="openCorRadSliderPopup")
         input(:value="Math.round(value)"
               @input="setValue"
-              :disabled="disabled")
+              :disabled="disabled"
+              @change="handleChangeStop")
         //- div(v-if="mode === 'open'"
         //-     class="label-with-range__range-input-wrapper"
         //-     v-click-outside="handleSliderModal")
@@ -27,6 +28,7 @@
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   directives: {
@@ -62,6 +64,9 @@ export default Vue.extend({
     },
     emitValue(value: number) {
       this.$emit('update', value)
+    },
+    handleChangeStop() {
+      stepsUtils.record()
     }
   }
 })

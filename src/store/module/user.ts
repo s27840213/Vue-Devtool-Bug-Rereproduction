@@ -1,4 +1,5 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
 import { IAssetPhoto, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
@@ -28,7 +29,8 @@ export interface IUserModule {
   pending: boolean,
   images: Array<IAssetPhoto>,
   checkedAssets: Array<string>,
-  verUni: number
+  verUni: number,
+  imgSizeMap: Array<{[key: string]: string | number}>
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -57,7 +59,8 @@ const getDefaultState = (): IUserModule => ({
   pending: false,
   images: [],
   checkedAssets: [],
-  verUni: 0
+  verUni: 0,
+  imgSizeMap: []
 })
 
 const state = getDefaultState()
@@ -107,6 +110,7 @@ const mutations: MutationTree<IUserModule> = {
           (state[key] as any) = newState[key]
         }
       })
+    console.log(state)
   },
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, downloadUrl } = state
@@ -243,6 +247,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
+      console.log('wwww')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const words = uname.split(' ')
@@ -252,13 +257,16 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else {
         shortName = (uname.substring(0, 2)).toUpperCase()
       }
+      Sentry.setTag('user_name', uname)
+      Sentry.setTag('user_id', data.data.user_id)
       commit('SET_STATE', {
         downloadUrl: data.data.download_url,
         uname: uname,
         shortName: shortName,
         userId: data.data.user_id,
         role: data.data.role,
-        verUni: data.data.ver_uni
+        verUni: data.data.ver_uni,
+        imgSizeMap: data.data.image_size_map
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)

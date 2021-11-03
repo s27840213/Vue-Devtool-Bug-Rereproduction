@@ -5,7 +5,7 @@ import { GetterTree, MutationTree } from 'vuex'
 import Vue from 'vue'
 
 interface IDesignSidebarState {
-  currentSelectedFolder: string,
+  currLocation: string,
   folders: IFolder[],
   favoriteDesigns: IPathedDesign[],
   trashDesigns: IPathedDesign[],
@@ -14,10 +14,11 @@ interface IDesignSidebarState {
   draggingDesign: IPathedDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
   selectedDesigns: {[key: string]: IPathedDesign}
+  selectedFolders: {[key: string]: IPathedFolder}
 }
 
 const getDefaultState = (): IDesignSidebarState => ({
-  currentSelectedFolder: 'a',
+  currLocation: 'a',
   folders: [],
   favoriteDesigns: [],
   trashDesigns: [],
@@ -25,13 +26,14 @@ const getDefaultState = (): IDesignSidebarState => ({
   draggingType: '',
   draggingFolder: undefined,
   draggingDesign: undefined,
-  selectedDesigns: {}
+  selectedDesigns: {},
+  selectedFolders: {}
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IDesignSidebarState, unknown> = {
-  getCurrSelectedFolder(state: IDesignSidebarState): string {
-    return state.currentSelectedFolder
+  getCurrLocation(state: IDesignSidebarState): string {
+    return state.currLocation
   },
   getFolders(state: IDesignSidebarState): IFolder[] {
     return state.folders
@@ -56,15 +58,18 @@ const getters: GetterTree<IDesignSidebarState, unknown> = {
   },
   getSelectedDesigns(state: IDesignSidebarState): {[key: string]: IPathedDesign} {
     return state.selectedDesigns
+  },
+  getSelectedFolders(state: IDesignSidebarState): {[key: string]: IPathedFolder} {
+    return state.selectedFolders
   }
 }
 
 const mutations: MutationTree<IDesignSidebarState> = {
-  SET_currSelectedFolder(state: IDesignSidebarState, currentSelectedFolder: string) {
+  SET_currLocation(state: IDesignSidebarState, currLocation: string) {
     const folders = generalUtils.deepCopy(state.folders)
-    designUtils.deselect(folders, state.currentSelectedFolder)
-    designUtils.select(folders, currentSelectedFolder)
-    state.currentSelectedFolder = currentSelectedFolder
+    designUtils.dislocateFrom(folders, state.currLocation)
+    designUtils.locateTo(folders, currLocation)
+    state.currLocation = currLocation
     state.folders = folders
   },
   SET_expand(state: IDesignSidebarState, updateInfo: {path: string[], isExpanded: boolean}) {
@@ -99,7 +104,7 @@ const mutations: MutationTree<IDesignSidebarState> = {
     state.trashDesigns.push(pathedDesign)
   },
   UPDATE_addFolderToTrash(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
-    pathedFolder.folder.isSelected = false
+    pathedFolder.folder.isCurrLocation = false
     state.trashFolders.push(pathedFolder)
   },
   UPDATE_removeFromFavorite(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
@@ -183,8 +188,15 @@ const mutations: MutationTree<IDesignSidebarState> = {
   UPDATE_removeFromSelection(state: IDesignSidebarState, pathedDesign: IPathedDesign) {
     Vue.delete(state.selectedDesigns, pathedDesign.design.id)
   },
+  UPDATE_addFolderToSelection(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    Vue.set(state.selectedFolders, pathedFolder.folder.id, pathedFolder)
+  },
+  UPDATE_removeFolderFromSelection(state: IDesignSidebarState, pathedFolder: IPathedFolder) {
+    Vue.delete(state.selectedFolders, pathedFolder.folder.id)
+  },
   UPDATE_clearSelection(state: IDesignSidebarState) {
     state.selectedDesigns = {}
+    state.selectedFolders = {}
   }
 }
 

@@ -43,13 +43,19 @@
       svg-icon(v-if="isLogin"
         :iconName="`notify`"
         :iconWidth="'20px'")
-      div(v-if="isLogin" class="profile text-white text-body-2")
+      div(v-if="isLogin"
+        class="profile pointer text-white text-body-2"
+        @click="isAccountPopup = true")
         span {{shortName}}
+      popup-account(v-if="isAccountPopup"
+        class="nu-header__account"
+        @close="() => (isAccountPopup = false)")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
+import PopupAccount from '@/components/popup/PopupAccount.vue'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { mapState } from 'vuex'
@@ -57,12 +63,14 @@ import store from '@/store'
 
 export default Vue.extend({
   components: {
-    SearchBar
+    SearchBar,
+    PopupAccount
   },
   data() {
     return {
       ShortcutUtils,
-      StepsUtils
+      StepsUtils,
+      isAccountPopup: false
     }
   },
   computed: {
@@ -141,6 +149,14 @@ export default Vue.extend({
       align-items: center;
       margin-right: 2vw;
     }
+  }
+
+  &__account {
+    position: absolute;
+    top: 100%;
+    margin-top: 5px;
+    right: 20px;
+    width: 250px;
   }
 }
 .profile {

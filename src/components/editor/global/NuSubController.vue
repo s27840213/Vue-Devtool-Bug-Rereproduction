@@ -18,6 +18,7 @@
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-sub-${primaryLayerIndex}_${layerIndex}`" spellcheck="false"
+              draggable="false"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="contentEditable"
@@ -163,7 +164,6 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
-      console.log(val)
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {
@@ -234,7 +234,6 @@ export default Vue.extend({
       }
     },
     textStyles(styles: any) {
-      // const textStyles = CssConveter.convertFontStyle(Object.assign(newStyles, { color: styles.color ? styles.color : '' }))
       const textStyles = CssConveter.convertFontStyle(styles)
       Object.assign(textStyles, {
         'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000'
@@ -251,12 +250,14 @@ export default Vue.extend({
     },
     onMousedown() {
       if (this.getLayerType === 'text') {
+        if (this.isActive) {
+          this.contentEditable = true
+        }
         this.posDiff.x = this.getPrimaryLayer.styles.x
         this.posDiff.y = this.getPrimaryLayer.styles.y
-        this.contentEditable = true
-        document.addEventListener('mouseup', this.onMouseup)
-        this.isControlling = true
       }
+      document.addEventListener('mouseup', this.onMouseup)
+      this.isControlling = true
     },
     onMouseup() {
       if (this.getLayerType === 'text') {
@@ -265,9 +266,9 @@ export default Vue.extend({
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           this.contentEditable = false
         }
-        document.removeEventListener('mouseup', this.onMouseup)
-        this.isControlling = false
       }
+      document.removeEventListener('mouseup', this.onMouseup)
+      this.isControlling = false
     },
     styles(type: string) {
       const zindex = (type === 'control-point') || (this.isActive && this.getLayerType === 'text')
@@ -314,17 +315,19 @@ export default Vue.extend({
               start.sIndex = 0
               start.offset = 1
             } else {
-              // start.sIndex = +(startContainer?.parentElement?.dataset.sindex as string)
-              // start.pIndex = +(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
               Object.assign(start, this.sel.start)
             }
             TextUtils.updateSelection(start, TextUtils.getNullSel())
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
+              if (start.sIndex === 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
+                !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
+                start.pIndex -= 1
+                TextUtils.updateSelection(start, TextUtils.getNullSel())
+              }
               if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
-                // return
               } else {
                 if (e.key === 'Backspace' || e.key === ' ') {
                   e.stopPropagation()
@@ -344,6 +347,7 @@ export default Vue.extend({
         })
       }
     },
+
     composingEnd() {
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
@@ -356,44 +360,12 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
-        if (this.currSelectedInfo.index < 0) {
-          // GroupUtils.select([this.layerIndex])
-        }
         this.$nextTick(() => {
           const el = document.querySelector('.dropdowns--layer') as HTMLElement
           const mousePos = MouseUtils.getMouseAbsPoint(event)
           el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
           el.focus()
         })
-      }
-    },
-    onClickEvent(e: MouseEvent) {
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      if (this.getLayerType === 'text') {
-        this.textClickHandler(e)
-      }
-      this.$emit('clickSubController', this.layerIndex, this.config.type)
-    },
-    onDblClick() {
-      if (this.type === 'tmp') {
-        return
-      }
-      this.$emit('dblSubController', this.layerIndex)
-    },
-    textClickHandler(e: MouseEvent) {
-      if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-          const sel = TextUtils.getSelection()
-          if (sel) {
-            TextUtils.updateSelection(sel.start, sel.end)
-          }
-        }
-        TextPropUtils.updateTextPropsState()
       }
     },
     onTyping(e: KeyboardEvent, isComposing: boolean) {
@@ -442,11 +414,12 @@ export default Vue.extend({
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
+            // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
+            LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: true })
             StepsUtils.record()
             /**
              * TODO: For some reason while hit Enter the text block, the browser would
              * produce extra <p>, the following could temporarily fix this problem
-             * p.s. not sure if this is a bug of vue
              */
             if (text.childNodes.length !== (this.config as IText).paragraphs.length) {
               let isRemoved = false
@@ -573,6 +546,35 @@ export default Vue.extend({
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
         const sel = TextUtils.getSelection()
         TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
+        TextPropUtils.updateTextPropsState()
+      }
+    },
+    onClickEvent(e: MouseEvent) {
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
+      if (this.getLayerType === 'text') {
+        this.textClickHandler(e)
+      }
+      this.$emit('clickSubController', this.layerIndex, this.config.type)
+    },
+    onDblClick() {
+      if (this.type === 'tmp') {
+        return
+      }
+      this.$emit('dblSubController', this.layerIndex)
+    },
+    textClickHandler(e: MouseEvent) {
+      if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+          const sel = TextUtils.getSelection()
+          if (sel) {
+            TextUtils.updateSelection(sel.start, sel.end)
+          }
+        }
         TextPropUtils.updateTextPropsState()
       }
     },

@@ -35,7 +35,7 @@ import { IDesign, IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import DesignItem from '@/components/navigation/mydesign/DesignItem.vue'
+import DesignItem from '@/components/mydesign/DesignItem.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({

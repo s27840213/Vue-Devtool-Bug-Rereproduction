@@ -5,8 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { Layer } from 'konva/types/Layer'
-
+import { SrcObj } from '@/interfaces/gallery'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -29,9 +28,9 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage, size: string | number = -1) {
+  getSrc(config: IImage, size?: string | number) {
     const { type, userId, assetId } = config.srcObj || config.src_obj
-    if (size === -1) {
+    if (typeof size === 'undefined') {
       size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
     }
     switch (type) {
@@ -54,26 +53,19 @@ class ImageUtils {
   }
 
   getSrcSize(type: string, width: number, preload = '') {
-    if (type === 'pexels' || type === 'unsplash') {
-      if (width < 540) {
-        return preload === 'next' ? 800 : 540
-      } else if (width < 800) {
-        if (preload === 'pre') {
-          return 540
-        } else if (preload === 'next') {
-          return 1080
-        } else return 800
-      } else if (width < 1080) {
-        if (preload === 'pre') {
-          return 800
-        } else if (preload === 'next') {
-          return 1600
-        } else return 1080
-      } else {
-        return preload === 'pre' ? 1080 : 1600
+    const sizeMap = store.state.user?.imgSizeMap
+    const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
+    if (sizeMap?.length) {
+      let i = 0
+      while (width < sizeMap[i].size && i < sizeMap.length - 1) {
+        i++
       }
+      return preload
+        ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
+        : sizeMap[i][key]
     } else {
-      return 'full'
+      console.error('image size map is empty !')
+      return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
     }
   }
 

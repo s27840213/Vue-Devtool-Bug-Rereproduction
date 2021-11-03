@@ -15,7 +15,7 @@ export interface IFolder {
   createdTime: number,
   lastUpdatedTime: number,
   isExpanded: boolean,
-  isSelected: boolean,
+  isCurrLocation: boolean,
   subFolders: IFolder[],
   designs: IDesign[]
 }
@@ -31,5 +31,5 @@ export interface IPathedFolder {
 
 export interface IQueueItem {
   type: 'design' | 'folder' | 'multi',
-  data: IPathedDesign | IPathedFolder
+  data: IPathedDesign | IPathedFolder | undefined
 }
