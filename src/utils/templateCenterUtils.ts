@@ -8,21 +8,20 @@ class TemplateCenterUtils {
     console.log(templates)
     const list = templates.list ?? []
     for (const template of list) {
-      const url = this.getPrevUrl(template)
-      const { width, height } = await imageUtils.getImageSize(url, 10, 10)
+      const { width, height } = await imageUtils.getImageSize(this.getPrevUrl(template), 10, 10)
       const ratio = height / width
       const index = this.lowestColumn(ratios)
       ratios[index] += ratio
       res[index].push({
-        url,
+        url: this.getPrevUrl(template, true),
         id: template.id
       })
     }
     return res
   }
 
-  getPrevUrl(item: {id: string, ver: number}): string {
-    return `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`
+  getPrevUrl(item: {id: string, ver: number}, larger = false): string {
+    return `https://template.vivipic.com/template/${item.id}/prev${larger ? '_2x' : ''}?ver=${item.ver}`
   }
 
   lowestColumn(ratios: number[]): number {

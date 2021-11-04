@@ -254,6 +254,7 @@ export default Vue.extend({
     background-color: setColor(gray-5);
   }
   &__sorter {
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
