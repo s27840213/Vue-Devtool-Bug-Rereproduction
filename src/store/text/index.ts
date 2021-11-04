@@ -48,7 +48,7 @@ const getDefaultState = (): ITextState => ({
     decoration: 'none',
     isVertical: false
   },
-  pending: false,
+  pending: '',
   fontStore: [
     {
       name: '思源黑體',
