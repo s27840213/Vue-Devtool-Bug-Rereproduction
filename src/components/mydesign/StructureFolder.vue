@@ -86,7 +86,7 @@ $maxLevels: 5;
       display: flex;
       align-items: center;
       > span {
-        font-family: 'SFProDisplay';
+        font-family: 'NotoSansTC';
         text-align: left;
         color: setColor(gray-2);
         font-size: 12px;

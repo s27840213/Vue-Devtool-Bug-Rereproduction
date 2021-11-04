@@ -444,7 +444,7 @@ export default Vue.extend({
     padding: 2px 8px;
     z-index: 1000;
     > span {
-      font-family: "SFProDisplay";
+      font-family: "NotoSansTC";
       font-weight: 400;
       font-size: 10px;
       line-height: 20px;

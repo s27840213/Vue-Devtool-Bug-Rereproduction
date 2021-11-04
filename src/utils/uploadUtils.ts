@@ -663,7 +663,6 @@ class UploadUtils {
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
-        console.log(generalUtils.deepCopy(styles))
         return {
           type,
           layers: filteredLayers,

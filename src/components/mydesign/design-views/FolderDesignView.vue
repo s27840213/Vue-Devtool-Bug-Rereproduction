@@ -527,7 +527,7 @@ export default Vue.extend({
     border-radius: 2px;
     padding: 2px 8px;
     > span {
-      font-family: "SFProDisplay";
+      font-family: "NotoSansTC";
       font-weight: 400;
       font-size: 10px;
       line-height: 20px;

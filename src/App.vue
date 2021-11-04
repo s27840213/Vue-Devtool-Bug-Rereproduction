@@ -61,6 +61,17 @@ export default Vue.extend({
       coordinateHeight: 0
     }
   },
+  created() {
+    fetch('https://template.vivipic.com/static/app.json')
+      .then(response => response.json())
+      .then(json => {
+        this.$store.commit('user/SET_STATE', {
+          verUni: json.ver_uni,
+          imgSizeMap: json.image_size_map
+        })
+        console.log('static data loaded')
+      })
+  },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
   },

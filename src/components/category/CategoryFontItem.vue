@@ -9,11 +9,11 @@
         :src="`${host}/${item.id}/${preview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
-      svg-icon(v-if="props.font === item.id && !pending"
+      svg-icon(v-if="props.font === item.id"
         iconName="done"
         iconColor="gray-2"
         iconWidth="25px")
-      svg-icon(v-else-if="pending"
+      svg-icon(v-else-if="pending === item.id"
         iconName="loading"
         iconColor="gray-1"
         iconWidth="20px")
@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -35,39 +35,39 @@ export default Vue.extend({
     preview2: String,
     item: Object
   },
-  data() {
-    return {
-      pending: false
-    }
-  },
   computed: {
-    ...mapState('text', ['sel', 'props', 'fontStore'])
+    ...mapState('text', ['sel', 'props', 'fontStore', 'pending'])
   },
   methods: {
+    ...mapMutations('text', {
+      updateState: 'UPDATE_STATE'
+    }),
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
-    async setFont() {
+    setFont() {
       const fontStore = this.fontStore as Array<IFont>
-      if (!fontStore.some(font => font.face === this.item.id)) {
-        this.pending = true
+      if (!this.pending && !fontStore.some(font => font.face === this.item.id)) {
+        this.updateState({ pending: this.item.id })
         const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
         const promise = () => {
           return new Promise<void>((resolve) => {
             newFont.load().then(newFont => {
               document.fonts.add(newFont)
               TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+
+              TextPropUtils.onPropertyClick('fontFamily', this.item.id, this.sel.start, this.sel.end)
+              TextPropUtils.updateTextPropsState({ font: this.item.id })
+              AssetUtils.addAssetToRecentlyUsed(this.item)
+
               StepsUtils.record()
-              this.pending = false
+              this.updateState({ pending: '' })
               resolve()
             })
           })
         }
-        await promise()
+        promise()
       }
-      AssetUtils.addAssetToRecentlyUsed(this.item)
-      TextPropUtils.onPropertyClick('fontFamily', this.item.id, this.sel.start, this.sel.end)
-      TextPropUtils.updateTextPropsState({ font: this.item.id })
     },
     getFontUrl(fontID: string): string {
       console.log(fontID)
@@ -97,3 +97,7 @@ export default Vue.extend({
     }
   }
 </style>
+
+function mapMutation(arg0: string, arg1: string[]): any {
+  throw new Error('Function not implemented.')
+}
