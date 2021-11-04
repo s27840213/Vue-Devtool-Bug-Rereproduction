@@ -53,20 +53,34 @@ class ImageUtils {
   }
 
   getSrcSize(type: string, width: number, preload = '') {
-    const sizeMap = store.state.user?.imgSizeMap
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    if (sizeMap?.length) {
-      let i = 0
-      while (width < sizeMap[i].size && i < sizeMap.length - 1) {
-        i++
+    const getSize = () => {
+      const sizeMap = store.state.user?.imgSizeMap
+      if (sizeMap?.length) {
+        let i = 0
+        while (width < sizeMap[i].size && i < sizeMap.length - 1) {
+          i++
+        }
+        return preload
+          ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
+          : sizeMap[i][key]
       }
-      return preload
-        ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
-        : sizeMap[i][key]
-    } else {
-      console.error('image size map is empty !')
-      return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
     }
+    getSize()
+
+    const startTime = new Date()
+    const interval = setInterval(() => {
+      if ((new Date()).getTime() - startTime.getTime() < 3000) {
+        if (getSize()) {
+          clearInterval(interval)
+          return getSize()
+        }
+      } else {
+        console.error('image size map is empty !')
+        clearInterval(interval)
+        return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
+      }
+    }, 500)
   }
 
   getSrcType(src: string) {
