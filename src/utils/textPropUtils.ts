@@ -38,7 +38,7 @@ class TextPropUtils {
     }
   }
 
-  onPropertyClick(propName: string, value?: string | number, selStart = { pIndex: NaN, sIndex: NaN, offset: NaN }, selEnd = { pIndex: NaN, sIndex: NaN, offset: NaN }) {
+  onPropertyClick(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel()) {
     if (this.isBlockProperty(propName)) {
       const currLayer = this.getCurrLayer
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
@@ -54,75 +54,78 @@ class TextPropUtils {
     } else {
       const currLayer = this.getCurrLayer
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const nan = TextUtils.getNullSel()
-        /**
-         * Check the LayerGroup's property indicated value
-         */
-        let flag = false
-        let propValue: number | string | undefined
-        const groupLayer = this.getCurrLayer
-        if (this.targetInfo.subLayerIndex === -1) {
-          for (let i = 0; i < groupLayer.layers.length && !flag; i++) {
-            if (groupLayer.layers[i].type === 'text') {
-              const tmpLayer = groupLayer.layers[i] as IText
-              const propBuff = this.propIndicator(
-                {
-                  pIndex: 0,
-                  sIndex: 0
-                },
-                {
-                  pIndex: tmpLayer.paragraphs.length - 1,
-                  sIndex: tmpLayer.paragraphs[tmpLayer.paragraphs.length - 1].spans.length - 1
-                }, propName, value || '', tmpLayer
-              )
-              switch (propName) {
-                case 'bold':
-                  propValue = 'normal'
-                  if (propBuff.weight === 'bold') {
-                    propValue = 'bold'
-                    flag = true
-                  }
-                  break
-                case 'italic':
-                  propValue = 'normal'
-                  if (propBuff.style === 'italic') {
-                    propValue = 'italic'
-                    flag = true
-                  }
-                  break
-                case 'underline':
-                  propValue = 'none'
-                  if (propBuff.decoration === 'underline') {
-                    propValue = 'underline'
-                    flag = true
-                  }
-                  break
-                case 'fontSize':
-                  propValue = value as string
-                  break
-                case 'fontFamily':
-                  propValue = value as string
-                  break
-                case 'color': {
-                  propValue = value as string
-                  flag = true
-                  break
-                }
-              }
-            }
-          }
-          for (let i = 0; i < groupLayer.layers.length; i++) {
-            const layer = groupLayer.layers[i]
-            if (layer.type === 'text') {
-              this.spanPropertyHandler(propName, propValue, nan, nan, i)
-            }
-          }
-        } else {
-          this.spanPropertyHandler(propName, value, selStart, selEnd, this.targetInfo.subLayerIndex)
-        }
+        this.groupHandler(propName, value, selStart, selEnd)
       } else {
         this.spanPropertyHandler(propName, value, selStart, selEnd)
       }
+    }
+  }
+
+  groupHandler(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel()) {
+    /**
+     * Check the LayerGroup's property indicated value
+     */
+    let flag = false
+    let propValue: number | string | undefined
+    const groupLayer = this.getCurrLayer
+    if (this.targetInfo.subLayerIndex === -1) {
+      for (let i = 0; i < groupLayer.layers.length && !flag; i++) {
+        if (groupLayer.layers[i].type === 'text') {
+          const tmpLayer = groupLayer.layers[i] as IText
+          const propBuff = this.propIndicator(
+            {
+              pIndex: 0,
+              sIndex: 0
+            },
+            {
+              pIndex: tmpLayer.paragraphs.length - 1,
+              sIndex: tmpLayer.paragraphs[tmpLayer.paragraphs.length - 1].spans.length - 1
+            }, propName, value || '', tmpLayer
+          )
+          switch (propName) {
+            case 'bold':
+              propValue = 'normal'
+              if (propBuff.weight === 'bold') {
+                propValue = 'bold'
+                flag = true
+              }
+              break
+            case 'italic':
+              propValue = 'normal'
+              if (propBuff.style === 'italic') {
+                propValue = 'italic'
+                flag = true
+              }
+              break
+            case 'underline':
+              propValue = 'none'
+              if (propBuff.decoration === 'underline') {
+                propValue = 'underline'
+                flag = true
+              }
+              break
+            case 'fontSize':
+              propValue = value as string
+              break
+            case 'fontFamily':
+              propValue = value as string
+              break
+            case 'color': {
+              propValue = value as string
+              flag = true
+              break
+            }
+          }
+        }
+      }
+      for (let i = 0; i < groupLayer.layers.length; i++) {
+        const layer = groupLayer.layers[i]
+        if (layer.type === 'text') {
+          this.spanPropertyHandler(propName, propValue, TextUtils.getNullSel(), TextUtils.getNullSel(), i)
+        }
+      }
+    } else {
+      this.spanPropertyHandler(propName, value, selStart, selEnd, this.targetInfo.subLayerIndex)
     }
   }
 
@@ -232,7 +235,6 @@ class TextPropUtils {
         p.styles.size = fontSize
       }
     }
-    // if (!sel || typeof tmpLayerIndex !== 'undefined') return
 
     if (TextUtils.isSel(end)) {
       if (isStartContainerDivided) {

@@ -53,8 +53,8 @@ class ImageUtils {
   }
 
   getSrcSize(type: string, width: number, preload = '') {
-    const sizeMap = store.state.user?.imgSizeMap
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
+    const sizeMap = store.state.user?.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
       while (width < sizeMap[i].size && i < sizeMap.length - 1) {
@@ -63,10 +63,8 @@ class ImageUtils {
       return preload
         ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
         : sizeMap[i][key]
-    } else {
-      console.error('image size map is empty !')
-      return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
     }
+    return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
   }
 
   getSrcType(src: string) {

@@ -123,7 +123,6 @@ export default Vue.extend({
         if (this.config.isTyping) return
         this.$nextTick(() => {
           TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
-          console.log(LayerUtils.getCurrLayer)
         })
       },
       deep: true
