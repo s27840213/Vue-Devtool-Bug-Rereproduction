@@ -7,8 +7,10 @@
                 :style="absoluteSearchbarStyles()"
                 class="template-center__absolute-searchbar"
                 :clear="true"
+                :defaultKeyword="searchbarKeyword"
                 placeholder="Search from our templates"
                 fontFamily="Mulish"
+                @update="handleUpdate"
                 @search="handleSearch")
     div(class="template-center__search-container")
       div(class="template-center__search")
@@ -22,8 +24,10 @@
                   class="template-center__search__searchbar"
                   :style="searchbarStyles()"
                   :clear="true"
+                  :defaultKeyword="searchbarKeyword"
                   placeholder="Search from our templates"
                   fontFamily="Mulish"
+                  @update="handleUpdate"
                   @search="handleSearch")
     div(class="template-center__content")
       div(class="template-center__filter")
@@ -42,6 +46,14 @@
             svg-icon(iconName="chevron-down"
                     iconWidth="24px"
                     iconColor="gray-2")
+      div(v-if="isTemplateReady" class="template-center__waterfall")
+        div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
+          div(v-for="template in waterfallTemplate" class="template-center__waterfall__column__template")
+            img(:src="template.url")
+      div(v-else class="template-center__loading")
+        svg-icon(iconName="loading"
+                iconWidth="24px"
+                iconColor="gray-2")
     nu-footer
 </template>
 
@@ -52,7 +64,8 @@ import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagRow from '@/components/templates/HashtagRow.vue'
-import { IHashtagServiceContentData } from '@/interfaces/api'
+import { ITemplate } from '@/interfaces/template'
+import templateCenterUtils from '@/utils/templateCenterUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -73,7 +86,9 @@ export default Vue.extend({
       searchbarKeyword: '',
       hashtagSelections: {} as {[key: string]: {type: string, selection: string[]}},
       sortingCriteria,
-      selectedSorting: sortingCriteria[0]
+      selectedSorting: sortingCriteria[0],
+      waterfallTemplates: [] as ITemplate[][],
+      isTemplateReady: false
     }
   },
   mounted() {
@@ -93,7 +108,7 @@ export default Vue.extend({
       hashtags: 'categories'
     }),
     ...mapState('templates', {
-      templates: 'categories'
+      templates: 'content'
     })
   },
   methods: {
@@ -113,6 +128,9 @@ export default Vue.extend({
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= 50
       this.searchbarTop = searchbar.getBoundingClientRect().top
+    },
+    handleUpdate(keyword: string) {
+      this.searchbarKeyword = keyword
     },
     handleSearch(keyword: string) {
       this.searchbarKeyword = keyword
@@ -145,7 +163,11 @@ export default Vue.extend({
         res.push('tag::' + tags.join('&&'))
       }
       res.push('order_by::' + this.selectedSorting)
-      this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') })
+      this.isTemplateReady = false
+      this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(async () => {
+        this.waterfallTemplates = await templateCenterUtils.generateWaterfall(this.templates)
+        this.isTemplateReady = true
+      })
     }
   }
 })
@@ -278,6 +300,25 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+  }
+  &__waterfall {
+    margin-bottom: 80px;
+    display: flex;
+    gap: 15px;
+    &__column {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      &__template {
+        width: 100%;
+        height: fit-content;
+        > img {
+          width: 100%;
+          display: block;
+        }
+      }
     }
   }
 }
