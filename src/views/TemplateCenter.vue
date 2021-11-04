@@ -72,7 +72,6 @@ export default Vue.extend({
       searchbarTop: 0,
       searchbarKeyword: '',
       hashtagSelections: {} as {[key: string]: {type: string, selection: string[]}},
-      themeMap: {} as {[key: string]: number},
       sortingCriteria,
       selectedSorting: sortingCriteria[0]
     }
@@ -80,16 +79,10 @@ export default Vue.extend({
   mounted() {
     this.getHashtags().then(() => {
       this.hashtagSelections = {}
-      this.themeMap = {}
       for (const hashtag of this.hashtags) {
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
           selection: []
-        }
-        if (hashtag.type === 'theme') {
-          for (const theme of hashtag.list) {
-            this.themeMap[theme.name] = theme.id
-          }
         }
       }
       this.composeKeyword()
@@ -136,7 +129,7 @@ export default Vue.extend({
     composeKeyword() {
       const res = ['locale::tw']
       const tags = []
-      let themes: number[] = []
+      let themes: string[] = []
       if (this.searchbarKeyword !== '') {
         tags.push(this.searchbarKeyword)
       }
@@ -145,15 +138,13 @@ export default Vue.extend({
           tags.push(hashtagSelection.selection.join(' '))
         }
         if (hashtagSelection.type === 'theme') {
-          themes = themes.concat(hashtagSelection.selection.map(name => this.themeMap[name]))
+          themes = themes.concat(hashtagSelection.selection)
         }
       }
       if (tags.length > 0) {
         res.push('tag::' + tags.join('&&'))
       }
       res.push('order_by::' + this.selectedSorting)
-      console.log(res.join(';;'))
-      console.log(themes.join(','))
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') })
     }
   }

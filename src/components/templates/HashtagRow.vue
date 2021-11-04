@@ -6,8 +6,8 @@
           :class="{'selected': selected.length === 0}"
           @click="handleSelectAll") All
       div(v-for="tag in list.list" class="hashtag-row__tags__tag"
-          :class="checkSelection(tag.name)"
-          @click="handleSelect(tag.name)") {{ tag.name }}
+          :class="checkSelection(tag)"
+          @click="handleSelect(tag)") {{ tag.name }}
 </template>
 
 <script lang="ts">
@@ -31,19 +31,21 @@ export default Vue.extend({
     }
   },
   methods: {
-    checkSelection(name: string) {
-      return this.selected.includes(name) ? 'selected' : ''
+    checkSelection(tag: any) {
+      const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
+      return this.selected.includes(key) ? 'selected' : ''
     },
     handleSelectAll() {
       this.selected = []
       this.emitSelect()
     },
-    handleSelect(name: string) {
-      const index = this.selected.indexOf(name)
+    handleSelect(tag: any) {
+      const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
+      const index = this.selected.indexOf(key)
       if (index !== -1) {
         this.selected.splice(index, 1)
       } else {
-        this.selected.push(name)
+        this.selected.push(key)
       }
       this.emitSelect()
     },
