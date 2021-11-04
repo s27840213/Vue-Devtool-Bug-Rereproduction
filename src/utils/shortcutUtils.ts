@@ -304,6 +304,23 @@ class ShortcutHandler {
   }
 
   undo() {
+    const currLayer = LayerUtils.getCurrLayer
+    switch (currLayer.type) {
+      case 'frame':
+        if ((currLayer as IFrame).clips.some(img => img.imgControl)) {
+          return
+        }
+        break
+      case 'group':
+        if ((currLayer as IGroup).layers.some(l => l.type === 'image' && l.imgControl)) {
+          return
+        }
+        break
+      case 'image':
+        if (currLayer.imgControl) {
+          return
+        }
+    }
     console.log('undo')
     StepsUtils.undo()
   }

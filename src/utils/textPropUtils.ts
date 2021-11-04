@@ -8,6 +8,7 @@ import { ITextState } from '@/store/text'
 import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
+import { consoleSandbox } from '@sentry/browser/node_modules/@sentry/utils'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -162,23 +163,24 @@ class TextPropUtils {
     })
   }
 
-  spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection, tmpLayerIndex?: number) {
+  spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection,
+    tmpLayerIndex?: number, primaryLayerIndex?: number): { config: IText, start: ISelection, end: ISelection } {
     const sel = TextUtils.getSelection()
+    const isGroupLayer = typeof tmpLayerIndex !== 'undefined'
+    const layer = LayerUtils.getLayer(LayerUtils.pageIndex, primaryLayerIndex ?? LayerUtils.layerIndex)
+
     let config: IText
-    if (typeof tmpLayerIndex === 'undefined') {
-      config = GeneralUtils.deepCopy(this.getCurrLayer) as IText
+    if (isGroupLayer) {
+      config = GeneralUtils.deepCopy((layer as IGroup).layers[tmpLayerIndex]) as IText
     } else {
-      config = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[tmpLayerIndex]) as IText
+      config = GeneralUtils.deepCopy(layer) as IText
     }
+
     let start = { pIndex: 0, sIndex: 0, offset: 0 }
     let end = { pIndex: 0, sIndex: 0, offset: 0 }
-
-    if (TextUtils.isSel(selStart) || TextUtils.isSel(selEnd)) {
+    if (TextUtils.isSel(selStart)) {
       Object.assign(start, selStart)
       Object.assign(end, selEnd)
-    } else if (TextUtils.isSel(this.getCurrSel?.start)) {
-      Object.assign(start, this.getCurrSel?.start)
-      Object.assign(end, this.getCurrSel?.end)
     } else {
       end.pIndex = config.paragraphs.length - 1
       end.sIndex = config.paragraphs[end.pIndex].spans.length - 1
@@ -187,24 +189,23 @@ class TextPropUtils {
 
     let isStartContainerDivided = true
     let prop: { [key: string]: string | number }
-    // If temLayerIndex equals to 'undefined', means this function is now handler non-group-layer
-    if (typeof tmpLayerIndex === 'undefined') {
-      prop = this.propIndicator(start, end, propName, value || '')
-    } else {
+    if (isGroupLayer) {
       const i = Object.keys(fontPropsMap).indexOf(propName)
       const v = Object.values(fontPropsMap)[i]
       prop = { [v]: value as string | number }
       // prop = this.propIndicator(start, end, propName, value || '', config)
+    } else {
+      prop = this.propIndicator(start, end, propName, value || '')
     }
     if (TextUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
-      if (typeof tmpLayerIndex === 'undefined') {
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
-      } else {
+      if (isGroupLayer) {
         TextUtils.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
+      } else {
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
     } else if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
@@ -212,15 +213,15 @@ class TextPropUtils {
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
-      if (typeof tmpLayerIndex === 'undefined') {
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
-      } else {
+      if (isGroupLayer) {
         TextUtils.updateSelectedParagraphs(tmpLayerIndex, config.paragraphs)
         // LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, tmpLayerIndex,
         //   {
         //     paragraphs: config.paragraphs
         //   }
         // )
+      } else {
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
     }
 
@@ -251,7 +252,7 @@ class TextPropUtils {
     }
     // sync updating text effect if the color changed
     TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
-    if (!sel || typeof tmpLayerIndex !== 'undefined' || propName === 'color') return
+    if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
 
     // Below is used to re-select the caret-range after the props are applied
     Vue.nextTick(() => {
@@ -271,11 +272,12 @@ class TextPropUtils {
             TextUtils.updateSelection(start, end)
           } else {
             TextUtils.focus(start, start, true)
-            TextUtils.updateSelection(start, { pIndex: NaN, sIndex: NaN, offset: NaN })
+            TextUtils.updateSelection(start, TextUtils.getNullSel())
           }
         }
       }
     })
+    return { config, start, end }
   }
 
   rangedSelHandler (start: ISelection, end: ISelection, config: IText, prop: { [key: string]: string | number }): boolean {

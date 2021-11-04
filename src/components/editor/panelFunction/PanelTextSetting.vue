@@ -273,7 +273,7 @@ export default Vue.extend({
       return origin
     },
     onPropertyClick(iconName: string) {
-      TextPropUtils.onPropertyClick(iconName)
+      TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
       /**
        *  Only select with range or none selection exist, the prop-panel update.
        * */
