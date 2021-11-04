@@ -715,7 +715,7 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       > span {
-        font-family: 'SFProDisplay';
+        font-family: 'NotoSansTC';
         font-size: 14px;
         font-weight: 700;
         line-height: 20px;
@@ -763,7 +763,7 @@ export default Vue.extend({
       justify-content: center;
       cursor: pointer;
       > span {
-        font-family: SF Pro Display;
+        font-family: NotoSansTC;
         font-size: 12px;
         line-height: 25px;
         letter-spacing: 0.875em;
@@ -782,7 +782,7 @@ export default Vue.extend({
       justify-content: center;
       cursor: pointer;
       > span {
-        font-family: SF Pro Display;
+        font-family: NotoSansTC;
         font-size: 12px;
         line-height: 25px;
         display: block;

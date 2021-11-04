@@ -118,7 +118,7 @@ export default Vue.extend({
       justify-content: center;
       height: 40px;
       > span {
-        font-family: "SFPr Display";
+        font-family: "NotoSansTC";
         font-weight: 700;
         font-size: 40px;
         line-height: 40px;
