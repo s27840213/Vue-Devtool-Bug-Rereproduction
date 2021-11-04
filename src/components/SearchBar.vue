@@ -4,7 +4,8 @@
     input(class="search-bar__input body-2"
       type="text"
       v-model="keyword"
-      :placeholder="placeholder")
+      :placeholder="placeholder"
+      :style="inputStyles()")
     svg-icon(v-if="clear && keyword"
       class="pointer mr-5"
       iconName="close"
@@ -36,6 +37,10 @@ export default Vue.extend({
     defaultKeyword: {
       type: String,
       default: ''
+    },
+    fontFamily: {
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -49,6 +54,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    inputStyles() {
+      return { fontFamily: this.fontFamily }
+    },
     onSearch (event: Event) {
       event.preventDefault()
       this.$emit('search', this.keyword)
