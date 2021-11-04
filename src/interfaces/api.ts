@@ -100,7 +100,7 @@ export interface ISearchPhotoParams {
 export interface IListServiceParams {
   token?: string
   locale?: string
-  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout' | 'theme'
+  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout' | 'theme' | 'hashtag'
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
@@ -210,4 +210,19 @@ export interface IPhotoItemInfo {
 export interface IPhotoUserInfo {
   name: string
   link: string
+}
+
+export interface IHashtagServiceContentDataTagItem {
+  name: string
+}
+
+export interface IHashtagServiceContentDataThemeItem {
+  id: number
+  name: string
+}
+
+export interface IHashtagServiceContentData {
+  list: (IHashtagServiceContentDataTagItem | IHashtagServiceContentDataThemeItem)[]
+  title: string
+  type: string
 }
