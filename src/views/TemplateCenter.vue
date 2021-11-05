@@ -41,11 +41,11 @@
               :class="{'selected': selectedSorting === sortingCriterium}"
               @click="handleSelectSorting(sortingCriterium)") {{ sortingCriterium }}
         div(class="template-center__sorter__right")
-          div(class="template-center__sorter__color-title") Color
-          div(class="template-center__sorter__color-down")
-            svg-icon(iconName="chevron-down"
-                    iconWidth="24px"
-                    iconColor="gray-2")
+          //- div(class="template-center__sorter__color-title") Color
+          //- div(class="template-center__sorter__color-down")
+          //-   svg-icon(iconName="chevron-down"
+          //-           iconWidth="24px"
+          //-           iconColor="gray-2")
       div(v-if="isTemplateReady" class="template-center__waterfall")
         div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
           div(v-for="template in waterfallTemplate" class="template-center__waterfall__column__template")
