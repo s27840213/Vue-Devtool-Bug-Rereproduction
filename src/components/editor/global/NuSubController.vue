@@ -250,11 +250,16 @@ export default Vue.extend({
     },
     onMousedown() {
       if (this.getLayerType === 'text') {
-        if (this.isActive) {
-          this.contentEditable = true
-        }
         this.posDiff.x = this.getPrimaryLayer.styles.x
         this.posDiff.y = this.getPrimaryLayer.styles.y
+        if (this.isActive && this.contentEditable) return
+        else if (!this.isActive) {
+          this.isControlling = true
+          this.contentEditable = false
+          document.addEventListener('mouseup', this.onMouseup)
+          return
+        }
+        this.contentEditable = true
       }
       document.addEventListener('mouseup', this.onMouseup)
       this.isControlling = true

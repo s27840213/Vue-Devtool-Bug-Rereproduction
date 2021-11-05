@@ -113,8 +113,8 @@ class TextUtils {
   }
 
   startEqualEnd (start: ISelection, end: ISelection) {
-    return (Object.keys(start) as Array<(keyof ISelection)>)
-      .every((k: (keyof ISelection)) => start[k] === end[k])
+    return (Object.keys(start) as Array<keyof ISelection>)
+      .every((k: keyof ISelection) => start[k] === end[k])
   }
 
   focus(start?: ISelection, end?: ISelection, async = false) {

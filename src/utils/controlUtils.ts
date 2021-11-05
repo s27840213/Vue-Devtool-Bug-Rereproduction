@@ -87,24 +87,28 @@ class Controller {
       ],
       resizers: [
         {
+          type: 'H',
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: `${-resizerShort - 1.5}px`,
           transform: 'translate(0, -50%)'
         },
         {
+          type: 'H',
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: `${-resizerShort - 1.5}px`,
           transform: 'translate(0, -50%)'
         },
         {
+          type: 'V',
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: `${-resizerShort - 1.5}px`,
           transform: 'translate(-50%, 0)'
         },
         {
+          type: 'V',
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: `${-resizerShort - 1.5}px`,

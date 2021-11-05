@@ -399,6 +399,12 @@ class UploadUtils {
     }
     groupUtils.reset()
 
+    if (!page.appVer_origin) {
+      page.appVer_origin = page.appVer || new Date().toISOString()
+    }
+    if (!page.jsonVer_origin) {
+      page.jsonVer_origin = page.jsonVer || jsonVer
+    }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
     return page

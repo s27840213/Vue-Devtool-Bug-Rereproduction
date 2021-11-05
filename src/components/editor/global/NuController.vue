@@ -114,10 +114,10 @@
               @mousedown.left.stop="scaleStart")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart($event)")
-            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point__resize-bar"
+            div(class="control-point__resize-bar"
                 :key="index"
                 :style="resizerBarStyles(resizer)")
-            div(v-if="getLayerWidth > 50 && getLayerHeight > 50" class="control-point"
+            div(class="control-point"
                 :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
@@ -175,6 +175,9 @@ import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
+
+const LAYER_SIZE_MIN = 10
+const RESIZER_SHOWN_MIN = 50
 
 export default Vue.extend({
   props: {
@@ -403,7 +406,7 @@ export default Vue.extend({
       return Object.assign(resizerStyle, HW)
     },
     resizer(controlPoints: any, textMoveBar = false) {
-      let resizers = controlPoints.resizers
+      let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
       switch (this.getLayerType) {
         case 'text':
           if (textMoveBar) {
@@ -424,12 +427,18 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          if (FrameUtils.isImageFrame(this.config)) {
-            return resizers
-          } else {
-            return []
+          if (!FrameUtils.isImageFrame(this.config)) {
+            resizers = []
           }
       }
+
+      if (resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
+        resizers = resizers.filter(r => r.type !== 'H')
+      }
+      if (resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
+        resizers = resizers.filter(r => r.type !== 'V')
+      }
+
       return resizers
     },
     lineEnds(scalers: any, point: number[]) {
@@ -761,8 +770,15 @@ export default Vue.extend({
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
       }
-      // The minimum size of the layer
-      if (width <= 15 || height <= 15) return
+      /** The minimum size of the layer
+       *  */
+      if (width <= LAYER_SIZE_MIN) {
+        width = LAYER_SIZE_MIN
+        height = LAYER_SIZE_MIN * this.getLayerHeight / this.getLayerWidth
+      } else if (height <= LAYER_SIZE_MIN) {
+        width = LAYER_SIZE_MIN * this.getLayerWidth / this.getLayerHeight
+        height = LAYER_SIZE_MIN
+      }
 
       const offsetSize = {
         width: width - initWidth,
@@ -1266,10 +1282,13 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+      if (!this.contentEditable) {
+        TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+      } else if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
           if (sel) {
+            console.warn(sel.start.pIndex)
             TextUtils.updateSelection(sel.start, sel.end)
           }
         }
@@ -1447,9 +1466,6 @@ export default Vue.extend({
               }
               if (!Number.isNaN(pIndex)) {
                 const range = new Range()
-                console.log(pIndex)
-                console.log(sIndex)
-                console.log(offset)
                 if (text.childNodes[pIndex].firstChild?.nodeName === 'SPAN') {
                   try {
                     range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
