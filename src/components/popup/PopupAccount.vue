@@ -11,30 +11,20 @@
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
       span 帳 號 設 定
-    div(class="popup-account__hr")
     div(class="popup-account__option")
       svg-icon(class="pr-10"
-        :iconName="'settings'"
+        :iconName="'lock'"
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
-      span 優 惠 代 碼
-    div(class="popup-account__option")
-      svg-icon(class="pr-10"
-        :iconName="'settings'"
-        :iconWidth="'15px'"
-        :iconColor="'gray-2'")
-      span 推 薦 朋 友
-    div(class="popup-account__option")
-      svg-icon(class="pr-10"
-        :iconName="'settings'"
-        :iconWidth="'15px'"
-        :iconColor="'gray-2'")
-      span 幫 助
+      span 登 入 與 安 全 性
     div(class="popup-account__hr")
     div(class="popup-account__option"
       @click="onLogoutClicked()")
+      svg-icon(class="pr-10"
+        :iconName="'logout'"
+        :iconWidth="'15px'"
+        :iconColor="'gray-2'")
       span 登 出
-
 </template>
 
 <script lang="ts">
