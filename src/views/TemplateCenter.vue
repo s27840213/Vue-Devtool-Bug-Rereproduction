@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="template-center"
+  div(ref="body"
+      class="template-center"
       @scroll="handleScroll")
     nu-header(:noSearchbar="true" :noNavigation="snapToTop")
       transition(name="slide")
@@ -55,6 +56,9 @@
                 iconWidth="24px"
                 iconColor="gray-2")
     nu-footer
+    transition(name="fade-scale")
+      div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
+        img(:src="require('@/assets/img/svg/to_top.svg')")
 </template>
 
 <script lang="ts">
@@ -143,6 +147,12 @@ export default Vue.extend({
     handleSelectSorting(sortingCriterium: string) {
       this.selectedSorting = sortingCriterium
       this.composeKeyword()
+    },
+    scrollToTop() {
+      (this.$refs.body as HTMLElement).scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     },
     composeKeyword() {
       const res = ['locale::tw']
@@ -321,6 +331,22 @@ export default Vue.extend({
         }
       }
     }
+  }
+  &__to-top {
+    position: fixed;
+    right: max(min(calc(50% - 540px), 76px), 10px);
+    bottom: 84px;
+  }
+}
+
+.fade-scale {
+  &-enter-active, &-leave-active  {
+    transition: .3s ease;
+  }
+
+  &-enter, &-leave-to {
+    transform: scale(0.8);
+    opacity: 0;
   }
 }
 </style>
