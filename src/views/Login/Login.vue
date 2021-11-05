@@ -1,123 +1,192 @@
 <template lang="pug">
-div(style="position:relative;")
+div(style="position: relative;")
   div(class="login-wrapper")
-    div(v-if="currentPageIndex === 0" class="login login-p0")
+    div(v-if="currentPageIndex === 0"
+      class="login login-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
+        img(:src="require('@/assets/img/svg/signup.svg')"
+          style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") LOG IN
+        span(class="text-blue-1 heading-5") 登 入
       div
-        btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'")
+        btn(@click.native="onFacebookClicked()"
+          :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") Log in with Facebook
+        span(class="body-2") 使用 Facebook 帳號登入
       div
-        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
+        btn(@click.native="onGoogleClicked()"
+          :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") Log in with Google
+        span(class="body-2") 使用 Google 帳號登入
       div
-        span or
+        span 或
       div
         div
-          span(class="label-mid") Email
-          property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your email")
-          div(v-if="!mailValid" class="invalid-message")
+          span(class="label-mid") 電子郵件
+          property-bar(class="mt-5"
+            :class="{'input-invalid': !mailValid}")
+            input(class="body-2 text-gray-2"
+              v-model="email"
+              type="email" name="email"
+              placeholder="請輸入常用 Email")
+          div(v-if="!mailValid"
+            class="invalid-message")
             span {{ mailErrorMessage }}
         div
           div(class="flex flex-between")
-            span(class="label-mid") Password
-            btn(:type="'icon'" class="text-gray-3 body-2 forgot-pwd" @click.native="onForgotClicked()") Forgot your password
-          property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
-            input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your password" :type="togglePeerPasswordInput")
+            span(class="label-mid") 密碼
+            btn(:type="'icon'"
+              class="text-gray-3 body-2 forgot-pwd"
+              @click.native="onForgotClicked()") 忘記密碼
+          property-bar(class="mt-5"
+            :class="{'input-invalid': !passwordValid}")
+            input(class="body-2 text-gray-2"
+              v-model="password" type="number"
+              placeholder="請輸入密碼" :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
-              :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(v-if="!passwordValid" class="invalid-message")
+                :iconName="togglePeerPasswordIcon"
+                :iconWidth="'20px'" :iconColor="'gray-2'")
+          div(v-if="!passwordValid"
+            class="invalid-message")
             span {{ passwordErrorMessage }}
       div
-        btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow"
-        @click.native="onLogInClicked()") Log in
+        btn(:type="'primary-mid'"
+          class="bg-gray-2 text-white btn-shadow"
+          @click.native="onLogInClicked()") 送 出
       div
-        span New to Here?
-        btn(:type="'icon'" class="h-link" @click.native="onSignupClicked()") Sign up
-      div
+        span 初次使用？
+        btn(:type="'icon'"
+          class="h-link"
+          @click.native="onSignupClicked()") 立即註冊
+      div(class="page-close")
         button(@click="onCloseClicked")
-              svg-icon(class="pointer"
-              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
-    div(v-if="currentPageIndex === 1" class="login")
+          svg-icon(class="pointer"
+            iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
+    div(v-if="currentPageIndex === 1"
+      class="login")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Forgot you password?
+        span(class="text-blue-1 heading-5") 忘 記 密 碼？
       div
-        span(class="body-2") Don't worry, please enter your email.<br> We will send an email to help you reset the password.
+        span(class="body-2") 別擔心，請輸入Email<br>我們會傳送訊息給你，以協助你重設密碼。
       div
-        property-bar(class="mt-5" :class="{'input-invalid': !mailValid || emailResponseError}")
-          input(class="body-2 text-gray-2" v-model="email" type="email" name="email" min="0" placeholder="Your Email")
-        div(v-if="!mailValid || emailResponseError" class="invalid-message")
+        property-bar(class="mt-5"
+          :class="{'input-invalid': !mailValid || emailResponseError}")
+          input(class="body-2 text-gray-2"
+            v-model="email"
+            type="email" name="email"
+            placeholder="請輸入 Email")
+        div(v-if="!mailValid || emailResponseError"
+          class="invalid-message")
           span {{ mailErrorMessage }}
-      div(class="flex" style="justify-content: center;")
-        btn(:type="'primary-mid'" class="btn-shadow body-1" style="width: 50%;"
-        @click.native="onSendEmailClicked()") Send email
-      div(class="flex" style="justify-content: center;")
-        btn(:type="'icon-mid'" class="bg-gray-3 text-white btn-shadow" style="width: 50%;"
-        @click.native="onBackClicked()") Back to login
-    div(v-if="currentPageIndex === 2" class="login")
+      div(class="flex"
+        style="justify-content: center;")
+        btn(:type="'primary-mid'"
+          class="btn-shadow body-1"
+          style="width: 50%;"
+          @click.native="onSendEmailClicked()") 確 定 發 送
+      div(class="flex"
+        style="justify-content: center;")
+        btn(:type="'icon-mid'"
+          class="bg-gray-3 text-white btn-shadow"
+          style="width: 50%;"
+          @click.native="onBackClicked()") 返 回 登 入 頁
+      div(class="page-close")
+        button(@click="onCloseClicked")
+          svg-icon(class="pointer"
+            iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
+    div(v-if="currentPageIndex === 2"
+      class="login")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Verification code is sent
+        span(class="text-blue-1 heading-5") 驗 證 碼 已 傳 送
       div
-        span(class="body-2") We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
+        span(class="body-2") 請在 10 分鐘內輸入我們傳送到 {{ email }} 的驗證碼。
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
-          input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
-        div(v-if="!vcodeValid" class="invalid-message")
+          input(class="body-2 text-gray-2"
+            v-model="vcode" type="text" name="vcode"
+            placeholder="請輸入驗證碼")
+        div(v-if="!vcodeValid"
+          class="invalid-message")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
-        btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(v-if="resendAvailable" class="flex flex-between align-center"
-      style="height:30px; margin-bottom: 0;")
-        span didn't receive email?
-        btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
-      div(v-else class="flex align-center text-gray-3"
-      style="height:30px; margin-bottom: 0;")
+        btn(:type="'primary-mid'"
+          class="btn-shadow full-width"
+          @click.native="onEnterCodeDoneClicked()") 完 成
+      div(v-if="resendAvailable"
+        class="flex flex-between align-center"
+        style="height:30px; margin-bottom: 0;")
+        span 沒有收到驗證碼嗎？
+        btn(:type="'icon'"
+          class="text-blue-1 body-1"
+          @click.native="onResendClicked()") 重新傳送驗證碼
+      div(v-else
+        class="flex align-center text-gray-3"
+        style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
-    div(v-if="currentPageIndex === 3" class="login")
+      div(class="page-close")
+        button(@click="onCloseClicked")
+          svg-icon(class="pointer"
+            iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
+    div(v-if="currentPageIndex === 3"
+      class="login")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Choose a new password
+        span(class="text-blue-1 heading-5") 重 設 新 密 碼
       div
         div
-          span(class="label-mid") New password
-        property-bar(class="mt-5" :class="{'input-invalid': !resetPasswordValid}")
-          input(class="body-2 text-gray-2" v-model="password" type="number" min="0" placeholder="Your password" :type="togglePeerPasswordInput")
+          span(class="label-mid") 新密碼
+        property-bar(class="mt-5"
+          :class="{'input-invalid': !resetPasswordValid}")
+          input(class="body-2 text-gray-2"
+            v-model="password" type="number"
+            placeholder="新密碼"
+            :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
             svg-icon(class="pointer"
-            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+              :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(class="invalid-message")
           div(class="flex align-center")
             svg-icon(class="pointer"
-            :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
-            :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-            span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of 8 to 18 characters.
+              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+            span(class="ml-5"
+              :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
           div(class="flex align-center")
             svg-icon(class="pointer"
-            :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
-            :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
-            span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+            span(class="ml-5"
+              :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
           div(class="flex align-center")
             svg-icon(class="pointer"
-            :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
-            :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
-            span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
+              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+            span(class="ml-5"
+              :class="{'text-green-1': passwordContainNum}") 密碼包含數字
         div(class="mt-20")
-          span(class="label-mid") Confirm new password
-        property-bar(class="mt-5" :class="{'input-invalid': !confirmPasswordValid}")
-          input(class="body-2 text-gray-2" v-model="confirmPassword" type="number" min="0" placeholder="Confirm password" :type="togglePeerPasswordInput")
+          span(class="label-mid") 確認新密碼
+        property-bar(class="mt-5"
+          :class="{'input-invalid': !confirmPasswordValid}")
+          input(class="body-2 text-gray-2"
+            v-model="confirmPassword" type="number"
+            placeholder="確認新密碼"
+            :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
             svg-icon(class="pointer"
             :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-        div(v-if="!confirmPasswordValid" class="invalid-message")
+        div(v-if="!confirmPasswordValid"
+          class="invalid-message")
             span {{ confirmErrorMessage }}
-        div(class="mt-20 flex" style="justify-content: center;")
-          btn(:type="'primary-mid'" class="btn-shadow"  style="width: 50%;"
-          @click.native="onResetDoneClicked()") Done
+        div(class="mt-20 flex"
+          style="justify-content: center;")
+          btn(:type="'primary-mid'"
+            class="btn-shadow"
+            style="width: 50%;"
+            @click.native="onResetDoneClicked()") 完 成
+        div(class="page-close")
+          button(@click="onCloseClicked")
+            svg-icon(class="pointer"
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
   spinner(v-if="isLoading")
 </template>
 
@@ -143,10 +212,10 @@ export default Vue.extend({
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
-      passwordErrorMessage: 'Please enter your password.' as string,
+      passwordErrorMessage: '請輸入您的密碼' as string,
       emailResponseError: false as boolean,
-      mailErrorMessage: 'Invalid email address format.' as string,
-      vcodeErrorMessage: 'Invalid verification code.' as string,
+      mailErrorMessage: 'Email 格式錯誤' as string,
+      vcodeErrorMessage: '驗證碼錯誤' as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -302,7 +371,7 @@ export default Vue.extend({
       this.isLoginClicked = true
       this.isLoading = true
       if (this.password.length === 0) {
-        this.passwordErrorMessage = 'Please enter your password.'
+        this.passwordErrorMessage = '請輸入您的密碼'
         this.isLoading = false
         return
       }
@@ -342,12 +411,12 @@ export default Vue.extend({
       this.isLoading = true
       if (this.email.length === 0) {
         this.isLoading = false
-        this.mailErrorMessage = 'Please enter your email.'
+        this.mailErrorMessage = '請輸入您的 Email'
         return
       }
       if (!this.mailValid) {
         this.isLoading = false
-        this.mailErrorMessage = 'Invalid email address format.'
+        this.mailErrorMessage = 'Email 格式錯誤'
         return
       }
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
@@ -368,13 +437,13 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+      this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
       const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+          this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -397,7 +466,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = 'Please enter the verification code.'
+        this.vcodeErrorMessage = '請輸入驗證碼'
         this.isLoading = false
         return
       }
@@ -422,11 +491,11 @@ export default Vue.extend({
         return
       }
       if (this.password.length === 0) {
-        this.confirmErrorMessage = 'Please enter the new password.'
+        this.confirmErrorMessage = '請輸入新密碼'
         this.isLoading = false
         return
       } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
-        this.confirmErrorMessage = 'Your confirmation password does not match the new password.'
+        this.confirmErrorMessage = '您的兩組密碼不相同'
         this.isLoading = false
         return
       }
@@ -493,6 +562,7 @@ export default Vue.extend({
   align-items: center;
 }
 .login {
+  position: relative;
   margin: 0 auto;
   text-align: left;
   width: 360px;
@@ -507,9 +577,7 @@ export default Vue.extend({
     }
   }
 }
-
 .login-p0 {
-  position: relative;
   padding: 0 32px 20px 32px;
   > div {
     margin-bottom: 2vh;
@@ -535,16 +603,13 @@ export default Vue.extend({
         cursor: pointer;
         background: setColor(gray-5);
       }
-
       &:active {
         background: setColor(gray-4);
       }
-
       > button {
         width: 100%;
         height: 100%;
       }
-
       > img {
         position: absolute;
         left: 15%;
@@ -552,7 +617,6 @@ export default Vue.extend({
         height: 25px;
         pointer-events: none;
       }
-
       > span {
         position: absolute;
         left: 30%;
@@ -613,14 +677,8 @@ export default Vue.extend({
       // signup hint
       font-size: 14px;
     }
-    &:nth-child(9) {
-      position: absolute;
-      right: 15px;
-      top: 15px;
-    }
   }
 }
-
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }
@@ -640,9 +698,13 @@ export default Vue.extend({
   color: setColor(red);
   padding-top: 5px;
 }
-
 .btn-shadow {
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
+}
+.page-close {
+  position: absolute;
+  right: 15px;
+  top: 15px;
 }
 </style>

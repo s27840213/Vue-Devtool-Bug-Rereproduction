@@ -1,106 +1,147 @@
 <template lang="pug">
 div(style="position:relative;")
   div(class="signup-wrapper")
-    div(v-if="currentPageIndex === 0" class="signup signup-p0")
+    div(v-if="currentPageIndex === 0"
+      class="signup signup-p0")
       div
-        img(:src="require('@/assets/img/svg/signup.svg')" style="width: 180px; height: 133px;")
+        img(:src="require('@/assets/img/svg/signup.svg')"
+          style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") Start with Vivipic
+        span(class="text-blue-1 heading-5") 開始使用 Vivipic
       div
-        div Let Vivipic be your good design assistant in the E-commerce world!
-        div Sign up now, enjoy unlimited templates for free!
+        div 在電商這條路上，讓 Vivipic 成為你的設計好助手！
+        div 馬上註冊，即可免費享用無數電商模板
       div
-        btn(@click.native="onFacebookClicked()" :type="'icon-mid-body'")
+        btn(@click.native="onFacebookClicked()"
+          :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") Log in with Facebook
+        span(class="body-2") 使用 Facebook 帳號註冊
       div
         btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") Log in with Google
+        span(class="body-2") 使用 Google 帳號註冊
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") Sign up with Email
+        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") 使用電子郵件註冊
       div
-        span Already sign up?
-        btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
+        span 已是會員?
+        btn(:type="'icon'"
+          class="h-link"
+          @click.native="onLoginClicked()") 立即登入
       div
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
-              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-2'")
+              iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
     div(v-if="currentPageIndex === 1" class="signup signup-p1")
       div
         button(@click="onBackClicked")
               svg-icon(class="pointer"
-              iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-2'")
-        span(class="text-blue-1") Create your account
+              iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-3'")
+        span(class="text-blue-1") 建立您的帳號
         button
               svg-icon(class="pointer"
-              iconName="page-close" :iconWidth="'0px'" :iconColor="'gray-2'")
+                iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
       div
         div
-          span(class="label-mid") Name
-          property-bar(class="mt-5" :class="{'input-invalid': !nameValid}")
-            input(class="body-2 text-gray-2" v-model="name" type="text" name="name" placeholder="Your name")
+          span(class="label-mid") 暱稱
+          property-bar(class="mt-5"
+            :class="{'input-invalid': !nameValid}")
+            input(class="body-2 text-gray-2"
+              v-model="name" type="text" name="name"
+              placeholder="您的暱稱")
           div(v-if="!nameValid" class="invalid-message")
-            span Please enter your name.
+            span 請輸入您的暱稱
         div
-          span(class="label-mid") Email
-          property-bar(class="mt-5" :class="{'input-invalid': !mailValid}")
-            input(class="body-2 text-gray-2" v-model="email" type="email" name="email" placeholder="Your email")
-          div(v-if="!mailValid" class="invalid-message")
+          span(class="label-mid") 電子郵件
+          property-bar(class="mt-5"
+            :class="{'input-invalid': !mailValid}")
+            input(class="body-2 text-gray-2"
+              v-model="email" type="email" name="email"
+              placeholder="請輸入常用 Email")
+          div(v-if="!mailValid"
+            class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          span(class="label-mid") Password
-          property-bar(class="mt-5" :class="{'input-invalid': !passwordValid}")
-            input(class="body-2 text-gray-2" v-model="password" type="number" placeholder="Your password" :type="togglePeerPasswordInput")
+          span(class="label-mid") 密碼
+          property-bar(class="mt-5"
+            :class="{'input-invalid': !passwordValid}")
+            input(class="body-2 text-gray-2"
+              v-model="password" type="number"
+              placeholder="請輸入密碼"
+              :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
-              :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-          div(v-if="emptyPassword || emailResponseError" class="password-hint" :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
+                :iconName="togglePeerPasswordIcon"
+                :iconWidth="'20px'" :iconColor="'gray-2'")
+          div(v-if="emptyPassword || emailResponseError"
+            class="password-hint"
+            :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
             span {{ passwordHint }}
           div(v-else class="invalid-message")
             div(class="flex align-center")
               svg-icon(class="pointer"
-              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordLengthValid}") password length of at least 8 characters.
+                :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
+                :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+              span(class="ml-5 mt-2"
+                :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
             div(class="flex align-center")
               svg-icon(class="pointer"
-              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordContainEng}") password contains english letters.
+                :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
+                :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+              span(class="ml-5 mt-2"
+                :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
             div(class="flex align-center")
               svg-icon(class="pointer"
-              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
-              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
-              span(class="ml-5" :class="{'text-green-1': passwordContainNum}") password contains numbers.
+                :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
+                :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+              span(class="ml-5 mt-2"
+                :class="{'text-green-1': passwordContainNum}") 密碼包含數字
       div
-        btn(:type="'icon-mid'" class="bg-gray-2 text-white btn-shadow" @click.native="onSignUpClicked()") Sign up
+        btn(:type="'primary-mid'"
+          class="bg-gray-2 text-white btn-shadow"
+          @click.native="onSignUpClicked()") 送出
       div
-        span By clicking signup, you're agreeing to our
-        a(class="h-link") terms of service
-        span  and
-        a(class="h-link") privacy policy.
+        span 註冊即代表你同意 Vivipic 的
+        a(class="h-link") 使用條款
+        span 與
+        a(class="h-link") 隱私政策
+        span 。
       div
-        span Already sign up?
-        btn(:type="'icon'" class="h-link" @click.native="onLoginClicked()") Log in
-    div(v-if="currentPageIndex === 2" class="signup")
+        span 已是會員?
+        btn(:type="'icon'"
+          class="h-link"
+          @click.native="onLoginClicked()") 立即登入
+    div(v-if="currentPageIndex === 2"
+      class="signup")
       div(class="text-center")
-        span(class="text-blue-1 h-5") Verification code is sent
+        span(class="text-blue-1 heading-5") 驗 證 碼 已 傳 送
       div
-        span(class="body-2") We sent an email to {{ email }}. Please enter the code in the email within 10 minutes.
+        span(class="body-2") 請在 10 分鐘內輸入我們傳送到 {{ email }} 的驗證碼。
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
-          input(class="body-2 text-gray-2" v-model="vcode" type="text" name="vcode" placeholder="Enter code")
-        div(v-if="!vcodeValid" class="invalid-message")
+          input(class="body-2 text-gray-2"
+            v-model="vcode" type="text" name="vcode"
+            placeholder="Enter code")
+        div(v-if="!vcodeValid"
+          class="invalid-message")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
-        btn(:type="'primary-mid'" class="btn-shadow full-width" @click.native="onEnterCodeDoneClicked()") Done
-      div(v-if="resendAvailable" class="flex flex-between align-center"
-      style="height:30px; margin-bottom: 0;")
-        span didn't receive email?
-        btn(:type="'icon'" class="text-blue-1 body-1" @click.native="onResendClicked()") resend email
-      div(v-else class="flex align-center text-gray-3"
-      style="height:30px; margin-bottom: 0;")
+        btn(:type="'primary-mid'"
+          class="btn-shadow full-width"
+          @click.native="onEnterCodeDoneClicked()") 完成
+      div(class="page-close")
+        button(@click="onCloseClicked")
+          svg-icon(class="pointer"
+            iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
+      div(v-if="resendAvailable"
+        class="flex flex-between align-center"
+        style="height:30px; margin-bottom: 0;")
+        span 沒有收到驗證碼嗎？
+        btn(:type="'icon'"
+          class="text-blue-1 body-1"
+          @click.native="onResendClicked()") 重新傳送驗證碼
+      div(v-else
+        class="flex align-center text-gray-3"
+        style="height:30px; margin-bottom: 0;")
         span {{ leftTimeText }}
   spinner(v-if="isLoading")
 </template>
@@ -131,8 +172,8 @@ export default Vue.extend({
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
       emailResponseError: false as boolean,
-      passwordHint: 'a mix of letters, numbers and symbols with at least 8 characters.' as string,
-      vcodeErrorMessage: 'Invalid verification code.' as string,
+      passwordHint: '密碼需包含大小寫英文字母、數字８碼以上。' as string,
+      vcodeErrorMessage: '驗證碼錯誤' as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
@@ -189,9 +230,9 @@ export default Vue.extend({
     },
     mailErrorMessage(): string {
       if (this.email.length === 0) {
-        return 'Please enter your email.'
+        return '請輸入您的 Email'
       } else {
-        return 'Invalid email address format.'
+        return 'Email 格式錯誤'
       }
     },
     passwordLengthValid(): boolean {
@@ -302,7 +343,7 @@ export default Vue.extend({
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         this.isLoading = false
-        this.passwordHint = 'a mix of letters, numbers and symbols with at least 8 characters.'
+        this.passwordHint = '密碼需包含大小寫英文字母、數字８碼以上。'
         return
       }
       const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
@@ -323,13 +364,13 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+      this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
       const { data } = await userApis.sendVcode('', this.email, '', '1', '1') // uname, account, upass, register, vcode_only
       if (data.flag === 0) {
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = 'Resend email in ' + this.leftTime + ' seconds.'
+          this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -352,7 +393,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = 'Please enter the verification code.'
+        this.vcodeErrorMessage = '請輸入驗證碼'
         this.isLoading = false
         return
       }
@@ -420,6 +461,7 @@ export default Vue.extend({
   align-items: center;
 }
 .signup {
+  position: relative;
   margin: 0 auto;
   text-align: left;
   width: 360px;
@@ -435,7 +477,6 @@ export default Vue.extend({
   }
 }
 .signup-p0 {
-  position: relative;
   padding: 0 32px 32px 32px;
   > div {
     &:nth-child(1) {
@@ -447,7 +488,8 @@ export default Vue.extend({
     &:nth-child(3) {
       // intro text
       margin: 0 auto;
-      width: 85%;
+      width: 90%;
+      text-align: center;
       font-size: 14px;
       margin-bottom: 3vh;
       > div {
@@ -471,16 +513,13 @@ export default Vue.extend({
         cursor: pointer;
         background: setColor(gray-5);
       }
-
       &:active {
         background: setColor(gray-4);
       }
-
       > button {
         width: 100%;
         height: 100%;
       }
-
       > img {
         position: absolute;
         left: 15%;
@@ -488,7 +527,6 @@ export default Vue.extend({
         height: 25px;
         pointer-events: none;
       }
-
       > span {
         position: absolute;
         left: 30%;
@@ -509,19 +547,16 @@ export default Vue.extend({
       );
       margin-bottom: 2vh;
       &:hover {
-        cursor: pointer;
         background: #4aa2da;
       }
       &:active {
         background: #4395c7;
       }
-
       > button {
         width: 100%;
         height: 100%;
       }
     }
-
     &:nth-child(7) {
       // login hint
       margin: 0 auto;
@@ -529,7 +564,6 @@ export default Vue.extend({
       font-size: 14px;
       margin-bottom: 2vh;
     }
-
     &:nth-child(8) {
       // close icon
       position: absolute;
@@ -538,10 +572,8 @@ export default Vue.extend({
     }
   }
 }
-
 .signup-p1 {
   padding: 32px;
-
   > div {
     &:nth-child(1) {
       // title
@@ -582,7 +614,6 @@ export default Vue.extend({
     }
   }
 }
-
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }
@@ -606,9 +637,13 @@ export default Vue.extend({
   color: setColor(red);
   padding-top: 10px;
 }
-
 .btn-shadow {
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
+}
+.page-close {
+  position: absolute;
+  right: 15px;
+  top: 15px;
 }
 </style>
