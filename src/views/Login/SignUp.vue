@@ -136,7 +136,6 @@ export default Vue.extend({
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
-      isRollbackByFacebookSignIn: window.location.href.indexOf('facebook') > -1 as boolean,
       isLoading: false
     }
   },
@@ -155,7 +154,7 @@ export default Vue.extend({
       }
 
       // Facebook login status
-      if (this.isRollbackByFacebookSignIn && !store.getters['user/isLogin'] && platform === 'fb_vivipic') {
+      if (!store.getters['user/isLogin'] && platform === 'fb_vivipic') {
         this.isLoading = true
         if (this.$route.query.error) {
           this.isLoading = false
@@ -370,17 +369,18 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
+      const redirectUri = window.location.href.split('?')[0]
       if (this.redirect) {
         const redirectStr = JSON.stringify({
           redirect: this.redirect,
           platform: 'fb_vivipic'
         })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
       }
       const redirectStr = JSON.stringify({
         platform: 'fb_vivipic'
       })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, window.location.href)
+      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
     },
     onGoogleClicked() {
       let stateStr
