@@ -1,27 +1,29 @@
 import { ITemplate } from '@/interfaces/template'
-import imageUtils from './imageUtils'
 
 class TemplateCenterUtils {
-  async generateWaterfall(templates: any): Promise<ITemplate[][]> {
+  generateWaterfall(templates: any): ITemplate[][] {
     const res = [[], [], [], [], [], []] as ITemplate[][]
     const ratios = [0, 0, 0, 0, 0, 0]
     console.log(templates)
     const list = templates.list ?? []
     for (const template of list) {
-      const { width, height } = await imageUtils.getImageSize(this.getPrevUrl(template), 10, 10)
+      const cover = template.match_cover
+      const { width, height } = cover
       const ratio = height / width
       const index = this.lowestColumn(ratios)
       ratios[index] += ratio
       res[index].push({
-        url: this.getPrevUrl(template, true),
-        id: template.id
+        url: this.getPrevUrl(cover),
+        id: cover.id,
+        theme: cover.theme,
+        height: height / width * 100
       })
     }
     return res
   }
 
-  getPrevUrl(item: {id: string, ver: number}, larger = false): string {
-    return `https://template.vivipic.com/template/${item.id}/prev${larger ? '_2x' : ''}?ver=${item.ver}`
+  getPrevUrl(item: {id: string, ver: number}): string {
+    return `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`
   }
 
   lowestColumn(ratios: number[]): number {

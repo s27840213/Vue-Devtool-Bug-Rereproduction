@@ -49,8 +49,12 @@
           //-           iconColor="gray-2")
       div(v-if="isTemplateReady" class="template-center__waterfall")
         div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
-          div(v-for="template in waterfallTemplate" class="template-center__waterfall__column__template")
-            img(:src="template.url")
+          div(v-for="template in waterfallTemplate"
+              class="template-center__waterfall__column__template"
+              :style="templateStyles(template.height)")
+            div(class="template-center__waterfall__column__template__container")
+              img(:src="template.url")
+            div(class="template-center__waterfall__column__template__theme") {{ template.theme }}
       div(v-else class="template-center__loading")
         svg-icon(iconName="loading"
                 iconWidth="24px"
@@ -128,6 +132,9 @@ export default Vue.extend({
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
+    templateStyles(heightPercent: number) {
+      return { paddingTop: `${heightPercent}%` }
+    },
     handleScroll() {
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= 50
@@ -174,8 +181,8 @@ export default Vue.extend({
       }
       res.push('order_by::' + this.selectedSorting)
       this.isTemplateReady = false
-      this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(async () => {
-        this.waterfallTemplates = await templateCenterUtils.generateWaterfall(this.templates)
+      this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
+        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
         this.isTemplateReady = true
       })
     }
@@ -323,11 +330,41 @@ export default Vue.extend({
       flex-direction: column;
       gap: 15px;
       &__template {
+        position: relative;
         width: 100%;
-        height: fit-content;
-        > img {
+        overflow: hidden;
+        cursor: pointer;
+        &__container {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
-          display: block;
+          height: 100%;
+          background-color: setColor(gray-5);
+          > img {
+            width: 100%;
+            display: block;
+          }
+        }
+        &__theme {
+          position: absolute;
+          bottom: -20px;
+          left: 0;
+          width: 100%;
+          height: 20px;
+          background-color: rgba(238, 239, 244, 0.8);
+          font-family: Mulish;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 20px;
+          color: setColor(gray-2);
+          text-align: left;
+          padding: 0;
+          padding-left: 8px;
+          transition: 0.2s ease;
+        }
+        &:hover &__theme {
+          bottom: 0;
         }
       }
     }

@@ -1,4 +1,6 @@
 export interface ITemplate {
   url: string,
-  id: string
+  id: string,
+  theme: string,
+  height: number
 }
