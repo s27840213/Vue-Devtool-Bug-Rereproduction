@@ -16,6 +16,13 @@ var getSidebarFolder = (level, nth = undefined) => {
   return res
 }
 
+var getSidebarRow = (name) => {
+  const names = ['all', 'favorite', 'trash']
+  const index = names.indexOf(name)
+  if (index < 0) throw new Error('no such sidebar row')
+  return cy.get('.nav-item').eq(index)
+}
+
 describe('MyDesign', () => {
   beforeEach(() => {
     cy.visit('http://localhost:8080/mydesign?token=OvODomMEzmmUBXXP')
@@ -40,13 +47,33 @@ describe('MyDesign', () => {
 
     it('creates new folder', () => {
       cy.get('.nav-item-new-folder__container').click()
-      cy.contains('新增資料夾').should('exist').and('have.class', 'nav-folder-0__text')
+      cy.contains('未命名資料夾').should('exist').and('have.class', 'nav-folder-0__text')
     })
 
     it('has draggble folder rows and moves them when dropping', () => {
       getSidebarFolder(0, 0).dragElementTo(() => getSidebarFolder(0, 2), () => getSidebarFolder(0, 0))
       toggleFolderExpansion(0)
       getSidebarFolder(1).contains('Toby')
+      cy.contains('已移至').should('exist')
+    })
+
+    it('has draggble folder rows and deletes them when dropping into trashcan', () => {
+      cy.contains('日本行銷').parent('.nav-folder-0').dragElementTo(() => getSidebarRow('trash'), () => getSidebarFolder(0, 0))
+      getSidebarRow('trash').click()
+      cy.contains('已移至垃圾桶').should('exist')
+      cy.get('.folder-item__name').children('span').should('have.text', '日本行銷')
+    })
+
+    it('navigates to the corresponding view while its rows are clicked', () => {
+      getSidebarRow('all').click()
+      cy.get('.design-view').should('have.class', 'all-design-view')
+      getSidebarRow('favorite').click()
+      cy.get('.design-view').should('have.class', 'favorite-design-view')
+      getSidebarFolder(0, 0).click()
+      cy.get('.design-view').should('have.class', 'folder-design-view')
+      cy.get('.folder-design-view__folder-name').should('have.text', 'Toby')
+      getSidebarRow('trash').click()
+      cy.get('.design-view').should('have.class', 'trash-design-view')
     })
   })
 })
