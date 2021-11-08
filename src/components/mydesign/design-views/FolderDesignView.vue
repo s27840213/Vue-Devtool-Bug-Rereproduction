@@ -104,27 +104,18 @@
                         iconWidth="15px"
                         iconColor="gray-2")
     div(class="horizontal-rule")
-    div(v-if="subFolders.length > 0" class="folder-design-view__folder-header")
-      div(class="folder-design-view__expand-icon-container"
-          @click="toggleFoldersExpansion")
-        svg-icon(:style="foldersExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="folder-design-view__folder-title")
-        span 資料夾
-    div(v-if="foldersExpanded && subFolders.length > 0" class="folder-design-view__folders")
-      folder-item(v-for="subFolder in subFolders"
+    folder-gallery(v-if="allFolders.length > 0"
                   :path="path"
-                  :config="subFolder"
-                  @goto="handleGotoFolder(subFolder.id)"
+                  :menuItems="[]"
+                  :allFolders="allFolders"
+                  :selectedNum="selectedNum"
+                  @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
     design-gallery(v-if="allDesigns.length > 0"
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction")
+                  @menuAction="handleMenuAction")
     div(v-if="isEmpty" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
@@ -133,10 +124,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import FolderItem from '@/components/mydesign/FolderItem.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 import hintUtils from '@/utils/hintUtils'
@@ -147,12 +138,11 @@ export default Vue.extend({
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
   },
   components: {
-    FolderItem,
+    FolderGallery,
     DesignGallery
   },
   data() {
     return {
-      foldersExpanded: true,
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
       editableFolderName: '',
@@ -208,7 +198,6 @@ export default Vue.extend({
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
-      favoriteDesigns: 'getFavoriteDesigns',
       selectedDesigns: 'getSelectedDesigns'
     }),
     path(): string[] {
@@ -238,6 +227,9 @@ export default Vue.extend({
       designUtils.sortFoldersBy(subFolders, this.sortByField, this.sortByDescending)
       return subFolders
     },
+    allFolders(): ([string[], IFolder])[] {
+      return (this.subFolders as IFolder[]).map((subFolder) => [this.path, subFolder])
+    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     },
@@ -251,27 +243,14 @@ export default Vue.extend({
   methods: {
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
-      setExpand: 'SET_expand',
-      addToFavorite: 'UPDATE_addToFavorite',
-      removeFromFavorite: 'UPDATE_removeFromFavorite',
       setFolderName: 'UPDATE_folderName'
     }),
-    foldersExpansionIconStyles() {
-      return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
     newFolderStyles() {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
       this.setCurrLocation(`f:${selectedParents.join('/')}`)
-    },
-    handleGotoFolder(id: string) {
-      this.setExpand({
-        path: this.path,
-        isExpanded: true
-      })
-      this.setCurrLocation(`${this.currLocation}/${id}`)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true
@@ -298,7 +277,7 @@ export default Vue.extend({
         newFolderName: this.editableFolderName
       })
     },
-    handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
+    handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
@@ -348,9 +327,6 @@ export default Vue.extend({
     },
     checkSortSelected(payload: [string, boolean]) {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
-    },
-    toggleFoldersExpansion() {
-      this.foldersExpanded = !this.foldersExpanded
     },
     toggleFolderMenu() {
       this.isFolderMenuOpen = !this.isFolderMenuOpen
@@ -678,40 +654,6 @@ export default Vue.extend({
         }
       }
     }
-  }
-  &__folder-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-  &__folder-title {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    > span {
-      line-height: 40px;
-      font-size: 24px;
-      font-weight: 700;
-      color: setColor(gray-2);
-      letter-spacing: 0.205em;
-    }
-  }
-  &__expand-icon-container {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    > svg {
-      transition: 0.1s linear;
-    }
-  }
-  &__folders {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 45px;
   }
   &__empty {
     display: flex;

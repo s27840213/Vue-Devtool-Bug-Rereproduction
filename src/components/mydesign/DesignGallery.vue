@@ -64,8 +64,6 @@ export default Vue.extend({
     useDelete: Boolean,
     noHeader: Boolean
   },
-  watch: {
-  },
   computed: {
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',

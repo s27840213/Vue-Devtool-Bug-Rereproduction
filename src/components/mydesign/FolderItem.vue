@@ -78,6 +78,7 @@ export default Vue.extend({
     menuItemNum: Number,
     undraggable: Boolean,
     undroppable: Boolean,
+    nameIneditable: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean
   },
@@ -226,6 +227,7 @@ export default Vue.extend({
       }
     },
     handleNameEditStart() {
+      if (this.nameIneditable) return
       this.editableName = this.config.name
       this.isNameEditing = true
       this.$nextTick(() => {

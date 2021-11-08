@@ -15,47 +15,22 @@
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
             span 30天後自動永久刪除。
     div(class="horizontal-rule")
-    div(v-if="allFolders.length > 0" class="trash-design-view__folder-header")
-      div(class="trash-design-view__expand-icon-container"
-          @click="toggleFoldersExpansion")
-        svg-icon(:style="foldersExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="trash-design-view__folder-title")
-        span 資料夾
-    div(v-if="foldersExpanded && allFolders.length > 0" class="trash-design-view__folders")
-      folder-item(v-for="[parents, folder] in allFolders"
-                  :path="parents"
-                  :config="folder"
-                  :undraggable="true"
-                  :undroppable="true"
-                  :isSelected="checkFolderSelected(folder.id)"
-                  :isAnySelected="isAnySelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @moveItem="handleMoveItem"
-                  @select="selectFolder(parents, folder)"
-                  @deselect="deselectFolder(parents, folder)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, parents, folder)")
-            div(class="folder-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="folder-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
+    folder-gallery(v-if="allFolders.length > 0"
+                  :menuItems="menuItems"
+                  :allFolders="allFolders"
+                  :selectedNum="selectedNum"
+                  :limitFunctions="true"
+                  :useDelete="true"
+                  :selectable="true"
+                  @menuAction="handleMenuAction"
+                  @moveItem="handleMoveItem")
     design-gallery(v-if="allDesigns.length > 0"
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
                   :useDelete="true"
-                  @menuAction="handleDesignMenuAction")
+                  @menuAction="handleMenuAction")
 </template>
 
 <script lang="ts">
@@ -64,18 +39,17 @@ import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import FolderItem from '@/components/mydesign/FolderItem.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
-    FolderItem,
+    FolderGallery,
     DesignGallery
   },
   data() {
     return {
-      foldersExpanded: true,
       isInfoOpen: false,
       menuItems: designUtils.makeTrashMenuItems()
     }
@@ -113,53 +87,21 @@ export default Vue.extend({
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
-    },
-    isAnySelected(): boolean {
-      return this.selectedNum > 0
     }
   },
   methods: {
-    foldersExpansionIconStyles() {
-      return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
-    handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
+    handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
-    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
-      if (icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
-      if (extraEvent) {
-        const { event, payload } = extraEvent
-        this.$emit(event, payload)
-      }
-    },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
-    },
-    toggleFoldersExpansion() {
-      this.foldersExpanded = !this.foldersExpanded
     },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen
     },
     closeInfo() {
       this.isInfoOpen = false
-    },
-    checkFolderSelected(id: string): boolean {
-      return !!this.selectedFolders[id]
-    },
-    selectFolder(parents: string[], folder: IFolder) {
-      this.$emit('selectFolder', {
-        parents,
-        folder
-      })
-    },
-    deselectFolder(parents: string[], folder: IFolder) {
-      this.$emit('deselectFolder', {
-        parents,
-        folder
-      })
     }
   }
 })
@@ -193,40 +135,6 @@ export default Vue.extend({
       letter-spacing: 0.205em;
       color: setColor(bu);
     }
-  }
-  &__folder-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-  &__folder-title {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    > span {
-      line-height: 40px;
-      font-size: 24px;
-      font-weight: 700;
-      color: setColor(gray-2);
-      letter-spacing: 0.205em;
-    }
-  }
-  &__expand-icon-container {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    > svg {
-      transition: 0.1s linear;
-    }
-  }
-  &__folders {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 45px;
   }
   &__info {
     display: flex;
