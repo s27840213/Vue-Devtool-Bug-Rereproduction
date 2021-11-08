@@ -432,10 +432,10 @@ export default Vue.extend({
           }
       }
 
-      if (resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'H')
       }
-      if (resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'V')
       }
 
