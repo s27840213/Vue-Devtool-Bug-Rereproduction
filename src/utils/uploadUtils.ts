@@ -12,39 +12,41 @@ import { IMarker } from '@/interfaces/shape'
 import zindexUtils from './zindexUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
+import { IUploadAssetResponse } from '@/interfaces/upload'
 
 class UploadUtils {
   loginOutput: any
   get token(): string { return store.getters['user/getToken'] }
   get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
   get userId(): string { return store.getters['user/getUserId'] }
+  get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
-  get supportTypes(): Array<string> {
-    return ['jpeg', 'gif', 'png', 'apng', 'svg', 'bmp', 'png', 'ico']
-  }
+  get isAdmin(): boolean { return store.getters['user/isAdmin'] }
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
     this.getTmpJSON()
   }
 
-  uploadAsset() {
+  chooseAssets(type: 'image' | 'font') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
+    const acceptType = type === 'image' ? '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic' : '.woff2'
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic')
+    inputNode.setAttribute('accept', acceptType)
     inputNode.setAttribute('multiple', 'true')
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        this.uploadImageAsset(files as FileList)
+        this.uploadAsset(type, files as FileList)
       }
     }, false)
   }
 
-  uploadImageAsset(files: FileList) {
+  // Upload the user's asset in my file panel
+  uploadAsset(type: 'image' | 'font', files: FileList) {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = generalUtils.generateAssetId()
@@ -52,8 +54,7 @@ class UploadUtils {
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
-      formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
-      // only for template
+      formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
@@ -65,51 +66,67 @@ class UploadUtils {
       }
 
       reader.onload = (evt) => {
-        const img = new Image()
-        img.src = evt.target?.result as string
-        img.onload = (evt) => {
-          store.commit('user/ADD_PREVIEW', {
-            imageFile: img,
-            assetId: assetId
-          })
-          xhr.open('POST', this.loginOutput.upload_map.url, true)
-          let increaseInterval = undefined as any
-          xhr.upload.onprogress = (event) => {
-            const uploadProgress = Math.floor(event.loaded / event.total * 100)
-            store.commit('user/UPDATE_PROGRESS', {
-              assetId: assetId,
-              progress: uploadProgress / 2
+        /**
+         * @TODO -> simplify the codes below
+         */
+        if (type === 'image') {
+          const img = new Image()
+          img.src = evt.target?.result as string
+          img.onload = (evt) => {
+            store.commit('user/ADD_PREVIEW', {
+              imageFile: img,
+              assetId: assetId
             })
-            if (uploadProgress === 100) {
-              increaseInterval = setInterval(() => {
-                const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
-                  return img.id === assetId
+            xhr.open('POST', this.loginOutput.upload_map.url, true)
+            let increaseInterval = undefined as any
+            xhr.upload.onprogress = (event) => {
+              const uploadProgress = Math.floor(event.loaded / event.total * 100)
+              store.commit('user/UPDATE_PROGRESS', {
+                assetId: assetId,
+                progress: uploadProgress / 2
+              })
+              if (uploadProgress === 100) {
+                increaseInterval = setInterval(() => {
+                  const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
+                    return img.id === assetId
+                  })
+                  const curr = this.images[targetIndex].progress as number
+                  const increaseNum = (90 - curr) * 0.05
+                  this.images[targetIndex].progress = curr + increaseNum
+                }, 10)
+              }
+            }
+            xhr.send(formData)
+            xhr.onload = () => {
+              // polling the JSON file of uploaded image
+              const interval = setInterval(() => {
+                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+                fetch(pollingTargetSrc).then((response) => {
+                  if (response.status === 200) {
+                    clearInterval(interval)
+                    clearInterval(increaseInterval)
+                    response.json().then((json: IUploadAssetResponse) => {
+                      if (json.flag === 0) {
+                        console.log('Successfully upload the file')
+                        if (type === 'image') {
+                          store.commit('user/UPDATE_PROGRESS', {
+                            assetId: assetId,
+                            progress: 100
+                          })
+                          store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                          store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
+                        }
+                      } else {
+                        console.log('Failed to upload the file')
+                      }
+                    })
+                  }
                 })
-                const curr = this.images[targetIndex].progress as number
-                const increaseNum = (90 - curr) * 0.05
-                this.images[targetIndex].progress = curr + increaseNum
-              }, 10)
+              }, 2000)
             }
           }
-          xhr.send(formData)
-          xhr.onload = () => {
-            const token = this.token
-            const interval = setInterval(() => {
-              fetch(this.downloadUrl.replace('*', `asset/image/${assetId}/prev`)).then((response) => {
-                if (response.status !== 200) {
-                  console.log('The preview image has not been created yet.')
-                } else {
-                  store.commit('user/UPDATE_PROGRESS', {
-                    assetId: assetId,
-                    progress: 100
-                  })
-                  store.commit('user/UPDATE_IMAGE_URLS', { assetId })
-                  clearInterval(interval)
-                  clearInterval(increaseInterval)
-                }
-              })
-            }, 2000)
-          }
+        } else if (type === 'font') {
+          //
         }
       }
 
@@ -172,7 +189,6 @@ class UploadUtils {
       })
 
       formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`)
-      // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhrReq = new XMLHttpRequest()
@@ -211,8 +227,6 @@ class UploadUtils {
     layerInfo.dragging = false
     layerInfo.editing = false
     this.removeComputableInfo(layerInfo)
-
-    Object.assign(layerInfo, { active: false })
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -302,7 +316,6 @@ class UploadUtils {
   }
 
   updateTemplate() {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
     const pageIndex = store.getters.getLastSelectedPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 

@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-use-before-define */
 export interface IPhotoTag {
   title: string
   type: string
@@ -163,6 +165,11 @@ export interface IUserImageContentData {
   width: number,
   height: number,
   id: string
+  author: string,
+  team_id: string
+  ver: string,
+  // Only for private asset
+  signed_url?: string
 }
 
 export interface IPhotoServiceParams {

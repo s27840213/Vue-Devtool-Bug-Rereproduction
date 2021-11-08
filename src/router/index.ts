@@ -28,7 +28,7 @@ const SUPPORTED_LOCALES = [{
   code: 'jp',
   base: '/jp',
   flag: 'jp',
-  name: 'Français'
+  name: 'Japan'
 }]
 
 const routes: Array<RouteConfig> = [
@@ -37,11 +37,11 @@ const routes: Array<RouteConfig> = [
     name: 'Home',
     component: Home,
     beforeEnter: async (to, from, next) => {
-      // const lang = to.params.lang
-      // console.log(`Lang: ${lang}`)
-      // if (lang && ['tw', 'en', 'jp'].includes(lang) && lang !== i18n.locale) {
-      //   i18n.locale = mappingUtils.mappingLocales(lang)
+      // const locale = from.params.locale
+      // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
+      //   i18n.locale = mappingUtils.mappingLocales(locale)
       // }
+      // to.params.locale = 'en'
       try {
         next()
         const urlParams = new URLSearchParams(window.location.search)
@@ -126,7 +126,7 @@ const router = new VueRouter({
   routes: [
     {
       // Include the locales you support between ()
-      path: `/:locale${localeUtils.getLocaleRegex()}`,
+      path: `/:locale${localeUtils.getLocaleRegex()}?`,
       component: {
         render(h) { return h('router-view') }
       },

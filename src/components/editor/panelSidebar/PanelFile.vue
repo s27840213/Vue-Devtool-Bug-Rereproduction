@@ -62,13 +62,13 @@ export default Vue.extend({
       clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
     }),
     uploadImage() {
-      uploadUtils.uploadAsset()
+      uploadUtils.chooseAssets('image')
     },
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
       if (dt) {
         const files = dt.files
-        uploadUtils.uploadImageAsset(files)
+        uploadUtils.uploadAsset('image', files)
       }
     }
   }

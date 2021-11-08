@@ -338,15 +338,16 @@ class AssetUtils {
   }
 
   addImage(url: string, attrs: IAssetProps = {}) {
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, styles = {}, isPreview, assetId } = attrs
     const { width, height, x, y } = styles
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     const type = ImageUtils.getSrcType(url)
     const config = {
+      ...(isPreview && { previewSrc: url }),
       srcObj: {
         type,
         userId: ImageUtils.getUserId(url, type),
-        assetId: ImageUtils.getAssetId(url, type)
+        assetId: assetId ?? ImageUtils.getAssetId(url, type)
       },
       styles: {
         x,

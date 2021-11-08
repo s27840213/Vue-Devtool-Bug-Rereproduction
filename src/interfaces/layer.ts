@@ -111,6 +111,7 @@ export interface IShape extends ILayer<IStyle> {
   shapeType?: string
 }
 export interface IImage extends ILayer<IImageStyle> {
+  previewSrc?: string,
   srcObj: SrcObj
   clipPath: string,
   isClipper: boolean,

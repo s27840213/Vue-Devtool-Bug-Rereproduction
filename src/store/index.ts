@@ -25,6 +25,7 @@ import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
+import imageUtils from '@/utils/imageUtils'
 
 Vue.use(Vuex)
 
@@ -406,8 +407,12 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, layerIndex, layer } = updateInfo
     state.pages[pageIndex].layers.splice(layerIndex, 1, layer)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph
-    | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | SrcObj } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, props: {
+      [key: string]: string | number | boolean | IParagraph
+      | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | SrcObj
+    }
+  }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
@@ -632,6 +637,20 @@ const mutations: MutationTree<IEditorState> = {
       props && Object.assign(targetLayer, props)
       styles && Object.assign(targetLayer.styles, styles)
     }
+  },
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId }) {
+    state.pages.forEach((page: IPage, index: number) => {
+      page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
+        return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
+      }).forEach((layer) => {
+        Vue.delete(layer, 'previewSrc')
+        Object.assign(layer.srcObj, {
+          type,
+          userId,
+          assetId
+        })
+      })
+    })
   },
   ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string, pageIndex?: number }) {
     const { pos, type, pageIndex } = updateInfo

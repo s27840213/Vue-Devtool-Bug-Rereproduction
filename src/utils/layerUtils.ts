@@ -266,6 +266,10 @@ class LayerUtils {
       return GroupUtils.calcType((layers[0] as IGroup).layers)
     }
   }
+
+  updateImageLayerUrls(id: string, flag: 0 | 1) {
+    store.commit('UPDATE_imageLayerUrl', { id, flag })
+  }
 }
 
 const layerUtils = new LayerUtils()

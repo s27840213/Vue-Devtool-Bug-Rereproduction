@@ -36,5 +36,8 @@ export interface IAsset {
 
 export interface IAssetProps {
   pageIndex?: number
-  styles?: Partial<IStyle>
+  styles?: Partial<IStyle>,
+  // the following props are used for preview image during polling process
+  isPreview?: boolean,
+  assetId?: string
 }
