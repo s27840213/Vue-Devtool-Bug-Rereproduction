@@ -4,12 +4,9 @@ import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText }
 import { stringToArray } from 'konva/types/shapes/Text'
 import { SidebarPanelType } from '@/store/types'
 import shapeUtils from '@/utils/shapeUtils'
+import layerUtils from './layerUtils'
 
 class Controller {
-  get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
-  get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): IText { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
-
   getLength(vect: ICoordinate): number {
     const sqareSum = Math.pow(vect.x, 2) + Math.pow(vect.y, 2)
     return Math.sqrt(sqareSum)
@@ -35,36 +32,48 @@ class Controller {
     return {
       scalers: [
         {
-          width: '8px',
-          height: '8px',
-          left: '0',
-          top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
-          borderRadius: '50%'
+          cursor: 0,
+          styles: {
+            width: '8px',
+            height: '8px',
+            left: '0',
+            top: '0',
+            transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
+            borderRadius: '50%'
+          }
         },
         {
-          width: '8px',
-          height: '8px',
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
-          right: '0',
-          top: '0',
-          borderRadius: '50%'
+          cursor: 2,
+          styles: {
+            width: '8px',
+            height: '8px',
+            transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
+            right: '0',
+            top: '0',
+            borderRadius: '50%'
+          }
         },
         {
-          width: '8px',
-          height: '8px',
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
-          right: '0',
-          bottom: '0',
-          borderRadius: '50%'
+          cursor: 4,
+          styles: {
+            width: '8px',
+            height: '8px',
+            transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
+            right: '0',
+            bottom: '0',
+            borderRadius: '50%'
+          }
         },
         {
-          width: '8px',
-          height: '8px',
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
-          left: '0',
-          bottom: '0',
-          borderRadius: '50%'
+          cursor: 6,
+          styles: {
+            width: '8px',
+            height: '8px',
+            transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
+            left: '0',
+            bottom: '0',
+            borderRadius: '50%'
+          }
         }
       ],
       lineEnds: [
@@ -88,59 +97,74 @@ class Controller {
       resizers: [
         {
           type: 'H',
-          height: `${resizerLong}px`,
-          width: `${resizerShort}px`,
-          left: `${-resizerShort - 1.5}px`,
-          transform: 'translate(0, -50%)'
+          cursor: 7,
+          styles: {
+            height: `${resizerLong}px`,
+            width: `${resizerShort}px`,
+            left: `${-resizerShort - 1.5}px`,
+            transform: 'translate(0, -50%)'
+          }
         },
         {
           type: 'H',
-          height: `${resizerLong}px`,
-          width: `${resizerShort}px`,
-          right: `${-resizerShort - 1.5}px`,
-          transform: 'translate(0, -50%)'
+          cursor: 3,
+          styles: {
+            height: `${resizerLong}px`,
+            width: `${resizerShort}px`,
+            right: `${-resizerShort - 1.5}px`,
+            transform: 'translate(0, -50%)'
+          }
         },
         {
           type: 'V',
-          width: `${resizerLong}px`,
-          height: `${resizerShort}px`,
-          bottom: `${-resizerShort - 1.5}px`,
-          transform: 'translate(-50%, 0)'
+          cursor: 5,
+          styles: {
+            width: `${resizerLong}px`,
+            height: `${resizerShort}px`,
+            bottom: `${-resizerShort - 1.5}px`,
+            transform: 'translate(-50%, 0)'
+          }
         },
         {
           type: 'V',
-          width: `${resizerLong}px`,
-          height: `${resizerShort}px`,
-          top: `${-resizerShort - 1.5}px`,
-          transform: 'translate(-50%, 0)'
+          cursor: 1,
+          styles: {
+            width: `${resizerLong}px`,
+            height: `${resizerShort}px`,
+            top: `${-resizerShort - 1.5}px`,
+            transform: 'translate(-50%, 0)'
+          }
         }
       ],
       cursors: [
         'nwse-resize',
-        'ew-resize',
+        'ns-resize',
         'nesw-resize',
         'ew-resize',
         'nwse-resize',
         'ns-resize',
         'nesw-resize',
-        'ns-resize'
+        'ew-resize'
       ]
     }
   }
 
-  dirHandler(clientP: ICoordinate, rect: DOMRect): boolean {
+  dirHandler(clientP: ICoordinate, rect: DOMRect, width?: number, height?: number): boolean {
     const center: ICoordinate = this.getRectCenter(rect)
+    width = width ?? rect.width
+    height = height ?? rect.height
     const H = {
-      left: center.x - rect.width / 2,
-      right: center.x + rect.width / 2
+      left: center.x - width / 2,
+      right: center.x + width / 2
     }
     const V = {
-      top: center.y - rect.height / 2,
-      bottom: center.y + rect.height / 2
+      top: center.y - height / 2,
+      bottom: center.y + height / 2
     }
     const xmin = Math.min(Math.abs(clientP.x - H.left), Math.abs(clientP.x - H.right))
     const ymin = Math.min(Math.abs(clientP.y - V.top), Math.abs(clientP.y - V.bottom))
-    //  If it's in horizontal direction, return true
+    /**  If it's in horizontal direction, return true
+     *  */
     return xmin < ymin
   }
 
@@ -273,7 +297,7 @@ class Controller {
         let scaleY = scale.scaleY
         scaleX = width / initHW.width === 1 ? scaleX : width / initHW.width * scaleX
         scaleY = height / initHW.height === 1 ? scaleY : height / initHW.height * scaleY
-        this.updateLayerScale(this.pageIndex, this.layerIndex, scaleX, scaleY)
+        this.updateLayerScale(layerUtils.pageIndex, layerUtils.layerIndex, scaleX, scaleY)
         break
       }
       case 'C': {
@@ -302,8 +326,8 @@ class Controller {
               height = patchDiffY === SIZE_LIMIT - pSize[1] ? (patchDiffY + config.vSize[1]) * scale / config.ratio : height
             }
         }
-        this.updateShapePatchDiff(this.pageIndex, this.layerIndex, [patchDiffX, patchDiffY])
-        this.updateLayerInitSize(this.pageIndex, this.layerIndex, width / scale, height / scale, scale)
+        this.updateShapePatchDiff(layerUtils.pageIndex, layerUtils.layerIndex, [patchDiffX, patchDiffY])
+        this.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, width / scale, height / scale, scale)
       }
     }
     return [width, height]

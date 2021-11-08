@@ -56,10 +56,11 @@ export default Vue.extend({
     }
   },
   async created() {
+    console.log(this.config)
     switch (this.config.category) {
       case 'C': {
         // should be deleted after the new json format stablize
-        if (!this.config.svg) {
+        if (!this.config.svg && this.config.designId) {
           const shape = await shapeUtils.fetchSvg(this.config)
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
@@ -91,7 +92,7 @@ export default Vue.extend({
         break
       }
       default: {
-        if (!this.config.svg) {
+        if (!this.config.svg && this.config.designId) {
           const shape = await shapeUtils.fetchSvg(this.config)
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()

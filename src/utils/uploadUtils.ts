@@ -549,9 +549,12 @@ class UploadUtils {
     switch (type) {
       case 'image':
         if (general.scale !== 1) {
-          general.width = styles.imgWidth
-          general.height = styles.imgHeight
-          general.scale = 1
+          // general.width = styles.imgWidth
+          // general.height = styles.imgHeight
+          // styles.imgWidth = general.width
+          // styles.imgHeight = general.height
+          // general.scale = 1
+          console.error('image scale is not equal to 1')
         }
         return {
           ...general,

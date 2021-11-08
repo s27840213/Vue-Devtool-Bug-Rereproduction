@@ -10,7 +10,7 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
-      div(class="nu-controller__content"
+      div(class="nu-controller__content hover"
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
@@ -108,17 +108,17 @@
               :style="Object.assign(end, {'cursor': 'pointer'})"
               @mousedown.left.stop="lineEndMoveStart")
           div(v-for="(scaler, index) in (!isLine) ? controlPoints.scalers : []"
-              class="control-point"
+              class="control-point scaler"
               :key="index"
-              :style="Object.assign(scaler, cursorStyles(index * 2, getLayerRotate))"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
               @mousedown.left.stop="scaleStart")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @mousedown.left.stop="resizeStart($event)")
             div(class="control-point__resize-bar"
                 :key="index"
-                :style="resizerBarStyles(resizer)")
-            div(class="control-point"
-                :style="Object.assign(resizer, cursorStyles(index * 2 + 1, getLayerRotate))")
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
+            div(class="control-point resizer"
+                :style="Object.assign(resizer.styles, cursorStyles(resizer.cursor, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
             div(class="control-point__resize-bar control-point__move-bar"
@@ -739,6 +739,8 @@ export default Vue.extend({
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
       }
 
+      const body = this.$refs.body as HTMLElement
+      body.classList.remove('hover')
       this.currCursorStyling(event)
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
@@ -881,6 +883,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
+      const body = this.$refs.body as HTMLElement
+      body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -953,6 +957,9 @@ export default Vue.extend({
     resizeStart(event: MouseEvent) {
       this.isControlling = true
       const body = this.$refs.body as HTMLElement
+      body.classList.remove('hover')
+      this.currCursorStyling(event)
+
       const rect = body.getBoundingClientRect()
       const center = ControlUtils.getRectCenter(rect)
 
@@ -968,11 +975,13 @@ export default Vue.extend({
       const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
-      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
+
+      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
+        this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
+      console.log(this.control.isHorizon)
 
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
-      this.currCursorStyling(event)
 
       switch (this.getLayerType) {
         case 'shape':
@@ -1105,6 +1114,9 @@ export default Vue.extend({
       }
       this.isControlling = false
       StepsUtils.record()
+
+      const body = this.$refs.body as HTMLElement
+      body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
@@ -1243,6 +1255,8 @@ export default Vue.extend({
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
+      if (this.isControlling) return { cursor: 'default' }
+
       switch (this.getLayerType) {
         case 'text':
           if (this.config.styles.writingMode.includes('vertical')) index += 4
@@ -1744,9 +1758,6 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
     transform-style: preserve-3d;
-    &:hover {
-      cursor: pointer;
-    }
   }
   &__ctrl-points {
     display: flex;
@@ -1841,6 +1852,12 @@ export default Vue.extend({
     padding: 0;
     position: relative;
   }
+  &__content {
+    text-align: left;
+    outline: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
 }
 
 .sub-controller {
@@ -1850,10 +1867,9 @@ export default Vue.extend({
   left: 0;
 }
 
-.text-content {
-  text-align: left;
-  outline: none;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+.hover {
+      &:hover {
+    cursor: pointer;
+  }
 }
 </style>
