@@ -23,6 +23,8 @@ import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   props: {
@@ -82,9 +84,6 @@ export default Vue.extend({
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
-    },
-    getImgController(): ICoordinate {
-      return this.config.styles.imgController
     }
   },
   methods: {
@@ -101,7 +100,6 @@ export default Vue.extend({
         height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${3 * (100 / this.scaleRatio)}px solid red`,
         'pointer-events': this.config.pointerEvents ?? 'initial'
-        // 'pointer-events': 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -144,10 +142,35 @@ export default Vue.extend({
         outline: `${3 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
+    updateLayerProps(prop: { [key: string]: string | boolean | number }) {
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'frame':
+            FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
+            break
+          case 'group':
+            LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
+        }
+      } else {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, prop)
+      }
+    },
+    updateLayerStyles(prop: { [key: string]: number }) {
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        switch (LayerUtils.getCurrLayer.type) {
+          case 'frame':
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
+            break
+          case 'group':
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
+        }
+      } else {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, prop)
+      }
+    },
     moveStart(event: MouseEvent) {
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
       window.addEventListener('mouseup', this.moveEnd)
@@ -185,23 +208,10 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
       }
-
-      if (typeof this.primaryLayerIndex === 'undefined') {
-        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
-      } else {
-        let updateSubLayerStyles = null as any
-        switch (LayerUtils.getCurrLayer.type) {
-          case 'group':
-            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
-            break
-          case 'frame':
-            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
-        }
-        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-          imgX: imgPos.x,
-          imgY: imgPos.y
-        })
-      }
+      this.updateLayerStyles({
+        imgX: imgPos.x,
+        imgY: imgPos.y
+      })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -210,7 +220,16 @@ export default Vue.extend({
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
-    moveEnd() {
+    moveEnd(e: MouseEvent) {
+      const posDiff = {
+        x: Math.abs(e.clientX - this.initialPos.x),
+        y: Math.abs(e.clientY - this.initialPos.y)
+      }
+      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+        this.updateLayerProps({ imgControl: false })
+        stepsUtils.record()
+        this.updateLayerProps({ imgControl: true })
+      }
       this.setCursorStyle('default')
       window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -218,7 +237,6 @@ export default Vue.extend({
     scaleStart(event: MouseEvent) {
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       this.initialWH = {
         width: this.getImgWidth,
         height: this.getImgHeight
@@ -316,27 +334,24 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      if (typeof this.primaryLayerIndex === 'undefined') {
-        ControlUtils.updateImgSize(this.pageIndex, this.layerIndex, width, height)
-        ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, imgPos.x, imgPos.y)
-      } else {
-        let updateSubLayerStyles = null as any
-        switch (LayerUtils.getCurrLayer.type) {
-          case 'group':
-            updateSubLayerStyles = LayerUtils.updateSubLayerStyles
-            break
-          case 'frame':
-            updateSubLayerStyles = FrameUtils.updateFrameLayerStyles
-        }
-        updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-          imgWidth: width,
-          imgHeight: height,
-          imgX: imgPos.x,
-          imgY: imgPos.y
-        })
-      }
+
+      this.updateLayerStyles({
+        imgWidth: width,
+        imgHeight: height,
+        imgX: imgPos.x,
+        imgY: imgPos.y
+      })
     },
-    scaleEnd() {
+    scaleEnd(e: MouseEvent) {
+      const posDiff = {
+        x: Math.abs(e.clientX - this.initialPos.x),
+        y: Math.abs(e.clientY - this.initialPos.y)
+      }
+      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+        this.updateLayerProps({ imgControl: false })
+        stepsUtils.record()
+        this.updateLayerProps({ imgControl: true })
+      }
       this.isControlling = false
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.scaling, false)

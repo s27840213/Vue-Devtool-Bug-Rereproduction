@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter")
+    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
       defs(v-if="config.category === 'E'" v-html="svgFormatter")
       defs
         filter(v-if="config.category === 'C'" :id="className" v-html="filterFormatter")
@@ -56,10 +56,11 @@ export default Vue.extend({
     }
   },
   async created() {
+    console.log(this.config)
     switch (this.config.category) {
       case 'C': {
         // should be deleted after the new json format stablize
-        if (!this.config.svg) {
+        if (!this.config.svg && this.config.designId) {
           const shape = await shapeUtils.fetchSvg(this.config)
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
@@ -91,7 +92,7 @@ export default Vue.extend({
         break
       }
       default: {
-        if (!this.config.svg) {
+        if (!this.config.svg && this.config.designId) {
           const shape = await shapeUtils.fetchSvg(this.config)
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
@@ -475,5 +476,8 @@ export default Vue.extend({
 .nu-shape {
   display: relative;
   cursor: default;
+  svg {
+    display: block;
+  }
 }
 </style>

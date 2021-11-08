@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="text-setting" @mousedown.capture="textRangeRecorder($event)" ref='body')
+  div(class="text-setting" ref='body'
+      @mousedown.capture="textRangeRecorder()")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
@@ -112,6 +113,7 @@ export default Vue.extend({
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
+    TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -158,6 +160,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     openFontsPanel() {
+      this.textRangeRecorder()
       this.$emit('openFontsPanel')
     },
     inputColor(input: Event) {
@@ -272,8 +275,19 @@ export default Vue.extend({
       }
       return origin
     },
+    textRangeRecorder() {
+      // if ((e.target as HTMLElement).classList.contains('record-selection')) {
+      if (!TextUtils.isSel(this.sel.start)) {
+        const sel = TextUtils.getSelection()
+        const start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+        const end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+        TextUtils.updateSelection(start, end)
+      }
+    },
     onPropertyClick(iconName: string) {
-      TextPropUtils.onPropertyClick(iconName)
+      // console.log(this.sel.start.pIndex)
+      // console.log(this.sel.end.pIndex)
+      TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
       /**
        *  Only select with range or none selection exist, the prop-panel update.
        * */
@@ -298,30 +312,35 @@ export default Vue.extend({
         }
       }, tickInterval)
       const onmouseup = () => {
+        window.removeEventListener('mouseup', onmouseup)
         if (new Date().getTime() - startTime < 500) {
           this.fontSizeSteppingHandler(step)
         }
         clearInterval(interval)
         StepsUtils.record()
-        window.removeEventListener('mouseup', onmouseup)
       }
-      TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
       window.addEventListener('mouseup', onmouseup)
+      TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
     },
     fontSizeSteppingHandler(step: number) {
-      const sel = TextUtils.getSelection()
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+      const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
+      const sel = TextUtils.getSelection()
+      // const sel = this.sel
+      // if (!TextUtils.isSel(sel.end)) {
+      //   const { start, end } = TextPropUtils.selectAll(config)
+      //   TextUtils.updateSelection(start, end)
+      // }
       if (sel) {
         const { start, end } = sel
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
-        const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
+        const currStart = {} as ISelection
+        const currEnd = {} as ISelection
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           const p = config.paragraphs[pidx]
           for (let sidx = 0; sidx < p.spans.length; sidx++) {
             const span = p.spans[sidx]
-            const currStart = {} as ISelection
-            const currEnd = {} as ISelection
             if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
               continue
             }
@@ -334,14 +353,14 @@ export default Vue.extend({
                 Object.assign(currEnd, end)
               } else {
                 Object.assign(currStart, start)
-                Object.assign(currEnd, { pIndex: start.pIndex, sIndex: start.sIndex, offset: span.text.length })
+                Object.assign(currEnd, { ...start, offset: span.text.length })
               }
             } else if (pidx === end.pIndex && sidx === end.sIndex) {
-              const endSidx = start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              const endSidx = (start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
             } else {
-              const endSidx = start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex ? sidx + 1 : sidx
+              const endSidx = (start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
@@ -353,6 +372,8 @@ export default Vue.extend({
           }
         }
         Object.assign(finalEnd, this.sel.end)
+        // Object.assign(finalEnd, currEnd)
+        // const finalSel = [finalStart, finalEnd]
         const finalSel = TextPropUtils.spanMerger(TextPropUtils.getCurrLayer.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
           TextUtils.focus(finalSel[0], finalSel[1])
@@ -377,14 +398,6 @@ export default Vue.extend({
       if (value < min) return min.toString()
       else if (value > max) return max.toString()
       return value.toString()
-    },
-    textRangeRecorder(e: MouseEvent) {
-      if ((e.target as HTMLElement).classList.contains('record-selection')) {
-        const sel = TextUtils.getSelection()
-        const start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-        const end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
-        TextUtils.updateSelection(start, end)
-      }
     },
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
