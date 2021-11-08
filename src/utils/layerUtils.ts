@@ -16,9 +16,9 @@ import { SrcObj } from '@/interfaces/gallery'
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get currSubSelectedInfo(): ICurrSubSelectedInfo { return store.getters.getSubSelectedInfo }
-  get pageIndex() { return store.getters.getLastSelectedPageIndex }
-  get scaleRatio() { return store.getters.getPageScaleRatio }
-  get layerIndex() { return store.getters.getCurrSelectedIndex }
+  get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
+  get scaleRatio(): number { return store.getters.getPageScaleRatio }
+  get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage() { return store.getters.getPage }
   get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
@@ -107,7 +107,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | IParagraph | Array<string> | Array<IShape | IText | IImage | IGroup> }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,

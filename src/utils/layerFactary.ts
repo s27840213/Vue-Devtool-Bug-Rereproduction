@@ -1,5 +1,5 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import ZindexUtils from './zindexUtils'
@@ -138,7 +138,7 @@ class LayerFactary {
           height: initHeight,
           initWidth: initWidth,
           initHeight: initHeight
-        } as any
+        } as IStyle
         return decoration
       })()) : undefined,
       decorationTop: decorationTop ? this.newShape((() => {
@@ -148,7 +148,7 @@ class LayerFactary {
           height: initHeight,
           initWidth: initWidth,
           initHeight: initHeight
-        } as any
+        } as IStyle
         return decorationTop
       })()) : undefined
     }
@@ -222,7 +222,9 @@ class LayerFactary {
             i--
             continue
           }
-          if (p.spans[i].text.includes('\n')) {
+          if (typeof p.spans[i].text === 'undefined') {
+            p.spans.splice(i, 1)
+          } else if (p.spans[i].text.includes('\n')) {
             console.warn('some /n detected:', p.spans[i].text)
             p.spans[i].text.replace('\n', '')
           }

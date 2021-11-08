@@ -260,11 +260,17 @@ class UploadUtils {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const pageIndex = store.getters.getLastSelectedPageIndex
+    const page = store.getters.getPage(pageIndex)
+    const parentId = page.designId ?? ''
     store.commit('SET_pageDesignId', {
       pageIndex: pageIndex,
       designId: designId
     })
-    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
+
+    const pageJSON = this.default(generalUtils.deepCopy(page))
+    if (!pageJSON.parentId) {
+      pageJSON.parentId = parentId
+    }
     // pageJSON.layers
     //   .forEach((l: ILayer) => {
     //     l = this.layerInfoFilter(l)
@@ -399,6 +405,12 @@ class UploadUtils {
     }
     groupUtils.reset()
 
+    if (!page.appVer_origin) {
+      page.appVer_origin = page.appVer || new Date().toISOString()
+    }
+    if (!page.jsonVer_origin) {
+      page.jsonVer_origin = page.jsonVer || jsonVer
+    }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
     return page
@@ -537,9 +549,12 @@ class UploadUtils {
     switch (type) {
       case 'image':
         if (general.scale !== 1) {
-          general.width = styles.imgWidth
-          general.height = styles.imgHeight
-          general.scale = 1
+          // general.width = styles.imgWidth
+          // general.height = styles.imgHeight
+          // styles.imgWidth = general.width
+          // styles.imgHeight = general.height
+          // general.scale = 1
+          console.error('image scale is not equal to 1')
         }
         return {
           ...general,
