@@ -151,14 +151,16 @@ export default Vue.extend({
       this.setCurrLocation(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
     },
     handleDragEnter() {
+      if (this.folderUndroppable()) return
       this.isDraggedOver = true
     },
     handleDragLeave() {
+      if (this.folderUndroppable()) return
       this.isDraggedOver = false
     },
     handleDrop() {
       this.isDraggedOver = false
-      if (this.isDragged) return
+      if (this.folderUndroppable() || this.isDragged) return
       const destination = designUtils.appendPath(this.parents as string[], this.folder as IFolder)
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
@@ -241,6 +243,9 @@ export default Vue.extend({
       } else {
         return []
       }
+    },
+    folderUndroppable(): boolean {
+      return designUtils.isMaxLevelReached(this.level) && this.draggingFolder
     }
   }
 })
@@ -275,7 +280,7 @@ $maxLevels: 5;
     margin-bottom: 10px;
     cursor: pointer;
     &__text {
-      font-family: 'SFProDisplay';
+      font-family: 'NotoSansTC';
       text-align: left;
       color: white;
       font-size: 14px;
@@ -286,7 +291,7 @@ $maxLevels: 5;
     &__input {
       width: 144px;
       padding: 4px 5px;
-      font-family: 'SFProDisplay';
+      font-family: 'NotoSansTC';
       text-align: left;
       color: white;
       font-size: 14px;

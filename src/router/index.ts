@@ -6,6 +6,7 @@ import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
+import TemplateCenter from '../views/TemplateCenter.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -112,6 +113,33 @@ const routes: Array<RouteConfig> = [
           next({ name: 'Login', query: { redirect: to.fullPath } })
         } else {
           next()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: '/templates',
+    name: 'TemplateCenter',
+    component: TemplateCenter
+  },
+  {
+    path: '/',
+    name: 'Home',
+    component: Home,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        next()
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.has('type') && urlParams.has('design_id')) {
+          const type = urlParams.get('type')
+          const designId = urlParams.get('design_id')
+
+          if (type && designId) {
+            uploadUtils.getDesign(type, designId)
+          }
         }
       } catch (error) {
         console.log(error)

@@ -112,13 +112,13 @@ const mutations: MutationTree<IUserModule> = {
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
+    console.log(data)
     keys
       .forEach(key => {
         if (key in state) {
           (state[key] as any) = newState[key]
         }
       })
-    console.log(state)
   },
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, downloadUrl } = state
@@ -234,7 +234,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
-      console.log(data)
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
@@ -257,13 +256,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log('wwww')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
-      const words = uname.split(' ')
-      let shortName = ''
-      if (words.length > 1) {
-        shortName = (words[0][0] + words[1][0]).toUpperCase()
-      } else {
-        shortName = (uname.substring(0, 2)).toUpperCase()
-      }
+      const shortName = uname.substring(0, 1).toUpperCase()
       Sentry.setTag('user_name', uname)
       Sentry.setTag('user_id', data.data.user_id)
       commit('SET_STATE', {
@@ -271,9 +264,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         uname: uname,
         shortName: shortName,
         userId: data.data.user_id,
-        role: data.data.role,
-        verUni: data.data.ver_uni,
-        imgSizeMap: data.data.image_size_map
+        role: data.data.role
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)

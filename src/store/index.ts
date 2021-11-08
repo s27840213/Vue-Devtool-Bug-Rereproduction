@@ -21,6 +21,7 @@ import popup from '@/store/module/popup'
 import design from '@/store/module/design'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
+import hashtag from '@/store/module/hashtag'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -706,6 +707,7 @@ export default new Vuex.Store({
     popup,
     design,
     page,
-    homeTemplate
+    homeTemplate,
+    hashtag
   }
 })

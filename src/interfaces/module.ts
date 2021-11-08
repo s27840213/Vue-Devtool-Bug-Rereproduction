@@ -6,6 +6,7 @@ export interface IListModuleState {
   content: Partial<IListServiceContentData>
   categories: IListServiceContentData[]
   keyword: string
+  theme: string
   page: number
   nextPage: number | undefined
   perPage: number

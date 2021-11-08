@@ -25,7 +25,7 @@ export default Vue.extend({
     layerIndex: Number
   },
   async created() {
-    if (this.config.needFetch) {
+    if (this.config.needFetch && this.config.designId) {
       const config = this.config as IFrame
       const asset = {
         type: 8,

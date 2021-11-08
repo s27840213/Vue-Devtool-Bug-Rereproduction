@@ -6,7 +6,7 @@
         @dragstart="handleDragStart"
         @drag="handleDragging"
         @dragend="handleDragEnd"
-        v-on="undroppable ? {} : { dragenter: handleMouseEnter, dragleave: handleMouseLeave }"
+        v-on="undroppable ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
         @dragover.prevent
@@ -179,6 +179,14 @@ export default Vue.extend({
     preventDefaultDragOver(e: DragEvent) {
       e.preventDefault()
     },
+    handleDragEnter() {
+      if (this.folderUndroppable()) return
+      this.handleMouseEnter()
+    },
+    handleDragLeave() {
+      if (this.folderUndroppable()) return
+      this.handleMouseLeave()
+    },
     handleMouseEnter() {
       this.isMouseOver = true
     },
@@ -188,8 +196,7 @@ export default Vue.extend({
     },
     handleDrop() {
       this.isMouseOver = false
-      if (this.undroppable) return
-      if (this.isDragged) return
+      if (this.folderUndroppable() || this.undroppable || this.isDragged) return
       const destination = designUtils.appendPath(this.path as string[], this.config as IFolder)
       if (this.draggingType === 'design') {
         const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
@@ -265,6 +272,9 @@ export default Vue.extend({
     },
     emitDeselect() {
       this.$emit('deselect')
+    },
+    folderUndroppable(): boolean {
+      return designUtils.isMaxLevelReached(this.path.length - 1) && this.draggingFolder
     }
   }
 })
@@ -444,7 +454,7 @@ export default Vue.extend({
     padding: 2px 8px;
     z-index: 1000;
     > span {
-      font-family: "SFProDisplay";
+      font-family: "NotoSansTC";
       font-weight: 400;
       font-size: 10px;
       line-height: 20px;

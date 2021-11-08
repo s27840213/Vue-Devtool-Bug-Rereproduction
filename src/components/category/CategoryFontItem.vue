@@ -9,11 +9,11 @@
         :src="`${host}/${item.id}/${preview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
-      svg-icon(v-if="props.font === item.id && !pending"
+      svg-icon(v-if="props.font === item.id"
         iconName="done"
         iconColor="gray-2"
         iconWidth="25px")
-      svg-icon(v-else-if="pending"
+      svg-icon(v-else-if="pending && pending === item.id"
         iconName="loading"
         iconColor="gray-1"
         iconWidth="20px")
@@ -21,12 +21,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { IFont } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
+import layerUtils from '@/utils/layerUtils'
+import { IGroup, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -35,39 +37,87 @@ export default Vue.extend({
     preview2: String,
     item: Object
   },
-  data() {
-    return {
-      pending: false
+  computed: {
+    ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
+    getCurrLayerInfo(): {
+      layer: IText,
+      layerIndex: number,
+      primaryLayerIndex?: number
+      pageIndex: number
+      } {
+      const { getCurrLayer: currLayer, layerIndex } = layerUtils
+      switch (currLayer.type) {
+        case 'group': {
+          const activeIdx = (currLayer as IGroup).layers
+            .findIndex(l => l.type === 'text' && l.active)
+          if (activeIdx !== -1) {
+            return {
+              layer: (currLayer as IGroup).layers[activeIdx] as IText,
+              layerIndex: activeIdx,
+              primaryLayerIndex: layerIndex,
+              pageIndex: layerUtils.pageIndex
+            }
+          } else throw new Error('Wrong subLayer state')
+        }
+        case 'text':
+          return {
+            layer: currLayer as IText,
+            layerIndex,
+            primaryLayerIndex: undefined,
+            pageIndex: layerUtils.pageIndex
+          }
+        default:
+          throw new Error('Wrong layer type as Font Item applied')
+      }
     }
   },
-  computed: {
-    ...mapState('text', ['sel', 'props', 'fontStore'])
-  },
   methods: {
+    ...mapMutations('text', {
+      updateState: 'UPDATE_STATE'
+    }),
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
-    async setFont() {
+    setFont() {
       const fontStore = this.fontStore as Array<IFont>
-      if (!fontStore.some(font => font.face === this.item.id)) {
-        this.pending = true
+      if (!this.pending && !fontStore.some(font => font.face === this.item.id)) {
+        this.updateState({ pending: this.item.id })
         const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
+        const { layer, primaryLayerIndex, layerIndex, pageIndex } = this.getCurrLayerInfo
+        let { start, end } = this.sel
         const promise = () => {
           return new Promise<void>((resolve) => {
             newFont.load().then(newFont => {
               document.fonts.add(newFont)
               TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+
+              if (!TextUtils.isSel(end)) {
+                start = TextUtils.selectAll(layer).start
+                end = TextUtils.selectAll(layer).end
+              }
+
+              const newConfig = TextPropUtils._spanPropertyHandler('fontFamily',
+                {
+                  font: this.item.id
+                }, start, end, layer)
+
+              if (typeof primaryLayerIndex !== 'undefined') {
+                layerUtils.updateSubLayerProps(pageIndex, primaryLayerIndex, layerIndex,
+                  { paragraphs: newConfig.paragraphs })
+              } else {
+                layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+              }
+
+              TextPropUtils.updateTextPropsState({ font: this.item.id })
+              AssetUtils.addAssetToRecentlyUsed(this.item)
+              this.updateState({ pending: '' })
               StepsUtils.record()
-              this.pending = false
               resolve()
             })
           })
         }
-        await promise()
+        promise()
       }
-      AssetUtils.addAssetToRecentlyUsed(this.item)
-      TextPropUtils.onPropertyClick('fontFamily', this.item.id, this.sel.start, this.sel.end)
-      TextPropUtils.updateTextPropsState({ font: this.item.id })
     },
     getFontUrl(fontID: string): string {
       console.log(fontID)
@@ -97,3 +147,7 @@ export default Vue.extend({
     }
   }
 </style>
+
+function mapMutation(arg0: string, arg1: string[]): any {
+  throw new Error('Function not implemented.')
+}
