@@ -74,11 +74,12 @@
                   span 刪除資料夾
         div(ref="newFolder"
             class="folder-design-view__new-folder"
+            :style="newFolderStyles()"
             @click="handleNewFolder")
           svg-icon(class="header-icon"
                   iconName="folder_plus"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  :iconColor="newFolderColor")
         div(class="folder-design-view__sort-by"
             @click="toggleSortMenu"
             v-click-outside="closeSortMenu")
@@ -284,6 +285,9 @@ export default Vue.extend({
     },
     isEmpty(): boolean {
       return this.folder.subFolders.length + this.designs.length === 0
+    },
+    newFolderColor(): string {
+      return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
     }
   },
   methods: {
@@ -299,6 +303,9 @@ export default Vue.extend({
     },
     designsExpansionIconStyles() {
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
+    },
+    newFolderStyles() {
+      return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
     },
     checkFavorite(id: string): boolean {
       return this.favoriteIds.includes(id)
