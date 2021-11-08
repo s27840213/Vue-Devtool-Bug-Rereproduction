@@ -530,6 +530,10 @@ class DesignUtils {
       store.commit('design/UPDATE_addToFavorite', pathedDesign)
     }
   }
+
+  isMaxLevelReached(level: number) {
+    return level >= 4
+  }
 }
 
 export default new DesignUtils()

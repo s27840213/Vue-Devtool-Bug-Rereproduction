@@ -18,8 +18,7 @@
               @mouseleave="handleFolderNameMouseLeave"
               @click="handleFolderNameClick")
           span {{ folder.name }}
-          svg-icon(v-if="isFolderNameMouseOver"
-                  iconName="pen"
+          svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
         transition(name="fade")
@@ -36,8 +35,8 @@
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in shownParents")
           span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
-          span {{ ' > ' }}
-          span {{ ' ' }}
+          span(class="folder-design-view__path__text") {{ ' > ' }}
+          span(class="folder-design-view__path__text") {{ ' ' }}
         span(class="folder-design-view__path__node") {{ folder.name }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more"
@@ -74,11 +73,12 @@
                   span 刪除資料夾
         div(ref="newFolder"
             class="folder-design-view__new-folder"
+            :style="newFolderStyles()"
             @click="handleNewFolder")
           svg-icon(class="header-icon"
                   iconName="folder_plus"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  :iconColor="newFolderColor")
         div(class="folder-design-view__sort-by"
             @click="toggleSortMenu"
             v-click-outside="closeSortMenu")
@@ -284,6 +284,9 @@ export default Vue.extend({
     },
     isEmpty(): boolean {
       return this.folder.subFolders.length + this.designs.length === 0
+    },
+    newFolderColor(): string {
+      return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
     }
   },
   methods: {
@@ -299,6 +302,9 @@ export default Vue.extend({
     },
     designsExpansionIconStyles() {
       return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
+    },
+    newFolderStyles() {
+      return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
     },
     checkFavorite(id: string): boolean {
       return this.favoriteIds.includes(id)
@@ -452,8 +458,10 @@ export default Vue.extend({
   }
   &__folder-name {
     margin-top: 94px;
+    width: calc(80vw - 360px);
     > span {
       position: relative;
+      width: 100%;
       font-size: 24px;
       font-weight: 700;
       line-height: 40px;
@@ -462,6 +470,7 @@ export default Vue.extend({
       > button {
         display: flex;
         align-items: center;
+        max-width: 100%;
         height: 40px;
         padding: 0;
         box-sizing: border-box;
@@ -473,14 +482,24 @@ export default Vue.extend({
         border: none;
         &:hover {
           border-bottom: 1px dashed setColor(gray-3);
+          > svg {
+            opacity: 1;
+          }
         }
         > span {
+          max-width: 100%;
+          overflow: hidden;
+          text-align: left;
+          text-overflow: ellipsis;
           font-size: inherit;
           font-weight: inherit;
           line-height: inherit;
           letter-spacing: inherit;
           color: inherit;
           white-space: nowrap;
+        }
+        > svg {
+          opacity: 0;
         }
       }
       > div.input-container {
@@ -545,14 +564,24 @@ export default Vue.extend({
     width: calc(100% - 120px);
   }
   &__path {
+    display: flex;
+    align-items: center;
     font-size: 14px;
     line-height: 20px;
     color: setColor(gray-2);
     white-space: pre-wrap;
+    &__text {
+      display: inline-block;
+    }
     &__node {
+      max-width: 5vw;
+      overflow: hidden;
+      display: inline-block;
+      text-overflow: ellipsis;
       cursor: pointer;
       &:hover {
-        border-bottom: 1px solid;
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid setColor(gray-2);
       }
     }
   }
