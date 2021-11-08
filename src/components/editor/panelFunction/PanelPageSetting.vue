@@ -154,16 +154,18 @@
               @click.native="updateDataClicked()") 更新
           div(class="template-information__divider")
           div(class="template-information__line bg-blue")
-            span(class="body-1") 父模板
+            span(class="body-1") 父
             span(class="pl-15 body-2"
               @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
-          div(class="template-information__line bg-blue")
-            span(class="body-1") 爺模板
+            span(class="text-blue-1") {{templateInfo.parent_locale}}
+          div(class="template-information__line bg-blue border-bottom pb-5")
+            span(class="body-1") 爺
             span(class="pl-15 body-2"
               @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+            span(class="text-blue-1") {{templateInfo.grandparent_locale}}
           div(class="bg-blue")
             div(v-for="(item) in templateInfo.grandchildren_id"
-              class="child-block py-5")
+              class="border-bottom py-5")
               div(class="child-item")
                 span(class="body-1") 子
                 span(class="body-2"
@@ -250,7 +252,9 @@ export default Vue.extend({
         height: '' as string,
         theme_ids: '' as string,
         parent_id: '' as string,
+        parent_locale: '' as string,
         grandparent_id: '' as string,
+        grandparent_locale: '' as string,
         grandchildren_id: []
       },
       themeList: [] as Itheme[],
@@ -272,7 +276,9 @@ export default Vue.extend({
         height: '',
         theme_ids: '',
         parent_id: '',
+        parent_locale: '',
         grandparent_id: '',
+        grandparent_locale: '',
         grandchildren_id: []
       }
       this.themeList = []
@@ -831,8 +837,7 @@ export default Vue.extend({
       margin: auto 0;
     }
   }
-  .child-block {
-    // border-top: 1px dashed setColor(blue-1);
+  .border-bottom {
     border-bottom: 1px dashed setColor(blue-1);
   }
   .child-item {
