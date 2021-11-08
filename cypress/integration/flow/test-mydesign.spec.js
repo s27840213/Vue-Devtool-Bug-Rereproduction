@@ -76,4 +76,55 @@ describe('MyDesign', () => {
       cy.get('.design-view').should('have.class', 'trash-design-view')
     })
   })
+
+  describe('AllDesignView', () => {
+    it('shows all designs', () => {
+      getSidebarRow('all').click()
+      for (let i = 0; i < 15; i++) {
+        cy.contains(`Name${i + 1}`).should('exist')
+      }
+    })
+  })
+
+  describe('FavoriteDesignView', () => {
+    beforeEach(() => {
+      getSidebarRow('all').click()
+      for (let i = 0; i < 3; i++) {
+        cy.contains(`Name${i + 2}`).parents('.design-item')
+          .children('.design-item__block')
+          .children('.design-item__controller')
+          .children('.design-item__controller-content')
+          .children('.design-item__favorite')
+          .click()
+      }
+      getSidebarRow('favorite').click()
+    })
+
+    it('shows favorite designs', () => {
+      for (let i = 0; i < 3; i++) {
+        cy.contains(`Name${i + 2}`).should('exist')
+      }
+    })
+
+    it('has only "share", "download" and "delete" in design item menu', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      const icons = ['#share-alt', '#download', '#trash']
+      for (let i = 0; i < 3; i++) {
+        cy.get('.design-menu-item__icon svg use').eq(i).should('have.attr', 'xlink:href').and('be.equal', icons[i])
+      }
+    })
+
+    it('it has only "rmFav" and "delete" in multi-select menu', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      const icons = ['#heart', '#trash']
+      for (let i = 0; i < 2; i++) {
+        cy.get('.my-design__multi__icon svg use').eq(i).should('have.attr', 'xlink:href').and('be.equal', icons[i])
+      }
+      cy.get('.my-design__multi__icon').eq(1).trigger('mouseenter')
+      cy.contains('刪除後會將原始檔案一併移除。').should('exist')
+    })
+  })
 })
