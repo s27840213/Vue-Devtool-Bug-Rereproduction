@@ -96,6 +96,7 @@ export default Vue.extend({
     menuItemNum: Number,
     favorable: Boolean,
     undraggable: Boolean,
+    nameIneditable: Boolean,
     isInFavorites: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,
@@ -237,12 +238,15 @@ export default Vue.extend({
       this.isMenuOpen = false
     },
     handleNameMouseEnter() {
+      if (this.nameIneditable) return
       this.isNameMouseOver = true
     },
     handleNameMouseLeave() {
+      if (this.nameIneditable) return
       this.isNameMouseOver = false
     },
     handleNameClick() {
+      if (this.nameIneditable) return
       this.editableName = this.config.name
       this.isNameEditing = true
       this.$nextTick(() => {
