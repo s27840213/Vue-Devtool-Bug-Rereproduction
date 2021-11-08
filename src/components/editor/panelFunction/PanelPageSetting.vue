@@ -100,51 +100,65 @@
           :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
         btn(:type="'primary-sm'" class="rounded my-5" style="padding: 8px 40px;"
           @click.native="getDataClicked()") 取得模板資料
-        div(class="template-information__line")
-          span(class="body-1") key_id
-          span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
-        div(class="template-information__line")
-          span(class="body-1") 作者
-          span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
-        div(class="template-information__line")
-          span(class="body-1") 上次更新
-          span(class="pl-15 body-2") {{templateInfo.edit_time}}
-        div(class="template-information__line")
-          span(class="body-1") 語系
-          select(class="template-information__select" v-model="templateInfo.locale")
-            option(v-for="locale in localeOptions" :value="locale") {{locale}}
-        div(class="template-information__line")
-          span(class="body-1") Theme_ids
-        div(class="theme-wrapper")
-          div(v-for="(item, idx) in themeList"
-          class="pt-5 theme-option")
-            input(type="checkbox"
-              class="theme-option__check"
-              :disabled="isDisabled(item.width, item.height)"
-              v-model="templateThemes[item.id]")
-            span(class="body-1") {{item.title}}
-            span(class="body-2 text-gray-2") {{item.description}}
-        div
-          span tags_tw
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_tw")
-        div
-          span tags_us
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_us")
-        div
-          span tags_jp
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_jp")
-        div(class="template-information__line")
-          div(style="width: 50%;")
-            input(type="checkbox" class="template-information__check" v-model="updateChecked")
-            label 確定更新
-          btn(:type="'primary-sm'" class="rounded my-5"
-          style="padding: 5px 40px;" @click.native="updateDataClicked()") 更新
+        div(v-if="isGetTemplate")
+          div(class="template-information__line")
+            span(class="body-1") key_id
+            span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
+          div(class="template-information__line")
+            span(class="body-1") 作者
+            span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
+          div(class="template-information__line")
+            span(class="body-1") 上次更新
+            span(class="pl-15 body-2") {{templateInfo.edit_time}}
+          div(class="template-information__line")
+            span(class="body-1") 語系
+            select(class="template-information__select" v-model="templateInfo.locale")
+              option(v-for="locale in localeOptions" :value="locale") {{locale}}
+          div(class="template-information__line")
+            span(class="body-1") Theme_ids
+          div(class="theme-wrapper")
+            div(v-for="(item, idx) in themeList"
+            class="pt-5 theme-option")
+              input(type="checkbox"
+                class="theme-option__check"
+                :disabled="isDisabled(item.width, item.height)"
+                v-model="templateThemes[item.id]")
+              span(class="body-1") {{item.title}}
+              span(class="body-2 text-gray-2") {{item.description}}
+          div
+            span tags_tw
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_tw")
+          div
+            span tags_us
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_us")
+          div
+            span tags_jp
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_jp")
+          div(class="template-information__line")
+            div(style="width: 50%;")
+              input(type="checkbox" class="template-information__check" v-model="updateChecked")
+              label 確定更新
+            btn(:type="'primary-sm'" class="rounded my-5"
+              style="padding: 5px 40px;" @click.native="updateDataClicked()") 更新
+          div(class="template-information__divider")
+          div(class="template-information__line")
+            span(class="body-1") parent_id
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0" v-model="userParentId")
+            div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
+          div(class="template-information__line")
+            div(style="width: 50%;")
+              input(type="checkbox" class="template-information__check" v-model="updateParentIdChecked")
+              label 確定修改
+            btn(:type="'primary-sm'" class="rounded my-5"
+              style="padding: 5px 40px;" @click.native="updateParentIdClicked()") 修改
     spinner(v-if="isLoading")
 </template>
 
@@ -159,6 +173,7 @@ import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import PageUtils from '@/utils/pageUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
@@ -185,8 +200,9 @@ export default Vue.extend({
       isLocked: true,
       isPanelOpen: false,
       isLoading: false,
-      needUpdate: false,
+      isGetTemplate: false,
       updateChecked: false,
+      updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
       currentKeyId: '',
       imgRandQuery: '',
@@ -200,13 +216,16 @@ export default Vue.extend({
         locale: '' as string,
         width: '' as string,
         height: '' as string,
-        theme_ids: '' as string
+        theme_ids: '' as string,
+        parent_id: '' as string
       },
-      themeList: [] as Itheme[]
+      themeList: [] as Itheme[],
+      userParentId: ''
     }
   },
   watch: {
     key_id: function() {
+      this.isGetTemplate = false
       this.templateInfo = {
         key_id: '',
         author: '',
@@ -217,7 +236,8 @@ export default Vue.extend({
         locale: '',
         width: '',
         height: '',
-        theme_ids: ''
+        theme_ids: '',
+        parent_id: ''
       }
       this.themeList = []
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
@@ -400,13 +420,14 @@ export default Vue.extend({
         return
       }
       this.updateChecked = false
-      this.needUpdate = true
       const data = {}
       const res = await designApis.getTemplateInfo(this.token, 'template', this.key_id, 'select', JSON.stringify(data))
       if (res.data.flag === 0) {
+        this.isGetTemplate = true
         this.templateInfo = res.data.data
         this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
         this.themeList = res.data.data.themeList
+        this.userParentId = this.templateInfo.parent_id
       } else {
         this.$notify({ group: 'copy', text: '找不到模板資料' })
       }
@@ -456,6 +477,28 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.updateChecked = false
+      this.isLoading = false
+    },
+    updateParentIdClicked() {
+      this.isLoading = true
+      if (!this.templateInfo.key_id) {
+        this.isLoading = false
+        this.$notify({ group: 'copy', text: '請先取得模板資料' })
+        return
+      }
+      if (!this.updateParentIdChecked) {
+        this.isLoading = false
+        this.$notify({ group: 'copy', text: '請先勾選確定修改' })
+        return
+      }
+      this.updatePageProps({
+        pageIndex: this.lastSelectedPageIndex,
+        props: {
+          parentId: this.userParentId
+        }
+      })
+      uploadUtils.updateTemplate()
+      this.updateParentIdChecked = false
       this.isLoading = false
     },
     copyText(text: string) {
@@ -732,6 +775,12 @@ export default Vue.extend({
   }
   &__check {
     width: 10%;
+  }
+  &__divider {
+    width: 100%;
+    border-top: 2px solid #000;
+    margin-top: 10px;
+    padding-bottom: 5px;
   }
 
   .theme-wrapper {
