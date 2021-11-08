@@ -13,7 +13,7 @@
         iconName="done"
         iconColor="gray-2"
         iconWidth="25px")
-      svg-icon(v-else-if="pending === item.id"
+      svg-icon(v-else-if="pending && pending === item.id"
         iconName="loading"
         iconColor="gray-1"
         iconWidth="20px")
@@ -27,6 +27,8 @@ import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { IFont } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
+import layerUtils from '@/utils/layerUtils'
+import { IGroup, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -36,7 +38,38 @@ export default Vue.extend({
     item: Object
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'fontStore', 'pending'])
+    ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
+    getCurrLayerInfo(): {
+      layer: IText,
+      layerIndex: number,
+      primaryLayerIndex?: number
+      pageIndex: number
+      } {
+      const { getCurrLayer: currLayer, layerIndex } = layerUtils
+      switch (currLayer.type) {
+        case 'group': {
+          const activeIdx = (currLayer as IGroup).layers
+            .findIndex(l => l.type === 'text' && l.active)
+          if (activeIdx !== -1) {
+            return {
+              layer: (currLayer as IGroup).layers[activeIdx] as IText,
+              layerIndex: activeIdx,
+              primaryLayerIndex: layerIndex,
+              pageIndex: layerUtils.pageIndex
+            }
+          } else throw new Error('Wrong subLayer state')
+        }
+        case 'text':
+          return {
+            layer: currLayer as IText,
+            layerIndex,
+            primaryLayerIndex: undefined,
+            pageIndex: layerUtils.pageIndex
+          }
+        default:
+          throw new Error('Wrong layer type as Font Item applied')
+      }
+    }
   },
   methods: {
     ...mapMutations('text', {
@@ -50,18 +83,35 @@ export default Vue.extend({
       if (!this.pending && !fontStore.some(font => font.face === this.item.id)) {
         this.updateState({ pending: this.item.id })
         const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
+        const { layer, primaryLayerIndex, layerIndex, pageIndex } = this.getCurrLayerInfo
+        let { start, end } = this.sel
         const promise = () => {
           return new Promise<void>((resolve) => {
             newFont.load().then(newFont => {
               document.fonts.add(newFont)
               TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
 
-              TextPropUtils.onPropertyClick('fontFamily', this.item.id, this.sel.start, this.sel.end)
+              if (!TextUtils.isSel(end)) {
+                start = TextUtils.selectAll(layer).start
+                end = TextUtils.selectAll(layer).end
+              }
+
+              const newConfig = TextPropUtils._spanPropertyHandler('fontFamily',
+                {
+                  font: this.item.id
+                }, start, end, layer)
+
+              if (typeof primaryLayerIndex !== 'undefined') {
+                layerUtils.updateSubLayerProps(pageIndex, primaryLayerIndex, layerIndex,
+                  { paragraphs: newConfig.paragraphs })
+              } else {
+                layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+              }
+
               TextPropUtils.updateTextPropsState({ font: this.item.id })
               AssetUtils.addAssetToRecentlyUsed(this.item)
-
-              StepsUtils.record()
               this.updateState({ pending: '' })
+              StepsUtils.record()
               resolve()
             })
           })

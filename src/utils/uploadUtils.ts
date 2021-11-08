@@ -260,11 +260,17 @@ class UploadUtils {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const pageIndex = store.getters.getLastSelectedPageIndex
+    const page = store.getters.getPage(pageIndex)
+    const parentId = page.designId ?? ''
     store.commit('SET_pageDesignId', {
       pageIndex: pageIndex,
       designId: designId
     })
-    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex)))
+
+    const pageJSON = this.default(generalUtils.deepCopy(page))
+    if (!pageJSON.parentId) {
+      pageJSON.parentId = parentId
+    }
     // pageJSON.layers
     //   .forEach((l: ILayer) => {
     //     l = this.layerInfoFilter(l)

@@ -2,7 +2,6 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
-import { pid } from 'process'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {

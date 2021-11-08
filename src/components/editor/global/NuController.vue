@@ -1288,7 +1288,6 @@ export default Vue.extend({
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
           if (sel) {
-            console.warn(sel.start.pIndex)
             TextUtils.updateSelection(sel.start, sel.end)
           }
         }

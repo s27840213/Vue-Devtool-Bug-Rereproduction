@@ -14,7 +14,11 @@ import { instrumentOutgoingRequests } from '@sentry/tracing/dist/browser'
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return store.state.text?.props }
-  get getCurrSel() { return store.state.text?.sel }
+  get getCurrSel() {
+    return store.state.text
+      ? store.state.text.sel : { start: this.getNullSel(), end: this.getNullSel() }
+  }
+
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
 
   isArrowKey(e: KeyboardEvent): boolean {
@@ -112,19 +116,38 @@ class TextUtils {
     }
   }
 
+  selectAll(config: IText): { start: ISelection, end: ISelection } {
+    const pIndex = config.paragraphs.length - 1
+    const sIndex = config.paragraphs[pIndex].spans.length - 1
+    const offset = config.paragraphs[pIndex].spans[sIndex].text.length
+    return {
+      start: { pIndex: 0, sIndex: 0, offset: 0 },
+      end: {
+        pIndex,
+        sIndex,
+        offset
+      }
+    }
+  }
+
   startEqualEnd (start: ISelection, end: ISelection) {
     return (Object.keys(start) as Array<keyof ISelection>)
       .every((k: keyof ISelection) => start[k] === end[k])
   }
 
-  focus(start?: ISelection, end?: ISelection, async = false) {
-    const text = document.getElementById(`text-${LayerUtils.layerIndex}`) as HTMLElement
+  focus(start?: ISelection, end?: ISelection, subLayerIndex?: number) {
+    let text: HTMLElement
     const range = new Range()
+    if (typeof subLayerIndex !== 'undefined') {
+      text = document.getElementById(`text-sub-${LayerUtils.layerIndex}-${subLayerIndex}`) as HTMLElement
+    } else {
+      text = document.getElementById(`text-${LayerUtils.layerIndex}`) as HTMLElement
+    }
 
     if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
       start = {} as ISelection
       Object.assign(start, this.getCurrSel.start)
-    } else if (!this.getCurrSel || !this.isSel(this.getCurrSel.start)) {
+    } else if (!this.isSel(this.getCurrSel.start)) {
       return
     }
     start = start as ISelection
@@ -161,13 +184,14 @@ class TextUtils {
      * However this problem will not happen in the situation of range-selection,
      * in the other hand, in this situation put the setSelection in the setTimeout function will casue glitch.
      * */
-    if (async) {
-      setTimeout(() => {
-        setSelection()
-      }, 0)
-    } else {
-      setSelection()
-    }
+    setSelection()
+    // if (async) {
+    //   setTimeout(() => {
+    //     setSelection()
+    //   }, 0)
+    // } else {
+    //   setSelection()
+    // }
   }
 
   isEmptyText(config: IText): boolean {

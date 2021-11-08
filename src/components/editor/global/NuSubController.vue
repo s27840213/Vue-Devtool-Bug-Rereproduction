@@ -17,7 +17,7 @@
               @dragleave="onDragLeave()")
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
-            div(ref="text" :id="`text-sub-${primaryLayerIndex}_${layerIndex}`" spellcheck="false"
+            div(ref="text" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`" spellcheck="false"
               draggable="false"
               :style="textBodyStyle()"
               class="text__body"
@@ -190,7 +190,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    if (this.getLayerType === 'text' && this.getPrimaryLayer.id === this.parentId) {
+    if (this.getLayerType === 'text' && this.getPrimaryLayer && this.getPrimaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     }
