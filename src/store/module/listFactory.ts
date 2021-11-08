@@ -13,6 +13,7 @@ export default function (this: any) {
     content: {},
     categories: [],
     keyword: '',
+    theme: '',
     page: 0,
     perPage: 0,
     nextPage: 0,
@@ -43,6 +44,19 @@ export default function (this: any) {
       commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
         const { data } = await this.api({ locale, keyword, listAll: 1 })
+        commit(SET_CONTENT, data.data)
+        console.log(data.data)
+      } catch (error) {
+        captureException(error)
+      }
+    },
+
+    getThemeContent: async ({ commit, state }, params = {}) => {
+      const { locale } = state
+      const { keyword, theme } = params
+      commit(SET_STATE, { pending: true, keyword, theme, content: {} })
+      try {
+        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
       } catch (error) {
@@ -132,10 +146,11 @@ export default function (this: any) {
 
   const getters: GetterTree<IListModuleState, any> = {
     nextParams (state) {
-      const { nextPage, keyword, locale } = state
+      const { nextPage, keyword, theme, locale } = state
       return {
         locale,
         keyword,
+        theme,
         listAll: 1,
         pageIndex: nextPage
       }

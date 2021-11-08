@@ -80,6 +80,11 @@ class ListService {
     params.type = 'theme'
     return this.getList(params)
   }
+
+  getHashtag (params: IListServiceParams) {
+    params.type = 'hashtag'
+    return this.getList(params)
+  }
 }
 
 export default new ListService()

@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211028"
+  version: "20211104"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -212,6 +212,26 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /put-asset-design:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: putAssetDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/putAssetDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -844,6 +864,24 @@ definitions:
       vcode:
         type: string
         description: verification code
+  putAssetDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - asset_id
+          - team_id
+          - type
+        properties:
+          team_id:
+            type: string
+            description: team in
+          asset_id:
+            type: string
+            description: asset id for design
+          type:
+            type: number
+            description: 0 for update db, 1 for update prev, 2 for update both
   loginInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -872,6 +910,18 @@ definitions:
       - $ref: "#/definitions/apiCommonInput"
       - type: object
         properties:
+          locale:
+            type: string
+            description: user locale
+          type:
+            type: string
+            description: "asset type: image, font, or design"
           page_index:
             type: number
             description: pagination index
+          team_id:
+            type: string
+            description: team id
+          asset_list:
+            type: string
+            description: ${assetType}:${teamId}:${assetId} separate by comma

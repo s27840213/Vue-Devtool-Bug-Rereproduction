@@ -59,10 +59,10 @@
         @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
       div(class="home-content-template")
         scroll-list(:list="latestTemplateList" type='template')
-    nu-footer
-    div(v-if="showSizePopup"
-      class="home__size")
-      popup-size(@close="closePopup()")
+      nu-footer(class="mt-100")
+      div(v-if="showSizePopup"
+        class="home__size")
+        popup-size(@close="closePopup()")
 </template>
 
 <script lang="ts">
@@ -194,8 +194,6 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: scroll;
 
   &__size {
     position: fixed;
@@ -213,8 +211,9 @@ export default Vue.extend({
 .home-content {
   display: flex;
   flex-direction: column;
-  padding-top: 50px;
-  padding-bottom: 100px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: calc(100% - 50px);
 
   &-title {
     display: flex;
@@ -266,6 +265,10 @@ export default Vue.extend({
     @media screen and (min-width: 990px) {
       padding: 56px 0;
     }
+
+      > img {
+        width: 100%;
+      }
 
       &-title {
         position: absolute;

@@ -16,9 +16,10 @@
         img(:src="require('@/assets/img/png/plus-origin.png')"
           @click="openPopup()")
         div(class="pt-10 body-1") 自訂尺寸
-      div(v-for="item, idx in list" class="scroll-list-item pt-10"
+      div(v-for="item, idx in list" class="scroll-list-item py-10"
         :class="{'pb-70': type === 'theme'}")
         img(class="pointer item-image"
+          :class="{'square': type === 'template'}"
           :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
           @click="goToPage('Editor')"
           @error="handleNotFound")
@@ -141,12 +142,17 @@ export default Vue.extend({
     .item-image {
       border-radius: 10px;
       height: 100%;
-
       &:hover {
         transition: all .2s ease-in-out;
-        box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
-        transform: translate(0, -10px);
+        box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+        transform: translate(0, -5px);
       }
+    }
+
+    .square {
+      width: 100%;
+      object-fit: contain;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%);
     }
 
     &-title {

@@ -4,6 +4,7 @@
     input(class="search-bar__input body-2"
       type="text"
       v-model="keyword"
+      @input="onUpdate"
       :placeholder="placeholder"
       :style="inputStyles()")
     svg-icon(v-if="clear && keyword"
@@ -45,7 +46,7 @@ export default Vue.extend({
   },
   data () {
     return {
-      keyword: ''
+      keyword: this.defaultKeyword
     }
   },
   watch: {
@@ -64,6 +65,9 @@ export default Vue.extend({
     onClear () {
       this.keyword = ''
       this.$emit('search', '')
+    },
+    onUpdate () {
+      this.$emit('update', this.keyword)
     }
   }
 })

@@ -249,13 +249,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log('wwww')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
-      const words = uname.split(' ')
-      let shortName = ''
-      if (words.length > 1) {
-        shortName = (words[0][0] + words[1][0]).toUpperCase()
-      } else {
-        shortName = (uname.substring(0, 2)).toUpperCase()
-      }
+      const shortName = uname.substring(0, 1).toUpperCase()
       Sentry.setTag('user_name', uname)
       Sentry.setTag('user_id', data.data.user_id)
       commit('SET_STATE', {
