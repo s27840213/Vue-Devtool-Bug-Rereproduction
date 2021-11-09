@@ -118,7 +118,7 @@
             span(class="body-1") Theme_ids
           div(class="theme-wrapper")
             div(v-for="(item, idx) in themeList"
-            class="pt-5 theme-option")
+              class="pt-5 theme-option")
               input(type="checkbox"
                 class="theme-option__check"
                 :disabled="isDisabled(item.width, item.height)"
@@ -129,36 +129,70 @@
             span tags_tw
           div
             property-bar
-              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_tw")
+              input(class="body-2 text-gray-2" min="0"
+                v-model="templateInfo.tags_tw")
           div
             span tags_us
           div
             property-bar
-              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_us")
+              input(class="body-2 text-gray-2" min="0"
+                v-model="templateInfo.tags_us")
           div
             span tags_jp
           div
             property-bar
-              input(class="body-2 text-gray-2" min="0" v-model="templateInfo.tags_jp")
-          div(class="template-information__line")
+              input(class="body-2 text-gray-2" min="0"
+                v-model="templateInfo.tags_jp")
+          div(class="template-information__line pt-10")
             div(style="width: 50%;")
-              input(type="checkbox" class="template-information__check" v-model="updateChecked")
+              input(type="checkbox"
+                class="template-information__check"
+                v-model="updateChecked")
               label 確定更新
             btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;" @click.native="updateDataClicked()") 更新
+              style="padding: 5px 40px;"
+              @click.native="updateDataClicked()") 更新
           div(class="template-information__divider")
+          div(class="template-information__line bg-blue")
+            span(class="body-1") 父
+            span(class="pl-15 body-2"
+              @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
+            span(class="text-blue-1") {{templateInfo.parent_locale}}
+          div(class="template-information__line bg-blue border-bottom pb-5")
+            span(class="body-1") 爺
+            span(class="pl-15 body-2"
+              @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+            span(class="text-blue-1") {{templateInfo.grandparent_locale}}
+          div(class="bg-blue")
+            div(v-for="(item) in templateInfo.grandchildren_id"
+              class="border-bottom py-5")
+              div(class="child-item")
+                span(class="body-1") 子
+                span(class="body-2"
+                  @click="copyText(item.childrenId)") {{item.childrenId}}
+                span {{item.childrenLocale}}
+              div(v-for="(item2) in item.grandchildren"
+                class="child-item")
+                span 孫
+                span(class="body-2"
+                  @click="copyText(item2.key_id)") {{item2.key_id}}
+                span {{item2.locale}}
           div(class="template-information__line")
-            span(class="body-1") parent_id
+            span(class="body-1 pt-10") parent_id (父模板)
           div
             property-bar
-              input(class="body-2 text-gray-2" min="0" v-model="userParentId")
+              input(class="body-2 text-gray-2" min="0"
+                v-model="userParentId")
             div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
-          div(class="template-information__line")
+          div(class="template-information__line pt-10")
             div(style="width: 50%;")
-              input(type="checkbox" class="template-information__check" v-model="updateParentIdChecked")
+              input(type="checkbox"
+                class="template-information__check"
+                v-model="updateParentIdChecked")
               label 確定修改
             btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;" @click.native="updateParentIdClicked()") 修改
+              style="padding: 5px 40px;"
+              @click.native="updateParentIdClicked()") 修改
     spinner(v-if="isLoading")
 </template>
 
@@ -200,7 +234,7 @@ export default Vue.extend({
       isLocked: true,
       isPanelOpen: false,
       isLoading: false,
-      isGetTemplate: false,
+      isGetTemplate: true,
       updateChecked: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
@@ -217,7 +251,11 @@ export default Vue.extend({
         width: '' as string,
         height: '' as string,
         theme_ids: '' as string,
-        parent_id: '' as string
+        parent_id: '' as string,
+        parent_locale: '' as string,
+        grandparent_id: '' as string,
+        grandparent_locale: '' as string,
+        grandchildren_id: []
       },
       themeList: [] as Itheme[],
       userParentId: ''
@@ -237,7 +275,11 @@ export default Vue.extend({
         width: '',
         height: '',
         theme_ids: '',
-        parent_id: ''
+        parent_id: '',
+        parent_locale: '',
+        grandparent_id: '',
+        grandparent_locale: '',
+        grandchildren_id: []
       }
       this.themeList = []
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
@@ -754,7 +796,6 @@ export default Vue.extend({
   margin-right: auto;
   padding: 0;
 }
-
 .template-information {
   &__content {
     display: grid;
@@ -782,13 +823,11 @@ export default Vue.extend({
     margin-top: 10px;
     padding-bottom: 5px;
   }
-
   .theme-wrapper {
     border: 1px #000 solid;
     border-radius: 5px;
     padding: 5px 0;
   }
-
   .theme-option {
     display: grid;
     align-items: center;
@@ -797,6 +836,20 @@ export default Vue.extend({
     &__check {
       margin: auto 0;
     }
+  }
+  .border-bottom {
+    border-bottom: 1px dashed setColor(blue-1);
+  }
+  .child-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    > :last-child {
+      color: setColor(blue-1);
+    }
+  }
+  .bg-blue {
+    background: setColor(blue-4);
   }
 }
 
