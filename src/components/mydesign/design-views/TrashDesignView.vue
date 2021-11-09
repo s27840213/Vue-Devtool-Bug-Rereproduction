@@ -15,97 +15,51 @@
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
             span 30天後自動永久刪除。
     div(class="horizontal-rule")
-    div(v-if="allFolders.length > 0" class="trash-design-view__folder-header")
-      div(class="trash-design-view__expand-icon-container"
-          @click="toggleFoldersExpansion")
-        svg-icon(:style="foldersExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="trash-design-view__folder-title")
-        span 資料夾
-    div(v-if="foldersExpanded && allFolders.length > 0" class="trash-design-view__folders")
-      folder-item(v-for="[parents, folder] in allFolders"
-                  :path="parents"
-                  :config="folder"
-                  :undraggable="true"
-                  :undroppable="true"
-                  :isSelected="checkFolderSelected(folder.id)"
-                  :isAnySelected="isAnySelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @moveItem="handleMoveItem"
-                  @select="selectFolder(parents, folder)"
-                  @deselect="deselectFolder(parents, folder)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, parents, folder)")
-            div(class="folder-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="folder-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-    div(v-if="allDesigns.length > 0" class="trash-design-view__design-header")
-      div(class="trash-design-view__expand-icon-container"
-          @click="toggleDesignsExpansion")
-        svg-icon(:style="designsExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="trash-design-view__design-title")
-        span 設計
-    div(v-if="designsExpanded" class="trash-design-view__designs")
-      design-item(v-for="[path, design] in allDesigns"
-                  :key="design.id"
-                  :path="path"
-                  :config="design"
-                  :favorable="false"
-                  :undraggable="true"
-                  :isSelected="checkSelected(design.id)"
-                  :isAnySelected="isAnySelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @select="selectDesign(path, design)"
-                  @deselect="deselectDesign(path, design)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
-            div(class="design-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="design-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
+    folder-gallery(v-if="allFolders.length > 0"
+                  :menuItems="menuItems"
+                  :allFolders="allFolders"
+                  :selectedNum="selectedNum"
+                  :limitFunctions="true"
+                  :useDelete="true"
+                  :selectable="true"
+                  @menuAction="handleMenuAction"
+                  @moveItem="handleMoveItem")
+    design-gallery(v-if="allDesigns.length > 0"
+                  :menuItems="menuItems"
+                  :allDesigns="allDesigns"
+                  :selectedNum="selectedNum"
+                  :limitFunctions="true"
+                  :useDelete="true"
+                  @menuAction="handleMenuAction")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import FolderItem from '@/components/mydesign/FolderItem.vue'
-import DesignItem from '@/components/mydesign/DesignItem.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
+import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
-    FolderItem,
-    DesignItem
+    FolderGallery,
+    DesignGallery
   },
   data() {
     return {
-      foldersExpanded: true,
-      designsExpanded: true,
       isInfoOpen: false,
       menuItems: designUtils.makeTrashMenuItems()
+    }
+  },
+  watch: {
+    allDesigns() {
+      this.$emit('clearSelection')
+    },
+    allFolders() {
+      this.$emit('clearSelection')
     }
   },
   directives: {
@@ -113,7 +67,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders',
       trashDesigns: 'getTrashDesigns',
       trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns',
@@ -130,92 +83,25 @@ export default Vue.extend({
       return folders.map((item) => [item.parents, item.folder])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
-      return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
+      return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
-    },
-    isAnySelected(): boolean {
-      return this.selectedNum > 0
-    }
-  },
-  watch: {
-    allDesigns() {
-      this.$emit('clearSelection')
-    },
-    allFolders() {
-      this.$emit('clearSelection')
     }
   },
   methods: {
-    // ...mapMutations('design', {
-    // }),
-    foldersExpansionIconStyles() {
-      return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
-    designsExpansionIconStyles() {
-      return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
-      if (icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchDesignMenuAction(icon, path, design)
-      if (extraEvent) {
-        const { event, payload } = extraEvent
-        this.$emit(event, payload)
-      }
-    },
-    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
-      if (icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
-      if (extraEvent) {
-        const { event, payload } = extraEvent
-        this.$emit(event, payload)
-      }
+    handleMenuAction(extraEvent: {event: string, payload: any}) {
+      const { event, payload } = extraEvent
+      this.$emit(event, payload)
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
-    },
-    toggleFoldersExpansion() {
-      this.foldersExpanded = !this.foldersExpanded
-    },
-    toggleDesignsExpansion() {
-      this.designsExpanded = !this.designsExpanded
     },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen
     },
     closeInfo() {
       this.isInfoOpen = false
-    },
-    checkSelected(id: string): boolean {
-      return !!this.selectedDesigns[id]
-    },
-    checkFolderSelected(id: string): boolean {
-      return !!this.selectedFolders[id]
-    },
-    selectDesign(path: string[], design: IDesign) {
-      this.$emit('selectDesign', {
-        path,
-        design
-      })
-    },
-    deselectDesign(path: string[], design: IDesign) {
-      this.$emit('deselectDesign', {
-        path,
-        design
-      })
-    },
-    selectFolder(parents: string[], folder: IFolder) {
-      this.$emit('selectFolder', {
-        parents,
-        folder
-      })
-    },
-    deselectFolder(parents: string[], folder: IFolder) {
-      this.$emit('deselectFolder', {
-        parents,
-        folder
-      })
     }
   }
 })
@@ -250,57 +136,6 @@ export default Vue.extend({
       color: setColor(bu);
     }
   }
-  &__folder-header, &__design-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-  &__folder-title, &__design-title {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    > span {
-      line-height: 40px;
-      font-size: 24px;
-      font-weight: 700;
-      color: setColor(gray-2);
-      letter-spacing: 0.205em;
-    }
-  }
-  &__expand-icon-container {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    > svg {
-      transition: 0.1s linear;
-    }
-  }
-  &__folders {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 45px;
-  }
-  &__designs {
-    display: grid;
-    grid-gap: 25px;
-    justify-items: stretch;
-    width: calc(100% - 120px);
-    margin-bottom: 20px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    @media(min-width: 976px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    @media(min-width: 1260px) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    @media(min-width: 1560px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
-  }
   &__info {
     display: flex;
     align-items: center;
@@ -332,14 +167,6 @@ export default Vue.extend({
         color: white;
       }
     }
-  }
-}
-
-.header-icon{
-  cursor: pointer;
-  &:hover {
-    color: setColor(blue-1);
-    background-color: setColor(gray-6);
   }
 }
 

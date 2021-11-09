@@ -104,58 +104,18 @@
                         iconWidth="15px"
                         iconColor="gray-2")
     div(class="horizontal-rule")
-    div(v-if="subFolders.length > 0" class="folder-design-view__folder-header")
-      div(class="folder-design-view__expand-icon-container"
-          @click="toggleFoldersExpansion")
-        svg-icon(:style="foldersExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="folder-design-view__folder-title")
-        span 資料夾
-    div(v-if="foldersExpanded && subFolders.length > 0" class="folder-design-view__folders")
-      folder-item(v-for="subFolder in subFolders"
+    folder-gallery(v-if="allFolders.length > 0"
                   :path="path"
-                  :config="subFolder"
-                  @goto="handleGotoFolder(subFolder.id)"
+                  :menuItems="[]"
+                  :allFolders="allFolders"
+                  :selectedNum="selectedNum"
+                  @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
-    div(v-if="designs.length > 0" class="folder-design-view__design-header")
-      div(class="folder-design-view__expand-icon-container"
-          @click="toggleDesignsExpansion")
-        svg-icon(:style="designsExpansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="folder-design-view__design-title")
-        span 設計
-    div(v-if="designsExpanded" class="folder-design-view__designs")
-      design-item(v-for="design in designs"
-                  :key="design.id"
-                  :path="path"
-                  :config="design"
-                  :favorable="true"
-                  :isInFavorites="checkFavorite(design.id)"
-                  :isSelected="checkSelected(design.id)"
-                  :isAnySelected="isAnySelected"
-                  :isMultiSelected="isMultiSelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @like="toggleFavorite(design)"
-                  @select="selectDesign(design)"
-                  @deselect="deselectDesign(design)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
-            div(class="design-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="design-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
+    design-gallery(v-if="allDesigns.length > 0"
+                  :menuItems="menuItems"
+                  :allDesigns="allDesigns"
+                  :selectedNum="selectedNum"
+                  @menuAction="handleMenuAction")
     div(v-if="isEmpty" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
@@ -164,11 +124,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapGetters, mapMutations } from 'vuex'
-import FolderItem from '@/components/mydesign/FolderItem.vue'
-import DesignItem from '@/components/mydesign/DesignItem.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
+import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 import hintUtils from '@/utils/hintUtils'
 
@@ -178,13 +138,11 @@ export default Vue.extend({
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
   },
   components: {
-    FolderItem,
-    DesignItem
+    FolderGallery,
+    DesignGallery
   },
   data() {
     return {
-      foldersExpanded: true,
-      designsExpanded: true,
       isFolderNameMouseOver: false,
       isFolderNameEditing: false,
       editableFolderName: '',
@@ -227,7 +185,7 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   watch: {
-    designs() {
+    allDesigns() {
       this.$emit('clearSelection')
     },
     currLocation() {
@@ -240,7 +198,6 @@ export default Vue.extend({
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
-      favoriteDesigns: 'getFavoriteDesigns',
       selectedDesigns: 'getSelectedDesigns'
     }),
     path(): string[] {
@@ -262,25 +219,19 @@ export default Vue.extend({
       designUtils.sortDesignsBy(designs, this.sortByField, this.sortByDescending)
       return designs
     },
+    allDesigns(): ([string[], IDesign])[] {
+      return (this.designs as IDesign[]).map((design) => [this.path, design])
+    },
     subFolders(): IFolder[] {
       const subFolders = generalUtils.deepCopy(this.folder.subFolders)
       designUtils.sortFoldersBy(subFolders, this.sortByField, this.sortByDescending)
       return subFolders
     },
-    favoriteIds(): string[] {
-      return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    },
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
-      return this.menuItems.map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
+    allFolders(): ([string[], IFolder])[] {
+      return (this.subFolders as IFolder[]).map((subFolder) => [this.path, subFolder])
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
-    },
-    isAnySelected(): boolean {
-      return this.selectedNum > 0
-    },
-    isMultiSelected(): boolean {
-      return this.selectedNum > 1
     },
     isEmpty(): boolean {
       return this.folder.subFolders.length + this.designs.length === 0
@@ -292,36 +243,14 @@ export default Vue.extend({
   methods: {
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
-      setExpand: 'SET_expand',
-      addToFavorite: 'UPDATE_addToFavorite',
-      removeFromFavorite: 'UPDATE_removeFromFavorite',
       setFolderName: 'UPDATE_folderName'
     }),
-    foldersExpansionIconStyles() {
-      return this.foldersExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
-    designsExpansionIconStyles() {
-      return this.designsExpanded ? {} : { transform: 'rotate(-90deg)' }
-    },
     newFolderStyles() {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
-    },
-    checkFavorite(id: string): boolean {
-      return this.favoriteIds.includes(id)
-    },
-    checkSelected(id: string): boolean {
-      return !!this.selectedDesigns[id]
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
       this.setCurrLocation(`f:${selectedParents.join('/')}`)
-    },
-    handleGotoFolder(id: string) {
-      this.setExpand({
-        path: this.path,
-        isExpanded: true
-      })
-      this.setCurrLocation(`${this.currLocation}/${id}`)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true
@@ -348,12 +277,9 @@ export default Vue.extend({
         newFolderName: this.editableFolderName
       })
     },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
-      const extraEvent = designUtils.dispatchDesignMenuAction(icon, path, design)
-      if (extraEvent) {
-        const { event, payload } = extraEvent
-        this.$emit(event, payload)
-      }
+    handleMenuAction(extraEvent: {event: string, payload: any}) {
+      const { event, payload } = extraEvent
+      this.$emit(event, payload)
     },
     handleDeleteFolder() {
       this.$emit('deleteFolder', {
@@ -402,23 +328,6 @@ export default Vue.extend({
     checkSortSelected(payload: [string, boolean]) {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
-    toggleFoldersExpansion() {
-      this.foldersExpanded = !this.foldersExpanded
-    },
-    toggleDesignsExpansion() {
-      this.designsExpanded = !this.designsExpanded
-    },
-    toggleFavorite(design: IDesign) {
-      const payload = {
-        path: this.path,
-        design
-      }
-      if (this.checkFavorite(design.id)) {
-        this.removeFromFavorite(payload)
-      } else {
-        this.addToFavorite(payload)
-      }
-    },
     toggleFolderMenu() {
       this.isFolderMenuOpen = !this.isFolderMenuOpen
     },
@@ -430,18 +339,6 @@ export default Vue.extend({
     },
     closeSortMenu() {
       this.isSortMenuOpen = false
-    },
-    selectDesign(design: IDesign) {
-      this.$emit('selectDesign', {
-        path: this.path,
-        design
-      })
-    },
-    deselectDesign(design: IDesign) {
-      this.$emit('deselectDesign', {
-        path: this.path,
-        design
-      })
     }
   }
 })
@@ -756,56 +653,6 @@ export default Vue.extend({
           height: 15px;
         }
       }
-    }
-  }
-  &__folder-header, &__design-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
-  }
-  &__folder-title, &__design-title {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    > span {
-      line-height: 40px;
-      font-size: 24px;
-      font-weight: 700;
-      color: setColor(gray-2);
-      letter-spacing: 0.205em;
-    }
-  }
-  &__expand-icon-container {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    > svg {
-      transition: 0.1s linear;
-    }
-  }
-  &__folders {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 45px;
-  }
-  &__designs {
-    display: grid;
-    grid-gap: 25px;
-    width: calc(100% - 120px);
-    margin-bottom: 20px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    @media(min-width: 976px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    @media(min-width: 1260px) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    @media(min-width: 1560px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
   &__empty {
