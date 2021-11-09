@@ -257,8 +257,8 @@ export default Vue.extend({
   }
   &__content {
     margin: auto;
-    width: 100%;
-    max-width: 1110px;
+    width: 80%;
+    min-width: min(1110px, 98%);
     min-height: 100%;
   }
   &__filter {
@@ -371,7 +371,7 @@ export default Vue.extend({
   }
   &__to-top {
     position: fixed;
-    right: max(min(calc(50% - 540px), 76px), 10px);
+    right: max(min(calc(50% - 550px), 76px), calc(1% + 10px));
     bottom: 84px;
   }
 }
