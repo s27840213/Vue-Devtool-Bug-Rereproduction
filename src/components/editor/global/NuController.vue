@@ -10,7 +10,7 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
-      div(class="nu-controller__content hover"
+      div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
@@ -54,9 +54,9 @@
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()")
+          div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-              draggable="false"
+              @dragstart="preventDefault($event)"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
@@ -883,8 +883,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
-      const body = this.$refs.body as HTMLElement
-      body.classList.add('hover')
+      // const body = this.$refs.body as HTMLElement
+      // body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -1115,8 +1115,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
-      const body = this.$refs.body as HTMLElement
-      body.classList.add('hover')
+      // const body = this.$refs.body as HTMLElement
+      // body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
@@ -1706,6 +1706,9 @@ export default Vue.extend({
     },
     onFrameDrop(clipIndex: number) {
       StepsUtils.record()
+    },
+    preventDefault(e: Event) {
+      e.preventDefault()
     }
   }
 })
