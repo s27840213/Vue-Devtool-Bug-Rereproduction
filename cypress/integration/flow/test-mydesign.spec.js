@@ -399,4 +399,70 @@ describe('MyDesign', () => {
       cy.get('.design-item__checkbox-checked').should('not.exist')
     })
   })
+
+  describe('MultiMenu', () => {
+    beforeEach(() => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+    })
+
+    it('adds all selected design items to favorite when heart icon is pressed', () => {
+      cy.get('.my-design__multi__actions > div').eq(0).click()
+      cy.get('.design-item__favorite:nth(0) > svg > use').should('have.attr', 'xlink:href').and('be.equal', '#favorites-fill')
+      cy.get('.design-item__favorite:nth(1) > svg > use').should('have.attr', 'xlink:href').and('be.equal', '#favorites-fill')
+    })
+
+    it('deletes all selected design items when trash icon is pressed (shows confirm message)', () => {
+      cy.get('.my-design__multi__actions > div').eq(2).click()
+      cy.contains('確定要刪除這些設計？').should('exist')
+    })
+
+    it('removes all selected design items from favorite when heart icon is pressed when in favorite design view', () => {
+      cy.get('.my-design__multi__actions > div').eq(0).click()
+      getSidebarRow('favorite').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi__actions > div').eq(0).click()
+      cy.get('.design-item').should('not.exist')
+    })
+
+    it('recovers all selected design items when reduction icon is pressed', () => {
+      cy.get('.my-design__multi__actions > div').eq(2).click()
+      cy.get('.delete-all-message__confirm').click()
+      getSidebarRow('trash').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi__actions > div').eq(0).click()
+      cy.contains('已移至').should('exist')
+      cy.contains('原資料夾').should('exist')
+    })
+
+    it('deletes all selected design items forever when trash icon is pressed (shows confirm message)', () => {
+      cy.get('.my-design__multi__actions > div').eq(2).click()
+      cy.get('.delete-all-message__confirm').click()
+      getSidebarRow('trash').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi__actions > div').eq(1).click()
+      cy.get('.delete-forever-message').should('exist')
+      cy.get('.delete-forever-message__confirm').click()
+      cy.get('.design-item').should('not.exist')
+    })
+
+    it('is shown when a folder item and a design item are selected in trash design view', () => {
+      cy.get('.my-design__multi__actions > div').eq(2).click()
+      cy.get('.delete-all-message__confirm').click()
+      getSidebarFolder(0, 2).dragElementTo(() => getSidebarRow('trash'))
+      getSidebarRow('trash').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.folder-item__block').eq(0).trigger('mouseenter')
+      cy.get('.folder-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi').should('exist')
+    })
+  })
 })
