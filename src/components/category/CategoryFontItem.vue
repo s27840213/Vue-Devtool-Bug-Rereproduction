@@ -145,7 +145,3 @@ export default Vue.extend({
     }
   }
 </style>
-
-function mapMutation(arg0: string, arg1: string[]): any {
-  throw new Error('Function not implemented.')
-}

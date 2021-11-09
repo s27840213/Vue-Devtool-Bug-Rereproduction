@@ -68,23 +68,20 @@ class MathUtils {
     }
   }
 
-  multipy(multiplier: number, ...params: [string, number][] | number[]) {
-    if (!params.length) return []
+  multipy(multiplier: number, _params: { [key: string]: number } | Array<number>): { [key: string]: number } | Array<number> {
+    const params = Object.entries(_params)
+    if (!params.length) return {}
 
-    try {
-      const result = (params as any).map((el: number | [string, number]) => {
-        if (typeof el === 'number') {
-          return el * multiplier
-        } else {
-          const k = el[0] as string
-          const v = el[1] as number
-          return [k, v * multiplier]
-        }
-      })
-      return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
-    } catch {
-      console.error('input params with wrong types')
-    }
+    const result = (params as any).map((el: number | [string, number]) => {
+      if (typeof el === 'number') {
+        return el * multiplier
+      } else {
+        const k = el[0] as string
+        const v = el[1] as number
+        return [k, v * multiplier]
+      }
+    })
+    return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
   }
 }
 

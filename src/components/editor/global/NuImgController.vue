@@ -8,7 +8,7 @@
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index"
-            :style="Object.assign(scaler, cursorStyles(index, getLayerRotate), pointerEvents())"
+            :style="Object.assign(scaler.styles, cursorStyles(index, getLayerRotate), pointerEvents())"
             @mousedown.stop="scaleStart")
       div(class="nu-controller"
           :style="controllerStyles()")

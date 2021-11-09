@@ -369,7 +369,7 @@ export default Vue.extend({
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
     this.isControlling = false
-    this.setCursorStyle('default')
+    this.setCursorStyle('initial')
     this.setMoving(false)
   },
   methods: {
@@ -380,22 +380,6 @@ export default Vue.extend({
       setMoving: 'SET_moving',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
-    frameLayerMapper(_config: any) {
-      const config = GeneralUtils.deepCopy(_config)
-      const { x, y, width, height, initWidth, initHeight, scale } = config.styles
-      return Object.assign(config, {
-        styles: {
-          ...config.styles,
-          ...MathUtils.multipy(this.getLayerScale, ...Object.entries({
-            x,
-            y,
-            width,
-            height,
-            scale
-          }))
-        }
-      })
-    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
       const HW = {
@@ -496,11 +480,13 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        if ((type === 'frame' && this.isMoving) || (type === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex)) {
+        const isFrame = this.getLayerType === 'frame' && this.isMoving
+        const isGroup = this.getLayerType === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex
+        if (type === 'control-point') {
+          return (this.layerIndex + 1) * (isFrame || isGroup ? 1000 : 100)
+        } else if (isFrame || isGroup) {
           return (this.layerIndex + 1) * 1000
-        } else if (type === 'control-point') {
-          return (this.layerIndex + 1) * (this.getLayerType === 'frame' && this.isMoving ? 1000 : 100)
-        } else if (type === 'tmp') {
+        } else if (this.getLayerType === 'tmp') {
           return 0
         } else {
           return this.config.styles.zindex + 1
@@ -511,7 +497,7 @@ export default Vue.extend({
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
         height: `${height}px`,
-        outline: this.outlineStyles(type),
+        outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
@@ -531,7 +517,7 @@ export default Vue.extend({
         transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
       }
     },
-    outlineStyles(type: string) {
+    outlineStyles() {
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
           return '#F10994'
@@ -706,7 +692,7 @@ export default Vue.extend({
           }
         }
         this.isControlling = false
-        this.setCursorStyle('default')
+        this.setCursorStyle('initial')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
@@ -887,7 +873,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('default')
+      this.setCursorStyle('initial')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
       this.$emit('setFocus')
@@ -950,7 +936,7 @@ export default Vue.extend({
       this.isLineEndMoving = false
       StepsUtils.record()
 
-      this.setCursorStyle('default')
+      this.setCursorStyle('initial')
       document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
       document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
@@ -1119,7 +1105,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('default')
+      this.setCursorStyle('initial')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
@@ -1183,7 +1169,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('default')
+      this.setCursorStyle('initial')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
       this.$emit('setFocus')
@@ -1251,13 +1237,13 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('default')
+      this.setCursorStyle('initial')
       window.removeEventListener('mousemove', this.lineRotating)
       window.removeEventListener('mouseup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
-      if (this.isControlling) return { cursor: 'default' }
+      if (this.isControlling) return { cursor: 'initial' }
 
       switch (this.getLayerType) {
         case 'text':
@@ -1608,6 +1594,22 @@ export default Vue.extend({
         return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+    },
+    frameLayerMapper(_config: any) {
+      const config = GeneralUtils.deepCopy(_config)
+      const { x, y, width, height, scale } = config.styles
+      return Object.assign(config, {
+        styles: {
+          ...config.styles,
+          ...MathUtils.multipy(this.getLayerScale, {
+            x,
+            y,
+            width,
+            height,
+            scale
+          })
+        }
+      })
     },
     onFrameMouseEnter(clipIndex: number) {
       if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl()) {

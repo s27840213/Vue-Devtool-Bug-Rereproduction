@@ -205,7 +205,7 @@ export default Vue.extend({
       return {
         fill: '#00000000',
         stroke: this.isActive ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${5 * (100 / this.scaleRatio)}px`
+        strokeWidth: `${2.5 * (100 / this.scaleRatio)}px`
       }
     },
     textScaleStyle() {
@@ -620,9 +620,9 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    &:hover {
-      cursor: pointer;
-    }
+    // &:hover {
+    //   cursor: pointer;
+    // }
   }
   &__ctrl-points {
     display: flex;
@@ -630,9 +630,9 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    &:hover {
-      cursor: pointer;
-    }
+    // &:hover {
+    //   cursor: pointer;
+    // }
     pointer-events: "none";
   }
 

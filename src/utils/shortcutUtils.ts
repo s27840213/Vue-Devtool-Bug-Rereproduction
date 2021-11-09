@@ -295,6 +295,7 @@ class ShortcutHandler {
         assetId: '',
         userId: ''
       }
+      StepsUtils.record()
       LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
     } else {
       LayerUtils.deleteSelectedLayer()

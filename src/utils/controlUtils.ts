@@ -5,7 +5,6 @@ import { stringToArray } from 'konva/types/shapes/Text'
 import { SidebarPanelType } from '@/store/types'
 import shapeUtils from '@/utils/shapeUtils'
 import layerUtils from './layerUtils'
-
 class Controller {
   getLength(vect: ICoordinate): number {
     const sqareSum = Math.pow(vect.x, 2) + Math.pow(vect.y, 2)
