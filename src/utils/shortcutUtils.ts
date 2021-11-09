@@ -30,29 +30,29 @@ class ShortcutHandler {
   //   this.target = target
   // }
 
-  async getClipboardContents(): Promise<string | undefined> {
-    try {
-      const clipboardItems = await navigator.clipboard.read()
+  // async getClipboardContents(): Promise<string | undefined> {
+  //   try {
+  //     const clipboardItems = await navigator.clipboard.read()
 
-      for (const clipboardItem of clipboardItems) {
-        for (const type of clipboardItem.types) {
-          const blob = await clipboardItem.getType(type)
+  //     for (const clipboardItem of clipboardItems) {
+  //       for (const type of clipboardItem.types) {
+  //         const blob = await clipboardItem.getType(type)
 
-          // we can now use blob here
-          if (blob.type.includes('image')) {
-            uploadUtils.uploadScreenShotImage(blob)
-            return 'image'
-          } else if (blob.type.includes('text')) {
-            return 'text'
-          } else {
-            return ''
-          }
-        }
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
+  //         // we can now use blob here
+  //         if (blob.type.includes('image')) {
+  //           uploadUtils.uploadScreenShotImage(blob)
+  //           return 'image'
+  //         } else if (blob.type.includes('text')) {
+  //           return 'text'
+  //         } else {
+  //           return ''
+  //         }
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error(err)
+  //   }
+  // }
 
   // private getClipboardData(){
   //   const inputNode = document.createElement('input')
@@ -71,10 +71,11 @@ class ShortcutHandler {
   }
 
   async paste(evt?: Event) {
-    const type = await this.getClipboardContents()
-    if (type === 'image') {
-      return
-    }
+    // const type = await this.getClipboardContents()
+    // if (type === 'image') {
+    //   return
+    // }
+    const type = 'text'
 
     const text = await navigator.clipboard.readText()
 
