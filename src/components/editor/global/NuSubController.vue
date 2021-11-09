@@ -18,7 +18,7 @@
         template(v-if="config.type === 'text' && config.active")
           div(class="text text__wrapper" :style="textWrapperStyle()")
             div(ref="text" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`" spellcheck="false"
-              draggable="false"
+              @dragstart="preventDefault($event)"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="contentEditable"
@@ -603,6 +603,9 @@ export default Vue.extend({
       if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
         this.$emit('onFrameDrop')
       }
+    },
+    preventDefault(e: Event) {
+      e.preventDefault()
     }
   }
 })

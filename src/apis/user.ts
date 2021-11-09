@@ -16,9 +16,22 @@ export default {
       password
     }
   }),
-  putAssets: (assetId: string, categoryId: string): AxiosPromise => axios(`/put-asset/${assetId}/${categoryId}`, {
+  /**
+   *
+   * @param token
+   * @param teamId
+   * @param assetId
+   * @param type - 0 for update db, 1 for update prev, 2 for update both
+   * @returns
+   */
+  // eslint-disable-next-line camelcase
+  putAssetDesign: (token: string, team_id: string, asset_id: string, type: number): AxiosPromise => axios('/put-asset-design', {
     method: 'POST',
     data: {
+      token,
+      team_id,
+      asset_id,
+      type
     }
   }),
   deleteAssets: (token: string, keyList: string): AxiosPromise => axios('/delete-asset', {

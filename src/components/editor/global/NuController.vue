@@ -10,7 +10,7 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
-      div(class="nu-controller__content hover"
+      div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles(getLayerType)"
@@ -54,9 +54,9 @@
                 @clickSubController="clickSubController"
                 @dblSubController="dblSubController")
         template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()")
+          div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
             div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-              draggable="false"
+              @dragstart="preventDefault($event)"
               :style="textBodyStyle()"
               class="text__body"
               :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
@@ -432,10 +432,10 @@ export default Vue.extend({
           }
       }
 
-      if (resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'H')
       }
-      if (resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'V')
       }
 
@@ -878,13 +878,15 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
+      // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
       this.isControlling = false
       StepsUtils.record()
 
-      const body = this.$refs.body as HTMLElement
-      body.classList.add('hover')
+      // const body = this.$refs.body as HTMLElement
+      // body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -1115,8 +1117,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
-      const body = this.$refs.body as HTMLElement
-      body.classList.add('hover')
+      // const body = this.$refs.body as HTMLElement
+      // body.classList.add('hover')
       this.setCursorStyle('default')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
@@ -1706,6 +1708,9 @@ export default Vue.extend({
     },
     onFrameDrop(clipIndex: number) {
       StepsUtils.record()
+    },
+    preventDefault(e: Event) {
+      e.preventDefault()
     }
   }
 })
@@ -1868,7 +1873,7 @@ export default Vue.extend({
 }
 
 .hover {
-      &:hover {
+  &:hover {
     cursor: pointer;
   }
 }

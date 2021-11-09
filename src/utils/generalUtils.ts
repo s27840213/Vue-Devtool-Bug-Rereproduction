@@ -2,6 +2,15 @@ import store from '@/store'
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
 
+  isJsonString(str: string) {
+    try {
+      JSON.parse(str)
+    } catch (e) {
+      return false
+    }
+    return true
+  }
+
   deepCopy(el: unknown) {
     return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
   }

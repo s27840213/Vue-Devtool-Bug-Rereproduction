@@ -162,9 +162,9 @@ export default Vue.extend({
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
-  &:hover {
-    cursor: pointer;
-  }
+  // &:hover {
+  //   cursor: pointer;
+  // }
   &__layer-scale {
   }
 }
