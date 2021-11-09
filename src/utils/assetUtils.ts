@@ -452,7 +452,7 @@ class AssetUtils {
   }
 
   addAssetToRecentlyUsed(asset: IAsset) {
-    const { id, type } = asset
+    const { id, type, width, height } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
@@ -464,7 +464,14 @@ class AssetUtils {
         if (assetIndex >= 0) {
           recentlyUsed.list.splice(assetIndex, 1)
         }
-        recentlyUsed.list.unshift(asset)
+        recentlyUsed.list.unshift({
+          id,
+          type,
+          width,
+          height,
+          content_ids: asset.content_ids,
+          match_cover: asset.match_cover
+        })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
       listApi.addDesign(id, typeCategory)
