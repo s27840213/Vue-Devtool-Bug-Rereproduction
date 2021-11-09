@@ -115,7 +115,7 @@ describe('MyDesign', () => {
       }
     })
 
-    it('it has only "rmFav" and "delete" in multi-select menu', () => {
+    it('has only "rmFav" and "delete" in multi-select menu', () => {
       cy.get('.design-item__block').eq(0).trigger('mouseenter')
       cy.get('.design-item__checkbox').eq(0).click()
       cy.get('.design-item__checkbox').eq(0).click()
@@ -125,6 +125,81 @@ describe('MyDesign', () => {
       }
       cy.get('.my-design__multi__icon').eq(1).trigger('mouseenter')
       cy.contains('刪除後會將原始檔案一併移除。').should('exist')
+    })
+  })
+
+  describe('FolderDesignView', () => {
+    it('shows the current folder name which is editable', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__folder-name span button span').should('have.text', 'Toby')
+      cy.get('.folder-design-view__folder-name span button').click()
+      cy.get('.folder-design-view__folder-name span div input')
+        .type('{selectall}{backspace}AnotherFolderName{enter}')
+      cy.get('.folder-design-view__folder-name span button').click()
+      cy.get('.folder-design-view__folder-name span div input')
+        .type('{selectall}{backspace}01234567891123456789212345678931234567894123456789512345678912345')
+      cy.contains('不可超過64個字元，請縮減名稱。').should('exist')
+      cy.get('.folder-design-view__folder-name span div input')
+        .type('{enter}')
+      cy.get('.folder-design-view__folder-name span button span').should('have.text', '0123456789112345678921234567893123456789412345678951234567891234')
+    })
+
+    it('shows all the path from ROOT whose nodes navigate to corresponding folder', () => {
+      for (let i = 0; i < 5; i++) {
+        toggleFolderExpansion(i)
+      }
+      getSidebarFolder(4).click()
+      const pathText = 'Toby 素材2 材質3 材質4 材質5'
+      cy.get('.folder-design-view__path__node').should('have.text', pathText)
+      const parentIndex = Math.floor(Math.random() * 4)
+      cy.get('.folder-design-view__path__node').eq(parentIndex).click()
+      cy.get('.folder-design-view__folder-name span button span').should('have.text', pathText.split(' ')[parentIndex])
+    })
+
+    it('enters folder name editting when more/rename is pressed', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__more').click()
+      cy.get('.folder-design-view__more__menu__actions > div').eq(0).click()
+      cy.get('.folder-design-view__folder-name span div input').should('exist')
+    })
+
+    it('shows warning message before deleting current folder or just deletes it when it\'s empty and navigates to parent folder', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__more').click()
+      cy.get('.folder-design-view__more__menu__actions > div').eq(1).click()
+      cy.get('.delete-folder-message').should('exist')
+      cy.get('.delete-folder-message__cancel').click()
+      cy.get('.folder-design-view__more').click()
+      cy.get('.folder-design-view__more__menu__actions > div').eq(1).click()
+      cy.get('.delete-folder-message__confirm').click()
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__more').click()
+      cy.get('.folder-design-view__more__menu__actions > div').eq(1).click()
+      cy.contains('已移至垃圾桶').should('exist')
+      cy.get('.my-design__message__button').click()
+      cy.contains('日本行銷').should('exist')
+    })
+
+    it('creates a new folder when New Folder buttion is pressed', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__new-folder').click()
+      cy.contains('未命名資料夾').should('exist')
+    })
+
+    it('changes sorting method when some sorting criterium is selected and shows check icon on selected criterium', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__sort-by').click()
+      cy.contains('名稱 ( 遞減 )').click()
+      const oneDigitNames = []
+      for (let i = 0; i < 8; i++) {
+        oneDigitNames.push(`Name${9 - i}`)
+      }
+      const twoDigitNames = []
+      for (let i = 0; i < 6; i++) {
+        twoDigitNames.push(`Name1${5 - i}`)
+      }
+      cy.get('.design-item__name__container').should('have.text', oneDigitNames.join('') + twoDigitNames.join('') + 'Name1')
+      cy.get('.sort-menu-right').parent().should('have.text', '名稱 ( 遞減 )')
     })
   })
 })
