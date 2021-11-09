@@ -8,8 +8,20 @@ var toggleFolderExpansion = (level, nth = 0) => {
   cy.get(`.nav-folder-${level}`).eq(nth).children('.nav-folder__expand-icon-container').click()
 }
 
+var toggleStructureFolderExpansion = (level, nth = 0) => {
+  cy.get(`.my-design__change-folder__folders .nav-folder-${level}`).eq(nth).children('.nav-folder__expand-icon-container').click()
+}
+
 var getSidebarFolder = (level, nth = undefined) => {
   let res = cy.get(`.nav-folder-${level}`)
+  if (nth !== undefined) {
+    res = res.eq(nth)
+  }
+  return res
+}
+
+var getStructureFolder = (level, nth = undefined) => {
+  let res = cy.get(`.my-design__change-folder__folders .nav-folder-${level}`)
   if (nth !== undefined) {
     res = res.eq(nth)
   }
@@ -463,6 +475,98 @@ describe('MyDesign', () => {
       cy.get('.folder-item__block').eq(0).trigger('mouseenter')
       cy.get('.folder-item__checkbox').eq(0).click()
       cy.get('.my-design__multi').should('exist')
+    })
+  })
+
+  describe('ChangeFolderMenu', () => {
+    it('is shown when folder icon in design-item menu is pressed', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('移至資料夾').click()
+      cy.get('.my-design__change-folder').should('exist')
+    })
+
+    it('is shown when folder icon in multi-select menu is pressed', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi__actions > div').eq(1).click()
+      cy.get('.my-design__change-folder').should('exist')
+    })
+
+    it('shows folder structure', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('移至資料夾').click()
+      getStructureFolder(0, 0).should('have.text', 'Toby')
+      getStructureFolder(0, 1).should('have.text', '日本行銷')
+      getStructureFolder(1).should('not.exist')
+      toggleStructureFolderExpansion(0)
+      getStructureFolder(1).should('have.text', '素材2')
+      for (let i = 0; i < 4; i++) {
+        toggleStructureFolderExpansion(i + 1)
+      }
+      getStructureFolder(4).should('have.text', '材質5')
+      toggleStructureFolderExpansion(0)
+      getStructureFolder(4).should('not.exist')
+      toggleStructureFolderExpansion(0)
+      getStructureFolder(4).should('have.text', '材質5')
+    })
+
+    it('moves design(s) to selected folder', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('移至資料夾').click()
+      getStructureFolder(0, 1).click()
+      cy.get('.my-design__change-folder__confirm').click()
+      getSidebarFolder(0, 2).click()
+      cy.get('.design-item').should('exist')
+      getSidebarRow('all').click()
+      cy.get('.design-item__block').eq(1).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(1).click()
+      cy.get('.my-design__multi__actions > div').eq(1).click()
+      getStructureFolder(0, 1).click()
+      cy.get('.my-design__change-folder__confirm').click()
+      getSidebarFolder(0, 2).click()
+      cy.get('.design-item').eq(1).should('exist')
+      cy.get('.design-item').eq(2).should('exist')
+    })
+  })
+
+  describe('ExtraRules', () => {
+    it('limits moving a folder to its children or grand children folders (including itself)', () => {
+      toggleFolderExpansion(0)
+      getSidebarFolder(0, 0).dragElementTo(
+        () => getSidebarFolder(1),
+        () => getSidebarFolder(0, 0)
+      )
+      cy.contains('已移至').should('not.exist')
+    })
+
+    it('limits moving a folder to a max-level folder', () => {
+      for (let i = 0; i < 4; i++) {
+        toggleFolderExpansion(i)
+      }
+      cy.contains('日本行銷').parent('.nav-folder-0').dragElementTo(
+        () => getSidebarFolder(4),
+        () => cy.contains('日本行銷').parent('.nav-folder-0')
+      )
+      cy.contains('日本行銷').parent('.nav-folder-0').should('exist')
+      getSidebarFolder(3).click(50, 0)
+      cy.contains('日本行銷').parent('.nav-folder-0').dragElementTo(
+        () => cy.get('.folder-item__block').eq(0),
+        () => cy.contains('日本行銷').parent('.nav-folder-0')
+      )
+      cy.contains('日本行銷').parent('.nav-folder-0').should('exist')
+    })
+
+    it('limits creating new folders in a max-level folder', () => {
+      for (let i = 0; i < 4; i++) {
+        toggleFolderExpansion(i)
+      }
+      getSidebarFolder(4).click(50, 0)
+      cy.get('.folder-design-view__new-folder').should('have.css', 'pointer-events').and('be.equal', 'none')
     })
   })
 })
