@@ -32,7 +32,7 @@
                   @search="handleSearch")
     div(class="template-center__content")
       div(class="template-center__filter")
-        hashtag-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
+        hashtag-category-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
       div(class="template-center__hr")
       div(class="template-center__sorter")
         div(class="template-center__sorter__left")
@@ -71,7 +71,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
-import HashtagRow from '@/components/templates/HashtagRow.vue'
+import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import { ITemplate } from '@/interfaces/template'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 
@@ -81,7 +81,7 @@ export default Vue.extend({
     NuHeader,
     SearchBar,
     NuFooter,
-    HashtagRow
+    HashtagCategoryRow
   },
   data() {
     const sortingCriteria = [
@@ -257,8 +257,8 @@ export default Vue.extend({
   }
   &__content {
     margin: auto;
-    width: 100%;
-    max-width: 1110px;
+    width: 80%;
+    min-width: min(1110px, 98%);
     min-height: 100%;
   }
   &__filter {
@@ -371,7 +371,7 @@ export default Vue.extend({
   }
   &__to-top {
     position: fixed;
-    right: max(min(calc(50% - 540px), 76px), 10px);
+    right: max(min(calc(50% - 550px), 76px), calc(1% + 10px));
     bottom: 84px;
   }
 }

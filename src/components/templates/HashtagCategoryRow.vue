@@ -66,6 +66,7 @@ export default Vue.extend({
   margin-bottom: 16px;
   &__title {
     margin-top: 1px;
+    margin-left: 8px;
     font-family: Mulish;
     font-weight: 700;
     font-size: 18px;
