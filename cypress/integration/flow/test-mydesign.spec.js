@@ -202,4 +202,40 @@ describe('MyDesign', () => {
       cy.get('.sort-menu-right').parent().should('have.text', '名稱 ( 遞減 )')
     })
   })
+
+  describe('TrashDesignView', () => {
+    beforeEach(() => {
+      getSidebarRow('all').click()
+      for(let i = 0; i < 3; i++) {
+        cy.get('.design-item__block').eq(0).trigger('mouseenter')
+        cy.get('.design-item__more').eq(0).click()
+        cy.contains('刪除').click()
+      }
+      getSidebarRow('trash').click()
+    })
+
+    it('shows information while info icon is pressed', () => {
+      cy.get('.trash-design-view__info').click()
+      cy.contains('30天後自動永久刪除。').should('exist')
+    })
+
+    it('has only "recover" and "delete-forever" in design item menu', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      const icons = ['#reduction', '#trash']
+      for (let i = 0; i < 2; i++) {
+        cy.get('.design-menu-item__icon svg use').eq(i).should('have.attr', 'xlink:href').and('be.equal', icons[i])
+      }
+    })
+
+    it('has only "recover" and "delete-forever" in multi-select menu', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).click()
+      const icons = ['#reduction', '#trash']
+      for (let i = 0; i < 2; i++) {
+        cy.get('.my-design__multi__icon svg use').eq(i).should('have.attr', 'xlink:href').and('be.equal', icons[i])
+      }
+    })
+  })
 })
