@@ -208,6 +208,19 @@ class PageUtils {
       props
     })
   }
+
+  appendPagesTo(pages: IPage[], index?: number) {
+    const currentPages = store.getters.getPages as IPage[]
+    let currentPagesTmp = GeneralUtils.deepCopy(currentPages)
+    if (typeof index === 'number') {
+      currentPagesTmp = currentPagesTmp.slice(0, index)
+        .concat(pages)
+        .concat(currentPagesTmp.slice(index))
+    } else {
+      currentPagesTmp = currentPagesTmp.concat(pages)
+    }
+    store.commit('SET_pages', currentPagesTmp)
+  }
 }
 
 const pageUtils = new PageUtils()

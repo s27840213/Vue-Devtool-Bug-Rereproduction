@@ -1,0 +1,98 @@
+<template lang="pug">
+  div(class="panel-group-template py-20 px-10 flex flex-column")
+    div(class="mb-30 relative")
+      svg-icon(class="panel-group-template__close pointer"
+        iconName="chevron-left"
+        iconColor="white"
+        @click.native="$emit('close')")
+      button(class="panel-group-template__apply lead-2"
+        @click="handleApplyGroupTemplate") 套用全部 {{ count }} 個頁面
+    div(class="panel-group-template__list")
+      category-template-item(v-for="(item, idx) in contents"
+        class="panel-group-template__item"
+        :showId="showId"
+        :item="item"
+        :key="`${item.id}${idx}`")
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
+import assetUtils from '@/utils/assetUtils'
+
+export default Vue.extend({
+  components: { CategoryTemplateItem },
+  props: {
+    showId: Boolean,
+    groupItem: Object
+  },
+  computed: {
+    count (): number {
+      return this.groupItem.content_ids.length
+    },
+    contents (): Array<{ [key: string]: any }> {
+      const { content_ids: ids } = this.groupItem
+      return (ids as Array<{ [key: string]: any }>)
+        .map(content => ({
+          ...content,
+          type: 6
+        }))
+    }
+  },
+  methods: {
+    handleApplyGroupTemplate () {
+      assetUtils.addGroupTemplate(this.groupItem)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.panel-group-template {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background-color: #2c2f43;
+  &__apply {
+    color: setColor(gray-6);
+    padding: 7px 25px;
+    border: 1px solid setColor(gray-6);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  &__list {
+    display: grid;
+    grid-template-columns: 145px 145px;
+    row-gap: 10px;
+    column-gap: 10px;
+    margin-right: -10px;
+    padding-right: 10px;
+    overflow-y: overlay;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      visibility: hidden;
+      background-color: #d9dbe1;
+      border: 3px solid #2c2f43;
+    }
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+      }
+    }
+  }
+  &__close {
+    position: absolute;
+    left: 0;
+  }
+}
+</style>

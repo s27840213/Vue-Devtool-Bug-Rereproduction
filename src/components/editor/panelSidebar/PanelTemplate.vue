@@ -1,10 +1,16 @@
 <template lang="pug">
   div(class="panel-template")
-    search-bar(class="mb-15"
-      placeholder="Search from our templates"
-      clear
-      :defaultKeyword="keyword"
-      @search="handleSearch")
+    panel-group-template(v-if="currentGroup"
+      :showId="showTemplateId"
+      :groupItem="currentGroup"
+      @close="currentGroup = null")
+    div
+      div(class="panel-template__search")
+        search-bar(class="mb-15"
+          placeholder="Search from our templates"
+          clear
+          :defaultKeyword="keyword"
+          @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
@@ -14,41 +20,52 @@
             iconColor="white"
             iconWidth="20px")
       template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          v-if="!keyword"
+        category-list-rows(v-if="!keyword"
           :list="list"
           :title="title"
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
-            category-template-item(class="panel-template__item"
+            component(class="panel-template__item"
+              :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
               :showId="showTemplateId"
-              :item="item")
+              :item="item"
+              @showGroup="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
         div(class="panel-template__items")
-          div(v-if="title"
-            class="panel-template__header") {{ title }}
-          category-template-item(v-for="item in list"
+          div(v-if="title" class="panel-template__header") {{ title }}
+          component(v-for="item in list"
             class="panel-template__item"
-            :key="item.id"
+            :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="showTemplateId"
-            :item="item")
+            :item="item"
+            :key="item.id"
+            @showGroup="handleShowGroup")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapState } from 'vuex'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
+import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryTemplateItem
+    CategoryTemplateItem,
+    CategoryGroupTemplateItem,
+    PanelGroupTemplate
+  },
+  data () {
+    return {
+      currentGroup: null
+    }
   },
   computed: {
     ...mapState(
@@ -148,6 +165,9 @@ export default Vue.extend({
     },
     handleLoadMore() {
       this.getMoreContent()
+    },
+    handleShowGroup(group: any) {
+      this.currentGroup = group
     }
   }
 })
@@ -177,6 +197,26 @@ export default Vue.extend({
     color: #ffffff;
     padding: 10px 0;
     text-align: left;
+  }
+  &__advanced--active,
+  &__advanced:hover {
+    color: #D9DBE1;
+  }
+  &__theme {
+    position: absolute;
+  }
+  &__search {
+    position: relative;
+    z-index: 2;
+  }
+  &__wrap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, .8);
   }
 }
 </style>

@@ -121,6 +121,7 @@ export interface IListServiceContentDataItem {
   height?: number
   title?: string
   description?: string
+  content_ids?: IListServiceContentDataItem[]
 }
 
 export interface IListServiceContentData {
