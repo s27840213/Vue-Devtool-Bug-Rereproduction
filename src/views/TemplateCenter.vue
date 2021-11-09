@@ -32,7 +32,7 @@
                   @search="handleSearch")
     div(class="template-center__content")
       div(class="template-center__filter")
-        hashtag-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
+        hashtag-category-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
       div(class="template-center__hr")
       div(class="template-center__sorter")
         div(class="template-center__sorter__left")
@@ -71,7 +71,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
-import HashtagRow from '@/components/templates/HashtagRow.vue'
+import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import { ITemplate } from '@/interfaces/template'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 
@@ -81,7 +81,7 @@ export default Vue.extend({
     NuHeader,
     SearchBar,
     NuFooter,
-    HashtagRow
+    HashtagCategoryRow
   },
   data() {
     const sortingCriteria = [
