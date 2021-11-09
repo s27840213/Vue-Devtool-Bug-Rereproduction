@@ -4,6 +4,7 @@ import VueRecyclerviewNew from 'vue-recyclerview'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import i18n from './i18n'
 import vueColor from 'vue-color'
 import { Store } from 'vuex'
 import { IEditorState } from './store/types'
@@ -93,6 +94,7 @@ if (['production'].includes(process.env.NODE_ENV)) {
 new Vue({
   router,
   store,
+  i18n,
   render: (h) => h(App)
 }).$mount('#app')
 

@@ -64,10 +64,6 @@
         component(:is="mydesignView"
                   class="design-view"
                   @deleteItem="handleDeleteItem"
-                  @selectDesign="handleSelectDesign"
-                  @deselectDesign="handleDeselectDesign"
-                  @selectFolder="handleSelectFolder"
-                  @deselectFolder="handleDeselectFolder"
                   @clearSelection="handleClearSelection"
                   @recoverItem="handleRecoverItem"
                   @deleteFolder="handleDeleteFolder"
@@ -274,10 +270,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      addToSelection: 'UPDATE_addToSelection',
-      removeFromSelection: 'UPDATE_removeFromSelection',
-      addFolderToSelection: 'UPDATE_addFolderToSelection',
-      removeFolderFromSelection: 'UPDATE_removeFolderFromSelection',
       clearSelection: 'UPDATE_clearSelection',
       setCurrLocation: 'SET_currLocation'
     }),
@@ -333,18 +325,6 @@ export default Vue.extend({
     },
     showMoveMessage() {
       this.showMessage(this.movedQueue, 'isShowMoveMessage', false)
-    },
-    handleSelectDesign(pathedDesign: IPathedDesign) {
-      this.addToSelection(pathedDesign)
-    },
-    handleDeselectDesign(pathedDesign: IPathedDesign) {
-      this.removeFromSelection(pathedDesign)
-    },
-    handleSelectFolder(pathedFolder: IPathedFolder) {
-      this.addFolderToSelection(pathedFolder)
-    },
-    handleDeselectFolder(pathedFolder: IPathedFolder) {
-      this.removeFolderFromSelection(pathedFolder)
     },
     handleClearSelection() {
       this.isMoveToFolderPanelOpen = false

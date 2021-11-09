@@ -13,7 +13,7 @@ export interface ISvg {
     point?: number[];
     path?: string;
     dasharray?: number[],
-    linecap?: "butt" | "round"
+    linecap?: 'butt' | 'round'
     markerId?: string[];
     markerWidth?: number[];
     trimWidth?: boolean[];

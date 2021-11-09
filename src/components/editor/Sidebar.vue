@@ -31,17 +31,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      SidebarPanelType,
-      navItem: [
-        { icon: 'template', text: 'Templates' },
-        { icon: 'photo', text: 'Photos' },
-        { icon: 'shape', text: 'Objects' },
-        { icon: 'bg', text: 'Background' },
-        { icon: 'text', text: 'Text' },
-        { icon: 'folder', text: 'MyFile' },
-        { icon: 'brand', text: 'Brandkit' },
-        { icon: 'photo', text: 'Pexels' }
-      ]
+      SidebarPanelType
     }
   },
   computed: {
@@ -49,7 +39,19 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview'
-    })
+    }),
+    navItem(): Array<{ icon: string, text: string }> {
+      return [
+        { icon: 'template', text: `${this.$t('editor.templates')}` },
+        { icon: 'photo', text: `${this.$t('editor.photos')}` },
+        { icon: 'shape', text: `${this.$t('editor.objects')}` },
+        { icon: 'bg', text: `${this.$t('editor.backgrounds')}` },
+        { icon: 'text', text: `${this.$t('editor.texts')}` },
+        { icon: 'folder', text: `${this.$t('editor.myFile')}` },
+        { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
+        { icon: 'photo', text: 'Pexels' }
+      ]
+    }
   },
   methods: {
     ...mapMutations({

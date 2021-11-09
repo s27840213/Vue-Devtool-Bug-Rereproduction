@@ -184,7 +184,7 @@ class SnapUtils {
     }
   }
 
-  getClosestSnapAngle(angle: number, multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET) {
+  getClosestSnapAngle(angle: number, multipleOf: number, allowedOffset: number = this.GUIDEANGLE_OFFSET): void {
     const quotient = Math.floor(angle / multipleOf)
     let candidateAngle = quotient * multipleOf
     if ((angle - candidateAngle) > multipleOf / 2) {

@@ -21,6 +21,8 @@
     div(class="body-2")
       span 我的設計 / 新增檔案名稱
     div(class="body-2 relative")
+      div(class="editor-header__locale" @click="switchLocale()")
+        span {{currLocale}}
       div(v-if="!isLogin")
         span 若要儲存設計，請
         a(:href="`/signup?redirect=${path}`") 註冊
@@ -105,6 +107,9 @@ export default Vue.extend({
     },
     path(): string {
       return this.$route.path
+    },
+    currLocale(): string {
+      return this.$i18n.locale
     }
   },
   methods: {
@@ -144,6 +149,10 @@ export default Vue.extend({
     },
     goToPage(pageName: string) {
       this.$router.push({ name: pageName })
+    },
+    switchLocale() {
+      const targetLocale = this.currLocale === 'en-US' ? 'zh-TW' : 'en-US'
+      this.$i18n.locale = targetLocale
     }
   }
 })

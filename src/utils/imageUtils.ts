@@ -71,6 +71,7 @@ class ImageUtils {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     // TODO:
+    if (src.includes('data:image')) return 'preview'
     if (src.includes('vivipic')) {
       return 'public'
     } else {

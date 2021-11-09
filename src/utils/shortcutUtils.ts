@@ -10,8 +10,8 @@ import TextUtils from './textUtils'
 import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
-import { Layer } from 'konva/types/Layer'
 import frameUtils from './frameUtils'
+import uploadUtils from './uploadUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -29,21 +29,30 @@ class ShortcutHandler {
   // constructor(target: HTMLElement) {
   //   this.target = target
   // }
-  // async getClipboardContents() {
-  //   try {
-  //     const clipboardItems = await navigator.clipboard.read()
 
-  //     for (const clipboardItem of clipboardItems) {
-  //       for (const type of clipboardItem.types) {
-  //         const blob = await clipboardItem.getType(type)
-  //         // we can now use blob here
-  //         console.log(blob)
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.error(err.name, err.message)
-  //   }
-  // }
+  async getClipboardContents(): Promise<string | undefined> {
+    try {
+      const clipboardItems = await (navigator.clipboard as any).read()
+
+      for (const clipboardItem of clipboardItems) {
+        for (const type of clipboardItem.types) {
+          const blob = await clipboardItem.getType(type)
+
+          // we can now use blob here
+          if (blob.type.includes('image')) {
+            uploadUtils.uploadScreenShotImage(blob)
+            return 'image'
+          } else if (blob.type.includes('text')) {
+            return 'text'
+          } else {
+            return ''
+          }
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   // private getClipboardData(){
   //   const inputNode = document.createElement('input')
@@ -54,16 +63,26 @@ class ShortcutHandler {
 
   copy() {
     if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
-      store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
+      navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex))))
+      // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
       console.warn('You did\'t select any unlocked layer')
     }
   }
 
-  paste(evt?: Event) {
-    // this.getClipboardContents()
+  async paste(evt?: Event) {
+    const type = await this.getClipboardContents()
+    if (type === 'image') {
+      return
+    }
 
-    const clipboardInfo = store.getters.getClipboard.map((layer: ILayer) => {
+    const text = await navigator.clipboard.readText()
+
+    if (!GeneralUtils.isJsonString(text)) {
+      return
+    }
+
+    const clipboardInfo = [JSON.parse(text)].map((layer: ILayer) => {
       layer.styles.x += 10
       layer.styles.y += 10
       layer.id = GeneralUtils.generateRandomString(8)
@@ -285,6 +304,11 @@ class ShortcutHandler {
 
   cut() {
     console.log('cut')
+  }
+
+  save() {
+    console.log('save')
+    // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
   }
 
   selectAll() {
