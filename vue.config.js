@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 
-function resolve(dir) {
+function resolve (dir) {
   return path.join(__dirname, dir)
 }
 
@@ -39,15 +39,27 @@ module.exports = {
           org: 'nuphoto',
           project: 'vivipic',
           include: './dist',
-          ignore: ['node_modules', 'vue.config.js'],
+          ignore: ['node_modules', 'vue.config.js']
         }])
     }
   },
+
   css: {
     loaderOptions: {
       scss: {
         prependData: '@import "~@/assets/scss/main.scss";'
       }
+    }
+  },
+
+  pluginOptions: {
+    i18n: {
+      locale: 'zh-tw',
+      fallbackLocale: 'zh-tw',
+      localeDir: 'locales',
+      enableInSFC: true,
+      includeLocales: false,
+      enableBridge: true
     }
   }
 }

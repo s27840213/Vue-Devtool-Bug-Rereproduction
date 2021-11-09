@@ -9,6 +9,8 @@ class LayerFactary {
     const { width, height, initWidth, initHeight } = config.styles
     const basicConfig = {
       type: 'image',
+      ...(config.previewSrc && { previewSrc: config.previewSrc }),
+      previewSrc: config.previewSrc,
       srcObj: {
         tpye: config.srcObj.type,
         userId: config.srcObj.userId,

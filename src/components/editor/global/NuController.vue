@@ -432,10 +432,10 @@ export default Vue.extend({
           }
       }
 
-      if (resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'H')
       }
-      if (resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
+      if (resizers && resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
         resizers = resizers.filter(r => r.type !== 'V')
       }
 
@@ -878,6 +878,8 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
+      // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
       this.isControlling = false
@@ -1868,7 +1870,7 @@ export default Vue.extend({
 }
 
 .hover {
-      &:hover {
+  &:hover {
     cursor: pointer;
   }
 }

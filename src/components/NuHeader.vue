@@ -102,17 +102,17 @@ export default Vue.extend({
   methods: {
     goToPage(pageName = '' as string) {
       if (pageName === this.currentPage) {
-        this.$router.go(0)
+        // this.$router.go(0)
       } else if (pageName === '/login' || pageName === '/signup') {
         this.$router.push({ path: pageName, query: { redirect: this.$route.path } })
-      // Temporary setting ----
+        // Temporary setting ----
       } else if (pageName === '/toturial' || pageName === '/faq') {
         window.location.href = 'https://www.facebook.com/vivipictw'
       } else if (pageName === '/' || pageName === '/pricing' || pageName === '/mydesign' || pageName === '/templates') {
         this.$router.push({ path: pageName })
       } else {
         // this.$router.push({ path: pageName })
-        this.$router.push({ name: 'Editor' })
+        this.$router.push({ name: 'Home' })
       }
       // ----------------------
     }
@@ -188,10 +188,12 @@ export default Vue.extend({
 }
 
 .fade {
-  &-enter-active, &-leave-active {
-    transition: .1s;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.1s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }

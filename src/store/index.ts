@@ -26,6 +26,7 @@ import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
+import imageUtils from '@/utils/imageUtils'
 
 Vue.use(Vuex)
 
@@ -142,6 +143,8 @@ const getDefaultState = (): IEditorState => ({
     }
   ],
   designId: '',
+  assetId: '',
+  name: '',
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
@@ -193,8 +196,14 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPages(state: IEditorState): Array<IPage> {
     return state.pages
   },
+  getPagesName(state: IEditorState): string {
+    return state.name
+  },
   getDesignId(state: IEditorState): string {
     return state.designId
+  },
+  getAssetId(state: IEditorState): string {
+    return state.assetId
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number } => {
@@ -302,8 +311,14 @@ const mutations: MutationTree<IEditorState> = {
   DELETE_page(state: IEditorState, pageIndex: number) {
     state.pages.splice(pageIndex, 1)
   },
+  SET_pagesName(state: IEditorState, name: string) {
+    state.name = name
+  },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
+  },
+  SET_assetId(state: IEditorState, assetId: string) {
+    state.assetId = assetId
   },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
     state.pages[updateInfo.pageIndex].designId = updateInfo.designId
@@ -407,8 +422,12 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, layerIndex, layer } = updateInfo
     state.pages[pageIndex].layers.splice(layerIndex, 1, layer)
   },
-  UPDATE_layerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | IParagraph
-    | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | SrcObj } }) {
+  UPDATE_layerProps(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, props: {
+      [key: string]: string | number | boolean | IParagraph
+      | Array<string> | Array<IShape | IText | IImage | IGroup> | number[] | SrcObj
+    }
+  }) {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
@@ -634,6 +653,20 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId }) {
+    state.pages.forEach((page: IPage, index: number) => {
+      page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
+        return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
+      }).forEach((layer) => {
+        Vue.delete(layer, 'previewSrc')
+        Object.assign(layer.srcObj, {
+          type,
+          userId,
+          assetId
+        })
+      })
+    })
+  },
   ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string, pageIndex?: number }) {
     const { pos, type, pageIndex } = updateInfo
     const { pages } = state
@@ -665,6 +698,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
+  },
+  CLEAR_pagesInfo(state: IEditorState) {
+    state.designId = ''
+    state.assetId = ''
+    state.name = '我的設計'
   }
 }
 

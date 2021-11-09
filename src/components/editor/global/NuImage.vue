@@ -78,7 +78,7 @@ export default Vue.extend({
       if (this.config.src) {
         return this.config.src
       } else {
-        return ImageUtils.getSrc(this.config)
+        return this.config.previewSrc ?? ImageUtils.getSrc(this.config)
       }
     },
     isAdjustImage(): boolean {

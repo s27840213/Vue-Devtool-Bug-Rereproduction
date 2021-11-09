@@ -63,6 +63,8 @@
         @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
         @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
         @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+        @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
+        @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
         @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
         @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
         @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
@@ -187,6 +189,7 @@ import NuBackgroundController from '@/components/editor/global/NuBackgroundContr
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   components: {
@@ -350,9 +353,6 @@ export default Vue.extend({
           transform: `translate3d(0,${pos}px,50px)`,
           'pointer-events': isGuideline ? 'auto' : 'none'
         }
-    },
-    onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex)
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
       this.ADD_newLayers({

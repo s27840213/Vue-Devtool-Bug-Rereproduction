@@ -21,6 +21,7 @@ export interface IUserModule {
   uname: string,
   shortName: string,
   userId: string,
+  teamId: string,
   role: number,
   adminMode: boolean,
   isAuthenticated: boolean,
@@ -30,7 +31,7 @@ export interface IUserModule {
   images: Array<IAssetPhoto>,
   checkedAssets: Array<string>,
   verUni: number,
-  imgSizeMap: Array<{[key: string]: string | number}>
+  imgSizeMap: Array<{ [key: string]: string | number }>
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -38,6 +39,7 @@ const getDefaultState = (): IUserModule => ({
   uname: '',
   shortName: '',
   userId: '',
+  teamId: '',
   role: -1,
   adminMode: true,
   isAuthenticated: false,
@@ -72,6 +74,9 @@ const getters: GetterTree<IUserModule, any> = {
   getUserId: state => {
     return state.userId
   },
+  getTeamId: state => {
+    return state.teamId
+  },
   getToken(state) {
     return state.token
   },
@@ -92,6 +97,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getVerUni(state) {
     return state.verUni
+  },
+  isAdmin(state) {
+    return state.role === 0
   }
 }
 
@@ -139,7 +147,6 @@ const mutations: MutationTree<IUserModule> = {
     state.pending = false
   },
   [ADD_PREVIEW](state: IUserModule, { imageFile, assetId }) {
-    console.log(assetId)
     const previewImage = {
       width: imageFile.width,
       height: imageFile.height,
@@ -219,6 +226,20 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.deleteAssets(state.token, keyList)
       dispatch('getAssets', { token: state.token })
       commit('CLEAR_CHECKED_ASSETS')
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async putAssetDesign({ commit, dispatch }, { assetId, type }) {
+    try {
+      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
+      const { flag } = data
+      console.log(data)
+      if (flag === 1) {
+        console.log('Put asset failed')
+      } else if (flag === 2) {
+        console.log('Token invalid!')
+      }
     } catch (error) {
       console.log(error)
     }

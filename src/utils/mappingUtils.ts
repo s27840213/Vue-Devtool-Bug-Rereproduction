@@ -37,6 +37,13 @@ const minMaxHash: { [index: string]: { min: number, max: number } } = {
     min: 0, max: 100
   }
 }
+
+const langMap: { [index: string]: string } = {
+  tw: 'zh-TW',
+  en: 'en-US',
+  jp: 'ja-JP'
+}
+
 class MappingUtils {
   mappingIconSet(set: string): string[] {
     switch (set) {
@@ -156,6 +163,10 @@ class MappingUtils {
 
   mappingMinMax(type: string) {
     return minMaxHash[type]
+  }
+
+  mappingLocales(lang: string) {
+    return langMap[lang]
   }
 }
 
