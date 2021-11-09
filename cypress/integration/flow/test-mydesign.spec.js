@@ -238,4 +238,75 @@ describe('MyDesign', () => {
       }
     })
   })
+
+  describe('FolderItem', () => {
+    it('is draggable and moves itself to dropped target (sidebar folder or folder item)', () => {
+      for (let i = 0; i < 2; i++) {
+        toggleFolderExpansion(i)
+      }
+      getSidebarFolder(2, 0).click('right')
+      cy.get('.folder-design-view__new-folder').click()
+      cy.get('.folder-design-view').click()
+      cy.get('.folder-item__block').eq(0).dragElementTo(
+        () => cy.get('.folder-item__block').eq(1),
+        () => cy.get('.folder-item__block').eq(0)
+      )
+      cy.contains('已移至').should('exist')
+      cy.get('.folder-item__block').eq(0).click()
+      cy.contains('未命名資料夾').should('exist')
+      cy.get('.folder-item__block').eq(0).dragElementTo(
+        () => getSidebarFolder(0, 0),
+        () => cy.get('.folder-item__block').eq(0)
+      )
+      cy.contains('已移至').should('exist')
+      toggleFolderExpansion(0, 0)
+      getSidebarFolder(0, 0).click()
+      cy.wait(5000)
+      cy.contains('未命名資料夾').should('exist')
+      cy.get('.folder-item__block').eq(0).dragElementTo(
+        () => getSidebarRow('trash'),
+        () => cy.get('.folder-item__block').eq(0)
+      )
+      cy.contains('已移至垃圾桶').should('exist')
+      getSidebarRow('trash').click()
+      cy.contains('未命名資料夾').should('exist')
+    })
+
+    it('is not selectable', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-item__checkbox').should('not.exist')
+    })
+
+    it('is selectable in trash-design-view', () => {
+      getSidebarFolder(0, 0).click()
+      for (let i = 0; i < 3; i++) {
+        cy.get('.folder-design-view__new-folder').click()
+      }
+      cy.get('.folder-design-view').click()
+      for (let i = 0; i < 3; i++) {
+        cy.get('.folder-item__block').eq(0).dragElementTo(
+          () => getSidebarRow('trash'),
+          () => cy.get('.folder-item__block').eq(0)
+        )
+      }
+      getSidebarRow('trash').click()
+      cy.get('.folder-item__block').eq(0).trigger('mouseenter')
+      cy.get('.folder-item__checkbox').eq(0).click()
+      cy.get('.folder-item__checkbox').eq(0).should('exist')
+      cy.get('.folder-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi').should('exist')
+    })
+
+    it('is not draggable in trash-design-view', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.folder-design-view__new-folder').click()
+      cy.get('.folder-design-view').click()
+      cy.get('.folder-item__block').eq(0).dragElementTo(
+        () => getSidebarRow('trash'),
+        () => cy.get('.folder-item__block').eq(0)
+      )
+      getSidebarRow('trash').click()
+      cy.get('.folder-item__block').should('has.attr', 'draggable').and('be.equal', 'false')
+    })
+  })
 })
