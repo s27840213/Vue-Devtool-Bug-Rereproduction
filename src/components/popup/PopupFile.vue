@@ -26,6 +26,8 @@ import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
+import { mapGetters } from 'vuex'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -34,6 +36,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters({
+      isLogin: 'user/isLogin'
+    }),
     pageSize(): { w: number, h: number } {
       return {
         w: pageUtils.currFocusPage.width,
@@ -64,6 +69,9 @@ export default Vue.extend({
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
     },
     newDesign() {
+      if (this.isLogin) {
+        // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+      }
       pageUtils.setPages()
       this.closePopup()
     }

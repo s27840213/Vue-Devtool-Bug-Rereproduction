@@ -135,29 +135,14 @@ export default Vue.extend({
       })
     },
     addImage(photo: IAssetPhoto) {
-      const resizeRatio = 0.8
-      const pageAspectRatio = this.pageSize.width / this.pageSize.height
-      const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
-      const allLayers = this.getLayers(this.lastSelectedPageIndex)
-      const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-        const src = this.fullSrc
-        const type = ImageUtils.getSrcType(src)
-        const assetId = ImageUtils.getAssetId(src, type)
-
-        return (layer.type === 'image') && (!layer.moved) && ((layer as IImage).srcObj.assetId === assetId)
-      }) as Array<IImage>
-
-      const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
-      const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
       const src = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
+      const photoAspectRatio = photo.width / photo.height
 
       AssetUtils.addImage(
         src,
+        photoAspectRatio,
         {
           pageIndex: this.lastSelectedPageIndex,
-          styles: { x, y, width: photoWidth, height: photoHeight },
           // The following props is used for preview image during polling process
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }

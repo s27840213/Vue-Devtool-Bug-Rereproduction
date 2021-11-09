@@ -7,6 +7,7 @@ import GeneralUtils from './generalUtils'
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getPage() { return store.getters.getPage }
+  get getPages() { return store.getters.getPages }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }

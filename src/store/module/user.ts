@@ -230,6 +230,20 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
+  async putAssetDesign({ commit, dispatch }, { assetId, type }) {
+    try {
+      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
+      const { flag } = data
+      console.log(data)
+      if (flag === 1) {
+        console.log('Put asset failed')
+      } else if (flag === 2) {
+        console.log('Token invalid!')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  },
   async login({ commit, dispatch }, { token, account, password }) {
     try {
       state.isAuthenticated = token.length > 0

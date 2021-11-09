@@ -5,7 +5,7 @@ div(class="overflow-container"
     div(:class="['page-content']"
         :style="styles()"
         ref="page-content"
-        @drop="onDrop"
+        @drop.prevent="onDrop"
         @dragover.prevent,
         @dragenter.prevent
         @click.right.stop="onRightClick"
@@ -32,6 +32,9 @@ import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { SidebarPanelType } from '@/store/types'
+import assetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   props: {
@@ -66,12 +69,20 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page'
     }),
     onDrop(e: DragEvent) {
-      mouseUtils.onDrop(e, this.pageIndex)
+      const dt = e.dataTransfer
+      if (dt && dt.files.length !== 0) {
+        const files = dt.files
+        this.setCurrSidebarPanel(SidebarPanelType.file)
+        uploadUtils.uploadAsset('image', files, true)
+      } else {
+        mouseUtils.onDrop(e, this.pageIndex)
+      }
     },
     styles() {
       return {

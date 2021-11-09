@@ -1,6 +1,6 @@
 import { captureException } from '@sentry/browser'
 import store from '@/store'
-import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceContentData, IAssetPhoto } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
 import PageUtils from './pageUtils'
@@ -9,7 +9,7 @@ import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import GeneralUtils from './generalUtils'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage } from '@/interfaces/layer'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
@@ -24,9 +24,11 @@ class AssetUtils {
 
   get getAsset() { return store.getters.getAsset }
   get getPage() { return store.getters.getPage }
+  get pageSize() { return store.getters.getPageSize(PageUtils.currFocusPageIndex) }
   get getLayer() { return store.getters.getLayer }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get getLayers() { return store.getters.getLayers }
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
@@ -337,27 +339,46 @@ class AssetUtils {
       })
   }
 
-  addImage(url: string, attrs: IAssetProps = {}) {
-    const { pageIndex, styles = {}, isPreview, assetId } = attrs
-    const { width, height, x, y } = styles
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+  addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
+    const { pageIndex, isPreview, assetId: previewAssetId } = attrs
+    const resizeRatio = 0.8
+    const pageAspectRatio = this.pageSize.width / this.pageSize.height
+    const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+    const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+
+    const allLayers = this.getLayers(this.lastSelectedPageIndex)
     const type = ImageUtils.getSrcType(url)
+    const assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
+
+    // Check if there is any unchanged image layer with the same asset ID
+    const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
+      if (layer.type !== 'image') return false
+
+      return (layer.type === 'image') && (!layer.moved) && ((layer as IImage).srcObj.assetId === assetId)
+    }) as Array<IImage>
+
+    // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
+    const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
+    const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
+
+    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj: {
         type,
         userId: ImageUtils.getUserId(url, type),
-        assetId: assetId ?? ImageUtils.getAssetId(url, type)
+        assetId: previewAssetId ?? ImageUtils.getAssetId(url, type)
       },
       styles: {
         x,
         y,
-        width,
-        height,
-        initWidth: width,
-        initHeight: height,
-        imgWidth: width,
-        imgHeight: height
+        width: photoWidth,
+        height: photoHeight,
+        initWidth: photoWidth,
+        initHeight: photoHeight,
+        imgWidth: photoWidth,
+        imgHeight: photoHeight
       }
     }
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
