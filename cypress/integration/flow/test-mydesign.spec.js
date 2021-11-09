@@ -252,6 +252,7 @@ describe('MyDesign', () => {
         () => cy.get('.folder-item__block').eq(0)
       )
       cy.contains('已移至').should('exist')
+      cy.wait(3000)
       cy.get('.folder-item__block').eq(0).click()
       cy.contains('未命名資料夾').should('exist')
       cy.get('.folder-item__block').eq(0).dragElementTo(
@@ -261,7 +262,6 @@ describe('MyDesign', () => {
       cy.contains('已移至').should('exist')
       toggleFolderExpansion(0, 0)
       getSidebarFolder(0, 0).click()
-      cy.wait(5000)
       cy.contains('未命名資料夾').should('exist')
       cy.get('.folder-item__block').eq(0).dragElementTo(
         () => getSidebarRow('trash'),
@@ -295,6 +295,9 @@ describe('MyDesign', () => {
       cy.get('.folder-item__checkbox').eq(0).should('exist')
       cy.get('.folder-item__checkbox').eq(0).click()
       cy.get('.my-design__multi').should('exist')
+      cy.get('.folder-item__checkbox-checked').eq(0).click()
+      cy.get('.folder-item__checkbox-checked').eq(0).click()
+      cy.get('.folder-item__checkbox-checked').should('not.exist')
     })
 
     it('is not draggable in trash-design-view', () => {
@@ -307,6 +310,93 @@ describe('MyDesign', () => {
       )
       getSidebarRow('trash').click()
       cy.get('.folder-item__block').should('has.attr', 'draggable').and('be.equal', 'false')
+    })
+  })
+
+  describe('DesignItem', () => {
+    it('is draggable and moves itself to dropped target (sidebar folder or folder item)', () => {
+      getSidebarFolder(0, 0).click()
+      cy.get('.design-item__block').eq(0).dragElementTo(
+        () => cy.get('.folder-item__block').eq(0),
+        () => cy.get('.design-item__block').eq(0)
+      )
+      cy.contains('已移至').should('exist')
+      cy.wait(3000)
+      cy.get('.folder-item__block').eq(0).click()
+      cy.contains('Name1').should('exist')
+      cy.get('.design-item__block').eq(0).dragElementTo(
+        () => getSidebarFolder(0, 0)
+      )
+      cy.contains('已移至').should('exist')
+      getSidebarFolder(0, 0).click()
+      cy.contains('Name1').should('exist')
+      cy.get('.design-item__block').eq(0).dragElementTo(
+        () => getSidebarRow('trash'),
+        () => cy.get('.design-item__block').eq(0)
+      )
+      cy.contains('已移至垃圾桶').should('exist')
+      getSidebarRow('trash').click()
+      cy.contains('Name1').should('exist')
+    })
+
+    it('toggles favorite when heart icon is pressed', () => {
+      cy.get('.design-item__favorite:nth(0) > svg > use').should('not.exist')
+      cy.get('.design-item__favorite').eq(0).click()
+      cy.get('.design-item__favorite:nth(0) > svg > use').should('have.attr', 'xlink:href').and('be.equal', '#favorites-fill')
+      cy.get('.design-item__favorite').eq(0).click()
+      cy.get('.design-item__favorite:nth(0) > svg > use').should('have.attr', 'xlink:href').and('be.equal', '#favorites')
+    })
+
+    it('creates duplicate when copy icon is pressed', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('建立副本').click()
+      cy.contains('的副本').should('exist')
+    })
+
+    it('deletes itself when trash icon is pressed and shows delete message', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('刪除').click()
+      cy.contains('已移至垃圾桶').should('exist')
+      getSidebarRow('trash').click()
+      cy.get('.design-item').should('exist')
+    })
+
+    it('recovers itself when reduction icon is pressed and shows recover message', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('刪除').click()
+      getSidebarRow('trash').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('還原').click()
+      cy.contains('已移至垃圾桶').should('exist')
+      cy.contains('已移至').should('exist')
+    })
+
+    it('shows delete forever message when trash icon is pressed (in trash design view)', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('刪除').click()
+      getSidebarRow('trash').click()
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__more').eq(0).click()
+      cy.contains('永久刪除').click()
+      cy.get('.delete-forever-message').should('exist')
+      cy.get('.delete-forever-message__confirm').click()
+      cy.get('.design-item').should('not.exist')
+    })
+
+    it('is selectable', () => {
+      cy.get('.design-item__block').eq(0).trigger('mouseenter')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.design-item__checkbox').eq(0).should('exist')
+      cy.get('.design-item__checkbox').eq(0).click()
+      cy.get('.my-design__multi').should('exist')
+      cy.get('.design-item__checkbox-checked').eq(0).click()
+      cy.get('.design-item__checkbox-checked').eq(0).click()
+      cy.get('.design-item__checkbox-checked').should('not.exist')
     })
   })
 })

@@ -34,13 +34,14 @@ Cypress.Commands.add(
   {
     prevSubject: true
   },
-  (subject, targetAfterDrag, targetAfterDrop) => {
+  (subject, targetAfterDrag, targetAfterDrop = undefined) => {
     cy.wrap(subject).trigger('dragstart')
                     .trigger('drag')
                     .trigger('dragleave')
     targetAfterDrag().trigger('dragenter')
                     .trigger('dragover')
                     .trigger('drop')
+    if (!targetAfterDrop) return
     targetAfterDrop().trigger('dragend')
   }
 )
