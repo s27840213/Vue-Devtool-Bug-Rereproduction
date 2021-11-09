@@ -29,6 +29,7 @@ import { IFont } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IText } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -78,46 +79,43 @@ export default Vue.extend({
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
     },
-    setFont() {
+    async setFont() {
+      if (this.pending) return
+
       const fontStore = this.fontStore as Array<IFont>
-      if (!this.pending && !fontStore.some(font => font.face === this.item.id)) {
+      const { layer, primaryLayerIndex, layerIndex, pageIndex } = this.getCurrLayerInfo
+      let { start, end } = generalUtils.deepCopy(this.sel)
+
+      if (!fontStore.some(font => font.face === this.item.id)) {
         this.updateState({ pending: this.item.id })
         const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-        const { layer, primaryLayerIndex, layerIndex, pageIndex } = this.getCurrLayerInfo
-        let { start, end } = this.sel
-        const promise = () => {
-          return new Promise<void>((resolve) => {
-            newFont.load().then(newFont => {
-              document.fonts.add(newFont)
-              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
 
-              if (!TextUtils.isSel(end)) {
-                start = TextUtils.selectAll(layer).start
-                end = TextUtils.selectAll(layer).end
-              }
-
-              const newConfig = TextPropUtils._spanPropertyHandler('fontFamily',
-                {
-                  font: this.item.id
-                }, start, end, layer)
-
-              if (typeof primaryLayerIndex !== 'undefined') {
-                layerUtils.updateSubLayerProps(pageIndex, primaryLayerIndex, layerIndex,
-                  { paragraphs: newConfig.paragraphs })
-              } else {
-                layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-              }
-
-              TextPropUtils.updateTextPropsState({ font: this.item.id })
-              AssetUtils.addAssetToRecentlyUsed(this.item)
-              this.updateState({ pending: '' })
-              StepsUtils.record()
-              resolve()
-            })
+        const load = newFont.load()
+          .then(newFont => {
+            document.fonts.add(newFont)
+            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
           })
-        }
-        promise()
+        await load
       }
+
+      if (!TextUtils.isSel(end)) {
+        start = TextUtils.selectAll(layer).start
+        end = TextUtils.selectAll(layer).end
+      }
+
+      const newConfig = TextPropUtils._spanPropertyHandler('fontFamily',
+        { font: this.item.id }, start, end, layer)
+
+      if (typeof primaryLayerIndex !== 'undefined') {
+        layerUtils.updateSubLayerProps(pageIndex, primaryLayerIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+      } else {
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+      }
+
+      TextPropUtils.updateTextPropsState({ font: this.item.id })
+      AssetUtils.addAssetToRecentlyUsed(this.item)
+      this.updateState({ pending: '' })
+      StepsUtils.record()
     },
     getFontUrl(fontID: string): string {
       console.log(fontID)

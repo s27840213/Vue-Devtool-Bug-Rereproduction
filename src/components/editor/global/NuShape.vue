@@ -475,7 +475,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-shape {
   display: relative;
-  cursor: default;
   svg {
     display: block;
   }

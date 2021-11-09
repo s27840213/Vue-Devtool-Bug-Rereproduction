@@ -446,9 +446,7 @@ class UploadUtils {
     })
 
     const pageJSON = this.default(generalUtils.deepCopy(page))
-    if (!pageJSON.parentId) {
-      pageJSON.parentId = parentId
-    }
+    pageJSON.parentId = parentId
     // pageJSON.layers
     //   .forEach((l: ILayer) => {
     //     l = this.layerInfoFilter(l)
