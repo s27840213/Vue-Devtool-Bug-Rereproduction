@@ -371,6 +371,7 @@ export default Vue.extend({
       }
     },
     applySelectedFormat(record = true) {
+      if (!this.isFormatApplicable) return
       if (record) {
         StepsUtils.record()
       }
@@ -385,6 +386,7 @@ export default Vue.extend({
       this.recentlyUsed.unshift(format)
     },
     copyAndApplySelectedFormat() {
+      if (!this.isFormatApplicable) return
       StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.designId = ''
