@@ -221,7 +221,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.config)
     this.setLastSelectedLayerIndex(this.layerIndex)
   },
   beforeDestroy() {
@@ -680,10 +679,10 @@ export default Vue.extend({
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
         if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
-          if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-            GroupUtils.deselect()
-            this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-          }
+          // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
+          //   GroupUtils.deselect()
+          //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
+          // }
         }
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           StepsUtils.record()

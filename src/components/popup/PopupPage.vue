@@ -1,26 +1,17 @@
 <template lang="pug">
   div(class="popup-page bg-gray-6"
       @click.stop="closePopup")
-    template(v-if="inAdminMode && isLogin")
-      div(class="popup-page__item"
-          @click="uploadMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="uploadMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{uploadMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="inAdminMode && hasDesignId && isLogin")
-      div(class="popup-page__item"
-          @click="updateMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="updateMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{updateMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
+    template(v-for="option in updateOptions")
+      template(v-if="option.condition")
+        div(class="popup-page__item"
+            @click="option.action")
+          svg-icon(
+            class="pointer"
+            :iconName="option.icon"
+            :iconWidth="'16px'"
+            :iconColor="'gray-1'")
+          span(class="ml-10 body-2") {{option.text}}
+          span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
     div(v-for="(data,index) in shortcutMenu()"
         :key="`popup-page__shortcut-${index}`"
         class="popup-page__item"
@@ -60,6 +51,8 @@ import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
 import shapeUtils from '@/utils/shapeUtils'
 import popupUtils from '@/utils/popupUtils'
+import { IPopupOptions } from '@/interfaces/popup'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -93,23 +86,6 @@ export default Vue.extend({
           zindex: -1,
           opacity: 100
         }
-      },
-      uploadMenu: {
-        icon: 'copy',
-        text: 'Upload single-page template',
-        shortcutText: '',
-        action: () => {
-          console.log('Upload template')
-          uploadUtils.uploadTemplate()
-        }
-      },
-      updateMenu: {
-        icon: 'copy',
-        text: 'Update single-page template',
-        shortcutText: '',
-        action: () => {
-          uploadUtils.updateTemplate()
-        }
       }
     }
   },
@@ -122,13 +98,54 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getBackgroundImage: 'getBackgroundImage',
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      groupId: 'getGroupId'
     }),
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
+    },
+    updateOptions(): Array<IPopupOptions> {
+      return [
+        {
+          icon: 'copy',
+          text: '上傳單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
+          action: () => {
+            uploadUtils.updateTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳群組模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          action: () => {
+            uploadUtils.setGroupDesign(0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.setGroupDesign(1)
+          }
+        }
+      ]
     }
   },
   methods: {

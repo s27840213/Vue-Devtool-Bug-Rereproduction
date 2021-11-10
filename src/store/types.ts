@@ -14,6 +14,11 @@ import { IUserModule } from './module/user'
  *    -> 若不為 -1 ， focus 該 index 的 Page
  */
 
+/**
+ * @param designId: for multiple template used (only for admin),
+   @param assetId: for user upload asset used,
+   @param groupId: for template group used (only for admin),
+ */
 export interface IEditorState {
   user?: IUserModule,
   text?: ITextState,
@@ -21,6 +26,7 @@ export interface IEditorState {
   name: string,
   designId: string,
   assetId: string,
+  groupId: string,
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,

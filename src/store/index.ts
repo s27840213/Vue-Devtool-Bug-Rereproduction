@@ -143,6 +143,7 @@ const getDefaultState = (): IEditorState => ({
     }
   ],
   designId: '',
+  groupId: '',
   assetId: '',
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
@@ -204,6 +205,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getAssetId(state: IEditorState): string {
     return state.assetId
+  },
+  getGroupId(state: IEditorState): string {
+    return state.groupId
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number } => {
@@ -298,9 +302,14 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage>) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage> }) {
     groupUtils.reset()
-    state.pages = pageUtils.newPages(newPages)
+    if (Array.isArray(newPages)) {
+      state.pages = pageUtils.newPages(newPages)
+    } else {
+      state.pages = pageUtils.newPages(newPages.pages)
+      state.name = newPages.name
+    }
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
@@ -318,6 +327,9 @@ const mutations: MutationTree<IEditorState> = {
     state.designId = designId
   },
   SET_assetId(state: IEditorState, assetId: string) {
+    state.assetId = assetId
+  },
+  SET_groupId(state: IEditorState, assetId: string) {
     state.assetId = assetId
   },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
@@ -702,6 +714,7 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_pagesInfo(state: IEditorState) {
     state.designId = ''
     state.assetId = ''
+    state.groupId = ''
     state.name = '我的設計'
   }
 }

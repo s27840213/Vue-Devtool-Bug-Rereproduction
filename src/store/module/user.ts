@@ -2,7 +2,8 @@ import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
-import { IAssetPhoto, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
+import modalUtils from '@/utils/modalUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -112,7 +113,6 @@ const mutations: MutationTree<IUserModule> = {
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
-    console.log(data)
     keys
       .forEach(key => {
         if (key in state) {
@@ -122,6 +122,7 @@ const mutations: MutationTree<IUserModule> = {
   },
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, downloadUrl } = state
+    const isAdmin = state.role === 0
     const images = userAssets.image.content.map((image: IUserImageContentData) => {
       const aspectRatio = image.width / image.height
       const prevW = image.width > image.height ? image.width : 384 * aspectRatio
@@ -135,10 +136,10 @@ const mutations: MutationTree<IUserModule> = {
           height: prevH
         },
         urls: {
-          prev: downloadUrl.replace('*', `asset/image/${image.id}/prev`),
-          full: downloadUrl.replace('*', `asset/image/${image.id}/full`),
-          larg: downloadUrl.replace('*', `asset/image/${image.id}/larg`),
-          original: downloadUrl.replace('*', `asset/image/${image.id}/original`)
+          prev: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/prev`) : image.signed_url?.prev ?? '',
+          full: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/full`) : image.signed_url?.full ?? '',
+          larg: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/larg`) : image.signed_url?.larg ?? '',
+          original: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/original`) : image.signed_url?.original ?? ''
         }
       }
     })
@@ -209,6 +210,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   async getAssets({ commit }, { token }) {
     try {
       const { data } = await userApis.getAssets(token)
+      console.log(data)
       commit(SET_STATE, {
         pending: true,
         contents: [],
@@ -230,11 +232,36 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
+  async groupDesign({ commit }, params: IGroupDesignInputParams) {
+    try {
+      const { data } = await userApis.groupDesign(params)
+      const { flag, msg } = data
+      modalUtils.setIsModalOpen(true)
+      if (flag === 0) {
+        modalUtils.setModalInfo('上傳成功', [`Group ID: ${params.group_id}`])
+        console.log(`Success: ${params.group_id}}`)
+      } else if (flag === 1) {
+        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        console.log(`Failed: ${msg}`)
+      } else if (flag === 2) {
+        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        console.log(`Invalid token: ${msg}`)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  },
   async putAssetDesign({ commit, dispatch }, { assetId, type }) {
     try {
+      if (type === 0) {
+        console.log('Update DB')
+      } else if (type === 1) {
+        console.log('Update preview')
+      } else if (type === 3) {
+        console.group('Update DB and preview')
+      }
       const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
       const { flag } = data
-      console.log(data)
       if (flag === 1) {
         console.log('Put asset failed')
       } else if (flag === 2) {
@@ -248,6 +275,7 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
+      console.log(data)
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
@@ -267,7 +295,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
-      console.log('wwww')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()

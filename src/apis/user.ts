@@ -1,4 +1,5 @@
 import axios from '@/apis'
+import { IGroupDesignInputParams } from '@/interfaces/api'
 import { AxiosPromise } from 'axios'
 
 export default {
@@ -39,6 +40,12 @@ export default {
     data: {
       token,
       key_list: keyList
+    }
+  }),
+  groupDesign: (params: IGroupDesignInputParams): AxiosPromise => axios('/group-design', {
+    method: 'POST',
+    data: {
+      ...params
     }
   }),
   register: (token: string, meta: string): AxiosPromise => axios('/register', {

@@ -7,7 +7,7 @@ import GeneralUtils from './generalUtils'
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getPage() { return store.getters.getPage }
-  get getPages() { return store.getters.getPages }
+  get getPages(): Array<IPage> { return store.getters.getPages }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -150,6 +150,10 @@ class PageUtils {
     currentPage.scrollIntoView({
       behavior: 'smooth'
     })
+  }
+
+  clearPagesInfo() {
+    store.commit('CLEAR_pagesInfo')
   }
 
   updateSpecPage(index: number, json: any): void {
