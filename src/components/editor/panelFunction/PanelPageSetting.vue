@@ -234,7 +234,7 @@ export default Vue.extend({
       isLocked: true,
       isPanelOpen: false,
       isLoading: false,
-      isGetTemplate: true,
+      isGetTemplate: false,
       updateChecked: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
