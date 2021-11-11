@@ -500,7 +500,7 @@ export default Vue.extend({
         return
       }
 
-      const { data } = await userApis.resetPassword(this.token, this.email, this.password) // token, account, upass
+      const data = await store.dispatch('user/updateUser', { token: this.token, upass: this.password })
       if (data.flag === 0) {
         this.email = ''
         this.currentPageIndex = 0

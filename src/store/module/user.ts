@@ -315,6 +315,15 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log('login failed')
       commit('SET_TOKEN', '')
     }
+  },
+  async updateUser({ commit, dispatch }, { token, account, upass, uname, locale, subscribe }) {
+    try {
+      const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
   }
 }
 
