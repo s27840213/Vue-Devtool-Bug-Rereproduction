@@ -471,7 +471,7 @@ export default Vue.extend({
       display: inline-block;
     }
     &__node {
-      max-width: 5vw;
+      max-width: 6vw;
       overflow: hidden;
       display: inline-block;
       text-overflow: ellipsis;
@@ -479,6 +479,9 @@ export default Vue.extend({
       &:hover {
         border-top: 1px solid transparent;
         border-bottom: 1px solid setColor(gray-2);
+      }
+      @media(min-width: 1360px) {
+        max-width: 10vw;
       }
     }
   }
