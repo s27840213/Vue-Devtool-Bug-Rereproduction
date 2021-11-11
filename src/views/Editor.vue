@@ -112,10 +112,10 @@ export default Vue.extend({
     },
     beforeWindowUnload(e: any) {
       // Cancel the event
-      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      // e.preventDefault()
-      // // Chrome requires returnValue to be set
-      // e.returnValue = ''
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+      e.preventDefault()
+      // Chrome requires returnValue to be set
+      e.returnValue = ''
     }
   }
 })

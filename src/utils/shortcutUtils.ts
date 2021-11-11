@@ -308,7 +308,7 @@ class ShortcutHandler {
   }
 
   save() {
-    // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
   }
 
   selectAll() {

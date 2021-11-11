@@ -73,6 +73,7 @@ export default Vue.extend({
       pageUtils.clearPagesInfo()
       if (this.isLogin) {
         // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+        this.$router.push({ query: Object.assign({}, this.$route.query, { newKey: 'newValue' }) })
       }
       this.closePopup()
     }
