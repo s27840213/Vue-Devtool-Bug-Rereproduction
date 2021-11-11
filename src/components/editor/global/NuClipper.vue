@@ -4,6 +4,7 @@
 </template>
 
 <script lang="ts">
+import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -18,14 +19,20 @@ export default Vue.extend({
   methods: {
     styles() {
       const { type } = this.config
-      let { width, height, initWidth, initHeight, scale } = this.config.styles
-      // const clipPath = (type === 'image' && this.config.clipPath) ? `path('M0 0 L0 ${height} ${width} ${height} ${width} 0Z')` : 'none'
-      const clipPath = type === 'image'
-        ? (this.config.isFrame ? `path('${this.config.clipPath}')` : `path('M0,0h${width}v${height}h${-width}z`) : ''
+      let { width, height, scale } = this.config.styles
+      const layerPath = `path('M0,0h${width}v${height}h${-width}z`
+      let clipPath = ''
+
+      if (type === 'image') {
+        if (this.config.isFrame) {
+          clipPath = imageUtils.isImgControl() ? layerPath : `path('${this.config.clipPath}')`
+        } else {
+          clipPath = layerPath
+        }
+      }
+
       switch (type) {
         case 'shape':
-          // width = `${initWidth}px`
-          // height = `${initHeight}px`
           width = `${this.config.vSize[0] + this.config.pDiff[0]}px`
           height = `${this.config.vSize[1] + this.config.pDiff[1]}px`
           break
@@ -36,11 +43,7 @@ export default Vue.extend({
       return {
         width,
         height,
-        // transform: 'translate3d(0, 0, 0)',
         clipPath,
-        // 'clip-path': this.config.clipPath
-        //   ? (this.config.clipPath as string).includes('path')
-        //     ?  : "path('" + this.config.clipPath + "')" : '',
         'background-color': '#00000001'
       }
     }

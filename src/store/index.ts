@@ -27,6 +27,7 @@ import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
 import imageUtils from '@/utils/imageUtils'
+import generalUtils from '@/utils/generalUtils'
 
 Vue.use(Vuex)
 
@@ -80,7 +81,7 @@ const getDefaultState = (): IEditorState => ({
       name: '',
       layers: [
       ],
-      documentColor: [],
+      documentColors: [],
       designId: '',
       guidelines: {
         v: [],
@@ -134,7 +135,7 @@ const getDefaultState = (): IEditorState => ({
       },
       name: '',
       layers: [],
-      documentColor: [],
+      documentColors: [],
       designId: '',
       guidelines: {
         v: [],
@@ -703,6 +704,28 @@ const mutations: MutationTree<IEditorState> = {
     state.designId = ''
     state.assetId = ''
     state.name = '我的設計'
+  },
+  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color:string, count: number }> }) {
+    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
+    console.warn(state.pages[data.pageIndex].documentColors)
+  },
+  UPDATE_documentColors(state: IEditorState, data: { pageIndex: number, colors: [{ color: string, count: number }] }) {
+    const documentColors = state.pages[data.pageIndex].documentColors
+    data.colors
+      .forEach(e => {
+        const colorIdx = documentColors.findIndex(c => c.color === e.color)
+        if (colorIdx !== -1) {
+          documentColors[colorIdx].count += e.count
+          if (documentColors[colorIdx].count === 0) {
+            documentColors.splice(colorIdx, 1)
+          }
+        } else {
+          documentColors.push({
+            color: e.color,
+            count: 1
+          })
+        }
+      })
   }
 }
 

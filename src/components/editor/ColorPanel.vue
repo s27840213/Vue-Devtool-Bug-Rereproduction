@@ -44,10 +44,11 @@
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import textUtils from '@/utils/textUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {

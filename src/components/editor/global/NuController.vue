@@ -177,7 +177,7 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 
 const LAYER_SIZE_MIN = 10
-const RESIZER_SHOWN_MIN = 50
+const RESIZER_SHOWN_MIN = 40
 
 export default Vue.extend({
   props: {
@@ -966,7 +966,6 @@ export default Vue.extend({
 
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
         this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
-      console.log(this.control.isHorizon)
 
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)

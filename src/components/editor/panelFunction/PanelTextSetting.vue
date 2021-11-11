@@ -154,7 +154,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType',
+      updateDocumentColors: 'UPDATE_documentColors'
     }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
@@ -171,7 +172,6 @@ export default Vue.extend({
       }
     },
     handleColorModal() {
-      // this.openColorPicker = !this.openColorPicker
       colorUtils.setCurrEvent(ColorEventType.text)
       colorUtils.setCurrColor(this.props.color)
 
@@ -180,14 +180,11 @@ export default Vue.extend({
       input.select()
 
       this.$emit('toggleColorPanel', true)
-      // if (!this.openColorPicker) {
-      //   TextUtils.focus(this.sel.start, this.sel.end)
-      // }
-      // StepsUtils.record()
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const currLayer = LayerUtils.getCurrLayer
+      const colors: Array<{ color: string, count: number }> = []
+      let currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
       if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
         const isSelCollapse = (() => {
@@ -196,20 +193,72 @@ export default Vue.extend({
           }
           return true
         })()
-        window.requestAnimationFrame(() => {
-          TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
-        })
+        currLayer = currLayer as IText
+        currLayer.paragraphs
+          .forEach(p => {
+            p.spans.forEach(s => {
+              const i = colors.findIndex(e => e.color === s.styles.color)
+              if (i !== -1) {
+                colors[i].count--
+              } else {
+                colors.push({ color: s.styles.color, count: -1 })
+              }
+            })
+          })
+
+        // window.requestAnimationFrame(() => {
+        TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
+        // })
+
+        currLayer.paragraphs
+          .forEach(p => {
+            p.spans.forEach(s => {
+              const i = colors.findIndex(e => e.color === s.styles.color)
+              if (i !== -1) {
+                colors[i].count++
+              } else {
+                colors.push({ color: s.styles.color, count: 1 })
+              }
+            })
+          })
       } else {
         const primaryLayer = currLayer as IGroup
         for (let i = 0; i < primaryLayer.layers.length; i++) {
-          const layer = primaryLayer.layers[i]
+          const layer = primaryLayer.layers[i] as IText
           if (layer.type === 'text') {
-            window.requestAnimationFrame(() => {
-              TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
-            })
+            layer.paragraphs
+              .forEach(p => {
+                p.spans.forEach(s => {
+                  const i = colors.findIndex(e => e.color === s.styles.color)
+                  if (i !== -1) {
+                    colors[i].count--
+                  } else {
+                    colors.push({ color: s.styles.color, count: -1 })
+                  }
+                })
+              })
+            // window.requestAnimationFrame(() => {
+            TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
+            // })
+            layer.paragraphs
+              .forEach(p => {
+                p.spans.forEach(s => {
+                  const i = colors.findIndex(e => e.color === s.styles.color)
+                  if (i !== -1) {
+                    colors[i].count++
+                  } else {
+                    colors.push({ color: s.styles.color, count: 1 })
+                  }
+                })
+              })
           }
         }
       }
+      this.updateDocumentColors({
+        pageIndex: LayerUtils.pageIndex,
+        colors
+      })
+
       TextPropUtils.updateTextPropsState({ color })
       if (!TextUtils.isSel(this.sel.end)) {
         TextUtils.focus(this.sel.start, this.sel.end)

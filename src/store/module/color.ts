@@ -1,10 +1,11 @@
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { IEditorState } from '../types'
 
 interface IColorState {
   defaultColors: Array<string>,
   brandColors: Array<string>,
-  documentColors: Array<string>,
-  defaultBgColors: Array<string>
+  defaultBgColors: Array<string>,
+  documentColors: Array<string>
 }
 
 const getDefaultState = (): IColorState => ({
@@ -54,7 +55,7 @@ const getDefaultState = (): IColorState => ({
 })
 
 const state = getDefaultState()
-const getters: GetterTree<IColorState, unknown> = {
+const getters: GetterTree<IColorState, IEditorState> = {
   getDefaultColors(state): Array<string> {
     return state.defaultColors
   },
@@ -64,8 +65,13 @@ const getters: GetterTree<IColorState, unknown> = {
   getBrandColors(state): Array<string> {
     return state.brandColors
   },
-  getDocumentColors(state): Array<string> {
-    return state.documentColors
+  getDocumentColors(state, getters, rootState): Array<string> {
+    const pageColors = rootState.pages[rootState.lastSelectedPageIndex].documentColors
+    if (!pageColors.length) {
+      return state.documentColors
+    }
+    return rootState.pages[rootState.lastSelectedPageIndex].documentColors
+      .map(colorData => colorData.color)
   }
 }
 

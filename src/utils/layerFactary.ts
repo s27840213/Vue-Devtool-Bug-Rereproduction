@@ -1,12 +1,14 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle } from '@/interfaces/layer'
+import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import layerUtils from './layerUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height, initWidth, initHeight } = config.styles
+    const { width, height, initWidth, initHeight, zindex } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -41,7 +43,7 @@ class LayerFactary {
         imgY: 0,
         imgWidth: initWidth ?? width,
         imgHeight: initHeight ?? height,
-        zindex: -1,
+        zindex: zindex ?? -1,
         opacity: 100,
         horizontalFlip: false,
         verticalFlip: false,
@@ -62,12 +64,10 @@ class LayerFactary {
      * used for some old template, that img might have rotate angle
      * here the rotate should be deleted and the rotation number be handled by the frame iteself
      */
-    let rotate
 
     if (clips.length && !clips[0].isFrameImg) {
-      clips.forEach(img => {
-        rotate = img.styles.rotate
-        img.styles.rotate = 0
+      clips.forEach((img, i) => {
+        img.styles.zindex = i
         const imgConfig = {
           isFrame: true,
           clipPath: img.clipPath,
@@ -122,7 +122,7 @@ class LayerFactary {
         scale: styles.scale ?? 1,
         scaleX: styles.scaleX ?? 1,
         scaleY: styles.scaleY ?? 1,
-        rotate: rotate ?? (styles.rotate ?? 0),
+        rotate: styles.rotate ?? 0,
         width: width,
         height: height,
         initWidth: initWidth,
@@ -339,17 +339,58 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
+    store.commit('UPDATE_documentColors', {
+      pageIndex: layerUtils.pageIndex,
+      colors: (config.color as Array<string>)
+        .map(color => {
+          return { color, count: 1 }
+        })
+    })
     return Object.assign(basicConfig, config)
   }
 
   newTemplate(config: any): any {
+    const documentColors: Array<{ color: string, count: number }> = []
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
-        config.layers[layerIndex].needFetch = true
+
+      switch (config.layers[layerIndex].type) {
+        case 'text': {
+          const text = config.layers[layerIndex] as IText
+          text.paragraphs
+            .forEach(p => {
+              p.spans.forEach(s => {
+                const colorIdx = documentColors.findIndex(c => c.color === s.styles.color)
+                if (colorIdx === -1) {
+                  documentColors.push({ color: s.styles.color, count: 1 })
+                } else {
+                  documentColors[colorIdx].count++
+                }
+              })
+            })
+          break
+        }
+        case 'shape': {
+          const shape = config.layers[layerIndex] as IShape
+          shape.color.forEach(color => {
+            const colorIdx = documentColors.findIndex(c => c.color === color)
+            if (colorIdx === -1) {
+              documentColors.push({ color, count: 1 })
+            } else {
+              documentColors[colorIdx].count++
+            }
+          })
+          break
+        }
+        case 'frame':
+          if (!config.layers[layerIndex].clips[0].clipPath) {
+            config.layers[layerIndex].needFetch = true
+          }
       }
     }
+    config.documentColors = documentColors
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
+
     return config
   }
 
@@ -372,6 +413,7 @@ class LayerFactary {
         for (const layerIndex in config.layers) {
           config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
         }
+        console.error('Basically, the template should not have the layer type of tmp')
         return this.newTmp(config.styles, config.layers)
       default:
         throw new Error(`Unknown layer type: ${config.type}`)

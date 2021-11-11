@@ -56,7 +56,6 @@ export default Vue.extend({
     }
   },
   async created() {
-    console.log(this.config)
     switch (this.config.category) {
       case 'C': {
         // should be deleted after the new json format stablize

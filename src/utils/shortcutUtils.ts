@@ -277,29 +277,47 @@ class ShortcutHandler {
   }
 
   del() {
-    const currLayer = LayerUtils.getCurrLayer as IFrame
-    if (currLayer.type === 'frame' && currLayer.clips.some(img => img.active)) {
-      const idx = currLayer.clips.findIndex(img => img.active)
-      if (currLayer.clips[idx].srcObj.type === 'frame') {
-        LayerUtils.deleteSelectedLayer()
-        GroupUtils.reset()
-        return
-      }
-      const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
-      if (clips[idx].imgControl) {
-        frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
-        return
-      }
-      clips[idx].srcObj = {
-        type: 'frame',
-        assetId: '',
-        userId: ''
-      }
-      StepsUtils.record()
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
-    } else {
+    const delLayer = () => {
       LayerUtils.deleteSelectedLayer()
       GroupUtils.reset()
+    }
+    const currLayer = LayerUtils.getCurrLayer as IFrame
+    switch (currLayer.type) {
+      case 'frame':
+        if (currLayer.clips.some(img => img.active)) {
+          const idx = currLayer.clips.findIndex(img => img.active)
+          if (currLayer.clips[idx].srcObj.type === 'frame') {
+            LayerUtils.deleteSelectedLayer()
+            GroupUtils.reset()
+            return
+          }
+          const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
+          if (clips[idx].imgControl) {
+            frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
+            return
+          }
+          clips[idx].srcObj = {
+            type: 'frame',
+            assetId: '',
+            userId: ''
+          }
+          StepsUtils.record()
+          LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+        }
+        break
+      case 'shape':
+        console.warn('sss')
+        store.commit('UPDATE_documentColors', {
+          pageIndex: LayerUtils.pageIndex,
+          colors: (currLayer.color as Array<string>)
+            .map(color => {
+              return { color, count: -1 }
+            })
+        })
+        delLayer()
+        break
+      default:
+        delLayer()
     }
   }
 

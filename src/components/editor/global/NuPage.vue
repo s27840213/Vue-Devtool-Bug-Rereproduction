@@ -112,7 +112,7 @@
           template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
             nu-layer(:layerIndex="currSubSelectedInfo.index"
               :pageIndex="pageIndex"
-              :config="getCurrSubSelectedLayer")
+              :config="getCurrSubSelectedLayerShown")
             div(class="page-control" :style="Object.assign(styles('control'))")
                 nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                   :pageIndex="pageIndex"
@@ -255,6 +255,17 @@ export default Vue.extend({
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },
     getCurrSubSelectedLayer(): ILayer | undefined {
+      const layer = this.getCurrLayer
+      if (layer.type === 'group') {
+        return GroupUtils.mapLayersToPage(
+          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+      } else if (layer.type === 'frame') {
+        return GroupUtils.mapLayersToPage(
+          [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+      }
+      return undefined
+    },
+    getCurrSubSelectedLayerShown(): ILayer | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
         return GroupUtils.mapLayersToPage(
