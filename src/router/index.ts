@@ -159,6 +159,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  // some pages must render with userInfo,
+  // hence we should guarantee to receive login response before navigate to these pages
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
