@@ -1,5 +1,5 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer } from '@/interfaces/layer'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
@@ -215,6 +215,10 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
+    /**
+     * For the past structure, some text might have wrong structure
+     * below fix the wrong part
+     */
     if (config.paragraphs) {
       config.paragraphs.forEach((p, pidx) => {
         for (let i = 0; i < p.spans.length; i++) {
@@ -233,6 +237,16 @@ class LayerFactary {
         }
       })
     }
+
+    (config as IText).paragraphs
+      .forEach(p => {
+        p.spans.forEach(s => {
+          store.commit('UPDATE_documentColors', {
+            pageIndex: layerUtils.pageIndex,
+            colors: [{ color: s.styles.color, count: 1 }]
+          })
+        })
+      })
 
     return Object.assign(basicConfig, config)
   }
@@ -351,12 +365,11 @@ class LayerFactary {
 
   newTemplate(config: any): any {
     const documentColors: Array<{ color: string, count: number }> = []
-    for (const layerIndex in config.layers) {
-      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 
-      switch (config.layers[layerIndex].type) {
+    const init = (layer: ILayer) => {
+      switch (layer.type) {
         case 'text': {
-          const text = config.layers[layerIndex] as IText
+          const text = layer as IText
           text.paragraphs
             .forEach(p => {
               p.spans.forEach(s => {
@@ -371,7 +384,7 @@ class LayerFactary {
           break
         }
         case 'shape': {
-          const shape = config.layers[layerIndex] as IShape
+          const shape = layer as IShape
           shape.color.forEach(color => {
             const colorIdx = documentColors.findIndex(c => c.color === color)
             if (colorIdx === -1) {
@@ -382,13 +395,62 @@ class LayerFactary {
           })
           break
         }
-        case 'frame':
-          if (!config.layers[layerIndex].clips[0].clipPath) {
-            config.layers[layerIndex].needFetch = true
+        case 'frame': {
+          const frame = layer as IFrame
+          if (!frame.clips[0].clipPath) {
+            frame.needFetch = true
           }
+        }
+          break
+        case 'group': {
+          const group = layer as IGroup
+          group.layers
+            .forEach(l => init(l))
+        }
       }
     }
+
+    for (const layerIndex in config.layers) {
+      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+
+      const layer = config.layers[layerIndex]
+      init(layer)
+      // switch (config.layers[layerIndex].type) {
+      //   case 'text': {
+      //     const text = config.layers[layerIndex] as IText
+      //     text.paragraphs
+      //       .forEach(p => {
+      //         p.spans.forEach(s => {
+      //           const colorIdx = documentColors.findIndex(c => c.color === s.styles.color)
+      //           if (colorIdx === -1) {
+      //             documentColors.push({ color: s.styles.color, count: 1 })
+      //           } else {
+      //             documentColors[colorIdx].count++
+      //           }
+      //         })
+      //       })
+      //     break
+      //   }
+      //   case 'shape': {
+      //     const shape = config.layers[layerIndex] as IShape
+      //     shape.color.forEach(color => {
+      //       const colorIdx = documentColors.findIndex(c => c.color === color)
+      //       if (colorIdx === -1) {
+      //         documentColors.push({ color, count: 1 })
+      //       } else {
+      //         documentColors[colorIdx].count++
+      //       }
+      //     })
+      //     break
+      //   }
+      //   case 'frame':
+      //     if (!config.layers[layerIndex].clips[0].clipPath) {
+      //       config.layers[layerIndex].needFetch = true
+      //     }
+      // }
+    }
     config.documentColors = documentColors
+    console.log(GeneralUtils.deepCopy(documentColors))
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
 
     return config

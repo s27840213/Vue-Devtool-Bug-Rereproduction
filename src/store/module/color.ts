@@ -71,7 +71,7 @@ const getters: GetterTree<IColorState, IEditorState> = {
       return state.documentColors
     }
     return rootState.pages[rootState.lastSelectedPageIndex].documentColors
-      .map(colorData => colorData.color)
+      .map(colorData => colorData.color).reverse()
   }
 }
 

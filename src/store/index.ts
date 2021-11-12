@@ -735,10 +735,11 @@ const mutations: MutationTree<IEditorState> = {
         } else {
           documentColors.push({
             color: e.color,
-            count: 1
+            count: e.count
           })
         }
       })
+    console.log(generalUtils.deepCopy(documentColors))
   }
 }
 

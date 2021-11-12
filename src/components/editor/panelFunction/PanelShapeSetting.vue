@@ -424,7 +424,6 @@ export default Vue.extend({
     selectColor(index: number) {
       this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
-      console.log(index)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)

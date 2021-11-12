@@ -69,7 +69,6 @@ import { ISelection } from '@/interfaces/text'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import GroupUtils from '@/utils/groupUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -183,7 +182,6 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const colors: Array<{ color: string, count: number }> = []
       let currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
       if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
@@ -193,6 +191,7 @@ export default Vue.extend({
           }
           return true
         })()
+        const colors: Array<{ color: string, count: number }> = []
         currLayer = currLayer as IText
         currLayer.paragraphs
           .forEach(p => {
@@ -221,7 +220,12 @@ export default Vue.extend({
               }
             })
           })
+        this.updateDocumentColors({
+          pageIndex: LayerUtils.pageIndex,
+          colors
+        })
       } else {
+        const colors: Array<{ color: string, count: number }> = []
         const primaryLayer = currLayer as IGroup
         for (let i = 0; i < primaryLayer.layers.length; i++) {
           const layer = primaryLayer.layers[i] as IText
@@ -253,11 +257,11 @@ export default Vue.extend({
               })
           }
         }
+        this.updateDocumentColors({
+          pageIndex: LayerUtils.pageIndex,
+          colors
+        })
       }
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors
-      })
 
       TextPropUtils.updateTextPropsState({ color })
       if (!TextUtils.isSel(this.sel.end)) {
