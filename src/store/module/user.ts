@@ -273,8 +273,8 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async login({ commit, dispatch }, { token, account, password }) {
     try {
-      state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
+      state.isAuthenticated = token.length > 0
       console.log(data)
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)

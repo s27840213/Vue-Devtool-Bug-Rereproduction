@@ -105,19 +105,7 @@ const routes: Array<RouteConfig> = [
   {
     path: 'mydesign',
     name: 'MyDesign',
-    component: MyDesign,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        if (!store.getters['user/isLogin']) {
-          next({ name: 'Login', query: { redirect: to.fullPath } })
-        } else {
-          next()
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
+    component: MyDesign
   },
   {
     path: '/templates',
@@ -168,6 +156,33 @@ const router = new VueRouter({
       children: routes
     }
   ]
+})
+
+router.beforeEach(async (to, from, next) => {
+  if (to.name === 'Settings' || to.name === 'MyDesign') {
+    // if not login, navigate to login page
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token === '' || !token) {
+        next({ name: 'Login', query: { redirect: to.fullPath } })
+      } else {
+        const data = await store.dispatch('user/login', { token: token })
+        if (data.flag === 0) {
+          next()
+        } else {
+          next({ name: 'Login', query: { redirect: to.fullPath } })
+        }
+      }
+    } else {
+      next()
+    }
+  } else {
+    const token = localStorage.getItem('token')
+    if (token && token.length > 0) {
+      await store.dispatch('user/login', { token: token })
+    }
+    next()
+  }
 })
 
 // router.beforeEach((to, from, next) => {
