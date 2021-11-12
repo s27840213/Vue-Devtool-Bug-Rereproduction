@@ -13,7 +13,7 @@ div(class="settings-account")
     div(class="settings-account__label my-10") 信箱
     property-bar
       input(class="body-2 text-gray-2"
-        v-model="email" type="text"
+        v-model="inputAccount" type="text"
         placeholder="請輸入信箱")
     div(class="settings-account__label my-10") 語系
     select(class="locale-select" v-model="inputLocale")
@@ -31,22 +31,30 @@ div(class="settings-account")
       btn(class="pointer"
         :disabled="!isChanged"
         @click.native="onConfirmClicked()") 修 改 並 儲 存
+  div(v-if="showVerifyPopup"
+    class="settings-account__popup-verify")
+    popup-verify(@close="closePopup()"
+      @isVerified="verifyEmail()"
+      :account="inputAccount")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
+import PopupVerify from '@/components/popup/PopupVerify.vue'
+// import userApis from '@/apis/user'
 import store from '@/store'
 
 export default Vue.extend({
   components: {
+    PopupVerify
   },
   data() {
     return {
       inputName: '',
+      inputAccount: '',
       inputLocale: '',
       inputSubscribe: true,
-      email: '',
       subscribeText: '我願意收到來自 Vivipic 的設計技巧、熱門模板、電商趨勢、促銷訊息等電子信。',
       localeOptions: [
         {
@@ -61,7 +69,9 @@ export default Vue.extend({
           value: 'jp',
           text: '日文'
         }],
-      isLoading: false
+      isLoading: false,
+      isEmailVerified: false,
+      showVerifyPopup: false
     }
   },
   computed: {
@@ -74,8 +84,16 @@ export default Vue.extend({
       locale: 'getLocale',
       subscribe: 'getSubscribe'
     }),
+    mailValid(): boolean {
+      if (this.inputAccount.length > 0) {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.inputAccount)
+      } else {
+        return false
+      }
+    },
     isChanged() {
       if (this.inputName.trim() === this.uname.trim() &&
+          this.inputAccount.trim() === this.account.trim() &&
           this.inputLocale === this.getLocaleText(this.locale) &&
           this.inputSubscribe === (this.subscribe === 1)) {
         return false
@@ -86,6 +104,7 @@ export default Vue.extend({
   },
   mounted() {
     this.inputName = this.uname
+    this.inputAccount = this.account
     this.inputLocale = this.getLocaleText(this.locale) as string
     this.inputSubscribe = this.subscribe === 1
   },
@@ -96,10 +115,36 @@ export default Vue.extend({
     async onConfirmClicked() {
       console.log('confirm')
       this.isLoading = true
+      if (!this.mailValid) {
+        this.isLoading = false
+        return
+      }
       const updateValue = {} as any
       updateValue.token = this.token
       if (this.inputName.trim() !== this.uname.trim()) {
         updateValue.uname = this.inputName.trim()
+      }
+      if (this.inputAccount.trim() !== this.account.trim()) {
+        updateValue.account = this.inputAccount.trim()
+        if (!this.isEmailVerified) {
+          const parameter = {
+            token: this.token,
+            account: this.inputAccount,
+            register: '0',
+            vcode_only: '1',
+            type: 1
+          }
+          const data = await store.dispatch('user/sendVcode', parameter)
+          console.log(data)
+          if (data.flag === 0) {
+            this.showVerifyPopup = true
+          } else {
+            console.log(data.msg)
+          }
+
+          this.isLoading = false
+          return
+        }
       }
       if (this.inputLocale !== this.getLocaleText(this.locale)) {
         updateValue.locale = this.getLocaleValue(this.inputLocale)
@@ -107,14 +152,17 @@ export default Vue.extend({
       if (this.inputSubscribe !== (this.subscribe === 1)) {
         updateValue.subscribe = this.inputSubscribe ? 1 : 0
       }
-      const data = await store.dispatch('user/updateUser', updateValue)
-      if (data.flag === 0) {
-        store.commit('user/SET_STATE', {
-          uname: data.data.uname,
-          locale: data.data.locale,
-          subscribe: data.data.subscribe
-        })
-      }
+      console.log('update userInfo')
+      // TODO: update api (change account)
+
+      // const data = await store.dispatch('user/updateUser', updateValue)
+      // if (data.flag === 0) {
+      //   store.commit('user/SET_STATE', {
+      //     uname: data.data.uname,
+      //     locale: data.data.locale,
+      //     subscribe: data.data.subscribe
+      //   })
+      // }
 
       this.isLoading = false
     },
@@ -123,8 +171,16 @@ export default Vue.extend({
     },
     getLocaleValue(text: string) {
       return this.localeOptions.find(x => x.text === text)?.value
+    },
+    verifyEmail() {
+      console.log('verifyEmail')
+      this.isEmailVerified = true
+      this.closePopup()
+      this.onConfirmClicked()
+    },
+    closePopup() {
+      this.showVerifyPopup = false
     }
-
   }
 })
 </script>
@@ -134,6 +190,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
   width: 100%;
   height: 100%;
   &__profile {
@@ -237,6 +294,18 @@ export default Vue.extend({
         background: setColor(gray-4);
       }
     }
+  }
+  &__popup-verify {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000a1;
+    z-index: 999999;
   }
 }
 </style>
