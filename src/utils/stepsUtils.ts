@@ -8,6 +8,7 @@ import Vue from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
+import uploadUtils from './uploadUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -43,6 +44,8 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
     }
+
+    // uploadUtils.uploadDesign()
   }
 
   undo() {

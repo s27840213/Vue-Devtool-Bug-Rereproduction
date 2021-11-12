@@ -1,4 +1,4 @@
-import { IAssetPhoto, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import generalUtils from './generalUtils'
@@ -22,14 +22,29 @@ enum PutAssetDesignType {
   UPDATE_BOTH
 }
 
+// 0 for upload new one, 1 for update prev
+enum GroupDesignUpdateFlag {
+  UPLOAD,
+  UPDATE_GROUP,
+  UPDATE_COVER
+}
+
+/**
+ * @todo do the house keeping for upload and update logic
+ */
+
 class UploadUtils {
   static readonly PutAssetDesignType = PutAssetDesignType
   readonly PutAssetDesignType = UploadUtils.PutAssetDesignType
+  static readonly GroupDesignUpdateFlag = GroupDesignUpdateFlag
+  readonly GroupDesignUpdateFlag = UploadUtils.GroupDesignUpdateFlag
   loginOutput: any
   get token(): string { return store.getters['user/getToken'] }
   get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
   get userId(): string { return store.getters['user/getUserId'] }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
+  get groupId(): string { return store.getters.getGroupId }
+  get assetId(): string { return store.getters.getAssetId }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
 
@@ -114,7 +129,6 @@ class UploadUtils {
         }
         xhr.send(formData)
         xhr.onload = () => {
-          console.log('onload!')
           // polling the JSON file of uploaded image
           const interval = setInterval(() => {
             const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
@@ -134,6 +148,8 @@ class UploadUtils {
                     })
                     store.commit('user/UPDATE_IMAGE_URLS', { assetId })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
+                  } else if (json.flag === 1) {
+                    console.log('error!')
                   }
                 })
               }
@@ -243,9 +259,10 @@ class UploadUtils {
   }
 
   uploadDesign(putAssetDesignType?: PutAssetDesignType) {
-    const assetId = store.getters.getAssetId.length !== 0 ? store.getters.getAssetId : generalUtils.generateAssetId()
-    const pages = pageUtils.getPages
+    console.log('upload design')
+    const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
     store.commit('SET_assetId', assetId)
+    const pages = generalUtils.deepCopy(pageUtils.getPages)
 
     const pagesJSON = pages.map((page: IPage) => {
       return this.default(generalUtils.deepCopy(page))
@@ -262,8 +279,7 @@ class UploadUtils {
     })
 
     formData.append('key', `${this.loginOutput.upload_map.path}asset/design/${assetId}/config.json`)
-    console.log(`${this.loginOutput.upload_map.path}asset/design/${assetId}/config.json`)
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('Content-Disposition', 'inline')
 
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
@@ -276,15 +292,10 @@ class UploadUtils {
     }
 
     xhr.open('POST', this.loginOutput.upload_map.url, true)
-    console.log(this.loginOutput.upload_map.url)
     xhr.send(formData)
 
-    modalUtils.setIsPending(true)
-    modalUtils.setModalInfo('上傳中')
     xhr.onload = () => {
       navigator.clipboard.writeText(assetId)
-      modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${assetId}`, `Status code: ${xhr.status}`, '已複製 Asset ID 到剪貼簿'])
       if (putAssetDesignType !== undefined) {
         store.dispatch('user/putAssetDesign', {
           assetId,
@@ -292,10 +303,6 @@ class UploadUtils {
         })
       }
     }
-  }
-
-  clearPagesInfo() {
-    store.commit('CLEAR_pagesInfo')
   }
 
   uploadLayer(type: string) {
@@ -431,6 +438,37 @@ class UploadUtils {
       xhrReq.onload = () => {
         console.log(designId)
       }
+    }
+  }
+
+  setGroupDesign(update: GroupDesignUpdateFlag, coverId?: string) {
+    const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? generalUtils.generateRandomString(20) : this.groupId
+    store.commit('SET_groupId', groupId)
+    const pages = pageUtils.getPages
+    /**
+     * @param {string} list - template id list (separate by comma)
+     */
+    if (update === GroupDesignUpdateFlag.UPLOAD || update === GroupDesignUpdateFlag.UPDATE_GROUP) {
+      const list = pages.map((page: IPage) => page.designId).join(',')
+      store.dispatch('user/groupDesign', {
+        token: this.token,
+        update,
+        list,
+        group_id: groupId
+      } as IGroupDesignInputParams)
+    }
+
+    if (update === GroupDesignUpdateFlag.UPDATE_COVER) {
+      const coverType = 'Idontknow'
+      const cover = `${coverType}:${coverId}`
+      store.dispatch('user/groupDesign', {
+        token: this.token,
+        update,
+        group_id: groupId,
+        cover
+      } as IGroupDesignInputParams).then(() => {
+        console.log(groupId)
+      })
     }
   }
 
@@ -868,7 +906,6 @@ class UploadUtils {
       })
 
       formData.append('key', `${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
-      // only for template
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()

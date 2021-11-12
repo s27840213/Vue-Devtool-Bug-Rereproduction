@@ -12,3 +12,11 @@ export interface IPopupComponent {
   properties: Partial<IPopupProps>,
   closeHandler: () => void
 }
+
+export interface IPopupOptions {
+  icon: string,
+  text: string,
+  shortcutText: string,
+  action: () => void,
+  condition?: boolean
+}

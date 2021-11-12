@@ -30,6 +30,23 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
+  'dragElementTo',
+  {
+    prevSubject: true
+  },
+  (subject, targetAfterDrag, targetAfterDrop = undefined) => {
+    cy.wrap(subject).trigger('dragstart')
+                    .trigger('drag')
+                    .trigger('dragleave')
+    targetAfterDrag().trigger('dragenter')
+                    .trigger('dragover')
+                    .trigger('drop')
+    if (!targetAfterDrop) return
+    targetAfterDrop().trigger('dragend')
+  }
+)
+
+Cypress.Commands.add(
   'selectAll',
   (pageIndex = 0) => {
     cy.get('.pages-wrapper')

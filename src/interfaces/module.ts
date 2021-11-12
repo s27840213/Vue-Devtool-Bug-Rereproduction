@@ -1,4 +1,4 @@
-import { IListServiceContentData } from '@/interfaces/api'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IImage, IStyle, IShape, IText, ITmp, IGroup, ILayer } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 
@@ -32,6 +32,14 @@ export interface IAsset {
     larg: string
     original: string
     json: string
+  }
+  content_ids?: IListServiceContentDataItem[]
+  match_cover?: {
+    height: number
+    id: string
+    theme: string
+    width: number
+    ver: number
   }
 }
 

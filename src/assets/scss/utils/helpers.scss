@@ -41,12 +41,6 @@
 $spacer: 5;
 @for $i from 1 through 24 {
     $space: ($spacer * $i);
-    .w-#{$space} {
-        width: $space*1px;
-    }
-    .h-#{$space} {
-        width: $space*1px;
-    }
     .mt-#{$space} {
         margin-top: $space*1px;
     }

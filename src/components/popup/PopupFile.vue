@@ -69,10 +69,11 @@ export default Vue.extend({
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
     },
     newDesign() {
+      pageUtils.setPages()
+      pageUtils.clearPagesInfo()
       if (this.isLogin) {
         // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
       }
-      pageUtils.setPages()
       this.closePopup()
     }
   }

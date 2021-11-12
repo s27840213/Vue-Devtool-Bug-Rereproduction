@@ -17,8 +17,8 @@
       iconName="search"
       iconColor="gray-3"
       iconWidth="20px"
-      @click.native="onSearch"
-    )
+      @click.native="onSearch")
+    slot
 </template>
 
 <script lang="ts">
@@ -81,6 +81,7 @@ export default Vue.extend({
   align-items: center;
   padding: 5px 16px;
   box-sizing: border-box;
+  border-radius: 3px;
   &__input {
     flex: 1;
     margin-right: 10px;

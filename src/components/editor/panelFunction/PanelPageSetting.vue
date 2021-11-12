@@ -105,7 +105,10 @@
             span(class="body-1") key_id
             span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
           div(class="template-information__line")
-            span(class="body-1") 作者
+            span(class="body-1") 創建者
+            span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
+          div(class="template-information__line")
+            span(class="body-1") 修改者
             span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
           div(class="template-information__line")
             span(class="body-1") 上次更新
@@ -234,7 +237,7 @@ export default Vue.extend({
       isLocked: true,
       isPanelOpen: false,
       isLoading: false,
-      isGetTemplate: true,
+      isGetTemplate: false,
       updateChecked: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
@@ -242,6 +245,7 @@ export default Vue.extend({
       imgRandQuery: '',
       templateInfo: {
         key_id: '' as string,
+        creator: '' as string,
         author: '' as string,
         edit_time: '' as string,
         tags_tw: '' as string,
@@ -266,6 +270,7 @@ export default Vue.extend({
       this.isGetTemplate = false
       this.templateInfo = {
         key_id: '',
+        creator: '',
         author: '',
         edit_time: '',
         tags_tw: '',
@@ -371,6 +376,7 @@ export default Vue.extend({
       }
     },
     applySelectedFormat(record = true) {
+      if (!this.isFormatApplicable) return
       if (record) {
         StepsUtils.record()
       }
@@ -385,6 +391,7 @@ export default Vue.extend({
       this.recentlyUsed.unshift(format)
     },
     copyAndApplySelectedFormat() {
+      if (!this.isFormatApplicable) return
       StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.designId = ''

@@ -1,46 +1,19 @@
 <template lang="pug">
   div(class=" popup-layer bg-gray-6"
       @click.stop="closePopup")
-    template(v-if="inAdminMode && isLogin")
-      div(class="popup-layer__item"
-          @click="pageUploadMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="pageUploadMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{pageUploadMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{pageUploadMenu.shortcutText}}
-    template(v-if="hasDesignId && getToekn!==''")
-      div(class="popup-layer__item"
-          @click="pageUpdateMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="pageUpdateMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{pageUpdateMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{pageUpdateMenu.shortcutText}}
-    template(v-if="inAdminMode && isLogin && (isText || isShape || isTextGroup)")
-      div(class="popup-layer__item"
-          @click="uploadMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="uploadMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{uploadMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
-    template(v-if="currSelectedInfo.layers[0] && currSelectedInfo.layers[0].designId !=='' && inAdminMode && isLogin && (isText || isShape)")
-      div(class="popup-layer__item"
-          @click="updateMenu.action")
-        svg-icon(
-          class="pointer"
-          :iconName="updateMenu.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{updateMenu.text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{updateMenu.shortcutText}}
+    //- for page and layer
+    template(v-for="option in updateOptions")
+      template(v-if="option.condition")
+        div(class="popup-layer__item"
+            @click="option.action")
+          svg-icon(
+            class="pointer"
+            :iconName="option.icon"
+            :iconWidth="'16px'"
+            :iconColor="'gray-1'")
+          span(class="ml-10 body-2") {{option.text}}
+          span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
+    //- for other purpose
     template(v-if="isImage")
       div(class="popup-layer__item"
           @click="updateImageAsFrame().action()")
@@ -50,7 +23,7 @@
           :iconWidth="'16px'"
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{updateImageAsFrame().text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
     template(v-if="isFrame")
       div(class="popup-layer__item"
           @click="detachImage().action()")
@@ -60,7 +33,7 @@
           :iconWidth="'16px'"
           :iconColor="'gray-1'")
         span(class="ml-10 body-2") {{detachImage().text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{uploadMenu.shortcutText}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
     hr(v-if="inAdminMode && isLogin" class="popup-layer__hr")
     div(v-for="(data,index) in shortcutMenu()"
         :key="`popup-layer__shortcut-${index}`"
@@ -129,13 +102,14 @@ import pageUtils from '@/utils/pageUtils'
 import { Layer } from 'konva/types/Layer'
 import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
 import frameUtils from '@/utils/frameUtils'
+import { IPopupOptions } from '@/interfaces/popup'
 
 export default Vue.extend({
   data() {
     return {
       pageUploadMenu: {
         icon: 'copy',
-        text: 'Upload single-page template',
+        text: '上傳單頁模板',
         shortcutText: '',
         action: () => {
           uploadUtils.uploadTemplate()
@@ -143,10 +117,26 @@ export default Vue.extend({
       },
       pageUpdateMenu: {
         icon: 'copy',
-        text: 'Modify single-page template',
+        text: '更新單頁模板',
         shortcutText: '',
         action: () => {
           uploadUtils.updateTemplate()
+        }
+      },
+      uploadGroupMenu: {
+        icon: 'copy',
+        text: '上傳群組模板',
+        shortcutText: '',
+        action: () => {
+          uploadUtils.setGroupDesign(0)
+        }
+      },
+      modifyGroupMenu: {
+        icon: 'copy',
+        text: '更新群組模板',
+        shortcutText: '',
+        action: () => {
+          uploadUtils.setGroupDesign(1)
         }
       }
     }
@@ -161,7 +151,9 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isLogin: 'user/isLogin',
-      _layerNum: 'getLayersNum'
+      token: 'user/getToken',
+      _layerNum: 'getLayersNum',
+      groupId: 'getGroupId'
     }),
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -193,29 +185,45 @@ export default Vue.extend({
     hasDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
-    uploadMenu(): any {
-      return {
-        icon: 'copy',
-        text: `Upload ${this.getType[0]}`,
-        shortcutText: '',
-        action: () => {
-          if (!this.isTextGroup) {
-            uploadUtils.uploadLayer(this.getType[0])
-          } else {
-            uploadUtils.uploadLayer('text')
+    updateOptions(): Array<IPopupOptions> {
+      return [
+        {
+          icon: 'copy',
+          text: '上傳單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
+          action: () => {
+            uploadUtils.updateTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳群組模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.setGroupDesign(0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.setGroupDesign(1)
           }
         }
-      }
-    },
-    updateMenu(): any {
-      return {
-        icon: 'copy',
-        text: `Modify ${this.getType[0]}`,
-        shortcutText: '',
-        action: () => {
-          uploadUtils.updateLayer(this.getType[0])
-        }
-      }
+      ]
     },
     groupOption(): any {
       return {

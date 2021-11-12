@@ -7,7 +7,7 @@ import GeneralUtils from './generalUtils'
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getPage() { return store.getters.getPage }
-  get getPages() { return store.getters.getPages }
+  get getPages(): Array<IPage> { return store.getters.getPages }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -152,6 +152,10 @@ class PageUtils {
     })
   }
 
+  clearPagesInfo() {
+    store.commit('CLEAR_pagesInfo')
+  }
+
   updateSpecPage(index: number, json: any): void {
     const pages = store.getters.getPages
     const pagesTmp = GeneralUtils.deepCopy(pages)
@@ -209,6 +213,19 @@ class PageUtils {
       pageIndex: this.currFocusPageIndex,
       props
     })
+  }
+
+  appendPagesTo(pages: IPage[], index?: number) {
+    const currentPages = store.getters.getPages as IPage[]
+    let currentPagesTmp = GeneralUtils.deepCopy(currentPages)
+    if (typeof index === 'number') {
+      currentPagesTmp = currentPagesTmp.slice(0, index)
+        .concat(pages)
+        .concat(currentPagesTmp.slice(index))
+    } else {
+      currentPagesTmp = currentPagesTmp.concat(pages)
+    }
+    store.commit('SET_pages', currentPagesTmp)
   }
 }
 

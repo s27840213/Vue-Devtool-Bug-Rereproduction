@@ -31,6 +31,7 @@ import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -78,6 +79,24 @@ export default Vue.extend({
       }
     }
   },
+  created() {
+    window.addEventListener('beforeunload', this.beforeWindowUnload)
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.beforeWindowUnload)
+  },
+  beforeRouteLeave(to, from, next) {
+    // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    next()
+    // const answer = this.confirmLeave()
+    // if (answer) {
+    //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    //   next()
+    // } else {
+    //   next(false)
+    // }
+  },
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType'
@@ -87,6 +106,16 @@ export default Vue.extend({
     },
     toggleColorPanel(bool: boolean) {
       this.isColorPanelOpen = bool
+    },
+    confirmLeave() {
+      return window.confirm('Do you really want to leave? you have unsaved changes!')
+    },
+    beforeWindowUnload(e: any) {
+      // Cancel the event
+      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+      // e.preventDefault()
+      // // Chrome requires returnValue to be set
+      // e.returnValue = ''
     }
   }
 })

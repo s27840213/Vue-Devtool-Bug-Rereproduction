@@ -1,4 +1,5 @@
 import axios from '@/apis'
+import { IGroupDesignInputParams } from '@/interfaces/api'
 import { AxiosPromise } from 'axios'
 
 export default {
@@ -41,6 +42,12 @@ export default {
       key_list: keyList
     }
   }),
+  groupDesign: (params: IGroupDesignInputParams): AxiosPromise => axios('/group-design', {
+    method: 'POST',
+    data: {
+      ...params
+    }
+  }),
   register: (token: string, meta: string): AxiosPromise => axios('/register', {
     method: 'POST',
     data: {
@@ -66,12 +73,15 @@ export default {
       vcode
     }
   }),
-  resetPassword: (token: string, account: string, upass: string): AxiosPromise => axios('/reset-password', {
+  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {
     method: 'POST',
     data: {
       token,
       account,
-      upass
+      upass,
+      uname,
+      locale,
+      subscribe
     }
   }),
   fbLogin: (code: string, redirect_uri: string): AxiosPromise => axios('/fb-login', {

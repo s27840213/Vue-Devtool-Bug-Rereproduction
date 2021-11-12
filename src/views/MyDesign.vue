@@ -395,6 +395,7 @@ export default Vue.extend({
       }
     },
     handleMoveToFolder() {
+      if (this.moveToFolderSelectInfo === '') return
       const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
       if (this.isMovingSingleToFolder && this.designBuffer) {
         const { path, design } = this.designBuffer

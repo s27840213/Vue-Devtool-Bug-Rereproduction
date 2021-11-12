@@ -113,6 +113,14 @@ export interface IListServiceParams {
   theme?: string
 }
 
+export interface IGroupDesignInputParams {
+  token: string,
+  update: number,
+  group_id: string,
+  list?: string,
+  cover?: string,
+}
+
 export interface IListServiceContentDataItem {
   id: string
   type: number
@@ -121,6 +129,7 @@ export interface IListServiceContentDataItem {
   height?: number
   title?: string
   description?: string
+  content_ids?: IListServiceContentDataItem[]
 }
 
 export interface IListServiceContentData {
@@ -160,16 +169,27 @@ export interface IUserAssetsData {
 
 export interface IUserImageContentData {
   color: Array<string>,
+  create_time: string,
+  update_time: string,
+  author: string,
   file_ext: string,
   file_name: string,
   width: number,
   height: number,
   id: string
-  author: string,
   team_id: string
-  ver: string,
+  ver: number,
   // Only for private asset
-  signed_url?: string
+  signed_url?: {
+    full: string,
+    larg: string,
+    midd: string,
+    original: string,
+    prev: string,
+    smal: string,
+    tiny: string
+  },
+  asset_index: number
 }
 
 export interface IPhotoServiceParams {

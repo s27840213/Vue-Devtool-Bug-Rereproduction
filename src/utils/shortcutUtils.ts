@@ -326,7 +326,6 @@ class ShortcutHandler {
   }
 
   save() {
-    console.log('save')
     // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
   }
 

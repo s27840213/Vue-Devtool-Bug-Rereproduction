@@ -8,11 +8,11 @@
         div(class="home-content-video-text")
           div(class="heading-3 pb-15") 海量精美電商模板等您使用！
           div(class="subtitle-1 pb-5"
-          style="font-weight: 400;") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+            style="font-weight: 400;") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
           div(class="subtitle-1 pb-20"
-          style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
-          btn(:type="'primary-mid'"
-            class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
+            style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
+          btn(:type="'primary-mid'" class="rounded"
+            @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
         scroll-list(:list="themeList" type='theme'
@@ -25,38 +25,38 @@
         div(style="width: 100%;")
           div(style="height: 140px;" class="x-scrollbar")
             btn(v-for="item, idx in featureList" :type="'icon-mid'"
-            class="home-content-feature-item"
-            :class="{'selected': featureSelected === idx}"
-            @click.native="featureItemClicked(idx)")
+              class="home-content-feature-item"
+              :class="{'selected': featureSelected === idx}"
+              @click.native="featureItemClicked(idx)")
               svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
-              :iconWidth="'40px'")
+                :iconWidth="'40px'")
               div(class="pt-10 body-2") {{item.title}}
         div(class="home-content-feature-content")
           div(class="home-content-feature-img")
-            img(:src="require('@/assets/img/png/home-video.png')")
+            img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
           div(class="home-content-feature-text")
             div(class="pb-20") {{featureContent}}
-            btn(:type="'primary-mid'"
-            class="rounded" @click.native="goToPage('Editor')") 開 始 製 作
+            btn(:type="'primary-mid'" class="rounded"
+              @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg")
         div
           template(v-for="tag in tags")
             span(class="pointer mr-20"
-            @click="goToPage('Editor', tag)") {{'#' + tag}}
+              @click="goToPage('Editor', tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
-        @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
+          @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
       div(class="home-content-template")
         scroll-list(:list="tagTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
-        @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
+          @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
       div(class="home-content-template")
         scroll-list(:list="popularTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
-        @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
+          @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
       div(class="home-content-template")
         scroll-list(:list="latestTemplateList" type='template')
       nu-footer(class="mt-100")
@@ -194,7 +194,6 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
-
   &__size {
     position: fixed;
     top: 0;
@@ -214,13 +213,11 @@ export default Vue.extend({
   overflow-x: hidden;
   overflow-y: scroll;
   height: calc(100% - 50px);
-
   &-title {
     display: flex;
     justify-content: space-between;
     text-align: left;
     padding: 4vw 10vw 1.5vw 10vw;
-
     .more {
       white-space: nowrap;
     }
@@ -229,7 +226,6 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     padding: 5vw 0;
-
     &-img {
       width: 40vw;
       > img {
@@ -237,7 +233,6 @@ export default Vue.extend({
         height: 100%;
       }
     }
-
     &-text {
       display: flex;
       flex-direction: column;
@@ -245,7 +240,6 @@ export default Vue.extend({
       text-align: left;
       font-family: Mulish;
       padding-left: 5vw;
-
       > button {
         width: 40%;
         height: 45px;
@@ -261,15 +255,12 @@ export default Vue.extend({
     justify-content: center;
     position: relative;
     padding: 36px 0;
-
     @media screen and (min-width: 990px) {
       padding: 56px 0;
     }
-
       > img {
         width: 100%;
       }
-
       &-title {
         position: absolute;
         top: 34%;
@@ -283,7 +274,6 @@ export default Vue.extend({
         font-size: 1.1vw;
       }
   }
-
   &-feature {
     display: flex;
     flex-direction: column;
@@ -291,7 +281,6 @@ export default Vue.extend({
     align-items: center;
     position: relative;
     padding: 0 10%;
-
     &-item {
       cursor: pointer;
       width: 200px;
@@ -299,12 +288,10 @@ export default Vue.extend({
       border: 1px solid #f4f4f5;
       border-radius: 8px;
       padding: 24px 16px;
-
       &:hover {
         background: setColor("gray-5");
       }
     }
-
     &-content {
       display: flex;
       justify-content: center;
@@ -315,6 +302,8 @@ export default Vue.extend({
       width: 35%;
       > img {
         width: 100%;
+        filter: drop-shadow(0px 3px 15px rgba(0, 0, 0, 0.25));
+        border-radius: 8px;
       }
     }
     &-text {
@@ -327,30 +316,25 @@ export default Vue.extend({
       font-weight: 400;
       text-align: left;
       padding-left: 5vw;
-
       > button {
         width: 40%;
         height: 45px;
         padding: 5px 30px;
       }
     }
-
     .selected {
       background: #09467E;
       color: white;
     }
   }
-
   &-template {
     padding: 0 10%;
   }
 }
-
 .x-scrollbar {
   display: grid;
   column-gap: 30px;
   grid-template-columns: auto;
-  justify-content: center;
   grid-auto-flow: column;
   scroll-behavior: smooth;
   overflow-x: scroll;

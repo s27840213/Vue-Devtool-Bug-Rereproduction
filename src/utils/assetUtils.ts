@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
 import { IListServiceContentDataItem, IListServiceContentData, IAssetPhoto } from '@/interfaces/api'
@@ -29,6 +30,7 @@ class AssetUtils {
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
   get getLayers() { return store.getters.getLayers }
+  get getPages() { return store.getters.getPages }
 
   get(item: IListServiceContentDataItem): IAsset {
     const asset = this.getAsset(item.id)
@@ -384,6 +386,28 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
   }
 
+  async addGroupTemplate (item: IListServiceContentDataItem) {
+    const { content_ids: contents = [], type } = item
+    const lastPageIndex = this.getPages.length
+    const promises = contents?.map(content => this.get({ ...content, type }))
+    this.addAssetToRecentlyUsed(item as any)
+    Promise.all(promises)
+      .then(assets => {
+        const updatePromise = assets.map(asset =>
+          this.updateBackground(asset.jsonData || {})
+            .then(json => LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+        )
+        return Promise.all(updatePromise)
+      })
+      .then(jsonDataList => {
+        PageUtils.appendPagesTo(jsonDataList, lastPageIndex)
+        stepsUtils.record()
+        Vue.nextTick(() => {
+          PageUtils.scrollIntoPage(lastPageIndex)
+        })
+      })
+  }
+
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       console.log('item ID: ' + item.id)
@@ -440,7 +464,14 @@ class AssetUtils {
         if (assetIndex >= 0) {
           recentlyUsed.list.splice(assetIndex, 1)
         }
-        recentlyUsed.list.unshift({ id, type, width, height })
+        recentlyUsed.list.unshift({
+          id,
+          type,
+          width,
+          height,
+          content_ids: asset.content_ids,
+          match_cover: asset.match_cover
+        })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
       listApi.addDesign(id, typeCategory)
