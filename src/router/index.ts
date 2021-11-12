@@ -6,6 +6,7 @@ import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
+import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
@@ -111,6 +112,11 @@ const routes: Array<RouteConfig> = [
     path: '/templates',
     name: 'TemplateCenter',
     component: TemplateCenter
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings
   },
   {
     path: '/',
