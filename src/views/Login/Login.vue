@@ -419,7 +419,12 @@ export default Vue.extend({
         this.mailErrorMessage = 'Email 格式錯誤'
         return
       }
-      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      const parameter = {
+        account: this.email,
+        register: '0',
+        vcode_only: '1'
+      }
+      const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
         this.isVcodeClicked = false
         this.currentPageIndex = 2
@@ -438,7 +443,12 @@ export default Vue.extend({
       }
       this.resendAvailable = false
       this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
-      const { data } = await userApis.sendVcode('', this.email, '', '0', '1') // uname, account, upass, register, vcode_only
+      const parameter = {
+        account: this.email,
+        register: '0',
+        vcode_only: '1'
+      }
+      const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
         this.isLoading = false
         const clock = window.setInterval(() => {
@@ -470,7 +480,11 @@ export default Vue.extend({
         this.isLoading = false
         return
       }
-      const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
+      const parameter = {
+        account: this.email,
+        vcode: this.vcode
+      }
+      const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''
       if (data.flag === 0) {
         this.currentPageIndex = 3

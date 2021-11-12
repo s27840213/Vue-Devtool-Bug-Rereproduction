@@ -56,21 +56,24 @@ export default {
     }
   }),
   /* eslint-disable camelcase */
-  sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string): AxiosPromise => axios('/send-vcode', {
+  sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string, type: number, token: string): AxiosPromise => axios('/send-vcode', {
     method: 'POST',
     data: {
       uname,
       account,
       upass,
       register,
-      vcode_only
+      vcode_only,
+      type,
+      token
     }
   }),
-  verifyVcode: (account: string, vcode: string): AxiosPromise => axios('/verify-vcode', {
+  verifyVcode: (account: string, vcode: string, token: string): AxiosPromise => axios('/verify-vcode', {
     method: 'POST',
     data: {
       account,
-      vcode
+      vcode,
+      token
     }
   }),
   updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {

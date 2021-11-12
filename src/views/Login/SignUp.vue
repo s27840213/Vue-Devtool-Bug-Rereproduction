@@ -365,7 +365,12 @@ export default Vue.extend({
       }
       this.resendAvailable = false
       this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
-      const { data } = await userApis.sendVcode('', this.email, '', '1', '1') // uname, account, upass, register, vcode_only
+      const parameter = {
+        account: this.email,
+        register: '1',
+        vcode_only: '1'
+      }
+      const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
         this.isLoading = false
         const clock = window.setInterval(() => {
@@ -397,7 +402,11 @@ export default Vue.extend({
         this.isLoading = false
         return
       }
-      const { data } = await userApis.verifyVcode(this.email, this.vcode) // account, vcode
+      const parameter = {
+        account: this.email,
+        vcode: this.vcode
+      }
+      const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
         await store.dispatch('user/login', { token: data.token })
         this.$router.push({ path: this.redirect || '/' })
