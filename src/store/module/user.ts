@@ -26,6 +26,9 @@ export interface IUserModule {
   role: number,
   adminMode: boolean,
   isAuthenticated: boolean,
+  account: string,
+  locale: string,
+  subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
   pending: boolean,
@@ -44,6 +47,9 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   adminMode: true,
   isAuthenticated: false,
+  account: '',
+  locale: '',
+  subscribe: 1,
   userAssets: {
     design: {
       content: []
@@ -80,6 +86,15 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getToken(state) {
     return state.token
+  },
+  getAccount(state) {
+    return state.account
+  },
+  getLocale(state) {
+    return state.locale
+  },
+  getSubscribe(state) {
+    return state.subscribe
   },
   getUserAssets(state) {
     return state.userAssets
@@ -305,7 +320,10 @@ const actions: ActionTree<IUserModule, unknown> = {
         uname: uname,
         shortName: shortName,
         userId: data.data.user_id,
-        role: data.data.role
+        role: data.data.role,
+        account: data.data.account,
+        locale: data.data.locale,
+        subscribe: data.data.subscribe
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
