@@ -27,27 +27,6 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  /delete-asset:
-    post:
-      description: 刪除使用者上傳之檔案
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: deleteAssetInput
-          required: true
-          schema:
-            $ref: "#/definitions/deleteAssetInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/apiCommonResponse"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /export-template:
     post:
       description: 輸出design
@@ -648,16 +627,6 @@ definitions:
               new name for rename
               0 (recover), 1 (delete), and 2 (force delete) for delete
               0 (no favor) and 1 (favor) for favor
-  deleteAssetInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - key_list
-        properties:
-          key_list:
-            type: string
-            description: key list of assets to be deleted, separated by comma ','
   exportTemplateInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
