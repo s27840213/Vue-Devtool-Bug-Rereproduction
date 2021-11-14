@@ -1,0 +1,150 @@
+<template lang="pug">
+  div(class="sidebar")
+    div(class="nav")
+      div(class="nav-container")
+        div(class="nav-container__profile")
+          div(class="profile-img mr-10 body-2 text-white") {{shortName}}
+          div(class="profile-text body-4")
+            div {{showUname}}
+            div(class="text-gray-3") {{account}}
+        div(class="nav-container__option"
+          :class="{'selected': optionSelected === 0}"
+          @click="switchNav(0)")
+          svg-icon(:iconName="'settings'"
+            :iconWidth="'15px'"
+            :iconColor="'gray-2'")
+          span 帳 號 設 定
+        div(class="nav-container__option"
+          :class="{'selected': optionSelected === 1}"
+          @click="switchNav(1)")
+          svg-icon(:iconName="'lock'"
+            :iconWidth="'15px'"
+            :iconColor="'gray-2'")
+          span 登 入 與 安 全 性
+</template>
+<script lang="ts">
+import Vue from 'vue'
+import { mapState, mapGetters, mapMutations } from 'vuex'
+
+export default Vue.extend({
+  components: {
+  },
+  data() {
+    return {
+      optionSelected: 0
+    }
+  },
+  computed: {
+    ...mapState('user', [
+      'shortName', 'uname']),
+    ...mapGetters('user', {
+      account: 'getAccount'
+    }),
+    ...mapGetters({
+      currPanel: 'getCurrSidebarPanelType',
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      isShowPagePreview: 'page/getIsShowPagePreview'
+    }),
+    showUname(): string {
+      if (this.uname.length > 10) {
+        return this.uname.substring(0, 10).concat('...')
+      } else {
+        return this.uname
+      }
+    }
+  },
+  methods: {
+    ...mapMutations({
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+    }),
+    switchNav(index: number): void {
+      this.optionSelected = index
+      this.$emit('switch', index)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.sidebar {
+  @include size(200px, 100%);
+  background-color: setColor(gray-6);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  z-index: setZindex(sidebar);
+}
+.nav {
+  @include size(100%, 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+.nav-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: fit-content;
+  min-width: 100%;
+  padding-top: 30px;
+  &__profile {
+    display: flex;
+    padding-left: 10px;
+    padding-bottom: 30px;
+    .profile-img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 30px;
+      height: 30px;
+      font-weight: 700;
+      background: #61aac2;
+      border-radius: 50%;
+    }
+    .profile-text {
+      display: flex;
+      text-align: left;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+  &__option {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 3px);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    cursor: pointer;
+    margin: 10px 0;
+    > svg {
+      padding: 0 10px 0 20px;
+    }
+  }
+  .selected {
+    border-right: 3px solid setColor(blue-1);
+  }
+}
+.nav-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 15px 0px;
+  box-sizing: border-box;
+  transition: background-color 0.2s;
+  &__text {
+    transition: color 0.2s;
+  }
+}
+.nav-setting {
+  border-top: 1px solid #494e67;
+  padding: 30px;
+}
+</style>

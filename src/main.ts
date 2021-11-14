@@ -58,11 +58,8 @@ if (urlParams.has('token')) {
   const tokenGet = urlParams.get('token')
   if (tokenGet) {
     token = tokenGet
+    localStorage.setItem('token', token)
   }
-}
-
-if (token.length > 0) {
-  store.dispatch('user/login', { token: token })
 }
 
 if (['production'].includes(process.env.NODE_ENV)) {

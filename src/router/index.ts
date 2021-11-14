@@ -6,6 +6,7 @@ import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
+import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
@@ -105,24 +106,17 @@ const routes: Array<RouteConfig> = [
   {
     path: 'mydesign',
     name: 'MyDesign',
-    component: MyDesign,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        if (!store.getters['user/isLogin']) {
-          next({ name: 'Login', query: { redirect: to.fullPath } })
-        } else {
-          next()
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
+    component: MyDesign
   },
   {
     path: '/templates',
     name: 'TemplateCenter',
     component: TemplateCenter
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings
   },
   {
     path: '/',
@@ -168,6 +162,35 @@ const router = new VueRouter({
       children: routes
     }
   ]
+})
+
+router.beforeEach(async (to, from, next) => {
+  // some pages must render with userInfo,
+  // hence we should guarantee to receive login response before navigate to these pages
+  if (to.name === 'Settings' || to.name === 'MyDesign') {
+    // if not login, navigate to login page
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token === '' || !token) {
+        next({ name: 'Login', query: { redirect: to.fullPath } })
+      } else {
+        const data = await store.dispatch('user/login', { token: token })
+        if (data.flag === 0) {
+          next()
+        } else {
+          next({ name: 'Login', query: { redirect: to.fullPath } })
+        }
+      }
+    } else {
+      next()
+    }
+  } else {
+    const token = localStorage.getItem('token')
+    if (token && token.length > 0) {
+      await store.dispatch('user/login', { token: token })
+    }
+    next()
+  }
 })
 
 // router.beforeEach((to, from, next) => {

@@ -26,6 +26,9 @@ export interface IUserModule {
   role: number,
   adminMode: boolean,
   isAuthenticated: boolean,
+  account: string,
+  locale: string,
+  subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
   pending: boolean,
@@ -44,6 +47,9 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   adminMode: true,
   isAuthenticated: false,
+  account: '',
+  locale: '',
+  subscribe: 1,
   userAssets: {
     design: {
       content: []
@@ -80,6 +86,15 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getToken(state) {
     return state.token
+  },
+  getAccount(state) {
+    return state.account
+  },
+  getLocale(state) {
+    return state.locale
+  },
+  getSubscribe(state) {
+    return state.subscribe
   },
   getUserAssets(state) {
     return state.userAssets
@@ -273,8 +288,8 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async login({ commit, dispatch }, { token, account, password }) {
     try {
-      state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
+      state.isAuthenticated = token.length > 0
       console.log(data)
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
@@ -305,7 +320,10 @@ const actions: ActionTree<IUserModule, unknown> = {
         uname: uname,
         shortName: shortName,
         userId: data.data.user_id,
-        role: data.data.role
+        role: data.data.role,
+        account: data.data.account,
+        locale: data.data.locale,
+        subscribe: data.data.subscribe
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
@@ -316,7 +334,27 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_TOKEN', '')
     }
   },
-  async updateUser({ commit, dispatch }, { token, account, upass, uname, locale, subscribe }) {
+  /* eslint-disable camelcase */
+  async sendVcode({ commit }, { uname, account, upass, register, vcode_only, type, token }) {
+    try {
+      const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  /* eslint-disable camelcase */
+  async verifyVcode({ commit }, { account, vcode, token }) {
+    try {
+      const { data } = await userApis.verifyVcode(account, vcode, token)
+      return Promise.resolve(data)
+    } catch (error) {
+      console.log(error)
+      return Promise.reject(error)
+    }
+  },
+  async updateUser({ commit }, { token, account, upass, uname, locale, subscribe }) {
     try {
       const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe)
       return Promise.resolve(data)
