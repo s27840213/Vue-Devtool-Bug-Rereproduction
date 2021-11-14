@@ -297,7 +297,7 @@ export default Vue.extend({
     },
     textInfoRecorder() {
       const currLayer = LayerUtils.getCurrLayer
-      let config = currLayer as IText
+      let config = currLayer
       let start
       let end
       let subLayerIndex
@@ -307,16 +307,20 @@ export default Vue.extend({
         start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
         end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 
-        if (!TextUtils.isSel(start)) {
-          start = TextUtils.selectAll(config).start
-          end = TextUtils.selectAll(config).end
+        if (!TextUtils.isSel(start) && currLayer.type === 'text') {
+          start = TextUtils.selectAll(config as IText).start
+          end = TextUtils.selectAll(config as IText).end
         }
         TextUtils.updateSelection(start, end)
       }
 
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
-        config = (currLayer as IGroup).layers[subLayerIndex] as IText
+        if (subLayerIndex !== -1) {
+          config = (currLayer as IGroup).layers[subLayerIndex] as IText
+        } else {
+          subLayerIndex = undefined
+        }
       }
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
