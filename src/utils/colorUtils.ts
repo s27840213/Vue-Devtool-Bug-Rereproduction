@@ -1,4 +1,7 @@
+import { IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
+import store from '@/store'
+import layerUtils from './layerUtils'
 
 class ColorUtils {
   event: any
@@ -29,6 +32,35 @@ class ColorUtils {
 
   setCurrColor(color: string) {
     this.currColor = color
+  }
+}
+
+export function DocColorHandler(config: IShape | IText) {
+  switch (config.type) {
+    case 'shape':
+      store.commit('UPDATE_documentColors', {
+        pageIndex: layerUtils.pageIndex,
+        colors: (config as IShape).color
+          .map(color => {
+            return { color, count: -1 }
+          })
+      })
+      break
+    case 'text': {
+      config = config as IText
+      config.paragraphs
+        .forEach(p => {
+          p.spans.forEach(s => {
+            store.commit('UPDATE_documentColors', {
+              pageIndex: layerUtils.pageIndex,
+              colors: [{
+                color: s.styles.color,
+                count: -1
+              }]
+            })
+          })
+        })
+    }
   }
 }
 

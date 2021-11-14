@@ -1,6 +1,6 @@
 import { SrcObj } from './gallery'
 
-export const jsonVer = '1.0.2'
+export const jsonVer = '1.0.3'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
@@ -35,7 +35,8 @@ export interface ILayer<T extends IStyle = IStyle> {
   moved: boolean,
   dragging: boolean,
   designId: string,
-  styles: T
+  styles: T,
+  id?: string
 }
 
 export interface ITextStyle extends IStyle {

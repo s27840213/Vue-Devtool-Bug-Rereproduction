@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
-      @mousedown.capture="textRangeRecorder()")
+      @mousedown.capture="textInfoRecorder()")
     span(class="text-setting__title text-blue-1 label-lg") Text Setting
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
@@ -59,7 +59,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -72,6 +72,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
+import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   components: {
@@ -115,7 +116,7 @@ export default Vue.extend({
     TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -156,11 +157,14 @@ export default Vue.extend({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       updateDocumentColors: 'UPDATE_documentColors'
     }),
+    ...mapMutations('text', {
+      setCurrTextInfo: 'SET_textInfo'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     openFontsPanel() {
-      this.textRangeRecorder()
+      this.textInfoRecorder()
       this.$emit('openFontsPanel')
     },
     inputColor(input: Event) {
@@ -184,6 +188,21 @@ export default Vue.extend({
       if (color === this.props.color) return
       let currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
+      const colors: Array<{ color: string, count: number }> = []
+      const colorCounter = (paragraphs: Array<IParagraph>, step: number) => {
+        paragraphs
+          .forEach(p => {
+            p.spans.forEach(s => {
+              const i = colors.findIndex(e => e.color === s.styles.color)
+              if (i !== -1) {
+                colors[i].count += step
+              } else {
+                colors.push({ color: s.styles.color, count: step })
+              }
+            })
+          })
+      }
+
       if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
         const isSelCollapse = (() => {
           for (const [k, v] of Object.entries(this.sel.start)) {
@@ -191,78 +210,26 @@ export default Vue.extend({
           }
           return true
         })()
-        const colors: Array<{ color: string, count: number }> = []
         currLayer = currLayer as IText
-        currLayer.paragraphs
-          .forEach(p => {
-            p.spans.forEach(s => {
-              const i = colors.findIndex(e => e.color === s.styles.color)
-              if (i !== -1) {
-                colors[i].count--
-              } else {
-                colors.push({ color: s.styles.color, count: -1 })
-              }
-            })
-          })
-
-        // window.requestAnimationFrame(() => {
+        colorCounter(currLayer.paragraphs, -1)
         TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
-        // })
-
-        currLayer.paragraphs
-          .forEach(p => {
-            p.spans.forEach(s => {
-              const i = colors.findIndex(e => e.color === s.styles.color)
-              if (i !== -1) {
-                colors[i].count++
-              } else {
-                colors.push({ color: s.styles.color, count: 1 })
-              }
-            })
-          })
-        this.updateDocumentColors({
-          pageIndex: LayerUtils.pageIndex,
-          colors
-        })
+        colorCounter(currLayer.paragraphs, 1)
       } else {
-        const colors: Array<{ color: string, count: number }> = []
         const primaryLayer = currLayer as IGroup
         for (let i = 0; i < primaryLayer.layers.length; i++) {
           const layer = primaryLayer.layers[i] as IText
           if (layer.type === 'text') {
-            layer.paragraphs
-              .forEach(p => {
-                p.spans.forEach(s => {
-                  const i = colors.findIndex(e => e.color === s.styles.color)
-                  if (i !== -1) {
-                    colors[i].count--
-                  } else {
-                    colors.push({ color: s.styles.color, count: -1 })
-                  }
-                })
-              })
-            // window.requestAnimationFrame(() => {
+            colorCounter(layer.paragraphs, -1)
             TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
-            // })
-            layer.paragraphs
-              .forEach(p => {
-                p.spans.forEach(s => {
-                  const i = colors.findIndex(e => e.color === s.styles.color)
-                  if (i !== -1) {
-                    colors[i].count++
-                  } else {
-                    colors.push({ color: s.styles.color, count: 1 })
-                  }
-                })
-              })
+            colorCounter(layer.paragraphs, 1)
           }
         }
-        this.updateDocumentColors({
-          pageIndex: LayerUtils.pageIndex,
-          colors
-        })
       }
 
+      this.updateDocumentColors({
+        pageIndex: LayerUtils.pageIndex,
+        colors
+      })
       TextPropUtils.updateTextPropsState({ color })
       if (!TextUtils.isSel(this.sel.end)) {
         TextUtils.focus(this.sel.start, this.sel.end)
@@ -328,18 +295,32 @@ export default Vue.extend({
       }
       return origin
     },
-    textRangeRecorder() {
-      // if ((e.target as HTMLElement).classList.contains('record-selection')) {
+    textInfoRecorder() {
+      const currLayer = LayerUtils.getCurrLayer
+      let config = currLayer as IText
+      let start
+      let end
+      let subLayerIndex
+
       if (!TextUtils.isSel(this.sel.start)) {
         const sel = TextUtils.getSelection()
-        const start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-        const end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+        start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+        end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+
+        if (!TextUtils.isSel(start)) {
+          start = TextUtils.selectAll(config).start
+          end = TextUtils.selectAll(config).end
+        }
         TextUtils.updateSelection(start, end)
       }
+
+      if (currLayer.type === 'group') {
+        subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
+        config = (currLayer as IGroup).layers[subLayerIndex] as IText
+      }
+      this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
-      // console.log(this.sel.start.pIndex)
-      // console.log(this.sel.end.pIndex)
       TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
       /**
        *  Only select with range or none selection exist, the prop-panel update.
@@ -358,12 +339,20 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
+      const { config, subLayerIndex } = this.currTextInfo
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
-          this.fontSizeSteppingHandler(step)
-          TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
+          try {
+            this.fontSizeSteppingHandler(step)
+            TextUtils.updateLayerSize(config, LayerUtils.layerIndex, subLayerIndex)
+          } catch (error) {
+            console.error(error)
+            window.removeEventListener('mouseup', onmouseup)
+            clearInterval(interval)
+          }
         }
       }, tickInterval)
+
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
         if (new Date().getTime() - startTime < 500) {
@@ -372,20 +361,18 @@ export default Vue.extend({
         clearInterval(interval)
         StepsUtils.record()
       }
+
       window.addEventListener('mouseup', onmouseup)
-      TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
+      // TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
     },
     fontSizeSteppingHandler(step: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      const config = GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.layerIndex)) as IText
-      const sel = TextUtils.getSelection()
-      // const sel = this.sel
-      // if (!TextUtils.isSel(sel.end)) {
-      //   const { start, end } = TextPropUtils.selectAll(config)
-      //   TextUtils.updateSelection(start, end)
-      // }
-      if (sel) {
-        const { start, end } = sel
+      const { config, subLayerIndex } = this.currTextInfo
+      if (this.sel) {
+        const { start, end } = this.sel
+        // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
         const currStart = {} as ISelection
@@ -417,7 +404,7 @@ export default Vue.extend({
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
-            TextPropUtils.fontSizeStepper(span.styles.size + step, currStart, currEnd)
+            TextPropUtils.fontSizeStepper(span.styles.size + step)
 
             if (Object.keys(finalStart).length === 0) {
               Object.assign(finalStart, this.sel.start)
@@ -425,11 +412,9 @@ export default Vue.extend({
           }
         }
         Object.assign(finalEnd, this.sel.end)
-        // Object.assign(finalEnd, currEnd)
-        // const finalSel = [finalStart, finalEnd]
-        const finalSel = TextPropUtils.spanMerger(TextPropUtils.getCurrLayer.paragraphs, finalStart, finalEnd)
+        const finalSel = TextPropUtils.spanMerger(config.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
-          TextUtils.focus(finalSel[0], finalSel[1])
+          TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex)
           TextUtils.updateSelection(finalSel[0], finalSel[1])
           TextPropUtils.updateTextPropsState()
         })
@@ -490,15 +475,6 @@ export default Vue.extend({
         window.requestAnimationFrame(() => {
           TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value / 100).toFixed(2)), this.sel.start, this.sel.end)
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value / 100).toFixed(2)) })
-        })
-      }
-    },
-    setColor(e: Event) {
-      const { value } = e.target as HTMLInputElement
-      if (this.isValidHexColor(value)) {
-        window.requestAnimationFrame(() => {
-          TextPropUtils.spanPropertyHandler('color', this.props.color, this.sel.start, this.sel.end)
-          TextPropUtils.updateTextPropsState({ color: value })
         })
       }
     },

@@ -1,10 +1,10 @@
+import Vue from 'vue'
 import store from '@/store'
+import text, { ITextState } from '@/store/text/index'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import GeneralUtils from './generalUtils'
-import Vue from 'vue'
 import LayerUtils from './layerUtils'
-import { ITextState } from '@/store/text'
 import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
@@ -22,14 +22,14 @@ class TextPropUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get getCurrSel() {
-    return store.state.text
-      ? store.state.text.sel : { start: TextUtils.getNullSel(), end: TextUtils.getNullSel() }
+  get getCurrSel() { return (text.state as any).sel }
+  get getCurrTextProps() { return (text.state as any).props }
+  get getTextState() { return text.state as ITextState }
+  get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
+  get getTextInfo(): { config: IText, layerIndex: number, subLayerIndex?: number } {
+    return (text.state as any).currTextInfo
   }
 
-  get getCurrTextProps() { return store.state.text?.props }
-  get getTextState() { return store.state.text as ITextState }
-  get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
   get targetInfo() {
     const { type } = this.getCurrLayer
     const subLayerIndex = (type === 'group')
@@ -236,41 +236,26 @@ class TextPropUtils {
     // sync updating text effect if the color changed
     TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     return config
-
-    // Below is used to re-select the caret-range after the props are applied
-    // Vue.nextTick(() => {
-    //   if (TextUtils.isSel(end)) {
-    //     TextUtils.focus(start, end)
-    //     // TextUtils.updateSelection(start, end)
-    //     this.updateTextPropsState()
-    //   } else {
-    //     const select = window.getSelection()
-    //     if (select) {
-    //       if (propName === 'fontFamily' || propName === 'fontSize') {
-    //         start.offset = 0
-    //         Object.assign(end, start)
-    //         end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-    //         this.updateTextPropsState()
-    //         TextUtils.focus(start, end)
-    //         TextUtils.updateSelection(start, end)
-    //       } else {
-    //         TextUtils.focus(start, start, true)
-    //         TextUtils.updateSelection(start, TextUtils.getNullSel())
-    //       }
-    //     }
-    //   }
-    // })
-    // return { config, start, end }
   }
 
-  fontSizeStepper(value: number, selStart: ISelection, selEnd: ISelection, tmpLayerIndex?: number) {
-    this.spanPropertyHandler('fontSize', value, selStart, selEnd, tmpLayerIndex)
+  fontSizeStepper(value: number) {
+    // this.spanPropertyHandler('fontSize', value, selStart, selEnd, tmpLayerIndex)
     // Vue.nextTick(() => {
     //   const sel = window.getSelection()
     //   if (sel) {
     //     sel.removeAllRanges()
     //   }
     // })
+
+    const prop = { [fontPropsMap.fontSize]: value }
+    const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
+    const { start, end } = this.getCurrSel
+    const config = this._spanPropertyHandler('fontSize', prop, start, end, _config)
+    if (typeof subLayerIndex === 'undefined') {
+      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: config.paragraphs })
+    } else {
+      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: config.paragraphs })
+    }
   }
 
   spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection,
@@ -646,8 +631,8 @@ class TextPropUtils {
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
-    const sel = TextUtils.isSel(store.state.text?.sel.start)
-      ? GeneralUtils.deepCopy(store.state.text?.sel) as { start: ISelection, end: ISelection } : TextUtils.getSelection()
+    const sel = TextUtils.isSel(this.getCurrSel)
+      ? GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection } : TextUtils.getSelection()
     // If layer is assigned, means the current selected layer is a group/tmp layer
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     let start

@@ -164,8 +164,6 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
-      console.warn(json)
-      console.warn(pagesTmp[index])
       store.commit('SET_pages', pagesTmp)
     }
   }

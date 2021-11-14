@@ -326,7 +326,7 @@ export default Vue.extend({
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
-              if (start.sIndex === 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
+              if (start.sIndex === 0 && start.pIndex > 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
                 !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
                 start.pIndex -= 1
                 TextUtils.updateSelection(start, TextUtils.getNullSel())
@@ -490,62 +490,39 @@ export default Vue.extend({
       }
     },
     textSizeRefresh(text: IText) {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: true })
-      const isVertical = this.config.styles.writingMode.includes('vertical')
+      const group = LayerUtils.getCurrLayer as IGroup
+      const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
+      const isAllHorizon = !group.layers
+        .some(l => l.type === 'text' &&
+        ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
-      let layerX = this.getLayerPos.x
-      let layerY = this.getLayerPos.y
-      const textHW = TextUtils.getTextHW(text, this.config.widthLimit)
-
-      if (this.config.widthLimit === -1) {
-        const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
-        const currTextWidth = textHW.width
-        layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
-        if (layerX <= 0) {
-          layerX = 0
-          textHW.width = this.getLayerWidth
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-        } else if (layerX + currTextWidth >= pageWidth) {
-          layerX = pageWidth - this.getLayerWidth
-          textHW.width = this.getLayerWidth
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-        }
-      } else {
-        const initData = {
-          xSign: 1,
-          ySign: 1,
-          x: this.getLayerPos.x,
-          y: this.getLayerPos.y,
-          angle: this.getLayerRotate * Math.PI / 180
-        }
-        const offsetSize = {
-          width: isVertical ? textHW.width - this.getLayerWidth : 0,
-          height: isVertical ? 0 : textHW.height - this.getLayerHeight
-        }
-        const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
-        layerX = trans.x
-        layerY = trans.y
-      }
-
-      if (isVertical && textHW.width < 5) {
-        textHW.width = this.getLayerWidth
-      } else if (!isVertical && textHW.height < 5) {
-        const config = GeneralUtils.deepCopy(text) as IText
-        config.paragraphs[0].spans[0].text = '|'
-        config.paragraphs.splice(1)
-        textHW.height = TextUtils.getTextHW(config).height
-      }
-
+      const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-        width: textHW.width,
-        height: textHW.height,
+        width: newSize.width,
+        height: newSize.height,
         sclae: this.getLayerScale
       })
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-        x: layerX,
-        y: layerY
-      })
-      TextUtils.updateLayerSize(this.config, this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
+
+      if (isAllHorizon) {
+        const lowLine = this.getLayerPos.y + originSize.height
+        const diff = newSize.height - originSize.height
+        const targetSubLayers: Array<[number, number]> = []
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+              y: data[1] + diff
+            })
+          })
+      }
+      // @TODO: the vertical kind pending
+
+      TextUtils.updateLayerSize(this.config, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {

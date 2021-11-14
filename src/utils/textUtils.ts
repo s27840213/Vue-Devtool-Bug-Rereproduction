@@ -13,12 +13,8 @@ import { instrumentOutgoingRequests } from '@sentry/tracing/dist/browser'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get getCurrTextProps() { return store.state.text?.props }
-  get getCurrSel() {
-    return store.state.text
-      ? store.state.text.sel : { start: this.getNullSel(), end: this.getNullSel() }
-  }
-
+  get getCurrTextProps() { return (store.state as any).text.props }
+  get getCurrSel() { return (store.state as any).text.sel }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
 
   isArrowKey(e: KeyboardEvent): boolean {
@@ -87,8 +83,8 @@ class TextUtils {
           default:
             return div ? {
               div,
-              start: { ...store.state.text?.sel.start } as ISelection,
-              end: { ...store.state.text?.sel.end } as ISelection
+              start: { ...this.getCurrSel.start } as ISelection,
+              end: { ...this.getCurrSel.end } as ISelection
             } : undefined
         }
       } else {
@@ -450,9 +446,10 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex,
+  updateLayerSize(config: IText, layerIndex = LayerUtils.layerIndex,
     subLayerIndex: number | undefined = undefined, targetIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
+    const pageIndex = LayerUtils.pageIndex
     if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {

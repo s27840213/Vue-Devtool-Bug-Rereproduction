@@ -12,6 +12,7 @@ import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
+import { DocColorHandler } from './colorUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -277,13 +278,10 @@ class ShortcutHandler {
   }
 
   del() {
-    const delLayer = () => {
-      LayerUtils.deleteSelectedLayer()
-      GroupUtils.reset()
-    }
-    const currLayer = LayerUtils.getCurrLayer as IFrame
+    let currLayer = LayerUtils.getCurrLayer
     switch (currLayer.type) {
       case 'frame':
+        currLayer = currLayer as IFrame
         if (currLayer.clips.some(img => img.active)) {
           const idx = currLayer.clips.findIndex(img => img.active)
           if (currLayer.clips[idx].srcObj.type === 'frame') {
@@ -303,22 +301,26 @@ class ShortcutHandler {
           }
           StepsUtils.record()
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+          return
         }
         break
-      case 'shape':
-        console.warn('sss')
-        store.commit('UPDATE_documentColors', {
-          pageIndex: LayerUtils.pageIndex,
-          colors: (currLayer.color as Array<string>)
-            .map(color => {
-              return { color, count: -1 }
-            })
-        })
-        delLayer()
+      case 'group':
+        currLayer = currLayer as IGroup
+        currLayer.layers
+          .forEach(l => {
+            if (l.type === 'text' || l.type === 'shape') {
+              DocColorHandler(l as IText | IShape)
+            }
+          })
         break
       default:
-        delLayer()
+        if (currLayer.type === 'text' || currLayer.type === 'shape') {
+          DocColorHandler(currLayer as IShape | IText)
+        }
     }
+
+    LayerUtils.deleteSelectedLayer()
+    GroupUtils.reset()
   }
 
   cut() {

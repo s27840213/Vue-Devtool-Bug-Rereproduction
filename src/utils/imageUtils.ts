@@ -54,7 +54,7 @@ class ImageUtils {
 
   getSrcSize(type: string, width: number, preload = '') {
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = store.state.user?.imgSizeMap
+    const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
       while (width < sizeMap[i].size && i < sizeMap.length - 1) {

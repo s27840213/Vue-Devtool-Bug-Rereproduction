@@ -6,9 +6,9 @@ import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
-import user from '@/store/module/user'
+import user, { IUserModule } from '@/store/module/user'
 import color from '@/store/module/color'
-import text from '@/store/text'
+import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
 import markers from '@/store/module/markers'
 import templates from '@/store/module/templates'
@@ -739,7 +739,6 @@ const mutations: MutationTree<IEditorState> = {
           })
         }
       })
-    console.log(generalUtils.deepCopy(documentColors))
   }
 }
 
