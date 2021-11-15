@@ -18,6 +18,12 @@ const fontPropsMap = {
   color: 'color'
 }
 
+enum textPropType {
+  paragraph,
+  span,
+  block
+}
+
 class TextPropUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
@@ -42,29 +48,53 @@ class TextPropUtils {
     }
   }
 
-  onPropertyClick(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel()) {
+  propTypeSorter(propName: string): textPropType {
+    if (propName.includes('vertical')) {
+      return textPropType.block
+    }
+    if (propName.includes('text-align') || propName.includes('height')) {
+      return textPropType.paragraph
+    }
+    return textPropType.span
+  }
+
+  onPropertyClick(propName: string, value?: string | number, selStart = this.getCurrSel.start, selEnd = this.getCurrSel.end) {
     const currLayer = this.getCurrLayer
+    const { layerIndex, subLayerIndex, config } = this.getTextInfo
     if (!currLayer) return
 
-    if (this.isBlockProperty(propName)) {
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const groupLayer = currLayer
-        for (let i = 0; i < groupLayer.layers.length; i++) {
-          if (groupLayer.layers[i].type === 'text') {
-            this.blockPropertyHandler(propName, i)
+    if (currLayer.type === 'group' || currLayer.type === 'tmp') {
+      switch (this.propTypeSorter(propName)) {
+        case textPropType.block: {
+          const groupLayer = currLayer
+          if (typeof subLayerIndex === 'undefined') {
+            for (let i = 0; i < groupLayer.layers.length; i++) {
+              if (groupLayer.layers[i].type === 'text') {
+                this.blockPropertyHandler(propName, i)
+              }
+            }
+          } else {
+            this.blockPropertyHandler(propName, subLayerIndex)
+            TextUtils.updateLayerSize(config, layerIndex, subLayerIndex, subLayerIndex)
           }
+          break
         }
-      } else {
-        this.blockPropertyHandler(propName)
+        case textPropType.span: {
+          this.groupHandler(propName, value, selStart, selEnd, layerIndex, subLayerIndex)
+        }
       }
     } else {
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        let subLayIdx = (currLayer as IGroup).layers
-          .findIndex(l => l.type === 'text' && l.active) as number | undefined
-        subLayIdx = subLayIdx === -1 ? undefined : subLayIdx
-        this.groupHandler(propName, value, selStart, selEnd, LayerUtils.layerIndex, subLayIdx)
-      } else {
-        this.spanPropertyHandler(propName, value, selStart, selEnd)
+      switch (this.propTypeSorter(propName)) {
+        case textPropType.block:
+          this.blockPropertyHandler(propName)
+          break
+        case textPropType.span: {
+          // this.spanPropertyHandler(propName, value, selStart, selEnd)
+          const prop = this.propIndicator(selStart, selEnd, propName, value || '')
+          const newConfig = this._spanPropertyHandler(propName, prop, selStart, selEnd, config)
+          LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+        }
       }
     }
   }
@@ -86,6 +116,7 @@ class TextPropUtils {
           const { width, height } = TextUtils.getTextHW(config)
           writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
+          // @TODO: need to reallocate position of each layer
         }
         handler({ writingMode })
       }
@@ -166,18 +197,18 @@ class TextPropUtils {
       const prop = { [v]: propValue as string | number }
 
       for (let i = 0; i < groupLayer.layers.length; i++) {
-        const layer = groupLayer.layers[i]
-        if (layer.type === 'text') {
-          const { start, end } = selHandler(layer)
-          const newConfig = this._spanPropertyHandler(propName, prop, start, end, layer)
+        const config = groupLayer.layers[i]
+        if (config.type === 'text') {
+          const { start, end } = TextUtils.selectAll(config)
+          const newConfig = this._spanPropertyHandler(propName, prop, start, end, config)
           LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, i, { paragraphs: newConfig.paragraphs })
         }
       }
     } else {
-      const layer = (LayerUtils.getLayer(this.pageIndex, layerIndex) as IGroup).layers[subLayerIndex] as IText
-      const { start, end } = selHandler(layer)
-      const prop = this.propIndicator(start, end, propName, value ?? '', layer)
-      const newConfig = this._spanPropertyHandler(propName, prop, start, end, layer)
+      const config = (LayerUtils.getLayer(this.pageIndex, layerIndex) as IGroup).layers[subLayerIndex] as IText
+      const { start, end } = selHandler(config)
+      const prop = this.propIndicator(start, end, propName, value ?? '', config)
+      const newConfig = this._spanPropertyHandler(propName, prop, start, end, config)
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
       Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
     }
@@ -239,14 +270,6 @@ class TextPropUtils {
   }
 
   fontSizeStepper(value: number) {
-    // this.spanPropertyHandler('fontSize', value, selStart, selEnd, tmpLayerIndex)
-    // Vue.nextTick(() => {
-    //   const sel = window.getSelection()
-    //   if (sel) {
-    //     sel.removeAllRanges()
-    //   }
-    // })
-
     const prop = { [fontPropsMap.fontSize]: value }
     const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
     const { start, end } = this.getCurrSel
@@ -814,10 +837,6 @@ class TextPropUtils {
       opacity: span ? span.styles.opacity : NaN
     }
     return Object.assign(spanStyles, prop)
-  }
-
-  isBlockProperty(propName: string): boolean {
-    return propName.includes('text-align') || propName === 'font-vertical'
   }
 
   updateTextPropsState(prop: { [key: string]: string | number | boolean } | undefined = undefined) {

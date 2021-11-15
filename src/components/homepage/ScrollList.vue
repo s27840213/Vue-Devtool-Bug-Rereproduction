@@ -66,7 +66,6 @@ export default Vue.extend({
       this.items.scrollLeft = scrollLeft + (offsetWidth / 2)
     },
     handlePrev() {
-      console.log('handlePrev')
       const { scrollLeft, offsetWidth } = this.items
       this.items.scrollLeft = scrollLeft - (offsetWidth / 2)
     },
