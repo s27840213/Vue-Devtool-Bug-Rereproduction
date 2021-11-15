@@ -1,10 +1,8 @@
 <template lang="pug">
-  div(class="category-template-item")
+  div(class="category-template-item" @click="handleClickGroup")
     div(class="relative pointer"
-      style="margin-bottom: 2px;"
       @mouseover="showCarousel = true"
-      @mouseleave="showCarousel = false"
-      @click="handleShowGroupItems")
+      @mouseleave="showCarousel = false")
       image-carousel(v-if="showCarousel"
         :imgs="groupImages"
         @change="handleCarouselIdx")
@@ -17,7 +15,7 @@
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
     div(v-if="showId"
       class="category-template-item__id"
-      @click="copyId") {{ item.id }}
+      @click.self.stop="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
@@ -60,8 +58,8 @@ export default Vue.extend({
     handleCarouselIdx (idx: number) {
       this.carouselIdx = idx
     },
-    handleShowGroupItems () {
-      this.$emit('showGroup', this.item)
+    handleClickGroup () {
+      this.$emit('click', this.item)
     }
   }
 })
