@@ -1,7 +1,6 @@
 <template lang="pug">
   div(class="category-template-item")
-    div(class="relative"
-      style="margin-bottom: 2px;")
+    div(class="relative")
       img(class="category-template-item__img pointer"
         draggable="true"
         :src="src || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
@@ -24,7 +23,8 @@ export default Vue.extend({
   props: {
     src: String,
     item: Object,
-    showId: Boolean
+    showId: Boolean,
+    groupItem: Object
   },
   computed: {
     previewImage (): string {
@@ -44,7 +44,7 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addTemplate() {
-      AssetUtils.addAsset(this.item)
+      this.groupItem ? AssetUtils.addGroupTemplate(this.groupItem, this.item.id) : AssetUtils.addAsset(this.item)
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)

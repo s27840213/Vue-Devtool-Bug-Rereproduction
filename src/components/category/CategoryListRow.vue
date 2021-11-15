@@ -48,7 +48,7 @@ export default Vue.extend({
     handleIconDisplay (left = 0) {
       const { scrollWidth, offsetWidth } = this.items
       this.prevIcon = left > 0
-      this.nextIcon = left < (scrollWidth - offsetWidth)
+      this.nextIcon = left < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     }
   }
 })

@@ -44,6 +44,7 @@ import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
+import listService from '@/apis/list'
 
 export default Vue.extend({
   components: {
@@ -71,6 +72,11 @@ export default Vue.extend({
           imgSizeMap: json.image_size_map
         })
         console.log('static data loaded')
+      })
+    listService.getTheme({})
+      .then(response => {
+        const { data } = response.data
+        this.$store.commit('SET_themes', data.content)
       })
   },
   mounted() {
