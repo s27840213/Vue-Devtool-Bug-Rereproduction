@@ -272,6 +272,7 @@ class Controller {
       case 'B':
       case 'C':
       case 'E':
+      case 'G':
         switch (scaleType) {
           case 1:
             return resizers
@@ -327,6 +328,37 @@ class Controller {
         }
         this.updateShapePatchDiff(layerUtils.pageIndex, layerUtils.layerIndex, [patchDiffX, patchDiffY])
         this.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, width / scale, height / scale, scale)
+        break
+      }
+      case 'G': {
+        const scale = config.styles.scale
+        let patchDiffX = width * config.ratio / scale - config.vSize[0]
+        let patchDiffY = height * config.ratio / scale - config.vSize[1]
+        const pDiff = config.pDiff
+        switch (config.scaleType) {
+          case 1:
+            if (pDiff) {
+              patchDiffX = Math.max(patchDiffX, config.pDiffLimits?.[0] ?? 0)
+              patchDiffY = Math.max(patchDiffY, config.pDiffLimits?.[1] ?? 0)
+              width = (patchDiffX + config.vSize[0]) * scale / config.ratio
+              height = (patchDiffY + config.vSize[1]) * scale / config.ratio
+            }
+            break
+          case 2:
+            if (pDiff) {
+              patchDiffX = Math.max(patchDiffX, config.pDiffLimits?.[0] ?? 0)
+              width = (patchDiffX + config.vSize[0]) * scale / config.ratio
+            }
+            break
+          case 3:
+            if (pDiff) {
+              patchDiffY = Math.max(patchDiffY, config.pDiffLimits?.[1] ?? 0)
+              height = (patchDiffY + config.vSize[1]) * scale / config.ratio
+            }
+        }
+        this.updateShapePatchDiff(layerUtils.pageIndex, layerUtils.layerIndex, [patchDiffX, patchDiffY])
+        this.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, width / scale, height / scale, scale)
+        break
       }
     }
     return [width, height]

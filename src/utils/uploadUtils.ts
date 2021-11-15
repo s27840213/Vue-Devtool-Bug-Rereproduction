@@ -330,6 +330,57 @@ class UploadUtils {
       })
   }
 
+  uploadTmpJSON() {
+    const assetId = generalUtils.generateAssetId()
+
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_map.fields[key])
+    })
+
+    formData.append('key', `${this.loginOutput.upload_map.path}edit/temp.json`)
+    // only for template
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
+    const xhr = new XMLHttpRequest()
+    // console.log(this.loginOutput)
+    const pagesJSON = store.getters.getPages
+    const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
+
+    xhr.open('POST', this.loginOutput.upload_map.url, true)
+    xhr.send(formData)
+    xhr.onload = function () {
+      console.log(this)
+    }
+  }
+
+  async getTmpJSON() {
+    const fetchTarget = `https://template.vivipic.com/admin/${this.teamId}/edit/temp.json`
+    const response = await fetch(`${fetchTarget}?ver=${generalUtils.generateRandomString(6)}`)
+    stepsUtils.reset()
+    response.json().then((json: Array<IPage>) => {
+      store.commit('SET_pages', json)
+      /**
+       * @todo need to disable sub controller if we have
+       */
+      const hasTmp = json.some((page: IPage, pageIndex: number) => {
+        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp | IFrame, layerIndex: number) => {
+          if (layer.active) {
+            layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
+            return true
+          }
+          return false
+        })
+      })
+      stepsUtils.record()
+    })
+  }
+
   uploadLayer(type: string) {
     const targetBucket = type === 'shape' ? 'svg' : type
     const designId = generalUtils.generateRandomString(20)

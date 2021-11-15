@@ -19,6 +19,10 @@ div(class="popup-file")
     span {{showGuideline ?'隱藏所有參考線':'顯示所有參考線'}}
   div(class="popup-file__item" @click="clearGuideline()")
     span 刪除所有參考線
+  div(class="popup-file__item" @click="uploadTmpJson()")
+    span Upload Temp.json
+  div(class="popup-file__item" @click="getTmpJson()")
+    span Get Temp.json
 </template>
 
 <script lang="ts">
@@ -77,6 +81,13 @@ export default Vue.extend({
     },
     save() {
       shortcutHandler.save()
+    },
+    uploadTmpJson() {
+      uploadUtils.uploadTmpJSON()
+    },
+    getTmpJson() {
+      // designUtils.newDesign()
+      uploadUtils.getTmpJSON()
     }
   }
 })

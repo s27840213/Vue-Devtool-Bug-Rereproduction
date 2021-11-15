@@ -109,7 +109,8 @@ export interface IShape extends ILayer<IStyle> {
   trimOffset?: number[],
   styleArray: string[],
   filled?: boolean,
-  shapeType?: string
+  shapeType?: string,
+  pDiffLimits?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
   previewSrc?: string,
