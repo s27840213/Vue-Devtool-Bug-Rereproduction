@@ -107,38 +107,10 @@ import { IPopupOptions } from '@/interfaces/popup'
 export default Vue.extend({
   data() {
     return {
-      pageUploadMenu: {
-        icon: 'copy',
-        text: '上傳單頁模板',
-        shortcutText: '',
-        action: () => {
-          uploadUtils.uploadTemplate()
-        }
-      },
-      pageUpdateMenu: {
-        icon: 'copy',
-        text: '更新單頁模板',
-        shortcutText: '',
-        action: () => {
-          uploadUtils.updateTemplate()
-        }
-      },
-      uploadGroupMenu: {
-        icon: 'copy',
-        text: '上傳群組模板',
-        shortcutText: '',
-        action: () => {
-          uploadUtils.setGroupDesign(0)
-        }
-      },
-      modifyGroupMenu: {
-        icon: 'copy',
-        text: '更新群組模板',
-        shortcutText: '',
-        action: () => {
-          uploadUtils.setGroupDesign(1)
-        }
-      }
+      typeMap: {
+        text: '文字',
+        shape: 'SVG'
+      } as { [index: string]: string }
     }
   },
   computed: {
@@ -182,8 +154,23 @@ export default Vue.extend({
     isFrame(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
     },
-    hasDesignId(): boolean {
+    hasPageDesignId(): boolean {
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
+    },
+    hasLayerDesignId(): boolean {
+      return this.currSelectedInfo.layers[0].designId !== ''
+    },
+    // the group which contain at least one text, but it can contain other type of layer
+    isTextGroup(): boolean {
+      if (this.isGroup) {
+        const typeSet = layerUtils.getGroupLayerTypes()
+        return typeSet.has('text')
+      } else {
+        return false
+      }
+    },
+    updateType(): string {
+      return this.isTextGroup || this.isText ? 'text' : this.getType[0]
     },
     updateOptions(): Array<IPopupOptions> {
       return [
@@ -200,7 +187,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新單頁模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
+          condition: this.inAdminMode && this.hasPageDesignId && this.isLogin,
           action: () => {
             uploadUtils.updateTemplate()
           }
@@ -222,6 +209,24 @@ export default Vue.extend({
           action: () => {
             uploadUtils.setGroupDesign(1)
           }
+        },
+        {
+          icon: 'copy',
+          text: `上傳 ${this.typeMap[this.updateType]}`,
+          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          shortcutText: '',
+          action: () => {
+            uploadUtils.uploadLayer(this.updateType)
+          }
+        },
+        {
+          icon: 'copy',
+          text: `更新 ${this.typeMap[this.updateType]}`,
+          condition: this.hasLayerDesignId && this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          shortcutText: '',
+          action: () => {
+            uploadUtils.updateLayer(this.updateType)
+          }
         }
       ]
     },
@@ -233,15 +238,6 @@ export default Vue.extend({
         action: () => {
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
         }
-      }
-    },
-    // the group which contain at least one text, but it can contain other type of layer
-    isTextGroup(): boolean {
-      if (this.isGroup) {
-        const typeSet = layerUtils.getGroupLayerTypes()
-        return typeSet.has('text')
-      } else {
-        return false
       }
     }
   },
