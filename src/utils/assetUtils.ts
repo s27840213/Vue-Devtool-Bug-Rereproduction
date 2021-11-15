@@ -317,7 +317,7 @@ class AssetUtils {
         : { x, y }
     )
     const newLayer = config.type === 'group'
-      ? LayerFactary.newGroup((config.styles as ICalculatedGroupStyle), (config as IGroup).layers)
+      ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
@@ -386,7 +386,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
   }
 
-  async addGroupTemplate (item: IListServiceContentDataItem, childId?: string) {
+  async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
     const { content_ids: contents = [], type } = item
     const lastPageIndex = this.getPages.length
     const promises = contents?.filter(content => childId ? content.id === childId : true)
