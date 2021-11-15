@@ -572,8 +572,8 @@ class UploadUtils {
     }
 
     if (page.backgroundImage.config.src) {
-      const src = page.backgroundImage.config.src
-      const type = ImageUtils.getSrcType(page.backgroundImage.config.src)
+      const src = page.backgroundImage.config.src as string
+      const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
       page.backgroundImage.config.srcObj = {
         type,
         userId: ImageUtils.getUserId(src, type),
@@ -624,6 +624,9 @@ class UploadUtils {
     }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
+    const documentColors = page.documentColors.map(e => e.color)
+    delete page.documentColors
+    page.documentColors = documentColors
     return page
   }
 

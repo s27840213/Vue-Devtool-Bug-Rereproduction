@@ -200,7 +200,7 @@ class TextPropUtils {
       for (let i = 0; i < groupLayer.layers.length; i++) {
         const config = groupLayer.layers[i]
         if (config.type === 'text') {
-          const { start, end } = selHandler(config)
+          const { start, end } = TextUtils.selectAll(config)
           const newConfig = this._spanPropertyHandler(propName, prop, start, end, config)
           LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, i, { paragraphs: newConfig.paragraphs })
         }

@@ -301,7 +301,6 @@ export default Vue.extend({
       let start
       let end
       let subLayerIndex
-
       if (!TextUtils.isSel(this.sel.start)) {
         const sel = TextUtils.getSelection()
         start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()

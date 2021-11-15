@@ -19,6 +19,7 @@ class TemplateUtils {
 
   updateTemplate(json: any): any {
     if (!json) { return }
+    console.log(GeneralUtils.deepCopy(json))
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
       let isAssignField = false
