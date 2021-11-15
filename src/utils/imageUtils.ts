@@ -319,7 +319,7 @@ class ImageUtils {
     })
   }
 
-  async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number }> {
+  async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image()
       image.onload = () => resolve(image)
@@ -328,10 +328,9 @@ class ImageUtils {
     })
     try {
       const img = await loadImage
-      return { width: img.width, height: img.height }
+      return { width: img.width, height: img.height, exists: true }
     } catch (error) {
-      console.log(error)
-      return { width: defaultWidth, height: defaultHeight }
+      return { width: defaultWidth, height: defaultHeight, exists: false }
     }
   }
 

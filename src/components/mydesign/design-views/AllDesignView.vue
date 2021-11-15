@@ -13,12 +13,16 @@
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import { IDesign, IPathedDesign } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
     DesignGallery
+  },
+  mounted() {
+    this.fetchAllDesigns()
   },
   data() {
     return {
@@ -33,18 +37,20 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      allDesignsRaw: 'getAllDesigns'
     }),
-    allDesigns() {
-      const designs = designUtils.getAllDesigns(this.folders)
-      designUtils.sortDesignsBy(designs, 'time', true)
-      return designs.map((item) => [item.path, item.design])
+    allDesigns(): ([string[], IDesign])[] {
+      return (this.allDesignsRaw as IPathedDesign[]).map((item) => [item.path, item.design])
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchAllDesigns: 'fetchAllDesigns'
+    }),
     handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)

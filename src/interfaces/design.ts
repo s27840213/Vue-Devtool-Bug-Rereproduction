@@ -4,16 +4,18 @@ export interface IDesign {
   width: number,
   height: number,
   thumbnail: string,
-  createdTime: number,
-  lastUpdatedTime: number
+  createdTime: string,
+  lastUpdatedTime: string,
+  favorite: boolean,
+  ver: number
 }
 
 export interface IFolder {
   id: string,
   name: string,
   author: string,
-  createdTime: number,
-  lastUpdatedTime: number,
+  createdTime: string,
+  lastUpdatedTime: string,
   isExpanded: boolean,
   isCurrLocation: boolean,
   subFolders: IFolder[],

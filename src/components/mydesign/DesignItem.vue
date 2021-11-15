@@ -10,7 +10,7 @@
       @mouseleave="handleMouseLeave")
       div(class="design-item__img-container"
         :style="containerStyles()")
-        img(v-if="ratioReady"
+        img(v-if="previewCheckReady"
             class="design-item__thumbnail"
             :style="imageStyles()"
             draggable="false"
@@ -88,6 +88,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
 import vClickOutside from 'v-click-outside'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
@@ -111,47 +112,44 @@ export default Vue.extend({
       isMenuOpen: false,
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
-      ratioReady: false,
       imgWidth: 10,
-      imgHeight: 10
+      imgHeight: 10,
+      previewCheckReady: false,
+      previewPlaceholder: require('@/assets/img/svg/image-preview.svg')
     }
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   created() {
-    this.ratioReady = false
-    imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
-      const { width, height } = size
-      this.imgWidth = width
-      this.imgHeight = height
-      this.ratioReady = true
-    })
+    this.checkImageSize()
   },
   watch: {
-    thumbnail(newVal) {
-      this.isDragged = false
-      this.ratioReady = false
-      imageUtils.getImageSize(newVal, this.config.width, this.config.height).then((size) => {
-        const { width, height } = size
-        this.imgWidth = width
-        this.imgHeight = height
-        this.ratioReady = true
-      })
+    config: {
+      handler: function() {
+        this.$nextTick(() => {
+          this.isDragged = false
+          this.checkImageSize()
+        })
+      },
+      deep: true
     }
   },
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders'
     }),
-    appliedUrl(): string {
-      return this.config.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.config.thumbnail
-    },
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
     },
     aspectRatio(): number {
-      return this.imgWidth / this.imgHeight
+      return this.config.width / this.config.height
+    },
+    configPreview(): string {
+      return designUtils.getDesignPreview(this.config.id, 1, this.config.ver)
+    },
+    appliedUrl(): string {
+      return this.config.thumbnail !== '' ? this.config.thumbnail : this.previewPlaceholder
     }
   },
   methods: {
@@ -283,6 +281,20 @@ export default Vue.extend({
     },
     emitDeselect() {
       this.$emit('deselect')
+    },
+    checkImageSize() {
+      if (this.config.thumbnail !== '') {
+        this.previewCheckReady = true
+        return
+      }
+      this.previewCheckReady = false
+      imageUtils.getImageSize(this.configPreview, 80, 80).then((size) => {
+        const { width, height, exists } = size
+        this.imgWidth = width
+        this.imgHeight = height
+        this.previewCheckReady = true
+        this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+      })
     }
   }
 })
@@ -506,6 +518,12 @@ export default Vue.extend({
   transform: translate(-50%, -50%) scale(0.5);
   pointer-events: none;
   z-index: 1000;
+  > div {
+    background-color: white;
+    > img {
+      display: block;
+    }
+  }
   &__stack {
     position: absolute;
     top: 10px;

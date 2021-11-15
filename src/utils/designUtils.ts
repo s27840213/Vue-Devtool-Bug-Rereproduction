@@ -1,24 +1,26 @@
 import { IUserDesignContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import designApis from '@/apis/design'
+import { AxiosPromise } from 'axios'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
-const FIELD_MAPPER: { [key: string]: (item: IDesign | IFolder) => any } = {
+const FIELD_MAPPER: { [key: string]: (item: IDesign | IFolder) => string } = {
   name: (item: IDesign | IFolder): string => item.name,
-  time: (item: IDesign | IFolder): number => item.lastUpdatedTime
+  time: (item: IDesign | IFolder): string => item.lastUpdatedTime
 }
 
-const COMP_MAPPER: { [key: string]: (a: any, b: any, descending: boolean) => number } = {
+const COMP_MAPPER: { [key: string]: (a: string, b: string, descending: boolean) => number } = {
   name: (a: string, b: string, descending: boolean): number => {
     const modifier = descending ? -1 : 1
     return a.localeCompare(b) * modifier
   },
-  time: (a: number, b: number, descending: boolean): number => {
+  time: (a: string, b: string, descending: boolean): number => {
     const modifier = descending ? -1 : 1
-    return (a - b) * modifier
+    return (Date.parse(a) - Date.parse(b)) * modifier
   }
 }
 
@@ -27,14 +29,28 @@ class DesignUtils {
   ROOT_DISPLAY = '我所有的設計'
   get isLogin(): boolean { return store.getters['user/isLogin'] }
 
+  apiDesign2IDesign(design: IUserDesignContentData): IDesign {
+    return {
+      id: design.id,
+      name: design.name,
+      width: design.width,
+      height: design.height,
+      createdTime: design.create_time,
+      lastUpdatedTime: design.update_time,
+      favorite: design.favorite > 0,
+      ver: design.ver,
+      thumbnail: ''
+    }
+  }
+
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
       id: isROOT ? this.ROOT : generalUtils.generateAssetId(),
       name,
       author,
-      createdTime: time,
-      lastUpdatedTime: time,
+      createdTime: time.toString(),
+      lastUpdatedTime: time.toString(),
       isExpanded: false,
       isCurrLocation: false,
       designs: [],
@@ -68,8 +84,10 @@ class DesignUtils {
         height: 1200,
         id: generalUtils.generateAssetId(),
         thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-        createdTime: time,
-        lastUpdatedTime: time
+        createdTime: time.toString(),
+        lastUpdatedTime: time.toString(),
+        favorite: false,
+        ver: 0
       })
     }
     return template
@@ -209,36 +227,6 @@ class DesignUtils {
     }
   }
 
-  getAllDesigns(folders: IFolder[]): IPathedDesign[] {
-    const nodes: IPathedFolder[] = []
-    for (const folder of folders) {
-      nodes.push({
-        parents: [],
-        folder
-      })
-    }
-    const res = []
-    while (nodes.length > 0) {
-      const node = nodes.shift()
-      if (node) {
-        const { parents, folder } = node
-        for (const design of folder.designs) {
-          res.push({
-            path: this.createPath(node),
-            design
-          })
-        }
-        for (const subFolder of folder.subFolders) {
-          nodes.push({
-            parents: this.createPath(node),
-            folder: subFolder
-          })
-        }
-      }
-    }
-    return res
-  }
-
   foldAll(folders: IFolder[]): IFolder[] {
     const nodes = [...folders]
     while (nodes.length > 0) {
@@ -318,16 +306,7 @@ class DesignUtils {
   dispatchDesignMenuAction(icon: string, path: string[], design: IDesign): { event: string, payload: any } | undefined {
     switch (icon) {
       case 'copy': {
-        const newId = generalUtils.generateAssetId()
-        const newDesign = generalUtils.deepCopy(design)
-        newDesign.id = newId
-        newDesign.name += ' 的副本'
-        newDesign.createdTime = Date.now()
-        newDesign.lastUpdatedTime = newDesign.createdTime
-        store.commit('design/UPDATE_addDesign', {
-          path,
-          design: newDesign
-        })
+        store.dispatch('design/copyDesign', design)
         return
       }
       case 'trash': {
@@ -445,8 +424,9 @@ class DesignUtils {
   }
 
   delete(pathedDesign: IPathedDesign) {
-    store.commit('design/UPDATE_addToTrash', pathedDesign)
-    store.commit('design/UPDATE_deleteDesign', pathedDesign)
+    // store.commit('design/UPDATE_addToTrash', pathedDesign)
+    // store.commit('design/UPDATE_deleteDesign', pathedDesign)
+    store.dispatch('design/deleteDesign', pathedDesign.design)
   }
 
   deleteAll(pathedDesigns: IPathedDesign[]) {
@@ -540,9 +520,23 @@ class DesignUtils {
     return level >= 4
   }
 
-  getDesignPreview(assetId: string, scale = 2 as 1 | 2): string {
+  getCurrList(state: any): IPathedDesign[] {
+    switch (state.currLocation) {
+      case 'a':
+        return state.allDesigns
+      case 'f':
+        return state.favoriteDesigns
+      case 't':
+        return state.trashDesigns
+      default:
+        return state.folderDesigns
+    }
+  }
+
+  getDesignPreview(assetId: string, scale = 2 as 1 | 2, ver?: number): string {
     const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
-    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${generalUtils.generateRandomString(6)}`
+    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
+    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
     return previewUrl
   }
 
