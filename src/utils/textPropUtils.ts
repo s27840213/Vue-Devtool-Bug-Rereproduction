@@ -8,7 +8,6 @@ import LayerUtils from './layerUtils'
 import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
-import { config } from 'dotenv/types'
 
 const fontPropsMap = {
   fontSize: 'size',
