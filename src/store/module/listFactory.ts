@@ -28,10 +28,10 @@ export default function (this: any) {
 
   const actions: ActionTree<IListModuleState, unknown> = {
     getCategories: async ({ commit, state }) => {
-      const { locale } = state
+      const { locale, theme } = state
       commit(SET_STATE, { pending: true, categories: [] })
       try {
-        const { data } = await this.api({ locale, listAll: 0 })
+        const { data } = await this.api({ locale, theme, listAll: 0 })
         commit(SET_CATEGORIES, data.data)
       } catch (error) {
         captureException(error)
@@ -39,11 +39,11 @@ export default function (this: any) {
     },
 
     getContent: async ({ commit, state }, params = {}) => {
-      const { locale } = state
+      const { locale, theme } = state
       const { keyword } = params
       commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, listAll: 1 })
+        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
       } catch (error) {
@@ -65,12 +65,13 @@ export default function (this: any) {
     },
 
     getTagContent: async ({ commit, state }, params = {}) => {
-      const { locale } = state
+      const { locale, theme } = state
       const { keyword } = params
       commit(SET_STATE, { pending: true, keyword, content: {} })
       try {
         const { data } = await this.api({
           locale,
+          theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1
         })

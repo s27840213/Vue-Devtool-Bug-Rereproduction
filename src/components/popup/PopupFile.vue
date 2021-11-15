@@ -4,7 +4,7 @@ div(class="popup-file")
     span 檔案名稱
   div(class="popup-file__item text-gray-3")
     span {{pageSize.w}}像素 x {{pageSize.h}}像素
-  div(class="popup-file__item")
+  div(class="popup-file__item" @click="save()")
     span 保存
   div(class="popup-file__item" @click="newDesign()")
     span 建立新設計
@@ -28,6 +28,8 @@ import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
+import designUtils from '@/utils/designUtils'
+import shortcutHandler from '@/utils/shortcutUtils'
 
 export default Vue.extend({
   data() {
@@ -69,12 +71,12 @@ export default Vue.extend({
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
     },
     newDesign() {
-      pageUtils.setPages()
-      pageUtils.clearPagesInfo()
-      if (this.isLogin) {
-        // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
-      }
+      designUtils.newDesign()
+
       this.closePopup()
+    },
+    save() {
+      shortcutHandler.save()
     }
   }
 })

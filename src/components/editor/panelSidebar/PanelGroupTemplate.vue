@@ -12,6 +12,7 @@
         class="panel-group-template__item"
         :showId="showId"
         :item="item"
+        :groupItem="groupItem"
         :key="`${item.id}${idx}`")
 </template>
 

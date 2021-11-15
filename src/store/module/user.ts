@@ -52,16 +52,20 @@ const getDefaultState = (): IUserModule => ({
   subscribe: 1,
   userAssets: {
     design: {
-      content: []
+      content: [],
+      title: ''
     },
     font: {
-      content: []
+      content: [],
+      title: ''
     },
     image: {
-      content: []
+      content: [],
+      title: ''
     },
     video: {
-      content: []
+      content: [],
+      title: ''
     }
   },
   downloadUrl: '',
@@ -102,6 +106,9 @@ const getters: GetterTree<IUserModule, any> = {
   getDownloadUrl(state) {
     return state.downloadUrl
   },
+  getAssetDesign(state) {
+    return state.userAssets.design.content
+  },
   getImages(state) {
     return state.images
   },
@@ -135,8 +142,9 @@ const mutations: MutationTree<IUserModule> = {
         }
       })
   },
+  // This function is out of date, may be modified in the future
   [SET_IMAGES](state: IUserModule) {
-    const { userAssets, downloadUrl } = state
+    const { userAssets, downloadUrl, teamId, userId } = state
     const isAdmin = state.role === 0
     const images = userAssets.image.content.map((image: IUserImageContentData) => {
       const aspectRatio = image.width / image.height
@@ -151,10 +159,10 @@ const mutations: MutationTree<IUserModule> = {
           height: prevH
         },
         urls: {
-          prev: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/prev`) : image.signed_url?.prev ?? '',
-          full: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/full`) : image.signed_url?.full ?? '',
-          larg: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/larg`) : image.signed_url?.larg ?? '',
-          original: isAdmin ? downloadUrl.replace('*', `asset/image/${image.id}/original`) : image.signed_url?.original ?? ''
+          prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
+          full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
+          larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
+          original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? ''
         }
       }
     })
@@ -188,15 +196,23 @@ const mutations: MutationTree<IUserModule> = {
     state.images[targetIndex].progress = progress
   },
   [UPDATE_IMAGE_URLS](state: IUserModule, { assetId }) {
-    const { images, downloadUrl } = state
+    const { images, downloadUrl, teamId, userId } = state
+    const isAdmin = state.role === 0
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return img.id === assetId
     })
+    // const targetUrls = {
+    //   prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : image.signed_url?.prev ?? '',
+    //   full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : image.signed_url?.full ?? '',
+    //   larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : image.signed_url?.larg ?? '',
+    //   original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : image.signed_url?.original ?? ''
+    // }
+
     const targetUrls = {
-      prev: downloadUrl.replace('*', `asset/image/${images[targetIndex].id}/prev`),
-      full: downloadUrl.replace('*', `asset/image/${images[targetIndex].id}/full`),
-      larg: downloadUrl.replace('*', `asset/image/${images[targetIndex].id}/larg`),
-      original: downloadUrl.replace('*', `asset/image/${images[targetIndex].id}/original`)
+      prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : '',
+      full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : '',
+      larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : '',
+      original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : ''
     }
 
     images[targetIndex].urls = targetUrls
@@ -272,11 +288,15 @@ const actions: ActionTree<IUserModule, unknown> = {
         console.log('Update DB')
       } else if (type === 1) {
         console.log('Update preview')
-      } else if (type === 3) {
-        console.group('Update DB and preview')
+      } else if (type === 2) {
+        console.log('Update DB and preview')
       }
       const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
       const { flag } = data
+      if (flag === 0) {
+        console.log('Put asset success')
+        dispatch('getAssets', { token: state.token })
+      }
       if (flag === 1) {
         console.log('Put asset failed')
       } else if (flag === 2) {
@@ -328,7 +348,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('getAssets', { token: newToken })
-      uploadUtils.uploadTmpJSON()
     } else {
       console.log('login failed')
       commit('SET_TOKEN', '')

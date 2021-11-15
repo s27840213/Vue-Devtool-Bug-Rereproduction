@@ -44,8 +44,9 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
     }
-
-    // uploadUtils.uploadDesign()
+    if (uploadUtils.isLogin) {
+      uploadUtils.uploadDesign()
+    }
   }
 
   undo() {
@@ -109,6 +110,7 @@ class StepsUtils {
   reset() {
     this.steps = []
     this.currStep = -1
+    this.record()
   }
 }
 

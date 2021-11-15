@@ -250,7 +250,7 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType'
     }),
-    ...mapState('user', ['downloadUrl', 'checkedAssets']),
+    ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
       return this.getLayer(this.pageIndex, this.currSelectedIndex)
     },

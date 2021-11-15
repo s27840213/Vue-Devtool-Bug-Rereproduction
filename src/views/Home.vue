@@ -12,7 +12,8 @@
           div(class="subtitle-1 pb-20"
             style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
           btn(:type="'primary-mid'" class="rounded"
-            @click.native="goToPage('Editor')") 開 始 製 作
+            @click.native="newDesign()") 開 始 製 作
+            //- @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-size")
         scroll-list(:list="themeList" type='theme'
@@ -37,7 +38,8 @@
           div(class="home-content-feature-text")
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
-              @click.native="goToPage('Editor')") 開 始 製 作
+              @click.native="newDesign()") 開 始 製 作
+              //- @click.native="goToPage('Editor')") 開 始 製 作
       div(class="home-content-title label-lg")
         div
           template(v-for="tag in tags")
@@ -73,6 +75,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -176,7 +179,12 @@ export default Vue.extend({
         this.$router.push({ name: pageName })
       }
     },
-    featureItemClicked (idx: number) {
+    newDesign() {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign()
+      })
+    },
+    featureItemClicked(idx: number) {
       this.featureSelected = idx
     },
     openPopup() {
@@ -258,21 +266,21 @@ export default Vue.extend({
     @media screen and (min-width: 990px) {
       padding: 56px 0;
     }
-      > img {
-        width: 100%;
-      }
-      &-title {
-        position: absolute;
-        top: 34%;
-        font-size: 1.6vw;
-        font-weight: 700;
-        line-height: 1.3;
-      }
-      &-subtitle {
-        position: absolute;
-        top: 57%;
-        font-size: 1.1vw;
-      }
+    > img {
+      width: 100%;
+    }
+    &-title {
+      position: absolute;
+      top: 34%;
+      font-size: 1.6vw;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    &-subtitle {
+      position: absolute;
+      top: 57%;
+      font-size: 1.1vw;
+    }
   }
   &-feature {
     display: flex;
@@ -323,7 +331,7 @@ export default Vue.extend({
       }
     }
     .selected {
-      background: #09467E;
+      background: #09467e;
       color: white;
     }
   }
@@ -345,6 +353,6 @@ export default Vue.extend({
   }
 }
 .x-scrollbar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 </style>

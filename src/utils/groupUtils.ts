@@ -307,10 +307,6 @@ class GroupUtils {
       layers: [],
       types: new Set<string>()
     })
-    store.commit('SET_currSelectedInfo', {
-      index: -1,
-      type: ''
-    })
   }
 
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {

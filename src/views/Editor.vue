@@ -87,8 +87,9 @@ export default Vue.extend({
     window.removeEventListener('beforeunload', this.beforeWindowUnload)
   },
   beforeRouteLeave(to, from, next) {
-    // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-    next()
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+      next()
+    })
     // const answer = this.confirmLeave()
     // if (answer) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
@@ -110,12 +111,14 @@ export default Vue.extend({
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
-    beforeWindowUnload(e: any) {
+    async beforeWindowUnload(e: any) {
       // Cancel the event
-      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      // e.preventDefault()
-      // // Chrome requires returnValue to be set
-      // e.returnValue = ''
+      if (uploadUtils.isLogin) {
+        e.preventDefault()
+        await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+        // // Chrome requires returnValue to be set
+        e.returnValue = 'Do you really want to leave? You have unsaved changes'
+      }
     }
   }
 })

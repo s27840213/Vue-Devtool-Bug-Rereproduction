@@ -50,8 +50,7 @@ export default Vue.extend({
       'getToken',
       'getImages',
       'getIsPending',
-      'getUserAssets',
-      'getDownloadUrl'
+      'getUserAssets'
     ]),
     margin(): number {
       return this.galleryUtils.margin

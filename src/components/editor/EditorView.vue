@@ -95,7 +95,8 @@ export default Vue.extend({
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     const editorViewBox = this.$el as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
-    const resizeRatio = Math.min(editorViewBox.clientWidth / this.pageSize.width, editorViewBox.clientHeight / this.pageSize.height) * 0.8
+    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.pageSize.width * (this.pageScaleRatio / 100)), editorViewBox.clientHeight / (this.pageSize.height * (this.pageScaleRatio / 100))) * 0.8
+
     this.setPageScaleRatio(Math.round(this.pageScaleRatio * resizeRatio))
     this.$nextTick(() => {
       this.currActivePageIndex = PageUtils.activeMostCentralPage()

@@ -1,13 +1,17 @@
+import { IUserDesignContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import router from '@/router'
 import store from '@/store'
 import generalUtils from './generalUtils'
+import pageUtils from './pageUtils'
+import uploadUtils from './uploadUtils'
 
-const FIELD_MAPPER: {[key: string]: (item: IDesign | IFolder) => any} = {
+const FIELD_MAPPER: { [key: string]: (item: IDesign | IFolder) => any } = {
   name: (item: IDesign | IFolder): string => item.name,
   time: (item: IDesign | IFolder): number => item.lastUpdatedTime
 }
 
-const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => number} = {
+const COMP_MAPPER: { [key: string]: (a: any, b: any, descending: boolean) => number } = {
   name: (a: string, b: string, descending: boolean): number => {
     const modifier = descending ? -1 : 1
     return a.localeCompare(b) * modifier
@@ -21,6 +25,7 @@ const COMP_MAPPER: {[key: string]: (a: any, b: any, descending: boolean) => numb
 class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = '我所有的設計'
+  get isLogin(): boolean { return store.getters['user/isLogin'] }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
@@ -82,7 +87,7 @@ class DesignUtils {
     return this.appendPath(pathedFolder.parents, pathedFolder.folder)
   }
 
-  makeNormalMenuItems(): {icon: string, text: string, extendable?: boolean}[] {
+  makeNormalMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
     return [
       {
         icon: 'copy',
@@ -108,7 +113,7 @@ class DesignUtils {
     ]
   }
 
-  makeFavoriteMenuItems(): {icon: string, text: string, extendable?: boolean}[] {
+  makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
     return [
       {
         icon: 'share-alt',
@@ -125,7 +130,7 @@ class DesignUtils {
     ]
   }
 
-  makeTrashMenuItems(): {icon: string, text: string}[] {
+  makeTrashMenuItems(): { icon: string, text: string }[] {
     return [
       {
         icon: 'reduction',
@@ -533,6 +538,44 @@ class DesignUtils {
 
   isMaxLevelReached(level: number) {
     return level >= 4
+  }
+
+  getDesignPreview(assetId: string, scale = 2 as 1 | 2): string {
+    const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
+    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${generalUtils.generateRandomString(6)}`
+    return previewUrl
+  }
+
+  // Below function is used to update the page
+  newDesign(width?: number, height?: number) {
+    pageUtils.setPages([pageUtils.newPage({
+      width: width ?? 1080,
+      height: height ?? 1080
+    })])
+    pageUtils.clearPagesInfo()
+    if (this.isLogin) {
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+      /**
+       * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
+       */
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
+    }
+  }
+
+  setDesign(design: IUserDesignContentData) {
+    // if(uploadUtils.assetId.length !== 0) {
+    //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+    // }
+
+    pageUtils.clearPagesInfo()
+    if (this.isLogin) {
+      store.commit('SET_assetId', design.id)
+      if (router.currentRoute.query.design_id !== design.id) {
+        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id }) })
+      }
+    }
+
+    uploadUtils.getDesign('design', design.id)
   }
 }
 
