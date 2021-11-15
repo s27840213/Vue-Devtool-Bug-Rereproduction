@@ -14,6 +14,7 @@ import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
+import router from '@/router'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -29,6 +30,11 @@ enum GroupDesignUpdateFlag {
   UPDATE_COVER
 }
 
+enum GetDesignType {
+  TEMPLATE = 'template',
+  TEXT = 'text',
+  ASSET_DESIGN = 'design'
+}
 /**
  * @todo do the house keeping for upload and update logic
  */
@@ -38,7 +44,22 @@ class UploadUtils {
   readonly PutAssetDesignType = UploadUtils.PutAssetDesignType
   static readonly GroupDesignUpdateFlag = GroupDesignUpdateFlag
   readonly GroupDesignUpdateFlag = UploadUtils.GroupDesignUpdateFlag
+  static readonly GetDesignType = GetDesignType
+  readonly GetDesignType = UploadUtils.GetDesignType
   loginOutput: any
+
+  /**
+   * @param getDesignInfo
+   *  - the reason why we need this param is that if  the url contain the infomation of type=design, and design_id, we need to get the design "after" logining
+   *  - However, the getDeisgn function trigger in handler.ts is before the login infomation setup.
+   *  - Thus, we need to record the information and call the getDesign function after logining
+   */
+
+  getDesignInfo: {
+    flag: number,
+    id: string
+  }
+
   get token(): string { return store.getters['user/getToken'] }
   get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
   get userId(): string { return store.getters['user/getUserId'] }
@@ -47,10 +68,20 @@ class UploadUtils {
   get assetId(): string { return store.getters.getAssetId }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
+  get isLogin(): boolean { return store.getters['user/isLogin'] }
+
+  constructor() {
+    this.getDesignInfo = {
+      flag: 0,
+      id: ''
+    }
+  }
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    this.getTmpJSON()
+    if (this.getDesignInfo.flag) {
+      this.getDesign(GetDesignType.ASSET_DESIGN, this.getDesignInfo.id)
+    }
   }
 
   chooseAssets(type: 'image' | 'font') {
@@ -258,8 +289,7 @@ class UploadUtils {
     }
   }
 
-  uploadDesign(putAssetDesignType?: PutAssetDesignType) {
-    console.log('upload design')
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
@@ -282,7 +312,6 @@ class UploadUtils {
     formData.append('Content-Disposition', 'inline')
 
     formData.append('x-amz-meta-tn', this.userId)
-    const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -291,18 +320,15 @@ class UploadUtils {
       formData.append('file', blob)
     }
 
-    xhr.open('POST', this.loginOutput.upload_map.url, true)
-    xhr.send(formData)
-
-    xhr.onload = () => {
-      navigator.clipboard.writeText(assetId)
-      if (putAssetDesignType !== undefined) {
-        store.dispatch('user/putAssetDesign', {
-          assetId,
-          type: putAssetDesignType
-        })
-      }
-    }
+    await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
+      .then(() => {
+        if (putAssetDesignType !== undefined) {
+          store.dispatch('user/putAssetDesign', {
+            assetId,
+            type: putAssetDesignType
+          })
+        }
+      })
   }
 
   uploadLayer(type: string) {
@@ -602,19 +628,10 @@ class UploadUtils {
               }
             }
           }
-          layer.type = 'group'
-          LayerUtils.updateLayerProps(LayerUtils.pageIndex, index, {
-            type: 'group',
-            active: false,
-            shown: false,
-            layers
-          })
-          zindexUtils.reassignZindex(LayerUtils.pageIndex)
         }
       }
       basicDefault(layer)
     }
-    groupUtils.reset()
 
     if (!page.appVer_origin) {
       page.appVer_origin = page.appVer || new Date().toISOString()
@@ -627,74 +644,63 @@ class UploadUtils {
     return page
   }
 
-  uploadTmpJSON() {
-    const assetId = generalUtils.generateAssetId()
-
-    const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
-      formData.append(key, this.loginOutput.upload_map.fields[key])
-    })
-
-    formData.append('key', `${this.loginOutput.upload_map.path}edit/temp.json`)
-    // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
-    formData.append('x-amz-meta-tn', this.userId)
-    const xhr = new XMLHttpRequest()
-    // console.log(this.loginOutput)
-    setInterval(() => {
-      const pagesJSON = store.getters.getPages
-      const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
-      if (formData.has('file')) {
-        formData.set('file', blob)
-      } else {
-        formData.append('file', blob)
-      }
-
-      xhr.open('POST', this.loginOutput.upload_map.url, true)
-      xhr.send(formData)
-      xhr.onload = function () {
-        // console.log(this)
-      }
-    }, 5000)
-  }
-
-  async getTmpJSON() {
-    this.loginOutput.download_url = this.loginOutput.download_url.replace('*', 'edit/temp.json')
-    const querySign = this.loginOutput.download_url.indexOf('?') !== -1 ? '&' : '?'
-    const response = await fetch(`${this.loginOutput.download_url}${querySign}ver=${generalUtils.generateRandomString(6)}`)
-    stepsUtils.reset()
-    response.json().then((json: Array<IPage>) => {
-      store.commit('SET_pages', json)
-      /**
-       * @todo need to disable sub controller if we have
-       */
-      const hasTmp = json.some((page: IPage, pageIndex: number) => {
-        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp | IFrame, layerIndex: number) => {
-          if (layer.active) {
-            layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
-            return true
-          }
-          return false
-        })
-      })
-      stepsUtils.record()
-    })
-  }
-
   async getDesign(type: string, designId: string) {
-    const jsonName = type === 'template' ? 'config.json' : 'page.json'
-    const response = await fetch(`https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`)
-    if (type === 'template') {
-      const json = await response.json()
-      assetUtils.addTemplate(json)
-    } else {
-      response.json().then(async (json) => {
-        if (type !== 'template') {
-          await ShapeUtils.addComputableInfo(json.layers[0])
+    let jsonName = ''
+    let fetchTarget = ''
+    switch (type) {
+      case GetDesignType.TEMPLATE:
+      case GetDesignType.TEXT: {
+        jsonName = type === GetDesignType.TEMPLATE ? 'config.json' : 'page.json'
+        fetchTarget = `https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        break
+      }
+      case GetDesignType.ASSET_DESIGN: {
+        if (!this.isLogin) {
+          this.getDesignInfo.flag = 1
+          this.getDesignInfo.id = designId
+          return
         }
-        store.commit('SET_pages', [json])
-      })
+        jsonName = 'config.json'
+        fetchTarget = `https://template.vivipic.com/${this.loginOutput.upload_map.path}asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+      }
     }
+    fetch(fetchTarget)
+      .then((response) => {
+        if (!response.ok) {
+          /**
+           * @Note remove the designId and type query if 404
+           */
+          router.replace({ query: Object.assign({}) })
+        } else {
+          response.json().then(async (json) => {
+            switch (type) {
+              case GetDesignType.TEMPLATE: {
+                assetUtils.addTemplate(json)
+                break
+              }
+              case GetDesignType.TEXT: {
+                await ShapeUtils.addComputableInfo(json.layers[0])
+                store.commit('SET_pages', [json])
+                break
+              }
+              case GetDesignType.ASSET_DESIGN: {
+                /**
+                 * @Todo add computableInfo if we need
+                 */
+                // await ShapeUtils.addComputableInfo(json.layers[0])
+                store.commit('SET_assetId', designId)
+                store.commit('SET_pages', json)
+
+                //
+                stepsUtils.reset()
+              }
+            }
+          })
+        }
+      })
+      .catch((err) => {
+        console.error('fetch failed', err)
+      })
   }
 
   async getExport(params: URLSearchParams) {
@@ -921,6 +927,24 @@ class UploadUtils {
       xhr.send(formData)
       xhr.onload = resolve
       xhr.onerror = reject
+    })
+  }
+
+  makeXhrRequest(method: string, url: string, data: FormData) {
+    return new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest()
+      xhr.open(method, url, true)
+      xhr.onload = function () {
+        if (this.status >= 200 && this.status < 300) {
+          resolve(xhr.response)
+        } else {
+          reject(new Error(`${this.status}: ${this.statusText}`))
+        }
+      }
+      xhr.onerror = function () {
+        reject(new Error(`${this.status}: ${this.statusText}`))
+      }
+      xhr.send(data)
     })
   }
 }

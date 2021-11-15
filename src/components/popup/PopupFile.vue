@@ -28,6 +28,7 @@ import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   data() {
@@ -69,12 +70,8 @@ export default Vue.extend({
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
     },
     newDesign() {
-      pageUtils.setPages()
-      pageUtils.clearPagesInfo()
-      if (this.isLogin) {
-        // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
-        this.$router.push({ query: Object.assign({}, this.$route.query, { newKey: 'newValue' }) })
-      }
+      designUtils.newDesign()
+
       this.closePopup()
     }
   }

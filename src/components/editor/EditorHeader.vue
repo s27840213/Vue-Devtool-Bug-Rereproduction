@@ -21,8 +21,8 @@
     div(class="body-2")
       span 我的設計 / 新增檔案名稱
     div(class="body-2 relative")
-      div(class="editor-header__locale" @click="switchLocale()")
-        span {{currLocale}}
+      //- div(class="editor-header__locale" @click="switchLocale()")
+      //-   span {{currLocale}}
       div(v-if="!isLogin")
         span 若要儲存設計，請
         a(:href="`/signup?redirect=${path}`") 註冊

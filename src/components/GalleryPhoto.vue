@@ -34,6 +34,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
 
 export default Vue.extend({
+  name: 'GalleryPhoto',
   props: {
     photo: Object,
     vendor: String,

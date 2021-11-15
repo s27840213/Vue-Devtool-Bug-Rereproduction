@@ -21,7 +21,7 @@
         img(class="pointer item-image"
           :class="{'square': type === 'template'}"
           :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
-          @click="goToPage('Editor')"
+          @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
           @error="handleNotFound")
         div(v-if="type === 'theme'"
           class="pt-10 body-1") {{item.title}}
@@ -29,6 +29,8 @@
           class="pt-2 body-2 text-gray-2") {{item.description}}
 </template>
 <script lang="ts">
+import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -36,14 +38,14 @@ export default Vue.extend({
     list: Array,
     type: String
   },
-  data () {
+  data() {
     return {
       prevIcon: false,
       nextIcon: true
     }
   },
   computed: {
-    items () {
+    items() {
       return this.$refs.items as HTMLElement
     }
   },
@@ -54,25 +56,29 @@ export default Vue.extend({
     goToPage(pageName: string) {
       this.$router.push({ name: pageName })
     },
-    handleNext () {
+    newDesign(item: Itheme) {
+      this.$router.push({ name: 'Editor' })
+      designUtils.newDesign(item.width, item.height)
+    },
+    handleNext() {
       const { scrollLeft, offsetWidth } = this.items
       this.items.scrollLeft = scrollLeft + (offsetWidth / 2)
     },
-    handlePrev () {
+    handlePrev() {
       console.log('handlePrev')
       const { scrollLeft, offsetWidth } = this.items
       this.items.scrollLeft = scrollLeft - (offsetWidth / 2)
     },
-    handleScroll (event: Event) {
+    handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement
       this.handleIconDisplay(scrollLeft)
     },
-    handleIconDisplay (left = 0) {
+    handleIconDisplay(left = 0) {
       const { scrollWidth, offsetWidth } = this.items
       this.prevIcon = left > 0
       this.nextIcon = left < (scrollWidth - offsetWidth)
     },
-    openPopup () {
+    openPopup() {
       this.$emit('openPopup')
     }
   }
@@ -104,18 +110,18 @@ export default Vue.extend({
     width: 100px;
     text-align: center;
 
-    @media(min-width: 976px) {
+    @media (min-width: 976px) {
       width: 140px;
     }
-    @media(min-width: 1260px) {
+    @media (min-width: 1260px) {
       width: 170px;
     }
-    @media(min-width: 1560px) {
+    @media (min-width: 1560px) {
       width: 200px;
     }
 
     > img:hover {
-      transition: all .2s ease-in-out;
+      transition: all 0.2s ease-in-out;
       box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
       transform: translate(0, -10px);
     }
@@ -126,15 +132,15 @@ export default Vue.extend({
     height: 100px;
     text-align: center;
 
-    @media(min-width: 976px) {
+    @media (min-width: 976px) {
       width: 140px;
       height: 140px;
     }
-    @media(min-width: 1260px) {
+    @media (min-width: 1260px) {
       width: 170px;
       height: 170px;
     }
-    @media(min-width: 1560px) {
+    @media (min-width: 1560px) {
       width: 200px;
       height: 200px;
     }
@@ -143,7 +149,7 @@ export default Vue.extend({
       border-radius: 10px;
       height: 100%;
       &:hover {
-        transition: all .2s ease-in-out;
+        transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
         transform: translate(0, -5px);
       }

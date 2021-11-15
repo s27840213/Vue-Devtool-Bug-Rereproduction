@@ -48,6 +48,12 @@ class GeneralUtils {
     return start.getTime() + Math.random() * (end.getTime() - start.getTime())
   }
 
+  async asyncForEach(array: Array<any>, callback: (el: any, index?: number, array?: Array<any>) => void) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array)
+    }
+  }
+
   formatStr(str: string, len: number) {
     if (str.length === len) {
       return str

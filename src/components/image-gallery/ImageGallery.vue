@@ -19,7 +19,6 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import GalleryUtils from '@/utils/galleryUtils'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 
@@ -33,7 +32,11 @@ export default Vue.extend({
   },
   components: {
     ObserverSentinel,
-    GalleryPhoto
+    /**
+     * I'm not sure why I need to async import this component to prevent from the following errors:
+     *  did you register the component correctly? For recursive components, make sure to provide the "name" option
+     */
+    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
   },
   computed: {
     margin(): number {

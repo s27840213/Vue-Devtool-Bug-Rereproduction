@@ -12,6 +12,7 @@ import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
+import router from '@/router'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -308,7 +309,16 @@ class ShortcutHandler {
   }
 
   save() {
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    const urlParams = new URLSearchParams(window.location.search)
+    const type = urlParams.get('type')
+    const designId = urlParams.get('design_id')
+
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+      Vue.notify({ group: 'copy', text: '檔案資料已儲存' })
+    })
+    if (!type || !designId) {
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
+    }
   }
 
   selectAll() {

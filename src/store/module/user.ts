@@ -46,16 +46,20 @@ const getDefaultState = (): IUserModule => ({
   isAuthenticated: false,
   userAssets: {
     design: {
-      content: []
+      content: [],
+      title: ''
     },
     font: {
-      content: []
+      content: [],
+      title: ''
     },
     image: {
-      content: []
+      content: [],
+      title: ''
     },
     video: {
-      content: []
+      content: [],
+      title: ''
     }
   },
   downloadUrl: '',
@@ -86,6 +90,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getDownloadUrl(state) {
     return state.downloadUrl
+  },
+  getAssetDesign(state) {
+    return state.userAssets.design.content
   },
   getImages(state) {
     return state.images
@@ -120,6 +127,7 @@ const mutations: MutationTree<IUserModule> = {
         }
       })
   },
+  // This function is out of date, may be modified in the future
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, downloadUrl } = state
     const isAdmin = state.role === 0
@@ -257,11 +265,15 @@ const actions: ActionTree<IUserModule, unknown> = {
         console.log('Update DB')
       } else if (type === 1) {
         console.log('Update preview')
-      } else if (type === 3) {
-        console.group('Update DB and preview')
+      } else if (type === 2) {
+        console.log('Update DB and preview')
       }
       const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
       const { flag } = data
+      if (flag === 0) {
+        console.log('Put asset success')
+        dispatch('getAssets', { token: state.token })
+      }
       if (flag === 1) {
         console.log('Put asset failed')
       } else if (flag === 2) {
@@ -273,8 +285,8 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async login({ commit, dispatch }, { token, account, password }) {
     try {
-      state.isAuthenticated = token.length > 0
       const { data } = await userApis.login(token, account, password)
+      state.isAuthenticated = token.length > 0
       console.log(data)
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
@@ -310,7 +322,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('getAssets', { token: newToken })
-      uploadUtils.uploadTmpJSON()
     } else {
       console.log('login failed')
       commit('SET_TOKEN', '')

@@ -1,11 +1,14 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import GeneralUtils from './generalUtils'
+import uploadUtils from './uploadUtils'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get isLogin(): boolean { return store.getters['user/isLogin'] }
   get getPage() { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get lastSelectedPageIndex(): number {
@@ -37,6 +40,7 @@ class PageUtils {
   }
 
   newPage(pageData: Partial<IPage>) {
+    console.log(pageData)
     const defaultPage = {
       width: 1080,
       height: 1080,

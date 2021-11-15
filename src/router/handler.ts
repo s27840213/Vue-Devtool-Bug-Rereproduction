@@ -24,7 +24,7 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
-        : uploadUtils.getDesign(type, designId)
+        : await uploadUtils.getDesign(type, designId)
     }
     if (panelIndex && +panelIndex in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', +panelIndex)

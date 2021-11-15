@@ -154,19 +154,38 @@ export interface IListServiceResponse {
 
 export interface IUserAssetsData {
   design: {
-    content: Array<string>,
+    content: Array<IUserDesignContentData>,
+    title: string
   },
   font: {
     content: Array<string>,
+    title: string
   },
   image: {
     content: Array<IUserImageContentData>,
+    title: string
   },
   video: {
     content: Array<string>,
+    title: string
   }
 }
 
+export interface IUserDesignContentData {
+  author: string,
+  color: Array<string>,
+  create_time: string,
+  favorite: number,
+  file_ext: string,
+  file_name: string,
+  height: number,
+  id: string,
+  name: string,
+  team_id: string,
+  update_time: string,
+  ver: number,
+  width: number
+}
 export interface IUserImageContentData {
   color: Array<string>,
   create_time: string,
