@@ -28,7 +28,7 @@ div(style="position: relative;")
             input(class="body-2 text-gray-2"
               v-model="email"
               type="email" name="email"
-              placeholder="請輸入常用 Email")
+              placeholder="請輸入 Email")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}

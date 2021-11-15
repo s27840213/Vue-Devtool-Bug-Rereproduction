@@ -11,10 +11,14 @@ div(class="settings-account")
         v-model="inputName" type="text"
         placeholder="請輸入暱稱")
     div(class="settings-account__label my-10") 信箱
-    property-bar
+    property-bar(:class="{'input-invalid': !mailValid}")
       input(class="body-2 text-gray-2"
-        v-model="inputAccount" type="text"
+        v-model="inputAccount"
+        type="email" name="email"
         placeholder="請輸入信箱")
+    div(v-if="!mailValid"
+      class="invalid-message")
+      span {{ accountErrorMessage }}
     div(class="settings-account__label my-10") 語系
     select(class="locale-select" v-model="inputLocale")
       option(v-for="locale in localeOptions" :value="locale.text") {{locale.text}}
@@ -69,9 +73,20 @@ export default Vue.extend({
           value: 'jp',
           text: '日文'
         }],
+      accountErrorMessage: 'Email 格式錯誤',
       isLoading: false,
+      isConfirmClicked: false as boolean,
       isEmailVerified: false,
       showVerifyPopup: false
+    }
+  },
+  watch: {
+    inputAccount() {
+      if (this.inputAccount.length === 0) {
+        this.accountErrorMessage = '請輸入 Email'
+      } else if (!this.mailValid) {
+        this.accountErrorMessage = 'Email 格式錯誤'
+      }
     }
   },
   computed: {
@@ -85,7 +100,9 @@ export default Vue.extend({
       subscribe: 'getSubscribe'
     }),
     mailValid(): boolean {
-      if (this.inputAccount.length > 0) {
+      if (!this.isConfirmClicked) {
+        return true
+      } else if (this.inputAccount.length > 0) {
         return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.inputAccount)
       } else {
         return false
@@ -113,8 +130,8 @@ export default Vue.extend({
       this.inputSubscribe = !this.inputSubscribe
     },
     async onConfirmClicked() {
-      console.log('confirm')
       this.isLoading = true
+      this.isConfirmClicked = true
       if (!this.mailValid) {
         this.isLoading = false
         return
@@ -125,7 +142,6 @@ export default Vue.extend({
         updateValue.uname = this.inputName.trim()
       }
       if (this.inputAccount.trim() !== this.account.trim()) {
-        updateValue.account = this.inputAccount.trim()
         if (!this.isEmailVerified) {
           const parameter = {
             token: this.token,
@@ -135,7 +151,6 @@ export default Vue.extend({
             type: 1
           }
           const data = await store.dispatch('user/sendVcode', parameter)
-          console.log(data)
           if (data.flag === 0) {
             this.showVerifyPopup = true
           } else {
@@ -144,6 +159,8 @@ export default Vue.extend({
 
           this.isLoading = false
           return
+        } else {
+          updateValue.account = this.inputAccount.trim()
         }
       }
       if (this.inputLocale !== this.getLocaleText(this.locale)) {
@@ -152,17 +169,18 @@ export default Vue.extend({
       if (this.inputSubscribe !== (this.subscribe === 1)) {
         updateValue.subscribe = this.inputSubscribe ? 1 : 0
       }
-      console.log('update userInfo')
-      // TODO: update api (change account)
 
-      // const data = await store.dispatch('user/updateUser', updateValue)
-      // if (data.flag === 0) {
-      //   store.commit('user/SET_STATE', {
-      //     uname: data.data.uname,
-      //     locale: data.data.locale,
-      //     subscribe: data.data.subscribe
-      //   })
-      // }
+      const data = await store.dispatch('user/updateUser', updateValue)
+      if (data.flag === 0) {
+        store.commit('user/SET_STATE', {
+          uname: data.data.uname,
+          account: data.data.account,
+          locale: data.data.locale,
+          subscribe: data.data.subscribe
+        })
+        this.isConfirmClicked = false
+        this.isEmailVerified = false
+      }
 
       this.isLoading = false
     },
@@ -173,7 +191,6 @@ export default Vue.extend({
       return this.localeOptions.find(x => x.text === text)?.value
     },
     verifyEmail() {
-      console.log('verifyEmail')
       this.isEmailVerified = true
       this.closePopup()
       this.onConfirmClicked()
@@ -231,6 +248,9 @@ export default Vue.extend({
       border: 1px setColor(gray-4) solid;
       padding-left: 8px;
       padding-right: 5px;
+    }
+    .property-bar:focus-within {
+      border: 1px solid setColor(blue-1);
     }
   }
   &__label {
@@ -307,5 +327,16 @@ export default Vue.extend({
     background-color: #000000a1;
     z-index: 999999;
   }
+}
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+}
+.invalid-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 14px;
+  color: setColor(red);
+  padding-top: 5px;
 }
 </style>
