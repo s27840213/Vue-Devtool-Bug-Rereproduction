@@ -75,7 +75,7 @@ class TextPropUtils {
             }
           } else {
             this.blockPropertyHandler(propName, subLayerIndex)
-            TextUtils.updateLayerSize(config, layerIndex, subLayerIndex, subLayerIndex)
+            TextUtils.updateLayerSize(config, LayerUtils.pageIndex, layerIndex, subLayerIndex)
           }
           break
         }

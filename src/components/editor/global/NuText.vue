@@ -122,7 +122,7 @@ export default Vue.extend({
          */
         if (this.config.isTyping) return
         this.$nextTick(() => {
-          TextUtils.updateLayerSize(this.config, this.layerIndex, this.subLayerIndex)
+          TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
         })
       },
       deep: true

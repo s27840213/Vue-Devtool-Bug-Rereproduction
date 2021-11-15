@@ -339,7 +339,10 @@ export default Vue.extend({
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
+          TextUtils.setCurrTextInfo({ layerIndex: -1 })
         }
+      } else {
+        TextUtils.setCurrTextInfo({ layerIndex: this.layerIndex })
       }
       if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
         this.$store.commit('text/SET_default')

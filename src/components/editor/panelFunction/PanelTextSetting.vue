@@ -117,6 +117,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    // ...mapState('text', ['currTextInfo']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -187,6 +188,7 @@ export default Vue.extend({
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
       let currLayer = LayerUtils.getCurrLayer
+      const { config, subLayerIndex } = this.currTextInfo
       const nan = TextUtils.getNullSel()
       const colors: Array<{ color: string, count: number }> = []
       const colorCounter = (paragraphs: Array<IParagraph>, step: number) => {
@@ -216,13 +218,19 @@ export default Vue.extend({
         colorCounter(currLayer.paragraphs, 1)
       } else {
         const primaryLayer = currLayer as IGroup
-        for (let i = 0; i < primaryLayer.layers.length; i++) {
-          const layer = primaryLayer.layers[i] as IText
-          if (layer.type === 'text') {
-            colorCounter(layer.paragraphs, -1)
-            TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
-            colorCounter(layer.paragraphs, 1)
+        if (typeof subLayerIndex === 'undefined') {
+          for (let i = 0; i < primaryLayer.layers.length; i++) {
+            const layer = primaryLayer.layers[i] as IText
+            if (layer.type === 'text') {
+              colorCounter(layer.paragraphs, -1)
+              TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
+              colorCounter(layer.paragraphs, 1)
+            }
           }
+        } else {
+          colorCounter(config.paragraphs, -1)
+          TextPropUtils.spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
+          colorCounter(config.paragraphs, 1)
         }
       }
 
@@ -347,7 +355,7 @@ export default Vue.extend({
         if (new Date().getTime() - startTime > 500) {
           try {
             this.fontSizeSteppingHandler(step)
-            TextUtils.updateLayerSize(config, LayerUtils.layerIndex, subLayerIndex)
+            TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)

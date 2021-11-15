@@ -112,7 +112,7 @@ export default Vue.extend({
     this.parentId = this.getPrimaryLayer.id as string
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -172,10 +172,13 @@ export default Vue.extend({
             editing: false,
             isTyping: false
           })
-          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
           this.contentEditable = false
           this.isControlling = false
+          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+          TextUtils.setCurrTextInfo({ subLayerIndex: undefined })
         }
+      } else {
+        TextUtils.setCurrTextInfo({ subLayerIndex: this.layerIndex })
       }
     },
     isTextEditing(editing) {
@@ -526,7 +529,7 @@ export default Vue.extend({
       }
       // @TODO: the vertical kind pending
 
-      TextUtils.updateLayerSize(text, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
+      TextUtils.updateLayerSize(text, this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {

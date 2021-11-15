@@ -446,21 +446,18 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, layerIndex = LayerUtils.layerIndex,
-    subLayerIndex: number | undefined = undefined, targetIndex: number | undefined = undefined) {
+  updateLayerSize(config: IText, pageIndex: number, layerIndex = LayerUtils.layerIndex,
+    subLayerIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
-    const pageIndex = LayerUtils.pageIndex
     if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
-      if (subLayerIndex === (targetIndex ?? currLayer.layers.length - 1)) {
-        let { width, height } = calcTmpProps(currLayer.layers)
-        width *= currLayer.styles.scale
-        height *= currLayer.styles.scale
-        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
-      }
+      let { width, height } = calcTmpProps(currLayer.layers)
+      width *= currLayer.styles.scale
+      height *= currLayer.styles.scale
+      LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
     }
   }
 
@@ -554,6 +551,10 @@ class TextUtils {
       start,
       end
     })
+  }
+
+  setCurrTextInfo(data: { config?: IText | IGroup, layerIndex?: number, subLayerIndex?: number }) {
+    store.commit('text/SET_textInfo', data)
   }
 
   setSelectionDefault() {
