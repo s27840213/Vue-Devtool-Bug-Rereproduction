@@ -1,3 +1,4 @@
+import { IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree } from 'vuex'
 
@@ -19,7 +20,12 @@ export interface ITextState {
     isVertical: boolean
   },
   pending: string,
-  fontStore: Array<IFont>
+  fontStore: Array<IFont>,
+  currTextInfo: {
+    config: IText,
+    layerIndex: number,
+    subLayerIndex?: number
+  }
 }
 
 const getDefaultState = (): ITextState => ({
@@ -47,6 +53,11 @@ const getDefaultState = (): ITextState => ({
     style: 'normal',
     decoration: 'none',
     isVertical: false
+  },
+  currTextInfo: {
+    config: {} as IText,
+    layerIndex: -1,
+    subLayerIndex: undefined
   },
   pending: '',
   fontStore: [
@@ -111,6 +122,11 @@ const mutations: MutationTree<ITextState> = {
     }
     Object.assign(state.sel.start, nan)
     Object.assign(state.sel.end, nan)
+  },
+  SET_textInfo(state: ITextState, data: { config: IText, layerIndex: number, subLayerIndex?: number }) {
+    state.currTextInfo.config = data.config
+    state.currTextInfo.layerIndex = data.layerIndex
+    state.currTextInfo.subLayerIndex = data.subLayerIndex
   }
 }
 

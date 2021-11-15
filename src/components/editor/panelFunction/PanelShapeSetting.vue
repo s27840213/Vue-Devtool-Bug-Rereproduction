@@ -134,9 +134,10 @@
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div 導圓角
     div(class="shape-setting__colors")
-      div(v-if="isGrouped"
+      div(v-if="inGrouped"
         class="shape-setting__color"
-        :style="groupColorStyles()")
+        :style="groupColorStyles()"
+        @click="selectColor(0)")
       div(v-for="(color, index) in getColors"
         class="shape-setting__color"
         :style="colorStyles(color, index)"
@@ -166,7 +167,6 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
-import GeneralUtils from '@/utils/generalUtils'
 import color from '@/store/module/color'
 import { Layer } from 'konva/types/Layer'
 import shapeUtils from '@/utils/shapeUtils'
@@ -260,10 +260,6 @@ export default Vue.extend({
         'categories'
       ]
     ),
-    /**
-     * This parameter means if current layer is a group/tmp and contains at least 2 of more
-     * IShape that the color-list of them only has one entry.
-     */
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0
@@ -284,25 +280,39 @@ export default Vue.extend({
     currLayer(): ILayer {
       return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
     },
-    isGrouped(): boolean {
-      const { currLayer } = this as any
+    inGrouped(): boolean {
+      const currLayer = LayerUtils.getCurrLayer
       let oneColorObjNum = 0
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        for (const layer of currLayer.layers) {
-          if (layer.type === 'shape' && layer.color.length === 1) {
+        for (const layer of (currLayer as IGroup).layers) {
+          if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
             oneColorObjNum++
           }
         }
+        return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
+          .some(l => l.type === 'shape' && l.active)
       }
-      return (currLayer.type === 'tmp' || currLayer.type === 'group') && oneColorObjNum >= 2
+      return false
     },
     getColors(): string[] {
-      const layer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
-      if (!(layer.type === 'tmp' || layer.type === 'group')) {
-        return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color
-      } else if (!this.isGrouped) {
-        return layer.layers.filter((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1)[0].color
+      const layer = LayerUtils.getCurrLayer
+      if (layer.type === 'shape') {
+        return (layer as IShape).color
+      } else if (layer.type === 'group' || layer.type === 'tmp') {
+        const subSelectedIdx = (layer as IGroup).layers
+          .findIndex(l => l.type === 'shape' && l.active)
+
+        if (subSelectedIdx === -1) {
+          if (!this.inGrouped) {
+            return (layer as IGroup).layers
+              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1)[0].color as string[]
+          } else return []
+        } else {
+          const colors = (layer as IGroup).layers[subSelectedIdx].color as string[]
+          return colors
+        }
       } else {
+        console.error('Wrong with the right-side-panel wrong')
         return []
       }
     },
@@ -322,11 +332,21 @@ export default Vue.extend({
   watch: {
     currSelectedIndex: function () {
       this.initilizeRecord()
+    },
+    getColors: function() {
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        if ((currLayer as IGroup).layers
+          .some(l => l.type === 'shape' && l.active && (l as IShape).color.length === 1)) {
+          this.currSelectedColorIndex = 0
+        }
+      }
     }
   },
   methods: {
     ...mapMutations({
-      _updateLayerProps: 'UPDATE_layerProps'
+      _updateLayerProps: 'UPDATE_layerProps',
+      updateDocumentColors: 'UPDATE_documentColors'
     }),
     ...mapActions('markers',
       [
@@ -347,7 +367,8 @@ export default Vue.extend({
     groupColorStyles() {
       const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const origin = currLayer.layers.find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
+        const origin = currLayer.layers
+          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
         const isGroupSameColor = (() => {
           for (const layer of currLayer.layers) {
             if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
@@ -361,7 +382,7 @@ export default Vue.extend({
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
         } : {
           background: `url(${require('@/assets/img/png/multi-color.png')})`,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
+          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
         }
       }
     },
@@ -423,16 +444,32 @@ export default Vue.extend({
     },
     setColor(newColor: string, index: number) {
       stepsUtils.record()
-      const { currLayer } = this
+      this.updateDocumentColors({
+        pageIndex: LayerUtils.pageIndex,
+        colors: [
+          { color: newColor, count: 1 },
+          { color: this.getColors[this.currSelectedColorIndex], count: -1 }
+        ]
+      })
+      const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-          if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-            const color = [newColor]
-            LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, i, { color })
+        const subSelectedIdx = (currLayer as IGroup).layers
+          .findIndex(l => l.type === 'shape' && (l as IShape).active)
+
+        if (subSelectedIdx === -1) {
+          for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
+            if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+              const color = [newColor]
+              LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, i, { color })
+            }
           }
+        } else {
+          const color = [...(currLayer as IGroup).layers[subSelectedIdx].color as string]
+          color[this.currSelectedColorIndex] = newColor
+          LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, subSelectedIdx, { color })
         }
       } else {
-        const color = [...this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).color]
+        const color = [...(currLayer as IShape).color]
         color[this.currSelectedColorIndex] = newColor
         const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
         if (record) {

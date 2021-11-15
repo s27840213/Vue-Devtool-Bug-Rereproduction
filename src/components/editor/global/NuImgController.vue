@@ -1,6 +1,8 @@
 <template lang="pug">
   keep-alive
     div(class="nu-img-controller")
+      div(class="nu-controller"
+        :style="controllerStyles()")
       div(class="nu-controller__body"
           ref="body"
           :style="styles()"
@@ -8,10 +10,8 @@
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index"
-            :style="Object.assign(scaler.styles, cursorStyles(index, getLayerRotate), pointerEvents())"
+            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), pointerEvents())"
             @mousedown.stop="scaleStart")
-      div(class="nu-controller"
-          :style="controllerStyles()")
 </template>
 
 <script lang="ts">
@@ -92,7 +92,7 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     styles() {
-      const zindex = (this.layerIndex + 1) * 100
+      const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
@@ -408,9 +408,9 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    &:hover {
-      cursor: pointer;
-    }
+    // &:hover {
+    //   cursor: pointer;
+    // }
     &__wrapper {
       width: max-content;
       height: max-content;

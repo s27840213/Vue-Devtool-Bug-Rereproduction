@@ -418,7 +418,6 @@ class AssetUtils {
           this.addText(asset.jsonData, attrs)
           break
         case 6:
-          console.log(GeneralUtils.deepCopy(asset.jsonData))
           this.addTemplate(asset.jsonData, attrs)
           break
         case 5:

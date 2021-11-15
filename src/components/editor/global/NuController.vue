@@ -35,7 +35,7 @@
             @drop="onFrameDrop(index)",
             @click="clickSubController(index)"
             @dblclick="dblSubController(index)")
-        template(v-if="(['group','frame','tmp'].includes(getLayerType)) && isActive")
+        template(v-if="(['group','frame'].includes(getLayerType)) && isActive")
           div(class="sub-controller")
             template(v-for="(layer,index) in getLayers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -177,7 +177,7 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 
 const LAYER_SIZE_MIN = 10
-const RESIZER_SHOWN_MIN = 50
+const RESIZER_SHOWN_MIN = 40
 
 export default Vue.extend({
   props: {
@@ -863,8 +863,6 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      // const offsetSnap = this.snapUtils.calcScaleSnap(this.config, this.layerIndex)
-      // this.$emit('getClosestSnaplines')
     },
     scaleEnd() {
       this.isControlling = false
@@ -965,7 +963,6 @@ export default Vue.extend({
 
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
         this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
-      console.log(this.control.isHorizon)
 
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
@@ -1324,14 +1321,13 @@ export default Vue.extend({
 
             if (e.key === 'Backspace') {
               const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
-              if (start.sIndex === 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
+              if (start.sIndex === 0 && start.pIndex > 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
                 !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
                 start.pIndex -= 1
                 TextUtils.updateSelection(start, TextUtils.getNullSel())
               }
               if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
                 e.preventDefault()
-                // return
               } else {
                 if (e.key === 'Backspace' || e.key === ' ') {
                   e.stopPropagation()

@@ -13,6 +13,7 @@ import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
 import router from '@/router'
+import { DocColorHandler } from './colorUtils'
 
 class ShortcutHandler {
   get currSelectedPageIndex() {
@@ -278,30 +279,49 @@ class ShortcutHandler {
   }
 
   del() {
-    const currLayer = LayerUtils.getCurrLayer as IFrame
-    if (currLayer.type === 'frame' && currLayer.clips.some(img => img.active)) {
-      const idx = currLayer.clips.findIndex(img => img.active)
-      if (currLayer.clips[idx].srcObj.type === 'frame') {
-        LayerUtils.deleteSelectedLayer()
-        GroupUtils.reset()
-        return
-      }
-      const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
-      if (clips[idx].imgControl) {
-        frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
-        return
-      }
-      clips[idx].srcObj = {
-        type: 'frame',
-        assetId: '',
-        userId: ''
-      }
-      StepsUtils.record()
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
-    } else {
-      LayerUtils.deleteSelectedLayer()
-      GroupUtils.reset()
+    let currLayer = LayerUtils.getCurrLayer
+    switch (currLayer.type) {
+      case 'frame':
+        currLayer = currLayer as IFrame
+        if (currLayer.clips.some(img => img.active)) {
+          const idx = currLayer.clips.findIndex(img => img.active)
+          if (currLayer.clips[idx].srcObj.type === 'frame') {
+            LayerUtils.deleteSelectedLayer()
+            GroupUtils.reset()
+            return
+          }
+          const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
+          if (clips[idx].imgControl) {
+            frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
+            return
+          }
+          clips[idx].srcObj = {
+            type: 'frame',
+            assetId: '',
+            userId: ''
+          }
+          StepsUtils.record()
+          LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+          return
+        }
+        break
+      case 'group':
+        currLayer = currLayer as IGroup
+        currLayer.layers
+          .forEach(l => {
+            if (l.type === 'text' || l.type === 'shape') {
+              DocColorHandler(l as IText | IShape)
+            }
+          })
+        break
+      default:
+        if (currLayer.type === 'text' || currLayer.type === 'shape') {
+          DocColorHandler(currLayer as IShape | IText)
+        }
     }
+
+    LayerUtils.deleteSelectedLayer()
+    GroupUtils.reset()
   }
 
   cut() {

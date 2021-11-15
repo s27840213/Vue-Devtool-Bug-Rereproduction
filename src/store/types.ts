@@ -20,8 +20,6 @@ import { IUserModule } from './module/user'
    @param groupId: for template group used (only for admin),
  */
 export interface IEditorState {
-  user?: IUserModule,
-  text?: ITextState,
   pages: Array<IPage>,
   name: string,
   designId: string,

@@ -54,7 +54,7 @@ class ImageUtils {
 
   getSrcSize(type: string, width: number, preload = '') {
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = store.state.user?.imgSizeMap
+    const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
       while (width < sizeMap[i].size && i < sizeMap.length - 1) {
@@ -71,7 +71,6 @@ class ImageUtils {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     // TODO:
-    if (src.includes('data:image')) return 'preview'
     if (src.includes('vivipic')) {
       return 'public'
     } else {

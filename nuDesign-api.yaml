@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211104"
+  version: "20211113"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -27,29 +27,9 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
-  /delete-asset:
-    post:
-      description: 刪除使用者上傳之檔案
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: deleteAssetInput
-          required: true
-          schema:
-            $ref: "#/definitions/deleteAssetInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/apiCommonResponse"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /export-template:
     post:
+      description: 輸出design
       consumes:
         - application/json
       produces:
@@ -217,6 +197,7 @@ paths:
               type: string
   /put-asset-design:
     post:
+      description: 將design寫入資料庫或產生縮圖
       consumes:
         - application/json
       produces:
@@ -273,27 +254,6 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/apiCommonResponse"
-  /reset-password:
-    post:
-      description: 重設密碼
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: resetPasswordInput
-          required: true
-          schema:
-            $ref: "#/definitions/resetPasswordInput"
-      responses:
-        "200":
-          description: 200 response
-          schema:
-            $ref: "#/definitions/apiCommonResponse"
-          headers:
-            Access-Control-Allow-Origin:
-              type: string
   /send-vcode:
     post:
       description: 傳送驗證碼
@@ -315,6 +275,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /update-asset:
+    post:
+      description: 更改使用者個人檔案的資料結構
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/updateAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /update-design:
     post:
       description: 更新或取得素材資訊
@@ -333,6 +314,26 @@ paths:
           description: 200 response
           schema:
             $ref: "#/definitions/updateDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /update-user:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateUserInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateUserInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
           headers:
             Access-Control-Allow-Origin:
               type: string
@@ -391,20 +392,6 @@ definitions:
               - font
               - photo
               - video
-  resetPasswordInput:
-    allOf:
-      - $ref: "#/definitions/apiCommonInput"
-      - type: object
-        required:
-          - account
-          - upass
-        properties:
-          account:
-            type: string
-            description: user account
-          upass:
-            type: string
-            description: user password
   registerInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -430,6 +417,9 @@ definitions:
       - register
       - vcode_only
     properties:
+      token:
+        type: string
+        description: user token
       uname:
         type: string
         description: user name
@@ -445,6 +435,9 @@ definitions:
       vcode_only:
         type: string
         description: vcode only flag
+      type:
+        type: number
+        description: type
   assetMap:
     type: object
     properties:
@@ -594,16 +587,46 @@ definitions:
           path:
             type: string
             description: path of design files to be re-processed
-  deleteAssetInput:
+  updateAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
       - type: object
         required:
-          - key_list
+          - locale
+          - team_id
+          - type
+          - update_type
         properties:
-          key_list:
+          locale:
             type: string
-            description: key list of assets to be deleted, separated by comma ','
+            description: user locale
+          team_id:
+            type: string
+            description: user team id
+          type:
+            type: string
+            description: asset type (image, font, or design)
+          update_type:
+            type: string
+            description: update method (create, copy, move, rename, delete, favor)
+          src_asset:
+            type: string
+            description: |-
+              asset index for copy and rename
+              asset index list separated by comma for move, delete, and favor
+          src_folder:
+            type: string
+            description: |-
+              folder name for create
+              folder id for move and rename
+              folder list separated by comma for delete
+          target:
+            type: string
+            description: |-
+              path for create and move
+              new name for rename
+              0 (recover), 1 (delete), and 2 (force delete) for delete
+              0 (no favor) and 1 (favor) for favor
   exportTemplateInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -653,6 +676,16 @@ definitions:
       msg:
         type: string
         description: error message
+  updateAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: folder item for create, asset item for copy, recover info in
+              data.msg for recover from delete
+            properties: {}
   groupDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -737,6 +770,26 @@ definitions:
           group_id:
             type: string
             description: current group id
+  updateUserInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          uname:
+            type: string
+            description: user name
+          account:
+            type: string
+            description: user account
+          upass:
+            type: string
+            description: user password
+          locale:
+            type: string
+            description: user locale
+          subscribe:
+            type: number
+            description: is subscribe
   googleLoginInput:
     type: object
     required:
@@ -855,9 +908,11 @@ definitions:
   verifyVcodeInput:
     type: object
     required:
-      - account
       - vcode
     properties:
+      token:
+        type: string
+        description: user token
       account:
         type: string
         description: user account
@@ -925,3 +980,29 @@ definitions:
           asset_list:
             type: string
             description: ${assetType}:${teamId}:${assetId} separate by comma
+          path:
+            type: string
+            description: >-
+              1.empty or unset to list all files (ex: designs).
+
+              2.'root' to list all files and/or folders in root.
+
+              3.'trash' to list all files and/or folders in trash can.
+
+              4.'favor' to list all favroite files.
+
+              5.`${folderId1},${folderId2}...` to list all files and/or folders under path folder1/folder2...
+
+              For case 2, 3, 5, use additional parameter 'data' to specify the return data type
+          data:
+            type: number
+            description: 0 (default) for files only, 1 for folders only, 2 for files and
+              folders
+          order_by:
+            type: string
+            description: >-
+              use ${orderType}:${sortOrder} (default as create:desc).
+
+              valid orderType: update for update time, create for create time, name for file/folder name.
+
+              valid sortOrder: asc for ascending (由小到大), desc for descending (由大到小)

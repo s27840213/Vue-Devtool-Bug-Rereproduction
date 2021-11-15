@@ -1,12 +1,14 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer } from '@/interfaces/layer'
+import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import layerUtils from './layerUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height, initWidth, initHeight } = config.styles
+    const { width, height, initWidth, initHeight, zindex } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -41,7 +43,7 @@ class LayerFactary {
         imgY: 0,
         imgWidth: initWidth ?? width,
         imgHeight: initHeight ?? height,
-        zindex: -1,
+        zindex: zindex ?? -1,
         opacity: 100,
         horizontalFlip: false,
         verticalFlip: false,
@@ -62,12 +64,10 @@ class LayerFactary {
      * used for some old template, that img might have rotate angle
      * here the rotate should be deleted and the rotation number be handled by the frame iteself
      */
-    let rotate
 
     if (clips.length && !clips[0].isFrameImg) {
-      clips.forEach(img => {
-        rotate = img.styles.rotate
-        img.styles.rotate = 0
+      clips.forEach((img, i) => {
+        img.styles.zindex = i
         const imgConfig = {
           isFrame: true,
           clipPath: img.clipPath,
@@ -122,7 +122,7 @@ class LayerFactary {
         scale: styles.scale ?? 1,
         scaleX: styles.scaleX ?? 1,
         scaleY: styles.scaleY ?? 1,
-        rotate: rotate ?? (styles.rotate ?? 0),
+        rotate: styles.rotate ?? 0,
         width: width,
         height: height,
         initWidth: initWidth,
@@ -215,6 +215,10 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
+    /**
+     * For the past structure, some text might have wrong structure
+     * below fix the wrong part
+     */
     if (config.paragraphs) {
       config.paragraphs.forEach((p, pidx) => {
         for (let i = 0; i < p.spans.length; i++) {
@@ -234,10 +238,29 @@ class LayerFactary {
       })
     }
 
+    (config as IText).paragraphs
+      .forEach(p => {
+        p.spans.forEach(s => {
+          store.commit('UPDATE_documentColors', {
+            pageIndex: layerUtils.pageIndex,
+            colors: [{ color: s.styles.color, count: 1 }]
+          })
+        })
+      })
+
     return Object.assign(basicConfig, config)
   }
 
   newGroup(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
+    layers
+      .forEach(l => {
+        if (l.type === 'text') {
+          const text = l as IText
+          text.widthLimit = text.styles.writingMode.includes('vertical')
+            ? text.styles.height : text.styles.width
+        }
+      })
+
     return {
       type: 'group',
       id: GeneralUtils.generateRandomString(8),
@@ -339,17 +362,71 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
+    store.commit('UPDATE_documentColors', {
+      pageIndex: layerUtils.pageIndex,
+      colors: (config.color as Array<string>)
+        .map(color => {
+          return { color, count: 1 }
+        })
+    })
     return Object.assign(basicConfig, config)
   }
 
   newTemplate(config: any): any {
-    for (const layerIndex in config.layers) {
-      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      if (config.layers[layerIndex].type === 'frame' && !config.layers[layerIndex].clips[0].clipPath) {
-        config.layers[layerIndex].needFetch = true
+    const documentColors: Array<{ color: string, count: number }> = []
+
+    const init = (layer: ILayer) => {
+      switch (layer.type) {
+        case 'text': {
+          const text = layer as IText
+          text.paragraphs
+            .forEach(p => {
+              p.spans.forEach(s => {
+                const colorIdx = documentColors.findIndex(c => c.color === s.styles.color)
+                if (colorIdx === -1) {
+                  documentColors.push({ color: s.styles.color, count: 1 })
+                } else {
+                  documentColors[colorIdx].count++
+                }
+              })
+            })
+          break
+        }
+        case 'shape': {
+          const shape = layer as IShape
+          shape.color.forEach(color => {
+            const colorIdx = documentColors.findIndex(c => c.color === color)
+            if (colorIdx === -1) {
+              documentColors.push({ color, count: 1 })
+            } else {
+              documentColors[colorIdx].count++
+            }
+          })
+          break
+        }
+        case 'frame': {
+          const frame = layer as IFrame
+          if (!frame.clips[0].clipPath) {
+            frame.needFetch = true
+          }
+        }
+          break
+        case 'group': {
+          const group = layer as IGroup
+          group.layers
+            .forEach(l => init(l))
+        }
       }
     }
+
+    for (const layerIndex in config.layers) {
+      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+      const layer = config.layers[layerIndex]
+      init(layer)
+    }
+    config.documentColors = documentColors
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
+
     return config
   }
 
@@ -372,6 +449,7 @@ class LayerFactary {
         for (const layerIndex in config.layers) {
           config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
         }
+        console.error('Basically, the template should not have the layer type of tmp')
         return this.newTmp(config.styles, config.layers)
       default:
         throw new Error(`Unknown layer type: ${config.type}`)

@@ -83,7 +83,7 @@ class PageUtils {
       name: '',
       layers: [
       ],
-      documentColor: [],
+      documentColors: [],
       designId: '',
       guidelines: {
         v: [],

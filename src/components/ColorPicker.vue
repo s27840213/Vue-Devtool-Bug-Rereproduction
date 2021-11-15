@@ -52,9 +52,10 @@
 </template>
 
 <script lang="ts">
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { Chrome } from 'vue-color'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   props: {
