@@ -94,6 +94,7 @@ export default Vue.extend({
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
+      layerSizeBuff: 0,
       contentEditable: true,
       posDiff: { x: 0, y: 0 },
       parentId: ''
@@ -167,14 +168,10 @@ export default Vue.extend({
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {
-          const { paragraphs } = this.config as IText
-          // if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
-          //   LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-          //   return
-          // }
-
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: false,
+            isTyping: false
+          })
           TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
           this.contentEditable = false
           this.isControlling = false
@@ -187,6 +184,14 @@ export default Vue.extend({
         if (editing && !this.config.isEdited) {
           // ShortcutUtils.textSelectAll(this.layerIndex)
         }
+      }
+    },
+    isComposing(val) {
+      if (!val) {
+        this.layerSizeBuff = this.config.styles.writingMode.includes('vertical')
+          ? this.getLayerWidth : this.getLayerHeight
+      } else {
+        this.layerSizeBuff = NaN
       }
     }
   },
@@ -351,17 +356,16 @@ export default Vue.extend({
           attributeOldValue: false,
           characterDataOldValue: false
         })
+        setTimeout(() => { observer.disconnect() }, 0)
       }
     },
 
     composingEnd() {
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
-      if (start) {
-        TextUtils.updateSelection(start, start)
-      }
+      TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
       const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs })
     },
     onRightClick(event: MouseEvent) {
       if (!this.isLocked) {
@@ -497,18 +501,15 @@ export default Vue.extend({
         ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
       const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-        width: newSize.width,
-        height: newSize.height,
-        sclae: this.getLayerScale
-      })
+      if (Number.isNaN(this.layerSizeBuff)) {
+        this.layerSizeBuff = newSize.height
+      } else if (newSize.height === this.layerSizeBuff) {
+        return
+      }
 
       if (isAllHorizon) {
         const lowLine = this.getLayerPos.y + originSize.height
         const diff = newSize.height - originSize.height
-        // console.warn('sdsdsds')
-        // console.log(originSize.height)
-        // console.log(diff)
         const targetSubLayers: Array<[number, number]> = []
         group.layers
           .forEach((l, idx) => {
@@ -525,7 +526,7 @@ export default Vue.extend({
       }
       // @TODO: the vertical kind pending
 
-      TextUtils.updateLayerSize(this.config, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
+      TextUtils.updateLayerSize(text, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {

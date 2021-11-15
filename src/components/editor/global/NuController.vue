@@ -335,10 +335,6 @@ export default Vue.extend({
             LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
             return
           }
-
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            editing: false
-          })
           if (this.currSelectedInfo.layers.length <= 1 && !this.isLocked) {
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -1345,6 +1341,7 @@ export default Vue.extend({
           attributeOldValue: false,
           characterDataOldValue: false
         })
+        setTimeout(() => { observer.disconnect() }, 0)
       }
     },
     onKeyUp(e: KeyboardEvent) {
@@ -1357,9 +1354,7 @@ export default Vue.extend({
     composingEnd() {
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
-      if (start) {
-        TextUtils.updateSelection(start, TextUtils.getNullSel())
-      }
+      TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
       const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
     },
