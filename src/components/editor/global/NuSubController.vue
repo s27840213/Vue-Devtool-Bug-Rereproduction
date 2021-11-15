@@ -175,6 +175,7 @@ export default Vue.extend({
 
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
+          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
           this.contentEditable = false
           this.isControlling = false
         }
@@ -414,8 +415,7 @@ export default Vue.extend({
           Object.assign(config.paragraphs, paragraphs)
           this.textSizeRefresh(config)
         } else {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs })
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isEdited: true })
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs, isEdited: true })
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
@@ -506,6 +506,9 @@ export default Vue.extend({
       if (isAllHorizon) {
         const lowLine = this.getLayerPos.y + originSize.height
         const diff = newSize.height - originSize.height
+        // console.warn('sdsdsds')
+        // console.log(originSize.height)
+        // console.log(diff)
         const targetSubLayers: Array<[number, number]> = []
         group.layers
           .forEach((l, idx) => {

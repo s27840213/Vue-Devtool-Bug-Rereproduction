@@ -1,4 +1,4 @@
-import { IText } from '@/interfaces/layer'
+import { IGroup, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree } from 'vuex'
 
@@ -22,7 +22,7 @@ export interface ITextState {
   pending: string,
   fontStore: Array<IFont>,
   currTextInfo: {
-    config: IText,
+    config: IText | IGroup,
     layerIndex: number,
     subLayerIndex?: number
   }

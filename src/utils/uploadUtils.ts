@@ -597,8 +597,8 @@ class UploadUtils {
     }
 
     if (page.backgroundImage.config.src) {
-      const src = page.backgroundImage.config.src
-      const type = ImageUtils.getSrcType(page.backgroundImage.config.src)
+      const src = page.backgroundImage.config.src as string
+      const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
       page.backgroundImage.config.srcObj = {
         type,
         userId: ImageUtils.getUserId(src, type),
