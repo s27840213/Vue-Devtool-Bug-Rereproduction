@@ -61,7 +61,6 @@ class UploadUtils {
   }
 
   get token(): string { return store.getters['user/getToken'] }
-  get downloadUrl(): string { return store.getters['user/getDownloadUrl'] }
   get userId(): string { return store.getters['user/getUserId'] }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }

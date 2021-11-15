@@ -65,7 +65,6 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
-import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { mapState } from 'vuex'
 import store from '@/store'
@@ -81,7 +80,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      ShortcutUtils,
       StepsUtils,
       isAccountPopup: false
     }

@@ -57,8 +57,9 @@ export default Vue.extend({
       this.$router.push({ name: pageName })
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' })
-      designUtils.newDesign(item.width, item.height)
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign(item.width, item.height)
+      })
     },
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items

@@ -15,7 +15,7 @@ import uploadUtils from './uploadUtils'
 import router from '@/router'
 import { DocColorHandler } from './colorUtils'
 
-class ShortcutHandler {
+class ShortcutUtils {
   get currSelectedPageIndex() {
     return store.getters.getCurrSelectedPageIndex
   }
@@ -421,6 +421,6 @@ class ShortcutHandler {
   }
 }
 
-const shortcutHandler = new ShortcutHandler()
+const shotcutUtils = new ShortcutUtils()
 
-export default shortcutHandler
+export default shotcutUtils
