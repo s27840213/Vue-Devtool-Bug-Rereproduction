@@ -88,7 +88,7 @@ class ShapeUtils {
     return style
   }
 
-  svgFormatter(svgIn: string, className: string, styleNum: number, transNum: number, mTransNum: number, point?: number[], svgParameters?: number[]): string {
+  svgFormatter(svgIn: string, className: string, styleNum: number, transNum: number, mTransNum: number, point?: number[], svgParameters?: number[], pDiff?: number[]): string {
     let svgOut = svgIn
     for (let i = 0; i < styleNum; i++) {
       const reg = new RegExp('\\$style\\[' + i + '\\]', 'g')
@@ -115,6 +115,16 @@ class ShapeUtils {
         const reg = new RegExp('\\$svgParam\\[' + i + '\\]', 'g')
         svgOut = svgOut.replace(reg, svgParameters[i].toString())
       }
+    }
+    if (pDiff !== undefined) {
+      const regX = new RegExp('\\$patchedX\\(([\\.\\d]+)\\)', 'g')
+      svgOut = svgOut.replace(regX, (m, p1) => {
+        return (Number(p1) + pDiff[0]).toString()
+      })
+      const regY = new RegExp('\\$patchedY\\(([\\.\\d]+)\\)', 'g')
+      svgOut = svgOut.replace(regY, (m, p1) => {
+        return (Number(p1) + pDiff[1]).toString()
+      })
     }
     return svgOut
   }
