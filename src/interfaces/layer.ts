@@ -1,6 +1,6 @@
 import { SrcObj } from './gallery'
 
-export const jsonVer = '1.0.2'
+export const jsonVer = '1.0.3'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
@@ -108,7 +108,8 @@ export interface IShape extends ILayer<IStyle> {
   trimOffset?: number[],
   styleArray: string[],
   filled?: boolean,
-  shapeType?: string
+  shapeType?: string,
+  pDiffLimits?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
   previewSrc?: string,
