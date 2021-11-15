@@ -11,6 +11,18 @@
           clear
           :defaultKeyword="keyword"
           @search="handleSearch")
+          svg-icon(class="ml-5 pointer panel-template__advanced"
+            :class="{ 'panel-template__advanced--active': theme }"
+            iconName="advanced"
+            iconColor="gray-6"
+            iconWidth="20px"
+            @click.native="showTheme = !showTheme")
+        popup-theme(v-if="showTheme"
+          class="panel-template__theme"
+          :preSelected="theme.split(',')"
+          @change="handleTheme"
+          @close="showTheme = false")
+      div(v-if="showTheme" class="panel-template__wrap")
     div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
@@ -29,7 +41,7 @@
               :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
               :showId="showTemplateId"
               :item="item"
-              @showGroup="handleShowGroup")
+              @click="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
         div(class="panel-template__items")
           div(v-if="title" class="panel-template__header") {{ title }}
@@ -38,18 +50,19 @@
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="showTemplateId"
             :item="item"
-            :key="item.id"
-            @showGroup="handleShowGroup")
+            :key="item.group_id"
+            @click="handleShowGroup")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
+import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 
@@ -59,11 +72,13 @@ export default Vue.extend({
     CategoryList,
     CategoryListRows,
     CategoryTemplateItem,
+    PopupTheme,
     CategoryGroupTemplateItem,
     PanelGroupTemplate
   },
   data () {
     return {
+      showTheme: false,
       currentGroup: null
     }
   },
@@ -76,7 +91,8 @@ export default Vue.extend({
         'pending',
         'host',
         'preview',
-        'keyword'
+        'keyword',
+        'theme'
       ]
     ),
     ...mapState('user', ['role', 'adminMode']),
@@ -123,12 +139,14 @@ export default Vue.extend({
       return this.listCategories.concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any templates for "${this.keyword}".` : ''
+      const { keyword, pending, listResult } = this
+      return !pending && !listResult.length ? (keyword ? `Sorry, we couldn't find any templates for "${this.keyword}".` : 'Sorry, we couldn\'t find any templates') : ''
     }
   },
   async mounted() {
     const queryString = new URLSearchParams(window.location.search)
     const keyword = queryString.get('search')
+    this._setTemplateState({ theme: '' })
     if (keyword) {
       this.getTagContent({ keyword })
       window.history.replaceState({}, document.title, window.location.pathname)
@@ -150,7 +168,10 @@ export default Vue.extend({
         'getMoreContent'
       ]
     ),
-    async handleSearch(keyword: string) {
+    ...mapMutations('templates', {
+      _setTemplateState: 'SET_STATE'
+    }),
+    async handleSearch(keyword?: string) {
       this.resetContent()
       if (keyword) {
         this.getTagContent({ keyword })
@@ -168,6 +189,19 @@ export default Vue.extend({
     },
     handleShowGroup(group: any) {
       this.currentGroup = group
+    },
+    handleTheme(selected: { [key: string]: boolean }) {
+      const { keyword } = this
+      const theme = Object
+        .entries(selected)
+        .reduce((prev, [id, checked]) => {
+          checked && prev.push(id)
+          return prev
+        }, [] as string[])
+        .join(',')
+      this._setTemplateState({ theme })
+      this.handleSearch(keyword)
+      this.showTheme = false
     }
   }
 })
@@ -198,12 +232,16 @@ export default Vue.extend({
     padding: 10px 0;
     text-align: left;
   }
-  &__advanced--active,
+  &__advanced--active {
+    color: setColor(gray-4);
+  }
   &__advanced:hover {
-    color: #D9DBE1;
+    color: #e0e0e0;
   }
   &__theme {
     position: absolute;
+    left: 20px;
+    right: 20px;
   }
   &__search {
     position: relative;
