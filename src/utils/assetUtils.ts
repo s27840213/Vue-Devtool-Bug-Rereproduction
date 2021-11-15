@@ -386,10 +386,11 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
   }
 
-  async addGroupTemplate (item: IListServiceContentDataItem) {
+  async addGroupTemplate (item: IListServiceContentDataItem, childId?: string) {
     const { content_ids: contents = [], type } = item
     const lastPageIndex = this.getPages.length
-    const promises = contents?.map(content => this.get({ ...content, type }))
+    const promises = contents?.filter(content => childId ? content.id === childId : true)
+      .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)
     Promise.all(promises)
       .then(assets => {
@@ -451,7 +452,7 @@ class AssetUtils {
   }
 
   addAssetToRecentlyUsed(asset: IAsset) {
-    const { id, type, width, height } = asset
+    const { id, type, width, height, content_ids: contentIds, match_cover: matchCover } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
@@ -468,8 +469,8 @@ class AssetUtils {
           type,
           width,
           height,
-          content_ids: asset.content_ids,
-          match_cover: asset.match_cover
+          content_ids: contentIds,
+          match_cover: matchCover
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }

@@ -28,6 +28,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
 import imageUtils from '@/utils/imageUtils'
 import generalUtils from '@/utils/generalUtils'
+import { Itheme } from '@/interfaces/theme'
 
 Vue.use(Vuex)
 
@@ -185,7 +186,8 @@ const getDefaultState = (): IEditorState => ({
   },
   isMoving: false,
   showRuler: false,
-  showGuideline: true
+  showGuideline: true,
+  themes: []
 })
 
 const state = getDefaultState()
@@ -299,6 +301,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getShowGuideline(state: IEditorState) {
     return state.showGuideline
+  },
+  getThemes(state: IEditorState) {
+    return state.themes
   }
 }
 
@@ -739,6 +744,9 @@ const mutations: MutationTree<IEditorState> = {
           })
         }
       })
+  },
+  SET_themes(state: IEditorState, themes: Itheme[]) {
+    state.themes = themes
   }
 }
 

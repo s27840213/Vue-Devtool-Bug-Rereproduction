@@ -5,6 +5,7 @@ import { ITextState } from './text'
 import { IAsset } from '@/interfaces/module'
 import { SrcObj } from '@/interfaces/gallery'
 import { IUserModule } from './module/user'
+import { Itheme } from '@/interfaces/theme'
 
 /**
  * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
@@ -58,7 +59,8 @@ export interface IEditorState {
     body: Array<string>
   },
   showRuler: boolean,
-  showGuideline: boolean
+  showGuideline: boolean,
+  themes: Itheme[]
 }
 
 export enum SidebarPanelType {
