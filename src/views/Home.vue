@@ -180,8 +180,9 @@ export default Vue.extend({
       }
     },
     newDesign() {
-      this.$router.push({ name: 'Editor' })
-      designUtils.newDesign()
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign()
+      })
     },
     featureItemClicked(idx: number) {
       this.featureSelected = idx
