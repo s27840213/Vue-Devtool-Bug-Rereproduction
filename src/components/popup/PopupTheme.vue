@@ -2,7 +2,8 @@
   div(class="popup-theme text-left"
     v-click-outside="handleCancel")
     div(class="popup-theme__recommend px-10")
-      btn(class="full-width body-3 rounded mb-10")
+      btn(class="full-width body-3 rounded mb-10"
+        @click.native="handleRecommend")
         span 自動推薦模板主題
     div(class="py-10 px-15")
       div(class="popup-theme__title body-2 mb-5") 模板主題
@@ -24,8 +25,10 @@
         @change="handleChange")
     div(class="flex px-20 flex-between")
       btn(class="popup-theme__btn popup-theme__btn--cancel rounded"
+        type="primary-sm"
         @click.native="handleCancel") 取消
       btn(class="popup-theme__btn rounded"
+        type="primary-sm"
         :disabled="isConfirmDisabled"
         @click.native="handleSubmit") 確定
 </template>
@@ -36,6 +39,7 @@ import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import { Itheme } from '@/interfaces/theme'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   components: { DownloadCheckButton },
@@ -55,7 +59,7 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.initSelected()
+    this.initSelected(this.preSelected as string[])
   },
   computed: {
     ...mapGetters({
@@ -66,8 +70,8 @@ export default Vue.extend({
     }
   },
   methods: {
-    initSelected () {
-      const { preSelected, themes } = this
+    initSelected (preSelected: string[]) {
+      const { themes } = this
       this.selected = themes.reduce((prev: { [key: string]: boolean }, curr: Itheme) => {
         prev[curr.id] = preSelected.includes(`${curr.id}`)
         return prev
@@ -90,6 +94,12 @@ export default Vue.extend({
     },
     handleCancel () {
       this.$emit('close')
+    },
+    handleRecommend () {
+      const currFocusPageSize = themeUtils.getFocusPageSize()
+      const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
+      this.all = false
+      this.initSelected(themes.map(theme => `${theme.id}`))
     }
   }
 })
@@ -115,18 +125,17 @@ export default Vue.extend({
       line-height: 24px;
       margin-bottom: 4px;
     }
-    &__btn {
+    &__btn.btn-inactive-sm,
+    &__btn.btn-primary-sm {
       width: 80px;
       padding: 4px 10px;
-      @include body-3();
-      font-weight: 700;
-      &--cancel {
-        color: setColor(gray-2);
-        background-color: setColor(gray-5);
-      }
       &:disabled {
         background-color: setColor(gray-3);
       }
+    }
+    &__btn--cancel.btn-primary-sm {
+      color: setColor(gray-2);
+      background-color: setColor(gray-5);
     }
   }
 </style>

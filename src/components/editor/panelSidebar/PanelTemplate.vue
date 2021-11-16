@@ -143,20 +143,26 @@ export default Vue.extend({
       return !pending && !listResult.length ? (keyword ? `Sorry, we couldn't find any templates for "${this.keyword}".` : 'Sorry, we couldn\'t find any templates') : ''
     }
   },
-  async mounted() {
-    const queryString = new URLSearchParams(window.location.search)
-    const keyword = queryString.get('search')
-    this._setTemplateState({ theme: '' })
-    if (keyword) {
-      this.getTagContent({ keyword })
-      window.history.replaceState({}, document.title, window.location.pathname)
-    } else {
-      await this.getCategories()
-      this.getContent()
-    }
+  mounted() {
+    this._setTemplateState({ pending: true })
   },
   destroyed() {
-    this.resetContent()
+    // this.resetContent()
+  },
+  watch: {
+    async theme (curr, prev) {
+      if (!prev && curr) {
+        const queryString = new URLSearchParams(window.location.search)
+        const keyword = queryString.get('search')
+        if (keyword) {
+          this.getTagContent({ keyword })
+          window.history.replaceState({}, document.title, window.location.pathname)
+        } else {
+          await this.getCategories()
+          this.getContent()
+        }
+      }
+    }
   },
   methods: {
     ...mapActions('templates',
