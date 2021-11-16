@@ -588,16 +588,6 @@ const mutations: MutationTree<IEditorState> = {
       state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
     }
   },
-  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
-    const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      for (let pIndex = 0; pIndex < pLeng; pIndex++) {
-        const p = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs[pIndex]
-        p.styles[k] = v
-      }
-    })
-    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
-  },
   UPDATE_tmpLayersZindex(state: IEditorState) {
     const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp
     tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
