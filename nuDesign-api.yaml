@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211113"
+  version: "20211116"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -706,6 +706,9 @@ definitions:
           group_id:
             type: string
             description: Current group id. Necessary for update = 1 and 2
+          ecomm:
+            type: number
+            description: 0 for normal group, 1 for 電商詳情 group
   listDesignOutput:
     allOf:
       - $ref: "#/definitions/apiCommonResponse"
