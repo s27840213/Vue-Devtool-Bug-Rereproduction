@@ -15,7 +15,6 @@ import stepsUtils from './stepsUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
-import themeUtils from './themeUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -747,8 +746,6 @@ class UploadUtils {
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', json)
-
-                themeUtils.setPageThemes()
                 //
                 stepsUtils.reset()
               }
