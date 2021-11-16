@@ -24,8 +24,7 @@
                   :selectable="true"
                   @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :menuItems="menuItems"
+    design-gallery(:menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
@@ -35,9 +34,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
@@ -47,6 +46,9 @@ export default Vue.extend({
   components: {
     FolderGallery,
     DesignGallery
+  },
+  mounted() {
+    designUtils.fetchDesigns(this.fetchTrashDesigns)
   },
   data() {
     return {
@@ -70,16 +72,11 @@ export default Vue.extend({
       trashDesigns: 'getTrashDesigns',
       trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      allDesigns: 'getAllDesigns'
     }),
-    allDesigns(): [string[], IDesign][] {
-      const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
-      designUtils.sortDesignsBy(designs, 'time', true)
-      return designs.map((item) => [item.path, item.design])
-    },
     allFolders(): [string[], IFolder][] {
       const folders = generalUtils.deepCopy(this.trashFolders) as IPathedFolder[]
-      designUtils.sortFoldersBy(folders, 'time', true)
       return folders.map((item) => [item.parents, item.folder])
     },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
@@ -90,6 +87,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchTrashDesigns: 'fetchTrashDesigns'
+    }),
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)

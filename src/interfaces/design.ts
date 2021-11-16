@@ -21,11 +21,6 @@ export interface IFolder {
   subFolders: IFolder[],
   designs: IDesign[]
 }
-
-export interface IPathedDesign {
-  design: IDesign,
-  path: string[]
-}
 export interface IPathedFolder {
   parents: string[],
   folder: IFolder
@@ -33,5 +28,5 @@ export interface IPathedFolder {
 
 export interface IQueueItem {
   type: 'design' | 'folder' | 'multi',
-  data: IPathedDesign | IPathedFolder | undefined
+  data: IDesign | IPathedFolder | undefined
 }

@@ -54,7 +54,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folder.name }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 ${folder.author} 創作 | ${designs.length}個項目` }}
+              span {{ `由 ${folder.author} 創作 | ${allDesigns.length}個項目` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -111,8 +111,7 @@
                   :selectedNum="selectedNum"
                   @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :menuItems="menuItems"
+    design-gallery(:menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   @menuAction="handleMenuAction")
@@ -124,9 +123,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
+import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import generalUtils from '@/utils/generalUtils'
@@ -136,6 +135,13 @@ export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+    designUtils.fetchDesigns(async () => {
+      await this.fetchFolderDesigns({
+        path: this.path.join(','),
+        sortByField: this.sortByField,
+        sortByDescending: this.sortByDescending
+      })
+    })
   },
   components: {
     FolderGallery,
@@ -170,13 +176,13 @@ export default Vue.extend({
           icon: 'clock',
           style: '',
           text: '修改日期 ( 新到舊 )',
-          payload: ['time', true]
+          payload: ['update', true]
         },
         {
           icon: 'clock',
           style: '',
           text: '修改日期 ( 舊到新 )',
-          payload: ['time', false]
+          payload: ['update', false]
         }
       ]
     }
@@ -198,7 +204,8 @@ export default Vue.extend({
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      allDesigns: 'getAllDesigns'
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
@@ -214,17 +221,8 @@ export default Vue.extend({
       const parentNames = designUtils.getFolderNames(this.folders, this.parents)
       return parentNames.slice(1)
     },
-    designs(): IDesign[] {
-      const designs = generalUtils.deepCopy(this.folder.designs)
-      designUtils.sortDesignsBy(designs, this.sortByField, this.sortByDescending)
-      return designs
-    },
-    allDesigns(): ([string[], IDesign])[] {
-      return (this.designs as IDesign[]).map((design) => [this.path, design])
-    },
     subFolders(): IFolder[] {
       const subFolders = generalUtils.deepCopy(this.folder.subFolders)
-      designUtils.sortFoldersBy(subFolders, this.sortByField, this.sortByDescending)
       return subFolders
     },
     allFolders(): ([string[], IFolder])[] {
@@ -234,13 +232,16 @@ export default Vue.extend({
       return Object.keys(this.selectedDesigns).length
     },
     isEmpty(): boolean {
-      return this.folder.subFolders.length + this.designs.length === 0
+      return this.folder.subFolders.length + this.allDesigns.length === 0
     },
     newFolderColor(): string {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFolderDesigns: 'fetchFolderDesigns'
+    }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setFolderName: 'UPDATE_folderName'

@@ -2,8 +2,7 @@
   div(class="all-design-view")
     div(class="all-design-view__folder-name") 我所有設計
     div(class="horizontal-rule")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :noHeader="true"
+    design-gallery(:noHeader="true"
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
@@ -15,14 +14,13 @@ import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import { IDesign, IPathedDesign } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
     DesignGallery
   },
   mounted() {
-    this.fetchAllDesigns()
+    designUtils.fetchDesigns(this.fetchAllDesigns)
   },
   data() {
     return {
@@ -38,11 +36,8 @@ export default Vue.extend({
     ...mapGetters('design', {
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
-      allDesignsRaw: 'getAllDesigns'
+      allDesigns: 'getAllDesigns'
     }),
-    allDesigns(): ([string[], IDesign])[] {
-      return (this.allDesignsRaw as IPathedDesign[]).map((item) => [item.path, item.design])
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     }

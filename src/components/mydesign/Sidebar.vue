@@ -64,7 +64,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
-import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
@@ -153,19 +153,19 @@ export default Vue.extend({
         case 'a':
           this.isAllDraggedOver = false
           if (this.draggingType === 'design') {
-            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            const design = this.draggingDesign as IDesign | undefined
             if (!design) return
             if (this.isMultiSelected && this.selectedDesigns[design.id]) {
               designUtils.moveAll(Object.values(this.selectedDesigns), destination)
               this.$emit('moveItem', {
                 type: 'multi',
-                data: { path: destination, design }
+                data: design
               })
             } else {
-              designUtils.move(design, path, destination)
+              designUtils.move(design, destination)
               this.$emit('moveItem', {
                 type: 'design',
-                data: { path: destination, design }
+                data: design
               })
             }
           } else if (this.draggingType === 'folder') {
@@ -184,15 +184,15 @@ export default Vue.extend({
         case 't':
           this.isTrashDraggedOver = false
           if (this.draggingType === 'design') {
-            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            const design = this.draggingDesign as IDesign | undefined
             if (!design) return
             if (this.isMultiSelected && this.selectedDesigns[design.id]) {
               this.$emit('deleteAll')
             } else {
-              designUtils.delete({ path, design })
+              designUtils.delete(design)
               this.$emit('deleteItem', {
                 type: 'design',
-                data: { path, design }
+                data: design
               })
             }
           } else if (this.draggingType === 'folder') {

@@ -2,8 +2,7 @@
   div(class="favorite-design-view")
     div(class="favorite-design-view__folder-name") 我的最愛
     div(class="horizontal-rule")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :noHeader="true"
+    design-gallery(:noHeader="true"
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
@@ -11,16 +10,17 @@
 </template>
 
 <script lang="ts">
-import { IPathedDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
     DesignGallery
+  },
+  mounted() {
+    designUtils.fetchDesigns(this.fetchFavoriteDesigns)
   },
   data() {
     return {
@@ -34,20 +34,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      favoriteDesigns: 'getFavoriteDesigns',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      allDesigns: 'getAllDesigns'
     }),
-    allDesigns() {
-      let designs = generalUtils.deepCopy(this.favoriteDesigns) as IPathedDesign[]
-      designs = designUtils.removeDeleted(designs)
-      designUtils.sortDesignsBy(designs, 'time', true)
-      return designs.map((item) => [item.path, item.design])
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFavoriteDesigns: 'fetchFavoriteDesigns'
+    }),
     handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)

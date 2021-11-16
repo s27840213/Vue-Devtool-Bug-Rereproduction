@@ -38,15 +38,15 @@
               v-click-outside="closeMenu")
             slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
           div(v-if="favorable" class="design-item__favorite" @click="emitLike")
-            svg-icon(v-if="isMouseOver && !isInFavorites"
+            svg-icon(v-if="isMouseOver && !config.favorite"
                     iconName="favorites"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="isMouseOver && isInFavorites"
+            svg-icon(v-if="isMouseOver && config.favorite"
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="!isMouseOver && isInFavorites"
+            svg-icon(v-if="!isMouseOver && config.favorite"
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
@@ -98,7 +98,6 @@ export default Vue.extend({
     favorable: Boolean,
     undraggable: Boolean,
     nameIneditable: Boolean,
-    isInFavorites: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,
     isMultiSelected: Boolean

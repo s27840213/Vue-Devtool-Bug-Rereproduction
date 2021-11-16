@@ -68,7 +68,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -200,19 +200,19 @@ export default Vue.extend({
       if (this.folderUndroppable() || this.undroppable || this.isDragged) return
       const destination = designUtils.appendPath(this.path as string[], this.config as IFolder)
       if (this.draggingType === 'design') {
-        const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+        const design = this.draggingDesign as IDesign | undefined
         if (!design) return
         if (this.isMultiSelected && this.selectedDesigns[design.id]) {
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
-            data: { path: destination, design }
+            data: design
           })
         } else {
-          designUtils.move(design, path, destination)
+          designUtils.move(design, destination)
           this.$emit('moveItem', {
             type: 'design',
-            data: { path: destination, design }
+            data: design
           })
         }
       } else if (this.draggingType === 'folder') {

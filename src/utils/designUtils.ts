@@ -1,28 +1,11 @@
+import Vue from 'vue'
 import { IUserDesignContentData } from '@/interfaces/api'
-import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
-import designApis from '@/apis/design'
-import { AxiosPromise } from 'axios'
+import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-
-const FIELD_MAPPER: { [key: string]: (item: IDesign | IFolder) => string } = {
-  name: (item: IDesign | IFolder): string => item.name,
-  time: (item: IDesign | IFolder): string => item.lastUpdatedTime
-}
-
-const COMP_MAPPER: { [key: string]: (a: string, b: string, descending: boolean) => number } = {
-  name: (a: string, b: string, descending: boolean): number => {
-    const modifier = descending ? -1 : 1
-    return a.localeCompare(b) * modifier
-  },
-  time: (a: string, b: string, descending: boolean): number => {
-    const modifier = descending ? -1 : 1
-    return (Date.parse(a) - Date.parse(b)) * modifier
-  }
-}
 
 class DesignUtils {
   ROOT = '$ROOT$'
@@ -72,24 +55,24 @@ class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
     template[0] = this.newFolder(this.ROOT, 'SYSTEM', true, true)
-    template[0].subFolders = [
-      this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
-      this.newFolder('日本行銷', 'Daniel', true)
-    ]
-    for (let i = 0; i < 15; i++) {
-      const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
-      template[0].subFolders[0].designs.push({
-        name: `Name${i + 1}`,
-        width: 1200,
-        height: 1200,
-        id: generalUtils.generateAssetId(),
-        thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-        createdTime: time.toString(),
-        lastUpdatedTime: time.toString(),
-        favorite: false,
-        ver: 0
-      })
-    }
+    // template[0].subFolders = [
+    //   this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
+    //   this.newFolder('日本行銷', 'Daniel', true)
+    // ]
+    // for (let i = 0; i < 15; i++) {
+    //   const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+    //   template[0].subFolders[0].designs.push({
+    //     name: `Name${i + 1}`,
+    //     width: 1200,
+    //     height: 1200,
+    //     id: generalUtils.generateAssetId(),
+    //     thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
+    //     createdTime: time.toString(),
+    //     lastUpdatedTime: time.toString(),
+    //     favorite: false,
+    //     ver: 0
+    //   })
+    // }
     return template
   }
 
@@ -242,46 +225,9 @@ class DesignUtils {
     return folders
   }
 
-  sortDesignsBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
-    if (this.checkIfPathed(designs)) {
-      const target = designs as IPathedDesign[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a.design), FIELD_MAPPER[field](b.design), descending)
-      })
-    } else {
-      const target = designs as IDesign[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
-      })
-    }
-  }
-
-  sortFoldersBy(folders: IFolder[] | IPathedFolder[], field: string, descending: boolean) {
-    if (this.checkIfPathed(folders)) {
-      const target = folders as IPathedFolder[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a.folder), FIELD_MAPPER[field](b.folder), descending)
-      })
-    } else {
-      const target = folders as IFolder[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
-      })
-    }
-  }
-
-  removeDeleted(designs: IPathedDesign[]): IPathedDesign[] {
-    const deletedDesignIds = store.getters['design/getTrashDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    return designs.filter(design => !(deletedDesignIds.includes(design.design.id)))
-  }
-
-  checkIfPathed(designs: IDesign[] | IPathedDesign[] | IFolder[] | IPathedFolder[]): boolean { // if empty, return true
-    return (designs.length === 0) || ('path' in designs[0])
-  }
-
-  checkAllInFavorite(pathedDesigns: IPathedDesign[]): boolean {
-    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    return !pathedDesigns.some(pathedDesign => !favoriteDesignIds.includes(pathedDesign.design.id))
+  checkAllInFavorite(designs: IDesign[]): boolean {
+    // const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
+    return !designs.some(design => !design.favorite)
   }
 
   checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
@@ -303,48 +249,48 @@ class DesignUtils {
     return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
   }
 
-  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign): { event: string, payload: any } | undefined {
+  dispatchDesignMenuAction(icon: string, design: IDesign): { event: string, payload: any } | undefined {
     switch (icon) {
       case 'copy': {
         store.dispatch('design/copyDesign', design)
         return
       }
       case 'trash': {
-        this.delete({ path, design })
+        this.delete(design)
         return {
           event: 'deleteItem',
           payload: {
             type: 'design',
-            data: { path, design }
+            data: design
           }
         }
       }
       case 'delete': {
         return {
           event: 'deleteForever',
-          payload: { path, design }
+          payload: design
         }
       }
       case 'reduction': {
-        this.recover({ path, design })
+        this.recover(design)
         return {
           event: 'recoverItem',
           payload: {
             type: 'design',
-            data: { path, design }
+            data: design
           }
         }
       }
       case 'folder': {
         return {
           event: 'moveDesignToFolder',
-          payload: { path, design }
+          payload: design
         }
       }
       case 'download': {
         return {
           event: 'downloadDesign',
-          payload: { path, design }
+          payload: design
         }
       }
     }
@@ -380,26 +326,18 @@ class DesignUtils {
     return folder.id
   }
 
-  move(design: IDesign, source: string[], destination: string[]) {
+  move(design: IDesign, destination: string[]) {
     // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    store.commit('design/UPDATE_deleteDesign', {
-      path: source,
-      design
-    })
-    store.commit('design/UPDATE_addDesign', {
-      path: destination,
-      design
-    })
-    store.commit('design/UPDATE_path', {
-      id: design.id,
-      path: destination
+    // if (generalUtils.arrayCompare<string>(source, destination)) return
+    store.commit('design/moveDesign', {
+      design,
+      destination
     })
   }
 
-  moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.move(pathedDesign.design, pathedDesign.path, destination)
+  moveAll(designs: IDesign[], destination: string[]) {
+    for (const design of designs) {
+      this.move(design, destination)
     }
   }
 
@@ -423,16 +361,13 @@ class DesignUtils {
     }
   }
 
-  delete(pathedDesign: IPathedDesign) {
-    // store.commit('design/UPDATE_addToTrash', pathedDesign)
-    // store.commit('design/UPDATE_deleteDesign', pathedDesign)
-    store.dispatch('design/deleteDesign', pathedDesign.design)
+  delete(design: IDesign) {
+    store.dispatch('design/deleteDesign', design)
   }
 
-  deleteAll(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_addToTrash', pathedDesign)
-      store.commit('design/UPDATE_deleteDesign', pathedDesign)
+  deleteAll(designs: IDesign[]) {
+    for (const design of designs) {
+      this.delete(design)
     }
   }
 
@@ -441,14 +376,13 @@ class DesignUtils {
     store.commit('design/UPDATE_deleteFolder', pathedFolder)
   }
 
-  deleteForever(pathedDesign: IPathedDesign) {
-    store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
-    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  deleteForever(design: IDesign) {
+    store.dispatch('design/deleteDesignForever', design)
   }
 
-  deleteAllForever(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.deleteForever(pathedDesign)
+  deleteAllForever(designs: IDesign[]) {
+    for (const design of designs) {
+      this.deleteForever(design)
     }
   }
 
@@ -462,23 +396,13 @@ class DesignUtils {
     }
   }
 
-  recover(pathedDesign: IPathedDesign) {
-    const folders = store.getters['design/getFolders'] as IFolder[]
-    const folder = this.search(folders, pathedDesign.path)
-    if (folder) {
-      store.commit('design/UPDATE_addDesign', pathedDesign)
-    } else {
-      store.commit('design/UPDATE_addDesign', {
-        path: [this.ROOT],
-        design: pathedDesign.design
-      })
-    }
-    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  recover(design: IDesign) {
+    store.dispatch('design/recoverDesign', design)
   }
 
-  recoverAll(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.recover(pathedDesign)
+  recoverAll(designs: IDesign[]) {
+    for (const design of designs) {
+      this.recover(design)
     }
   }
 
@@ -502,17 +426,23 @@ class DesignUtils {
     }
   }
 
-  removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
+  removeFromFavorite(design: IDesign) {
+    store.dispatch('design/unfavorDesign', design)
+  }
+
+  removeAllFromFavorite(designs: IDesign[]) {
+    for (const design of designs) {
+      this.removeFromFavorite(design)
     }
   }
 
-  addAllToFavorite(pathedDesigns: IPathedDesign[]) {
-    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    for (const pathedDesign of pathedDesigns) {
-      if (favoriteDesignIds.includes(pathedDesign.design.id)) continue
-      store.commit('design/UPDATE_addToFavorite', pathedDesign)
+  addToFavorite(design: IDesign) {
+    store.dispatch('design/favorDesign', design)
+  }
+
+  addAllToFavorite(designs: IDesign[]) {
+    for (const design of designs) {
+      this.addToFavorite(design)
     }
   }
 
@@ -520,17 +450,12 @@ class DesignUtils {
     return level >= 4
   }
 
-  getCurrList(state: any): IPathedDesign[] {
-    switch (state.currLocation) {
-      case 'a':
-        return state.allDesigns
-      case 'f':
-        return state.favoriteDesigns
-      case 't':
-        return state.trashDesigns
-      default:
-        return state.folderDesigns
-    }
+  fetchDesigns(fetcher: () => Promise<void>) {
+    store.commit('design/SET_allDesigns', [])
+    store.commit('design/SET_isDesignsLoading', true)
+    fetcher().then(() => {
+      store.commit('design/SET_isDesignsLoading', false)
+    })
   }
 
   getDesignPreview(assetId: string, scale = 2 as 1 | 2, ver?: number): string {

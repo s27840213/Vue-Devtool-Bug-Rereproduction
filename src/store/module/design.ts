@@ -1,4 +1,4 @@
-import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import store from '@/store'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -10,31 +10,29 @@ import { IUserDesignContentData } from '@/interfaces/api'
 interface IDesignState {
   currLocation: string,
   folders: IFolder[],
-  allDesigns: IPathedDesign[],
-  folderDesigns: IPathedDesign[],
-  favoriteDesigns: IPathedDesign[],
-  trashDesigns: IPathedDesign[],
+  allDesigns: IDesign[],
   trashFolders: IPathedFolder[],
   draggingType: 'design' | 'folder' | '',
-  draggingDesign: IPathedDesign | undefined,
+  draggingDesign: IDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
-  selectedDesigns: {[key: string]: IPathedDesign}
-  selectedFolders: {[key: string]: IPathedFolder}
+  selectedDesigns: {[key: string]: IDesign}
+  selectedFolders: {[key: string]: IPathedFolder},
+  destinationFolder: string,
+  isDesignsLoading: boolean
 }
 
 const getDefaultState = (): IDesignState => ({
   currLocation: 'a',
   folders: [],
   allDesigns: [],
-  folderDesigns: [],
-  favoriteDesigns: [],
-  trashDesigns: [],
   trashFolders: [],
   draggingType: '',
   draggingFolder: undefined,
   draggingDesign: undefined,
   selectedDesigns: {},
-  selectedFolders: {}
+  selectedFolders: {},
+  destinationFolder: '',
+  isDesignsLoading: false
 })
 
 const state = getDefaultState()
@@ -45,14 +43,8 @@ const getters: GetterTree<IDesignState, unknown> = {
   getFolders(state: IDesignState): IFolder[] {
     return state.folders
   },
-  getAllDesigns(state: IDesignState): IPathedDesign[] {
+  getAllDesigns(state: IDesignState): IDesign[] {
     return state.allDesigns
-  },
-  getFavoriteDesigns(state: IDesignState): IPathedDesign[] {
-    return state.favoriteDesigns
-  },
-  getTrashDesigns(state: IDesignState): IPathedDesign[] {
-    return state.trashDesigns
   },
   getTrashFolders(state: IDesignState): IPathedFolder[] {
     return state.trashFolders
@@ -63,31 +55,46 @@ const getters: GetterTree<IDesignState, unknown> = {
   getDraggingFolder(state: IDesignState): IPathedFolder | undefined {
     return state.draggingFolder
   },
-  getDraggingDesign(state: IDesignState): IPathedDesign | undefined {
+  getDraggingDesign(state: IDesignState): IDesign | undefined {
     return state.draggingDesign
   },
-  getSelectedDesigns(state: IDesignState): {[key: string]: IPathedDesign} {
+  getSelectedDesigns(state: IDesignState): {[key: string]: IDesign} {
     return state.selectedDesigns
   },
   getSelectedFolders(state: IDesignState): {[key: string]: IPathedFolder} {
     return state.selectedFolders
+  },
+  getDestinationFolder(state: IDesignState): string {
+    return state.destinationFolder
+  },
+  getIsDesignsLoading(state: IDesignState): boolean {
+    return state.isDesignsLoading
   }
 }
 
 const actions: ActionTree<IDesignState, unknown> = {
-  async fetchAllDesigns({ commit }) {
+  async fetchDesigns({ commit }, { path, sortByField = 'upate', sortByDescending = true }) {
     try {
-      const { data } = await designApis.getDesigns(store.getters['user/getToken'], '', false, 'update', true)
-      const pathedDesigns = data.data.design.content.map((design: IUserDesignContentData) => {
-        return {
-          path: [],
-          design: designUtils.apiDesign2IDesign(design)
-        }
+      const { data } = await designApis.getDesigns(store.getters['user/getToken'], path, false, sortByField, sortByDescending)
+      const designs = data.data.design.content.map((design: IUserDesignContentData) => {
+        return designUtils.apiDesign2IDesign(design)
       })
-      commit('SET_allDesigns', pathedDesigns)
+      commit('SET_allDesigns', designs)
     } catch (error) {
       console.log(error)
     }
+  },
+  async fetchAllDesigns({ dispatch }) {
+    await dispatch('fetchDesigns', { path: '' })
+  },
+  async fetchFavoriteDesigns({ dispatch }) {
+    await dispatch('fetchDesigns', { path: 'favor' })
+  },
+  async fetchTrashDesigns({ dispatch }) {
+    await dispatch('fetchDesigns', { path: 'trash' })
+  },
+  async fetchFolderDesigns({ dispatch }, { path, sortByField, sortByDescending }) {
+    await dispatch('fetchDesigns', { path, sortByField, sortByDescending })
   },
   async deleteDesign({ commit }, design: IDesign) {
     // TODO: send API to delete
@@ -101,10 +108,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     newDesign.name += ' 的副本'
     newDesign.createdTime = Date.now()
     newDesign.lastUpdatedTime = newDesign.createdTime
-    commit('UPDATE_addDesign', {
-      path: [],
-      design: newDesign
-    })
+    commit('UPDATE_addDesign', newDesign)
   }
 }
 
@@ -125,7 +129,7 @@ const mutations: MutationTree<IDesignState> = {
   SET_folders(state: IDesignState, folders: IFolder[]) {
     state.folders = folders
   },
-  SET_allDesigns(state: IDesignState, designs: IPathedDesign[]) {
+  SET_allDesigns(state: IDesignState, designs: IDesign[]) {
     state.allDesigns = designs
   },
   SET_draggingFolder(state: IDesignState, draggingFolder: IPathedFolder | undefined) {
@@ -136,7 +140,7 @@ const mutations: MutationTree<IDesignState> = {
     }
     state.draggingFolder = draggingFolder
   },
-  SET_draggingDesign(state: IDesignState, draggingDesign: IPathedDesign | undefined) {
+  SET_draggingDesign(state: IDesignState, draggingDesign: IDesign | undefined) {
     if (draggingDesign) {
       state.draggingType = 'design'
     } else {
@@ -144,27 +148,15 @@ const mutations: MutationTree<IDesignState> = {
     }
     state.draggingDesign = draggingDesign
   },
-  UPDATE_addToFavorite(state: IDesignState, pathedDesign: IPathedDesign) {
-    state.favoriteDesigns.push(pathedDesign)
+  SET_destinationFolder(state: IDesignState, destinationFolder: string) {
+    state.destinationFolder = destinationFolder
   },
-  UPDATE_addToTrash(state: IDesignState, pathedDesign: IPathedDesign) {
-    state.trashDesigns.push(pathedDesign)
+  SET_isDesignsLoading(state: IDesignState, isDesignsLoading: boolean) {
+    state.isDesignsLoading = isDesignsLoading
   },
   UPDATE_addFolderToTrash(state: IDesignState, pathedFolder: IPathedFolder) {
     pathedFolder.folder.isCurrLocation = false
     state.trashFolders.push(pathedFolder)
-  },
-  UPDATE_removeFromFavorite(state: IDesignState, pathedDesign: IPathedDesign) {
-    const index = state.favoriteDesigns.findIndex(pathedDesign1 => pathedDesign1.design.id === pathedDesign.design.id)
-    if (index >= 0) {
-      state.favoriteDesigns.splice(index, 1)
-    }
-  },
-  UPDATE_removeFromTrash(state: IDesignState, pathedDesign: IPathedDesign) {
-    const index = state.trashDesigns.findIndex(pathedDesign1 => pathedDesign1.design.id === pathedDesign.design.id)
-    if (index >= 0) {
-      state.trashDesigns.splice(index, 1)
-    }
   },
   UPDATE_removeFolderFromTrash(state: IDesignState, pathedFolder: IPathedFolder) {
     const index = state.trashFolders.findIndex(pathedFolder1 => {
@@ -172,16 +164,6 @@ const mutations: MutationTree<IDesignState> = {
     })
     if (index >= 0) {
       state.trashFolders.splice(index, 1)
-    }
-  },
-  UPDATE_path(state: IDesignState, updateInfo: {id: string, path: string[]}) {
-    const index = state.favoriteDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.id)
-    if (index >= 0) {
-      state.favoriteDesigns[index].path = updateInfo.path
-    }
-    const index2 = state.trashDesigns.findIndex(pathedDesign => pathedDesign.design.id === updateInfo.id)
-    if (index2 >= 0) {
-      state.trashDesigns[index].path = updateInfo.path
     }
   },
   UPDATE_folderName(state: IDesignState, updateInfo: {path: string[], newFolderName: string}) {
@@ -199,15 +181,13 @@ const mutations: MutationTree<IDesignState> = {
       }
     }
   },
-  UPDATE_addDesign(state: IDesignState, updateInfo: {path: string[], design: IDesign}) {
-    const list = designUtils.getCurrList(state)
-    list.splice(0, 0, updateInfo)
+  UPDATE_addDesign(state: IDesignState, design: IDesign) {
+    state.allDesigns.splice(0, 0, design)
   },
   UPDATE_deleteDesign(state: IDesignState, design: IDesign) {
-    const list = designUtils.getCurrList(state)
-    const index = list.findIndex(pathedDesign => pathedDesign.design.id === design.id)
+    const index = state.allDesigns.findIndex((design_) => design_.id === design.id)
     if (index >= 0) {
-      list.splice(index, 1)
+      state.allDesigns.splice(index, 1)
     }
   },
   UPDATE_addFolder(state: IDesignState, pathedFolder: IPathedFolder) {
@@ -225,11 +205,11 @@ const mutations: MutationTree<IDesignState> = {
       }
     }
   },
-  UPDATE_addToSelection(state: IDesignState, pathedDesign: IPathedDesign) {
-    Vue.set(state.selectedDesigns, pathedDesign.design.id, pathedDesign)
+  UPDATE_addToSelection(state: IDesignState, design: IDesign) {
+    Vue.set(state.selectedDesigns, design.id, design)
   },
-  UPDATE_removeFromSelection(state: IDesignState, pathedDesign: IPathedDesign) {
-    Vue.delete(state.selectedDesigns, pathedDesign.design.id)
+  UPDATE_removeFromSelection(state: IDesignState, design: IDesign) {
+    Vue.delete(state.selectedDesigns, design.id)
   },
   UPDATE_addFolderToSelection(state: IDesignState, pathedFolder: IPathedFolder) {
     Vue.set(state.selectedFolders, pathedFolder.folder.id, pathedFolder)

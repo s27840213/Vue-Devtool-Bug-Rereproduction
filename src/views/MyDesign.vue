@@ -171,7 +171,7 @@ import TrashDesignView from '@/components/mydesign/design-views/TrashDesignView.
 import FolderDesignView from '@/components/mydesign/design-views/FolderDesignView.vue'
 import StructureFolder from '@/components/mydesign/StructureFolder.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -201,7 +201,7 @@ export default Vue.extend({
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
       folderBuffer: undefined as IPathedFolder | undefined,
-      designBuffer: undefined as IPathedDesign | undefined,
+      designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
       isFavDelMouseOver: false,
       isMoveToFolderPanelOpen: false,
@@ -215,7 +215,8 @@ export default Vue.extend({
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      destinationFolder: 'getDestinationFolder'
     }),
     mydesignView(): string {
       switch (this.currLocation[0]) {
@@ -278,7 +279,7 @@ export default Vue.extend({
     },
     messageImageStyles(item: IQueueItem) {
       if (item.type === 'design') {
-        return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
+        return { 'background-image': `url(${(item.data as IDesign).thumbnail})` }
       } else {
         return { display: 'none' }
       }
@@ -294,11 +295,9 @@ export default Vue.extend({
     },
     messageDestName(item: IQueueItem, isRecover = false): string {
       if (item.type === 'multi') {
-        return isRecover ? '原資料夾' : designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
-      } else if (item.type === 'design') {
-        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
+        return isRecover ? '原資料夾' : this.destinationFolder as string
       } else {
-        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedFolder).parents)
+        return this.destinationFolder as string
       }
     },
     showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
@@ -372,7 +371,7 @@ export default Vue.extend({
         this.confirmMessage = 'delete-folder'
       }
     },
-    handleDeleteForever(payload: IPathedDesign) {
+    handleDeleteForever(payload: IDesign) {
       this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
@@ -398,34 +397,27 @@ export default Vue.extend({
       if (this.moveToFolderSelectInfo === '') return
       const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
       if (this.isMovingSingleToFolder && this.designBuffer) {
-        const { path, design } = this.designBuffer
-        designUtils.move(design, path, destination)
+        designUtils.move(this.designBuffer, destination)
         this.handleMoveItem({
           type: 'design',
-          data: {
-            path: destination,
-            design
-          }
+          data: this.designBuffer
         })
         this.designBuffer = undefined
       } else {
         designUtils.moveAll(Object.values(this.selectedDesigns), destination)
         this.handleMoveItem({
           type: 'multi',
-          data: {
-            path: destination,
-            design: (Object.values(this.selectedDesigns) as IPathedDesign[])[0].design
-          }
+          data: (Object.values(this.selectedDesigns) as IDesign[])[0]
         })
       }
     },
-    handleMoveDesignToFolder(pathedDesign: IPathedDesign) {
-      this.designBuffer = pathedDesign
+    handleMoveDesignToFolder(design: IDesign) {
+      this.designBuffer = design
       this.isMovingSingleToFolder = true
       this.isMoveToFolderPanelOpen = true
     },
-    handleDownloadDesign(pathedDesign: IPathedDesign) {
-      this.designBuffer = pathedDesign
+    handleDownloadDesign(design: IDesign) {
+      this.designBuffer = design
       this.confirmMessage = 'download'
     },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
@@ -433,7 +425,7 @@ export default Vue.extend({
       if (!currentShowing) return false
       if (item.type !== currentShowing.type) return false
       if (item.type === 'design') {
-        return (item.data as IPathedDesign).design.id === (this.deletedQueue[0].data as IPathedDesign).design.id
+        return (item.data as IDesign).id === (this.deletedQueue[0]?.data as IDesign)?.id
       }
       if (item.type === 'folder') {
         return designUtils.isFolderEqual(item.data as IPathedFolder, currentShowing.data as IPathedFolder)
@@ -455,7 +447,7 @@ export default Vue.extend({
       if (item) {
         clearTimeout(this.messageTimer)
         if (item.type === 'design') {
-          designUtils.recover(item.data as IPathedDesign)
+          designUtils.recover(item.data as IDesign)
         }
         if (item.type === 'folder') {
           designUtils.recoverFolder(item.data as IPathedFolder)
@@ -478,7 +470,7 @@ export default Vue.extend({
       this.confirmMessage = 'delete-all'
     },
     recoverAll() {
-      const selectedDesigns = Object.values(this.selectedDesigns) as IPathedDesign[]
+      const selectedDesigns = Object.values(this.selectedDesigns) as IDesign[]
       const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
       designUtils.recoverAll(selectedDesigns)
       designUtils.recoverAllFolder(selectedFolders)
