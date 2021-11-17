@@ -522,19 +522,21 @@ export default Vue.extend({
       if (isAllHorizon) {
         const lowLine = this.getLayerPos.y + originSize.height
         const diff = newSize.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-              y: data[1] + diff
+        if (diff > 0) {
+          const targetSubLayers: Array<[number, number]> = []
+          group.layers
+            .forEach((l, idx) => {
+              if (l.styles.y >= lowLine) {
+                targetSubLayers.push([idx, l.styles.y])
+              }
             })
-          })
+          targetSubLayers
+            .forEach(data => {
+              LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+                y: data[1] + diff
+              })
+            })
+        }
       }
       // @TODO: the vertical kind pending
 

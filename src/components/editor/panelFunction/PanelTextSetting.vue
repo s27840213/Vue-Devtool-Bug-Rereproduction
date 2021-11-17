@@ -70,7 +70,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import { Layer } from 'konva/types/Layer'
 
@@ -94,7 +94,8 @@ export default Vue.extend({
         fontSpacing: { min: -200, max: 800 },
         opacity: { min: 0, max: 100 }
       },
-      fontSelectValue: fontSelectValue
+      fontSelectValue: fontSelectValue,
+      isOpenFontPanel: false
     }
   },
   mounted() {
@@ -113,7 +114,9 @@ export default Vue.extend({
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
-    TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+    if (!this.isOpenFontPanel) {
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -165,6 +168,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     openFontsPanel() {
+      this.isOpenFontPanel = true
       this.textInfoRecorder()
       this.$emit('openFontsPanel')
     },
@@ -206,9 +210,9 @@ export default Vue.extend({
 
       if (currLayer.type === 'text') {
         currLayer = currLayer as IText
-        colorCounter(currLayer.paragraphs, -1)
+        // colorCounter(currLayer.paragraphs, -1)
         TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
-        colorCounter(currLayer.paragraphs, 1)
+        // colorCounter(currLayer.paragraphs, 1)
         if (!TextUtils.isSel(this.sel.end)) {
           TextUtils.focus(this.sel.start, this.sel.end)
         }
@@ -221,15 +225,15 @@ export default Vue.extend({
           for (let i = 0; i < primaryLayer.layers.length; i++) {
             const layer = primaryLayer.layers[i] as IText
             if (layer.type === 'text') {
-              colorCounter(layer.paragraphs, -1)
+              // colorCounter(layer.paragraphs, -1)
               TextPropUtils._spanPropertyHandler('color', color, nan, nan, i)
-              colorCounter(layer.paragraphs, 1)
+              // colorCounter(layer.paragraphs, 1)
             }
           }
         } else {
-          colorCounter(config.paragraphs, -1)
+          // colorCounter(config.paragraphs, -1)
           TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
-          colorCounter(config.paragraphs, 1)
+          // colorCounter(config.paragraphs, 1)
           if (!TextUtils.isSel(this.sel.end)) {
             TextUtils.focus(this.sel.start, this.sel.end, subLayerIndex)
           }
@@ -238,7 +242,11 @@ export default Vue.extend({
 
       this.updateDocumentColors({
         pageIndex: LayerUtils.pageIndex,
-        colors
+        colors: getDocumentColor(color)
+          .map(c => ({
+            color: c,
+            count: 1
+          }))
       })
       TextPropUtils.updateTextPropsState({ color })
     },
@@ -308,7 +316,6 @@ export default Vue.extend({
       let start
       let end
       let subLayerIndex
-
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
         if (subLayerIndex !== -1) {
@@ -317,7 +324,7 @@ export default Vue.extend({
           subLayerIndex = undefined
         }
       }
-
+      console.log('start: p: ', this.sel.start.pIndex)
       if (!TextUtils.isSel(this.sel.start)) {
         const sel = TextUtils.getSelection()
         start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()

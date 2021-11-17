@@ -3,10 +3,11 @@ import { IGroupDesignInputParams } from '@/interfaces/api'
 import { AxiosPromise } from 'axios'
 
 export default {
-  getAssets: (token: string): AxiosPromise => axios('/list-asset', {
+  getAssets: (token: string, attrs = {}): AxiosPromise => axios('/list-asset', {
     method: 'POST',
     data: {
-      token
+      token,
+      ...attrs
     }
   }),
   login: (token: string, account: string, password: string): AxiosPromise => axios('/login', {

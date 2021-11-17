@@ -38,9 +38,6 @@ export default Vue.extend({
     preview2: String,
     item: Object
   },
-  mounted() {
-    console.log(this.item)
-  },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
     getCurrLayerInfo(): {
@@ -102,11 +99,12 @@ export default Vue.extend({
             })
           await load
         }
-
-        if (!TextUtils.isSel(start) && config.type === 'text') {
-          start = TextUtils.selectAll(config as IText).start
-          end = TextUtils.selectAll(config as IText).end
-        }
+        console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+        // if (!TextUtils.isSel(start) && config.type === 'text') {
+        //   start = TextUtils.selectAll(config as IText).start
+        //   end = TextUtils.selectAll(config as IText).end
+        // }
 
         const handler = (config: IText, start: ISelection, end: ISelection): {
           config: IText,
@@ -122,7 +120,7 @@ export default Vue.extend({
         if (type === 'text') {
           const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          TextUtils.focus(newStart, newEnd, layerIndex)
+          // TextUtils.focus(newStart, newEnd, layerIndex)
         }
 
         if (type === 'group' || type === 'tmp') {
@@ -132,23 +130,27 @@ export default Vue.extend({
               if (l.type === 'text') {
                 start = TextUtils.selectAll(l as IText).start
                 end = TextUtils.selectAll(l as IText).end
-                const { config: newConfig, start: newStart, end: newEnd } = handler(l as IText, start, end)
+                const { config: newConfig } = handler(l as IText, start, end)
                 layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs: newConfig.paragraphs })
               }
             })
           }
           if (typeof subLayerIndex === 'number') {
+            // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+            // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
             const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
             layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-            TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
+            // TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
           }
         }
 
-        TextPropUtils.updateTextPropsState()
+        // TextPropUtils.updateTextPropsState()
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
       } finally {
         this.updateTextState({ pending: '' })
+        const sel = window.getSelection()
+        if (sel) sel.removeAllRanges()
       }
     },
     getFontUrl(fontID: string): string {

@@ -715,25 +715,28 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color:string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-    console.warn(state.pages[data.pageIndex].documentColors)
   },
   UPDATE_documentColors(state: IEditorState, data: { pageIndex: number, colors: [{ color: string, count: number }] }) {
     const documentColors = state.pages[data.pageIndex].documentColors
-    data.colors
-      .forEach(e => {
-        const colorIdx = documentColors.findIndex(c => c.color === e.color)
-        if (colorIdx !== -1) {
-          documentColors[colorIdx].count += e.count
-          if (documentColors[colorIdx].count === 0) {
-            documentColors.splice(colorIdx, 1)
-          }
-        } else {
-          documentColors.push({
-            color: e.color,
-            count: e.count
-          })
-        }
-      })
+
+    documentColors.splice(0, documentColors.length)
+    Object.assign(documentColors, data.colors)
+
+    // data.colors
+    //   .forEach(e => {
+    //     const colorIdx = documentColors.findIndex(c => c.color === e.color)
+    //     if (colorIdx !== -1) {
+    //       documentColors[colorIdx].count += e.count
+    //       if (documentColors[colorIdx].count === 0) {
+    //         documentColors.splice(colorIdx, 1)
+    //       }
+    //     } else {
+    //       documentColors.push({
+    //         color: e.color,
+    //         count: e.count
+    //       })
+    //     }
+    //   })
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes

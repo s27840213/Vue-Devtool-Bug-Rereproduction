@@ -2,6 +2,7 @@ import { IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import store from '@/store'
 import layerUtils from './layerUtils'
+import { IPage } from '@/interfaces/page'
 
 class ColorUtils {
   event: any
@@ -62,6 +63,33 @@ export function DocColorHandler(config: IShape | IText) {
         })
     }
   }
+}
+
+export function getDocumentColor(color: string): Array<string> {
+  const page = store.getters.getPage(layerUtils.pageIndex) as IPage
+  const docColors = new Set<string>()
+
+  page.layers
+    .forEach(l => {
+      if (l.type === 'text') {
+        (l as IText).paragraphs.forEach(p => {
+          p.spans.forEach(s => {
+            if (!docColors.has(s.styles.color)) {
+              docColors.add(s.styles.color)
+            }
+          })
+        })
+      }
+      if (l.type === 'shape') {
+        (l as IShape).color.forEach(c => {
+          if (!docColors.has(c)) {
+            docColors.add(c)
+          }
+        })
+      }
+    })
+  docColors.delete(color)
+  return [...docColors, color]
 }
 
 export default new ColorUtils()

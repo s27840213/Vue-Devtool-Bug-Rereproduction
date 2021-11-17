@@ -174,7 +174,9 @@ class TextUtils {
         sel.addRange(range)
       }
     }
-    setSelection()
+    setTimeout(() => {
+      setSelection()
+    }, 0)
   }
 
   isEmptyText(config: IText): boolean {

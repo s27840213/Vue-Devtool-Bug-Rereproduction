@@ -65,7 +65,8 @@ export interface IPhoto {
 export interface IAssetPhoto {
   width: number,
   height: number,
-  id: string
+  id: string,
+  assetIndex?: number,
   progress?: number,
   preview: {
     width: number,
@@ -75,7 +76,10 @@ export interface IAssetPhoto {
     prev: string,
     full: string,
     larg: string,
-    original: string
+    original: string,
+    midd: string,
+    smal: string,
+    tiny: string
   }
 }
 

@@ -124,15 +124,8 @@ export default Vue.extend({
     },
     dragEnd() {
       this.setCurrDraggedPhoto({
-        srcObj: {
-          type: '',
-          assetId: '',
-          userId: ''
-        },
-        styles: {
-          width: 0,
-          height: 0
-        }
+        srcObj: { type: '', assetId: '', userId: '' },
+        styles: { width: 0, height: 0 }
       })
     },
     addImage(photo: IAssetPhoto) {
@@ -144,6 +137,7 @@ export default Vue.extend({
         photoAspectRatio,
         {
           pageIndex: this.lastSelectedPageIndex,
+          ...(this.inFilePanel && { assetIndex: photo.assetIndex }),
           // The following props is used for preview image during polling process
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }

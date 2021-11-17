@@ -93,7 +93,7 @@ class TextPropUtils {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+          TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end)
         }
       }
     }
@@ -204,13 +204,15 @@ class TextPropUtils {
           LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, i, { paragraphs: newConfig.paragraphs })
         }
       }
-    } else {
+    }
+    if (typeof subLayerIndex === 'number') {
       const config = (LayerUtils.getLayer(this.pageIndex, layerIndex) as IGroup).layers[subLayerIndex] as IText
       const { start, end } = selHandler(config)
       const prop = this.propIndicator(start, end, propName, value ?? '', config)
       const newConfig = this.spanPropertyHandler(propName, prop, start, end, config)
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-      Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
+      // Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
+      TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex)
     }
   }
 
@@ -463,6 +465,7 @@ class TextPropUtils {
         break
       case 'fontFamily':
         styles.font = value as string
+        // this.updateTextPropsState({ font: value as string })
         break
       case 'color':
         this.updateTextPropsState({ color: value as string })
