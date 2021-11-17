@@ -115,7 +115,7 @@
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   @menuAction="handleMenuAction")
-    div(v-if="isEmpty" class="folder-design-view__empty")
+    div(v-if="isEmpty && !isDesignsLoading" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
 </template>
@@ -137,9 +137,7 @@ export default Vue.extend({
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
     designUtils.fetchDesigns(async () => {
       await this.fetchFolderDesigns({
-        path: this.path.join(','),
-        sortByField: this.sortByField,
-        sortByDescending: this.sortByDescending
+        path: this.path.join(',')
       })
     })
   },
@@ -157,8 +155,6 @@ export default Vue.extend({
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
-      sortByField: 'name',
-      sortByDescending: false,
       sortMenuItems: [
         {
           icon: 'chevron-duo-left',
@@ -205,7 +201,10 @@ export default Vue.extend({
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
-      allDesigns: 'getAllDesigns'
+      allDesigns: 'getAllDesigns',
+      sortByField: 'getSortByField',
+      sortByDescending: 'getSortByDescending',
+      isDesignsLoading: 'getIsDesignsLoading'
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
@@ -244,7 +243,9 @@ export default Vue.extend({
     }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
-      setFolderName: 'UPDATE_folderName'
+      setFolderName: 'UPDATE_folderName',
+      setSortByField: 'SET_sortByField',
+      setSortByDescending: 'SET_sortByDescending'
     }),
     newFolderStyles() {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
@@ -301,8 +302,8 @@ export default Vue.extend({
       })
     },
     handleSortByClick(payload: [string, boolean]) {
-      this.sortByField = payload[0]
-      this.sortByDescending = payload[1]
+      this.setSortByField(payload[0])
+      this.setSortByDescending(payload[1])
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)

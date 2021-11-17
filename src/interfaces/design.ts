@@ -1,5 +1,6 @@
 export interface IDesign {
   id: string,
+  asset_index: number,
   name: string,
   width: number,
   height: number,
@@ -18,8 +19,7 @@ export interface IFolder {
   lastUpdatedTime: string,
   isExpanded: boolean,
   isCurrLocation: boolean,
-  subFolders: IFolder[],
-  designs: IDesign[]
+  subFolders: IFolder[]
 }
 export interface IPathedFolder {
   parents: string[],

@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import { IUserDesignContentData } from '@/interfaces/api'
+import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
@@ -15,6 +14,7 @@ class DesignUtils {
   apiDesign2IDesign(design: IUserDesignContentData): IDesign {
     return {
       id: design.id,
+      asset_index: design.asset_index,
       name: design.name,
       width: design.width,
       height: design.height,
@@ -24,6 +24,57 @@ class DesignUtils {
       ver: design.ver,
       thumbnail: ''
     }
+  }
+
+  apiFolder2IFolder(folder: IUserFolderContentData): IFolder {
+    return {
+      id: folder.id,
+      name: folder.name,
+      createdTime: folder.create_time,
+      lastUpdatedTime: folder.update_time,
+      author: folder.author,
+      subFolders: [],
+      isExpanded: false,
+      isCurrLocation: false
+    }
+  }
+
+  updateFolders(currentFolders: IFolder[], newFolders: IFolder[]) {
+    const countMap = {} as {[key: string]: {seen: boolean, folder: IFolder}}
+    const indicesToDelete = []
+    for (const folder of newFolders) {
+      countMap[folder.id] = {
+        seen: false,
+        folder
+      }
+    }
+    for (const [i, folder] of currentFolders.entries()) {
+      if (countMap[folder.id] !== undefined) {
+        countMap[folder.id].seen = true
+      } else {
+        indicesToDelete.unshift(i)
+      }
+    }
+    for (const index of indicesToDelete) {
+      currentFolders.splice(index, 1)
+    }
+    for (const { seen, folder } of Object.values(countMap)) {
+      if (!seen) {
+        currentFolders.push(folder)
+      }
+    }
+    return currentFolders
+  }
+
+  getInsertIndex(designs: IDesign[], sortByField: string, sortByDescending: boolean, design: IDesign): number {
+    const modifier = sortByDescending ? -1 : 1
+    const compareFunction = sortByField === 'name' ? (design2: IDesign): boolean => {
+      return design2.name.localeCompare(design.name) * modifier > 0
+    } : (design2: IDesign): boolean => {
+      return (Date.parse(design2.lastUpdatedTime) - Date.parse(design.lastUpdatedTime)) * modifier > 0
+    }
+    const index = designs.findIndex(compareFunction)
+    return index >= 0 ? index : designs.length
   }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
@@ -36,7 +87,6 @@ class DesignUtils {
       lastUpdatedTime: time.toString(),
       isExpanded: false,
       isCurrLocation: false,
-      designs: [],
       subFolders: []
     }
   }
@@ -353,12 +403,6 @@ class DesignUtils {
       parents: destination,
       folder
     })
-    for (const design of folder.designs) {
-      store.commit('design/UPDATE_path', {
-        id: design.id,
-        path: this.appendPath(destination, folder)
-      })
-    }
   }
 
   delete(design: IDesign) {
@@ -446,6 +490,10 @@ class DesignUtils {
     }
   }
 
+  setDesignName(design: IDesign, name: string) {
+    store.dispatch('design/setDesignName', { design, name })
+  }
+
   isMaxLevelReached(level: number) {
     return level >= 4
   }
@@ -494,7 +542,7 @@ class DesignUtils {
       }
     }
 
-    uploadUtils.getDesign('design', design.id)
+    uploadUtils.getDesign('design', design.id ?? '')
   }
 }
 

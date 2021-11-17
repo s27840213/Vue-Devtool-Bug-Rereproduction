@@ -61,7 +61,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
@@ -71,6 +71,7 @@ export default Vue.extend({
     SidebarFolder
   },
   mounted() {
+    this.fetchFolders({ path: 'root', sortByField: 'name', sortByDescending: true })
     this.setFolders(designUtils.makeDesignsForTesting())
   },
   data() {
@@ -106,6 +107,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFolders: 'fetchFolders'
+    }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setFolders: 'SET_folders'
@@ -196,12 +200,13 @@ export default Vue.extend({
               })
             }
           } else if (this.draggingType === 'folder') {
-            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-            if (!folder) return
-            this.$emit('deleteFolder', {
-              pathedFolder: { parents, folder },
-              empty: folder.designs.length + folder.subFolders.length === 0
-            })
+            // const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
+            // if (!folder) return
+            // TODO: check empty by API
+            // this.$emit('deleteFolder', {
+            //   pathedFolder: { parents, folder },
+            //   empty: folder.designs.length + folder.subFolders.length === 0
+            // })
           }
           break
       }

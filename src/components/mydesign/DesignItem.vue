@@ -92,7 +92,6 @@ import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
-    path: Array,
     config: Object,
     menuItemNum: Number,
     favorable: Boolean,
@@ -153,8 +152,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingDesign: 'SET_draggingDesign',
-      setDesignName: 'UPDATE_designName'
+      setDraggingDesign: 'SET_draggingDesign'
     }),
     blockStyles() {
       return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
@@ -199,10 +197,7 @@ export default Vue.extend({
     handleDragStart(e: DragEvent) {
       const target = e.target as HTMLElement
       target.style.opacity = '0'
-      this.setDraggingDesign({
-        path: this.path,
-        design: this.config
-      })
+      this.setDraggingDesign(this.config)
 
       if (!e.dataTransfer) return
       e.dataTransfer.effectAllowed = 'move'
@@ -255,11 +250,7 @@ export default Vue.extend({
       this.isNameEditing = false
       this.isNameMouseOver = false
       if (this.editableName === '' || this.editableName === this.config.name) return
-      this.setDesignName({
-        path: this.path,
-        id: this.config.id,
-        newDesignName: this.editableName
-      })
+      designUtils.setDesignName(this.config, this.editableName)
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {

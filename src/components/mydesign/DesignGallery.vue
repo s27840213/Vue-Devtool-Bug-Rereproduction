@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="design-gallery")
+  div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
     div(v-if="!noHeader" class="design-gallery__header")
       div(class="design-gallery__expand-icon-container"
           @click="toggleExpansion")
