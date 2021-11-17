@@ -105,6 +105,7 @@ class UploadUtils {
     const assetId = generalUtils.generateAssetId()
     const fileName = `${generalUtils.generateRandomString(8)}.png`
     const formData = new FormData()
+    console.log(assetId)
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
     })
@@ -179,7 +180,8 @@ class UploadUtils {
                     store.commit('user/UPDATE_IMAGE_URLS', { assetId })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
                   } else if (json.flag === 1) {
-                    console.log('error!')
+                    modalUtils.setIsModalOpen(true)
+                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`])
                   }
                 })
               }
@@ -298,7 +300,7 @@ class UploadUtils {
     })
 
     const resultJSON = {
-      name: store.getters.getPagesName,
+      name: pageUtils.pagesName,
       pages: pagesJSON
     }
 
@@ -517,7 +519,7 @@ class UploadUtils {
     }
   }
 
-  setGroupDesign(update: GroupDesignUpdateFlag, coverId?: string) {
+  uploadGroupDesign(update: GroupDesignUpdateFlag, coverId?: string) {
     const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? generalUtils.generateRandomString(20) : this.groupId
     store.commit('SET_groupId', groupId)
     const pages = pageUtils.getPages

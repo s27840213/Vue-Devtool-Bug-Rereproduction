@@ -8,14 +8,14 @@
         span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-      div(class="property-bar relative")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-1)"
-          :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+      div(class="size-bar relative")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(-1)") -
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" :value="fontSize")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(1)"
-          :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(1)") +
         value-selector(v-if="openValueSelector"
                     :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
@@ -563,7 +563,7 @@ export default Vue.extend({
   &__row1 {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: auto 1fr;
     column-gap: 20px;
     box-sizing: border-box;
     position: relative;
@@ -661,7 +661,6 @@ export default Vue.extend({
 
 .center {
   text-align: center;
-  margin: auto;
 }
 
 .right {

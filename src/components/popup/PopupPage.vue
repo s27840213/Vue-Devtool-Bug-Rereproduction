@@ -133,7 +133,7 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
-            uploadUtils.setGroupDesign(0)
+            uploadUtils.uploadGroupDesign(0)
           }
         },
         {
@@ -142,7 +142,7 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
-            uploadUtils.setGroupDesign(1)
+            uploadUtils.uploadGroupDesign(1)
           }
         }
       ]
