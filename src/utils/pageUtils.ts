@@ -11,6 +11,7 @@ class PageUtils {
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get getPage() { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get pagesName(): string { return store.getters.getPagesName }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -40,7 +41,6 @@ class PageUtils {
   }
 
   newPage(pageData: Partial<IPage>) {
-    console.log(pageData)
     const defaultPage = {
       width: 1080,
       height: 1080,
@@ -108,6 +108,11 @@ class PageUtils {
 
   setPages(pages = [this.newPage({})]) {
     store.commit('SET_pages', pages)
+  }
+
+  setPagesName(name: string) {
+    store.commit('SET_pagesName', name)
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
   }
 
   activeMostCentralPage(): number {

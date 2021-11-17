@@ -554,7 +554,7 @@ class DesignUtils {
     })])
     pageUtils.clearPagesInfo()
     if (this.isLogin) {
-      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       /**
        * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
        */
