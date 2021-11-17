@@ -215,7 +215,7 @@ export default Vue.extend({
       clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
-        srcObj: { type: string, assetId: string, userId: string }
+        srcObj: { type: string, assetId: string | number, userId: string }
       },
       subControlerIndexs: []
     }
