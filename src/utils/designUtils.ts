@@ -299,49 +299,56 @@ class DesignUtils {
     return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
   }
 
-  dispatchDesignMenuAction(icon: string, design: IDesign): { event: string, payload: any } | undefined {
+  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'copy': {
         store.dispatch('design/copyDesign', design)
-        return
+        break
       }
       case 'trash': {
         this.delete(design)
-        return {
+        eventEmitter({
           event: 'deleteItem',
           payload: {
             type: 'design',
             data: design
           }
-        }
+        })
+        break
       }
       case 'delete': {
-        return {
+        eventEmitter({
           event: 'deleteForever',
           payload: design
-        }
+        })
+        break
       }
       case 'reduction': {
-        this.recover(design)
-        return {
-          event: 'recoverItem',
-          payload: {
-            type: 'design',
-            data: design
-          }
-        }
+        this.recover(design).then((dest) => {
+          eventEmitter({
+            event: 'recoverItem',
+            payload: {
+              type: 'design',
+              data: design,
+              dest
+            }
+          })
+        })
+        break
       }
       case 'folder': {
-        return {
+        eventEmitter({
           event: 'moveDesignToFolder',
           payload: design
-        }
+        })
+        break
       }
       case 'download': {
-        return {
+        eventEmitter({
           event: 'downloadDesign',
           payload: design
-        }
+        })
+        break
       }
     }
   }
@@ -377,18 +384,17 @@ class DesignUtils {
   }
 
   move(design: IDesign, destination: string[]) {
-    // if move to current folder, skip moving
-    // if (generalUtils.arrayCompare<string>(source, destination)) return
-    store.commit('design/moveDesign', {
+    store.dispatch('design/moveDesign', {
       design,
       destination
     })
   }
 
   moveAll(designs: IDesign[], destination: string[]) {
-    for (const design of designs) {
-      this.move(design, destination)
-    }
+    store.dispatch('design/moveDesigns', {
+      designs,
+      destination
+    })
   }
 
   moveFolder(folder: IFolder, source: string[], destination: string[]) {
@@ -410,9 +416,7 @@ class DesignUtils {
   }
 
   deleteAll(designs: IDesign[]) {
-    for (const design of designs) {
-      this.delete(design)
-    }
+    store.dispatch('design/deleteDesigns', designs)
   }
 
   deleteFolder(pathedFolder: IPathedFolder) {
@@ -425,9 +429,7 @@ class DesignUtils {
   }
 
   deleteAllForever(designs: IDesign[]) {
-    for (const design of designs) {
-      this.deleteForever(design)
-    }
+    store.dispatch('design/deleteDesignsForever', designs)
   }
 
   deleteFolderForever(pathedFolder: IPathedFolder) {
@@ -440,14 +442,12 @@ class DesignUtils {
     }
   }
 
-  recover(design: IDesign) {
-    store.dispatch('design/recoverDesign', design)
+  async recover(design: IDesign): Promise<string> {
+    return await store.dispatch('design/recoverDesign', design)
   }
 
-  recoverAll(designs: IDesign[]) {
-    for (const design of designs) {
-      this.recover(design)
-    }
+  async recoverAll(designs: IDesign[]): Promise<string> {
+    return await store.dispatch('design/recoverDesigns', designs)
   }
 
   recoverFolder(pathedFolder: IPathedFolder) {
@@ -475,9 +475,7 @@ class DesignUtils {
   }
 
   removeAllFromFavorite(designs: IDesign[]) {
-    for (const design of designs) {
-      this.removeFromFavorite(design)
-    }
+    store.dispatch('design/unfavorDesigns', designs)
   }
 
   addToFavorite(design: IDesign) {
@@ -485,9 +483,7 @@ class DesignUtils {
   }
 
   addAllToFavorite(designs: IDesign[]) {
-    for (const design of designs) {
-      this.addToFavorite(design)
-    }
+    store.dispatch('design/favorDesigns', designs)
   }
 
   setDesignName(design: IDesign, name: string) {

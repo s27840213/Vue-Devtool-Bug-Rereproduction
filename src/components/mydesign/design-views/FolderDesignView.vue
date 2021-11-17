@@ -137,7 +137,7 @@ export default Vue.extend({
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
     designUtils.fetchDesigns(async () => {
       await this.fetchFolderDesigns({
-        path: this.path.join(',')
+        path: this.path.slice(1).join(',')
       })
     })
   },

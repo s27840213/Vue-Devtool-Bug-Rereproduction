@@ -215,8 +215,7 @@ export default Vue.extend({
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders',
-      destinationFolder: 'getDestinationFolder'
+      selectedFolders: 'getSelectedFolders'
     }),
     mydesignView(): string {
       switch (this.currLocation[0]) {
@@ -293,12 +292,8 @@ export default Vue.extend({
         return (item.data as IPathedFolder).folder.name + ' '
       }
     },
-    messageDestName(item: IQueueItem, isRecover = false): string {
-      if (item.type === 'multi') {
-        return isRecover ? '原資料夾' : this.destinationFolder as string
-      } else {
-        return this.destinationFolder as string
-      }
+    messageDestName(item: IQueueItem): string {
+      return item.dest ?? ''
     },
     showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
       const item = queue[0]
@@ -400,16 +395,19 @@ export default Vue.extend({
         designUtils.move(this.designBuffer, destination)
         this.handleMoveItem({
           type: 'design',
-          data: this.designBuffer
+          data: this.designBuffer,
+          dest: designUtils.search(this.copiedFolders, destination)?.name ?? ''
         })
         this.designBuffer = undefined
       } else {
         designUtils.moveAll(Object.values(this.selectedDesigns), destination)
         this.handleMoveItem({
           type: 'multi',
-          data: (Object.values(this.selectedDesigns) as IDesign[])[0]
+          data: (Object.values(this.selectedDesigns) as IDesign[])[0],
+          dest: designUtils.search(this.copiedFolders, destination)?.name ?? ''
         })
       }
+      this.isMoveToFolderPanelOpen = false
     },
     handleMoveDesignToFolder(design: IDesign) {
       this.designBuffer = design

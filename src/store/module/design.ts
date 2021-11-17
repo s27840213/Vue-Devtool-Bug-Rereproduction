@@ -16,7 +16,6 @@ interface IDesignState {
   draggingFolder: IPathedFolder | undefined,
   selectedDesigns: {[key: string]: IDesign}
   selectedFolders: {[key: string]: IPathedFolder},
-  destinationFolder: string,
   isDesignsLoading: boolean,
   sortByField: string,
   sortByDescending: boolean,
@@ -33,7 +32,6 @@ const getDefaultState = (): IDesignState => ({
   draggingDesign: undefined,
   selectedDesigns: {},
   selectedFolders: {},
-  destinationFolder: '',
   isDesignsLoading: false,
   sortByField: 'update',
   sortByDescending: true,
@@ -68,9 +66,6 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getSelectedFolders(state: IDesignState): {[key: string]: IPathedFolder} {
     return state.selectedFolders
-  },
-  getDestinationFolder(state: IDesignState): string {
-    return state.destinationFolder
   },
   getIsDesignsLoading(state: IDesignState): boolean {
     return state.isDesignsLoading
@@ -166,17 +161,14 @@ const actions: ActionTree<IDesignState, unknown> = {
     design.name = name
   },
   async recoverDesign({ commit, getters }, design: IDesign) {
-    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', design.asset_index.toString(), '', '0')
-      .then((response) => {
-        console.log(response)
-      })
     if (getters.getCurrLocation === 't') {
       commit('UPDATE_deleteDesign', design)
-    } else {
-      if (!getters.getInDeletionView) return
+    } else if (getters.getInDeletionView) {
       commit('UPDATE_addDesign', design)
     }
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', design.asset_index.toString(), '', '0')
+    return '原資料夾'
   },
   async deleteDesignForever({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
@@ -185,6 +177,13 @@ const actions: ActionTree<IDesignState, unknown> = {
         console.log(response)
       })
     commit('UPDATE_deleteDesign', design)
+  },
+  async moveDesign({ commit, getters }, { design, destination }: {design: IDesign, destination: string[]}) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'move', design.asset_index.toString(), null, destination.slice(1).join(','))
+    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
+      commit('UPDATE_deleteDesign', design)
+    }
   }
 }
 
@@ -227,9 +226,6 @@ const mutations: MutationTree<IDesignState> = {
       state.draggingType = ''
     }
     state.draggingDesign = draggingDesign
-  },
-  SET_destinationFolder(state: IDesignState, destinationFolder: string) {
-    state.destinationFolder = destinationFolder
   },
   SET_isDesignsLoading(state: IDesignState, isDesignsLoading: boolean) {
     state.isDesignsLoading = isDesignsLoading

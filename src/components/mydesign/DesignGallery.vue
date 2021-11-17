@@ -100,10 +100,11 @@ export default Vue.extend({
     },
     handleDesignMenuAction(icon: string, design: IDesign) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchDesignMenuAction(icon, design)
-      if (extraEvent) {
-        this.$emit('menuAction', extraEvent)
-      }
+      designUtils.dispatchDesignMenuAction(icon, design, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+      })
     },
     toggleFavorite(design: IDesign) {
       if (design.favorite) {

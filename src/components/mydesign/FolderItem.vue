@@ -206,13 +206,15 @@ export default Vue.extend({
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
-            data: design
+            data: design,
+            dest: this.config.name
           })
         } else {
           designUtils.move(design, destination)
           this.$emit('moveItem', {
             type: 'design',
-            data: design
+            data: design,
+            dest: this.config.name
           })
         }
       } else if (this.draggingType === 'folder') {
@@ -222,7 +224,8 @@ export default Vue.extend({
         designUtils.moveFolder(folder, parents, destination)
         this.$emit('moveItem', {
           type: 'folder',
-          data: { parents: destination, folder }
+          data: { parents: destination, folder },
+          dest: this.config.name
         })
       }
     },
