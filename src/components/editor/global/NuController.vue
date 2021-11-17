@@ -342,9 +342,15 @@ export default Vue.extend({
           TextUtils.setCurrTextInfo({ layerIndex: -1 })
         }
       } else {
-        TextUtils.setCurrTextInfo({ layerIndex: this.layerIndex })
+        if (this.getLayerType === 'text') {
+          TextUtils.setCurrTextInfo({
+            config: this.config as IText,
+            layerIndex: this.layerIndex
+          })
+        }
       }
-      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
+
+      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && val) {
         this.$store.commit('text/SET_default')
         TextPropUtils.updateTextPropsState()
       }

@@ -174,12 +174,21 @@ export default Vue.extend({
           })
           this.contentEditable = false
           this.isControlling = false
-          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-          TextUtils.setCurrTextInfo({ subLayerIndex: undefined })
+
+          if (this.currTextInfo.subLayerIndex === this.layerIndex) {
+            TextUtils.setCurrTextInfo({
+              config: LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup,
+              subLayerIndex: undefined
+            })
+          }
         }
       } else {
-        TextUtils.setCurrTextInfo({ subLayerIndex: this.layerIndex })
+        TextUtils.setCurrTextInfo({
+          config: this.config as IText,
+          subLayerIndex: this.layerIndex
+        })
       }
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {

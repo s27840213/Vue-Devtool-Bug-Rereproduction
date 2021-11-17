@@ -160,15 +160,17 @@ export default Vue.extend({
 
   &__add-color {
     width: 100%;
-    height: 100%;
+    // height: 100%;
+    padding-top: 100%;
     background-image: url("~@/assets/img/svg/addColor.png");
     background-size: cover;
   }
 
   &__color {
-    aspect-ratio: 1/1;
+    // aspect-ratio: 1/1;
+    // height: 100%;
     width: 100%;
-    height: 100%;
+    padding-top: 100%;
     border-radius: 2px;
   }
 

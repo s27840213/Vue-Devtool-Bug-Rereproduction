@@ -748,7 +748,6 @@ class UploadUtils {
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', json)
-
                 //
                 stepsUtils.reset()
               }

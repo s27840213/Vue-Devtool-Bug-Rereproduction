@@ -361,13 +361,15 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
-    store.commit('UPDATE_documentColors', {
-      pageIndex: layerUtils.pageIndex,
-      colors: (config.color as Array<string>)
-        .map(color => {
-          return { color, count: 1 }
-        })
-    })
+    if (config.color) {
+      store.commit('UPDATE_documentColors', {
+        pageIndex: layerUtils.pageIndex,
+        colors: (config.color as Array<string>)
+          .map(color => {
+            return { color, count: 1 }
+          })
+      })
+    }
     return Object.assign(basicConfig, config)
   }
 
