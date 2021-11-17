@@ -1,6 +1,7 @@
 import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
+import { IDesign } from '@/interfaces/design'
 
 export default {
   getToken(): string {
@@ -11,6 +12,12 @@ export default {
   },
   getUserId(): string {
     return store.getters['user/getUserId']
+  },
+  getAssetIndex(design: IDesign): string {
+    return design.asset_index.toString()
+  },
+  getAssetIndices(designs: IDesign[]): string {
+    return designs.map((design) => this.getAssetIndex(design)).join(',')
   },
   async getDesigns(token: string, path: string, folderOnly: boolean, sortByField: string, sortByDescending: boolean): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {

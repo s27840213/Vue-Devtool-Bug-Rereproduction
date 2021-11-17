@@ -396,7 +396,7 @@ export default Vue.extend({
         this.handleMoveItem({
           type: 'design',
           data: this.designBuffer,
-          dest: designUtils.search(this.copiedFolders, destination)?.name ?? ''
+          dest: designUtils.search(this.copiedFolders, destination.slice(1))?.name ?? ''
         })
         this.designBuffer = undefined
       } else {
@@ -404,7 +404,7 @@ export default Vue.extend({
         this.handleMoveItem({
           type: 'multi',
           data: (Object.values(this.selectedDesigns) as IDesign[])[0],
-          dest: designUtils.search(this.copiedFolders, destination)?.name ?? ''
+          dest: designUtils.search(this.copiedFolders, destination.slice(1))?.name ?? ''
         })
       }
       this.isMoveToFolderPanelOpen = false
@@ -469,13 +469,15 @@ export default Vue.extend({
     },
     recoverAll() {
       const selectedDesigns = Object.values(this.selectedDesigns) as IDesign[]
-      const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
-      designUtils.recoverAll(selectedDesigns)
-      designUtils.recoverAllFolder(selectedFolders)
-      this.handleRecoverItem({
-        type: 'multi',
-        data: undefined
+      // const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
+      designUtils.recoverAll(selectedDesigns).then((dest) => {
+        this.handleRecoverItem({
+          type: 'multi',
+          data: undefined,
+          dest
+        })
       })
+      // designUtils.recoverAllFolder(selectedFolders)
     },
     deleteAllForever() {
       this.confirmMessage = 'delete-forever'

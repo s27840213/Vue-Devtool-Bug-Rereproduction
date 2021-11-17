@@ -123,11 +123,6 @@ const actions: ActionTree<IDesignState, unknown> = {
   async fetchFolderDesigns({ dispatch }, { path, sortByField, sortByDescending }) {
     await dispatch('fetchDesigns', { path, sortByField, sortByDescending })
   },
-  async deleteDesign({ commit }, design: IDesign) {
-    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', design.asset_index.toString(), null, '1')
-    commit('UPDATE_deleteDesign', design)
-  },
   async copyDesign({ commit }, design: IDesign) {
     const newId = generalUtils.generateAssetId() + '_new'
     const newDesign = generalUtils.deepCopy(design)
@@ -136,7 +131,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     newDesign.createdTime = new Date().toString()
     newDesign.lastUpdatedTime = newDesign.createdTime
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'copy', design.asset_index.toString(), null, '1')
+      'copy', designApis.getAssetIndex(design), null, '1')
       .then((response) => {
         commit('UPDATE_replaceDesign', {
           id: newId,
@@ -147,18 +142,44 @@ const actions: ActionTree<IDesignState, unknown> = {
   },
   async favorDesign({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'favor', design.asset_index.toString(), null, '1')
+      'favor', designApis.getAssetIndex(design), null, '1')
     design.favorite = true
+  },
+  async favorDesigns({ commit }, designs: IDesign[]) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'favor', designApis.getAssetIndices(designs), null, '1')
+    for (const design of designs) {
+      design.favorite = true
+    }
   },
   async unfavorDesign({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'favor', design.asset_index.toString(), null, '0')
+      'favor', designApis.getAssetIndex(design), null, '0')
     design.favorite = false
+  },
+  async unfavorDesigns({ commit }, designs: IDesign[]) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'favor', designApis.getAssetIndices(designs), null, '0')
+    for (const design of designs) {
+      design.favorite = false
+    }
   },
   async setDesignName({ commit }, { design, name }: { design: IDesign, name: string}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'rename', design.asset_index.toString(), null, name)
+      'rename', designApis.getAssetIndex(design), null, name)
     design.name = name
+  },
+  async deleteDesign({ commit }, design: IDesign) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', designApis.getAssetIndex(design), null, '1')
+    commit('UPDATE_deleteDesign', design)
+  },
+  async deleteDesigns({ commit }, designs: IDesign[]) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', designApis.getAssetIndices(designs), null, '1')
+    for (const design of designs) {
+      commit('UPDATE_deleteDesign', design)
+    }
   },
   async recoverDesign({ commit, getters }, design: IDesign) {
     if (getters.getCurrLocation === 't') {
@@ -167,22 +188,55 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_addDesign', design)
     }
     await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', design.asset_index.toString(), '', '0')
+      'delete', designApis.getAssetIndex(design), '', '0')
+    return '原資料夾'
+  },
+  async recoverDesigns({ commit, getters }, designs: IDesign[]) {
+    if (getters.getCurrLocation === 't') {
+      for (const design of designs) {
+        commit('UPDATE_deleteDesign', design)
+      }
+    } else if (getters.getInDeletionView) {
+      for (const design of designs) {
+        commit('UPDATE_addDesign', design)
+      }
+    }
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', designApis.getAssetIndices(designs), '', '0')
     return '原資料夾'
   },
   async deleteDesignForever({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', design.asset_index.toString(), '', '2')
+      'delete', designApis.getAssetIndex(design), '', '2')
       .then((response) => {
         console.log(response)
       })
     commit('UPDATE_deleteDesign', design)
   },
+  async deleteDesignsForever({ commit }, designs: IDesign[]) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', designApis.getAssetIndices(designs), '', '2')
+      .then((response) => {
+        console.log(response)
+      })
+    for (const design of designs) {
+      commit('UPDATE_deleteDesign', design)
+    }
+  },
   async moveDesign({ commit, getters }, { design, destination }: {design: IDesign, destination: string[]}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'move', design.asset_index.toString(), null, destination.slice(1).join(','))
+      'move', designApis.getAssetIndex(design), null, destination.slice(1).join(','))
     if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
       commit('UPDATE_deleteDesign', design)
+    }
+  },
+  async moveDesigns({ commit, getters }, { designs, destination }: {designs: IDesign[], destination: string[]}) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'move', designApis.getAssetIndices(designs), null, destination.slice(1).join(','))
+    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
+      for (const design of designs) {
+        commit('UPDATE_deleteDesign', design)
+      }
     }
   }
 }
