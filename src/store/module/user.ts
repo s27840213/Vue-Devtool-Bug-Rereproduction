@@ -396,10 +396,12 @@ const actions: ActionTree<IUserModule, unknown> = {
     const { token } = state
     const { data } = await userApis.getAssets(token, { asset_list: assetSet })
     const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string }}
-    const test = await userApis.getAssets(token, { asset_list: '2784,2783' })
-
-    for (const [assetId, urls] of Object.entries(urlSet)) {
-      commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
+    if (urlSet) {
+      for (const [assetId, urls] of Object.entries(urlSet)) {
+        commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
+      }
+    } else {
+      throw new Error('fail to fetch private image urls')
     }
   }
 }

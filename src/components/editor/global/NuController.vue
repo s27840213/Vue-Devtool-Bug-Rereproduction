@@ -485,7 +485,7 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = (() => {
         const isFrame = this.getLayerType === 'frame' && this.isMoving
-        const isGroup = this.getLayerType === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex
+        const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 1000 : 100)
         } else if (isFrame || isGroup) {

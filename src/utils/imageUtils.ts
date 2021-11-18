@@ -45,14 +45,13 @@ class ImageUtils {
             if (k === size) return v
           }
         } else {
-          store.dispatch('updateImages', { assetSet: `${assetId}` })
+          store.dispatch('user/updateImages', { assetSet: `${assetId}` })
             .then(() => {
-              const src = this.getSrc(config, size)
-              if (src) return src
-              else {
-                console.error('private image load error')
-                return ''
-              }
+              return this.getSrc(config, size)
+            })
+            .catch((error) => {
+              console.log(error + ', assetId: ' + assetId)
+              return ''
             })
         }
         return ''
@@ -129,7 +128,6 @@ class ImageUtils {
         const keyStart = 'background/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
       }
-        break
       case 'private':
         return src
       default:
@@ -139,28 +137,30 @@ class ImageUtils {
 
   setImgControlDefault() {
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
-    switch (currLayer.type) {
-      case 'image':
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
-        break
-      case 'group': {
-        const primaryLayer = currLayer as IGroup
-        for (let i = 0; i < primaryLayer.layers.length; i++) {
-          const props = {
-            active: false
-          } as { [key: string]: boolean | string | number }
+    if (currLayer) {
+      switch (currLayer.type) {
+        case 'image':
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
+          break
+        case 'group': {
+          const primaryLayer = currLayer as IGroup
+          for (let i = 0; i < primaryLayer.layers.length; i++) {
+            const props = {
+              active: false
+            } as { [key: string]: boolean | string | number }
 
-          if (primaryLayer.layers[i].type === 'image') {
-            props.imgControl = false
+            if (primaryLayer.layers[i].type === 'image') {
+              props.imgControl = false
+            }
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }
-          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+          break
         }
-        break
-      }
-      case 'frame': {
-        const primaryLayer = currLayer as IFrame
-        for (let i = 0; i < primaryLayer.clips.length; i++) {
-          FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+        case 'frame': {
+          const primaryLayer = currLayer as IFrame
+          for (let i = 0; i < primaryLayer.clips.length; i++) {
+            FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+          }
         }
       }
     }

@@ -563,10 +563,13 @@ class UploadUtils {
 
     const pageJSON = this.default(generalUtils.deepCopy(page))
     pageJSON.parentId = parentId
-    // pageJSON.layers
-    //   .forEach((l: ILayer) => {
-    //     l = this.layerInfoFilter(l)
-    //   })
+    for (const [i, layer] of pageJSON.layers.entries()) {
+      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      } else if (layer.type !== 'shape') {
+        pageJSON.layers[i] = this.layerInfoFilter(layer)
+      }
+    }
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
