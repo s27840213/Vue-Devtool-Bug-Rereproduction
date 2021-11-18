@@ -521,6 +521,7 @@ export default Vue.extend({
       background: white;
       box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
       border-radius: 2px;
+      z-index: 1;
       &__title {
         margin-top: 13px;
         margin-left: 8px;
