@@ -215,7 +215,7 @@ export default Vue.extend({
       clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
-        srcObj: { type: string, assetId: string, userId: string }
+        srcObj: { type: string, assetId: string | number, userId: string }
       },
       subControlerIndexs: []
     }
@@ -339,9 +339,18 @@ export default Vue.extend({
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
+          TextUtils.setCurrTextInfo({ layerIndex: -1 })
+        }
+      } else {
+        if (this.getLayerType === 'text') {
+          TextUtils.setCurrTextInfo({
+            config: this.config as IText,
+            layerIndex: this.layerIndex
+          })
         }
       }
-      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && this.isActive) {
+
+      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && val) {
         this.$store.commit('text/SET_default')
         TextPropUtils.updateTextPropsState()
       }
@@ -476,7 +485,7 @@ export default Vue.extend({
     styles(type: string) {
       const zindex = (() => {
         const isFrame = this.getLayerType === 'frame' && this.isMoving
-        const isGroup = this.getLayerType === 'group' && LayerUtils.currSelectedInfo.index === this.layerIndex
+        const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 1000 : 100)
         } else if (isFrame || isGroup) {

@@ -112,7 +112,7 @@ export default Vue.extend({
     this.parentId = this.getPrimaryLayer.id as string
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -172,11 +172,23 @@ export default Vue.extend({
             editing: false,
             isTyping: false
           })
-          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
           this.contentEditable = false
           this.isControlling = false
+
+          if (this.currTextInfo.subLayerIndex === this.layerIndex) {
+            TextUtils.setCurrTextInfo({
+              config: LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup,
+              subLayerIndex: undefined
+            })
+          }
         }
+      } else {
+        TextUtils.setCurrTextInfo({
+          config: this.config as IText,
+          subLayerIndex: this.layerIndex
+        })
       }
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
@@ -510,23 +522,25 @@ export default Vue.extend({
       if (isAllHorizon) {
         const lowLine = this.getLayerPos.y + originSize.height
         const diff = newSize.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-              y: data[1] + diff
+        if (diff > 0) {
+          const targetSubLayers: Array<[number, number]> = []
+          group.layers
+            .forEach((l, idx) => {
+              if (l.styles.y >= lowLine) {
+                targetSubLayers.push([idx, l.styles.y])
+              }
             })
-          })
+          targetSubLayers
+            .forEach(data => {
+              LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+                y: data[1] + diff
+              })
+            })
+        }
       }
       // @TODO: the vertical kind pending
 
-      TextUtils.updateLayerSize(text, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
+      TextUtils.updateLayerSize(text, this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {

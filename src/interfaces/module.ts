@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IImage, IStyle, IShape, IText, ITmp, IGroup, ILayer } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
@@ -48,5 +49,6 @@ export interface IAssetProps {
   styles?: Partial<IStyle>,
   // the following props are used for preview image during polling process
   isPreview?: boolean,
-  assetId?: string
+  assetId?: string,
+  assetIndex?: number
 }

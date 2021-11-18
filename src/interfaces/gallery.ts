@@ -24,5 +24,5 @@ export interface RowData {
 export interface SrcObj {
   type: string,
   userId: string,
-  assetId: string
+  assetId: string | number
 }

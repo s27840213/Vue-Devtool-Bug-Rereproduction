@@ -3,6 +3,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
+import themeUtils from '@/utils/themeUtils'
+import listService from '@/apis/list'
 
 export async function editorRouteHandler(_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
   try {
@@ -21,6 +23,7 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     const panelIndex = urlParams.get('panel_index')
     const url = urlParams.get('url')
 
+    console.log('handddddler')
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
@@ -37,6 +40,12 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     } else {
       (() => import('@/assets/scss/components/tmpFonts.scss'))()
     }
+    listService.getTheme({})
+      .then(response => {
+        const { data } = response.data
+        store.commit('SET_themes', data.content)
+        themeUtils.setPageThemes()
+      })
   } catch (error) {
     console.log(error)
   }

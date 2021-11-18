@@ -177,7 +177,7 @@ import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import controlUtils from '@/utils/controlUtils'
 import { ColorEventType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -444,13 +444,13 @@ export default Vue.extend({
     },
     setColor(newColor: string, index: number) {
       stepsUtils.record()
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors: [
-          { color: newColor, count: 1 },
-          { color: this.getColors[this.currSelectedColorIndex], count: -1 }
-        ]
-      })
+      // this.updateDocumentColors({
+      //   pageIndex: LayerUtils.pageIndex,
+      //   colors: [
+      //     { color: newColor, count: 1 },
+      //     { color: this.getColors[this.currSelectedColorIndex], count: -1 }
+      //   ]
+      // })
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const subSelectedIdx = (currLayer as IGroup).layers
@@ -477,6 +477,13 @@ export default Vue.extend({
         }
         LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
       }
+      this.updateDocumentColors({
+        pageIndex: LayerUtils.pageIndex,
+        colors: getDocumentColor(newColor).map(c => ({
+          color: c,
+          count: 1
+        }))
+      })
     },
     setLineWidth(value: number) {
       const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))

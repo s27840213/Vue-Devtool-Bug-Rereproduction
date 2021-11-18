@@ -18,8 +18,14 @@
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
         @click.native="ShortcutUtils.redo()")
-    div(class="body-2")
-      span 我的設計 / 新增檔案名稱
+    div(class="editor-header__pages-name body-2")
+      span 我的設計
+      span(class="ml-10 mr-5") /
+      input(class="body-2 text-gray-2" type="text"
+        placeholder="未命名設計"
+        maxlength="30"
+        :value="pagesName"
+        @change="setPagesName")
     div(class="body-2 relative")
       //- div(class="editor-header__locale" @click="switchLocale()")
       //-   span {{currLocale}}
@@ -110,6 +116,9 @@ export default Vue.extend({
     },
     currLocale(): string {
       return this.$i18n.locale
+    },
+    pagesName(): string {
+      return pageUtils.pagesName
     }
   },
   methods: {
@@ -153,6 +162,10 @@ export default Vue.extend({
     switchLocale() {
       const targetLocale = this.currLocale === 'en-US' ? 'zh-TW' : 'en-US'
       this.$i18n.locale = targetLocale
+    },
+    setPagesName(event: Event) {
+      const { value } = event.target as HTMLInputElement
+      pageUtils.setPagesName(value)
     }
   }
 })
@@ -182,14 +195,7 @@ export default Vue.extend({
       align-items: center;
       margin-left: 40px;
     }
-    &:nth-child(2) {
-      display: grid;
-      grid-template-columns: repeat(1, auto);
-      grid-template-rows: 1fr;
-      column-gap: 20px;
-      justify-items: center;
-      align-items: center;
-    }
+
     &:nth-child(3) {
       display: grid;
       grid-template-columns: repeat(4, auto);
@@ -198,6 +204,36 @@ export default Vue.extend({
       justify-items: center;
       align-items: center;
       margin-right: 40px;
+    }
+  }
+
+  &__pages-name {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    > span {
+      height: 100%;
+    }
+    > input {
+      width: auto;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
+      border: 2px solid transparent;
+      padding: 4px;
+      transition: all 0.3s;
+      background-color: transparent;
+      &::placeholder {
+        transition: color 0.3s;
+      }
+      &:hover,
+      &:focus {
+        border: 2px solid setColor(blue-1, 0.5);
+        box-sizing: border-box;
+        border-radius: 5px;
+        &::placeholder {
+          color: setColor(blue-1, 0.5);
+        }
+      }
     }
   }
   &__download {

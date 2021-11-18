@@ -57,6 +57,7 @@ export default Vue.extend({
     },
     rows(): any {
       if (this.getImages.length > 0) {
+        console.log(this.getUserAssets)
         const rows = this.galleryUtils.generate(this.getImages)
           .map((row, idx) => ({
             list: row,

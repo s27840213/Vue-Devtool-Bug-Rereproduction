@@ -588,16 +588,6 @@ const mutations: MutationTree<IEditorState> = {
       state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
     }
   },
-  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
-    const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      for (let pIndex = 0; pIndex < pLeng; pIndex++) {
-        const p = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs[pIndex]
-        p.styles[k] = v
-      }
-    })
-    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
-  },
   UPDATE_tmpLayersZindex(state: IEditorState) {
     const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp
     tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
@@ -725,25 +715,28 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color:string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-    console.warn(state.pages[data.pageIndex].documentColors)
   },
   UPDATE_documentColors(state: IEditorState, data: { pageIndex: number, colors: [{ color: string, count: number }] }) {
     const documentColors = state.pages[data.pageIndex].documentColors
-    data.colors
-      .forEach(e => {
-        const colorIdx = documentColors.findIndex(c => c.color === e.color)
-        if (colorIdx !== -1) {
-          documentColors[colorIdx].count += e.count
-          if (documentColors[colorIdx].count === 0) {
-            documentColors.splice(colorIdx, 1)
-          }
-        } else {
-          documentColors.push({
-            color: e.color,
-            count: e.count
-          })
-        }
-      })
+
+    documentColors.splice(0, documentColors.length)
+    Object.assign(documentColors, data.colors)
+
+    // data.colors
+    //   .forEach(e => {
+    //     const colorIdx = documentColors.findIndex(c => c.color === e.color)
+    //     if (colorIdx !== -1) {
+    //       documentColors[colorIdx].count += e.count
+    //       if (documentColors[colorIdx].count === 0) {
+    //         documentColors.splice(colorIdx, 1)
+    //       }
+    //     } else {
+    //       documentColors.push({
+    //         color: e.color,
+    //         count: e.count
+    //       })
+    //     }
+    //   })
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes

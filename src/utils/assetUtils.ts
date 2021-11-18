@@ -102,6 +102,7 @@ class AssetUtils {
   addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    console.log('add template')
     this.updateBackground(json).then((json) => {
       PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
       stepsUtils.record()
@@ -317,7 +318,7 @@ class AssetUtils {
         : { x, y }
     )
     const newLayer = config.type === 'group'
-      ? LayerFactary.newGroup((config.styles as ICalculatedGroupStyle), (config as IGroup).layers)
+      ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
@@ -342,7 +343,7 @@ class AssetUtils {
   }
 
   addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
-    const { pageIndex, isPreview, assetId: previewAssetId } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex } = attrs
     const resizeRatio = 0.8
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
@@ -370,7 +371,7 @@ class AssetUtils {
       srcObj: {
         type,
         userId: ImageUtils.getUserId(url, type),
-        assetId: previewAssetId ?? ImageUtils.getAssetId(url, type)
+        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type))
       },
       styles: {
         x,
@@ -383,10 +384,11 @@ class AssetUtils {
         imgHeight: photoHeight
       }
     }
+    console.log(config)
     LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
   }
 
-  async addGroupTemplate (item: IListServiceContentDataItem, childId?: string) {
+  async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
     const { content_ids: contents = [], type } = item
     const lastPageIndex = this.getPages.length
     const promises = contents?.filter(content => childId ? content.id === childId : true)

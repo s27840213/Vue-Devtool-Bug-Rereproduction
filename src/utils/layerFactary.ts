@@ -251,7 +251,7 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
+  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
     layers
       .forEach(l => {
         if (l.type === 'text') {
@@ -260,7 +260,6 @@ class LayerFactary {
             ? text.styles.height : text.styles.width
         }
       })
-
     return {
       type: 'group',
       id: GeneralUtils.generateRandomString(8),
@@ -269,21 +268,21 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
-      designId: '',
+      designId: config.designId,
       styles: {
-        x: styles.x,
-        y: styles.y,
-        scale: styles.scale as number ?? 1,
-        scaleX: styles.scaleX as number ?? 1,
-        scaleY: styles.scaleY as number ?? 1,
-        rotate: styles.rotate as number ?? 1,
-        width: styles.width,
-        height: styles.height,
-        initWidth: styles.initWidth ?? styles.width,
-        initHeight: styles.initHeight ?? styles.height,
+        x: config.styles.x,
+        y: config.styles.y,
+        scale: config.styles.scale as number ?? 1,
+        scaleX: config.styles.scaleX as number ?? 1,
+        scaleY: config.styles.scaleY as number ?? 1,
+        rotate: config.styles.rotate as number ?? 1,
+        width: config.styles.width,
+        height: config.styles.height,
+        initWidth: config.styles.initWidth ?? config.styles.width,
+        initHeight: config.styles.initHeight ?? config.styles.height,
         zindex: -1,
         opacity: 100,
-        horizontalFlip: styles.horizontalFlip as boolean || false,
+        horizontalFlip: config.styles.horizontalFlip as boolean || false,
         verticalFlip: false
       },
       layers: layers
@@ -362,13 +361,15 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
-    store.commit('UPDATE_documentColors', {
-      pageIndex: layerUtils.pageIndex,
-      colors: (config.color as Array<string>)
-        .map(color => {
-          return { color, count: 1 }
-        })
-    })
+    if (config.color) {
+      store.commit('UPDATE_documentColors', {
+        pageIndex: layerUtils.pageIndex,
+        colors: (config.color as Array<string>)
+          .map(color => {
+            return { color, count: 1 }
+          })
+      })
+    }
     return Object.assign(basicConfig, config)
   }
 
@@ -444,7 +445,7 @@ class LayerFactary {
         for (const layerIndex in config.layers) {
           config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
         }
-        return this.newGroup(config.styles, config.layers)
+        return this.newGroup(config, config.layers)
       case 'tmp':
         for (const layerIndex in config.layers) {
           config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])

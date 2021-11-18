@@ -1,6 +1,6 @@
 import { IGroup, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
-import { ModuleTree, MutationTree } from 'vuex'
+import { ModuleTree, MutationTree, GetterTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 export interface ITextState {
@@ -123,10 +123,13 @@ const mutations: MutationTree<ITextState> = {
     Object.assign(state.sel.start, nan)
     Object.assign(state.sel.end, nan)
   },
-  SET_textInfo(state: ITextState, data: { config: IText, layerIndex: number, subLayerIndex?: number }) {
-    state.currTextInfo.config = data.config
-    state.currTextInfo.layerIndex = data.layerIndex
-    state.currTextInfo.subLayerIndex = data.subLayerIndex
+  SET_textInfo(state: ITextState, data: { config?: IText, layerIndex?: number, subLayerIndex?: number }) {
+    Object.entries(data)
+      .forEach(([k, v]) => {
+        if (Object.keys(state.currTextInfo).includes(k)) {
+          Object.assign(state.currTextInfo, { [k]: v })
+        }
+      })
   }
 }
 

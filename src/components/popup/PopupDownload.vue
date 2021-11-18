@@ -19,7 +19,7 @@
       div(v-if="'scale' in selected"
         class="flex items-center mb-10")
         span 尺寸 x
-        dropdown(class="mx-5 w-65"
+        dropdown(class="mx-5 popup-download__size-scale"
           :options="scaleOptions"
           @select="option => handleUpdate('scale', option)") {{ selected.scale }}
         span 倍
@@ -27,7 +27,7 @@
         class="flex flex-column items-center mb-10")
         div(class="flex items-center full-width mb-5")
           span 品質
-          property-bar(class="w-60 ml-15")
+          property-bar(class="popup-download__size-scale ml-15")
             input(class="px-0"
               type="text"
               v-model.number="selectedTypeQuality")
@@ -305,6 +305,9 @@ export default Vue.extend({
         position: relative;
         cursor: pointer;
       }
+    }
+    &__size-scale {
+      width: 65px;
     }
     .property-bar,
     .btn {
