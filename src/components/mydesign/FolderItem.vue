@@ -220,11 +220,12 @@ export default Vue.extend({
         const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
         if (!folder) return
         if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.path as string[], folder: this.config as IFolder })) return
-        designUtils.moveFolder(folder, parents, destination)
-        this.$emit('moveItem', {
-          type: 'folder',
-          data: { parents: destination, folder },
-          dest: this.config.name
+        designUtils.moveFolder({ parents, folder }, destination).then(() => {
+          this.$emit('moveItem', {
+            type: 'folder',
+            data: folder,
+            dest: this.config.name
+          })
         })
       }
     },

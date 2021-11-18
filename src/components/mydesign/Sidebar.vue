@@ -169,14 +169,15 @@ export default Vue.extend({
           } else if (this.draggingType === 'folder') {
             const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
             if (!folder) return
-            designUtils.moveFolder(folder, parents, destination)
-            if (folder.isCurrLocation) {
-              this.setCurrLocation(`f:${this.ROOT}/${folder.id}`)
-            }
-            this.$emit('moveItem', {
-              type: 'folder',
-              data: { parents: destination, folder },
-              dest: designUtils.ROOT_DISPLAY
+            designUtils.moveFolder({ parents, folder }, destination).then(() => {
+              if (folder.isCurrLocation) {
+                this.setCurrLocation(`f:${this.ROOT}/${folder.id}`)
+              }
+              this.$emit('moveItem', {
+                type: 'folder',
+                data: folder,
+                dest: designUtils.ROOT_DISPLAY
+              })
             })
           }
           break

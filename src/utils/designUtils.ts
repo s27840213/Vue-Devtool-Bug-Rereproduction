@@ -293,10 +293,6 @@ class DesignUtils {
     return bFullPath.startsWith(aFullPath)
   }
 
-  isFolderEqual(a: IPathedFolder, b: IPathedFolder): boolean {
-    return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
-  }
-
   dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'copy': {
@@ -360,7 +356,7 @@ class DesignUtils {
         }
       }
       case 'reduction': {
-        this.recoverFolder({ parents, folder })
+        this.recoverFolder(folder)
         return {
           event: 'recoverItem',
           payload: {
@@ -395,17 +391,15 @@ class DesignUtils {
     })
   }
 
-  moveFolder(folder: IFolder, source: string[], destination: string[]) {
-    // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    console.log(folder, source, destination)
-    store.commit('design/UPDATE_deleteFolder', {
-      parents: source,
-      folder
+  async moveFolder(pathedFolder: IPathedFolder, destination: string[]) {
+    await store.dispatch('design/moveFolder', {
+      folder: pathedFolder.folder,
+      destination
     })
-    store.commit('design/UPDATE_addFolder', {
+    store.commit('design/UPDATE_removeFolder', pathedFolder)
+    store.commit('design/UPDATE_insertFolder', {
       parents: destination,
-      folder
+      folder: pathedFolder.folder
     })
   }
 
@@ -417,9 +411,8 @@ class DesignUtils {
     store.dispatch('design/deleteDesigns', designs)
   }
 
-  deleteFolder(pathedFolder: IPathedFolder) {
-    store.commit('design/UPDATE_addFolderToTrash', pathedFolder)
-    store.commit('design/UPDATE_deleteFolder', pathedFolder)
+  deleteFolder(folder: IFolder) {
+    store.dispatch('design/deleteFolder', folder)
   }
 
   deleteForever(design: IDesign) {
@@ -430,14 +423,12 @@ class DesignUtils {
     store.dispatch('design/deleteDesignsForever', designs)
   }
 
-  deleteFolderForever(pathedFolder: IPathedFolder) {
-    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  deleteFolderForever(folder: IFolder) {
+    store.dispatch('design/deleteFolderForever', folder)
   }
 
-  deleteAllFolderForever(pathedFolders: IPathedFolder[]) {
-    for (const pathedFolder of pathedFolders) {
-      this.deleteFolderForever(pathedFolder)
-    }
+  deleteAllFolderForever(folders: IFolder[]) {
+    store.dispatch('design/deleteFoldersForever', folders)
   }
 
   async recover(design: IDesign): Promise<string> {
@@ -448,24 +439,12 @@ class DesignUtils {
     return await store.dispatch('design/recoverDesigns', designs)
   }
 
-  recoverFolder(pathedFolder: IPathedFolder) {
-    const folders = store.getters['design/getFolders'] as IFolder[]
-    const folder = this.search(folders, pathedFolder.parents)
-    if (folder) {
-      store.commit('design/UPDATE_addFolder', pathedFolder)
-    } else {
-      store.commit('design/UPDATE_addFolder', {
-        parents: [this.ROOT],
-        folder: pathedFolder.folder
-      })
-    }
-    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  async recoverFolder(folder: IFolder) {
+    return await store.dispatch('design/recoverFolder', folder)
   }
 
-  recoverAllFolder(pathedFolders: IPathedFolder[]) {
-    for (const pathedFolder of pathedFolders) {
-      this.recoverFolder(pathedFolder)
-    }
+  async recoverAllFolder(folders: IFolder[]) {
+    return await store.dispatch('design/recoverFolders', folders)
   }
 
   removeFromFavorite(design: IDesign) {

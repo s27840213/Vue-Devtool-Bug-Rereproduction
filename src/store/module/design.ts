@@ -291,6 +291,13 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteFolder', folder)
       commit('UPDATE_addFolder', folder)
     }
+  },
+  async moveFolder({ commit, getters }, { folder, destination }: {folder: IDesign, destination: string[]}) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'move', null, folder.id, destination.slice(1).join(','))
+    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
+      commit('UPDATE_deleteFolder', folder)
+    }
   }
 }
 
@@ -406,6 +413,21 @@ const mutations: MutationTree<IDesignState> = {
     if (index >= 0) {
       state.inDeletionView = true
       state.allFolders.splice(index, 1)
+    }
+  },
+  UPDATE_removeFolder(state: IDesignState, pathedFolder: IPathedFolder) {
+    const targetFolder = designUtils.search(state.folders, pathedFolder.parents)
+    if (targetFolder) {
+      const index = targetFolder.subFolders.findIndex(folder_ => folder_.id === pathedFolder.folder.id)
+      if (index >= 0) {
+        targetFolder.subFolders.splice(index, 1)
+      }
+    }
+  },
+  UPDATE_insertFolder(state: IDesignState, pathedFolder: IPathedFolder) {
+    const targetFolder = designUtils.search(state.folders, pathedFolder.parents)
+    if (targetFolder) {
+      targetFolder.subFolders.push(pathedFolder.folder)
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {

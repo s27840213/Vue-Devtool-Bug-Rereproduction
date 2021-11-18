@@ -137,7 +137,7 @@
             div(class="delete-folder-message__buttons")
               div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
                 span 取消
-              div(class="delete-folder-message__confirm" @click="deleteFolder(folderBuffer)")
+              div(class="delete-folder-message__confirm" @click="deleteFolder(pathedFolderBuffer)")
                 span 刪除
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-forever-message")
@@ -225,7 +225,7 @@ export default Vue.extend({
       isShowRecoverMessage: false,
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
-      folderBuffer: undefined as IPathedFolder | undefined,
+      pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
       isFavDelMouseOver: false,
@@ -319,7 +319,7 @@ export default Vue.extend({
       } else if (item.type === 'design') {
         return '設計'
       } else {
-        return (item.data as IPathedFolder).folder.name + ' '
+        return (item.data as IFolder).name + ' '
       }
     },
     messageDestName(item: IQueueItem): string {
@@ -389,10 +389,10 @@ export default Vue.extend({
         this.deleteFolder(pathedFolder)
         this.handleDeleteItem({
           type: 'folder',
-          data: pathedFolder
+          data: pathedFolder.folder
         })
       } else {
-        this.folderBuffer = pathedFolder
+        this.pathedFolderBuffer = pathedFolder
         this.confirmMessage = 'delete-folder'
       }
     },
@@ -401,7 +401,7 @@ export default Vue.extend({
       this.confirmMessage = 'delete-forever'
     },
     handleDeleteFolderForever(payload: IPathedFolder) {
-      this.folderBuffer = payload
+      this.pathedFolderBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
     handleFavDelMouseOver(val: boolean) {
@@ -453,16 +453,16 @@ export default Vue.extend({
       if (!currentShowing) return false
       if (item.type !== currentShowing.type) return false
       if (item.type === 'design') {
-        return (item.data as IDesign).id === (this.deletedQueue[0]?.data as IDesign)?.id
+        return (item.data as IDesign).id === (currentShowing.data as IDesign).id
       }
       if (item.type === 'folder') {
-        return designUtils.isFolderEqual(item.data as IPathedFolder, currentShowing.data as IPathedFolder)
+        return (item.data as IFolder).id === (currentShowing.data as IFolder).id
       }
       return false
     },
     deleteFolder(pathedFolder: IPathedFolder) {
-      designUtils.deleteFolder(pathedFolder)
-      this.folderBuffer = undefined
+      designUtils.deleteFolder(pathedFolder.folder)
+      this.pathedFolderBuffer = undefined
       if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
       if (pathedFolder.parents.length > 1) {
         this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
@@ -478,7 +478,7 @@ export default Vue.extend({
           designUtils.recover(item.data as IDesign)
         }
         if (item.type === 'folder') {
-          designUtils.recoverFolder(item.data as IPathedFolder)
+          designUtils.recoverFolder(item.data as IFolder)
         }
         this.isShowDeleteMessage = false
         setTimeout(() => {
@@ -521,9 +521,9 @@ export default Vue.extend({
         this.designBuffer = undefined
         return
       }
-      if (this.folderBuffer) {
-        designUtils.deleteFolderForever(this.folderBuffer)
-        this.folderBuffer = undefined
+      if (this.pathedFolderBuffer) {
+        designUtils.deleteFolderForever(this.pathedFolderBuffer.folder)
+        this.pathedFolderBuffer = undefined
         return
       }
       if (this.isMultiSelected) {
@@ -533,7 +533,7 @@ export default Vue.extend({
     },
     closeConfirmMessage() {
       this.confirmMessage = ''
-      this.folderBuffer = undefined
+      this.pathedFolderBuffer = undefined
       this.designBuffer = undefined
     }
   }
