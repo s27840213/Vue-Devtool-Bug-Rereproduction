@@ -103,6 +103,7 @@ class AssetUtils {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     console.log('add template')
+    console.log(json)
     this.updateBackground(json).then((json) => {
       PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
       stepsUtils.record()

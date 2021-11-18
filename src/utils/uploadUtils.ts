@@ -613,6 +613,7 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
+    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -657,6 +658,7 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
+    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -911,39 +913,46 @@ class UploadUtils {
       }
       case 'shape': {
         const shape = layer as IShape
+        const { type, designId, ratio, color, styles, category } = shape
         switch (shape.category) {
           case 'D': {
-            delete layer.markerTransArray
-            delete layer.markerWidth
-            delete layer.trimWidth
-            delete layer.trimOffset
-            delete layer.styleArray
-            delete layer.svg
-            delete layer.pDiff
-            delete layer.pSize
-            delete layer.cSize
-            delete layer.vSize
-            delete layer.className
-            return shape
+            return {
+              type,
+              color,
+              ratio,
+              category,
+              designId,
+              size: shape.size,
+              markerId: shape.markerId,
+              dasharray: shape.dasharray,
+              linecap: shape.linecap,
+              point: shape.point,
+              styles: this.styleFilter(styles)
+            }
           }
           case 'E':
-            delete layer.styleArray
-            delete layer.svg
-            delete layer.pDiff
-            delete layer.pSize
-            delete layer.cSize
-            delete layer.className
-            return shape
+            return {
+              type,
+              color,
+              ratio,
+              category,
+              designId,
+              size: shape.size,
+              scaleType: shape.scaleType,
+              shapeType: shape.shapeType,
+              vSize: shape.vSize,
+              filled: shape.filled,
+              styles: this.styleFilter(styles)
+            }
           default: {
-            const { type, designId, pDiff, ratio, color, styles, category } = shape
             if (designId) {
               return {
                 type,
                 category,
                 designId,
-                pDiff,
                 ratio,
                 color,
+                pDiff: shape.pDiff,
                 styles: this.styleFilter(styles)
               }
             } else {
@@ -971,12 +980,16 @@ class UploadUtils {
               }
             })
           ],
-          decoration: decoration ? {
-            color: decoration.color
-          } : undefined,
-          decorationTop: decorationTop ? {
-            color: decorationTop.color
-          } : undefined,
+          ...(decoration && {
+            decoration: {
+              color: decoration.color
+            }
+          }),
+          ...(decorationTop && {
+            decoration: {
+              color: decorationTop.color
+            }
+          }),
           styles: this.styleFilter(styles)
         }
       }

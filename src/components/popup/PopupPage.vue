@@ -238,6 +238,42 @@ export default Vue.extend({
             newbasicShapeTest.styles.initWidth = width
             layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
           }
+        },
+        {
+          icon: 'copy',
+          text: 'append test layer',
+          shortcutText: '',
+          action: () => {
+            const config = {
+              srcObj: {
+                type: 'private',
+                userId: '',
+                assetId: 1538
+              },
+              styles: {
+                x: 250,
+                y: 250,
+                width: 500,
+                height: 400,
+                initWidth: 500,
+                initHeight: 400,
+                imgWidth: 500,
+                imgHeight: 400
+              }
+            }
+            this.$store.commit('user/UPDATE_IMAGE_URLS', {
+              assetId: 1538,
+              urls: {
+                prev: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
+                full: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
+                larg: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
+                original: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
+                midd: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
+                smal: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D'
+              }
+            })
+            layerUtils.addLayers(0, [layerFactary.newImage(config)])
+          }
         }
       ]
     },

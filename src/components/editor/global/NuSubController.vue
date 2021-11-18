@@ -208,6 +208,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
+    // the condition indicates the primaryLayer transform from group-layer to tmp-layer
     if (this.getLayerType === 'text' && this.getPrimaryLayer && this.getPrimaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
@@ -267,6 +268,7 @@ export default Vue.extend({
       }
     },
     onMousedown() {
+      if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x
         this.posDiff.y = this.getPrimaryLayer.styles.y
@@ -556,7 +558,7 @@ export default Vue.extend({
         }
         return
       }
-      if (this.getLayerType === 'text') {
+      if (this.getLayerType === 'text' && this.type === 'group') {
         this.textClickHandler(e)
       }
       this.$emit('clickSubController', this.layerIndex, this.config.type)

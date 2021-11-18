@@ -103,6 +103,7 @@ import { Layer } from 'konva/types/Layer'
 import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
+import assetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   data() {
