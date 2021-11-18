@@ -117,14 +117,22 @@ const actions: ActionTree<IDesignState, unknown> = {
     const folders = await dispatch('fetchFolders', { path })
     commit('UPDATE_folders', {
       path,
-      folders
+      folders: folders ?? []
     })
+    return folders === undefined
   },
-  async fetchFoldersAlong({ commit, dispatch }, { pathNodes }) {
+  async fetchFoldersAlong({ commit, dispatch, getters }, { pathNodes }) {
     const path = []
+    let currentFolder = getters.getFolders[0] as IFolder
     for (const node of pathNodes) {
+      const index = currentFolder.subFolders.findIndex(folder => folder.id === node)
+      if (index < 0) {
+        commit('SET_currLocation', 'a')
+        return
+      }
       path.push(node)
       await dispatch('fetchStructuralFolders', { path: path.join(',') })
+      currentFolder = currentFolder.subFolders[index]
       commit('SET_expand', {
         path: [designUtils.ROOT, ...path],
         isExpanded: true
@@ -133,11 +141,11 @@ const actions: ActionTree<IDesignState, unknown> = {
     commit('UPDATE_currLocation')
   },
   async fetchTrashFolders({ commit, dispatch }) {
-    const folders = await dispatch('fetchFolders', { path: 'trash' })
+    const folders = (await dispatch('fetchFolders', { path: 'trash' })) ?? []
     commit('SET_allFolders', folders)
   },
   async fetchFolderFolders({ commit, dispatch }, { path, sortByField, sortByDescending }) {
-    const folders = await dispatch('fetchFolders', { path, sortByField, sortByDescending })
+    const folders = (await dispatch('fetchFolders', { path, sortByField, sortByDescending })) ?? []
     commit('SET_allFolders', folders)
     commit('UPDATE_folders', {
       path,

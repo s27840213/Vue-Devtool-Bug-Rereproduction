@@ -70,10 +70,6 @@ export default Vue.extend({
   components: {
     SidebarFolder
   },
-  mounted() {
-    this.setFolders(designUtils.makeDesignsForTesting())
-    this.fetchStructuralFolders({ path: 'root' })
-  },
   data() {
     return {
       ROOT: designUtils.ROOT,
@@ -107,12 +103,8 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('design', {
-      fetchStructuralFolders: 'fetchStructuralFolders'
-    }),
     ...mapMutations('design', {
-      setCurrLocation: 'SET_currLocation',
-      setFolders: 'SET_folders'
+      setCurrLocation: 'SET_currLocation'
     }),
     draggedOverStyles(type: string) {
       switch (type) {

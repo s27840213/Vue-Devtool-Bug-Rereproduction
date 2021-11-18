@@ -195,7 +195,8 @@ export default Vue.extend({
     view: String
   },
   created() {
-    if (!this.view) return
+    this.setFolders(designUtils.makeDesignsForTesting())
+    this.fetchStructuralFolders({ path: 'root' })
     if (this.view === 'all') {
       this.setCurrLocation('a')
       return
@@ -206,6 +207,9 @@ export default Vue.extend({
     }
     if (this.view === 'trash') {
       this.setCurrLocation('t')
+      return
+    }
+    if (!this.view) {
       return
     }
     const path = this.view.split('&')
@@ -291,11 +295,13 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchFoldersAlong: 'fetchFoldersAlong'
+      fetchFoldersAlong: 'fetchFoldersAlong',
+      fetchStructuralFolders: 'fetchStructuralFolders'
     }),
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
-      setCurrLocation: 'SET_currLocation'
+      setCurrLocation: 'SET_currLocation',
+      setFolders: 'SET_folders'
     }),
     stackStyles() {
       return { top: this.isMultiSelected ? '82px' : '27px' }
