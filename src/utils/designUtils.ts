@@ -77,6 +77,14 @@ class DesignUtils {
     return index >= 0 ? index : designs.length
   }
 
+  sortById(folders: IFolder[]): IFolder[] {
+    folders = generalUtils.deepCopy(folders)
+    folders.sort((a, b) => {
+      return a.id.localeCompare(b.id)
+    })
+    return folders
+  }
+
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {

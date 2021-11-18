@@ -51,7 +51,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -93,6 +93,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchStructuralFolders: 'fetchStructuralFolders'
+    }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
@@ -239,10 +242,13 @@ export default Vue.extend({
         path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
         isExpanded: !this.folder.isExpanded
       })
+      if (!this.folder.isExpanded) {
+        this.fetchStructuralFolders({ path: designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',') })
+      }
     },
     checkExpand(folders: IFolder[]): IFolder[] {
       if (this.folder.isExpanded) {
-        return folders
+        return designUtils.sortById(folders)
       } else {
         return []
       }
