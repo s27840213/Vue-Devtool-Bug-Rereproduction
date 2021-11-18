@@ -282,6 +282,15 @@ const actions: ActionTree<IDesignState, unknown> = {
         commit('UPDATE_deleteDesign', design)
       }
     }
+  },
+  async setFolderName({ commit, getters }, { folder, name, fromFolderItem }: { folder: IFolder, name: string, fromFolderItem: boolean }) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'rename', null, folder.id, name)
+    folder.name = name
+    if (fromFolderItem) {
+      commit('UPDATE_deleteFolder', folder)
+      commit('UPDATE_addFolder', folder)
+    }
   }
 }
 
@@ -296,19 +305,22 @@ const mutations: MutationTree<IDesignState> = {
     state.sortByField = 'update'
     state.sortByDescending = true
     state.inDeletionView = false
+    let targetPath
     switch (currLocation) {
       case 'a':
-        router.replace({ path: '/mydesign/all' })
+        targetPath = '/mydesign/all'
         break
       case 'h':
-        router.replace({ path: '/mydesign/favor' })
+        targetPath = '/mydesign/favor'
         break
       case 't':
-        router.replace({ path: '/mydesign/trash' })
+        targetPath = '/mydesign/trash'
         break
       default:
-        router.replace({ path: `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}` })
+        targetPath = `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}`
     }
+    if (router.currentRoute.path === targetPath) return
+    router.replace({ path: targetPath })
   },
   SET_expand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
     const targetFolder = designUtils.search(state.folders, updateInfo.path)
@@ -370,24 +382,6 @@ const mutations: MutationTree<IDesignState> = {
     designUtils.locateTo(folders, state.currLocation)
     state.folders = folders
   },
-  // UPDATE_addFolderToTrash(state: IDesignState, pathedFolder: IPathedFolder) {
-  //   pathedFolder.folder.isCurrLocation = false
-  //   state.trashFolders.push(pathedFolder)
-  // },
-  // UPDATE_removeFolderFromTrash(state: IDesignState, pathedFolder: IPathedFolder) {
-  //   const index = state.trashFolders.findIndex(pathedFolder1 => {
-  //     return designUtils.isFolderEqual(pathedFolder1, pathedFolder)
-  //   })
-  //   if (index >= 0) {
-  //     state.trashFolders.splice(index, 1)
-  //   }
-  // },
-  // UPDATE_folderName(state: IDesignState, updateInfo: {path: string[], newFolderName: string}) {
-  //   const targetFolder = designUtils.search(state.folders, updateInfo.path)
-  //   if (targetFolder) {
-  //     targetFolder.name = updateInfo.newFolderName
-  //   }
-  // },
   UPDATE_addDesign(state: IDesignState, design: IDesign) {
     const index = designUtils.getInsertIndex(state.allDesigns, state.sortByField, state.sortByDescending, design)
     state.allDesigns.splice(index, 0, design)
@@ -403,19 +397,15 @@ const mutations: MutationTree<IDesignState> = {
       state.allDesigns.splice(index, 1)
     }
   },
-  UPDATE_addFolder(state: IDesignState, pathedFolder: IPathedFolder) {
-    const targetParent = designUtils.search(state.folders, pathedFolder.parents)
-    if (targetParent) {
-      targetParent.subFolders.push(pathedFolder.folder)
-    }
+  UPDATE_addFolder(state: IDesignState, folder: IFolder) {
+    const index = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
+    state.allFolders.splice(index, 0, folder)
   },
-  UPDATE_deleteFolder(state: IDesignState, updateInfo: {parents: string[], folder: IFolder}) {
-    const targetParent = designUtils.search(state.folders, updateInfo.parents)
-    if (targetParent) {
-      const index = targetParent.subFolders.findIndex(folder => folder.id === updateInfo.folder.id)
-      if (index >= 0) {
-        targetParent.subFolders.splice(index, 1)
-      }
+  UPDATE_deleteFolder(state: IDesignState, folder: IFolder) {
+    const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
+    if (index >= 0) {
+      state.inDeletionView = true
+      state.allFolders.splice(index, 1)
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {

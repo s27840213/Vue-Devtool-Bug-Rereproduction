@@ -77,13 +77,21 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  watch: {
+    'folder.isExpanded': function(newVal) {
+      if (newVal) {
+        this.fetchStructuralFolders({ path: `${designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',')}` })
+      }
+    }
+  },
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
       draggingFolder: 'getDraggingFolder',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      folders: 'getFolders'
     }),
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
@@ -99,8 +107,7 @@ export default Vue.extend({
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
-      setDraggingFolder: 'SET_draggingFolder',
-      setFolderName: 'UPDATE_folderName'
+      setDraggingFolder: 'SET_draggingFolder'
     }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -217,10 +224,7 @@ export default Vue.extend({
       this.isNameEditing = false
       if (this.editableName === '' || this.editableName === this.folder.name) return
       this.checkNameLength()
-      this.setFolderName({
-        path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
-        newFolderName: this.editableName
-      })
+      designUtils.setFolderName(this.folder, this.editableName)
     },
     handleShowHint(folderId: string) {
       this.$emit('showHint', folderId)
@@ -242,13 +246,10 @@ export default Vue.extend({
         path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
         isExpanded: !this.folder.isExpanded
       })
-      if (!this.folder.isExpanded) {
-        this.fetchStructuralFolders({ path: designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',') })
-      }
     },
     checkExpand(folders: IFolder[]): IFolder[] {
       if (this.folder.isExpanded) {
-        return designUtils.sortById(folders)
+        return designUtils.sortById([...folders])
       } else {
         return []
       }

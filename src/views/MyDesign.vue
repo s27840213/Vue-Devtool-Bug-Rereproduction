@@ -194,9 +194,9 @@ export default Vue.extend({
   props: {
     view: String
   },
-  created() {
+  async created() {
     this.setFolders(designUtils.makeDesignsForTesting())
-    this.fetchStructuralFolders({ path: 'root' })
+    await this.fetchStructuralFolders({ path: 'root' })
     if (this.view === 'all') {
       this.setCurrLocation('a')
       return

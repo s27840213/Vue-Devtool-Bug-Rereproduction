@@ -97,7 +97,7 @@ export default Vue.extend({
     },
     realFolders(): IFolder[] {
       if (this.folders.length > 0) {
-        return designUtils.sortById(this.folders[0].subFolders)
+        return designUtils.sortById([...this.folders[0].subFolders])
       }
       return []
     }

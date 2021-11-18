@@ -52,7 +52,7 @@
               class="folder-design-view__more__menu"
               @click.stop)
             div(class="folder-design-view__more__menu__title")
-              span {{ folder.name }}
+              span {{ folderName }}
             div(class="folder-design-view__more__menu__text")
               span {{ `由 ${folder ? folder.author : ''} 創作 | ${allDesigns.length}個項目` }}
             div(class="folder-design-view__more__menu__divider")
@@ -239,7 +239,6 @@ export default Vue.extend({
     }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
-      setFolderName: 'UPDATE_folderName',
       setSortByField: 'SET_sortByField',
       setSortByDescending: 'SET_sortByDescending'
     }),
@@ -270,10 +269,7 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
-      this.setFolderName({
-        path: this.path,
-        newFolderName: this.editableFolderName
-      })
+      designUtils.setFolderName(this.folder, this.editableFolderName)
     },
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent

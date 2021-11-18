@@ -6,6 +6,11 @@ import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
+interface Item {
+  name: string,
+  lastUpdatedTime: string
+}
+
 class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = '我所有的設計'
@@ -66,19 +71,18 @@ class DesignUtils {
     return currentFolders
   }
 
-  getInsertIndex(designs: IDesign[], sortByField: string, sortByDescending: boolean, design: IDesign): number {
+  getInsertIndex<T extends Item>(items: T[], sortByField: string, sortByDescending: boolean, item: T): number {
     const modifier = sortByDescending ? -1 : 1
-    const compareFunction = sortByField === 'name' ? (design2: IDesign): boolean => {
-      return design2.name.localeCompare(design.name) * modifier > 0
-    } : (design2: IDesign): boolean => {
-      return (Date.parse(design2.lastUpdatedTime) - Date.parse(design.lastUpdatedTime)) * modifier > 0
+    const compareFunction = sortByField === 'name' ? (item2: T): boolean => {
+      return item2.name.localeCompare(item.name) * modifier > 0
+    } : (item2: T): boolean => {
+      return (Date.parse(item2.lastUpdatedTime) - Date.parse(item.lastUpdatedTime)) * modifier > 0
     }
-    const index = designs.findIndex(compareFunction)
-    return index >= 0 ? index : designs.length
+    const index = items.findIndex(compareFunction)
+    return index >= 0 ? index : items.length
   }
 
   sortById(folders: IFolder[]): IFolder[] {
-    folders = generalUtils.deepCopy(folders)
     folders.sort((a, b) => {
       return a.id.localeCompare(b.id)
     })
@@ -283,20 +287,6 @@ class DesignUtils {
     return folders
   }
 
-  checkAllInFavorite(designs: IDesign[]): boolean {
-    // const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    return !designs.some(design => !design.favorite)
-  }
-
-  checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
-    const targetFolder = this.search(folders, path)
-    if (targetFolder) {
-      return targetFolder.name === this.ROOT ? this.ROOT_DISPLAY : targetFolder.name
-    } else {
-      return this.ROOT_DISPLAY
-    }
-  }
-
   isParentOrEqual(a: IPathedFolder, b: IPathedFolder): boolean {
     const aFullPath = this.createPath(a).join('/')
     const bFullPath = this.createPath(b).join('/')
@@ -496,6 +486,10 @@ class DesignUtils {
 
   setDesignName(design: IDesign, name: string) {
     store.dispatch('design/setDesignName', { design, name })
+  }
+
+  setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
+    store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
   }
 
   isMaxLevelReached(level: number) {

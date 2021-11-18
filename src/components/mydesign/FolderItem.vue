@@ -66,7 +66,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -123,8 +123,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingFolder: 'SET_draggingFolder',
-      setFolderName: 'UPDATE_folderName'
+      setDraggingFolder: 'SET_draggingFolder'
     }),
     emitGoto() {
       this.$emit('goto')
@@ -242,10 +241,7 @@ export default Vue.extend({
       this.isNameEditing = false
       if (this.editableName === '' || this.editableName === this.config.name) return
       this.checkNameLength()
-      this.setFolderName({
-        path: designUtils.appendPath(this.path as string[], this.config),
-        newFolderName: this.editableName
-      })
+      designUtils.setFolderName(this.config, this.editableName, true)
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.config.name) {
