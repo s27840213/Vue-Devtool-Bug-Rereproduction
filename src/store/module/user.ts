@@ -2,7 +2,7 @@ import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
-import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserImageContentData } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserFontContentData, IUserImageContentData } from '@/interfaces/api'
 import modalUtils from '@/utils/modalUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
@@ -109,6 +109,21 @@ const getters: GetterTree<IUserModule, any> = {
   getAssetDesign(state) {
     return state.userAssets.design.content
   },
+  getAssetFonts(state) {
+    const { role, teamId, userId, userAssets } = state
+    const isAdmin = role === 0
+
+    return userAssets.font.content.map((font: IUserFontContentData) => {
+      return {
+        original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/original` : font.signed_url?.original ?? '',
+        font: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/font` : font.signed_url?.font ?? '',
+        'prev-name': isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/prev-name` : font.signed_url?.['prev-name'] ?? '',
+        'prev_2x-name': isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/prev_2x-name` : font.signed_url?.['prev_2x-name'] ?? '',
+        'prev-sample': isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/prev-sample` : font.signed_url?.['prev-sample'] ?? '',
+        'prev-2x-sample': isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/prev-2x-sample` : font.signed_url?.['prev-2x-sample'] ?? ''
+      }
+    })
+  },
   getImages(state) {
     return state.images
   },
@@ -144,7 +159,7 @@ const mutations: MutationTree<IUserModule> = {
   },
   // This function is out of date, may be modified in the future
   [SET_IMAGES](state: IUserModule) {
-    const { userAssets, downloadUrl, teamId, userId } = state
+    const { userAssets, teamId, userId } = state
     const isAdmin = state.role === 0
     const images = userAssets.image.content.map((image: IUserImageContentData) => {
       const aspectRatio = image.width / image.height
@@ -203,7 +218,7 @@ const mutations: MutationTree<IUserModule> = {
     state.images[targetIndex].progress = progress
   },
   [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls }) {
-    const { images, downloadUrl, teamId, userId } = state
+    const { images, teamId, userId } = state
     const isAdmin = state.role === 0
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
@@ -395,7 +410,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   async updateImages({ state, commit }, { assetSet }) {
     const { token } = state
     const { data } = await userApis.getAssets(token, { asset_list: assetSet })
-    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string }}
+    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     const test = await userApis.getAssets(token, { asset_list: '2784,2783' })
 
     for (const [assetId, urls] of Object.entries(urlSet)) {

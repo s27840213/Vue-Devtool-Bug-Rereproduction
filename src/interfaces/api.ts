@@ -162,7 +162,7 @@ export interface IUserAssetsData {
     title: string
   },
   font: {
-    content: Array<string>,
+    content: Array<IUserFontContentData>,
     title: string
   },
   image: {
@@ -213,6 +213,28 @@ export interface IUserImageContentData {
     tiny: string
   },
   asset_index: number
+}
+
+export interface IUserFontContentData {
+  asset_index: number,
+  author: string,
+  create_time: string,
+  favorite: number,
+  file_ext: string,
+  file_name: string,
+  id: string,
+  name: string,
+  team_id: string,
+  update_time: string,
+  ver: number,
+  signed_url?: {
+    original: string,
+    font: string,
+    'prev-name': string,
+    'prev_2x-name': string,
+    'prev-sample': string,
+    'prev-2x-sample': string
+  }
 }
 
 export interface IPhotoServiceParams {
