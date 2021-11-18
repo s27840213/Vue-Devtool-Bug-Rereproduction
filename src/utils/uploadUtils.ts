@@ -8,13 +8,12 @@ import ImageUtils from '@/utils/imageUtils'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
 import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
-import { IMarker } from '@/interfaces/shape'
-import zindexUtils from './zindexUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
+import { EventEmitter } from 'events'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -47,7 +46,6 @@ class UploadUtils {
   static readonly GetDesignType = GetDesignType
   readonly GetDesignType = UploadUtils.GetDesignType
   loginOutput: any
-
   /**
    * @param getDesignInfo
    *  - the reason why we need this param is that if  the url contain the infomation of type=design, and design_id, we need to get the design "after" logining
@@ -59,6 +57,9 @@ class UploadUtils {
     flag: number,
     id: string
   }
+
+  event: any
+  eventHash: { [index: string]: (color: string) => void }
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
@@ -74,6 +75,9 @@ class UploadUtils {
       flag: 0,
       id: ''
     }
+
+    this.event = new EventEmitter()
+    this.eventHash = {}
   }
 
   setLoginOutput(loginOutput: any) {
@@ -83,14 +87,22 @@ class UploadUtils {
     }
   }
 
+  onFontUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+    this.event.on('fontUploadStatus', callback)
+  }
+
+  emitFontUploadEvent(status: 'none' | 'uploading' | 'success' | 'fail') {
+    this.event.emit('fontUploadStatus', status)
+  }
+
   chooseAssets(type: 'image' | 'font') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-    const acceptType = type === 'image' ? '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic' : '.woff2'
+    const acceptType = type === 'image' ? '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic' : '.ttf,.ttc,.otf,.woff2'
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptType)
-    inputNode.setAttribute('multiple', 'true')
+    inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
@@ -195,6 +207,9 @@ class UploadUtils {
 
   // Upload the user's asset in my file panel
   uploadAsset(type: 'image' | 'font', files: FileList, addToPage = false) {
+    if (type === 'font') {
+      this.emitFontUploadEvent('uploading')
+    }
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = generalUtils.generateAssetId()
@@ -212,7 +227,7 @@ class UploadUtils {
       } else {
         formData.append('file', files[i])
       }
-
+      console.log(type)
       reader.onload = (evt) => {
         /**
          * @TODO -> simplify the codes below
@@ -282,7 +297,35 @@ class UploadUtils {
             }
           }
         } else if (type === 'font') {
-          //
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          xhr.send(formData)
+          xhr.onload = () => {
+            // polling the JSON file of uploaded image
+            const interval = setInterval(() => {
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+              fetch(pollingTargetSrc).then((response) => {
+                if (response.status === 200) {
+                  clearInterval(interval)
+                  response.json().then((json: IUploadAssetResponse) => {
+                    if (json.flag === 0) {
+                      this.emitFontUploadEvent('success')
+                      console.log('Successfully upload the file')
+                      store.dispatch('getAssets', { token: this.token })
+                      setTimeout(() => {
+                        this.emitFontUploadEvent('none')
+                      }, 2000)
+                    } else {
+                      this.emitFontUploadEvent('fail')
+                      console.log('Failed to upload the file')
+                      setTimeout(() => {
+                        this.emitFontUploadEvent('none')
+                      }, 2000)
+                    }
+                  })
+                }
+              })
+            }, 2000)
+          }
         }
       }
 

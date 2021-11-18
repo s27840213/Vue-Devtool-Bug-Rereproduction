@@ -27,7 +27,17 @@
           :preview="preview"
           :preview2="preview2"
           :item="item")
-    btn(class="full-width" :type="'primary-mid'" @click.native="FileUtils.importFont(updateFontPreset)") Upload Font
+    div(class="panel-fonts__upload")
+      transition(name="fade-in")
+        div(v-if="['uploading', 'success'].includes(fontUploadStatus)"
+            class="panel-fonts__upload-status")
+          svg-icon(class="mr-5"
+            :iconName="uploadStatusIcon"
+            :iconWidth="'30px'"
+            :iconColor="'green-2'")
+          span {{fontUploadStatus === 'uploading' ? '上傳中' : '上傳成功'}}
+      btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
+        :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>
 
 <script lang="ts">
@@ -41,6 +51,7 @@ import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   components: {
@@ -51,11 +62,15 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils
+      FileUtils,
+      fontUploadStatus: 'none'
     }
   },
   mounted() {
     this.getCategories()
+    uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
+      this.fontUploadStatus = status
+    })
   },
   computed: {
     ...mapState(
@@ -76,7 +91,8 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      assetFonts: 'user/getAssetFonts'
     }),
     listResult(): any[] {
       const { hasNextPage, keyword } = this
@@ -130,6 +146,9 @@ export default Vue.extend({
     list(): any[] {
       return this.listCategories.concat(this.listResult)
     },
+    uploadStatusIcon(): string {
+      return this.fontUploadStatus === 'uploading' ? 'loading' : 'check'
+    },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any font for "${this.keyword}".` : ''
     }
@@ -176,6 +195,9 @@ export default Vue.extend({
     handleSearch(keyword: string) {
       this.resetContent()
       keyword ? this.getTagContent({ keyword }) : this.getCategories()
+    },
+    uploadFont() {
+      uploadUtils.chooseAssets('font')
     }
   }
 })
@@ -213,6 +235,21 @@ export default Vue.extend({
     text-align: left;
     font-size: 14px;
     line-height: 36px;
+  }
+
+  &__upload {
+    position: relative;
+    &-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: absolute;
+      transform: translate3d(0, -100%, 0);
+      padding: 12px 0px 8px 0px;
+      background-image: linear-gradient(transparent, setColor(white, 0.9) 30%);
+      color: setColor(blue-1);
+    }
   }
 }
 .category-list::v-deep::-webkit-scrollbar-thumb {
