@@ -168,6 +168,8 @@ const actions: ActionTree<IDesignState, unknown> = {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', designApis.getAssetIndex(design), null, name)
     design.name = name
+    commit('UPDATE_deleteDesign', design)
+    commit('UPDATE_addDesign', design)
   },
   async deleteDesign({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),

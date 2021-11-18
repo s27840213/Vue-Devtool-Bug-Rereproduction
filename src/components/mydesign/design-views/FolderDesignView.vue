@@ -135,11 +135,7 @@ export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
-    designUtils.fetchDesigns(async () => {
-      await this.fetchFolderDesigns({
-        path: this.path.slice(1).join(',')
-      })
-    })
+    this.refreshDesigns()
   },
   components: {
     FolderGallery,
@@ -304,6 +300,7 @@ export default Vue.extend({
     handleSortByClick(payload: [string, boolean]) {
       this.setSortByField(payload[0])
       this.setSortByDescending(payload[1])
+      this.refreshDesigns()
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
@@ -341,6 +338,13 @@ export default Vue.extend({
     },
     closeSortMenu() {
       this.isSortMenuOpen = false
+    },
+    refreshDesigns() {
+      designUtils.fetchDesigns(async () => {
+        await this.fetchFolderDesigns({
+          path: this.path.slice(1).join(',')
+        })
+      })
     }
   }
 })
