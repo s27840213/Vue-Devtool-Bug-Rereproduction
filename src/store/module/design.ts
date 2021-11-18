@@ -152,16 +152,23 @@ const actions: ActionTree<IDesignState, unknown> = {
       design.favorite = true
     }
   },
-  async unfavorDesign({ commit }, design: IDesign) {
+  async unfavorDesign({ commit, getters }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'favor', designApis.getAssetIndex(design), null, '0')
     design.favorite = false
+    if (getters.getCurrLocation === 'h') {
+      commit('UPDATE_deleteDesign', design)
+    }
   },
-  async unfavorDesigns({ commit }, designs: IDesign[]) {
+  async unfavorDesigns({ commit, getters }, designs: IDesign[]) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'favor', designApis.getAssetIndices(designs), null, '0')
+    const inFavoriteView = getters.getCurrLocation === 'h'
     for (const design of designs) {
       design.favorite = false
+      if (inFavoriteView) {
+        commit('UPDATE_deleteDesign', design)
+      }
     }
   },
   async setDesignName({ commit }, { design, name }: { design: IDesign, name: string}) {
@@ -189,8 +196,9 @@ const actions: ActionTree<IDesignState, unknown> = {
     } else if (getters.getInDeletionView) {
       commit('UPDATE_addDesign', design)
     }
-    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+    const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndex(design), '', '0')
+    console.log(response)
     return '原資料夾'
   },
   async recoverDesigns({ commit, getters }, designs: IDesign[]) {
@@ -210,17 +218,11 @@ const actions: ActionTree<IDesignState, unknown> = {
   async deleteDesignForever({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndex(design), '', '2')
-      .then((response) => {
-        console.log(response)
-      })
     commit('UPDATE_deleteDesign', design)
   },
   async deleteDesignsForever({ commit }, designs: IDesign[]) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndices(designs), '', '2')
-      .then((response) => {
-        console.log(response)
-      })
     for (const design of designs) {
       commit('UPDATE_deleteDesign', design)
     }
