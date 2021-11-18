@@ -104,9 +104,10 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
-    path: 'mydesign',
+    path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: MyDesign
+    component: MyDesign,
+    props: true
   },
   {
     path: '/templates',

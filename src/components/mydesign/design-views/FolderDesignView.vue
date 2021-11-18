@@ -17,7 +17,7 @@
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
               @click="handleFolderNameClick")
-          span {{ folder.name }}
+          span {{ folderName }}
           svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
@@ -37,7 +37,7 @@
           span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
           span(class="folder-design-view__path__text") {{ ' > ' }}
           span(class="folder-design-view__path__text") {{ ' ' }}
-        span(class="folder-design-view__path__node") {{ folder.name }}
+        span(class="folder-design-view__path__node") {{ folderName }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more"
             @click="toggleFolderMenu"
@@ -54,7 +54,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folder.name }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 ${folder.author} 創作 | ${allDesigns.length}個項目` }}
+              span {{ `由 ${folder ? folder.author : ''} 創作 | ${allDesigns.length}個項目` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -217,8 +217,10 @@ export default Vue.extend({
       return parentNames.slice(1)
     },
     subFolders(): IFolder[] {
-      const subFolders = generalUtils.deepCopy(this.folder.subFolders)
-      return subFolders
+      return this.folder?.subFolders ?? []
+    },
+    folderName(): string {
+      return this.folder?.name ?? '...'
     },
     allFolders(): ([string[], IFolder])[] {
       return (this.subFolders as IFolder[]).map((subFolder) => [this.path, subFolder])
@@ -227,7 +229,7 @@ export default Vue.extend({
       return Object.keys(this.selectedDesigns).length
     },
     isEmpty(): boolean {
-      return this.folder.subFolders.length + this.allDesigns.length === 0
+      return this.subFolders.length + this.allDesigns.length === 0
     },
     newFolderColor(): string {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
@@ -257,7 +259,7 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
     },
     handleFolderNameClick() {
-      this.editableFolderName = this.folder.name
+      this.editableFolderName = this.folderName
       this.isFolderNameEditing = true
       this.isFolderMenuOpen = false
       this.$nextTick(() => {
@@ -268,7 +270,7 @@ export default Vue.extend({
     handleFolderNameEditEnd() {
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
-      if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
+      if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
       this.setFolderName({
         path: this.path,
@@ -306,7 +308,7 @@ export default Vue.extend({
       this.$emit('moveItem', item)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
+      if (e.key === 'Enter' && this.editableFolderName === this.folderName) {
         this.handleFolderNameEditEnd()
       }
       this.checkNameLength()

@@ -83,7 +83,7 @@
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0], true)}` }}
+                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0])}` }}
           transition(name="slide-fade")
             div(v-if="isShowMoveMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
@@ -190,6 +190,27 @@ export default Vue.extend({
   },
   directives: {
     clickOutside: vClickOutside.directive
+  },
+  props: {
+    view: String
+  },
+  created() {
+    if (!this.view) return
+    if (this.view === 'all') {
+      this.setCurrLocation('a')
+      return
+    }
+    if (this.view === 'favor') {
+      this.setCurrLocation('h')
+      return
+    }
+    if (this.view === 'trash') {
+      this.setCurrLocation('t')
+      return
+    }
+    const path = this.view.split('&')
+    // TODO: navigate using path (need multiple api queries)
+    this.setCurrLocation(`f:${designUtils.ROOT}/${path.join('/')}`)
   },
   data() {
     return {

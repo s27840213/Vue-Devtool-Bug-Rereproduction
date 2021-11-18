@@ -4,6 +4,7 @@ import generalUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import Vue from 'vue'
+import router from '@/router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 
 interface IDesignState {
@@ -198,8 +199,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     }
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndex(design), '', '0')
-    console.log(response)
-    return '原資料夾'
+    return response.data.data.msg
   },
   async recoverDesigns({ commit, getters }, designs: IDesign[]) {
     if (getters.getCurrLocation === 't') {
@@ -211,9 +211,9 @@ const actions: ActionTree<IDesignState, unknown> = {
         commit('UPDATE_addDesign', design)
       }
     }
-    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+    const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndices(designs), '', '0')
-    return '原資料夾'
+    return response.data.data.msg
   },
   async deleteDesignForever({ commit }, design: IDesign) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
@@ -256,6 +256,19 @@ const mutations: MutationTree<IDesignState> = {
     state.sortByField = 'update'
     state.sortByDescending = true
     state.inDeletionView = false
+    switch (currLocation) {
+      case 'a':
+        router.replace({ path: '/mydesign/all' })
+        break
+      case 'h':
+        router.replace({ path: '/mydesign/favor' })
+        break
+      case 't':
+        router.replace({ path: '/mydesign/trash' })
+        break
+      default:
+        router.replace({ path: `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}` })
+    }
   },
   SET_expand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
     const targetFolder = designUtils.search(state.folders, updateInfo.path)
