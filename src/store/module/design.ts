@@ -120,6 +120,18 @@ const actions: ActionTree<IDesignState, unknown> = {
       folders
     })
   },
+  async fetchFoldersAlong({ commit, dispatch }, { pathNodes }) {
+    const path = []
+    for (const node of pathNodes) {
+      path.push(node)
+      await dispatch('fetchStructuralFolders', { path: path.join(',') })
+      commit('SET_expand', {
+        path: [designUtils.ROOT, ...path],
+        isExpanded: true
+      })
+    }
+    commit('UPDATE_currLocation')
+  },
   async fetchTrashFolders({ commit, dispatch }) {
     const folders = await dispatch('fetchFolders', { path: 'trash' })
     commit('SET_allFolders', folders)
@@ -344,6 +356,11 @@ const mutations: MutationTree<IDesignState> = {
     if (targetFolder) {
       targetFolder.subFolders = designUtils.updateFolders(targetFolder.subFolders, updateInfo.folders)
     }
+  },
+  UPDATE_currLocation(state: IDesignState) {
+    const folders = generalUtils.deepCopy(state.folders)
+    designUtils.locateTo(folders, state.currLocation)
+    state.folders = folders
   },
   // UPDATE_addFolderToTrash(state: IDesignState, pathedFolder: IPathedFolder) {
   //   pathedFolder.folder.isCurrLocation = false

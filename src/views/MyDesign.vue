@@ -161,7 +161,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
@@ -209,8 +209,8 @@ export default Vue.extend({
       return
     }
     const path = this.view.split('&')
-    // TODO: navigate using path (need multiple api queries)
     this.setCurrLocation(`f:${designUtils.ROOT}/${path.join('/')}`)
+    this.fetchFoldersAlong({ pathNodes: path })
   },
   data() {
     return {
@@ -290,6 +290,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFoldersAlong: 'fetchFoldersAlong'
+    }),
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
       setCurrLocation: 'SET_currLocation'
