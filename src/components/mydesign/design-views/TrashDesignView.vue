@@ -15,8 +15,7 @@
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
             span 30天後自動永久刪除。
     div(class="horizontal-rule")
-    folder-gallery(v-if="allFolders.length > 0"
-                  :menuItems="menuItems"
+    folder-gallery(:menuItems="menuItems"
                   :allFolders="allFolders"
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
@@ -36,11 +35,10 @@
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -49,6 +47,7 @@ export default Vue.extend({
   },
   mounted() {
     designUtils.fetchDesigns(this.fetchTrashDesigns)
+    designUtils.fetchFolders(this.fetchTrashFolders)
   },
   data() {
     return {
@@ -73,12 +72,9 @@ export default Vue.extend({
       trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders',
-      allDesigns: 'getAllDesigns'
+      allDesigns: 'getAllDesigns',
+      allFolders: 'getAllFolders'
     }),
-    allFolders(): [string[], IFolder][] {
-      const folders = generalUtils.deepCopy(this.trashFolders) as IPathedFolder[]
-      return folders.map((item) => [item.parents, item.folder])
-    },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
@@ -88,7 +84,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchTrashDesigns: 'fetchTrashDesigns'
+      fetchTrashDesigns: 'fetchTrashDesigns',
+      fetchTrashFolders: 'fetchTrashFolders'
     }),
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent

@@ -71,8 +71,8 @@ export default Vue.extend({
     SidebarFolder
   },
   mounted() {
-    this.fetchFolders({ path: 'root', sortByField: 'name', sortByDescending: true })
     this.setFolders(designUtils.makeDesignsForTesting())
+    this.fetchStructuralFolders({ path: 'root' })
   },
   data() {
     return {
@@ -108,7 +108,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchFolders: 'fetchFolders'
+      fetchStructuralFolders: 'fetchStructuralFolders'
     }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',

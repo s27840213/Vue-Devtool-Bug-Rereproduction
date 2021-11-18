@@ -502,6 +502,14 @@ class DesignUtils {
     })
   }
 
+  fetchFolders(fetcher: () => Promise<void>) {
+    store.commit('design/SET_allFolders', [])
+    store.commit('design/SET_isFoldersLoading', true)
+    fetcher().then(() => {
+      store.commit('design/SET_isFoldersLoading', false)
+    })
+  }
+
   getDesignPreview(assetId: string, scale = 2 as 1 | 2, ver?: number): string {
     const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
     const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)

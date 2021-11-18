@@ -104,8 +104,7 @@
                         iconWidth="15px"
                         iconColor="gray-2")
     div(class="horizontal-rule")
-    folder-gallery(v-if="allFolders.length > 0"
-                  :path="path"
+    folder-gallery(:path="path"
                   :menuItems="[]"
                   :allFolders="allFolders"
                   :selectedNum="selectedNum"
@@ -115,7 +114,7 @@
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   @menuAction="handleMenuAction")
-    div(v-if="isEmpty && !isDesignsLoading" class="folder-design-view__empty")
+    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
 </template>
@@ -128,13 +127,13 @@ import designUtils from '@/utils/designUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+    this.refreshFolders()
     this.refreshDesigns()
   },
   components: {
@@ -190,6 +189,8 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
+      this.refreshDesigns()
+      this.refreshFolders()
     }
   },
   computed: {
@@ -198,9 +199,11 @@ export default Vue.extend({
       folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
       allDesigns: 'getAllDesigns',
+      allFolders: 'getAllFolders',
       sortByField: 'getSortByField',
       sortByDescending: 'getSortByDescending',
-      isDesignsLoading: 'getIsDesignsLoading'
+      isDesignsLoading: 'getIsDesignsLoading',
+      isFoldersLoading: 'getIsFoldersLoading'
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
@@ -216,20 +219,14 @@ export default Vue.extend({
       const parentNames = designUtils.getFolderNames(this.folders, this.parents)
       return parentNames.slice(1)
     },
-    subFolders(): IFolder[] {
-      return this.folder?.subFolders ?? []
-    },
     folderName(): string {
       return this.folder?.name ?? '...'
-    },
-    allFolders(): ([string[], IFolder])[] {
-      return (this.subFolders as IFolder[]).map((subFolder) => [this.path, subFolder])
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     },
     isEmpty(): boolean {
-      return this.subFolders.length + this.allDesigns.length === 0
+      return this.allFolders.length + this.allDesigns.length === 0
     },
     newFolderColor(): string {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
@@ -237,7 +234,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchFolderDesigns: 'fetchFolderDesigns'
+      fetchFolderDesigns: 'fetchFolderDesigns',
+      fetchFolderFolders: 'fetchFolderFolders'
     }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
@@ -344,6 +342,13 @@ export default Vue.extend({
     refreshDesigns() {
       designUtils.fetchDesigns(async () => {
         await this.fetchFolderDesigns({
+          path: this.path.slice(1).join(',')
+        })
+      })
+    },
+    refreshFolders() {
+      designUtils.fetchFolders(async () => {
+        await this.fetchFolderFolders({
           path: this.path.slice(1).join(',')
         })
       })
