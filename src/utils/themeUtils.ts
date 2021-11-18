@@ -1,12 +1,13 @@
 import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
+import listService from '@/apis/list'
 
 class ThemeUtils {
   get themes () { return store.state.themes }
   get getPageSize () { return store.getters.getPageSize }
 
-  getFocusPageSize (pageIndex?: number) {
+  getFocusPageSize (pageIndex?: number): { width: number, height: number } {
     return this.getPageSize(pageIndex || PageUtils.currFocusPageIndex)
   }
 
@@ -14,6 +15,32 @@ class ThemeUtils {
     store.commit('templates/SET_STATE', {
       theme: themes.map(theme => theme.id).join(',')
     })
+  }
+
+  async fetchTemplateContent () {
+    store.dispatch('templates/resetContent')
+    await store.dispatch('templates/getCategories')
+    store.dispatch('templates/getContent')
+  }
+
+  refreshTemplateState (pageIndex?: number) {
+    this.setTemplateThemes([])
+    this.checkThemeState().then(() => {
+      this.setPageThemes(pageIndex)
+      this.fetchTemplateContent()
+    })
+  }
+
+  async checkThemeState () {
+    const { themes } = this
+    if (!themes.length) {
+      await listService.getTheme({})
+        .then(response => {
+          const { data } = response.data
+          store.commit('SET_themes', data.content)
+        })
+    }
+    return Promise.resolve()
   }
 
   setPageThemes (pageIndex?: number, themes?: Itheme[]) {
@@ -25,16 +52,16 @@ class ThemeUtils {
   getThemesBySize (width: number, height: number) {
     const { themes } = this
     const ratio = width / height
-    return themes.filter(theme => {
+    const recommendation = themes.filter(theme => {
       const themeRatio = theme.width / theme.height
-      return this.isSameDirection(themeRatio, ratio) && this.isSimilarSize(themeRatio, ratio, 0.2)
+      return this.isSimilarSize(themeRatio, ratio, 0.2)
     })
+    return recommendation.length ? recommendation : [...themes]
   }
 
   private isSameDirection (targetRatio: number, ratio: number) {
     // @TODO 正方形
-    if (targetRatio === 1) return true
-    return Math.floor(targetRatio) === Math.floor(ratio)
+    return targetRatio === 1 || (Math.floor(targetRatio) === Math.floor(ratio))
   }
 
   private isSimilarSize (targetRatio: number, ratio: number, range: number) {
