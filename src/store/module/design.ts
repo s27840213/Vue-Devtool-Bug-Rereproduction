@@ -20,8 +20,7 @@ interface IDesignState {
   isDesignsLoading: boolean,
   isFoldersLoading: boolean,
   sortByField: string,
-  sortByDescending: boolean,
-  inDeletionView: boolean
+  sortByDescending: boolean
 }
 
 const getDefaultState = (): IDesignState => ({
@@ -37,8 +36,7 @@ const getDefaultState = (): IDesignState => ({
   isDesignsLoading: false,
   isFoldersLoading: false,
   sortByField: 'update',
-  sortByDescending: true,
-  inDeletionView: false
+  sortByDescending: true
 })
 
 const state = getDefaultState()
@@ -81,9 +79,6 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getSortByDescending(state: IDesignState): boolean {
     return state.sortByDescending
-  },
-  getInDeletionView(state: IDesignState): boolean {
-    return state.inDeletionView
   }
 }
 
@@ -144,8 +139,8 @@ const actions: ActionTree<IDesignState, unknown> = {
     const folders = (await dispatch('fetchFolders', { path: 'trash' })) ?? []
     commit('SET_allFolders', folders)
   },
-  async fetchFolderFolders({ commit, dispatch }, { path, sortByField, sortByDescending }) {
-    const folders = (await dispatch('fetchFolders', { path, sortByField, sortByDescending })) ?? []
+  async fetchFolderFolders({ commit, dispatch }, { path }) {
+    const folders = (await dispatch('fetchFolders', { path })) ?? []
     commit('SET_allFolders', folders)
     commit('UPDATE_folders', {
       path,
@@ -161,8 +156,31 @@ const actions: ActionTree<IDesignState, unknown> = {
   async fetchTrashDesigns({ dispatch }) {
     await dispatch('fetchDesigns', { path: 'trash' })
   },
-  async fetchFolderDesigns({ dispatch }, { path, sortByField, sortByDescending }) {
-    await dispatch('fetchDesigns', { path, sortByField, sortByDescending })
+  async fetchFolderDesigns({ dispatch }, { path }) {
+    await dispatch('fetchDesigns', { path })
+  },
+  async fetchAllExpandedFolders({ dispatch, getters }) {
+    const folders = getters.getFolders
+    await dispatch('fetchStructuralFolders', { path: 'root' })
+    const expandedFolders: IPathedFolder[] = [{
+      parents: [],
+      folder: folders[0]
+    }]
+    while (expandedFolders.length > 0) {
+      const expandedFolder = expandedFolders.shift()
+      if (!expandedFolder) break
+      const { parents, folder } = expandedFolder
+      for (const subFolder of folder.subFolders) {
+        if (subFolder.isExpanded) {
+          const newParents = designUtils.appendPath(parents, subFolder)
+          expandedFolders.push({
+            parents: newParents,
+            folder: subFolder
+          })
+          await dispatch('fetchStructuralFolders', { path: newParents.join(',') })
+        }
+      }
+    }
   },
   async copyDesign({ commit }, design: IDesign) {
     const newId = generalUtils.generateAssetId() + '_new'
@@ -231,28 +249,42 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteDesign', design)
     }
   },
-  async recoverDesign({ commit, getters }, design: IDesign) {
-    if (getters.getCurrLocation === 't') {
-      commit('UPDATE_deleteDesign', design)
-    } else if (getters.getInDeletionView) {
-      commit('UPDATE_addDesign', design)
-    }
+  async recoverDesign({ commit, dispatch, getters }, design: IDesign) {
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndex(design), '', '0')
+    switch (getters.getCurrLocation) {
+      case 't':
+        commit('UPDATE_deleteDesign', design)
+        break
+      case 'a':
+        dispatch('fetchAllDesigns')
+        break
+      case 'h':
+        dispatch('fetchFavoriteDesigns')
+        break
+      default:
+        dispatch('fetchFolderDesigns', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+    }
     return response.data.data.msg
   },
-  async recoverDesigns({ commit, getters }, designs: IDesign[]) {
-    if (getters.getCurrLocation === 't') {
-      for (const design of designs) {
-        commit('UPDATE_deleteDesign', design)
-      }
-    } else if (getters.getInDeletionView) {
-      for (const design of designs) {
-        commit('UPDATE_addDesign', design)
-      }
-    }
+  async recoverDesigns({ commit, dispatch, getters }, designs: IDesign[]) {
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndices(designs), '', '0')
+    switch (getters.getCurrLocation) {
+      case 't':
+        for (const design of designs) {
+          commit('UPDATE_deleteDesign', design)
+        }
+        break
+      case 'a':
+        dispatch('fetchAllDesigns')
+        break
+      case 'h':
+        dispatch('fetchFavoriteDesigns')
+        break
+      default:
+        dispatch('fetchFolderDesigns', designUtils.makePath(getters.getCurrLocation).slice(1).join(','))
+    }
     return response.data.data.msg
   },
   async deleteDesignForever({ commit }, design: IDesign) {
@@ -319,6 +351,19 @@ const actions: ActionTree<IDesignState, unknown> = {
       2, 'update', true)
     const holder = data.data.design
     return (holder.content.length + holder.folder.length) === 0
+  },
+  async recoverFolder({ commit, dispatch, getters }, folder: IFolder) {
+    const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', '', folder.id, '0')
+    switch (getters.getCurrLocation) {
+      case 't':
+        commit('UPDATE_deleteFolder', folder)
+        break
+      default:
+        await dispatch('fetchFolderFolders', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+    }
+    dispatch('fetchAllExpandedFolders')
+    return response.data.data.msg
   }
 }
 
@@ -332,7 +377,6 @@ const mutations: MutationTree<IDesignState> = {
     state.folders = folders
     state.sortByField = 'update'
     state.sortByDescending = true
-    state.inDeletionView = false
     let targetPath
     switch (currLocation) {
       case 'a':
@@ -421,7 +465,6 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_deleteDesign(state: IDesignState, design: IDesign) {
     const index = state.allDesigns.findIndex((design_) => design_.id === design.id)
     if (index >= 0) {
-      state.inDeletionView = true
       state.allDesigns.splice(index, 1)
     }
   },
@@ -432,7 +475,6 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_deleteFolder(state: IDesignState, folder: IFolder) {
     const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
     if (index >= 0) {
-      state.inDeletionView = true
       state.allFolders.splice(index, 1)
     }
   },

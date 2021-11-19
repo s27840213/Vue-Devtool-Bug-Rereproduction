@@ -90,17 +90,19 @@ export default Vue.extend({
     expansionIconStyles() {
       return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
-    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
+    handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
-      if (extraEvent) {
-        this.$emit('menuAction', extraEvent)
-      }
+      designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+      })
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
     handleGotoFolder(id: string) {
+      if (this.currLocation === 't') return
       this.setCurrLocation(`${this.currLocation}/${id}`)
       this.setExpand({
         path: this.path,

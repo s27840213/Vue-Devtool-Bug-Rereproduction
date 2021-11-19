@@ -400,8 +400,8 @@ export default Vue.extend({
       this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
-    handleDeleteFolderForever(payload: IPathedFolder) {
-      this.pathedFolderBuffer = payload
+    handleDeleteFolderForever(payload: IFolder) {
+      this.pathedFolderBuffer = { parents: [], folder: payload }
       this.confirmMessage = 'delete-forever'
     },
     handleFavDelMouseOver(val: boolean) {

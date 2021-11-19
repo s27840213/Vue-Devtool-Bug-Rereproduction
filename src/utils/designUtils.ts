@@ -347,23 +347,27 @@ class DesignUtils {
     }
   }
 
-  dispatchFolderMenuAction(icon: string, parents: string[], folder: IFolder): { event: string, payload: any } | undefined {
+  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'delete': {
-        return {
+        eventEmitter({
           event: 'deleteFolderForever',
-          payload: { parents, folder }
-        }
+          payload: folder
+        })
+        break
       }
       case 'reduction': {
-        this.recoverFolder(folder)
-        return {
-          event: 'recoverItem',
-          payload: {
-            type: 'folder',
-            data: { parents, folder }
-          }
-        }
+        this.recoverFolder(folder).then((dest) => {
+          eventEmitter({
+            event: 'recoverItem',
+            payload: {
+              type: 'folder',
+              data: folder,
+              dest
+            }
+          })
+        })
+        break
       }
     }
   }
