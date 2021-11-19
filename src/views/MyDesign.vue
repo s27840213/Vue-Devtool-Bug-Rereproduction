@@ -501,16 +501,14 @@ export default Vue.extend({
       this.confirmMessage = 'delete-all'
     },
     recoverAll() {
-      const selectedDesigns = Object.values(this.selectedDesigns) as IDesign[]
-      // const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
-      designUtils.recoverAll(selectedDesigns).then((dest) => {
+      console.log(this.selectedDesigns, this.selectedFolders)
+      designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders)).then((dest) => {
         this.handleRecoverItem({
           type: 'multi',
           data: undefined,
           dest
         })
       })
-      // designUtils.recoverAllFolder(selectedFolders)
     },
     deleteAllForever() {
       this.confirmMessage = 'delete-forever'
@@ -530,8 +528,7 @@ export default Vue.extend({
         return
       }
       if (this.isMultiSelected) {
-        designUtils.deleteAllForever(Object.values(this.selectedDesigns))
-        designUtils.deleteAllFolderForever(Object.values(this.selectedFolders))
+        designUtils.deleteAllForever(Object.values(this.selectedDesigns), Object.values(this.selectedFolders))
       }
     },
     closeConfirmMessage() {

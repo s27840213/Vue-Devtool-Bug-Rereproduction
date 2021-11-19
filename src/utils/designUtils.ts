@@ -423,24 +423,20 @@ class DesignUtils {
     store.dispatch('design/deleteDesignForever', design)
   }
 
-  deleteAllForever(designs: IDesign[]) {
-    store.dispatch('design/deleteDesignsForever', designs)
+  deleteAllForever(designs: IDesign[], folders: IFolder[]) {
+    store.dispatch('design/deleteAllForever', { designs, folders })
   }
 
   deleteFolderForever(folder: IFolder) {
     store.dispatch('design/deleteFolderForever', folder)
   }
 
-  deleteAllFolderForever(folders: IFolder[]) {
-    store.dispatch('design/deleteFoldersForever', folders)
-  }
-
   async recover(design: IDesign): Promise<string> {
     return await store.dispatch('design/recoverDesign', design)
   }
 
-  async recoverAll(designs: IDesign[]): Promise<string> {
-    return await store.dispatch('design/recoverDesigns', designs)
+  async recoverAll(designs: IDesign[], folders: IFolder[]): Promise<string> {
+    return await store.dispatch('design/recoverAll', { designs, folders })
   }
 
   async recoverFolder(folder: IFolder) {

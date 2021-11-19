@@ -267,23 +267,18 @@ const actions: ActionTree<IDesignState, unknown> = {
     }
     return response.data.data.msg
   },
-  async recoverDesigns({ commit, dispatch, getters }, designs: IDesign[]) {
+  async recoverAll({ commit, getters }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', designApis.getAssetIndices(designs), '', '0')
+      'delete', designApis.getAssetIndices(designs), designApis.getFolderIds(folders), '0')
     switch (getters.getCurrLocation) {
-      case 't':
+      case 't': // currently the only possible one
         for (const design of designs) {
           commit('UPDATE_deleteDesign', design)
         }
+        for (const folder of folders) {
+          commit('UPDATE_deleteFolder', folder)
+        }
         break
-      case 'a':
-        dispatch('fetchAllDesigns')
-        break
-      case 'h':
-        dispatch('fetchFavoriteDesigns')
-        break
-      default:
-        dispatch('fetchFolderDesigns', designUtils.makePath(getters.getCurrLocation).slice(1).join(','))
     }
     return response.data.data.msg
   },
@@ -292,11 +287,14 @@ const actions: ActionTree<IDesignState, unknown> = {
       'delete', designApis.getAssetIndex(design), '', '2')
     commit('UPDATE_deleteDesign', design)
   },
-  async deleteDesignsForever({ commit }, designs: IDesign[]) {
+  async deleteAllForever({ commit }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-      'delete', designApis.getAssetIndices(designs), '', '2')
+      'delete', designApis.getAssetIndices(designs), designApis.getFolderIds(folders), '2')
     for (const design of designs) {
       commit('UPDATE_deleteDesign', design)
+    }
+    for (const folder of folders) {
+      commit('UPDATE_deleteFolder', folder)
     }
   },
   async moveDesign({ commit, getters }, { design, destination }: {design: IDesign, destination: string[]}) {

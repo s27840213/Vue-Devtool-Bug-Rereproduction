@@ -1,7 +1,7 @@
 import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
-import { IDesign } from '@/interfaces/design'
+import { IDesign, IFolder } from '@/interfaces/design'
 
 export default {
   getToken(): string {
@@ -18,6 +18,9 @@ export default {
   },
   getAssetIndices(designs: IDesign[]): string {
     return designs.map((design) => this.getAssetIndex(design)).join(',')
+  },
+  getFolderIds(folders: IFolder[]): string {
+    return folders.map((folder) => folder.id).join(',')
   },
   async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
