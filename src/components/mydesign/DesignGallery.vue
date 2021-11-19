@@ -1,6 +1,6 @@
 <template lang="pug">
   div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
-    div(v-if="!noHeader" class="design-gallery__header")
+    div(v-if="!noHeader && allDesigns.length > 0" class="design-gallery__header")
       div(class="design-gallery__expand-icon-container"
           @click="toggleExpansion")
         svg-icon(:style="expansionIconStyles()"

@@ -1,6 +1,6 @@
 <template lang="pug">
   div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
-    div(class="folder-gallery__header")
+    div(v-if="allFolders.length > 0" class="folder-gallery__header")
       div(class="folder-gallery__expand-icon-container"
           @click="toggleExpansion")
         svg-icon(:style="expansionIconStyles()"

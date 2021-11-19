@@ -297,6 +297,7 @@ export default Vue.extend({
       this.setSortByField(payload[0])
       this.setSortByDescending(payload[1])
       this.refreshDesigns()
+      this.refreshFolders()
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
