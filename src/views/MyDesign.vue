@@ -61,7 +61,8 @@
                         iconWidth="11px"
                         iconHeight="13px"
                         iconColor="gray-2")
-        component(:is="mydesignView"
+        component(v-if="currLocation !== ''"
+                  :is="mydesignView"
                   class="design-view"
                   @deleteItem="handleDeleteItem"
                   @clearSelection="handleClearSelection"
