@@ -32,7 +32,8 @@
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
     div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
-    category-list(:list="list"
+    category-list(ref="list"
+      :list="list"
       @loadMore="handleLoadMore")
       template(v-if="!theme || pending" #after)
         div(class="text-center")
@@ -89,7 +90,8 @@ export default Vue.extend({
     return {
       showPrompt: false,
       showTheme: false,
-      currentGroup: null
+      currentGroup: null,
+      scrollTop: 0
     }
   },
   computed: {
@@ -171,9 +173,15 @@ export default Vue.extend({
     }
     // await this.getCategories()
     // this.getContent()
+    this.$refs.list.$el.addEventListener('scroll', (event: Event) => {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
+    })
   },
-  destroyed() {
-    // this.resetContent()
+  activated() {
+    this.$refs.list.$el.scrollTop = this.scrollTop
+  },
+  beforeDestroy() {
+    this.$refs.list.$el.removeEventListener('scroll')
   },
   watch: {
     currPageThemeIds (curr: number[]) {
