@@ -4,10 +4,12 @@ import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import themeUtils from '@/utils/themeUtils'
-import listService from '@/apis/list'
 
-export async function editorRouteHandler(_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
+export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
+    if (from.name === 'Home') {
+      themeUtils.setTemplateThemes([])
+    }
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       next({ name: 'Home', query: { isMobile: 'true' } })
       return
@@ -22,13 +24,14 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     const designId = urlParams.get('design_id')
     const panelIndex = urlParams.get('panel_index')
     const url = urlParams.get('url')
-
-    console.log('handddddler')
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
         : await uploadUtils.getDesign(type, designId)
+    } else if (!url && from.name !== 'Home') {
+      themeUtils.refreshTemplateState()
     }
+
     if (panelIndex && +panelIndex in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', +panelIndex)
     }
@@ -40,12 +43,6 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     } else {
       (() => import('@/assets/scss/components/tmpFonts.scss'))()
     }
-    listService.getTheme({})
-      .then(response => {
-        const { data } = response.data
-        store.commit('SET_themes', data.content)
-        themeUtils.setPageThemes()
-      })
   } catch (error) {
     console.log(error)
   }

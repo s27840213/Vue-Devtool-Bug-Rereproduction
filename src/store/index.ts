@@ -33,117 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
-  pages: [
-    {
-      width: 1080,
-      height: 1080,
-      backgroundColor: '#ffffff',
-      backgroundImage: {
-        config: {
-          type: 'image',
-          srcObj: {
-            type: '',
-            userId: '',
-            assetId: ''
-          },
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          imgControl: false,
-          isClipper: false,
-          dragging: false,
-          designId: '',
-          styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1,
-            rotate: 0,
-            width: 0,
-            height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
-            zindex: -1,
-            opacity: 100,
-            horizontalFlip: false,
-            verticalFlip: false
-          }
-        },
-        posX: -1,
-        posY: -1
-      },
-      name: '',
-      layers: [
-      ],
-      documentColors: [],
-      designId: '',
-      guidelines: {
-        v: [],
-        h: []
-      }
-    },
-    {
-      width: 1080,
-      height: 1080,
-      backgroundColor: '#ffffff',
-      backgroundImage: {
-        config: {
-          type: 'image',
-          srcObj: {
-            type: '',
-            userId: '',
-            assetId: ''
-          },
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          imgControl: false,
-          isClipper: false,
-          dragging: false,
-          designId: '',
-          styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1,
-            rotate: 0,
-            width: 0,
-            height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
-            zindex: -1,
-            opacity: 100,
-            horizontalFlip: false,
-            verticalFlip: false
-          }
-        },
-        posX: -1,
-        posY: -1
-      },
-      name: '',
-      layers: [],
-      documentColors: [],
-      designId: '',
-      guidelines: {
-        v: [],
-        h: []
-      }
-    }
-  ],
+  pages: [pageUtils.newPage({})],
   designId: '',
   groupId: '',
   assetId: '',
@@ -316,6 +206,9 @@ const mutations: MutationTree<IEditorState> = {
       state.pages = pageUtils.newPages(newPages.pages)
       state.name = newPages.name
     }
+    // reset page index
+    state.lastSelectedPageIndex = 0
+    state.currActivePageIndex = -1
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
