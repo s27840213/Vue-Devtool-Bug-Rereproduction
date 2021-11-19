@@ -158,8 +158,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      updateDocumentColors: 'UPDATE_documentColors'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
     }),
     ...mapMutations('text', {
       setCurrTextInfo: 'SET_textInfo'
@@ -193,26 +192,10 @@ export default Vue.extend({
       if (color === this.props.color) return
       let currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
-      const colors: Array<{ color: string, count: number }> = []
-      const colorCounter = (paragraphs: Array<IParagraph>, step: number) => {
-        paragraphs
-          .forEach(p => {
-            p.spans.forEach(s => {
-              const i = colors.findIndex(e => e.color === s.styles.color)
-              if (i !== -1) {
-                colors[i].count += step
-              } else {
-                colors.push({ color: s.styles.color, count: step })
-              }
-            })
-          })
-      }
 
       if (currLayer.type === 'text') {
         currLayer = currLayer as IText
-        // colorCounter(currLayer.paragraphs, -1)
         TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
-        // colorCounter(currLayer.paragraphs, 1)
         if (!TextUtils.isSel(this.sel.end)) {
           TextUtils.focus(this.sel.start, this.sel.end)
         }
@@ -225,29 +208,16 @@ export default Vue.extend({
           for (let i = 0; i < primaryLayer.layers.length; i++) {
             const layer = primaryLayer.layers[i] as IText
             if (layer.type === 'text') {
-              // colorCounter(layer.paragraphs, -1)
               TextPropUtils._spanPropertyHandler('color', color, nan, nan, i)
-              // colorCounter(layer.paragraphs, 1)
             }
           }
         } else {
-          // colorCounter(config.paragraphs, -1)
           TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
-          // colorCounter(config.paragraphs, 1)
           if (!TextUtils.isSel(this.sel.end)) {
             TextUtils.focus(this.sel.start, this.sel.end, subLayerIndex)
           }
         }
       }
-
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors: getDocumentColor(color)
-          .map(c => ({
-            color: c,
-            count: 1
-          }))
-      })
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {

@@ -210,6 +210,8 @@ export default Vue.extend({
       if (this.config.category === 'D') {
         return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
       }
+      // console.log(this.layerIndex)
+      // console.log(`0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`)
       return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {

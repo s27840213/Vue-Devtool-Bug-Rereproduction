@@ -60,10 +60,6 @@ class LayerFactary {
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
-    /**
-     * used for some old template, that img might have rotate angle
-     * here the rotate should be deleted and the rotation number be handled by the frame iteself
-     */
 
     if (clips.length && !clips[0].isFrameImg) {
       clips.forEach((img, i) => {
@@ -107,6 +103,7 @@ class LayerFactary {
         isFrameImg: true
       }))
     }
+
     return {
       type: 'frame',
       id: GeneralUtils.generateRandomString(8),
@@ -407,7 +404,8 @@ class LayerFactary {
         }
         case 'frame': {
           const frame = layer as IFrame
-          if (!frame.clips[0].clipPath) {
+          // if (!frame.clips[0].clipPath) {
+          if (!frame.clips[0].isFrameImg) {
             frame.needFetch = true
           }
         }

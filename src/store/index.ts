@@ -26,7 +26,7 @@ import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
-import imageUtils from '@/utils/imageUtils'
+import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 
@@ -713,30 +713,8 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.name = '我的設計'
   },
-  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color:string, count: number }> }) {
-    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-  },
-  UPDATE_documentColors(state: IEditorState, data: { pageIndex: number, colors: [{ color: string, count: number }] }) {
-    const documentColors = state.pages[data.pageIndex].documentColors
-
-    documentColors.splice(0, documentColors.length)
-    Object.assign(documentColors, data.colors)
-
-    // data.colors
-    //   .forEach(e => {
-    //     const colorIdx = documentColors.findIndex(c => c.color === e.color)
-    //     if (colorIdx !== -1) {
-    //       documentColors[colorIdx].count += e.count
-    //       if (documentColors[colorIdx].count === 0) {
-    //         documentColors.splice(colorIdx, 1)
-    //       }
-    //     } else {
-    //       documentColors.push({
-    //         color: e.color,
-    //         count: e.count
-    //       })
-    //     }
-    //   })
+  UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
+    state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes

@@ -25,7 +25,6 @@ export default Vue.extend({
 
       if (type === 'image') {
         if (this.config.isFrame) {
-          console.log(this.config)
           clipPath = imageUtils.isImgControl() ? layerPath : `path('${this.config.clipPath}')`
         } else {
           clipPath = layerPath

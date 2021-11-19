@@ -76,6 +76,7 @@ import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
+import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   props: {

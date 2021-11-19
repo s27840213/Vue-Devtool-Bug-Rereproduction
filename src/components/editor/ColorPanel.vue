@@ -87,6 +87,12 @@ export default Vue.extend({
   created() {
     this.vcoConfig.middleware = this.middleware
   },
+  mounted() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: '' })
+  },
+  destroyed() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: '' })
+  },
   computed: {
     ...mapGetters({
       documentColors: 'color/getDocumentColors',
@@ -101,6 +107,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      updateDocumentColors: 'UPDATE_documentColors'
+    }),
     colorStyles(color: string) {
       return {
         backgroundColor: color
@@ -109,6 +118,7 @@ export default Vue.extend({
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
+      this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
     handleColorModal(): void {
       this.openColorPicker = !this.openColorPicker

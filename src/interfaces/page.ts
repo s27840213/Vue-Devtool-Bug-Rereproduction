@@ -15,7 +15,7 @@ export interface IPage {
   backgroundImage: IBackgroundImage,
   name: string,
   layers: Array<IShape | IText | IImage | IGroup | IFrame>,
-  documentColors: Array<{ color: string, count: number }>,
+  documentColors: Array<string>,
   designId: string,
   guidelines: {
     [index: string]: Array<number>,

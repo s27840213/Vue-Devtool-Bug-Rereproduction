@@ -484,7 +484,8 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        const isFrame = this.getLayerType === 'frame' && this.isMoving
+        // const isFrame = this.getLayerType === 'frame' && (this.imgControl.layerIndex === this.layerIndex || this.isMoving)
+        const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 1000 : 100)
@@ -1572,10 +1573,6 @@ export default Vue.extend({
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
-        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
-        // if (this.currSubSelectedInfo.type === 'image') {
-        //   updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
-        // }
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)

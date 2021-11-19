@@ -859,6 +859,8 @@ class UploadUtils {
       y: styles.y,
       width: styles.width,
       height: styles.height,
+      initWidth: styles.initWidth,
+      initHeight: styles.initHeight,
       scale: styles.scale,
       scaleX: styles.scaleX,
       scaleY: styles.scaleY,
@@ -986,7 +988,7 @@ class UploadUtils {
             }
           }),
           ...(decorationTop && {
-            decoration: {
+            decorationTop: {
               color: decorationTop.color
             }
           }),

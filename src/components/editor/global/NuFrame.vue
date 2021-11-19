@@ -12,11 +12,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
-import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -37,6 +36,7 @@ export default Vue.extend({
 
       this.config.styles.initWidth = json.width
       this.config.styles.initHeight = json.height
+
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
           img.clipPath = json.clips[idx].clipPath
@@ -48,7 +48,7 @@ export default Vue.extend({
       }
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
-        Object.assign(config.decoration, json.decorationTop)
+        Object.assign(config.decorationTop, json.decorationTop)
       }
       delete config.needFetch
     }
@@ -76,8 +76,6 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        // width: `${this.config.styles.width}px`,
-        // height: `${this.config.styles.height}px`
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
