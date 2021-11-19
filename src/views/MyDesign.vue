@@ -461,14 +461,15 @@ export default Vue.extend({
       return false
     },
     deleteFolder(pathedFolder: IPathedFolder) {
-      designUtils.deleteFolder(pathedFolder.folder)
       this.pathedFolderBuffer = undefined
-      if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
-      if (pathedFolder.parents.length > 1) {
-        this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
-      } else {
-        this.setCurrLocation('a')
-      }
+      designUtils.deleteFolder(pathedFolder).then(() => {
+        if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
+        if (pathedFolder.parents.length > 1) {
+          this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
+        } else {
+          this.setCurrLocation('a')
+        }
+      })
     },
     recover() {
       const item = this.deletedQueue[0]

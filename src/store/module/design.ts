@@ -92,7 +92,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     try {
       sortByField = sortByField ?? getters.getSortByField
       sortByDescending = sortByDescending ?? getters.getSortByDescending
-      const { data } = await designApis.getDesigns(designApis.getToken(), path, false, sortByField, sortByDescending)
+      const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, sortByField, sortByDescending)
       const designs = data.data.design.content.map((design: IUserDesignContentData) => {
         return designUtils.apiDesign2IDesign(design)
       })
@@ -105,7 +105,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     try {
       sortByField = sortByField ?? getters.getSortByField
       sortByDescending = sortByDescending ?? getters.getSortByDescending
-      const { data } = await designApis.getDesigns(designApis.getToken(), path, true, sortByField, sortByDescending)
+      const { data } = await designApis.getDesigns(designApis.getToken(), path, 1, sortByField, sortByDescending)
       return data.data.design.folder.map((folder: IUserFolderContentData) => {
         return designUtils.apiFolder2IFolder(folder)
       })
@@ -283,7 +283,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
     }
   },
-  async setFolderName({ commit, getters }, { folder, name, fromFolderItem }: { folder: IFolder, name: string, fromFolderItem: boolean }) {
+  async setFolderName({ commit, getters }, { folder, name, fromFolderItem }: {folder: IFolder, name: string, fromFolderItem: boolean}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', null, folder.id, name)
     folder.name = name
@@ -295,9 +295,30 @@ const actions: ActionTree<IDesignState, unknown> = {
   async moveFolder({ commit, getters }, { folder, destination }: {folder: IDesign, destination: string[]}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'move', null, folder.id, destination.slice(1).join(','))
-    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
-      commit('UPDATE_deleteFolder', folder)
+    if (getters.getCurrLocation.startsWith('f')) {
+      if (getters.getCurrLocation === `f:${destination.join('/')}`) {
+        commit('UPDATE_addFolder', folder)
+      } else {
+        commit('UPDATE_deleteFolder', folder)
+      }
     }
+  },
+  async deleteFolder({ commit, dispatch, getters }, pathedFolder: IPathedFolder) {
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', null, pathedFolder.folder.id, '1')
+    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) {
+      commit('UPDATE_deleteFolder', pathedFolder.folder)
+    }
+    if (getters.getCurrLocation === 't') {
+      commit('UPDATE_addFolder', pathedFolder.folder)
+    }
+    dispatch('fetchStructuralFolders', { path: pathedFolder.parents.slice(1).join(',') })
+  },
+  async checkEmpty({ commit }, pathedFolder: IPathedFolder) {
+    const { data } = await designApis.getDesigns(designApis.getToken(), designUtils.createPath(pathedFolder).slice(1).join(','),
+      2, 'update', true)
+    const holder = data.data.design
+    return (holder.content.length + holder.folder.length) === 0
   }
 }
 

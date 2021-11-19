@@ -19,13 +19,13 @@ export default {
   getAssetIndices(designs: IDesign[]): string {
     return designs.map((design) => this.getAssetIndex(design)).join(',')
   },
-  async getDesigns(token: string, path: string, folderOnly: boolean, sortByField: string, sortByDescending: boolean): Promise<any> {
+  async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',
       data: {
         type: 'design',
         token,
-        data: folderOnly ? 1 : 2,
+        data,
         order_by: `${sortByField}:${sortByDescending ? 'desc' : 'asc'}`,
         path: path
       }

@@ -191,16 +191,15 @@ export default Vue.extend({
           })
         }
       } else if (this.draggingType === 'folder') {
-        const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-        if (!folder) return
-        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
-        designUtils.moveFolder({ parents, folder }, destination).then(() => {
-          if (folder.isCurrLocation) {
-            this.setCurrLocation(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
+        if (!this.draggingFolder) return
+        if (designUtils.isParentOrEqual(this.draggingFolder, { parents: this.parents as string[], folder: this.folder as IFolder })) return
+        designUtils.moveFolder(this.draggingFolder, destination).then(() => {
+          if (this.draggingFolder.folder.isCurrLocation) {
+            this.setCurrLocation(`f:${designUtils.appendPath(destination, this.draggingFolder.folder as IFolder).join('/')}`)
           }
           this.$emit('moveItem', {
             type: 'folder',
-            data: folder,
+            data: this.draggingFolder.folder,
             dest: this.folder.name
           })
         })

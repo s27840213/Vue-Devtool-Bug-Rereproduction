@@ -217,13 +217,12 @@ export default Vue.extend({
           })
         }
       } else if (this.draggingType === 'folder') {
-        const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-        if (!folder) return
-        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.path as string[], folder: this.config as IFolder })) return
-        designUtils.moveFolder({ parents, folder }, destination).then(() => {
+        if (!this.draggingFolder) return
+        if (designUtils.isParentOrEqual(this.draggingFolder, { parents: this.path as string[], folder: this.config as IFolder })) return
+        designUtils.moveFolder(this.draggingFolder, destination).then(() => {
           this.$emit('moveItem', {
             type: 'folder',
-            data: folder,
+            data: this.draggingFolder.folder,
             dest: this.config.name
           })
         })

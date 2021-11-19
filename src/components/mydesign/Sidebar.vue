@@ -167,15 +167,14 @@ export default Vue.extend({
               })
             }
           } else if (this.draggingType === 'folder') {
-            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-            if (!folder) return
-            designUtils.moveFolder({ parents, folder }, destination).then(() => {
-              if (folder.isCurrLocation) {
-                this.setCurrLocation(`f:${this.ROOT}/${folder.id}`)
+            if (!this.draggingFolder) return
+            designUtils.moveFolder(this.draggingFolder, destination).then(() => {
+              if (this.draggingFolder.folder.isCurrLocation) {
+                this.setCurrLocation(`f:${this.ROOT}/${this.draggingFolder.folder.id}`)
               }
               this.$emit('moveItem', {
                 type: 'folder',
-                data: folder,
+                data: this.draggingFolder.folder,
                 dest: designUtils.ROOT_DISPLAY
               })
             })
@@ -196,13 +195,14 @@ export default Vue.extend({
               })
             }
           } else if (this.draggingType === 'folder') {
-            // const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-            // if (!folder) return
-            // TODO: check empty by API
-            // this.$emit('deleteFolder', {
-            //   pathedFolder: { parents, folder },
-            //   empty: folder.designs.length + folder.subFolders.length === 0
-            // })
+            const pathedFolder = this.draggingFolder
+            if (!pathedFolder) return
+            designUtils.checkEmpty(pathedFolder).then((empty) => {
+              this.$emit('deleteFolder', {
+                pathedFolder: pathedFolder,
+                empty
+              })
+            })
           }
           break
       }

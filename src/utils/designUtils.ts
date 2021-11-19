@@ -411,8 +411,8 @@ class DesignUtils {
     store.dispatch('design/deleteDesigns', designs)
   }
 
-  deleteFolder(folder: IFolder) {
-    store.dispatch('design/deleteFolder', folder)
+  async deleteFolder(pathedFolder: IPathedFolder) {
+    await store.dispatch('design/deleteFolder', pathedFolder)
   }
 
   deleteForever(design: IDesign) {
@@ -469,6 +469,10 @@ class DesignUtils {
 
   setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
     store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
+  }
+
+  async checkEmpty(pathedFolder: IPathedFolder): Promise<boolean> {
+    return await store.dispatch('design/checkEmpty', pathedFolder)
   }
 
   isMaxLevelReached(level: number) {
