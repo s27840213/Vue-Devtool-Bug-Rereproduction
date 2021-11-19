@@ -1,7 +1,6 @@
 import { IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import store from '@/store'
-import layerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 
 class ColorUtils {
