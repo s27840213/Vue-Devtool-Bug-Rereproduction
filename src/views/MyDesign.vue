@@ -386,10 +386,11 @@ export default Vue.extend({
     handleDeleteFolder(payload: {pathedFolder: IPathedFolder, empty: boolean}) {
       const { pathedFolder, empty } = payload
       if (empty) {
-        this.deleteFolder(pathedFolder)
-        this.handleDeleteItem({
-          type: 'folder',
-          data: pathedFolder.folder
+        this.deleteFolder(pathedFolder, () => {
+          this.handleDeleteItem({
+            type: 'folder',
+            data: pathedFolder.folder
+          })
         })
       } else {
         this.pathedFolderBuffer = pathedFolder
@@ -460,9 +461,10 @@ export default Vue.extend({
       }
       return false
     },
-    deleteFolder(pathedFolder: IPathedFolder) {
+    deleteFolder(pathedFolder: IPathedFolder, callback?: () => void) {
       this.pathedFolderBuffer = undefined
       designUtils.deleteFolder(pathedFolder).then(() => {
+        if (callback) callback()
         if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
         if (pathedFolder.parents.length > 1) {
           this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)

@@ -364,6 +364,11 @@ const actions: ActionTree<IDesignState, unknown> = {
     }
     dispatch('fetchAllExpandedFolders')
     return response.data.data.msg
+  },
+  async deleteFolderForever({ commit }, folder: IFolder) {
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'delete', '', folder.id, '2')
+    commit('UPDATE_deleteFolder', folder)
   }
 }
 
