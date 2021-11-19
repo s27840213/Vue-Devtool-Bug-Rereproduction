@@ -24,7 +24,7 @@ interface IDesignState {
 }
 
 const getDefaultState = (): IDesignState => ({
-  currLocation: 'a',
+  currLocation: '',
   folders: [],
   allDesigns: [],
   allFolders: [],
@@ -122,8 +122,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     for (const node of pathNodes) {
       const index = currentFolder.subFolders.findIndex(folder => folder.id === node)
       if (index < 0) {
-        commit('SET_currLocation', 'a')
-        return
+        return false
       }
       path.push(node)
       await dispatch('fetchStructuralFolders', { path: path.join(',') })
@@ -133,7 +132,7 @@ const actions: ActionTree<IDesignState, unknown> = {
         isExpanded: true
       })
     }
-    commit('UPDATE_currLocation')
+    return true
   },
   async fetchTrashFolders({ commit, dispatch }) {
     const folders = (await dispatch('fetchFolders', { path: 'trash' })) ?? []
@@ -313,7 +312,34 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
     }
   },
-  async setFolderName({ commit, getters }, { folder, name, fromFolderItem }: {folder: IFolder, name: string, fromFolderItem: boolean}) {
+  async createFolder({ commit, getters }, { path, folder, name }: {path: string, folder: IFolder, name: string}) {
+    folder.name = name
+    const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+      'create', null, name, path)
+    const newFolder = response.data.data
+    const nodes = path === '' ? [] : path.split(',')
+    if (newFolder) {
+      const newIFolder = designUtils.apiFolder2IFolder(newFolder)
+      commit('UPDATE_replaceFolder', {
+        parents: [designUtils.ROOT, ...nodes],
+        id: folder.id,
+        folder: newIFolder
+      })
+      if (getters.getCurrLocation === `f:${[designUtils.ROOT, ...nodes, folder.id].join('/')}`) {
+        commit('SET_currLocation', `f:${[designUtils.ROOT, ...nodes, newIFolder.id].join('/')}`)
+      }
+    } else {
+      commit('UPDATE_removeFolder', {
+        parents: [designUtils.ROOT, ...nodes],
+        folder
+      })
+      commit('UPDATE_deleteFolder', folder)
+      if (getters.getCurrLocation === `f:${[designUtils.ROOT, ...nodes, folder.id].join('/')}`) {
+        commit('SET_currLocation', 'a')
+      }
+    }
+  },
+  async setFolderName({ commit }, { folder, name, fromFolderItem }: {folder: IFolder, name: string, fromFolderItem: boolean}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', null, folder.id, name)
     folder.name = name
@@ -342,7 +368,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     if (getters.getCurrLocation === 't') {
       commit('UPDATE_addFolder', pathedFolder.folder)
     }
-    dispatch('fetchStructuralFolders', { path: pathedFolder.parents.slice(1).join(',') })
+    dispatch('fetchStructuralFolders', { path: pathedFolder.parents.length === 1 ? 'root' : pathedFolder.parents.slice(1).join(',') })
   },
   async checkEmpty({ commit }, pathedFolder: IPathedFolder) {
     const { data } = await designApis.getDesigns(designApis.getToken(), designUtils.createPath(pathedFolder).slice(1).join(','),
@@ -494,6 +520,17 @@ const mutations: MutationTree<IDesignState> = {
     const targetFolder = designUtils.search(state.folders, pathedFolder.parents)
     if (targetFolder) {
       targetFolder.subFolders.push(pathedFolder.folder)
+    }
+  },
+  UPDATE_replaceFolder(state: IDesignState, updateInfo: {parents: string[], id: string, folder: IFolder}) {
+    const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.id)
+    if (index >= 0) {
+      state.allFolders.splice(index, 1, updateInfo.folder)
+    }
+    const targetFolder = designUtils.search(state.folders, updateInfo.parents)
+    if (targetFolder) {
+      const index = targetFolder.subFolders.findIndex((folder_) => folder_.id === updateInfo.id)
+      targetFolder.subFolders.splice(index, 1, updateInfo.folder)
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {

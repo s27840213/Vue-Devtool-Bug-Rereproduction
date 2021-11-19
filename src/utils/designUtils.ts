@@ -92,7 +92,7 @@ class DesignUtils {
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
-      id: isROOT ? this.ROOT : generalUtils.generateAssetId(),
+      id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
       author,
       createdTime: time.toString(),
@@ -372,12 +372,15 @@ class DesignUtils {
     }
   }
 
-  addNewFolder(path: string[]): string {
-    const folder = this.newFolder('未命名資料夾', 'Daniel') // TODO: use usernames instead
-    store.commit('design/UPDATE_addFolder', {
+  addNewFolder(path: string[], fromFolderView = false): string {
+    const folder = this.newFolder('未命名資料夾', 'SYSTEM')
+    store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
     })
+    if (fromFolderView) {
+      store.commit('design/UPDATE_addFolder', folder)
+    }
     return folder.id
   }
 
@@ -469,6 +472,14 @@ class DesignUtils {
 
   setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
     store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
+  }
+
+  createFolder(parents: string[], folder: IFolder, name: string) {
+    store.dispatch('design/createFolder', {
+      path: parents.slice(1).join(','),
+      folder,
+      name
+    })
   }
 
   async checkEmpty(pathedFolder: IPathedFolder): Promise<boolean> {

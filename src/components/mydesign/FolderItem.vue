@@ -123,7 +123,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingFolder: 'SET_draggingFolder'
+      setDraggingFolder: 'SET_draggingFolder',
+      removeFolder: 'UPDATE_removeFolder',
+      deleteFolder: 'UPDATE_deleteFolder'
     }),
     emitGoto() {
       this.$emit('goto')
@@ -239,9 +241,21 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.editableName === '' || this.editableName === this.config.name) return
-      this.checkNameLength()
-      designUtils.setFolderName(this.config, this.editableName, true)
+      if (this.config.id.endsWith('_new')) {
+        if (this.editableName === '') {
+          this.removeFolder({
+            parents: this.path,
+            folder: this.config
+          })
+          this.deleteFolder(this.config)
+        } else {
+          designUtils.createFolder(this.path as string[], this.config, this.editableName)
+        }
+      } else {
+        if (this.editableName === '' || this.editableName === this.config.name) return
+        this.checkNameLength()
+        designUtils.setFolderName(this.config, this.editableName, true)
+      }
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.config.name) {

@@ -210,11 +210,16 @@ export default Vue.extend({
       return
     }
     if (!this.view) {
+      this.setCurrLocation('a')
       return
     }
     const path = this.view.split('&')
-    this.setCurrLocation(`f:${designUtils.ROOT}/${path.join('/')}`)
-    this.fetchFoldersAlong({ pathNodes: path })
+    const success = await this.fetchFoldersAlong({ pathNodes: path })
+    if (success) {
+      this.setCurrLocation(`f:${designUtils.ROOT}/${path.join('/')}`)
+    } else {
+      this.setCurrLocation('a')
+    }
   },
   data() {
     return {

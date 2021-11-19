@@ -285,7 +285,7 @@ export default Vue.extend({
       })
     },
     handleNewFolder() {
-      const folderId = designUtils.addNewFolder(this.path)
+      const folderId = designUtils.addNewFolder(this.path, true)
       this.$nextTick(() => {
         const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
         if (folderItemName) {

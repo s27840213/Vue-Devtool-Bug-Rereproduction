@@ -107,7 +107,8 @@ export default Vue.extend({
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
-      setDraggingFolder: 'SET_draggingFolder'
+      setDraggingFolder: 'SET_draggingFolder',
+      removeFolder: 'UPDATE_removeFolder'
     }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -222,9 +223,20 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.editableName === '' || this.editableName === this.folder.name) return
-      this.checkNameLength()
-      designUtils.setFolderName(this.folder, this.editableName)
+      if (this.folder.id.endsWith('_new')) {
+        if (this.editableName === '') {
+          this.removeFolder({
+            parents: this.parents,
+            folder: this.folder
+          })
+        } else {
+          designUtils.createFolder(this.parents as string[], this.folder, this.editableName)
+        }
+      } else {
+        if (this.editableName === '' || (this.editableName === this.folder.name)) return
+        this.checkNameLength()
+        designUtils.setFolderName(this.folder, this.editableName)
+      }
     },
     handleShowHint(folderId: string) {
       this.$emit('showHint', folderId)
