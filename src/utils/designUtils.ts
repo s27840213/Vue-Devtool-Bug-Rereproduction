@@ -272,21 +272,6 @@ class DesignUtils {
     }
   }
 
-  foldAll(folders: IFolder[]): IFolder[] {
-    const nodes = [...folders]
-    while (nodes.length > 0) {
-      const node = nodes.shift()
-      if (node) {
-        node.isExpanded = false
-        node.isCurrLocation = false
-        for (const subFolder of node.subFolders) {
-          nodes.push(subFolder)
-        }
-      }
-    }
-    return folders
-  }
-
   isParentOrEqual(a: IPathedFolder, b: IPathedFolder): boolean {
     const aFullPath = this.createPath(a).join('/')
     const bFullPath = this.createPath(b).join('/')

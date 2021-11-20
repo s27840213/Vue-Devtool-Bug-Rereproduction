@@ -64,8 +64,7 @@ import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
-import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
-import generalUtils from '@/utils/generalUtils'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {

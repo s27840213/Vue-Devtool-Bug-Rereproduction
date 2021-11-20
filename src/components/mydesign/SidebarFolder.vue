@@ -37,7 +37,7 @@
       div(v-else
           :class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
+    sidebar-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
                   @moveItem="handleMoveItem"
                   @showHint="handleShowHint")
     div(class="dragged-folder" :style="draggedFolderStyles()")
@@ -53,7 +53,7 @@
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -98,6 +98,9 @@ export default Vue.extend({
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.folder.subFolders])
     }
   },
   methods: {

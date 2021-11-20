@@ -100,12 +100,10 @@
                 span 移至資料夾
               div(class="my-design__change-folder__hr")
             div(class="my-design__change-folder__folders")
-              structure-folder(v-for="folder in copiedFolders"
+              structure-folder(v-for="folder in realFolders"
                               :folder="folder"
                               :parents="[]"
-                              :level="0"
-                              @moveToFolderSelect="handleMoveToFolderSelect"
-                              @moveToFolderExpand="handleMoveToFolderExpand")
+                              :level="0")
             div(class="my-design__change-folder__footer")
               div(class="my-design__change-folder__buttons")
                 div(class="my-design__change-folder__cancel"
@@ -175,7 +173,7 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
-import generalUtils from '@/utils/generalUtils'
+import design from '@/apis/design'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -236,15 +234,15 @@ export default Vue.extend({
       confirmMessage: '',
       isFavDelMouseOver: false,
       isMoveToFolderPanelOpen: false,
-      copiedFolders: [] as IFolder[],
-      moveToFolderSelectInfo: '',
       isMovingSingleToFolder: false
     }
   },
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
+      moveToFolderSelectInfo: 'getMoveToFolderSelectInfo',
       folders: 'getFolders',
+      copiedFolders: 'getCopiedFolders',
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders'
     }),
@@ -267,6 +265,9 @@ export default Vue.extend({
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.copiedFolders])
     }
   },
   watch: {
@@ -291,9 +292,8 @@ export default Vue.extend({
     },
     isMoveToFolderPanelOpen(newVal) {
       if (newVal) {
-        this.copiedFolders = designUtils.foldAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
+        this.snapshotFolders()
       } else {
-        this.copiedFolders = []
         this.designBuffer = undefined
         this.isMovingSingleToFolder = false
       }
@@ -307,7 +307,8 @@ export default Vue.extend({
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
       setCurrLocation: 'SET_currLocation',
-      setFolders: 'SET_folders'
+      setFolders: 'SET_folders',
+      snapshotFolders: 'UPDATE_snapshotFolders'
     }),
     stackStyles() {
       return { top: this.isMultiSelected ? '82px' : '27px' }
@@ -415,20 +416,9 @@ export default Vue.extend({
     handleFavDelMouseOver(val: boolean) {
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
     },
-    handleMoveToFolderSelect(selectInfo: string) {
-      designUtils.dislocateFrom(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
-      this.moveToFolderSelectInfo = selectInfo
-      designUtils.locateTo(this.copiedFolders, 'f:' + selectInfo)
-    },
-    handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
-      const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
-      if (targetFolder) {
-        targetFolder.isExpanded = !targetFolder.isExpanded
-      }
-    },
     handleMoveToFolder() {
       if (this.moveToFolderSelectInfo === '') return
-      const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
+      const destination = [designUtils.ROOT, ...(designUtils.makePath(this.moveToFolderSelectInfo))]
       if (this.isMovingSingleToFolder && this.designBuffer) {
         designUtils.move(this.designBuffer, destination)
         this.handleMoveItem({

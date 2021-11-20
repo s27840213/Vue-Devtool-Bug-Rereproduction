@@ -9,7 +9,9 @@ import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api
 
 interface IDesignState {
   currLocation: string,
+  moveToFolderSelectInfo: string,
   folders: IFolder[],
+  copiedFolders: IFolder[],
   allDesigns: IDesign[],
   allFolders: IFolder[],
   draggingType: 'design' | 'folder' | '',
@@ -25,7 +27,9 @@ interface IDesignState {
 
 const getDefaultState = (): IDesignState => ({
   currLocation: '',
+  moveToFolderSelectInfo: '',
   folders: [],
+  copiedFolders: [],
   allDesigns: [],
   allFolders: [],
   draggingType: '',
@@ -44,8 +48,14 @@ const getters: GetterTree<IDesignState, unknown> = {
   getCurrLocation(state: IDesignState): string {
     return state.currLocation
   },
+  getMoveToFolderSelectInfo(state: IDesignState): string {
+    return state.moveToFolderSelectInfo
+  },
   getFolders(state: IDesignState): IFolder[] {
     return state.folders
+  },
+  getCopiedFolders(state: IDesignState): IFolder[] {
+    return state.copiedFolders
   },
   getAllDesigns(state: IDesignState): IDesign[] {
     return state.allDesigns
@@ -111,6 +121,14 @@ const actions: ActionTree<IDesignState, unknown> = {
   async fetchStructuralFolders({ commit, dispatch }, { path }) {
     const folders = await dispatch('fetchFolders', { path })
     commit('UPDATE_folders', {
+      path,
+      folders: folders ?? []
+    })
+    return folders === undefined
+  },
+  async fetchCopiedStructuralFolders({ commit, dispatch }, { path }) {
+    const folders = await dispatch('fetchFolders', { path })
+    commit('UPDATE_copiedFolders', {
       path,
       folders: folders ?? []
     })
@@ -439,8 +457,21 @@ const mutations: MutationTree<IDesignState> = {
     if (router.currentRoute.path === targetPath) return
     router.replace({ path: targetPath })
   },
+  SET_moveToFolderSelectInfo(state: IDesignState, selectInfo: string) {
+    const folders = generalUtils.deepCopy(state.copiedFolders)
+    designUtils.dislocateFrom(folders, state.moveToFolderSelectInfo)
+    designUtils.locateTo(folders, selectInfo)
+    state.moveToFolderSelectInfo = selectInfo
+    state.copiedFolders = folders
+  },
   SET_expand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
     const targetFolder = designUtils.search(state.folders, updateInfo.path)
+    if (targetFolder) {
+      targetFolder.isExpanded = updateInfo.isExpanded
+    }
+  },
+  SET_copiedExpand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
+    const targetFolder = designUtils.search(state.copiedFolders, updateInfo.path)
     if (targetFolder) {
       targetFolder.isExpanded = updateInfo.isExpanded
     }
@@ -492,6 +523,23 @@ const mutations: MutationTree<IDesignState> = {
     const targetFolder = designUtils.search(state.folders, pathNodes)
     if (targetFolder) {
       targetFolder.subFolders = designUtils.updateFolders(targetFolder.subFolders, updateInfo.folders)
+    }
+  },
+  UPDATE_copiedFolders(state: IDesignState, updateInfo: {path: string, folders: IFolder[]}) {
+    const pathNodes = updateInfo.path.split(',')
+    const targetFolder = designUtils.search(state.copiedFolders, pathNodes)
+    if (targetFolder) {
+      targetFolder.subFolders = designUtils.updateFolders(targetFolder.subFolders, updateInfo.folders)
+    }
+  },
+  UPDATE_snapshotFolders(state: IDesignState) {
+    const copiedFolders = generalUtils.deepCopy(state.folders)
+    const root = copiedFolders[0]
+    if (root) {
+      designUtils.dislocateFrom(copiedFolders, state.currLocation)
+      state.copiedFolders = root.subFolders
+    } else {
+      state.copiedFolders = []
     }
   },
   UPDATE_currLocation(state: IDesignState) {
