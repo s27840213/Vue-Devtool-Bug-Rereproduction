@@ -65,6 +65,7 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -191,7 +192,8 @@ export default Vue.extend({
               designUtils.delete(design)
               this.$emit('deleteItem', {
                 type: 'design',
-                data: design
+                data: design,
+                dest: this.currLocation
               })
             }
           } else if (this.draggingType === 'folder') {

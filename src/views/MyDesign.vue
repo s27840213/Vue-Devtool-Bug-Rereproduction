@@ -395,7 +395,8 @@ export default Vue.extend({
         this.deleteFolder(pathedFolder, () => {
           this.handleDeleteItem({
             type: 'folder',
-            data: pathedFolder.folder
+            data: pathedFolder.folder,
+            dest: `f:${pathedFolder.parents.join('/')}`
           })
         })
       } else {
@@ -484,10 +485,10 @@ export default Vue.extend({
       if (item) {
         clearTimeout(this.messageTimer)
         if (item.type === 'design') {
-          designUtils.recover(item.data as IDesign)
+          designUtils.recover(item.data as IDesign, item.dest)
         }
         if (item.type === 'folder') {
-          designUtils.recoverFolder(item.data as IFolder)
+          designUtils.recoverFolder(item.data as IFolder, item.dest)
         }
         this.isShowDeleteMessage = false
         setTimeout(() => {

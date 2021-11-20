@@ -305,7 +305,8 @@ class DesignUtils {
           event: 'deleteItem',
           payload: {
             type: 'design',
-            data: design
+            data: design,
+            dest: store.getters['design/getCurrLocation']
           }
         })
         break
@@ -434,20 +435,16 @@ class DesignUtils {
     store.dispatch('design/deleteFolderForever', folder)
   }
 
-  async recover(design: IDesign): Promise<string> {
-    return await store.dispatch('design/recoverDesign', design)
+  async recover(design: IDesign, deletionLocation?: string): Promise<string> {
+    return await store.dispatch('design/recoverDesign', { design, deletionLocation })
   }
 
   async recoverAll(designs: IDesign[], folders: IFolder[]): Promise<string> {
     return await store.dispatch('design/recoverAll', { designs, folders })
   }
 
-  async recoverFolder(folder: IFolder) {
-    return await store.dispatch('design/recoverFolder', folder)
-  }
-
-  async recoverAllFolder(folders: IFolder[]) {
-    return await store.dispatch('design/recoverFolders', folders)
+  async recoverFolder(folder: IFolder, deletionLocation?: string): Promise<string> {
+    return await store.dispatch('design/recoverFolder', { folder, deletionLocation })
   }
 
   removeFromFavorite(design: IDesign) {

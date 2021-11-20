@@ -15,7 +15,7 @@ interface IDesignState {
   draggingType: 'design' | 'folder' | '',
   draggingDesign: IDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
-  selectedDesigns: {[key: string]: IDesign}
+  selectedDesigns: {[key: string]: IDesign},
   selectedFolders: {[key: string]: IFolder},
   isDesignsLoading: boolean,
   isFoldersLoading: boolean,
@@ -248,21 +248,29 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteDesign', design)
     }
   },
-  async recoverDesign({ commit, dispatch, getters }, design: IDesign) {
+  async recoverDesign({ commit, dispatch, getters }, { design, deletionLocation }: {design: IDesign, deletionLocation?: string}) {
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndex(design), '', '0')
-    switch (getters.getCurrLocation) {
-      case 't':
+    if (deletionLocation !== undefined) {
+      if (getters.getCurrLocation === deletionLocation) {
+        commit('UPDATE_addDesign', design)
+      } else if (getters.getCurrLocation === 't') {
         commit('UPDATE_deleteDesign', design)
-        break
-      case 'a':
-        dispatch('fetchAllDesigns')
-        break
-      case 'h':
-        dispatch('fetchFavoriteDesigns')
-        break
-      default:
-        dispatch('fetchFolderDesigns', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+      }
+    } else {
+      switch (getters.getCurrLocation) {
+        case 't':
+          commit('UPDATE_deleteDesign', design)
+          break
+        case 'a':
+          await dispatch('fetchAllDesigns')
+          break
+        case 'h':
+          await dispatch('fetchFavoriteDesigns')
+          break
+        default:
+          await dispatch('fetchFolderDesigns', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+      }
     }
     return response.data.data.msg
   },
@@ -376,15 +384,23 @@ const actions: ActionTree<IDesignState, unknown> = {
     const holder = data.data.design
     return (holder.content.length + holder.folder.length) === 0
   },
-  async recoverFolder({ commit, dispatch, getters }, folder: IFolder) {
+  async recoverFolder({ commit, dispatch, getters }, { folder, deletionLocation }: {folder: IFolder, deletionLocation?: string }) {
     const response = await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', '', folder.id, '0')
-    switch (getters.getCurrLocation) {
-      case 't':
+    if (deletionLocation !== undefined) {
+      if (getters.getCurrLocation === deletionLocation) {
+        commit('UPDATE_addFolder', folder)
+      } else if (getters.getCurrLocation === 't') {
         commit('UPDATE_deleteFolder', folder)
-        break
-      default:
-        await dispatch('fetchFolderFolders', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+      }
+    } else {
+      switch (getters.getCurrLocation) {
+        case 't':
+          commit('UPDATE_deleteFolder', folder)
+          break
+        default:
+          await dispatch('fetchFolderFolders', { path: designUtils.makePath(getters.getCurrLocation).slice(1).join(',') })
+      }
     }
     dispatch('fetchAllExpandedFolders')
     return response.data.data.msg
