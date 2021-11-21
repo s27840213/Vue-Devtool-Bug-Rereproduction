@@ -485,31 +485,28 @@ export default Vue.extend({
     },
     async updateDataClicked() {
       // handle theme_ids
-      let themeIds = ''
-      if (this.templateThemes.length === 1 && this.templateThemes[0]) {
-        // theme_ids unset
-        themeIds = '0'
-      } else {
-        const arr = [] as string[]
-        this.templateThemes.forEach((item, idx) => {
-          if (item && idx !== 0) {
-            arr.push(String(idx))
-          }
-        })
-        themeIds = arr.join()
-      }
+      const arr = [] as string[]
+      this.templateThemes.forEach((item, idx) => {
+        if (item && idx !== 0) {
+          arr.push(String(idx))
+        }
+      })
+      const themeIds = arr.join()
 
-      this.isLoading = true
-      if (!this.templateInfo.key_id) {
-        this.isLoading = false
-        this.$notify({ group: 'copy', text: '請先取得模板資料' })
-        return
-      }
       if (!this.updateChecked) {
-        this.isLoading = false
         this.$notify({ group: 'copy', text: '請先勾選確定更新' })
         return
       }
+      if (!this.templateInfo.key_id) {
+        this.$notify({ group: 'copy', text: '請先取得模板資料' })
+        return
+      }
+      if (themeIds === '' || themeIds.length === 0) {
+        this.$notify({ group: 'copy', text: 'theme_ids不得為空' })
+        return
+      }
+
+      this.isLoading = true
       const data = {
         locale: this.templateInfo.locale,
         tags_tw: this.templateInfo.tags_tw,
