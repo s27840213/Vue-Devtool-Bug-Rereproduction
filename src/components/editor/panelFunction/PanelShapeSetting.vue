@@ -421,8 +421,9 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
-      this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
+      colorUtils.setCurrColor(this.getColors[index])
+      this.$emit('toggleColorPanel', true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
@@ -460,7 +461,8 @@ export default Vue.extend({
           color[this.currSelectedColorIndex] = newColor
           LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, subSelectedIdx, { color })
         }
-      } else {
+      }
+      if (currLayer.type === 'shape') {
         const color = [...(currLayer as IShape).color]
         color[this.currSelectedColorIndex] = newColor
         const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)

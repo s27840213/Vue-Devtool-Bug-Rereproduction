@@ -14,6 +14,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
+import { IShape } from '@/interfaces/layer'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -92,7 +93,7 @@ export default Vue.extend({
       }
       default: {
         if (!this.config.svg && this.config.designId) {
-          const shape = await shapeUtils.fetchSvg(this.config)
+          const shape = await shapeUtils.fetchSvg(this.config) as IShape
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
           Object.assign(this.config, shape)

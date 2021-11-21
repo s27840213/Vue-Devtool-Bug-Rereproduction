@@ -52,12 +52,14 @@ export function getDocumentColor(pageIndex: number, color: string): Array<string
               })
             })
             break
-          case 'shape':
-            (l as IShape).color.forEach(c => {
-              if (!docColors.has(c)) {
-                docColors.add(c)
+          case 'shape': {
+            const shape = l as IShape
+            for (let i = 0; i < shape.color.length && i < 20; i++) {
+              if (!docColors.has(shape.color[i])) {
+                docColors.add(shape.color[i])
               }
-            })
+            }
+          }
             break
           case 'group':
             handler((l as IGroup).layers)
@@ -67,7 +69,7 @@ export function getDocumentColor(pageIndex: number, color: string): Array<string
 
   handler(page.layers)
   docColors.delete(color)
-  return color ? [color, ...docColors] : [...docColors]
+  return color ? [color, ...docColors].splice(0, 50) : [...docColors].splice(0, 50)
 }
 
 export default new ColorUtils()

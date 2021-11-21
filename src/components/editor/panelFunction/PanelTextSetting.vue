@@ -185,7 +185,6 @@ export default Vue.extend({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-
       this.$emit('toggleColorPanel', true)
     },
     handleColorUpdate(color: string) {

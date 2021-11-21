@@ -188,8 +188,10 @@ import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
-import { SidebarPanelType } from '@/store/types'
+import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   components: {
@@ -328,7 +330,9 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _deletePage: 'DELETE_page',
+      setPanelType: 'SET_currFunctionPanelType',
+      setSidebarType: 'SET_currSidebarPanelType'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -415,6 +419,40 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     addPage() {
+      const page = GeneralUtils.deepCopy(layerUtils.getPage(this.pageIndex)) as IPage
+      console.log(GeneralUtils.deepCopy(this.currSelectedInfo))
+      // const { layers, types, index } = this.currSelectedInfo as ICurrSelectedInfo
+      const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
+
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { active: false, shown: false })
+      switch (currLayer.type) {
+        case 'tmp':
+          GroupUtils.deselect()
+          break
+        case 'group':
+          (currLayer as IGroup).layers
+            .forEach((l, idx) => {
+              if (l.active) {
+                layerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, {
+                  active: false,
+                  shown: false,
+                  ...(l.type === 'image' && { imgControl: false })
+                })
+              }
+            })
+          break
+        case 'frame':
+          (currLayer as IFrame).clips
+            .forEach((img, idx) => {
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, idx, { active: false, shown: false, imgControl: false })
+            })
+          break
+      }
+
+      this.setPanelType(FunctionPanelType.none)
+      this.setPanelType(SidebarPanelType.template)
+      GroupUtils.reset()
+
       PageUtils.addPageToPos(PageUtils.newPage({}), this.pageIndex + 1)
       this.setLastSelectedPageIndex(this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)

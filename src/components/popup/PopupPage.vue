@@ -185,6 +185,24 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
+          text: 'update Doc',
+          shortcutText: '',
+          action: () => {
+            this.$store.commit('user/UPDATE_IMAGE_URLS', {
+              assetId: 2783,
+              urls: {
+                prev: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                full: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                larg: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                original: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                midd: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                smal: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D'
+              }
+            })
+          }
+        },
+        {
+          icon: 'copy',
           text: 'append test layer',
           shortcutText: '',
           action: () => {
@@ -192,7 +210,7 @@ export default Vue.extend({
               srcObj: {
                 type: 'private',
                 userId: '',
-                assetId: 1538
+                assetId: 2783
               },
               styles: {
                 x: 250,
@@ -205,17 +223,6 @@ export default Vue.extend({
                 imgHeight: 400
               }
             }
-            this.$store.commit('user/UPDATE_IMAGE_URLS', {
-              assetId: 1538,
-              urls: {
-                prev: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
-                full: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
-                larg: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
-                original: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
-                midd: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D',
-                smal: 'asset.vivipic.com/xyOGyk10sSATTMVzhHHX/asset/image/211104113942145JPf9ytBk/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637202931&Signature=6ELsomRueYZzmpwXNVBqO8gE164%3D'
-              }
-            })
             layerUtils.addLayers(0, [layerFactary.newImage(config)])
           }
         }

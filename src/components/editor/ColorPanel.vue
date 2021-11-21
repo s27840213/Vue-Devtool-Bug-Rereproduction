@@ -37,7 +37,7 @@
       class="color-panel__color-picker"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
-      @update="handleColorEvent")
+      @update="handleDragUpdate")
 </template>
 
 <script lang="ts">
@@ -88,10 +88,10 @@ export default Vue.extend({
     this.vcoConfig.middleware = this.middleware
   },
   mounted() {
-    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: '' })
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
   },
   destroyed() {
-    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: '' })
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
   },
   computed: {
     ...mapGetters({
@@ -119,6 +119,10 @@ export default Vue.extend({
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
+    },
+    handleDragUpdate(color: string) {
+      colorUtils.event.emit(colorUtils.currEvent, color)
+      colorUtils.setCurrColor(color)
     },
     handleColorModal(): void {
       this.openColorPicker = !this.openColorPicker
