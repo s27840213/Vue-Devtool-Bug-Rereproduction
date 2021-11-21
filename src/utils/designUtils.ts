@@ -513,7 +513,7 @@ class DesignUtils {
     }
   }
 
-  setDesign(design: IUserDesignContentData) {
+  setDesign(design: IUserDesignContentData | IDesign) {
     // if(uploadUtils.assetId.length !== 0) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
     // }

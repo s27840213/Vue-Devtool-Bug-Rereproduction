@@ -16,20 +16,21 @@
             draggable="false"
             :src="appliedUrl")
       div(class="design-item__controller")
-        div(class="design-item__controller-content")
+        div(class="design-item__controller-content"
+          @click.self="handleClick")
           div(v-if="isSelected"
             class="design-item__checkbox-checked"
-            @click="emitDeselect")
+            @click.stop="emitDeselect")
             svg-icon(iconName="check-large"
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
           div(v-if="!isSelected && (isMouseOver || isAnySelected)"
             class="design-item__checkbox"
-            @click="emitSelect")
+            @click.stop="emitSelect")
           div(v-if="isMouseOver"
             class="design-item__more"
-            @click="toggleMenu()")
+            @click.stop="toggleMenu()")
             svg-icon(iconName="more_horizontal"
                     iconWidth="24px"
                     iconColor="gray-2")
@@ -37,7 +38,7 @@
               class="design-item__menu"
               v-click-outside="closeMenu")
             slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-          div(v-if="favorable" class="design-item__favorite" @click="emitLike")
+          div(v-if="favorable" class="design-item__favorite" @click.stop="emitLike")
             svg-icon(v-if="isMouseOver && !config.favorite"
                     iconName="favorites"
                     iconWidth="20px"
@@ -77,9 +78,9 @@
                 iconColor="gray-3")
     div(class="design-item__size")
       span {{ `${config.width}x${config.height}` }}
-    div(class="dragged-thumbnail" :style="draggedImageStyles()")
+    div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
       div(class="relative")
-        img(:src="appliedUrl")
+        img(:src="appliedUrl" :style="draggedImageStyles()")
         div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
 </template>
 
@@ -113,7 +114,7 @@ export default Vue.extend({
       imgWidth: 10,
       imgHeight: 10,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/image-preview.svg')
+      previewPlaceholder: require('@/assets/img/svg/image-preview-large.svg')
     }
   },
   directives: {
@@ -173,12 +174,22 @@ export default Vue.extend({
         }
       }
     },
-    draggedImageStyles(): { [key: string]: string } {
+    draggedImageContainerStyles(): { [key: string]: string } {
       if (this.isDragged) {
         return {
           left: `${this.draggedImageCoordinate.x}px`,
           top: `${this.draggedImageCoordinate.y}px`,
           display: 'block'
+        }
+      } else {
+        return {}
+      }
+    },
+    draggedImageStyles(): { [key: string]: string } {
+      if (this.isDragged && this.config.thumbnail === this.previewPlaceholder) {
+        return {
+          width: '150px',
+          height: '150px'
         }
       } else {
         return {}
@@ -252,6 +263,11 @@ export default Vue.extend({
       if (this.editableName === '' || this.editableName === this.config.name) return
       designUtils.setDesignName(this.config, this.editableName)
     },
+    handleClick() {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.setDesign(this.config)
+      })
+    },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         this.handleNameEditEnd()
@@ -278,7 +294,7 @@ export default Vue.extend({
         return
       }
       this.previewCheckReady = false
-      imageUtils.getImageSize(this.configPreview, 80, 80).then((size) => {
+      imageUtils.getImageSize(this.configPreview, 150, 150).then((size) => {
         const { width, height, exists } = size
         this.imgWidth = width
         this.imgHeight = height
