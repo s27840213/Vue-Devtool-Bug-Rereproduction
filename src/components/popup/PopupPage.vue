@@ -142,6 +142,24 @@ export default Vue.extend({
           action: () => {
             uploadUtils.uploadGroupDesign(1)
           }
+        },
+        {
+          icon: 'copy',
+          text: '刪除群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, true)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '測試用',
+          shortcutText: '',
+          condition: true,
+          action: () => {
+            GeneralUtils.test()
+          }
         }
       ]
     }

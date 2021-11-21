@@ -213,6 +213,15 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
+          text: '刪除群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, true)
+          }
+        },
+        {
+          icon: 'copy',
           text: `上傳 ${this.typeMap[this.updateType]}`,
           condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
           shortcutText: '',

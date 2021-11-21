@@ -563,7 +563,7 @@ class UploadUtils {
     }
   }
 
-  uploadGroupDesign(update: GroupDesignUpdateFlag, coverId?: string) {
+  uploadGroupDesign(update: GroupDesignUpdateFlag, deleteGroup = false as boolean, coverId?: string) {
     const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? generalUtils.generateRandomString(20) : this.groupId
     store.commit('SET_groupId', groupId)
     const pages = pageUtils.getPages
@@ -571,7 +571,8 @@ class UploadUtils {
      * @param {string} list - template id list (separate by comma)
      */
     if (update === GroupDesignUpdateFlag.UPLOAD || update === GroupDesignUpdateFlag.UPDATE_GROUP) {
-      const list = pages.map((page: IPage) => page.designId).join(',')
+      // Could only delete group when updating group
+      const list = deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP ? '' : pages.map((page: IPage) => page.designId).join(',')
       store.dispatch('user/groupDesign', {
         token: this.token,
         update,
@@ -707,6 +708,12 @@ class UploadUtils {
         assetId: ImageUtils.getAssetId(src, type)
       }
       delete page.backgroundImage.config.src
+    }
+
+    if (!page.designId) {
+      if (generalUtils.objHasOwnProperty(page, 'modified')) {
+        delete page.modified
+      }
     }
 
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {

@@ -17,6 +17,7 @@ export interface IPage {
   layers: Array<IShape | IText | IImage | IGroup | IFrame>,
   documentColors: Array<{ color: string, count: number }>,
   designId: string,
+  modified?: boolean,
   guidelines: {
     [index: string]: Array<number>,
     v: Array<number>,

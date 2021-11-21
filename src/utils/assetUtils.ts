@@ -390,7 +390,8 @@ class AssetUtils {
   }
 
   async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
-    const { content_ids: contents = [], type } = item
+    const { content_ids: contents = [], type, group_id: groupId } = item
+    store.commit('SET_groupId', groupId)
     const lastPageIndex = this.getPages.length
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
