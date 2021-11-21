@@ -22,7 +22,8 @@ interface IDesignState {
   isDesignsLoading: boolean,
   isFoldersLoading: boolean,
   sortByField: string,
-  sortByDescending: boolean
+  sortByDescending: boolean,
+  designsPageIndex: number
 }
 
 const getDefaultState = (): IDesignState => ({
@@ -40,7 +41,8 @@ const getDefaultState = (): IDesignState => ({
   isDesignsLoading: false,
   isFoldersLoading: false,
   sortByField: 'update',
-  sortByDescending: true
+  sortByDescending: true,
+  designsPageIndex: 0
 })
 
 const state = getDefaultState()
@@ -89,15 +91,18 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getSortByDescending(state: IDesignState): boolean {
     return state.sortByDescending
+  },
+  getDesignsPageIndex(state: IDesignState): number {
+    return state.designsPageIndex
   }
 }
 
 const actions: ActionTree<IDesignState, unknown> = {
-  async fetchDesigns({ commit, getters }, { path, sortByField, sortByDescending }) {
+  async fetchDesigns({ commit, getters }, { path }) {
+    const { getSortByField, getSortByDescending } = getters
     try {
-      sortByField = sortByField ?? getters.getSortByField
-      sortByDescending = sortByDescending ?? getters.getSortByDescending
-      const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, sortByField, sortByDescending)
+      const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, getSortByField, getSortByDescending)
+      commit('SET_designsPageIndex', data.next_page)
       const designs = data.data.design.content.map((design: IUserDesignContentData) => {
         return designUtils.apiDesign2IDesign(design)
       })
@@ -106,17 +111,45 @@ const actions: ActionTree<IDesignState, unknown> = {
       console.log(error)
     }
   },
-  async fetchFolders({ commit, getters }, { path, sortByField, sortByDescending }) {
+  async fetchMoreDesigns({ commit, getters }, { path }) {
+    const pageIndex = getters.getDesignsPageIndex
+    if (pageIndex < 0) return
+    const { getSortByField, getSortByDescending } = getters
     try {
-      sortByField = sortByField ?? getters.getSortByField
-      sortByDescending = sortByDescending ?? getters.getSortByDescending
-      const { data } = await designApis.getDesigns(designApis.getToken(), path, 1, sortByField, sortByDescending)
-      return data.data.design.folder.map((folder: IUserFolderContentData) => {
-        return designUtils.apiFolder2IFolder(folder)
+      const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, getSortByField, getSortByDescending, {
+        page_index: pageIndex
       })
+      commit('SET_designsPageIndex', data.next_page)
+      const designs = data.data.design.content.map((design: IUserDesignContentData) => {
+        return designUtils.apiDesign2IDesign(design)
+      })
+      commit('SET_allDesigns', getters.getAllDesigns.concat(designs))
     } catch (error) {
       console.log(error)
     }
+  },
+  async fetchPageFolders({ getters }, { path, pageIndex }) {
+    const { getSortByField, getSortByDescending } = getters
+    const { data } = await designApis.getDesigns(designApis.getToken(), path, 1, getSortByField, getSortByDescending, {
+      page_index: pageIndex
+    })
+    return data
+  },
+  async fetchFolders({ dispatch }, { path }) {
+    let nextPage = 0
+    let folders: IFolder[] = []
+    while (nextPage >= 0) {
+      try {
+        const data = await dispatch('fetchPageFolders', { path, pageIndex: nextPage })
+        folders = folders.concat(data.data.design.folder.map((folder: IUserFolderContentData) => {
+          return designUtils.apiFolder2IFolder(folder)
+        }))
+        nextPage = data.next_page
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    return folders
   },
   async fetchStructuralFolders({ commit, dispatch }, { path }) {
     const folders = await dispatch('fetchFolders', { path })
@@ -512,6 +545,9 @@ const mutations: MutationTree<IDesignState> = {
   },
   SET_sortByDescending(state: IDesignState, sortByDescending: boolean) {
     state.sortByDescending = sortByDescending
+  },
+  SET_designsPageIndex(state: IDesignState, designsPageIndex: number) {
+    state.designsPageIndex = designsPageIndex
   },
   UPDATE_folders(state: IDesignState, updateInfo: {path: string, folders: IFolder[]}) {
     let pathNodes

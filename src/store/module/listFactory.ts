@@ -89,6 +89,7 @@ export default function (this: any) {
       try {
         const { data } = await this.api(nextParams)
         commit(SET_MORE_CONTENT, data.data)
+        console.log(data.data)
       } catch (error) {
         captureException(error)
       }

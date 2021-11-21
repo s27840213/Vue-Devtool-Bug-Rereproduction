@@ -22,7 +22,7 @@ export default {
   getFolderIds(folders: IFolder[]): string {
     return folders.map((folder) => folder.id).join(',')
   },
-  async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean): Promise<any> {
+  async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean, params: {[key: string]: any} = {}): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',
       data: {
@@ -30,7 +30,8 @@ export default {
         token,
         data,
         order_by: `${sortByField}:${sortByDescending ? 'desc' : 'asc'}`,
-        path: path
+        path: path,
+        ...params
       }
     }))
   },
