@@ -113,7 +113,8 @@
     design-gallery(:menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction")
+                  @menuAction="handleMenuAction"
+                  @loadMore="handleLoadMore")
     div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
@@ -235,7 +236,8 @@ export default Vue.extend({
   methods: {
     ...mapActions('design', {
       fetchFolderDesigns: 'fetchFolderDesigns',
-      fetchFolderFolders: 'fetchFolderFolders'
+      fetchFolderFolders: 'fetchFolderFolders',
+      fetchMoreFolderDesigns: 'fetchMoreFolderDesigns'
     }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
@@ -301,6 +303,13 @@ export default Vue.extend({
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
+    },
+    handleLoadMore() {
+      designUtils.fetchDesigns(async () => {
+        await this.fetchMoreFolderDesigns({
+          path: this.path.slice(1).join(',')
+        })
+      }, false)
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableFolderName === this.folderName) {

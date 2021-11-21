@@ -28,7 +28,8 @@
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
                   :useDelete="true"
-                  @menuAction="handleMenuAction")
+                  @menuAction="handleMenuAction"
+                  @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
@@ -85,7 +86,8 @@ export default Vue.extend({
   methods: {
     ...mapActions('design', {
       fetchTrashDesigns: 'fetchTrashDesigns',
-      fetchTrashFolders: 'fetchTrashFolders'
+      fetchTrashFolders: 'fetchTrashFolders',
+      fetchMoreTrashDesigns: 'fetchMoreTrashDesigns'
     }),
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
@@ -93,6 +95,9 @@ export default Vue.extend({
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
+    },
+    handleLoadMore() {
+      designUtils.fetchDesigns(this.fetchMoreTrashDesigns, false)
     },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen

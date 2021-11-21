@@ -6,7 +6,8 @@
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction")
+                  @menuAction="handleDesignMenuAction"
+                  @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
@@ -43,11 +44,15 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchFavoriteDesigns: 'fetchFavoriteDesigns'
+      fetchFavoriteDesigns: 'fetchFavoriteDesigns',
+      fetchMoreFavoriteDesigns: 'fetchMoreFavoriteDesigns'
     }),
     handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
+    },
+    handleLoadMore() {
+      designUtils.fetchDesigns(this.fetchMoreFavoriteDesigns, false)
     }
   }
 })

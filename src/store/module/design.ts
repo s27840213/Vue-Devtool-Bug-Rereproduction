@@ -209,6 +209,18 @@ const actions: ActionTree<IDesignState, unknown> = {
   async fetchFolderDesigns({ dispatch }, { path }) {
     await dispatch('fetchDesigns', { path })
   },
+  async fetchMoreAllDesigns({ dispatch }) {
+    await dispatch('fetchMoreDesigns', { path: '' })
+  },
+  async fetchMoreFavoriteDesigns({ dispatch }) {
+    await dispatch('fetchMoreDesigns', { path: 'favor' })
+  },
+  async fetchMoreTrashDesigns({ dispatch }) {
+    await dispatch('fetchMoreDesigns', { path: 'trash' })
+  },
+  async fetchMoreFolderDesigns({ dispatch }, { path }) {
+    await dispatch('fetchMoreDesigns', { path })
+  },
   async fetchAllExpandedFolders({ dispatch, getters }) {
     const folders = getters.getFolders
     await dispatch('fetchStructuralFolders', { path: 'root' })

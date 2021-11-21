@@ -472,8 +472,10 @@ class DesignUtils {
     return level >= 4
   }
 
-  fetchDesigns(fetcher: () => Promise<void>) {
-    store.commit('design/SET_allDesigns', [])
+  fetchDesigns(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('design/SET_allDesigns', [])
+    }
     store.commit('design/SET_isDesignsLoading', true)
     fetcher().then(() => {
       store.commit('design/SET_isDesignsLoading', false)

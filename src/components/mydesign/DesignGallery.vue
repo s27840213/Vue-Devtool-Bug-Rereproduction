@@ -40,6 +40,8 @@
       svg-icon(iconName="loading"
                 iconWidth="50px"
                 iconColor="gray-3")
+    observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
+                      @callback="handleLoadMore")
 </template>
 
 <script lang="ts">
@@ -48,10 +50,12 @@ import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default Vue.extend({
   components: {
-    DesignItem
+    DesignItem,
+    ObserverSentinel
   },
   data() {
     return {
@@ -70,7 +74,8 @@ export default Vue.extend({
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',
       selectedDesigns: 'getSelectedDesigns',
-      isDesignsLoading: 'getIsDesignsLoading'
+      isDesignsLoading: 'getIsDesignsLoading',
+      designsPageIndex: 'getDesignsPageIndex'
     }),
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
@@ -105,6 +110,9 @@ export default Vue.extend({
           this.$emit('menuAction', extraEvent)
         }
       })
+    },
+    handleLoadMore() {
+      this.$emit('loadMore')
     },
     toggleFavorite(design: IDesign) {
       if (design.favorite) {
