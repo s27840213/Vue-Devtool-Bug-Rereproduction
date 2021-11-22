@@ -868,6 +868,8 @@ class UploadUtils {
       y: styles.y,
       width: styles.width,
       height: styles.height,
+      initWidth: styles.initWidth,
+      initHeight: styles.initHeight,
       scale: styles.scale,
       scaleX: styles.scaleX,
       scaleY: styles.scaleY,
@@ -879,14 +881,6 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
-        if (general.scale !== 1) {
-          // general.width = styles.imgWidth
-          // general.height = styles.imgHeight
-          // styles.imgWidth = general.width
-          // styles.imgHeight = general.height
-          // general.scale = 1
-          console.error('image scale is not equal to 1')
-        }
         return {
           ...general,
           imgX: styles.imgX,
@@ -995,7 +989,7 @@ class UploadUtils {
             }
           }),
           ...(decorationTop && {
-            decoration: {
+            decorationTop: {
               color: decorationTop.color
             }
           }),
@@ -1024,6 +1018,20 @@ class UploadUtils {
           type,
           layers: filteredLayers,
           styles: this.styleFilter(styles)
+        }
+      }
+      case 'tmp': {
+        const tmp = layer as ITmp
+        const { type, layers, styles } = tmp
+        const filteredLayers = layers
+          .map(layer => {
+            return this.layerInfoFilter(layer)
+          })
+        return {
+          type: 'group',
+          layers: filteredLayers,
+          styles: this.styleFilter(styles)
+
         }
       }
     }

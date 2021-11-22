@@ -345,8 +345,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _updateLayerProps: 'UPDATE_layerProps',
-      updateDocumentColors: 'UPDATE_documentColors'
+      _updateLayerProps: 'UPDATE_layerProps'
     }),
     ...mapActions('markers',
       [
@@ -422,8 +421,9 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
-      this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
+      colorUtils.setCurrColor(this.getColors[index])
+      this.$emit('toggleColorPanel', true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
@@ -444,13 +444,6 @@ export default Vue.extend({
     },
     setColor(newColor: string, index: number) {
       stepsUtils.record()
-      // this.updateDocumentColors({
-      //   pageIndex: LayerUtils.pageIndex,
-      //   colors: [
-      //     { color: newColor, count: 1 },
-      //     { color: this.getColors[this.currSelectedColorIndex], count: -1 }
-      //   ]
-      // })
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const subSelectedIdx = (currLayer as IGroup).layers
@@ -468,7 +461,8 @@ export default Vue.extend({
           color[this.currSelectedColorIndex] = newColor
           LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, subSelectedIdx, { color })
         }
-      } else {
+      }
+      if (currLayer.type === 'shape') {
         const color = [...(currLayer as IShape).color]
         color[this.currSelectedColorIndex] = newColor
         const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
@@ -477,13 +471,6 @@ export default Vue.extend({
         }
         LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
       }
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors: getDocumentColor(newColor).map(c => ({
-          color: c,
-          count: 1
-        }))
-      })
     },
     setLineWidth(value: number) {
       const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))

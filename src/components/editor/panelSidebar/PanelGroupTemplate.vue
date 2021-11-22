@@ -6,7 +6,7 @@
         iconColor="white"
         @click.native="$emit('close')")
       button(class="panel-group-template__apply lead-2"
-        @click="handleApplyGroupTemplate") 套用全部 {{ count }} 個頁面
+        @click="handleApplyGroupTemplate") 加入全部 {{ count }} 個頁面
     div(class="panel-group-template__list")
       category-template-item(v-for="(item, idx) in contents"
         class="panel-group-template__item"

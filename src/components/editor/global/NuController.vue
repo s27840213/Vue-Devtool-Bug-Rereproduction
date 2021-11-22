@@ -484,10 +484,11 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        const isFrame = this.getLayerType === 'frame' && this.isMoving
+        // const isFrame = this.getLayerType === 'frame' && (this.imgControl.layerIndex === this.layerIndex || this.isMoving)
+        const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
-          return (this.layerIndex + 1) * (isFrame || isGroup ? 1000 : 100)
+          return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
         } else if (isFrame || isGroup) {
           return (this.layerIndex + 1) * 1000
         } else if (this.getLayerType === 'tmp') {
@@ -503,7 +504,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        'pointer-events': this.isImgControl ? 'none' : 'initial',
+        'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -825,8 +826,8 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            const clipPath = `M0,0h${width}v${height}h${-width}z`
-            FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
+            // const clipPath = `M0,0h${width}v${height}h${-width}z`
+            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break
@@ -1572,10 +1573,6 @@ export default Vue.extend({
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
-        // updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { active: false })
-        // if (this.currSubSelectedInfo.type === 'image') {
-        //   updateSubLayerProps(this.pageIndex, this.layerIndex, this.currSubSelectedInfo.index, { imgControl: false })
-        // }
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)

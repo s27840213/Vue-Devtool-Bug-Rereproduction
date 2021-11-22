@@ -1,9 +1,10 @@
 <template lang="pug">
   div(class="panel")
-    component(v-if="isActive"
-      class="p-10 border-box"
-      :style="panelStyles()"
-      :is="panelComponents[currPanel]")
+    keep-alive(:include="['panel-template']")
+      component(v-if="isActive"
+        class="p-10 border-box"
+        :style="panelStyles()"
+        :is="panelComponents[currPanel]")
     img(v-if="currPanel >= 0"
       class="btn-pack"
       :src="require('@/assets/img/svg/pack-up.svg')"

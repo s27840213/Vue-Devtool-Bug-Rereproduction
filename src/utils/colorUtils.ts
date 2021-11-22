@@ -1,7 +1,6 @@
-import { IShape, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import store from '@/store'
-import layerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 
 class ColorUtils {
@@ -36,60 +35,41 @@ class ColorUtils {
   }
 }
 
-export function DocColorHandler(config: IShape | IText) {
-  switch (config.type) {
-    case 'shape':
-      store.commit('UPDATE_documentColors', {
-        pageIndex: layerUtils.pageIndex,
-        colors: (config as IShape).color
-          .map(color => {
-            return { color, count: -1 }
-          })
-      })
-      break
-    case 'text': {
-      config = config as IText
-      config.paragraphs
-        .forEach(p => {
-          p.spans.forEach(s => {
-            store.commit('UPDATE_documentColors', {
-              pageIndex: layerUtils.pageIndex,
-              colors: [{
-                color: s.styles.color,
-                count: -1
-              }]
-            })
-          })
-        })
-    }
-  }
-}
-
-export function getDocumentColor(color: string): Array<string> {
-  const page = store.getters.getPage(layerUtils.pageIndex) as IPage
+export function getDocumentColor(pageIndex: number, color: string): Array<string> {
+  const page = store.getters.getPage(pageIndex) as IPage
   const docColors = new Set<string>()
 
-  page.layers
-    .forEach(l => {
-      if (l.type === 'text') {
-        (l as IText).paragraphs.forEach(p => {
-          p.spans.forEach(s => {
-            if (!docColors.has(s.styles.color)) {
-              docColors.add(s.styles.color)
+  const handler = (layers: Array<ILayer>) => {
+    layers
+      .forEach(l => {
+        switch (l.type) {
+          case 'text':
+            (l as IText).paragraphs.forEach(p => {
+              p.spans.forEach(s => {
+                if (!docColors.has(s.styles.color)) {
+                  docColors.add(s.styles.color)
+                }
+              })
+            })
+            break
+          case 'shape': {
+            const shape = l as IShape
+            for (let i = 0; i < shape.color.length && i < 20; i++) {
+              if (!docColors.has(shape.color[i])) {
+                docColors.add(shape.color[i])
+              }
             }
-          })
-        })
-      }
-      if (l.type === 'shape') {
-        (l as IShape).color.forEach(c => {
-          if (!docColors.has(c)) {
-            docColors.add(c)
           }
-        })
-      }
-    })
+            break
+          case 'group':
+            handler((l as IGroup).layers)
+        }
+      })
+  }
+
+  handler(page.layers)
   docColors.delete(color)
-  return [...docColors, color]
+  return color ? [color, ...docColors].splice(0, 50) : [...docColors].splice(0, 50)
 }
 
 export default new ColorUtils()

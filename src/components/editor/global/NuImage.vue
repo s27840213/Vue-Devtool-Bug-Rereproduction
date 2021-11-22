@@ -109,7 +109,12 @@ export default Vue.extend({
       }
     },
     onError() {
-      this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+      console.log('image on error')
+      try {
+        this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 })

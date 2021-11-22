@@ -76,6 +76,7 @@ import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
+import { config } from 'vue/types/umd'
 
 export default Vue.extend({
   props: {
@@ -132,9 +133,6 @@ export default Vue.extend({
     },
     isActive(): boolean {
       return this.config.active
-    },
-    isShown(): boolean {
-      return this.config.shown
     },
     isLocked(): boolean {
       return this.config.locked
@@ -300,7 +298,7 @@ export default Vue.extend({
         ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       const outline = (() => {
-        if ((this.isShown || this.isActive) && LayerUtils.getCurrLayer.type !== 'frame') {
+        if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
           if (this.config.type === 'tmp' || this.isControlling) {
             return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
           } else {
@@ -315,7 +313,7 @@ export default Vue.extend({
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline,
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        'pointer-events': (this.isActive) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -524,21 +522,19 @@ export default Vue.extend({
       if (isAllHorizon) {
         const lowLine = this.getLayerPos.y + originSize.height
         const diff = newSize.height - originSize.height
-        if (diff > 0) {
-          const targetSubLayers: Array<[number, number]> = []
-          group.layers
-            .forEach((l, idx) => {
-              if (l.styles.y >= lowLine) {
-                targetSubLayers.push([idx, l.styles.y])
-              }
+        const targetSubLayers: Array<[number, number]> = []
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+              y: data[1] + diff
             })
-          targetSubLayers
-            .forEach(data => {
-              LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-                y: data[1] + diff
-              })
-            })
-        }
+          })
       }
       // @TODO: the vertical kind pending
 

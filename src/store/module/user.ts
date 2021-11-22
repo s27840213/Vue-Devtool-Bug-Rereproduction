@@ -223,12 +223,6 @@ const mutations: MutationTree<IUserModule> = {
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
-    // const targetUrls = {
-    //   prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : image.signed_url?.prev ?? '',
-    //   full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : image.signed_url?.full ?? '',
-    //   larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : image.signed_url?.larg ?? '',
-    //   original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : image.signed_url?.original ?? ''
-    // }
 
     const targetUrls = {
       prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
@@ -239,7 +233,21 @@ const mutations: MutationTree<IUserModule> = {
       smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
       tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
     }
-    images[targetIndex].urls = targetUrls
+    if (targetIndex === -1) {
+      images.push({
+        width: 500,
+        height: 400,
+        id: 'this is a test',
+        assetIndex: assetId,
+        preview: {
+          width: 100,
+          height: 200
+        },
+        urls
+      })
+    } else {
+      images[targetIndex].urls = targetUrls
+    }
   },
   [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
     state.checkedAssets = [...val]
