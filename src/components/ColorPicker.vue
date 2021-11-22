@@ -5,6 +5,7 @@
       :value="convertedHex"
       @input="updateHex"
       @paste="onPaste"
+      @mouseup.native="onmouseup"
       :disableFields="true"
       :disableAlpha="true")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
@@ -52,10 +53,10 @@
 </template>
 
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { Chrome } from 'vue-color'
 import { mapGetters, mapMutations } from 'vuex'
+import layerUtils from '@/utils/layerUtils'
+import { Chrome } from 'vue-color'
 
 export default Vue.extend({
   props: {
@@ -139,6 +140,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      updateDocumentColors: 'UPDATE_documentColors'
+    }),
     paddingRight(str: string, n: number) {
       let len = str.length
       while (len < n) {
@@ -166,6 +170,9 @@ export default Vue.extend({
     setColor(color: string) {
       this.color = color
       this.$emit('update', color)
+    },
+    onmouseup() {
+      this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
     }
   }
 })

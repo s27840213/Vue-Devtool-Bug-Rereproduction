@@ -37,7 +37,7 @@
       class="color-panel__color-picker"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
-      @update="handleColorEvent")
+      @update="handleDragUpdate")
 </template>
 
 <script lang="ts">
@@ -49,6 +49,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import textUtils from '@/utils/textUtils'
 import layerUtils from '@/utils/layerUtils'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -87,6 +88,14 @@ export default Vue.extend({
   created() {
     this.vcoConfig.middleware = this.middleware
   },
+  mounted() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setCurrFunctionPanel(FunctionPanelType.colorPicker)
+  },
+  destroyed() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setCurrFunctionPanel(FunctionPanelType.none)
+  },
   computed: {
     ...mapGetters({
       documentColors: 'color/getDocumentColors',
@@ -101,12 +110,21 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      updateDocumentColors: 'UPDATE_documentColors',
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+    }),
     colorStyles(color: string) {
       return {
         backgroundColor: color
       }
     },
     handleColorEvent(color: string) {
+      colorUtils.event.emit(colorUtils.currEvent, color)
+      colorUtils.setCurrColor(color)
+      this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
+    },
+    handleDragUpdate(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
     },
@@ -160,15 +178,17 @@ export default Vue.extend({
 
   &__add-color {
     width: 100%;
-    height: 100%;
+    // height: 100%;
+    padding-top: 100%;
     background-image: url("~@/assets/img/svg/addColor.png");
     background-size: cover;
   }
 
   &__color {
-    aspect-ratio: 1/1;
+    // aspect-ratio: 1/1;
+    // height: 100%;
     width: 100%;
-    height: 100%;
+    padding-top: 100%;
     border-radius: 2px;
   }
 

@@ -3,9 +3,13 @@ import uploadUtils from '@/utils/uploadUtils'
 import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
+import themeUtils from '@/utils/themeUtils'
 
-export async function editorRouteHandler(_to: Route, _from: Route, next: NavigationGuardNext<Vue>) {
+export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
+    if (from.name === 'Home') {
+      themeUtils.setTemplateThemes([])
+    }
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       next({ name: 'Home', query: { isMobile: 'true' } })
       return
@@ -20,12 +24,14 @@ export async function editorRouteHandler(_to: Route, _from: Route, next: Navigat
     const designId = urlParams.get('design_id')
     const panelIndex = urlParams.get('panel_index')
     const url = urlParams.get('url')
-
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
         : await uploadUtils.getDesign(type, designId)
+    } else if (!url && from.name !== 'Home') {
+      themeUtils.refreshTemplateState()
     }
+
     if (panelIndex && +panelIndex in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', +panelIndex)
     }

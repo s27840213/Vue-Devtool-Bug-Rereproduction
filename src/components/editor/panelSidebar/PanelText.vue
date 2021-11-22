@@ -6,7 +6,8 @@
       :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
-    category-list(:list="list"
+    category-list(ref="list"
+      :list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
         div(class="text-center")
@@ -56,6 +57,11 @@ export default Vue.extend({
     CategoryList,
     CategoryListRows,
     CategoryTextItem
+  },
+  data() {
+    return {
+      scrollTop: 0
+    }
   },
   computed: {
     ...mapGetters({
@@ -127,9 +133,15 @@ export default Vue.extend({
     }
   },
   async mounted() {
+    (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
+    })
     await this.getCategories()
     this.getContent()
     this.loadDefaultFonts()
+  },
+  activated() {
+    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
   },
   destroyed() {
     this.resetContent()

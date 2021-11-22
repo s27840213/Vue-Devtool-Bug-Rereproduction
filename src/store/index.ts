@@ -26,124 +26,15 @@ import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
-import imageUtils from '@/utils/imageUtils'
+import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
+import unsplash from '@/store/module/photo'
 
 Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
-  pages: [
-    {
-      width: 1080,
-      height: 1080,
-      backgroundColor: '#ffffff',
-      backgroundImage: {
-        config: {
-          type: 'image',
-          srcObj: {
-            type: '',
-            userId: '',
-            assetId: ''
-          },
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          imgControl: false,
-          isClipper: false,
-          dragging: false,
-          designId: '',
-          styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1,
-            rotate: 0,
-            width: 0,
-            height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
-            zindex: -1,
-            opacity: 100,
-            horizontalFlip: false,
-            verticalFlip: false
-          }
-        },
-        posX: -1,
-        posY: -1
-      },
-      name: '',
-      layers: [
-      ],
-      documentColors: [],
-      designId: '',
-      guidelines: {
-        v: [],
-        h: []
-      }
-    },
-    {
-      width: 1080,
-      height: 1080,
-      backgroundColor: '#ffffff',
-      backgroundImage: {
-        config: {
-          type: 'image',
-          srcObj: {
-            type: '',
-            userId: '',
-            assetId: ''
-          },
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          imgControl: false,
-          isClipper: false,
-          dragging: false,
-          designId: '',
-          styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1,
-            rotate: 0,
-            width: 0,
-            height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
-            zindex: -1,
-            opacity: 100,
-            horizontalFlip: false,
-            verticalFlip: false
-          }
-        },
-        posX: -1,
-        posY: -1
-      },
-      name: '',
-      layers: [],
-      documentColors: [],
-      designId: '',
-      guidelines: {
-        v: [],
-        h: []
-      }
-    }
-  ],
+  pages: [pageUtils.newPage({})],
   designId: '',
   groupId: '',
   assetId: '',
@@ -316,6 +207,9 @@ const mutations: MutationTree<IEditorState> = {
       state.pages = pageUtils.newPages(newPages.pages)
       state.name = newPages.name
     }
+    // reset page index
+    state.lastSelectedPageIndex = 0
+    state.currActivePageIndex = -1
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
@@ -355,7 +249,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
     state.currSidebarPanelType = type
   },
-  SET_currFunctionPanelType(state: IEditorState, type: SidebarPanelType) {
+  SET_currFunctionPanelType(state: IEditorState, type: FunctionPanelType) {
     state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
@@ -588,16 +482,6 @@ const mutations: MutationTree<IEditorState> = {
       state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
     }
   },
-  UPDATE_selectedTextParagraphsProp(state: IEditorState, updateInfo: { tmpLayerIndex: number, props: { [key: string]: string | number } }) {
-    const pLeng = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs.length
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      for (let pIndex = 0; pIndex < pLeng; pIndex++) {
-        const p = ((state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs[pIndex]
-        p.styles[k] = v
-      }
-    })
-    state.currSelectedInfo.layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as ITmp).layers
-  },
   UPDATE_tmpLayersZindex(state: IEditorState) {
     const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].layers[state.currSelectedInfo.index] as ITmp
     tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
@@ -723,27 +607,8 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.name = '我的設計'
   },
-  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color:string, count: number }> }) {
-    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-    console.warn(state.pages[data.pageIndex].documentColors)
-  },
-  UPDATE_documentColors(state: IEditorState, data: { pageIndex: number, colors: [{ color: string, count: number }] }) {
-    const documentColors = state.pages[data.pageIndex].documentColors
-    data.colors
-      .forEach(e => {
-        const colorIdx = documentColors.findIndex(c => c.color === e.color)
-        if (colorIdx !== -1) {
-          documentColors[colorIdx].count += e.count
-          if (documentColors[colorIdx].count === 0) {
-            documentColors.splice(colorIdx, 1)
-          }
-        } else {
-          documentColors.push({
-            color: e.color,
-            count: e.count
-          })
-        }
-      })
+  UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
+    state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes
@@ -771,6 +636,7 @@ export default new Vuex.Store({
     design,
     page,
     homeTemplate,
-    hashtag
+    hashtag,
+    unsplash
   }
 })

@@ -5,7 +5,7 @@
     nu-adjust-image(v-if="isAdjustImage"
       :src="src"
       :styles="config.styles")
-    img(v-else class="nu-image__picture" :src="src")
+    img(v-else class="nu-image__picture" :src="src" @error="onError()")
 </template>
 
 <script lang="ts">
@@ -15,6 +15,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
+import { mapActions } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -25,11 +26,9 @@ export default Vue.extend({
   },
   created() {
     const { type } = this.config.srcObj
-
     const nextImg = new Image()
     nextImg.onerror = () => {
       if ((this.config as IImage).srcObj.type === 'pexels') {
-        console.log(this.config.srcObj.type)
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
         switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
           case 'group':
@@ -89,6 +88,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('user', ['updateImages']),
     styles() {
       const { styles } = this.config
       return {
@@ -106,6 +106,14 @@ export default Vue.extend({
         return 1080
       } else {
         return 1600
+      }
+    },
+    onError() {
+      console.log('image on error')
+      try {
+        this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+      } catch (error) {
+        console.log(error)
       }
     }
   }

@@ -97,6 +97,7 @@ export default function (this: any) {
     resetContent ({ commit }) {
       commit(SET_STATE, {
         content: {},
+        categories: [],
         keyword: '',
         page: 0,
         nextPage: 0

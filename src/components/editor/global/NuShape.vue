@@ -14,6 +14,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
+import { IShape } from '@/interfaces/layer'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -92,7 +93,7 @@ export default Vue.extend({
       }
       default: {
         if (!this.config.svg && this.config.designId) {
-          const shape = await shapeUtils.fetchSvg(this.config)
+          const shape = await shapeUtils.fetchSvg(this.config) as IShape
           shape.color = this.config.color
           shape.className = shapeUtils.classGenerator()
           Object.assign(this.config, shape)
@@ -210,6 +211,8 @@ export default Vue.extend({
       if (this.config.category === 'D') {
         return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
       }
+      // console.log(this.layerIndex)
+      // console.log(`0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`)
       return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {

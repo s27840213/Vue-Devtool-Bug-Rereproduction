@@ -45,8 +45,6 @@ import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
-import lineTest from '@/assets/json/line.json'
-import basicShapeTest from '@/assets/json/basic_shape.json'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
 import shapeUtils from '@/utils/shapeUtils'
@@ -133,7 +131,7 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
-            uploadUtils.setGroupDesign(0)
+            uploadUtils.uploadGroupDesign(0)
           }
         },
         {
@@ -142,7 +140,7 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
-            uploadUtils.setGroupDesign(1)
+            uploadUtils.uploadGroupDesign(1)
           }
         }
       ]
@@ -187,56 +185,45 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'Append test line',
-          shortcutText: 'Used for test',
+          text: 'update Doc',
+          shortcutText: '',
           action: () => {
-            const newLineTest: IShape = GeneralUtils.deepCopy(lineTest)
-            newLineTest.className = shapeUtils.classGenerator()
-            layerUtils.addLayers(this.lastSelectedPageIndex, [newLineTest])
+            this.$store.commit('user/UPDATE_IMAGE_URLS', {
+              assetId: 2783,
+              urls: {
+                prev: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                full: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                larg: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                original: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                midd: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
+                smal: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D'
+              }
+            })
           }
         },
         {
           icon: 'copy',
-          text: 'Append test ellipse',
-          shortcutText: 'Used for test',
+          text: 'append test layer',
+          shortcutText: '',
           action: () => {
-            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
-            newbasicShapeTest.className = shapeUtils.classGenerator()
-            newbasicShapeTest.shapeType = 'e'
-            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('e')
-            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 0]
-            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
-          }
-        },
-        {
-          icon: 'copy',
-          text: 'Append test rectangle',
-          shortcutText: 'Used for test',
-          action: () => {
-            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
-            newbasicShapeTest.className = shapeUtils.classGenerator()
-            newbasicShapeTest.shapeType = 'r'
-            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('r')
-            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
-            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
-          }
-        },
-        {
-          icon: 'copy',
-          text: 'Append test triangle',
-          shortcutText: 'Used for test',
-          action: () => {
-            const newbasicShapeTest: IShape = GeneralUtils.deepCopy(basicShapeTest)
-            newbasicShapeTest.className = shapeUtils.classGenerator()
-            newbasicShapeTest.shapeType = 't'
-            newbasicShapeTest.svg = shapeUtils.genBasicShapeSvgTemplate('t')
-            newbasicShapeTest.size = [newbasicShapeTest.size?.[0] ?? 0, 20]
-            const height = newbasicShapeTest.vSize?.[1] ?? 0
-            const width = height * 2 / Math.sqrt(3)
-            newbasicShapeTest.vSize = [width, height]
-            newbasicShapeTest.styles.width = width
-            newbasicShapeTest.styles.initWidth = width
-            layerUtils.addLayers(this.lastSelectedPageIndex, [newbasicShapeTest])
+            const config = {
+              srcObj: {
+                type: 'private',
+                userId: '',
+                assetId: 2783
+              },
+              styles: {
+                x: 250,
+                y: 250,
+                width: 500,
+                height: 400,
+                initWidth: 500,
+                initHeight: 400,
+                imgWidth: 500,
+                imgHeight: 400
+              }
+            }
+            layerUtils.addLayers(0, [layerFactary.newImage(config)])
           }
         }
       ]

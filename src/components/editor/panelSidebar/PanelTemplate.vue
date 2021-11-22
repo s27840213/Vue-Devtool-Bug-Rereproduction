@@ -1,5 +1,13 @@
 <template lang="pug">
   div(class="panel-template")
+    div(v-if="showPrompt"
+      class="panel-template__prompt body-2")
+      span ⬅️ 設計尺寸與模板尺寸不相同，可點選更新
+      svg-icon(class="pointer"
+        iconColor="gray-2"
+        iconName="close"
+        iconWidth="24px"
+        @click.native="handleClosePrompt")
     panel-group-template(v-if="currentGroup"
       :showId="showTemplateId"
       :groupItem="currentGroup"
@@ -23,10 +31,11 @@
           @change="handleTheme"
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
-    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
-    category-list(:list="list"
+    div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    category-list(ref="list"
+      :list="list"
       @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
+      template(v-if="!theme || pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
@@ -56,7 +65,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState, mapMutations } from 'vuex'
+import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -65,6 +74,7 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   components: {
@@ -78,8 +88,10 @@ export default Vue.extend({
   },
   data () {
     return {
+      showPrompt: false,
       showTheme: false,
-      currentGroup: null
+      currentGroup: null,
+      scrollTop: 0
     }
   },
   computed: {
@@ -95,7 +107,10 @@ export default Vue.extend({
         'theme'
       ]
     ),
-    ...mapState('user', ['role', 'adminMode']),
+    ...mapState('user', ['userId', 'role', 'adminMode']),
+    ...mapGetters({
+      currActivePageIndex: 'getCurrActivePageIndex'
+    }),
     showTemplateId (): boolean {
       return (this.role === 0) && this.adminMode
     },
@@ -141,22 +156,41 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
       return !pending && !listResult.length ? (keyword ? `Sorry, we couldn't find any templates for "${this.keyword}".` : 'Sorry, we couldn\'t find any templates') : ''
+    },
+    currPageThemeIds (): number[] {
+      const pageSize = themeUtils.getFocusPageSize()
+      return themeUtils
+        .getThemesBySize(pageSize.width, pageSize.height)
+        .map(theme => theme.id)
     }
   },
   async mounted() {
     const queryString = new URLSearchParams(window.location.search)
     const keyword = queryString.get('search')
-    this._setTemplateState({ theme: '' })
     if (keyword) {
       this.getTagContent({ keyword })
       window.history.replaceState({}, document.title, window.location.pathname)
-    } else {
-      await this.getCategories()
-      this.getContent()
     }
+    // await this.getCategories()
+    // this.getContent()
+    this.$refs.list.$el.addEventListener('scroll', (event: Event) => {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
+    })
   },
-  destroyed() {
-    this.resetContent()
+  activated() {
+    this.$refs.list.$el.scrollTop = this.scrollTop
+  },
+  watch: {
+    currPageThemeIds (curr: number[]) {
+      const { theme, userId } = this
+      if (theme && !sessionStorage[`${userId}_theme_prompt`]) {
+        const themes = theme.split(',')
+        const include = curr.some(id => themes.includes(`${id}`))
+        this.showPrompt = !include
+      } else {
+        this.showPrompt = false
+      }
+    }
   },
   methods: {
     ...mapActions('templates',
@@ -202,6 +236,12 @@ export default Vue.extend({
       this._setTemplateState({ theme })
       this.handleSearch(keyword)
       this.showTheme = false
+      this.showPrompt = false
+    },
+    handleClosePrompt() {
+      const { userId } = this
+      this.showPrompt = false
+      sessionStorage[`${userId}_theme_prompt`] = 'hidden'
     }
   }
 })
@@ -255,6 +295,30 @@ export default Vue.extend({
     right: 0;
     z-index: 1;
     background: rgba(0, 0, 0, .8);
+  }
+  &__prompt {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    right: -15px;
+    top: 10px;
+    padding: 8px;
+    line-height: 20px;
+    border-radius: 5px;
+    background-color: setColor(gray-4);
+    transform: translateX(100%);
+    &:before {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      position: absolute;
+      left: -8px;
+      top: 12px;
+      border-style: solid;
+      border-width: 8px 10px 8px 0;
+      border-color: transparent setColor(gray-4) transparent transparent;
+    }
   }
 }
 </style>

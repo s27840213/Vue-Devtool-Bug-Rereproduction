@@ -76,6 +76,8 @@ import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
+import { config } from 'vue/types/umd'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -112,11 +114,12 @@ export default Vue.extend({
     this.parentId = this.getPrimaryLayer.id as string
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -132,9 +135,6 @@ export default Vue.extend({
     },
     isActive(): boolean {
       return this.config.active
-    },
-    isShown(): boolean {
-      return this.config.shown
     },
     isLocked(): boolean {
       return this.config.locked
@@ -165,6 +165,12 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      if (val) {
+        // @todo
+        if (this.getCurrFunctionPanelType === FunctionPanelType.colorPicker && this.getLayerType === 'shape') {
+        // colorUtils.setCurrColor(this.getColors[index])
+        }
+      }
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {
@@ -172,11 +178,23 @@ export default Vue.extend({
             editing: false,
             isTyping: false
           })
-          TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
           this.contentEditable = false
           this.isControlling = false
+
+          if (this.currTextInfo.subLayerIndex === this.layerIndex) {
+            TextUtils.setCurrTextInfo({
+              config: LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup,
+              subLayerIndex: undefined
+            })
+          }
         }
+      } else {
+        TextUtils.setCurrTextInfo({
+          config: this.config as IText,
+          subLayerIndex: this.layerIndex
+        })
       }
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
       if (this.getLayerType === 'text') {
@@ -196,6 +214,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
+    // the condition indicates the primaryLayer transform from group-layer to tmp-layer
     if (this.getLayerType === 'text' && this.getPrimaryLayer && this.getPrimaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
@@ -255,6 +274,7 @@ export default Vue.extend({
       }
     },
     onMousedown() {
+      if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x
         this.posDiff.y = this.getPrimaryLayer.styles.y
@@ -286,7 +306,7 @@ export default Vue.extend({
         ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       const outline = (() => {
-        if ((this.isShown || this.isActive) && LayerUtils.getCurrLayer.type !== 'frame') {
+        if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
           if (this.config.type === 'tmp' || this.isControlling) {
             return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
           } else {
@@ -301,7 +321,7 @@ export default Vue.extend({
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline,
-        'pointer-events': (this.isActive || this.isShown) ? 'initial' : 'initial',
+        'pointer-events': (this.isActive) ? 'initial' : 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -526,7 +546,7 @@ export default Vue.extend({
       }
       // @TODO: the vertical kind pending
 
-      TextUtils.updateLayerSize(text, this.primaryLayerIndex, this.layerIndex, this.layerIndex)
+      TextUtils.updateLayerSize(text, this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
@@ -542,7 +562,7 @@ export default Vue.extend({
         }
         return
       }
-      if (this.getLayerType === 'text') {
+      if (this.getLayerType === 'text' && this.type === 'group') {
         this.textClickHandler(e)
       }
       this.$emit('clickSubController', this.layerIndex, this.config.type)

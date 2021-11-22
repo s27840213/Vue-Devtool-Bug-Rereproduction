@@ -4,6 +4,7 @@ import router from '@/router'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
+import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 
 interface Item {
@@ -502,8 +503,9 @@ class DesignUtils {
       height: height ?? 1080
     })])
     pageUtils.clearPagesInfo()
+    themeUtils.refreshTemplateState()
     if (this.isLogin) {
-      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       /**
        * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
        */

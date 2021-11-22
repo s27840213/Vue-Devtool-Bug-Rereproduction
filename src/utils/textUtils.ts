@@ -131,13 +131,13 @@ class TextUtils {
       .every((k: keyof ISelection) => start[k] === end[k])
   }
 
-  focus(start?: ISelection, end?: ISelection, subLayerIndex?: number) {
+  focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = LayerUtils.layerIndex) {
     let text: HTMLElement
     const range = new Range()
     if (typeof subLayerIndex !== 'undefined') {
-      text = document.getElementById(`text-sub-${LayerUtils.layerIndex}-${subLayerIndex}`) as HTMLElement
+      text = document.getElementById(`text-sub-${layerIndex}-${subLayerIndex}`) as HTMLElement
     } else {
-      text = document.getElementById(`text-${LayerUtils.layerIndex}`) as HTMLElement
+      text = document.getElementById(`text-${layerIndex}`) as HTMLElement
     }
 
     if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
@@ -174,20 +174,9 @@ class TextUtils {
         sel.addRange(range)
       }
     }
-    /**
-     * The reason to use setTimeout is because if not put the setSelection inside it,
-     * it will not set the single-caret to the desired position.
-     * However this problem will not happen in the situation of range-selection,
-     * in the other hand, in this situation put the setSelection in the setTimeout function will casue glitch.
-     * */
-    setSelection()
-    // if (async) {
-    //   setTimeout(() => {
-    //     setSelection()
-    //   }, 0)
-    // } else {
-    //   setSelection()
-    // }
+    setTimeout(() => {
+      setSelection()
+    }, 0)
   }
 
   isEmptyText(config: IText): boolean {
@@ -391,7 +380,7 @@ class TextUtils {
     return e.key.length !== 1
   }
 
-  isSel(sel?: { pIndex: number, sIndex: number, offset?: number }): boolean {
+  isSel(sel?: Partial<ISelection>): boolean {
     const isNotNull = (sel?.pIndex !== null) && (sel?.sIndex !== null)
     return typeof sel !== 'undefined' && (!Number.isNaN(sel.pIndex) && !Number.isNaN(sel.sIndex) && !Number.isNaN(sel.offset)) && isNotNull
   }
@@ -446,21 +435,18 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, layerIndex = LayerUtils.layerIndex,
-    subLayerIndex: number | undefined = undefined, targetIndex: number | undefined = undefined) {
+  updateLayerSize(config: IText, pageIndex: number, layerIndex = LayerUtils.layerIndex,
+    subLayerIndex: number | undefined = undefined) {
     const textHW = this.getTextHW(config, config.widthLimit)
-    const pageIndex = LayerUtils.pageIndex
     if (typeof subLayerIndex === 'undefined') {
       ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
     } else {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
-      if (subLayerIndex === (targetIndex ?? currLayer.layers.length - 1)) {
-        let { width, height } = calcTmpProps(currLayer.layers)
-        width *= currLayer.styles.scale
-        height *= currLayer.styles.scale
-        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
-      }
+      let { width, height } = calcTmpProps(currLayer.layers)
+      width *= currLayer.styles.scale
+      height *= currLayer.styles.scale
+      LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
     }
   }
 
@@ -554,6 +540,10 @@ class TextUtils {
       start,
       end
     })
+  }
+
+  setCurrTextInfo(data: { config?: IText | IGroup, layerIndex?: number, subLayerIndex?: number }) {
+    store.commit('text/SET_textInfo', data)
   }
 
   setSelectionDefault() {

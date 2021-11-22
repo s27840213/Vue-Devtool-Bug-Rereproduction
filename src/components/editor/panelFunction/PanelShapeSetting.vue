@@ -177,7 +177,7 @@ import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import controlUtils from '@/utils/controlUtils'
 import { ColorEventType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -298,7 +298,8 @@ export default Vue.extend({
       const layer = LayerUtils.getCurrLayer
       if (layer.type === 'shape') {
         return (layer as IShape).color
-      } else if (layer.type === 'group' || layer.type === 'tmp') {
+      }
+      if (layer.type === 'group' || layer.type === 'tmp') {
         const subSelectedIdx = (layer as IGroup).layers
           .findIndex(l => l.type === 'shape' && l.active)
 
@@ -345,8 +346,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _updateLayerProps: 'UPDATE_layerProps',
-      updateDocumentColors: 'UPDATE_documentColors'
+      _updateLayerProps: 'UPDATE_layerProps'
     }),
     ...mapActions('markers',
       [
@@ -415,6 +415,7 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     handleColorUpdate(color: string) {
+      console.log('update color')
       this.setColor(color, this.currSelectedColorIndex)
       const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
       if (record) {
@@ -422,8 +423,10 @@ export default Vue.extend({
       }
     },
     selectColor(index: number) {
-      this.$emit('toggleColorPanel', true)
       this.currSelectedColorIndex = index
+      console.log(this.getColors)
+      colorUtils.setCurrColor(this.getColors[index])
+      this.$emit('toggleColorPanel', true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
@@ -444,13 +447,6 @@ export default Vue.extend({
     },
     setColor(newColor: string, index: number) {
       stepsUtils.record()
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors: [
-          { color: newColor, count: 1 },
-          { color: this.getColors[this.currSelectedColorIndex], count: -1 }
-        ]
-      })
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const subSelectedIdx = (currLayer as IGroup).layers
@@ -468,7 +464,8 @@ export default Vue.extend({
           color[this.currSelectedColorIndex] = newColor
           LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, subSelectedIdx, { color })
         }
-      } else {
+      }
+      if (currLayer.type === 'shape') {
         const color = [...(currLayer as IShape).color]
         color[this.currSelectedColorIndex] = newColor
         const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)

@@ -13,7 +13,6 @@ import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
 import router from '@/router'
-import { DocColorHandler } from './colorUtils'
 
 class ShortcutUtils {
   get currSelectedPageIndex() {
@@ -305,19 +304,6 @@ class ShortcutUtils {
           return
         }
         break
-      case 'group':
-        currLayer = currLayer as IGroup
-        currLayer.layers
-          .forEach(l => {
-            if (l.type === 'text' || l.type === 'shape') {
-              DocColorHandler(l as IText | IShape)
-            }
-          })
-        break
-      default:
-        if (currLayer.type === 'text' || currLayer.type === 'shape') {
-          DocColorHandler(currLayer as IShape | IText)
-        }
     }
 
     LayerUtils.deleteSelectedLayer()

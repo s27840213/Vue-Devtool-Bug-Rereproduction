@@ -25,7 +25,7 @@ import { mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFont } from '@/interfaces/text'
+import { IFont, ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IText } from '@/interfaces/layer'
@@ -74,48 +74,84 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('text', {
-      updateState: 'UPDATE_STATE'
+      updateTextState: 'UPDATE_STATE'
     }),
     handleNotFound(event: Event) {
       (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      console.warn(this.item)
     },
     async setFont() {
       if (this.pending) return
+      try {
+        const fontStore = this.fontStore as Array<IFont>
+        const { config, layerIndex, subLayerIndex } = TextPropUtils.getTextInfo
+        const { type } = layerUtils.getCurrLayer
+        let { start, end } = generalUtils.deepCopy(this.sel)
 
-      const fontStore = this.fontStore as Array<IFont>
-      const { layer, primaryLayerIndex, layerIndex, pageIndex } = this.getCurrLayerInfo
-      let { start, end } = generalUtils.deepCopy(this.sel)
+        if (!fontStore.some(font => font.face === this.item.id)) {
+          this.updateTextState({ pending: this.item.id })
+          const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
 
-      if (!fontStore.some(font => font.face === this.item.id)) {
-        this.updateState({ pending: this.item.id })
-        const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
+          const load = newFont.load()
+            .then(newFont => {
+              document.fonts.add(newFont)
+              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+            })
+          await load
+        }
+        console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+        // if (!TextUtils.isSel(start) && config.type === 'text') {
+        //   start = TextUtils.selectAll(config as IText).start
+        //   end = TextUtils.selectAll(config as IText).end
+        // }
 
-        const load = newFont.load()
-          .then(newFont => {
-            document.fonts.add(newFont)
-            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
-          })
-        await load
+        const handler = (config: IText, start: ISelection, end: ISelection): {
+          config: IText,
+          start: ISelection,
+          end: ISelection
+        } => {
+          return {
+            config: TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText),
+            ...(generalUtils.deepCopy(this.sel) as { start: ISelection, end: ISelection })
+          }
+        }
+
+        if (type === 'text') {
+          const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          // TextUtils.focus(newStart, newEnd, layerIndex)
+        }
+
+        if (type === 'group' || type === 'tmp') {
+          if (typeof subLayerIndex === 'undefined') {
+            const layers = (config as IGroup).layers
+            layers.forEach((l, idx) => {
+              if (l.type === 'text') {
+                start = TextUtils.selectAll(l as IText).start
+                end = TextUtils.selectAll(l as IText).end
+                const { config: newConfig } = handler(l as IText, start, end)
+                layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs: newConfig.paragraphs })
+              }
+            })
+          }
+          if (typeof subLayerIndex === 'number') {
+            // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+            // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+            const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
+            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
+            // TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
+          }
+        }
+
+        // TextPropUtils.updateTextPropsState()
+        AssetUtils.addAssetToRecentlyUsed(this.item)
+        StepsUtils.record()
+      } finally {
+        this.updateTextState({ pending: '' })
+        const sel = window.getSelection()
+        if (sel) sel.removeAllRanges()
       }
-
-      if (!TextUtils.isSel(end)) {
-        start = TextUtils.selectAll(layer).start
-        end = TextUtils.selectAll(layer).end
-      }
-
-      const newConfig = TextPropUtils._spanPropertyHandler('fontFamily',
-        { font: this.item.id }, start, end, layer)
-
-      if (typeof primaryLayerIndex !== 'undefined') {
-        layerUtils.updateSubLayerProps(pageIndex, primaryLayerIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-      } else {
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-      }
-
-      TextPropUtils.updateTextPropsState({ font: this.item.id })
-      AssetUtils.addAssetToRecentlyUsed(this.item)
-      this.updateState({ pending: '' })
-      StepsUtils.record()
     },
     getFontUrl(fontID: string): string {
       console.log(fontID)

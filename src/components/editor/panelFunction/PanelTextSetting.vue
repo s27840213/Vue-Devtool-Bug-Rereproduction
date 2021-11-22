@@ -8,14 +8,14 @@
         span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-      div(class="property-bar relative")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(-1)"
-          :iconName="'minus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+      div(class="size-bar relative")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(-1)") -
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" :value="fontSize")
-        svg-icon(class="pointer" @mousedown.native="fontSizeStepping(1)"
-          :iconName="'plus'" :iconColor="'gray-2'" :iconWidth="'25px'")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(1)") +
         value-selector(v-if="openValueSelector"
                     :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
@@ -70,7 +70,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import { Layer } from 'konva/types/Layer'
 
@@ -94,7 +94,8 @@ export default Vue.extend({
         fontSpacing: { min: -200, max: 800 },
         opacity: { min: 0, max: 100 }
       },
-      fontSelectValue: fontSelectValue
+      fontSelectValue: fontSelectValue,
+      isOpenFontPanel: false
     }
   },
   mounted() {
@@ -113,10 +114,13 @@ export default Vue.extend({
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
-    TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+    if (!this.isOpenFontPanel) {
+      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    // ...mapState('text', ['currTextInfo']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -154,8 +158,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      updateDocumentColors: 'UPDATE_documentColors'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
     }),
     ...mapMutations('text', {
       setCurrTextInfo: 'SET_textInfo'
@@ -164,6 +167,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     openFontsPanel() {
+      this.isOpenFontPanel = true
       this.textInfoRecorder()
       this.$emit('openFontsPanel')
     },
@@ -181,59 +185,39 @@ export default Vue.extend({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-
       this.$emit('toggleColorPanel', true)
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
       let currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
-      const colors: Array<{ color: string, count: number }> = []
-      const colorCounter = (paragraphs: Array<IParagraph>, step: number) => {
-        paragraphs
-          .forEach(p => {
-            p.spans.forEach(s => {
-              const i = colors.findIndex(e => e.color === s.styles.color)
-              if (i !== -1) {
-                colors[i].count += step
-              } else {
-                colors.push({ color: s.styles.color, count: step })
-              }
-            })
-          })
-      }
 
-      if (currLayer.type !== 'group' && currLayer.type !== 'tmp') {
-        const isSelCollapse = (() => {
-          for (const [k, v] of Object.entries(this.sel.start)) {
-            if (this.sel.end[k] !== v) return false
-          }
-          return true
-        })()
+      if (currLayer.type === 'text') {
         currLayer = currLayer as IText
-        colorCounter(currLayer.paragraphs, -1)
-        TextPropUtils.spanPropertyHandler('color', color, this.sel.start, isSelCollapse ? nan : this.sel.end)
-        colorCounter(currLayer.paragraphs, 1)
-      } else {
-        const primaryLayer = currLayer as IGroup
-        for (let i = 0; i < primaryLayer.layers.length; i++) {
-          const layer = primaryLayer.layers[i] as IText
-          if (layer.type === 'text') {
-            colorCounter(layer.paragraphs, -1)
-            TextPropUtils.spanPropertyHandler('color', color, nan, nan, i)
-            colorCounter(layer.paragraphs, 1)
-          }
+        TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
+        if (!TextUtils.isSel(this.sel.end)) {
+          TextUtils.focus(this.sel.start, this.sel.end)
         }
       }
 
-      this.updateDocumentColors({
-        pageIndex: LayerUtils.pageIndex,
-        colors
-      })
-      TextPropUtils.updateTextPropsState({ color })
-      if (!TextUtils.isSel(this.sel.end)) {
-        TextUtils.focus(this.sel.start, this.sel.end)
+      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
+        const { config, subLayerIndex } = this.currTextInfo
+        const primaryLayer = currLayer as IGroup
+        if (typeof subLayerIndex === 'undefined') {
+          for (let i = 0; i < primaryLayer.layers.length; i++) {
+            const layer = primaryLayer.layers[i] as IText
+            if (layer.type === 'text') {
+              TextPropUtils._spanPropertyHandler('color', color, nan, nan, i)
+            }
+          }
+        } else {
+          TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
+          if (!TextUtils.isSel(this.sel.end)) {
+            TextUtils.focus(this.sel.start, this.sel.end, subLayerIndex)
+          }
+        }
       }
+      TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -254,7 +238,7 @@ export default Vue.extend({
           LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
         }, 0)
       } else {
-        TextPropUtils.spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
+        TextPropUtils._spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
       }
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
     },
@@ -301,18 +285,6 @@ export default Vue.extend({
       let start
       let end
       let subLayerIndex
-      if (!TextUtils.isSel(this.sel.start)) {
-        const sel = TextUtils.getSelection()
-        start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-        end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
-
-        if (!TextUtils.isSel(start) && currLayer.type === 'text') {
-          start = TextUtils.selectAll(config as IText).start
-          end = TextUtils.selectAll(config as IText).end
-        }
-        TextUtils.updateSelection(start, end)
-      }
-
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
         if (subLayerIndex !== -1) {
@@ -320,6 +292,18 @@ export default Vue.extend({
         } else {
           subLayerIndex = undefined
         }
+      }
+      console.log('start: p: ', this.sel.start.pIndex)
+      if (!TextUtils.isSel(this.sel.start)) {
+        const sel = TextUtils.getSelection()
+        start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+        end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+
+        if (!TextUtils.isSel(start) && config.type === 'text') {
+          start = TextUtils.selectAll(config as IText).start
+          end = TextUtils.selectAll(config as IText).end
+        }
+        TextUtils.updateSelection(start, end)
       }
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
@@ -347,7 +331,7 @@ export default Vue.extend({
         if (new Date().getTime() - startTime > 500) {
           try {
             this.fontSizeSteppingHandler(step)
-            TextUtils.updateLayerSize(config, LayerUtils.layerIndex, subLayerIndex)
+            TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -366,7 +350,6 @@ export default Vue.extend({
       }
 
       window.addEventListener('mouseup', onmouseup)
-      // TextUtils.updateLayerSize(LayerUtils.getCurrLayer as IText)
     },
     fontSizeSteppingHandler(step: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
@@ -453,7 +436,7 @@ export default Vue.extend({
               LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
             }, 0)
           } else {
-            TextPropUtils.spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
+            TextPropUtils._spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
           }
           TextPropUtils.updateTextPropsState({ fontSize: value })
         })
@@ -464,7 +447,7 @@ export default Vue.extend({
       if (this.isValidInt(value.toString())) {
         value = parseInt(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000, this.sel.start, this.sel.end)
+          TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000)
           TextPropUtils.updateTextPropsState({ fontSpacing: value })
         })
       }
@@ -476,7 +459,7 @@ export default Vue.extend({
       if (this.isValidInt(value.toString())) {
         value = parseInt(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value / 100).toFixed(2)), this.sel.start, this.sel.end)
+          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value / 100).toFixed(2)))
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value / 100).toFixed(2)) })
         })
       }
@@ -549,7 +532,7 @@ export default Vue.extend({
   &__row1 {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: auto 1fr;
     column-gap: 20px;
     box-sizing: border-box;
     position: relative;
@@ -647,7 +630,6 @@ export default Vue.extend({
 
 .center {
   text-align: center;
-  margin: auto;
 }
 
 .right {

@@ -6,6 +6,7 @@ import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { SrcObj } from '@/interfaces/gallery'
+import { IAssetPhoto } from '@/interfaces/api'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -28,7 +29,7 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage, size?: string | number) {
+  getSrc(config: IImage, size?: string | number): string {
     const { type, userId, assetId } = config.srcObj || config.src_obj
     if (typeof size === 'undefined') {
       size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
@@ -36,9 +37,25 @@ class ImageUtils {
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
-      case 'private':
-        // TODO: not have specific definition yet.
-        return `https://d28vpyd7xcfiwl.cloudfront.net/${assetId}/*`
+      case 'private': {
+        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+        const img = images.find(img => img.assetIndex === assetId)
+        if (img) {
+          for (const [k, v] of Object.entries(img.urls)) {
+            if (k === size) return v
+          }
+        } else {
+          store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+            .then(() => {
+              return this.getSrc(config, size)
+            })
+            .catch((error) => {
+              console.log(error + ', assetId: ' + assetId)
+              return ''
+            })
+        }
+        return ''
+      }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`
       case 'pexels':
@@ -70,12 +87,9 @@ class ImageUtils {
   getSrcType(src: string) {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
-    // TODO:
-    if (src.includes('vivipic')) {
-      return 'public'
-    } else {
-      return 'private'
-    }
+    if (src.includes('template.vivipic')) return 'public'
+    if (src.includes('asset.vivipic')) return 'private'
+    return ''
   }
 
   getUserId(src: string, type: string) {
@@ -114,6 +128,8 @@ class ImageUtils {
         const keyStart = 'background/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
       }
+      case 'private':
+        return src
       default:
         return ''
     }
@@ -121,28 +137,30 @@ class ImageUtils {
 
   setImgControlDefault() {
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
-    switch (currLayer.type) {
-      case 'image':
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
-        break
-      case 'group': {
-        const primaryLayer = currLayer as IGroup
-        for (let i = 0; i < primaryLayer.layers.length; i++) {
-          const props = {
-            active: false
-          } as { [key: string]: boolean | string | number }
+    if (currLayer) {
+      switch (currLayer.type) {
+        case 'image':
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
+          break
+        case 'group': {
+          const primaryLayer = currLayer as IGroup
+          for (let i = 0; i < primaryLayer.layers.length; i++) {
+            const props = {
+              active: false
+            } as { [key: string]: boolean | string | number }
 
-          if (primaryLayer.layers[i].type === 'image') {
-            props.imgControl = false
+            if (primaryLayer.layers[i].type === 'image') {
+              props.imgControl = false
+            }
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }
-          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+          break
         }
-        break
-      }
-      case 'frame': {
-        const primaryLayer = currLayer as IFrame
-        for (let i = 0; i < primaryLayer.clips.length; i++) {
-          FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+        case 'frame': {
+          const primaryLayer = currLayer as IFrame
+          for (let i = 0; i < primaryLayer.clips.length; i++) {
+            FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+          }
         }
       }
     }
