@@ -609,6 +609,7 @@ const mutations: MutationTree<IEditorState> = {
     state.assetId = ''
     state.groupId = ''
     state.name = '我的設計'
+    state.pages = []
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
