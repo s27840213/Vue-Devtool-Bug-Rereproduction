@@ -49,6 +49,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import textUtils from '@/utils/textUtils'
 import layerUtils from '@/utils/layerUtils'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -89,9 +90,11 @@ export default Vue.extend({
   },
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setCurrFunctionPanel(FunctionPanelType.colorPicker)
   },
   destroyed() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setCurrFunctionPanel(FunctionPanelType.none)
   },
   computed: {
     ...mapGetters({
@@ -108,7 +111,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateDocumentColors: 'UPDATE_documentColors'
+      updateDocumentColors: 'UPDATE_documentColors',
+      setCurrFunctionPanel: 'SET_currFunctionPanelType'
     }),
     colorStyles(color: string) {
       return {

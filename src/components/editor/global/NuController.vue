@@ -573,7 +573,8 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
+            // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
+            if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedPageIndex(this.pageIndex)
@@ -590,6 +591,7 @@ export default Vue.extend({
             }
             return
           }
+
           this.contentEditable = true
           break
         }
@@ -599,7 +601,6 @@ export default Vue.extend({
             return
           }
       }
-
       this.initTranslate = this.getLayerPos
       if (!this.config.locked && !inSelectionMode) {
         this.isControlling = true
@@ -667,9 +668,6 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
-        // if (this.getLayerType === 'image') {
-        //   (this.$refs.body as HTMLElement).style.pointerEvents = 'none'
-        // }
       }
     },
     imgHandler(offset: ICoordinate) {

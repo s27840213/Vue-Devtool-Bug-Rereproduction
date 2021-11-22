@@ -77,6 +77,7 @@ import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
 import { config } from 'vue/types/umd'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -117,7 +118,8 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       scaleRatio: 'getPageScaleRatio',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -163,6 +165,12 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      if (val) {
+        // @todo
+        if (this.getCurrFunctionPanelType === FunctionPanelType.colorPicker && this.getLayerType === 'shape') {
+        // colorUtils.setCurrColor(this.getColors[index])
+        }
+      }
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {

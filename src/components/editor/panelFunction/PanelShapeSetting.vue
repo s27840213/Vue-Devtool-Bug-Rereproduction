@@ -298,7 +298,8 @@ export default Vue.extend({
       const layer = LayerUtils.getCurrLayer
       if (layer.type === 'shape') {
         return (layer as IShape).color
-      } else if (layer.type === 'group' || layer.type === 'tmp') {
+      }
+      if (layer.type === 'group' || layer.type === 'tmp') {
         const subSelectedIdx = (layer as IGroup).layers
           .findIndex(l => l.type === 'shape' && l.active)
 
@@ -414,6 +415,7 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     handleColorUpdate(color: string) {
+      console.log('update color')
       this.setColor(color, this.currSelectedColorIndex)
       const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
       if (record) {
@@ -422,6 +424,7 @@ export default Vue.extend({
     },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
+      console.log(this.getColors)
       colorUtils.setCurrColor(this.getColors[index])
       this.$emit('toggleColorPanel', true)
     },

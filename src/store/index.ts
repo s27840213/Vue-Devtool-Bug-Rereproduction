@@ -248,7 +248,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
     state.currSidebarPanelType = type
   },
-  SET_currFunctionPanelType(state: IEditorState, type: SidebarPanelType) {
+  SET_currFunctionPanelType(state: IEditorState, type: FunctionPanelType) {
     state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
