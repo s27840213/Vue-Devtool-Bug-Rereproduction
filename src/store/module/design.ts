@@ -1034,10 +1034,10 @@ const mutations: MutationTree<IDesignState> = {
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {
-    Vue.set(state.selectedDesigns, design.id, design)
+    Vue.set(state.selectedDesigns, design.asset_index.toString(), design)
   },
   UPDATE_removeFromSelection(state: IDesignState, design: IDesign) {
-    Vue.delete(state.selectedDesigns, design.id)
+    Vue.delete(state.selectedDesigns, design.asset_index.toString())
   },
   UPDATE_addFolderToSelection(state: IDesignState, folder: IFolder) {
     Vue.set(state.selectedFolders, folder.id, folder)
