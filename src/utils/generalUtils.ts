@@ -1,4 +1,7 @@
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import modalUtils from './modalUtils'
+import pageUtils from './pageUtils'
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
 
@@ -13,6 +16,10 @@ class GeneralUtils {
 
   deepCopy(el: unknown) {
     return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
+  }
+
+  objHasOwnProperty(obj: { [index: string]: any }, property: string) {
+    return Object.prototype.hasOwnProperty.call(obj, property)
   }
 
   exact(conditions: Array<boolean>): boolean {
@@ -102,6 +109,19 @@ class GeneralUtils {
 
   fixSize(size: number) {
     return size * (100 / this.scaleRatio)
+  }
+
+  test() {
+    const modifiedPageIndex = [] as Array<number>
+    const pages = pageUtils.getPages
+    pages.forEach((page: IPage, index: number) => {
+      if (page.modified) {
+        modifiedPageIndex.push(index)
+      }
+    })
+    console.log(pages)
+    modalUtils.setIsModalOpen(true)
+    modalUtils.setModalInfo('測試', [`修改過的 templates: ${modifiedPageIndex.join(' ')}`, `數量: ${modifiedPageIndex.length}`])
   }
 
   // log(params: string, data: any = '') {

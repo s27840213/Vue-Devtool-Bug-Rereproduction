@@ -175,6 +175,8 @@ class PageUtils {
       pagesTmp[index] = json
       store.commit('SET_pages', pagesTmp)
     }
+
+    console.log('Update spec page')
   }
 
   startBackgroundImageControl(pageIndex: number): void {

@@ -133,7 +133,9 @@ export interface IListServiceContentDataItem {
   height?: number
   title?: string
   description?: string
-  content_ids?: IListServiceContentDataItem[]
+  content_ids?: IListServiceContentDataItem[],
+  group_id?: string,
+  group_type?: string
 }
 
 export interface IListServiceContentData {

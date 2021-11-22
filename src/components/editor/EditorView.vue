@@ -187,7 +187,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio'
     }),

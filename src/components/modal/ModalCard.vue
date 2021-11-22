@@ -4,7 +4,9 @@
       span {{modalInfo.title}}
     div(class="modal-card__content f-h5 text-gray-1 mb-20")
       template(v-if="!pending")
-        span(v-for="text  in modalInfo.content") {{text}}
+        span(v-for="text in modalInfo.content"
+        @keydown.ctrl.67.exact.stop
+        @keydown.meta.67.exact.stop) {{text}}
       svg-icon(v-if="pending"
         :iconName="'loading'"
         :iconColor="'gray-2'"
@@ -76,7 +78,6 @@ export default Vue.extend({
     // align-items: flex-start;
     > span:nth-child(n + 1) {
       margin-bottom: 4px;
-      user-select: text;
     }
   }
 

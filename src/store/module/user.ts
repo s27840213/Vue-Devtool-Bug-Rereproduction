@@ -299,9 +299,14 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.groupDesign(params)
       const { flag, msg } = data
+      const isDelete = params.list?.length === 0 && params.update === 1
       modalUtils.setIsModalOpen(true)
       if (flag === 0) {
-        modalUtils.setModalInfo('上傳成功', [`Group ID: ${params.group_id}`])
+        if (!isDelete) {
+          modalUtils.setModalInfo('上傳成功', [`Group ID: ${params.group_id}`])
+        } else {
+          modalUtils.setModalInfo('刪除成功', [])
+        }
         console.log(`Success: ${params.group_id}}`)
       } else if (flag === 1) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
@@ -418,7 +423,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   async updateImages({ state, commit }, { assetSet }) {
     const { token } = state
     const { data } = await userApis.getAssets(token, { asset_list: assetSet })
-    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string }}
+    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     if (urlSet) {
       for (const [assetId, urls] of Object.entries(urlSet)) {
         commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
