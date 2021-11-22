@@ -420,33 +420,34 @@ export default Vue.extend({
     },
     addPage() {
       const page = GeneralUtils.deepCopy(layerUtils.getPage(this.pageIndex)) as IPage
-      console.log(GeneralUtils.deepCopy(this.currSelectedInfo))
       // const { layers, types, index } = this.currSelectedInfo as ICurrSelectedInfo
       const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
 
       layerUtils.updateLayerProps(pageIndex, layerIndex, { active: false, shown: false })
-      switch (currLayer.type) {
-        case 'tmp':
-          GroupUtils.deselect()
-          break
-        case 'group':
-          (currLayer as IGroup).layers
-            .forEach((l, idx) => {
-              if (l.active) {
-                layerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, {
-                  active: false,
-                  shown: false,
-                  ...(l.type === 'image' && { imgControl: false })
-                })
-              }
-            })
-          break
-        case 'frame':
-          (currLayer as IFrame).clips
-            .forEach((img, idx) => {
-              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, idx, { active: false, shown: false, imgControl: false })
-            })
-          break
+      if (currLayer) {
+        switch (currLayer.type) {
+          case 'tmp':
+            GroupUtils.deselect()
+            break
+          case 'group':
+            (currLayer as IGroup).layers
+              .forEach((l, idx) => {
+                if (l.active) {
+                  layerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, {
+                    active: false,
+                    shown: false,
+                    ...(l.type === 'image' && { imgControl: false })
+                  })
+                }
+              })
+            break
+          case 'frame':
+            (currLayer as IFrame).clips
+              .forEach((img, idx) => {
+                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, idx, { active: false, shown: false, imgControl: false })
+              })
+            break
+        }
       }
 
       this.setPanelType(FunctionPanelType.none)
