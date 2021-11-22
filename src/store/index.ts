@@ -29,6 +29,7 @@ import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
+import unsplash from '@/store/module/photo'
 
 Vue.use(Vuex)
 
@@ -635,6 +636,7 @@ export default new Vuex.Store({
     design,
     page,
     homeTemplate,
-    hashtag
+    hashtag,
+    unsplash
   }
 })

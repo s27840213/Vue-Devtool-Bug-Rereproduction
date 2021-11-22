@@ -180,9 +180,6 @@ export default Vue.extend({
   activated() {
     this.$refs.list.$el.scrollTop = this.scrollTop
   },
-  beforeDestroy() {
-    this.$refs.list.$el.removeEventListener('scroll')
-  },
   watch: {
     currPageThemeIds (curr: number[]) {
       const { theme, userId } = this

@@ -553,7 +553,6 @@ class DesignUtils {
       width: width ?? 1080,
       height: height ?? 1080
     })])
-    store.commit('SET_lastSelectedPageIndex', 0)
     pageUtils.clearPagesInfo()
     themeUtils.refreshTemplateState()
     if (this.isLogin) {
