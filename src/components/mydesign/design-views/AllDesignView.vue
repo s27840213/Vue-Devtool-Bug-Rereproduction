@@ -2,23 +2,26 @@
   div(class="all-design-view")
     div(class="all-design-view__folder-name") 我所有設計
     div(class="horizontal-rule")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :noHeader="true"
+    design-gallery(:noHeader="true"
                   :menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction")
+                  @menuAction="handleDesignMenuAction"
+                  @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
 export default Vue.extend({
   components: {
     DesignGallery
+  },
+  mounted() {
+    designUtils.fetchDesigns(this.fetchAllDesigns)
   },
   data() {
     return {
@@ -33,21 +36,24 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      allDesigns: 'getAllDesigns'
     }),
-    allDesigns() {
-      const designs = designUtils.getAllDesigns(this.folders)
-      designUtils.sortDesignsBy(designs, 'time', true)
-      return designs.map((item) => [item.path, item.design])
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchAllDesigns: 'fetchAllDesigns',
+      fetchMoreAllDesigns: 'fetchMoreAllDesigns'
+    }),
     handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
+    },
+    handleLoadMore() {
+      designUtils.fetchDesigns(this.fetchMoreAllDesigns, false)
     }
   }
 })

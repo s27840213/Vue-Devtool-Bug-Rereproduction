@@ -1,28 +1,25 @@
 export interface IDesign {
   id: string,
+  asset_index: number,
   name: string,
   width: number,
   height: number,
   thumbnail: string,
-  createdTime: number,
-  lastUpdatedTime: number
+  createdTime: string,
+  lastUpdatedTime: string,
+  favorite: boolean,
+  ver: number
 }
 
 export interface IFolder {
   id: string,
   name: string,
   author: string,
-  createdTime: number,
-  lastUpdatedTime: number,
+  createdTime: string,
+  lastUpdatedTime: string,
   isExpanded: boolean,
   isCurrLocation: boolean,
-  subFolders: IFolder[],
-  designs: IDesign[]
-}
-
-export interface IPathedDesign {
-  design: IDesign,
-  path: string[]
+  subFolders: IFolder[]
 }
 export interface IPathedFolder {
   parents: string[],
@@ -31,5 +28,6 @@ export interface IPathedFolder {
 
 export interface IQueueItem {
   type: 'design' | 'folder' | 'multi',
-  data: IPathedDesign | IPathedFolder | undefined
+  data: IDesign | IFolder | undefined,
+  dest?: string
 }

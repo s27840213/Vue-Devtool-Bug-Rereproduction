@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="folder-gallery")
+  div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
     div(v-if="allFolders.length > 0" class="folder-gallery__header")
       div(class="folder-gallery__expand-icon-container"
           @click="toggleExpansion")
@@ -11,8 +11,8 @@
       div(class="folder-gallery__title")
         span 資料夾
     div(v-if="isExpanded" class="folder-gallery__folders")
-      folder-item(v-for="[parents, folder] in allFolders"
-                  :path="parents"
+      folder-item(v-for="folder in allFolders"
+                  :path="path"
                   :config="folder"
                   @goto="handleGotoFolder(folder.id)"
                   :undraggable="limitFunctions"
@@ -22,10 +22,10 @@
                   :isAnySelected="isAnySelected"
                   :menuItemNum="menuItemSlots.length"
                   @moveItem="handleMoveItem"
-                  @select="selectFolder(parents, folder)"
-                  @deselect="deselectFolder(parents, folder)")
+                  @select="selectFolder(folder)"
+                  @deselect="deselectFolder(folder)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, parents, folder)")
+          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, folder)")
             div(class="folder-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -36,6 +36,10 @@
               svg-icon(iconName="chevron-right"
                       iconWidth="10px"
                       iconColor="gray-2")
+    div(v-if="isExpanded && isFoldersLoading" class="folder-gallery__loading")
+      svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
 </template>
 
 <script lang="ts">
@@ -66,7 +70,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      isFoldersLoading: 'getIsFoldersLoading'
     }),
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
@@ -85,22 +90,24 @@ export default Vue.extend({
     expansionIconStyles() {
       return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
-    handleFolderMenuAction(icon: string, parents: string[], folder: IFolder) {
+    handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchFolderMenuAction(icon, parents, folder)
-      if (extraEvent) {
-        this.$emit('menuAction', extraEvent)
-      }
+      designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+      })
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
     handleGotoFolder(id: string) {
+      if (this.currLocation === 't') return
+      this.setCurrLocation(`${this.currLocation}/${id}`)
       this.setExpand({
         path: this.path,
         isExpanded: true
       })
-      this.setCurrLocation(`${this.currLocation}/${id}`)
     },
     toggleExpansion() {
       this.isExpanded = !this.isExpanded
@@ -108,13 +115,13 @@ export default Vue.extend({
     checkFolderSelected(id: string): boolean {
       return !!this.selectedFolders[id] && this.selectable
     },
-    selectFolder(parents: string[], folder: IFolder) {
+    selectFolder(folder: IFolder) {
       if (!this.selectable) return
-      this.addFolderToSelection({ parents, folder })
+      this.addFolderToSelection(folder)
     },
-    deselectFolder(parents: string[], folder: IFolder) {
+    deselectFolder(folder: IFolder) {
       if (!this.selectable) return
-      this.removeFolderFromSelection({ parents, folder })
+      this.removeFolderFromSelection(folder)
     }
   }
 })
@@ -155,6 +162,11 @@ export default Vue.extend({
     display: flex;
     gap: 30px;
     margin-bottom: 45px;
+  }
+  &__loading {
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 }
 </style>

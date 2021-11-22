@@ -1,6 +1,6 @@
 <template lang="pug">
-  div(class="design-gallery")
-    div(v-if="!noHeader" class="design-gallery__header")
+  div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
+    div(v-if="!noHeader && allDesigns.length > 0" class="design-gallery__header")
       div(class="design-gallery__expand-icon-container"
           @click="toggleExpansion")
         svg-icon(:style="expansionIconStyles()"
@@ -11,23 +11,21 @@
       div(class="design-gallery__title")
         span 設計
     div(v-if="isExpanded" class="design-gallery__designs")
-      design-item(v-for="[path, design] in allDesigns"
+      design-item(v-for="design in allDesigns"
                   :key="design.id"
-                  :path="path"
                   :config="design"
                   :favorable="!limitFunctions"
                   :undraggable="limitFunctions"
                   :nameIneditable="limitFunctions"
-                  :isInFavorites="checkFavorite(design.id)"
                   :isSelected="checkSelected(design.id)"
                   :isAnySelected="isAnySelected"
                   :isMultiSelected="isMultiSelected"
                   :menuItemNum="menuItemSlots.length"
-                  @like="toggleFavorite(path, design)"
-                  @select="selectDesign(path, design)"
-                  @deselect="deselectDesign(path, design)")
+                  @like="toggleFavorite(design)"
+                  @select="selectDesign(design)"
+                  @deselect="deselectDesign(design)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, path, design)")
+          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
             div(class="design-menu-item__icon")
               svg-icon(:iconName="menuItemSlot.icon"
                       iconWidth="10px"
@@ -38,18 +36,26 @@
               svg-icon(iconName="chevron-right"
                       iconWidth="10px"
                       iconColor="gray-2")
+    div(v-if="isExpanded && isDesignsLoading" class="design-gallery__loading")
+      svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
+    observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
+                      @callback="handleLoadMore")
 </template>
 
 <script lang="ts">
-import { IDesign, IPathedDesign } from '@/interfaces/design'
+import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default Vue.extend({
   components: {
-    DesignItem
+    DesignItem,
+    ObserverSentinel
   },
   data() {
     return {
@@ -67,11 +73,10 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      isDesignsLoading: 'getIsDesignsLoading',
+      designsPageIndex: 'getDesignsPageIndex'
     }),
-    favoriteIds(): string[] {
-      return this.favoriteDesigns.map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
@@ -89,9 +94,6 @@ export default Vue.extend({
       addToFavorite: 'UPDATE_addToFavorite',
       removeFromFavorite: 'UPDATE_removeFromFavorite'
     }),
-    checkFavorite(id: string): boolean {
-      return this.favoriteIds.includes(id)
-    },
     checkSelected(id: string): boolean {
       return !!this.selectedDesigns[id]
     },
@@ -101,29 +103,29 @@ export default Vue.extend({
     toggleExpansion() {
       this.isExpanded = !this.isExpanded
     },
-    handleDesignMenuAction(icon: string, path: string[], design: IDesign) {
+    handleDesignMenuAction(icon: string, design: IDesign) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
-      const extraEvent = designUtils.dispatchDesignMenuAction(icon, path, design)
-      if (extraEvent) {
-        this.$emit('menuAction', extraEvent)
-      }
+      designUtils.dispatchDesignMenuAction(icon, design, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+      })
     },
-    toggleFavorite(path: string[], design: IDesign) {
-      const payload = {
-        path,
-        design
-      }
-      if (this.checkFavorite(design.id)) {
-        this.removeFromFavorite(payload)
+    handleLoadMore() {
+      this.$emit('loadMore')
+    },
+    toggleFavorite(design: IDesign) {
+      if (design.favorite) {
+        designUtils.removeFromFavorite(design)
       } else {
-        this.addToFavorite(payload)
+        designUtils.addToFavorite(design)
       }
     },
-    selectDesign(path: string[], design: IDesign) {
-      this.addToSelection({ path, design })
+    selectDesign(design: IDesign) {
+      this.addToSelection(design)
     },
-    deselectDesign(path: string[], design: IDesign) {
-      this.removeFromSelection({ path, design })
+    deselectDesign(design: IDesign) {
+      this.removeFromSelection(design)
     }
   }
 })
@@ -175,6 +177,11 @@ export default Vue.extend({
     @media(min-width: 1560px) {
       grid-template-columns: repeat(6, minmax(0, 1fr));
     }
+  }
+  &__loading {
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 }
 </style>

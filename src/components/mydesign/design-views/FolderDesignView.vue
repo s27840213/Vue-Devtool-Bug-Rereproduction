@@ -17,7 +17,7 @@
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
               @click="handleFolderNameClick")
-          span {{ folder.name }}
+          span {{ folderName }}
           svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
@@ -37,7 +37,7 @@
           span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
           span(class="folder-design-view__path__text") {{ ' > ' }}
           span(class="folder-design-view__path__text") {{ ' ' }}
-        span(class="folder-design-view__path__node") {{ folder.name }}
+        span(class="folder-design-view__path__node") {{ folderName }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more"
             @click="toggleFolderMenu"
@@ -52,9 +52,9 @@
               class="folder-design-view__more__menu"
               @click.stop)
             div(class="folder-design-view__more__menu__title")
-              span {{ folder.name }}
+              span {{ folderName }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 ${folder.author} 創作 | ${designs.length}個項目` }}
+              span {{ `由 ${folder ? folder.author : ''} 創作 | ${allDesigns.length}個項目` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -104,19 +104,18 @@
                         iconWidth="15px"
                         iconColor="gray-2")
     div(class="horizontal-rule")
-    folder-gallery(v-if="allFolders.length > 0"
-                  :path="path"
+    folder-gallery(:path="path"
                   :menuItems="[]"
                   :allFolders="allFolders"
                   :selectedNum="selectedNum"
                   @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :menuItems="menuItems"
+    design-gallery(:menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction")
-    div(v-if="isEmpty" class="folder-design-view__empty")
+                  @menuAction="handleMenuAction"
+                  @loadMore="handleLoadMore")
+    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span(class="folder-design-view__empty__text") 此資料夾是空的
 </template>
@@ -124,18 +123,19 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
+import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+    this.refreshFolders()
+    this.refreshDesigns()
   },
   components: {
     FolderGallery,
@@ -151,8 +151,6 @@ export default Vue.extend({
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
-      sortByField: 'name',
-      sortByDescending: false,
       sortMenuItems: [
         {
           icon: 'chevron-duo-left',
@@ -170,13 +168,13 @@ export default Vue.extend({
           icon: 'clock',
           style: '',
           text: '修改日期 ( 新到舊 )',
-          payload: ['time', true]
+          payload: ['update', true]
         },
         {
           icon: 'clock',
           style: '',
           text: '修改日期 ( 舊到新 )',
-          payload: ['time', false]
+          payload: ['update', false]
         }
       ]
     }
@@ -192,13 +190,21 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
+      this.refreshDesigns()
+      this.refreshFolders()
     }
   },
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      allDesigns: 'getAllDesigns',
+      allFolders: 'getAllFolders',
+      sortByField: 'getSortByField',
+      sortByDescending: 'getSortByDescending',
+      isDesignsLoading: 'getIsDesignsLoading',
+      isFoldersLoading: 'getIsFoldersLoading'
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
@@ -214,36 +220,29 @@ export default Vue.extend({
       const parentNames = designUtils.getFolderNames(this.folders, this.parents)
       return parentNames.slice(1)
     },
-    designs(): IDesign[] {
-      const designs = generalUtils.deepCopy(this.folder.designs)
-      designUtils.sortDesignsBy(designs, this.sortByField, this.sortByDescending)
-      return designs
-    },
-    allDesigns(): ([string[], IDesign])[] {
-      return (this.designs as IDesign[]).map((design) => [this.path, design])
-    },
-    subFolders(): IFolder[] {
-      const subFolders = generalUtils.deepCopy(this.folder.subFolders)
-      designUtils.sortFoldersBy(subFolders, this.sortByField, this.sortByDescending)
-      return subFolders
-    },
-    allFolders(): ([string[], IFolder])[] {
-      return (this.subFolders as IFolder[]).map((subFolder) => [this.path, subFolder])
+    folderName(): string {
+      return this.folder?.name ?? '...'
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     },
     isEmpty(): boolean {
-      return this.folder.subFolders.length + this.designs.length === 0
+      return this.allFolders.length + this.allDesigns.length === 0
     },
     newFolderColor(): string {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFolderDesigns: 'fetchFolderDesigns',
+      fetchFolderFolders: 'fetchFolderFolders',
+      fetchMoreFolderDesigns: 'fetchMoreFolderDesigns'
+    }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
-      setFolderName: 'UPDATE_folderName'
+      setSortByField: 'SET_sortByField',
+      setSortByDescending: 'SET_sortByDescending'
     }),
     newFolderStyles() {
       return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
@@ -259,7 +258,7 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
     },
     handleFolderNameClick() {
-      this.editableFolderName = this.folder.name
+      this.editableFolderName = this.folderName
       this.isFolderNameEditing = true
       this.isFolderMenuOpen = false
       this.$nextTick(() => {
@@ -270,12 +269,9 @@ export default Vue.extend({
     handleFolderNameEditEnd() {
       this.isFolderNameEditing = false
       this.isFolderNameMouseOver = false
-      if (this.editableFolderName === '' || this.editableFolderName === this.folder.name) return
+      if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
-      this.setFolderName({
-        path: this.path,
-        newFolderName: this.editableFolderName
-      })
+      designUtils.setFolderName(this.folder, this.editableFolderName)
     },
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
@@ -291,7 +287,7 @@ export default Vue.extend({
       })
     },
     handleNewFolder() {
-      const folderId = designUtils.addNewFolder(this.path)
+      const folderId = designUtils.addNewFolder(this.path, true)
       this.$nextTick(() => {
         const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
         if (folderItemName) {
@@ -300,14 +296,23 @@ export default Vue.extend({
       })
     },
     handleSortByClick(payload: [string, boolean]) {
-      this.sortByField = payload[0]
-      this.sortByDescending = payload[1]
+      this.setSortByField(payload[0])
+      this.setSortByDescending(payload[1])
+      this.refreshDesigns()
+      this.refreshFolders()
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
+    handleLoadMore() {
+      designUtils.fetchDesigns(async () => {
+        await this.fetchMoreFolderDesigns({
+          path: this.path.slice(1).join(',')
+        })
+      }, false)
+    },
     checkFolderNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter' && this.editableFolderName === this.folder.name) {
+      if (e.key === 'Enter' && this.editableFolderName === this.folderName) {
         this.handleFolderNameEditEnd()
       }
       this.checkNameLength()
@@ -339,6 +344,20 @@ export default Vue.extend({
     },
     closeSortMenu() {
       this.isSortMenuOpen = false
+    },
+    refreshDesigns() {
+      designUtils.fetchDesigns(async () => {
+        await this.fetchFolderDesigns({
+          path: this.path.slice(1).join(',')
+        })
+      })
+    },
+    refreshFolders() {
+      designUtils.fetchFolders(async () => {
+        await this.fetchFolderFolders({
+          path: this.path.slice(1).join(',')
+        })
+      })
     }
   }
 })
@@ -512,6 +531,7 @@ export default Vue.extend({
       background: white;
       box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
       border-radius: 2px;
+      z-index: 1;
       &__title {
         margin-top: 13px;
         margin-left: 8px;

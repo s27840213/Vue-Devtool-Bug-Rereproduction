@@ -66,9 +66,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -124,7 +124,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations('design', {
       setDraggingFolder: 'SET_draggingFolder',
-      setFolderName: 'UPDATE_folderName'
+      removeFolder: 'UPDATE_removeFolder',
+      deleteFolder: 'UPDATE_deleteFolder'
     }),
     emitGoto() {
       this.$emit('goto')
@@ -200,29 +201,32 @@ export default Vue.extend({
       if (this.folderUndroppable() || this.undroppable || this.isDragged) return
       const destination = designUtils.appendPath(this.path as string[], this.config as IFolder)
       if (this.draggingType === 'design') {
-        const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+        const design = this.draggingDesign as IDesign | undefined
         if (!design) return
         if (this.isMultiSelected && this.selectedDesigns[design.id]) {
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
-            data: { path: destination, design }
+            data: design,
+            dest: this.config.name
           })
         } else {
-          designUtils.move(design, path, destination)
+          designUtils.move(design, destination)
           this.$emit('moveItem', {
             type: 'design',
-            data: { path: destination, design }
+            data: design,
+            dest: this.config.name
           })
         }
       } else if (this.draggingType === 'folder') {
-        const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-        if (!folder) return
-        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.path as string[], folder: this.config as IFolder })) return
-        designUtils.moveFolder(folder, parents, destination)
-        this.$emit('moveItem', {
-          type: 'folder',
-          data: { parents: destination, folder }
+        if (!this.draggingFolder) return
+        if (designUtils.isParentOrEqual(this.draggingFolder, { parents: this.path as string[], folder: this.config as IFolder })) return
+        designUtils.moveFolder(this.draggingFolder, destination).then(() => {
+          this.$emit('moveItem', {
+            type: 'folder',
+            data: this.draggingFolder.folder,
+            dest: this.config.name
+          })
         })
       }
     },
@@ -237,12 +241,21 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.editableName === '' || this.editableName === this.config.name) return
-      this.checkNameLength()
-      this.setFolderName({
-        path: designUtils.appendPath(this.path as string[], this.config),
-        newFolderName: this.editableName
-      })
+      if (this.config.id.endsWith('_new')) {
+        if (this.editableName === '') {
+          this.removeFolder({
+            parents: this.path,
+            folder: this.config
+          })
+          this.deleteFolder(this.config)
+        } else {
+          designUtils.createFolder(this.path as string[], this.config, this.editableName)
+        }
+      } else {
+        if (this.editableName === '' || this.editableName === this.config.name) return
+        this.checkNameLength()
+        designUtils.setFolderName(this.config, this.editableName, true)
+      }
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.config.name) {

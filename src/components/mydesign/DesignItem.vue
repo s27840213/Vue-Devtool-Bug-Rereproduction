@@ -10,26 +10,27 @@
       @mouseleave="handleMouseLeave")
       div(class="design-item__img-container"
         :style="containerStyles()")
-        img(v-if="ratioReady"
+        img(v-if="previewCheckReady"
             class="design-item__thumbnail"
             :style="imageStyles()"
             draggable="false"
             :src="appliedUrl")
       div(class="design-item__controller")
-        div(class="design-item__controller-content")
+        div(class="design-item__controller-content"
+          @click.self="handleClick")
           div(v-if="isSelected"
             class="design-item__checkbox-checked"
-            @click="emitDeselect")
+            @click.stop="emitDeselect")
             svg-icon(iconName="check-large"
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
           div(v-if="!isSelected && (isMouseOver || isAnySelected)"
             class="design-item__checkbox"
-            @click="emitSelect")
+            @click.stop="emitSelect")
           div(v-if="isMouseOver"
             class="design-item__more"
-            @click="toggleMenu()")
+            @click.stop="toggleMenu()")
             svg-icon(iconName="more_horizontal"
                     iconWidth="24px"
                     iconColor="gray-2")
@@ -37,16 +38,16 @@
               class="design-item__menu"
               v-click-outside="closeMenu")
             slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-          div(v-if="favorable" class="design-item__favorite" @click="emitLike")
-            svg-icon(v-if="isMouseOver && !isInFavorites"
+          div(v-if="favorable" class="design-item__favorite" @click.stop="emitLike")
+            svg-icon(v-if="isMouseOver && !config.favorite"
                     iconName="favorites"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="isMouseOver && isInFavorites"
+            svg-icon(v-if="isMouseOver && config.favorite"
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="white")
-            svg-icon(v-if="!isMouseOver && isInFavorites"
+            svg-icon(v-if="!isMouseOver && config.favorite"
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
@@ -77,9 +78,9 @@
                 iconColor="gray-3")
     div(class="design-item__size")
       span {{ `${config.width}x${config.height}` }}
-    div(class="dragged-thumbnail" :style="draggedImageStyles()")
+    div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
       div(class="relative")
-        img(:src="appliedUrl")
+        img(:src="appliedUrl" :style="draggedImageStyles()")
         div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
 </template>
 
@@ -88,16 +89,15 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
 import vClickOutside from 'v-click-outside'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   props: {
-    path: Array,
     config: Object,
     menuItemNum: Number,
     favorable: Boolean,
     undraggable: Boolean,
     nameIneditable: Boolean,
-    isInFavorites: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,
     isMultiSelected: Boolean
@@ -111,53 +111,49 @@ export default Vue.extend({
       isMenuOpen: false,
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
-      ratioReady: false,
       imgWidth: 10,
-      imgHeight: 10
+      imgHeight: 10,
+      previewCheckReady: false,
+      previewPlaceholder: require('@/assets/img/svg/image-preview-large.svg')
     }
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   created() {
-    this.ratioReady = false
-    imageUtils.getImageSize(this.config.thumbnail, this.config.width, this.config.height).then((size) => {
-      const { width, height } = size
-      this.imgWidth = width
-      this.imgHeight = height
-      this.ratioReady = true
-    })
+    this.checkImageSize()
   },
   watch: {
-    thumbnail(newVal) {
-      this.isDragged = false
-      this.ratioReady = false
-      imageUtils.getImageSize(newVal, this.config.width, this.config.height).then((size) => {
-        const { width, height } = size
-        this.imgWidth = width
-        this.imgHeight = height
-        this.ratioReady = true
-      })
+    config: {
+      handler: function() {
+        this.$nextTick(() => {
+          this.isDragged = false
+          this.checkImageSize()
+        })
+      },
+      deep: true
     }
   },
   computed: {
     ...mapGetters('design', {
       folders: 'getFolders'
     }),
-    appliedUrl(): string {
-      return this.config.thumbnail === '' ? require('@/assets/img/svg/image-preview.svg') : this.config.thumbnail
-    },
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
     },
     aspectRatio(): number {
-      return this.imgWidth / this.imgHeight
+      return this.config.width / this.config.height
+    },
+    configPreview(): string {
+      return designUtils.getDesignPreview(this.config.id, 1, this.config.ver)
+    },
+    appliedUrl(): string {
+      return this.config.thumbnail !== '' ? this.config.thumbnail : this.previewPlaceholder
     }
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingDesign: 'SET_draggingDesign',
-      setDesignName: 'UPDATE_designName'
+      setDraggingDesign: 'SET_draggingDesign'
     }),
     blockStyles() {
       return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
@@ -178,12 +174,22 @@ export default Vue.extend({
         }
       }
     },
-    draggedImageStyles(): { [key: string]: string } {
+    draggedImageContainerStyles(): { [key: string]: string } {
       if (this.isDragged) {
         return {
           left: `${this.draggedImageCoordinate.x}px`,
           top: `${this.draggedImageCoordinate.y}px`,
           display: 'block'
+        }
+      } else {
+        return {}
+      }
+    },
+    draggedImageStyles(): { [key: string]: string } {
+      if (this.isDragged && this.config.thumbnail === this.previewPlaceholder) {
+        return {
+          width: '150px',
+          height: '150px'
         }
       } else {
         return {}
@@ -202,10 +208,7 @@ export default Vue.extend({
     handleDragStart(e: DragEvent) {
       const target = e.target as HTMLElement
       target.style.opacity = '0'
-      this.setDraggingDesign({
-        path: this.path,
-        design: this.config
-      })
+      this.setDraggingDesign(this.config)
 
       if (!e.dataTransfer) return
       e.dataTransfer.effectAllowed = 'move'
@@ -258,10 +261,11 @@ export default Vue.extend({
       this.isNameEditing = false
       this.isNameMouseOver = false
       if (this.editableName === '' || this.editableName === this.config.name) return
-      this.setDesignName({
-        path: this.path,
-        id: this.config.id,
-        newDesignName: this.editableName
+      designUtils.setDesignName(this.config, this.editableName)
+    },
+    handleClick() {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.setDesign(this.config)
       })
     },
     checkNameEnter(e: KeyboardEvent) {
@@ -283,6 +287,20 @@ export default Vue.extend({
     },
     emitDeselect() {
       this.$emit('deselect')
+    },
+    checkImageSize() {
+      if (this.config.thumbnail !== '') {
+        this.previewCheckReady = true
+        return
+      }
+      this.previewCheckReady = false
+      imageUtils.getImageSize(this.configPreview, 150, 150).then((size) => {
+        const { width, height, exists } = size
+        this.imgWidth = width
+        this.imgHeight = height
+        this.previewCheckReady = true
+        this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+      })
     }
   }
 })
@@ -461,6 +479,10 @@ export default Vue.extend({
         font-size: 16px;
         font-weight: 400;
         color: setColor(gray-1);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+        overflow: hidden;
       }
       &-editor {
         border-top: 1px dashed transparent;
@@ -506,6 +528,12 @@ export default Vue.extend({
   transform: translate(-50%, -50%) scale(0.5);
   pointer-events: none;
   z-index: 1000;
+  > div {
+    background-color: white;
+    > img {
+      display: block;
+    }
+  }
   &__stack {
     position: absolute;
     top: 10px;
