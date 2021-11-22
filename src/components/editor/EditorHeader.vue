@@ -26,6 +26,8 @@
         maxlength="30"
         :value="pagesName"
         @change="setPagesName")
+      span(class="ml-10 text-bold text-orange") {{templateText}}
+      span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
     div(class="body-2 relative")
       //- div(class="editor-header__locale" @click="switchLocale()")
       //-   span {{currLocale}}
@@ -76,6 +78,7 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import GeneralUtils from '@/utils/generalUtils'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 export default Vue.extend({
@@ -94,7 +97,8 @@ export default Vue.extend({
       'role',
       'adminMode']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      groupId: 'getGroupId'
     }),
     isInFirstStep(): boolean {
       return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
@@ -119,6 +123,13 @@ export default Vue.extend({
     },
     pagesName(): string {
       return pageUtils.pagesName
+    },
+    templateText(): string {
+      if (this.groupId.length > 0) {
+        return '群組模板'
+      } else {
+        return '單頁模板'
+      }
     }
   },
   methods: {
@@ -166,6 +177,15 @@ export default Vue.extend({
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
+    },
+    copyText(text: string) {
+      if (text.length === 0) {
+        return
+      }
+      GeneralUtils.copyText(text)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${text} 已複製` })
+        })
     }
   }
 })
