@@ -524,6 +524,8 @@ class DesignUtils {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
     // }
 
+    pageUtils.setPages()
+
     let isPrivate = false
 
     if (design.id === undefined && design.signedUrl) {
