@@ -305,6 +305,7 @@ class DesignUtils {
       }
       case 'reduction': {
         this.recover(design).then((dest) => {
+          if (dest === '') return
           eventEmitter({
             event: 'recoverItem',
             payload: {
@@ -344,6 +345,7 @@ class DesignUtils {
       }
       case 'reduction': {
         this.recoverFolder(folder).then((dest) => {
+          if (dest === '') return
           eventEmitter({
             event: 'recoverItem',
             payload: {
@@ -386,13 +388,9 @@ class DesignUtils {
 
   async moveFolder(pathedFolder: IPathedFolder, destination: string[]) {
     await store.dispatch('design/moveFolder', {
+      parents: pathedFolder.parents,
       folder: pathedFolder.folder,
       destination
-    })
-    store.commit('design/UPDATE_removeFolder', pathedFolder)
-    store.commit('design/UPDATE_insertFolder', {
-      parents: destination,
-      folder: pathedFolder.folder
     })
   }
 

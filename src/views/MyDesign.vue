@@ -90,6 +90,10 @@
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
                 span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
+          transition(name="slide-fade")
+            div(v-if="isErrorShowing" class="my-design__message")
+              div(class="my-design__message__text")
+                span 發生問題，請稍後再試
         div(v-if="isMoveToFolderPanelOpen"
             class="my-design__change-folder"
             :class="{centered: isMovingSingleToFolder}"
@@ -173,7 +177,6 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
-import design from '@/apis/design'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -234,7 +237,8 @@ export default Vue.extend({
       confirmMessage: '',
       isFavDelMouseOver: false,
       isMoveToFolderPanelOpen: false,
-      isMovingSingleToFolder: false
+      isMovingSingleToFolder: false,
+      errorMessageTimer: -1
     }
   },
   computed: {
@@ -244,7 +248,8 @@ export default Vue.extend({
       folders: 'getFolders',
       copiedFolders: 'getCopiedFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      isErrorShowing: 'getIsErrorShowing'
     }),
     mydesignView(): string {
       switch (this.currLocation[0]) {
@@ -297,6 +302,16 @@ export default Vue.extend({
         this.designBuffer = undefined
         this.isMovingSingleToFolder = false
       }
+    },
+    isErrorShowing(newVal) {
+      if (newVal) {
+        if (this.errorMessageTimer > 0) {
+          clearTimeout(this.errorMessageTimer)
+        }
+        this.errorMessageTimer = setTimeout(() => {
+          this.setIsErrorShowing(false)
+        }, 1000)
+      }
     }
   },
   methods: {
@@ -308,7 +323,8 @@ export default Vue.extend({
       clearSelection: 'UPDATE_clearSelection',
       setCurrLocation: 'SET_currLocation',
       setFolders: 'SET_folders',
-      snapshotFolders: 'UPDATE_snapshotFolders'
+      snapshotFolders: 'UPDATE_snapshotFolders',
+      setIsErrorShowing: 'SET_isErrorShowing'
     }),
     stackStyles() {
       return { top: this.isMultiSelected ? '82px' : '27px' }
@@ -500,6 +516,7 @@ export default Vue.extend({
     recoverAll() {
       console.log(this.selectedDesigns, this.selectedFolders)
       designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders)).then((dest) => {
+        if (dest === '') return
         this.handleRecoverItem({
           type: 'multi',
           data: undefined,
