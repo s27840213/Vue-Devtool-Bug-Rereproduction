@@ -91,15 +91,46 @@
     div(class="page-setting__footer")
     div(v-if="inAdminMode"
       class="template-information")
-      span(class="text-gray-1 label-lg") Template Information
+      div(class="template-information__divider pb-10")
+      btn(:type="'primary-sm'" class="rounded my-5"
+          style="padding: 8px 40px; margin-left: 6%; width: 88%;"
+          @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
+      div(v-if="groupId.length > 0"
+        class="pt-10")
+        span(class="text-gray-1 label-lg") 群 組 資 訊
+        div(class="template-information__line")
+          span(class="body-1") groupId
+          span(class="pl-15 body-2"
+            @click="copyText(groupId)") {{groupId}}
+        div(v-if="isGetTemplate")
+          div(class="template-information__line")
+            span(class="body-1") 封面設定
+          div(class="square-wrapper text-center")
+            div(class="cover-option body-3")
+              span Theme
+              span Cover Id
+            template(v-for="(item, idx) in groupInfo.groupThemes")
+              div(v-if="item.options.length > 0" class="pt-5 cover-option")
+                span(class="body-1") {{item.id}}
+                select(class="template-information__cover-select" v-model="item.coverId")
+                  option(v-for="option in item.options" :value="option") {{option}}
+          div(class="template-information__line pt-10")
+            div(style="width: 50%;")
+              input(type="checkbox"
+                class="template-information__check"
+                v-model="updateGroupChecked")
+              label 確定更新
+            btn(:type="'primary-sm'" class="rounded my-5"
+              style="padding: 5px 40px;"
+              @click.native="updateGroupClicked()") 更新
+      div(class="template-information__divider2")
+      span(class="text-gray-1 label-lg") 模 板 資 訊
       div(class="template-information__content")
         div(class="template-information__line" style="background: #eee;")
           span(class="body-1") focus
           span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
         img(v-if="key_id.length > 0" style="margin: 0 auto;"
           :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
-        btn(:type="'primary-sm'" class="rounded my-5" style="padding: 8px 40px;"
-          @click.native="getDataClicked()") 取得模板資料
         div(v-if="isGetTemplate")
           div(class="template-information__line")
             span(class="body-1") key_id
@@ -119,7 +150,7 @@
               option(v-for="locale in localeOptions" :value="locale") {{locale}}
           div(class="template-information__line")
             span(class="body-1") Theme_ids
-          div(class="theme-wrapper")
+          div(class="square-wrapper")
             div(v-for="(item, idx) in themeList"
               class="pt-5 theme-option")
               input(type="checkbox"
@@ -128,20 +159,17 @@
                 v-model="templateThemes[item.id]")
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div
-            span tags_tw
+          div tags_tw
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_tw")
-          div
-            span tags_us
+          div tags_us
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_us")
-          div
-            span tags_jp
+          div tags_jp
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
@@ -150,7 +178,7 @@
             div(style="width: 50%;")
               input(type="checkbox"
                 class="template-information__check"
-                v-model="updateChecked")
+                v-model="updateTemplateChecked")
               label 確定更新
             btn(:type="'primary-sm'" class="rounded my-5"
               style="padding: 5px 40px;"
@@ -214,7 +242,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
-import { Itheme } from '@/interfaces/theme'
+import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 
 export default Vue.extend({
   components: {
@@ -238,7 +266,8 @@ export default Vue.extend({
       isPanelOpen: false,
       isLoading: false,
       isGetTemplate: false,
-      updateChecked: false,
+      updateGroupChecked: false,
+      updateTemplateChecked: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
       currentKeyId: '',
@@ -262,7 +291,12 @@ export default Vue.extend({
         grandchildren_id: []
       },
       themeList: [] as Itheme[],
-      userParentId: ''
+      userParentId: '',
+      groupInfo: {
+        cover_ids: '',
+        contents: [] as IThemeTemplate[],
+        groupThemes: [] as ICoverTheme[]
+      }
     }
   },
   watch: {
@@ -287,6 +321,11 @@ export default Vue.extend({
         grandchildren_id: []
       }
       this.themeList = []
+      this.groupInfo = {
+        cover_ids: '',
+        contents: [],
+        groupThemes: []
+      }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
     currentPageWidth: function (newVal) {
@@ -315,7 +354,8 @@ export default Vue.extend({
       getPage: 'getPage',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       token: 'user/getToken',
-      getAsset: 'getAsset'
+      getAsset: 'getAsset',
+      groupId: 'getGroupId'
     }),
     currentPageWidth(): number {
       return Math.round(this.getPage(this.lastSelectedPageIndex)?.width ?? 0)
@@ -462,25 +502,60 @@ export default Vue.extend({
       this.selectedFormat = key
     },
     async getDataClicked() {
-      this.isLoading = true
-      if (this.key_id.length === 0) {
-        this.isLoading = false
-        this.$notify({ group: 'copy', text: '找不到模板資料' })
-        return
-      }
-      this.updateChecked = false
+      // this.isLoading = true
+
+      this.resetStatus()
       const data = {}
-      const res = await designApis.getTemplateInfo(this.token, 'template', this.key_id, 'select', JSON.stringify(data))
-      if (res.data.flag === 0) {
-        this.isGetTemplate = true
-        this.templateInfo = res.data.data
-        this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
-        this.themeList = res.data.data.themeList
-        this.userParentId = this.templateInfo.parent_id
-      } else {
-        this.$notify({ group: 'copy', text: '找不到模板資料' })
+      if (this.groupId.length === 0 && this.key_id.length === 0) {
+        this.$notify({ group: 'copy', text: '無群組及模板id' })
+      }
+      if (this.groupId.length > 0) {
+        const groupRes = await designApis.getDesignInfo(this.token, 'group', this.groupId, 'select', JSON.stringify(data))
+        console.log('groupRes', groupRes.data)
+        if (groupRes.data.flag === 0) {
+          this.setGroupInfo(groupRes.data)
+        } else {
+          this.$notify({ group: 'copy', text: '找不到群組資料' })
+        }
       }
 
+      if (this.key_id.length > 0) {
+        const res = await designApis.getDesignInfo(this.token, 'template', this.key_id, 'select', JSON.stringify(data))
+        if (res.data.flag === 0) {
+          this.isGetTemplate = true
+          this.templateInfo = res.data.data
+          this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+          this.themeList = res.data.data.themeList
+          this.userParentId = this.templateInfo.parent_id
+        } else {
+          this.$notify({ group: 'copy', text: '找不到模板資料' })
+        }
+      }
+
+      this.isLoading = false
+    },
+    async updateGroupClicked() {
+      if (!this.updateGroupChecked) {
+        this.$notify({ group: 'copy', text: '請先勾選確定更新' })
+        return
+      }
+      const coverId = this.groupInfo.groupThemes.map(theme => {
+        if (theme.options.length > 0) {
+          return String(theme.id) + ':' + theme.coverId
+        }
+      })
+      this.isLoading = true
+      const data = {
+        cover_ids: coverId.join()
+      }
+      const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
+      if (res.data.flag === 0) {
+        this.$notify({ group: 'copy', text: '群組資料更新成功' })
+        this.setGroupInfo(res.data)
+      } else {
+        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+      }
+      this.resetStatus()
       this.isLoading = false
     },
     async updateDataClicked() {
@@ -493,7 +568,7 @@ export default Vue.extend({
       })
       const themeIds = arr.join()
 
-      if (!this.updateChecked) {
+      if (!this.updateTemplateChecked) {
         this.$notify({ group: 'copy', text: '請先勾選確定更新' })
         return
       }
@@ -514,7 +589,7 @@ export default Vue.extend({
         tags_jp: this.templateInfo.tags_jp,
         theme_ids: themeIds
       }
-      const res = await designApis.updateTemplateInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
+      const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
         this.$notify({ group: 'copy', text: '模板資料更新成功' })
         this.templateInfo = res.data.data
@@ -522,18 +597,11 @@ export default Vue.extend({
       } else {
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
-      this.updateChecked = false
+      this.resetStatus()
       this.isLoading = false
     },
     updateParentIdClicked() {
-      this.isLoading = true
-      if (!this.templateInfo.key_id) {
-        this.isLoading = false
-        this.$notify({ group: 'copy', text: '請先取得模板資料' })
-        return
-      }
       if (!this.updateParentIdChecked) {
-        this.isLoading = false
         this.$notify({ group: 'copy', text: '請先勾選確定修改' })
         return
       }
@@ -544,8 +612,40 @@ export default Vue.extend({
         }
       })
       uploadUtils.updateTemplate()
+      this.resetStatus()
+    },
+    resetStatus() {
+      this.updateGroupChecked = false
+      this.updateTemplateChecked = false
       this.updateParentIdChecked = false
-      this.isLoading = false
+    },
+    setGroupInfo(data: any) {
+      this.groupInfo = {
+        cover_ids: '',
+        contents: [],
+        groupThemes: []
+      }
+      this.groupInfo.cover_ids = data.data.cover_ids
+      this.groupInfo.contents = data.data.contents
+      const coverList = this.groupInfo.cover_ids.split(',')
+      coverList.map((cover) => {
+        const theme = {
+          id: parseInt(cover.split(':')[0]),
+          coverId: cover.split(':')[1],
+          options: []
+        }
+        this.groupInfo.groupThemes.push(theme)
+      })
+      this.groupInfo.contents.forEach(content => {
+        const themes = content.theme_ids.split(',')
+        themes.forEach(id => {
+          if (parseInt(id) !== 0) {
+            const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === parseInt(id))
+            this.groupInfo.groupThemes[index].options.push(content.key_id)
+          }
+        })
+      })
+      this.groupInfo.groupThemes = this.groupInfo.groupThemes.filter(theme => theme.options.length > 0)
     },
     copyText(text: string) {
       if (text.length === 0) {
@@ -811,6 +911,13 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
   }
+  &__cover-select {
+    width: 95%;
+    height: 30px;
+    font-size: 14px;
+    border: 1px solid #d9dbe1;
+    padding-left: 5px;
+  }
   &__select {
     width: 40%;
     height: 35px;
@@ -827,10 +934,22 @@ export default Vue.extend({
     margin-top: 10px;
     padding-bottom: 5px;
   }
-  .theme-wrapper {
+  &__divider2 {
+    width: 100%;
+    border-top: 2px dotted #000;
+    margin-top: 10px;
+    padding-bottom: 5px;
+  }
+  .square-wrapper {
     border: 1px #000 solid;
     border-radius: 5px;
     padding: 5px 0;
+  }
+  .cover-option {
+    display: grid;
+    align-items: center;
+    grid-auto-flow: column;
+    grid-template-columns: 50px auto;
   }
   .theme-option {
     display: grid;
