@@ -36,22 +36,21 @@ export default {
     }))
   },
   async updateDesigns(token: string, locale: string, teamId: string, updateType: string, srcAsset: string | null, srcFolder: string | null, target: string): Promise<any> {
-    // return await apiUtils.requestWithRetry(() => {
-    //   const payload: any = {
-    //     method: 'POST',
-    //     data: {
-    //       type: 'design',
-    //       token,
-    //       locale,
-    //       team_id: teamId,
-    //       update_type: updateType,
-    //       target
-    //     }
-    //   }
-    //   if (srcAsset != null) payload.data.src_asset = srcAsset
-    //   if (srcFolder != null) payload.data.src_folder = srcFolder
-    //   return axios('/update-asset', payload)
-    // })
-    throw new Error()
+    return await apiUtils.requestWithRetry(() => {
+      const payload: any = {
+        method: 'POST',
+        data: {
+          type: 'design',
+          token,
+          locale,
+          team_id: teamId,
+          update_type: updateType,
+          target
+        }
+      }
+      if (srcAsset != null) payload.data.src_asset = srcAsset
+      if (srcFolder != null) payload.data.src_folder = srcFolder
+      return axios('/update-asset', payload)
+    })
   }
 }
