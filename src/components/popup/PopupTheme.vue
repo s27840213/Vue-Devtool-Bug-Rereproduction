@@ -13,7 +13,7 @@
         label="All"
         value="all"
         :default-checked="all"
-        @change="handleChange")
+        @change="handleAllCheck")
       download-check-button(v-for="theme in themes"
         type="checkbox"
         class="popup-theme__checkbox body-3 text-gray-2 pl-5"
@@ -77,17 +77,16 @@ export default Vue.extend({
         return prev
       }, {})
     },
+    handleAllCheck (event: { value: string, checked: boolean }) {
+      this.all = event.checked
+      Object.keys(this.selected)
+        .forEach((id: string) => {
+          this.selected[id] = event.checked
+        })
+    },
     handleChange (event: { value: string, checked: boolean }) {
-      if (event.value === 'all') {
-        this.all = event.checked
-        event.checked && Object.keys(this.selected)
-          .forEach((id: string) => {
-            this.selected[id] = event.checked
-          })
-      } else {
-        !event.checked && (this.all = false)
-        this.selected[event.value] = event.checked
-      }
+      !event.checked && (this.all = false)
+      this.selected[event.value] = event.checked
     },
     handleSubmit () {
       this.$emit('change', this.selected)
