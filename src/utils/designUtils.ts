@@ -58,6 +58,9 @@ class DesignUtils {
     for (const [i, folder] of currentFolders.entries()) {
       if (countMap[folder.id] !== undefined) {
         countMap[folder.id].seen = true
+        if (countMap[folder.id].folder.name !== folder.name) {
+          folder.name = countMap[folder.id].folder.name
+        }
       } else {
         indicesToDelete.unshift(i)
       }
@@ -159,14 +162,6 @@ class DesignUtils {
         text: '建立副本'
       },
       {
-        icon: 'share-alt',
-        text: '分享'
-      },
-      {
-        icon: 'download',
-        text: '下載'
-      },
-      {
         icon: 'folder',
         text: '移至資料夾',
         extendable: true
@@ -176,6 +171,15 @@ class DesignUtils {
         text: '刪除'
       }
     ]
+    // ,
+    // {
+    //   icon: 'share-alt',
+    //   text: '分享'
+    // },
+    // {
+    //   icon: 'download',
+    //   text: '下載'
+    // }
   }
 
   makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
@@ -452,8 +456,8 @@ class DesignUtils {
     store.dispatch('design/setDesignName', { design, name })
   }
 
-  setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
-    store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
+  setFolderName(folder: IFolder, name: string, parents: string[]) {
+    store.dispatch('design/setFolderName', { folder, name, parents })
   }
 
   createFolder(parents: string[], folder: IFolder, name: string) {

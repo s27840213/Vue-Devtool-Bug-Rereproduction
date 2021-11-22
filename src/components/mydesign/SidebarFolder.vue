@@ -238,7 +238,7 @@ export default Vue.extend({
       } else {
         if (this.editableName === '' || (this.editableName === this.folder.name)) return
         this.checkNameLength()
-        designUtils.setFolderName(this.folder, this.editableName)
+        designUtils.setFolderName(this.folder, this.editableName, this.parents as string[])
       }
     },
     handleShowHint(folderId: string) {

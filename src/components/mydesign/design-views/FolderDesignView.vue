@@ -271,7 +271,7 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
-      designUtils.setFolderName(this.folder, this.editableFolderName)
+      designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
     },
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent

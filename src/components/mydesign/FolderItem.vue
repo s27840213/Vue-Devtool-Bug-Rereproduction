@@ -254,7 +254,7 @@ export default Vue.extend({
       } else {
         if (this.editableName === '' || this.editableName === this.config.name) return
         this.checkNameLength()
-        designUtils.setFolderName(this.config, this.editableName, true)
+        designUtils.setFolderName(this.config, this.editableName, this.path as string[])
       }
     },
     checkNameEnter(e: KeyboardEvent) {
