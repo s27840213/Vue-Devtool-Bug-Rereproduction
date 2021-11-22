@@ -37,7 +37,7 @@
       div(v-else
           :class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
+    sidebar-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
                   @moveItem="handleMoveItem"
                   @showHint="handleShowHint")
     div(class="dragged-folder" :style="draggedFolderStyles()")
@@ -51,9 +51,9 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -77,27 +77,41 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  watch: {
+    'folder.isExpanded': function(newVal) {
+      if (newVal) {
+        this.fetchStructuralFolders({ path: `${designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',')}` })
+      }
+    }
+  },
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       draggingType: 'getDraggingType',
       draggingDesign: 'getDraggingDesign',
       draggingFolder: 'getDraggingFolder',
-      selectedDesigns: 'getSelectedDesigns'
+      selectedDesigns: 'getSelectedDesigns',
+      folders: 'getFolders'
     }),
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.folder.subFolders])
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchStructuralFolders: 'fetchStructuralFolders'
+    }),
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
       setDraggingFolder: 'SET_draggingFolder',
-      setFolderName: 'UPDATE_folderName'
+      removeFolder: 'UPDATE_removeFolder'
     }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -163,32 +177,35 @@ export default Vue.extend({
       if (this.folderUndroppable() || this.isDragged) return
       const destination = designUtils.appendPath(this.parents as string[], this.folder as IFolder)
       if (this.draggingType === 'design') {
-        const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+        const design = this.draggingDesign as IDesign | undefined
         if (!design) return
         if (this.isMultiSelected && this.selectedDesigns[design.id]) {
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
-            data: { path: destination, design }
+            data: design,
+            dest: this.folder.name
           })
         } else {
-          designUtils.move(design, path, destination)
+          designUtils.move(design, destination)
           this.$emit('moveItem', {
             type: 'design',
-            data: { path: destination, design }
+            data: design,
+            dest: this.folder.name
           })
         }
       } else if (this.draggingType === 'folder') {
-        const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-        if (!folder) return
-        if (designUtils.isParentOrEqual({ parents, folder }, { parents: this.parents as string[], folder: this.folder as IFolder })) return
-        designUtils.moveFolder(folder, parents, destination)
-        if (folder.isCurrLocation) {
-          this.setCurrLocation(`f:${designUtils.appendPath(destination, folder as IFolder).join('/')}`)
-        }
-        this.$emit('moveItem', {
-          type: 'folder',
-          data: { parents: destination, folder }
+        if (!this.draggingFolder) return
+        if (designUtils.isParentOrEqual(this.draggingFolder, { parents: this.parents as string[], folder: this.folder as IFolder })) return
+        designUtils.moveFolder(this.draggingFolder, destination).then(() => {
+          if (this.draggingFolder.folder.isCurrLocation) {
+            this.setCurrLocation(`f:${designUtils.appendPath(destination, this.draggingFolder.folder as IFolder).join('/')}`)
+          }
+          this.$emit('moveItem', {
+            type: 'folder',
+            data: this.draggingFolder.folder,
+            dest: this.folder.name
+          })
         })
       }
     },
@@ -209,12 +226,20 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.editableName === '' || this.editableName === this.folder.name) return
-      this.checkNameLength()
-      this.setFolderName({
-        path: designUtils.appendPath(this.parents as string[], this.folder as IFolder),
-        newFolderName: this.editableName
-      })
+      if (this.folder.id.endsWith('_new')) {
+        if (this.editableName === '') {
+          this.removeFolder({
+            parents: this.parents,
+            folder: this.folder
+          })
+        } else {
+          designUtils.createFolder(this.parents as string[], this.folder, this.editableName)
+        }
+      } else {
+        if (this.editableName === '' || (this.editableName === this.folder.name)) return
+        this.checkNameLength()
+        designUtils.setFolderName(this.folder, this.editableName)
+      }
     },
     handleShowHint(folderId: string) {
       this.$emit('showHint', folderId)
@@ -239,7 +264,7 @@ export default Vue.extend({
     },
     checkExpand(folders: IFolder[]): IFolder[] {
       if (this.folder.isExpanded) {
-        return folders
+        return designUtils.sortById([...folders])
       } else {
         return []
       }

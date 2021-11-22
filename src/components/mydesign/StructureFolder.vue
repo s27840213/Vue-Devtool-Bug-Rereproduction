@@ -17,39 +17,52 @@
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none")
           span {{ folder.name }}
-    structure-folder(v-for="subFolder in checkExpand(folder.subFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
-                    @moveToFolderSelect="handleMoveToFolderSelect"
-                    @moveToFolderExpand="handleMoveToFolderExpand")
+    structure-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]")
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { IFolder, IPathedFolder } from '@/interfaces/design'
+import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import { mapActions, mapMutations } from 'vuex'
 
 export default Vue.extend({
   name: 'structure-folder',
-  components: {
-  },
   props: {
     folder: Object,
     parents: Array,
     level: Number
   },
+  computed: {
+    path(): string[] {
+      return designUtils.appendPath(this.parents as string[], this.folder as IFolder)
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.folder.subFolders])
+    }
+  },
+  watch: {
+    'folder.isExpanded': function(newVal) {
+      if (newVal) {
+        this.fetchCopiedStructuralFolders({ path: `${this.path.join(',')}` })
+      }
+    }
+  },
   methods: {
+    ...mapActions('design', {
+      fetchCopiedStructuralFolders: 'fetchCopiedStructuralFolders'
+    }),
+    ...mapMutations('design', {
+      setMoveToFolderSelectInfo: 'SET_moveToFolderSelectInfo',
+      setCopiedExpand: 'SET_copiedExpand'
+    }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     handleSelection() {
-      this.$emit('moveToFolderSelect', `${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
-    },
-    handleMoveToFolderSelect(data: string) {
-      this.$emit('moveToFolderSelect', data)
-    },
-    handleMoveToFolderExpand(data: IPathedFolder) {
-      this.$emit('moveToFolderExpand', data)
+      this.setMoveToFolderSelectInfo(`f:${this.path.join('/')}`)
     },
     toggleExpansion() {
-      this.$emit('moveToFolderExpand', { parents: this.parents, folder: this.folder })
+      this.setCopiedExpand({ path: this.path, isExpanded: !this.folder.isExpanded })
     },
     checkExpand(folders: IFolder[]): IFolder[] {
       if (this.folder.isExpanded) {

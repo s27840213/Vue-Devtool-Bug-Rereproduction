@@ -1,5 +1,5 @@
-import { IUserDesignContentData } from '@/interfaces/api'
-import { IDesign, IFolder, IPathedDesign, IPathedFolder } from '@/interfaces/design'
+import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from './generalUtils'
@@ -7,20 +7,9 @@ import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 
-const FIELD_MAPPER: { [key: string]: (item: IDesign | IFolder) => any } = {
-  name: (item: IDesign | IFolder): string => item.name,
-  time: (item: IDesign | IFolder): number => item.lastUpdatedTime
-}
-
-const COMP_MAPPER: { [key: string]: (a: any, b: any, descending: boolean) => number } = {
-  name: (a: string, b: string, descending: boolean): number => {
-    const modifier = descending ? -1 : 1
-    return a.localeCompare(b) * modifier
-  },
-  time: (a: number, b: number, descending: boolean): number => {
-    const modifier = descending ? -1 : 1
-    return (a - b) * modifier
-  }
+interface Item {
+  name: string,
+  lastUpdatedTime: string
 }
 
 class DesignUtils {
@@ -28,17 +17,89 @@ class DesignUtils {
   ROOT_DISPLAY = '我所有的設計'
   get isLogin(): boolean { return store.getters['user/isLogin'] }
 
+  apiDesign2IDesign(design: IUserDesignContentData): IDesign {
+    return {
+      id: design.id,
+      asset_index: design.asset_index,
+      name: design.name,
+      width: design.width,
+      height: design.height,
+      createdTime: design.create_time,
+      lastUpdatedTime: design.update_time,
+      favorite: design.favorite > 0,
+      ver: design.ver,
+      thumbnail: ''
+    }
+  }
+
+  apiFolder2IFolder(folder: IUserFolderContentData): IFolder {
+    return {
+      id: folder.id,
+      name: folder.name,
+      createdTime: folder.create_time,
+      lastUpdatedTime: folder.update_time,
+      author: folder.author,
+      subFolders: [],
+      isExpanded: false,
+      isCurrLocation: false
+    }
+  }
+
+  updateFolders(currentFolders: IFolder[], newFolders: IFolder[]) {
+    const countMap = {} as {[key: string]: {seen: boolean, folder: IFolder}}
+    const indicesToDelete = []
+    for (const folder of newFolders) {
+      countMap[folder.id] = {
+        seen: false,
+        folder
+      }
+    }
+    for (const [i, folder] of currentFolders.entries()) {
+      if (countMap[folder.id] !== undefined) {
+        countMap[folder.id].seen = true
+      } else {
+        indicesToDelete.unshift(i)
+      }
+    }
+    for (const index of indicesToDelete) {
+      currentFolders.splice(index, 1)
+    }
+    for (const { seen, folder } of Object.values(countMap)) {
+      if (!seen) {
+        currentFolders.push(folder)
+      }
+    }
+    return currentFolders
+  }
+
+  getInsertIndex<T extends Item>(items: T[], sortByField: string, sortByDescending: boolean, item: T): number {
+    const modifier = sortByDescending ? -1 : 1
+    const compareFunction = sortByField === 'name' ? (item2: T): boolean => {
+      return item2.name.localeCompare(item.name) * modifier > 0
+    } : (item2: T): boolean => {
+      return (Date.parse(item2.lastUpdatedTime) - Date.parse(item.lastUpdatedTime)) * modifier > 0
+    }
+    const index = items.findIndex(compareFunction)
+    return index >= 0 ? index : items.length
+  }
+
+  sortById(folders: IFolder[]): IFolder[] {
+    folders.sort((a, b) => {
+      return a.id.localeCompare(b.id)
+    })
+    return folders
+  }
+
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
     const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
     return {
-      id: isROOT ? this.ROOT : generalUtils.generateAssetId(),
+      id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
       author,
-      createdTime: time,
-      lastUpdatedTime: time,
+      createdTime: time.toString(),
+      lastUpdatedTime: time.toString(),
       isExpanded: false,
       isCurrLocation: false,
-      designs: [],
       subFolders: []
     }
   }
@@ -57,22 +118,24 @@ class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
     template[0] = this.newFolder(this.ROOT, 'SYSTEM', true, true)
-    template[0].subFolders = [
-      this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
-      this.newFolder('日本行銷', 'Daniel', true)
-    ]
-    for (let i = 0; i < 15; i++) {
-      const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
-      template[0].subFolders[0].designs.push({
-        name: `Name${i + 1}`,
-        width: 1200,
-        height: 1200,
-        id: generalUtils.generateAssetId(),
-        thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-        createdTime: time,
-        lastUpdatedTime: time
-      })
-    }
+    // template[0].subFolders = [
+    //   this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
+    //   this.newFolder('日本行銷', 'Daniel', true)
+    // ]
+    // for (let i = 0; i < 15; i++) {
+    //   const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+    //   template[0].subFolders[0].designs.push({
+    //     name: `Name${i + 1}`,
+    //     width: 1200,
+    //     height: 1200,
+    //     id: generalUtils.generateAssetId(),
+    //     thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
+    //     createdTime: time.toString(),
+    //     lastUpdatedTime: time.toString(),
+    //     favorite: false,
+    //     ver: 0
+    //   })
+    // }
     return template
   }
 
@@ -210,340 +273,226 @@ class DesignUtils {
     }
   }
 
-  getAllDesigns(folders: IFolder[]): IPathedDesign[] {
-    const nodes: IPathedFolder[] = []
-    for (const folder of folders) {
-      nodes.push({
-        parents: [],
-        folder
-      })
-    }
-    const res = []
-    while (nodes.length > 0) {
-      const node = nodes.shift()
-      if (node) {
-        const { parents, folder } = node
-        for (const design of folder.designs) {
-          res.push({
-            path: this.createPath(node),
-            design
-          })
-        }
-        for (const subFolder of folder.subFolders) {
-          nodes.push({
-            parents: this.createPath(node),
-            folder: subFolder
-          })
-        }
-      }
-    }
-    return res
-  }
-
-  foldAll(folders: IFolder[]): IFolder[] {
-    const nodes = [...folders]
-    while (nodes.length > 0) {
-      const node = nodes.shift()
-      if (node) {
-        node.isExpanded = false
-        node.isCurrLocation = false
-        for (const subFolder of node.subFolders) {
-          nodes.push(subFolder)
-        }
-      }
-    }
-    return folders
-  }
-
-  sortDesignsBy(designs: IDesign[] | IPathedDesign[], field: string, descending: boolean) {
-    if (this.checkIfPathed(designs)) {
-      const target = designs as IPathedDesign[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a.design), FIELD_MAPPER[field](b.design), descending)
-      })
-    } else {
-      const target = designs as IDesign[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
-      })
-    }
-  }
-
-  sortFoldersBy(folders: IFolder[] | IPathedFolder[], field: string, descending: boolean) {
-    if (this.checkIfPathed(folders)) {
-      const target = folders as IPathedFolder[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a.folder), FIELD_MAPPER[field](b.folder), descending)
-      })
-    } else {
-      const target = folders as IFolder[]
-      target.sort((a, b) => {
-        return COMP_MAPPER[field](FIELD_MAPPER[field](a), FIELD_MAPPER[field](b), descending)
-      })
-    }
-  }
-
-  removeDeleted(designs: IPathedDesign[]): IPathedDesign[] {
-    const deletedDesignIds = store.getters['design/getTrashDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    return designs.filter(design => !(deletedDesignIds.includes(design.design.id)))
-  }
-
-  checkIfPathed(designs: IDesign[] | IPathedDesign[] | IFolder[] | IPathedFolder[]): boolean { // if empty, return true
-    return (designs.length === 0) || ('path' in designs[0])
-  }
-
-  checkAllInFavorite(pathedDesigns: IPathedDesign[]): boolean {
-    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    return !pathedDesigns.some(pathedDesign => !favoriteDesignIds.includes(pathedDesign.design.id))
-  }
-
-  checkRecoveredDirectory(folders: IFolder[], path: string[]): string {
-    const targetFolder = this.search(folders, path)
-    if (targetFolder) {
-      return targetFolder.name === this.ROOT ? this.ROOT_DISPLAY : targetFolder.name
-    } else {
-      return this.ROOT_DISPLAY
-    }
-  }
-
   isParentOrEqual(a: IPathedFolder, b: IPathedFolder): boolean {
     const aFullPath = this.createPath(a).join('/')
     const bFullPath = this.createPath(b).join('/')
     return bFullPath.startsWith(aFullPath)
   }
 
-  isFolderEqual(a: IPathedFolder, b: IPathedFolder): boolean {
-    return generalUtils.arrayCompare<string>(a.parents, b.parents) && a.folder.id === b.folder.id
-  }
-
-  dispatchDesignMenuAction(icon: string, path: string[], design: IDesign): { event: string, payload: any } | undefined {
+  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'copy': {
-        const newId = generalUtils.generateAssetId()
-        const newDesign = generalUtils.deepCopy(design)
-        newDesign.id = newId
-        newDesign.name += ' 的副本'
-        newDesign.createdTime = Date.now()
-        newDesign.lastUpdatedTime = newDesign.createdTime
-        store.commit('design/UPDATE_addDesign', {
-          path,
-          design: newDesign
-        })
-        return
+        store.dispatch('design/copyDesign', design)
+        break
       }
       case 'trash': {
-        this.delete({ path, design })
-        return {
+        this.delete(design)
+        eventEmitter({
           event: 'deleteItem',
           payload: {
             type: 'design',
-            data: { path, design }
+            data: design,
+            dest: store.getters['design/getCurrLocation']
           }
-        }
+        })
+        break
       }
       case 'delete': {
-        return {
+        eventEmitter({
           event: 'deleteForever',
-          payload: { path, design }
-        }
+          payload: design
+        })
+        break
       }
       case 'reduction': {
-        this.recover({ path, design })
-        return {
-          event: 'recoverItem',
-          payload: {
-            type: 'design',
-            data: { path, design }
-          }
-        }
+        this.recover(design).then((dest) => {
+          if (dest === '') return
+          eventEmitter({
+            event: 'recoverItem',
+            payload: {
+              type: 'design',
+              data: design,
+              dest
+            }
+          })
+        })
+        break
       }
       case 'folder': {
-        return {
+        eventEmitter({
           event: 'moveDesignToFolder',
-          payload: { path, design }
-        }
+          payload: design
+        })
+        break
       }
       case 'download': {
-        return {
+        eventEmitter({
           event: 'downloadDesign',
-          payload: { path, design }
-        }
+          payload: design
+        })
+        break
       }
     }
   }
 
-  dispatchFolderMenuAction(icon: string, parents: string[], folder: IFolder): { event: string, payload: any } | undefined {
+  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'delete': {
-        return {
+        eventEmitter({
           event: 'deleteFolderForever',
-          payload: { parents, folder }
-        }
+          payload: folder
+        })
+        break
       }
       case 'reduction': {
-        this.recoverFolder({ parents, folder })
-        return {
-          event: 'recoverItem',
-          payload: {
-            type: 'folder',
-            data: { parents, folder }
-          }
-        }
+        this.recoverFolder(folder).then((dest) => {
+          if (dest === '') return
+          eventEmitter({
+            event: 'recoverItem',
+            payload: {
+              type: 'folder',
+              data: folder,
+              dest
+            }
+          })
+        })
+        break
       }
     }
   }
 
-  addNewFolder(path: string[]): string {
-    const folder = this.newFolder('未命名資料夾', 'Daniel') // TODO: use usernames instead
-    store.commit('design/UPDATE_addFolder', {
+  addNewFolder(path: string[], fromFolderView = false): string {
+    const folder = this.newFolder('未命名資料夾', 'SYSTEM')
+    store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
     })
+    if (fromFolderView) {
+      store.commit('design/UPDATE_addFolder', folder)
+    }
     return folder.id
   }
 
-  move(design: IDesign, source: string[], destination: string[]) {
-    // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    store.commit('design/UPDATE_deleteDesign', {
-      path: source,
-      design
-    })
-    store.commit('design/UPDATE_addDesign', {
-      path: destination,
-      design
-    })
-    store.commit('design/UPDATE_path', {
-      id: design.id,
-      path: destination
+  move(design: IDesign, destination: string[]) {
+    store.dispatch('design/moveDesign', {
+      design,
+      destination
     })
   }
 
-  moveAll(pathedDesigns: IPathedDesign[], destination: string[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.move(pathedDesign.design, pathedDesign.path, destination)
-    }
-  }
-
-  moveFolder(folder: IFolder, source: string[], destination: string[]) {
-    // if move to current folder, skip moving
-    if (generalUtils.arrayCompare<string>(source, destination)) return
-    console.log(folder, source, destination)
-    store.commit('design/UPDATE_deleteFolder', {
-      parents: source,
-      folder
+  moveAll(designs: IDesign[], destination: string[]) {
+    store.dispatch('design/moveDesigns', {
+      designs,
+      destination
     })
-    store.commit('design/UPDATE_addFolder', {
-      parents: destination,
-      folder
+  }
+
+  async moveFolder(pathedFolder: IPathedFolder, destination: string[]) {
+    await store.dispatch('design/moveFolder', {
+      parents: pathedFolder.parents,
+      folder: pathedFolder.folder,
+      destination
     })
-    for (const design of folder.designs) {
-      store.commit('design/UPDATE_path', {
-        id: design.id,
-        path: this.appendPath(destination, folder)
-      })
-    }
   }
 
-  delete(pathedDesign: IPathedDesign) {
-    store.commit('design/UPDATE_addToTrash', pathedDesign)
-    store.commit('design/UPDATE_deleteDesign', pathedDesign)
+  delete(design: IDesign) {
+    store.dispatch('design/deleteDesign', design)
   }
 
-  deleteAll(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_addToTrash', pathedDesign)
-      store.commit('design/UPDATE_deleteDesign', pathedDesign)
-    }
+  deleteAll(designs: IDesign[]) {
+    store.dispatch('design/deleteDesigns', designs)
   }
 
-  deleteFolder(pathedFolder: IPathedFolder) {
-    store.commit('design/UPDATE_addFolderToTrash', pathedFolder)
-    store.commit('design/UPDATE_deleteFolder', pathedFolder)
+  async deleteFolder(pathedFolder: IPathedFolder) {
+    await store.dispatch('design/deleteFolder', pathedFolder)
   }
 
-  deleteForever(pathedDesign: IPathedDesign) {
-    store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
-    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  deleteForever(design: IDesign) {
+    store.dispatch('design/deleteDesignForever', design)
   }
 
-  deleteAllForever(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.deleteForever(pathedDesign)
-    }
+  deleteAllForever(designs: IDesign[], folders: IFolder[]) {
+    store.dispatch('design/deleteAllForever', { designs, folders })
   }
 
-  deleteFolderForever(pathedFolder: IPathedFolder) {
-    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  deleteFolderForever(folder: IFolder) {
+    store.dispatch('design/deleteFolderForever', folder)
   }
 
-  deleteAllFolderForever(pathedFolders: IPathedFolder[]) {
-    for (const pathedFolder of pathedFolders) {
-      this.deleteFolderForever(pathedFolder)
-    }
+  async recover(design: IDesign, deletionLocation?: string): Promise<string> {
+    return await store.dispatch('design/recoverDesign', { design, deletionLocation })
   }
 
-  recover(pathedDesign: IPathedDesign) {
-    const folders = store.getters['design/getFolders'] as IFolder[]
-    const folder = this.search(folders, pathedDesign.path)
-    if (folder) {
-      store.commit('design/UPDATE_addDesign', pathedDesign)
-    } else {
-      store.commit('design/UPDATE_addDesign', {
-        path: [this.ROOT],
-        design: pathedDesign.design
-      })
-    }
-    store.commit('design/UPDATE_removeFromTrash', pathedDesign)
+  async recoverAll(designs: IDesign[], folders: IFolder[]): Promise<string> {
+    return await store.dispatch('design/recoverAll', { designs, folders })
   }
 
-  recoverAll(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      this.recover(pathedDesign)
-    }
+  async recoverFolder(folder: IFolder, deletionLocation?: string): Promise<string> {
+    return await store.dispatch('design/recoverFolder', { folder, deletionLocation })
   }
 
-  recoverFolder(pathedFolder: IPathedFolder) {
-    const folders = store.getters['design/getFolders'] as IFolder[]
-    const folder = this.search(folders, pathedFolder.parents)
-    if (folder) {
-      store.commit('design/UPDATE_addFolder', pathedFolder)
-    } else {
-      store.commit('design/UPDATE_addFolder', {
-        parents: [this.ROOT],
-        folder: pathedFolder.folder
-      })
-    }
-    store.commit('design/UPDATE_removeFolderFromTrash', pathedFolder)
+  removeFromFavorite(design: IDesign) {
+    store.dispatch('design/unfavorDesign', design)
   }
 
-  recoverAllFolder(pathedFolders: IPathedFolder[]) {
-    for (const pathedFolder of pathedFolders) {
-      this.recoverFolder(pathedFolder)
-    }
+  removeAllFromFavorite(designs: IDesign[]) {
+    store.dispatch('design/unfavorDesigns', designs)
   }
 
-  removeAllFromFavorite(pathedDesigns: IPathedDesign[]) {
-    for (const pathedDesign of pathedDesigns) {
-      store.commit('design/UPDATE_removeFromFavorite', pathedDesign)
-    }
+  addToFavorite(design: IDesign) {
+    store.dispatch('design/favorDesign', design)
   }
 
-  addAllToFavorite(pathedDesigns: IPathedDesign[]) {
-    const favoriteDesignIds = store.getters['design/getFavoriteDesigns'].map((pathedDesign: IPathedDesign) => pathedDesign.design.id)
-    for (const pathedDesign of pathedDesigns) {
-      if (favoriteDesignIds.includes(pathedDesign.design.id)) continue
-      store.commit('design/UPDATE_addToFavorite', pathedDesign)
-    }
+  addAllToFavorite(designs: IDesign[]) {
+    store.dispatch('design/favorDesigns', designs)
+  }
+
+  setDesignName(design: IDesign, name: string) {
+    store.dispatch('design/setDesignName', { design, name })
+  }
+
+  setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
+    store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
+  }
+
+  createFolder(parents: string[], folder: IFolder, name: string) {
+    store.dispatch('design/createFolder', {
+      path: parents.slice(1).join(','),
+      folder,
+      name
+    })
+  }
+
+  async checkEmpty(pathedFolder: IPathedFolder): Promise<boolean> {
+    return await store.dispatch('design/checkEmpty', pathedFolder)
   }
 
   isMaxLevelReached(level: number) {
     return level >= 4
   }
 
-  getDesignPreview(assetId: string, scale = 2 as 1 | 2): string {
+  fetchDesigns(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('design/SET_allDesigns', [])
+    }
+    store.commit('design/SET_isDesignsLoading', true)
+    fetcher().then(() => {
+      store.commit('design/SET_isDesignsLoading', false)
+    })
+  }
+
+  fetchFolders(fetcher: () => Promise<void>) {
+    store.commit('design/SET_allFolders', [])
+    store.commit('design/SET_isFoldersLoading', true)
+    fetcher().then(() => {
+      store.commit('design/SET_isFoldersLoading', false)
+    })
+  }
+
+  getDesignPreview(assetId: string, scale = 2 as 1 | 2, ver?: number): string {
     const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
-    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${generalUtils.generateRandomString(6)}`
+    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
+    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
     return previewUrl
   }
 
@@ -553,7 +502,6 @@ class DesignUtils {
       width: width ?? 1080,
       height: height ?? 1080
     })])
-    store.commit('SET_lastSelectedPageIndex', 0)
     pageUtils.clearPagesInfo()
     themeUtils.refreshTemplateState()
     if (this.isLogin) {
@@ -565,7 +513,7 @@ class DesignUtils {
     }
   }
 
-  setDesign(design: IUserDesignContentData) {
+  setDesign(design: IUserDesignContentData | IDesign) {
     // if(uploadUtils.assetId.length !== 0) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
     // }
@@ -578,7 +526,7 @@ class DesignUtils {
       }
     }
 
-    uploadUtils.getDesign('design', design.id)
+    uploadUtils.getDesign('design', design.id ?? '')
   }
 }
 

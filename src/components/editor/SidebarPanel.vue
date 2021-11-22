@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel")
-    keep-alive(:include="['panel-template']")
+    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
       component(v-if="isActive"
         class="p-10 border-box"
         :style="panelStyles()"

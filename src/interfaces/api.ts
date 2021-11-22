@@ -186,11 +186,20 @@ export interface IUserDesignContentData {
   file_name: string,
   height: number,
   id: string,
+  asset_index: number,
   name: string,
   team_id: string,
   update_time: string,
   ver: number,
   width: number
+}
+
+export interface IUserFolderContentData {
+  author: string,
+  create_time: string,
+  id: string,
+  name: string,
+  update_time: string
 }
 export interface IUserImageContentData {
   color: Array<string>,

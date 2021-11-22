@@ -29,6 +29,7 @@ import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
+import unsplash from '@/store/module/photo'
 
 Vue.use(Vuex)
 
@@ -248,7 +249,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
     state.currSidebarPanelType = type
   },
-  SET_currFunctionPanelType(state: IEditorState, type: SidebarPanelType) {
+  SET_currFunctionPanelType(state: IEditorState, type: FunctionPanelType) {
     state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
@@ -641,6 +642,7 @@ export default new Vuex.Store({
     design,
     page,
     homeTemplate,
-    hashtag
+    hashtag,
+    unsplash
   }
 })

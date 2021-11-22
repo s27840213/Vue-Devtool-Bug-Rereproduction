@@ -4,11 +4,6 @@
       @dragover.prevent,
       @dragenter.prevent)
     span(class="panel-file__title text-blue-1 label-lg") My File
-    //- will remove in the furture
-    span(class="panel-file__title text-blue-1 h-2") My Design Test
-    div(class="tmp-mydesign")
-      template(v-for="design in assetDesign")
-        img(class="mr-5" :src="getPreviewSrc(design.id)" @click="setDesign(design)")
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") Upload Image
@@ -39,7 +34,6 @@ import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import store from '@/store'
 import { IUserDesignContentData } from '@/interfaces/api'
-import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   components: {
@@ -60,9 +54,6 @@ export default Vue.extend({
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
-    },
-    assetDesign(): IUserDesignContentData {
-      return (store.getters['user/getAssetDesign'] as IUserDesignContentData)
     }
   },
   methods: {
@@ -81,12 +72,6 @@ export default Vue.extend({
         const files = dt.files
         uploadUtils.uploadAsset('image', files)
       }
-    },
-    getPreviewSrc(assetId: string) {
-      return designUtils.getDesignPreview(assetId)
-    },
-    setDesign(design: IUserDesignContentData) {
-      designUtils.setDesign(design)
     }
   }
 })

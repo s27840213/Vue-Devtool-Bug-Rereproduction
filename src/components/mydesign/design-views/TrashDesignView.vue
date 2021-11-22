@@ -15,8 +15,7 @@
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
             span 30天後自動永久刪除。
     div(class="horizontal-rule")
-    folder-gallery(v-if="allFolders.length > 0"
-                  :menuItems="menuItems"
+    folder-gallery(:menuItems="menuItems"
                   :allFolders="allFolders"
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
@@ -24,29 +23,32 @@
                   :selectable="true"
                   @menuAction="handleMenuAction"
                   @moveItem="handleMoveItem")
-    design-gallery(v-if="allDesigns.length > 0"
-                  :menuItems="menuItems"
+    design-gallery(:menuItems="menuItems"
                   :allDesigns="allDesigns"
                   :selectedNum="selectedNum"
                   :limitFunctions="true"
                   :useDelete="true"
-                  @menuAction="handleMenuAction")
+                  @menuAction="handleMenuAction"
+                  @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
     FolderGallery,
     DesignGallery
+  },
+  mounted() {
+    designUtils.fetchDesigns(this.fetchTrashDesigns)
+    designUtils.fetchFolders(this.fetchTrashFolders)
   },
   data() {
     return {
@@ -70,18 +72,10 @@ export default Vue.extend({
       trashDesigns: 'getTrashDesigns',
       trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      allDesigns: 'getAllDesigns',
+      allFolders: 'getAllFolders'
     }),
-    allDesigns(): [string[], IDesign][] {
-      const designs = generalUtils.deepCopy(this.trashDesigns) as IPathedDesign[]
-      designUtils.sortDesignsBy(designs, 'time', true)
-      return designs.map((item) => [item.path, item.design])
-    },
-    allFolders(): [string[], IFolder][] {
-      const folders = generalUtils.deepCopy(this.trashFolders) as IPathedFolder[]
-      designUtils.sortFoldersBy(folders, 'time', true)
-      return folders.map((item) => [item.parents, item.folder])
-    },
     menuItemSlots(): {name: string, icon: string, text: string}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
@@ -90,12 +84,20 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchTrashDesigns: 'fetchTrashDesigns',
+      fetchTrashFolders: 'fetchTrashFolders',
+      fetchMoreTrashDesigns: 'fetchMoreTrashDesigns'
+    }),
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
+    },
+    handleLoadMore() {
+      designUtils.fetchDesigns(this.fetchMoreTrashDesigns, false)
     },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen

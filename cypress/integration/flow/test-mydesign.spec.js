@@ -35,7 +35,7 @@ var getSidebarRow = (name) => {
   return cy.get('.nav-item').eq(index)
 }
 
-describe('MyDesign', () => {
+describe.skip('MyDesign', () => {
   beforeEach(() => {
     cy.visit('http://localhost:8080/mydesign?token=OvODomMEzmmUBXXP')
   })

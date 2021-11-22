@@ -61,7 +61,8 @@
                         iconWidth="11px"
                         iconHeight="13px"
                         iconColor="gray-2")
-        component(:is="mydesignView"
+        component(v-if="currLocation !== ''"
+                  :is="mydesignView"
                   class="design-view"
                   @deleteItem="handleDeleteItem"
                   @clearSelection="handleClearSelection"
@@ -83,12 +84,16 @@
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0], true)}` }}
+                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0])}` }}
           transition(name="slide-fade")
             div(v-if="isShowMoveMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
                 span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
+          transition(name="slide-fade")
+            div(v-if="isErrorShowing" class="my-design__message")
+              div(class="my-design__message__text")
+                span 發生問題，請稍後再試
         div(v-if="isMoveToFolderPanelOpen"
             class="my-design__change-folder"
             :class="{centered: isMovingSingleToFolder}"
@@ -99,12 +104,10 @@
                 span 移至資料夾
               div(class="my-design__change-folder__hr")
             div(class="my-design__change-folder__folders")
-              structure-folder(v-for="folder in copiedFolders"
+              structure-folder(v-for="folder in realFolders"
                               :folder="folder"
                               :parents="[]"
-                              :level="0"
-                              @moveToFolderSelect="handleMoveToFolderSelect"
-                              @moveToFolderExpand="handleMoveToFolderExpand")
+                              :level="0")
             div(class="my-design__change-folder__footer")
               div(class="my-design__change-folder__buttons")
                 div(class="my-design__change-folder__cancel"
@@ -137,7 +140,7 @@
             div(class="delete-folder-message__buttons")
               div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
                 span 取消
-              div(class="delete-folder-message__confirm" @click="deleteFolder(folderBuffer)")
+              div(class="delete-folder-message__confirm" @click="deleteFolder(pathedFolderBuffer)")
                 span 刪除
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-forever-message")
@@ -161,7 +164,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
@@ -171,10 +174,9 @@ import TrashDesignView from '@/components/mydesign/design-views/TrashDesignView.
 import FolderDesignView from '@/components/mydesign/design-views/FolderDesignView.vue'
 import StructureFolder from '@/components/mydesign/StructureFolder.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -191,6 +193,36 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  props: {
+    view: String
+  },
+  async created() {
+    this.setFolders(designUtils.makeDesignsForTesting())
+    await this.fetchStructuralFolders({ path: 'root' })
+    if (this.view === 'all') {
+      this.setCurrLocation('a')
+      return
+    }
+    if (this.view === 'favor') {
+      this.setCurrLocation('h')
+      return
+    }
+    if (this.view === 'trash') {
+      this.setCurrLocation('t')
+      return
+    }
+    if (!this.view) {
+      this.setCurrLocation('a')
+      return
+    }
+    const path = this.view.split('&')
+    const success = await this.fetchFoldersAlong({ pathNodes: path })
+    if (success) {
+      this.setCurrLocation(`f:${designUtils.ROOT}/${path.join('/')}`)
+    } else {
+      this.setCurrLocation('a')
+    }
+  },
   data() {
     return {
       deletedQueue: [] as IQueueItem[],
@@ -200,22 +232,24 @@ export default Vue.extend({
       isShowRecoverMessage: false,
       movedQueue: [] as IQueueItem[],
       isShowMoveMessage: false,
-      folderBuffer: undefined as IPathedFolder | undefined,
-      designBuffer: undefined as IPathedDesign | undefined,
+      pathedFolderBuffer: undefined as IPathedFolder | undefined,
+      designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
       isFavDelMouseOver: false,
       isMoveToFolderPanelOpen: false,
-      copiedFolders: [] as IFolder[],
-      moveToFolderSelectInfo: '',
-      isMovingSingleToFolder: false
+      isMovingSingleToFolder: false,
+      errorMessageTimer: -1
     }
   },
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
+      moveToFolderSelectInfo: 'getMoveToFolderSelectInfo',
       folders: 'getFolders',
+      copiedFolders: 'getCopiedFolders',
       selectedDesigns: 'getSelectedDesigns',
-      selectedFolders: 'getSelectedFolders'
+      selectedFolders: 'getSelectedFolders',
+      isErrorShowing: 'getIsErrorShowing'
     }),
     mydesignView(): string {
       switch (this.currLocation[0]) {
@@ -236,6 +270,9 @@ export default Vue.extend({
     },
     isMultiSelected(): boolean {
       return this.selectedNum > 1
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.copiedFolders])
     }
   },
   watch: {
@@ -260,25 +297,41 @@ export default Vue.extend({
     },
     isMoveToFolderPanelOpen(newVal) {
       if (newVal) {
-        this.copiedFolders = designUtils.foldAll((generalUtils.deepCopy(this.folders) as IFolder[])[0]?.subFolders ?? [])
+        this.snapshotFolders()
       } else {
-        this.copiedFolders = []
         this.designBuffer = undefined
         this.isMovingSingleToFolder = false
+      }
+    },
+    isErrorShowing(newVal) {
+      if (newVal) {
+        if (this.errorMessageTimer > 0) {
+          clearTimeout(this.errorMessageTimer)
+        }
+        this.errorMessageTimer = setTimeout(() => {
+          this.setIsErrorShowing(false)
+        }, 1000)
       }
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchFoldersAlong: 'fetchFoldersAlong',
+      fetchStructuralFolders: 'fetchStructuralFolders'
+    }),
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
-      setCurrLocation: 'SET_currLocation'
+      setCurrLocation: 'SET_currLocation',
+      setFolders: 'SET_folders',
+      snapshotFolders: 'UPDATE_snapshotFolders',
+      setIsErrorShowing: 'SET_isErrorShowing'
     }),
     stackStyles() {
       return { top: this.isMultiSelected ? '82px' : '27px' }
     },
     messageImageStyles(item: IQueueItem) {
       if (item.type === 'design') {
-        return { 'background-image': `url(${(item.data as IPathedDesign).design.thumbnail})` }
+        return { 'background-image': `url(${(item.data as IDesign).thumbnail})` }
       } else {
         return { display: 'none' }
       }
@@ -289,17 +342,11 @@ export default Vue.extend({
       } else if (item.type === 'design') {
         return '設計'
       } else {
-        return (item.data as IPathedFolder).folder.name + ' '
+        return (item.data as IFolder).name + ' '
       }
     },
-    messageDestName(item: IQueueItem, isRecover = false): string {
-      if (item.type === 'multi') {
-        return isRecover ? '原資料夾' : designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
-      } else if (item.type === 'design') {
-        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedDesign).path)
-      } else {
-        return designUtils.checkRecoveredDirectory(this.folders, (item.data as IPathedFolder).parents)
-      }
+    messageDestName(item: IQueueItem): string {
+      return item.dest ?? ''
     },
     showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
       const item = queue[0]
@@ -362,70 +409,57 @@ export default Vue.extend({
     handleDeleteFolder(payload: {pathedFolder: IPathedFolder, empty: boolean}) {
       const { pathedFolder, empty } = payload
       if (empty) {
-        this.deleteFolder(pathedFolder)
-        this.handleDeleteItem({
-          type: 'folder',
-          data: pathedFolder
+        this.deleteFolder(pathedFolder, () => {
+          this.handleDeleteItem({
+            type: 'folder',
+            data: pathedFolder.folder,
+            dest: `f:${pathedFolder.parents.join('/')}`
+          })
         })
       } else {
-        this.folderBuffer = pathedFolder
+        this.pathedFolderBuffer = pathedFolder
         this.confirmMessage = 'delete-folder'
       }
     },
-    handleDeleteForever(payload: IPathedDesign) {
+    handleDeleteForever(payload: IDesign) {
       this.designBuffer = payload
       this.confirmMessage = 'delete-forever'
     },
-    handleDeleteFolderForever(payload: IPathedFolder) {
-      this.folderBuffer = payload
+    handleDeleteFolderForever(payload: IFolder) {
+      this.pathedFolderBuffer = { parents: [], folder: payload }
       this.confirmMessage = 'delete-forever'
     },
     handleFavDelMouseOver(val: boolean) {
       this.isFavDelMouseOver = val && this.mydesignView === 'favorite-design-view'
     },
-    handleMoveToFolderSelect(selectInfo: string) {
-      designUtils.dislocateFrom(this.copiedFolders, 'f:' + this.moveToFolderSelectInfo)
-      this.moveToFolderSelectInfo = selectInfo
-      designUtils.locateTo(this.copiedFolders, 'f:' + selectInfo)
-    },
-    handleMoveToFolderExpand(pathedFolder: IPathedFolder) {
-      const targetFolder = designUtils.search(this.copiedFolders, designUtils.createPath(pathedFolder))
-      if (targetFolder) {
-        targetFolder.isExpanded = !targetFolder.isExpanded
-      }
-    },
     handleMoveToFolder() {
       if (this.moveToFolderSelectInfo === '') return
-      const destination = [designUtils.ROOT, ...(this.moveToFolderSelectInfo.split('/'))]
+      const destination = [designUtils.ROOT, ...(designUtils.makePath(this.moveToFolderSelectInfo))]
       if (this.isMovingSingleToFolder && this.designBuffer) {
-        const { path, design } = this.designBuffer
-        designUtils.move(design, path, destination)
+        designUtils.move(this.designBuffer, destination)
         this.handleMoveItem({
           type: 'design',
-          data: {
-            path: destination,
-            design
-          }
+          data: this.designBuffer,
+          dest: designUtils.search(this.copiedFolders, destination.slice(1))?.name ?? ''
         })
         this.designBuffer = undefined
       } else {
         designUtils.moveAll(Object.values(this.selectedDesigns), destination)
         this.handleMoveItem({
           type: 'multi',
-          data: {
-            path: destination,
-            design: (Object.values(this.selectedDesigns) as IPathedDesign[])[0].design
-          }
+          data: (Object.values(this.selectedDesigns) as IDesign[])[0],
+          dest: designUtils.search(this.copiedFolders, destination.slice(1))?.name ?? ''
         })
       }
+      this.isMoveToFolderPanelOpen = false
     },
-    handleMoveDesignToFolder(pathedDesign: IPathedDesign) {
-      this.designBuffer = pathedDesign
+    handleMoveDesignToFolder(design: IDesign) {
+      this.designBuffer = design
       this.isMovingSingleToFolder = true
       this.isMoveToFolderPanelOpen = true
     },
-    handleDownloadDesign(pathedDesign: IPathedDesign) {
-      this.designBuffer = pathedDesign
+    handleDownloadDesign(design: IDesign) {
+      this.designBuffer = design
       this.confirmMessage = 'download'
     },
     checkRecoveredItemShowing(item: IQueueItem): boolean {
@@ -433,32 +467,34 @@ export default Vue.extend({
       if (!currentShowing) return false
       if (item.type !== currentShowing.type) return false
       if (item.type === 'design') {
-        return (item.data as IPathedDesign).design.id === (this.deletedQueue[0].data as IPathedDesign).design.id
+        return (item.data as IDesign).id === (currentShowing.data as IDesign).id
       }
       if (item.type === 'folder') {
-        return designUtils.isFolderEqual(item.data as IPathedFolder, currentShowing.data as IPathedFolder)
+        return (item.data as IFolder).id === (currentShowing.data as IFolder).id
       }
       return false
     },
-    deleteFolder(pathedFolder: IPathedFolder) {
-      designUtils.deleteFolder(pathedFolder)
-      this.folderBuffer = undefined
-      if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
-      if (pathedFolder.parents.length > 1) {
-        this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
-      } else {
-        this.setCurrLocation('a')
-      }
+    deleteFolder(pathedFolder: IPathedFolder, callback?: () => void) {
+      this.pathedFolderBuffer = undefined
+      designUtils.deleteFolder(pathedFolder).then(() => {
+        if (callback) callback()
+        if (this.currLocation !== `f:${designUtils.createPath(pathedFolder).join('/')}`) return
+        if (pathedFolder.parents.length > 1) {
+          this.setCurrLocation(`f:${pathedFolder.parents.join('/')}`)
+        } else {
+          this.setCurrLocation('a')
+        }
+      })
     },
     recover() {
       const item = this.deletedQueue[0]
       if (item) {
         clearTimeout(this.messageTimer)
         if (item.type === 'design') {
-          designUtils.recover(item.data as IPathedDesign)
+          designUtils.recover(item.data as IDesign, item.dest)
         }
         if (item.type === 'folder') {
-          designUtils.recoverFolder(item.data as IPathedFolder)
+          designUtils.recoverFolder(item.data as IFolder, item.dest)
         }
         this.isShowDeleteMessage = false
         setTimeout(() => {
@@ -478,13 +514,14 @@ export default Vue.extend({
       this.confirmMessage = 'delete-all'
     },
     recoverAll() {
-      const selectedDesigns = Object.values(this.selectedDesigns) as IPathedDesign[]
-      const selectedFolders = Object.values(this.selectedFolders) as IPathedFolder[]
-      designUtils.recoverAll(selectedDesigns)
-      designUtils.recoverAllFolder(selectedFolders)
-      this.handleRecoverItem({
-        type: 'multi',
-        data: undefined
+      console.log(this.selectedDesigns, this.selectedFolders)
+      designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders)).then((dest) => {
+        if (dest === '') return
+        this.handleRecoverItem({
+          type: 'multi',
+          data: undefined,
+          dest
+        })
       })
     },
     deleteAllForever() {
@@ -499,19 +536,18 @@ export default Vue.extend({
         this.designBuffer = undefined
         return
       }
-      if (this.folderBuffer) {
-        designUtils.deleteFolderForever(this.folderBuffer)
-        this.folderBuffer = undefined
+      if (this.pathedFolderBuffer) {
+        designUtils.deleteFolderForever(this.pathedFolderBuffer.folder)
+        this.pathedFolderBuffer = undefined
         return
       }
       if (this.isMultiSelected) {
-        designUtils.deleteAllForever(Object.values(this.selectedDesigns))
-        designUtils.deleteAllFolderForever(Object.values(this.selectedFolders))
+        designUtils.deleteAllForever(Object.values(this.selectedDesigns), Object.values(this.selectedFolders))
       }
     },
     closeConfirmMessage() {
       this.confirmMessage = ''
-      this.folderBuffer = undefined
+      this.pathedFolderBuffer = undefined
       this.designBuffer = undefined
     }
   }

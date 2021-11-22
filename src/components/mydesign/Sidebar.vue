@@ -61,17 +61,14 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
-import { IFolder, IPathedDesign, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 
 export default Vue.extend({
   components: {
     SidebarFolder
-  },
-  mounted() {
-    this.setFolders(designUtils.makeDesignsForTesting())
   },
   data() {
     return {
@@ -100,15 +97,14 @@ export default Vue.extend({
     },
     realFolders(): IFolder[] {
       if (this.folders.length > 0) {
-        return this.folders[0].subFolders
+        return designUtils.sortById([...this.folders[0].subFolders])
       }
       return []
     }
   },
   methods: {
     ...mapMutations('design', {
-      setCurrLocation: 'SET_currLocation',
-      setFolders: 'SET_folders'
+      setCurrLocation: 'SET_currLocation'
     }),
     draggedOverStyles(type: string) {
       switch (type) {
@@ -153,54 +149,60 @@ export default Vue.extend({
         case 'a':
           this.isAllDraggedOver = false
           if (this.draggingType === 'design') {
-            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            const design = this.draggingDesign as IDesign | undefined
             if (!design) return
             if (this.isMultiSelected && this.selectedDesigns[design.id]) {
               designUtils.moveAll(Object.values(this.selectedDesigns), destination)
               this.$emit('moveItem', {
                 type: 'multi',
-                data: { path: destination, design }
+                data: design,
+                dest: designUtils.ROOT_DISPLAY
               })
             } else {
-              designUtils.move(design, path, destination)
+              designUtils.move(design, destination)
               this.$emit('moveItem', {
                 type: 'design',
-                data: { path: destination, design }
+                data: design,
+                dest: designUtils.ROOT_DISPLAY
               })
             }
           } else if (this.draggingType === 'folder') {
-            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-            if (!folder) return
-            designUtils.moveFolder(folder, parents, destination)
-            if (folder.isCurrLocation) {
-              this.setCurrLocation(`f:${this.ROOT}/${folder.id}`)
-            }
-            this.$emit('moveItem', {
-              type: 'folder',
-              data: { parents: destination, folder }
+            if (!this.draggingFolder) return
+            designUtils.moveFolder(this.draggingFolder, destination).then(() => {
+              if (this.draggingFolder.folder.isCurrLocation) {
+                this.setCurrLocation(`f:${this.ROOT}/${this.draggingFolder.folder.id}`)
+              }
+              this.$emit('moveItem', {
+                type: 'folder',
+                data: this.draggingFolder.folder,
+                dest: designUtils.ROOT_DISPLAY
+              })
             })
           }
           break
         case 't':
           this.isTrashDraggedOver = false
           if (this.draggingType === 'design') {
-            const { path = [], design = undefined } = (this.draggingDesign as IPathedDesign | undefined) ?? {}
+            const design = this.draggingDesign as IDesign | undefined
             if (!design) return
             if (this.isMultiSelected && this.selectedDesigns[design.id]) {
               this.$emit('deleteAll')
             } else {
-              designUtils.delete({ path, design })
+              designUtils.delete(design)
               this.$emit('deleteItem', {
                 type: 'design',
-                data: { path, design }
+                data: design,
+                dest: this.currLocation
               })
             }
           } else if (this.draggingType === 'folder') {
-            const { parents = [], folder = undefined } = (this.draggingFolder as IPathedFolder | undefined) ?? {}
-            if (!folder) return
-            this.$emit('deleteFolder', {
-              pathedFolder: { parents, folder },
-              empty: folder.designs.length + folder.subFolders.length === 0
+            const pathedFolder = this.draggingFolder
+            if (!pathedFolder) return
+            designUtils.checkEmpty(pathedFolder).then((empty) => {
+              this.$emit('deleteFolder', {
+                pathedFolder: pathedFolder,
+                empty
+              })
             })
           }
           break
