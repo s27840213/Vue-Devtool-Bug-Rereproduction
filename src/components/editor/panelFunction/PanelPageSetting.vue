@@ -102,12 +102,16 @@
           span(class="body-1") groupId
           span(class="pl-15 body-2"
             @click="copyText(groupId)") {{groupId}}
-        div(v-if="isGetTemplate")
+        div(class="pt-5 text-red body-2") {{groupErrorMsg}}
+        div(v-for="id in unsetThemeTemplate"
+          class="pt-5 text-red body-2"
+          @click="copyText(id)") {{id}}
+        div(v-if="isGetGroup")
           div(class="template-information__line")
-            span(class="body-1") 封面設定
+            span(class="body-1") Theme 封面設定
           div(class="square-wrapper text-center")
-            div(class="cover-option body-3")
-              span Theme
+            div(class="cover-option body-4")
+              span id
               span Cover Id
             template(v-for="(item, idx) in groupInfo.groupThemes")
               div(v-if="item.options.length > 0" class="pt-5 cover-option")
@@ -265,6 +269,7 @@ export default Vue.extend({
       isLocked: true,
       isPanelOpen: false,
       isLoading: false,
+      isGetGroup: false,
       isGetTemplate: false,
       updateGroupChecked: false,
       updateTemplateChecked: false,
@@ -296,11 +301,14 @@ export default Vue.extend({
         cover_ids: '',
         contents: [] as IThemeTemplate[],
         groupThemes: [] as ICoverTheme[]
-      }
+      },
+      groupErrorMsg: '',
+      unsetThemeTemplate: [] as string[]
     }
   },
   watch: {
     key_id: function() {
+      this.isGetGroup = false
       this.isGetTemplate = false
       this.templateInfo = {
         key_id: '',
@@ -502,7 +510,7 @@ export default Vue.extend({
       this.selectedFormat = key
     },
     async getDataClicked() {
-      // this.isLoading = true
+      this.isLoading = true
 
       this.resetStatus()
       const data = {}
@@ -511,8 +519,8 @@ export default Vue.extend({
       }
       if (this.groupId.length > 0) {
         const groupRes = await designApis.getDesignInfo(this.token, 'group', this.groupId, 'select', JSON.stringify(data))
-        console.log('groupRes', groupRes.data)
         if (groupRes.data.flag === 0) {
+          this.isGetGroup = true
           this.setGroupInfo(groupRes.data)
         } else {
           this.$notify({ group: 'copy', text: '找不到群組資料' })
@@ -540,9 +548,7 @@ export default Vue.extend({
         return
       }
       const coverId = this.groupInfo.groupThemes.map(theme => {
-        if (theme.options.length > 0) {
-          return String(theme.id) + ':' + theme.coverId
-        }
+        return String(theme.id) + ':' + theme.coverId
       })
       this.isLoading = true
       const data = {
@@ -598,6 +604,9 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
+      this.isGetGroup = false
+      this.unsetThemeTemplate = []
+      this.groupErrorMsg = ''
       this.isLoading = false
     },
     updateParentIdClicked() {
@@ -625,6 +634,8 @@ export default Vue.extend({
         contents: [],
         groupThemes: []
       }
+      this.unsetThemeTemplate = []
+      this.groupErrorMsg = ''
       this.groupInfo.cover_ids = data.data.cover_ids
       this.groupInfo.contents = data.data.contents
       const coverList = this.groupInfo.cover_ids.split(',')
@@ -638,14 +649,26 @@ export default Vue.extend({
       })
       this.groupInfo.contents.forEach(content => {
         const themes = content.theme_ids.split(',')
-        themes.forEach(id => {
-          if (parseInt(id) !== 0) {
-            const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === parseInt(id))
-            this.groupInfo.groupThemes[index].options.push(content.key_id)
-          }
-        })
+        if (themes.length === 0 || themes[0] === '0') {
+          // this.$notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
+          this.groupErrorMsg = '以下模板尚未設定theme，請設定完後再更新群組資訊：'
+          this.unsetThemeTemplate.push(content.key_id)
+          this.isGetGroup = false
+        } else {
+          themes.forEach(id => {
+            if (parseInt(id) !== 0) {
+              const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === parseInt(id))
+              this.groupInfo.groupThemes[index].options.push(content.key_id)
+            }
+          })
+        }
       })
       this.groupInfo.groupThemes = this.groupInfo.groupThemes.filter(theme => theme.options.length > 0)
+      this.groupInfo.groupThemes.forEach(theme => {
+        if (theme.options.indexOf(theme.coverId) === -1) {
+          theme.coverId = theme.options[0]
+        }
+      })
     },
     copyText(text: string) {
       if (text.length === 0) {
@@ -949,7 +972,7 @@ export default Vue.extend({
     display: grid;
     align-items: center;
     grid-auto-flow: column;
-    grid-template-columns: 50px auto;
+    grid-template-columns: 30px auto;
   }
   .theme-option {
     display: grid;
