@@ -1,83 +1,95 @@
 <template lang="pug">
   div(class="popup-download text-left"
     v-click-outside="handleClose")
-    div(class="body-3 mb-10") 檔案類型
-    dropdown(class="mb-10"
-      :options="typeOptions"
-      @select="handleSelectType")
-      download-type-option(:name="selectedType.name" :tag="selectedType.tag")
-      template(v-slot:option="{ data }")
-        div(class="popup-download__type")
-          download-type-option(:name="data.name" :tag="data.tag")
-          div(class="popup-download__type-desc") {{ data.desc }}
-    div(class="body-3")
-      div(v-if="'omitBackground' in selected")
-        download-check-button(type="checkbox"
-          class="mb-10"
-          label="透明背景"
-          @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
-      div(v-if="'scale' in selected"
-        class="flex items-center mb-10")
-        span 尺寸 x
-        dropdown(class="mx-5 popup-download__size-scale"
-          :options="scaleOptions"
-          @select="option => handleUpdate('scale', option)") {{ selected.scale }}
-        span 倍
-      div(v-if="'quality' in selected"
-        class="flex flex-column items-center mb-10")
-        div(class="flex items-center full-width mb-5")
-          span 品質
-          property-bar(class="popup-download__size-scale ml-15")
-            input(class="px-0"
-              type="text"
-              v-model.number="selectedTypeQuality")
-        input(class="popup-download__range-input"
-          v-model.number="selected.quality"
-          max="100"
-          min="1"
-          v-ratio-change
-          type="range")
-      div(class="mb-10 pt-5") 選擇頁面
-      div
-        download-check-button(type="radio"
-          class="mb-10"
-          group-name="range"
-          :label="`目前頁面（第${currentPageIndex + 1}頁）`"
-          value="current"
-          :default-checked="rangeType === 'current'"
-          @change="handleRangeType")
-        download-check-button(type="radio"
-          class="mb-10"
-          group-name="range"
-          label="所有頁面"
-          value="all"
-          :default-checked="rangeType === 'all'"
-          @change="handleRangeType")
-        div(class="flex items-center")
+    div(v-if="polling && filename" class="popup-download__form popup-download__form--polling")
+      div(class="body-3 text-gray-3") {{ filename }}
+      div(class="flex flex-between text-gray-2 items-center")
+        span(class="body-2") 正在下載
+        svg-icon(class="pointer"
+          iconName="close"
+          iconWidth="16px"
+          iconColor="gray-2"
+          @click.native="$emit('close')")
+      div(class="popup-download__progress mt-5")
+        div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
+    div(v-else class="popup-download__form")
+      div(class="body-3 mb-10") 檔案類型
+      dropdown(class="mb-10"
+        :options="typeOptions"
+        @select="handleSelectType")
+        download-type-option(:name="selectedType.name" :tag="selectedType.tag")
+        template(v-slot:option="{ data }")
+          div(class="popup-download__type")
+            download-type-option(:name="data.name" :tag="data.tag")
+            div(class="popup-download__type-desc") {{ data.desc }}
+      div(class="body-3")
+        div(v-if="'omitBackground' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            label="透明背景"
+            @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
+        div(v-if="'scale' in selected"
+          class="flex items-center mb-10")
+          span 尺寸 x
+          dropdown(class="mx-5 popup-download__size-scale"
+            :options="scaleOptions"
+            @select="option => handleUpdate('scale', option)") {{ selected.scale }}
+          span 倍
+        div(v-if="'quality' in selected"
+          class="flex flex-column items-center mb-10")
+          div(class="flex items-center full-width mb-5")
+            span 品質
+            property-bar(class="popup-download__size-scale ml-15")
+              input(class="px-0"
+                type="text"
+                v-model.number="selectedTypeQuality")
+          input(class="popup-download__range-input"
+            v-model.number="selected.quality"
+            max="100"
+            min="1"
+            v-ratio-change
+            type="range")
+        div(class="mb-10 pt-5") 選擇頁面
+        div
           download-check-button(type="radio"
+            class="mb-10"
             group-name="range"
-            value="spec"
-            label="範圍"
-            :default-checked="rangeType === 'spec'"
+            :label="`目前頁面（第${currentPageIndex + 1}頁）`"
+            value="current"
+            :default-checked="rangeType === 'current'"
             @change="handleRangeType")
-          download-page-selection(class="ml-5 w-75"
-            @confirm="handleRangeConfirm")
-      hr(class="popup-download__hr my-15")
-      download-check-button(type="checkbox"
-        class="mb-20"
-        label="儲存以上設定"
-        :default-checked="saveSubmission"
-        @change="({ checked }) => handleSubmission(checked)")
-    div
-      btn(class="full-width body-3 rounded"
-        :disabled="isButtonDisabled"
-        @click.native="handleSubmit")
-        svg-icon(v-if="polling"
-          class="align-middle"
-          iconName="loading"
-          iconColor="white"
-          iconWidth="20px")
-        span(v-else) 下載
+          download-check-button(type="radio"
+            class="mb-10"
+            group-name="range"
+            label="所有頁面"
+            value="all"
+            :default-checked="rangeType === 'all'"
+            @change="handleRangeType")
+          div(class="flex items-center")
+            download-check-button(type="radio"
+              group-name="range"
+              value="spec"
+              label="範圍"
+              :default-checked="rangeType === 'spec'"
+              @change="handleRangeType")
+            download-page-selection(class="ml-5 w-75"
+              @confirm="handleRangeConfirm")
+        hr(class="popup-download__hr my-15")
+        download-check-button(type="checkbox"
+          class="mb-20"
+          label="儲存以上設定"
+          :default-checked="saveSubmission"
+          @change="({ checked }) => handleSubmission(checked)")
+      div
+        btn(class="full-width body-3 rounded"
+          :disabled="isButtonDisabled"
+          @click.native="handleSubmit")
+          svg-icon(v-if="polling"
+            class="align-middle"
+            iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+          span(v-else) 下載
 </template>
 
 <script lang="ts">
@@ -113,6 +125,8 @@ export default Vue.extend({
       currentPageIndex,
       saveSubmission: !!selectedTypeVal,
       polling: false,
+      progress: -1,
+      filename: '',
       functionQueue: [] as Array<() => void>,
       exportId: '',
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
@@ -224,15 +238,16 @@ export default Vue.extend({
       if (['spec', 'current'].includes(rangeType)) {
         fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
       }
-
       DownloadUtil
         .getFileUrl(fileInfo)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress (response: any) {
-      const { flag, url, msg, progress } = response
+      const { flag, url, msg, progress, name } = response
+      if ((this as any)._isDestroyed) return
       switch (flag) {
         case 0:
+          this.progress = 100
           DownloadUtil.downloadByUrl(url)
           this.$emit('close')
           break
@@ -242,11 +257,16 @@ export default Vue.extend({
           break
         case 2:
           console.log('progress: ', progress)
+          if (name) {
+            this.progress = progress
+            this.filename = name
+            this.$emit('inprogress', true)
+          }
           setTimeout(() => {
             DownloadUtil
               .getFileStatus(url)
               .then(this.handleDownloadProgress)
-          }, 2000)
+          }, 500)
           break
       }
     }
@@ -264,6 +284,13 @@ export default Vue.extend({
     border-radius: 5px;
     box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
     background-color: setColor(white);
+    &__form {
+      min-height: 340px;
+      transition: .3s;
+      &--polling {
+        min-height: 50px;
+      }
+    }
     &__type {
       padding: 5px 10px 0;
       line-height: 18px;
@@ -308,6 +335,23 @@ export default Vue.extend({
     }
     &__size-scale {
       width: 65px;
+    }
+    &__progress {
+      width: 100%;
+      height: 8px;
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      background-color: #f1f1f1;
+    }
+    &__progress-value {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      transition: .3s;
+      border-radius: 4px;
+      background-color: setColor(blue-1);
     }
     .property-bar,
     .btn {
