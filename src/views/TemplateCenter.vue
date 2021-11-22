@@ -47,18 +47,21 @@
           //-   svg-icon(iconName="chevron-down"
           //-           iconWidth="24px"
           //-           iconColor="gray-2")
-      div(v-if="isTemplateReady" class="template-center__waterfall")
+      div(class="template-center__waterfall")
         div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
           div(v-for="template in waterfallTemplate"
               class="template-center__waterfall__column__template"
-              :style="templateStyles(template.height)")
+              :style="templateStyles(template.prev_height)"
+              @click="handleClickWaterfall(template)")
             div(class="template-center__waterfall__column__template__container")
               img(:src="template.url")
             div(class="template-center__waterfall__column__template__theme") {{ template.theme }}
-      div(v-else class="template-center__loading")
+      div(v-if="!isTemplateReady" class="template-center__loading")
         svg-icon(iconName="loading"
                 iconWidth="24px"
                 iconColor="gray-2")
+      observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                        @callback="handleLoadMore")
     nu-footer
     transition(name="fade-scale")
       div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
@@ -67,13 +70,17 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { ITemplate } from '@/interfaces/template'
 import templateCenterUtils from '@/utils/templateCenterUtils'
+import designUtils from '@/utils/designUtils'
+import assetUtils from '@/utils/assetUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -81,7 +88,8 @@ export default Vue.extend({
     NuHeader,
     SearchBar,
     NuFooter,
-    HashtagCategoryRow
+    HashtagCategoryRow,
+    ObserverSentinel
   },
   data() {
     const sortingCriteria = [
@@ -117,6 +125,9 @@ export default Vue.extend({
     }),
     ...mapState('templates', {
       templates: 'content'
+    }),
+    ...mapGetters('templates', {
+      hasNextPage: 'hasNextPage'
     })
   },
   methods: {
@@ -124,7 +135,8 @@ export default Vue.extend({
       getHashtags: 'getCategories'
     }),
     ...mapActions('templates', {
-      getTemplates: 'getThemeContent'
+      getTemplates: 'getThemeContent',
+      getMoreTemplates: 'getMoreContent'
     }),
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 5)}px` }
@@ -155,6 +167,16 @@ export default Vue.extend({
       this.selectedSorting = sortingCriterium
       this.composeKeyword()
     },
+    handleClickWaterfall(template: ITemplate) {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign(template.width, template.height)
+        assetUtils.addAsset({
+          id: template.id,
+          type: template.type,
+          ver: template.ver
+        })
+      })
+    },
     scrollToTop() {
       (this.$refs.body as HTMLElement).scrollTo({
         top: 0,
@@ -182,6 +204,14 @@ export default Vue.extend({
       res.push('order_by::' + this.selectedSorting)
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
+        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
+        this.isTemplateReady = true
+      })
+    },
+    handleLoadMore() {
+      console.log('load more')
+      this.isTemplateReady = false
+      this.getMoreTemplates().then(() => {
         this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
         this.isTemplateReady = true
       })
@@ -258,7 +288,7 @@ export default Vue.extend({
   &__content {
     margin: auto;
     width: 80%;
-    min-width: min(1110px, 98%);
+    min-width: calc(100% - 48px);
     min-height: 100%;
   }
   &__filter {
@@ -323,15 +353,16 @@ export default Vue.extend({
   &__waterfall {
     margin-bottom: 80px;
     display: flex;
-    gap: 15px;
+    gap: 24px;
     &__column {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 24px;
       &__template {
         position: relative;
         width: 100%;
+        border: 1px solid setColor(gray-5);
         overflow: hidden;
         cursor: pointer;
         &__container {
@@ -371,7 +402,7 @@ export default Vue.extend({
   }
   &__to-top {
     position: fixed;
-    right: max(min(calc(50% - 550px), 76px), calc(1% + 10px));
+    right: 76px;
     bottom: 84px;
   }
 }
