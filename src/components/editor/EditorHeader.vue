@@ -54,17 +54,7 @@
       //-   :iconWidth="'15px'"
       //-   :type="'primary-mid'"
       //-   @click.native="exportJsonFile()") Export JSON
-      btn(:hasIcon="true"
-        :iconName="'download'"
-        :iconWidth="'15px'"
-        :type="'primary-sm'"
-        class="rounded"
-        style="padding: 5px 40px;"
-        @click.native="download = true") 下 載
-      popup-download(v-if="download"
-        class="editor-header__download"
-        :page-index="lastSelectedPageIndex"
-        @close="() => (download = false)")
+      download-btn
       //- img(:src="require('@/assets/img/svg/avatar.svg')")
 </template>
 
@@ -79,25 +69,23 @@ import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
+import DownloadBtn from '@/components/download/DownloadBtn.vue'
 
 export default Vue.extend({
   data() {
     return {
       ShortcutUtils,
-      StepsUtils,
-      download: false
+      StepsUtils
     }
   },
   components: {
-    PopupDownload
+    DownloadBtn
   },
   computed: {
     ...mapState('user', [
       'role',
       'adminMode']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
       groupId: 'getGroupId'
     }),
     isInFirstStep(): boolean {
@@ -255,13 +243,6 @@ export default Vue.extend({
         }
       }
     }
-  }
-  &__download {
-    position: absolute;
-    top: 100%;
-    margin-top: 12px;
-    right: 0;
-    width: 210px;
   }
 }
 </style>
