@@ -479,6 +479,10 @@ export default Vue.extend({
         font-size: 16px;
         font-weight: 400;
         color: setColor(gray-1);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+        overflow: hidden;
       }
       &-editor {
         border-top: 1px dashed transparent;
