@@ -4,6 +4,7 @@ import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import layerUtils from './layerUtils'
+import textUtils from './textUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -371,40 +372,18 @@ class LayerFactary {
   }
 
   newTemplate(config: any): any {
-    const documentColors: Array<{ color: string, count: number }> = []
-
     const init = (layer: ILayer) => {
       switch (layer.type) {
         case 'text': {
           const text = layer as IText
-          text.paragraphs
-            .forEach(p => {
-              p.spans.forEach(s => {
-                const colorIdx = documentColors.findIndex(c => c.color === s.styles.color)
-                if (colorIdx === -1) {
-                  documentColors.push({ color: s.styles.color, count: 1 })
-                } else {
-                  documentColors[colorIdx].count++
-                }
-              })
-            })
-          break
+          if (text.widthLimit === -1) {
+            Object.assign(text.styles, textUtils.getTextHW(text, -1))
+          }
         }
-        case 'shape': {
-          const shape = layer as IShape
-          shape.color.forEach(color => {
-            const colorIdx = documentColors.findIndex(c => c.color === color)
-            if (colorIdx === -1) {
-              documentColors.push({ color, count: 1 })
-            } else {
-              documentColors[colorIdx].count++
-            }
-          })
-          break
-        }
+      }
+      switch (layer.type) {
         case 'frame': {
           const frame = layer as IFrame
-          // if (!frame.clips[0].clipPath) {
           if (!frame.clips[0].isFrameImg) {
             frame.needFetch = true
           }
@@ -420,10 +399,8 @@ class LayerFactary {
 
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-      const layer = config.layers[layerIndex]
-      init(layer)
+      init(config.layers[layerIndex])
     }
-    config.documentColors = documentColors
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
 
     return config

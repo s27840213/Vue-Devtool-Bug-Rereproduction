@@ -693,6 +693,8 @@ export default Vue.extend({
           if (this.getLayerType === 'text') {
             this.contentEditable = false
           }
+        } else if (this.getLayerType === 'text') {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
         }
         this.isControlling = false
         this.setCursorStyle('initial')
@@ -1367,7 +1369,7 @@ export default Vue.extend({
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
     },
     onTextFocus() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -1376,7 +1378,12 @@ export default Vue.extend({
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
         const text = this.$refs.text as HTMLElement
-        let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        let paragraphs: IParagraph[] = []
+        try {
+          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        } catch (error) {
+          console.log(error)
+        }
         if (e.key !== 'Enter' && e.key !== 'Backspace') {
           paragraphs = TextUtils.newPropsHandler(paragraphs)
         }
@@ -1416,10 +1423,10 @@ export default Vue.extend({
           TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
           // TemplateUtils.updateTextInfo(this.config)
+          // this.textSizeRefresh(Object.assign(GeneralUtils.deepCopy(this.config), { paragraphs }))
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
-            // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+            // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
             /**
              * TODO: For some reason while hit Enter the text block, the browser would
@@ -1489,7 +1496,6 @@ export default Vue.extend({
       }
     },
     textSizeRefresh(text: IText) {
-      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
       const isVertical = this.config.styles.writingMode.includes('vertical')
 
       let layerX = this.getLayerPos.x

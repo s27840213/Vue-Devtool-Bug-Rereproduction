@@ -25,7 +25,7 @@ class ShapeUtils {
     return className
   }
 
-  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray: number[], dashArray?: number[], linecap?: string, filled?: boolean): string {
+  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray?: number[], dashArray?: number[], linecap?: string, filled?: boolean): string {
     let style = ''
     for (let i = 0; i < styleArray.length; i++) {
       const tmpStyle = `.${className}S${i}{${styleArray[i]}}`
@@ -35,9 +35,11 @@ class ShapeUtils {
       const reg = new RegExp('\\$color\\[' + j + '\\]', 'g')
       style = style.replace(reg, colorArray[j])
     }
-    for (let j = 0; j < sizeArray.length; j++) {
-      const reg = new RegExp('\\$size\\[' + j + '\\]', 'g')
-      style = style.replace(reg, sizeArray[j].toString())
+    if (sizeArray) {
+      for (let j = 0; j < sizeArray.length; j++) {
+        const reg = new RegExp('\\$size\\[' + j + '\\]', 'g')
+        style = style.replace(reg, sizeArray[j].toString())
+      }
     }
     if (dashArray) {
       const reg = new RegExp('\\$dash', 'g')

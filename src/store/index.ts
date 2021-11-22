@@ -121,7 +121,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.pageScaleRatio
   },
   getLayer(state: IEditorState) {
-    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame => {
+    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
       return state.pages[pageIndex].layers[layerIndex >= 0 ? layerIndex : state.pages[pageIndex].layers.length + layerIndex]
     }
   },
@@ -229,8 +229,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_assetId(state: IEditorState, assetId: string) {
     state.assetId = assetId
   },
-  SET_groupId(state: IEditorState, assetId: string) {
-    state.assetId = assetId
+  SET_groupId(state: IEditorState, groupId: string) {
+    state.groupId = groupId
   },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
     state.pages[updateInfo.pageIndex].designId = updateInfo.designId
@@ -295,6 +295,9 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.forEach((page) => {
       page.backgroundImage.config.imgControl = imgControl
     })
+  },
+  SET_pageIsModified(state: IEditorState, { pageIndex, modified }) {
+    state.pages[pageIndex].modified = modified
   },
   SET_textInfo(state: IEditorState, textInfo: { [key: string]: Array<string> }) {
     Object.entries(textInfo).forEach(([k, v]) => {
@@ -606,6 +609,10 @@ const mutations: MutationTree<IEditorState> = {
     state.assetId = ''
     state.groupId = ''
     state.name = '我的設計'
+    state.pages = []
+  },
+  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
+    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
   },
   UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
     state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
