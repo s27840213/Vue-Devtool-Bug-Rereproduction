@@ -8,9 +8,9 @@
         div(class="home-content__top-title"
           style="font-size: 30px;") 海量精美電商模板等您使用！
         div(class="home-content__top-btns")
-          class(class="rounded home-btn"
+          div(class="rounded home-btn"
             @click="goToPage('TemplateCenter')") 瀏 覽 模 板
-          class(class="rounded home-btn"
+          div(class="rounded home-btn"
             @click="goToPage('MyDesign')") 我 的 設 計
       div(v-else
         class="home-content__top")
