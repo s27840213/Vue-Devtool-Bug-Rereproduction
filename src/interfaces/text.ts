@@ -6,5 +6,6 @@ export interface ISelection {
 
 export interface IFont {
   name: string,
-  face: string
+  face: string,
+  loaded: boolean
 }

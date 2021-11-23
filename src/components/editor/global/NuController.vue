@@ -85,13 +85,11 @@
                 :key="p.id",
                 :style="textStyles(p.styles)")
                 template(v-for="(span, sIndex) in p.spans")
-                  span(v-if="span.text" class="text__span"
+                  span(class="text__span"
                     :data-sindex="sIndex"
                     :key="span.id",
                     :style="textStyles(span.styles)") {{ span.text }}
-                  br(v-else
-                  :key="span.id"
-                  :data-sindex="sIndex")
+                    br(v-if="!span.text")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="lockIconStyles"
@@ -562,9 +560,6 @@ export default Vue.extend({
         e.stopPropagation()
       }
       switch (this.getLayerType) {
-        case 'image':
-          this.setMoving(true)
-          break
         case 'text': {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
@@ -668,6 +663,14 @@ export default Vue.extend({
         }
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
+
+        const posDiff = {
+          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
+          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) && this.getLayerType === 'image') {
+          this.setMoving(true)
+        }
       }
     },
     imgHandler(offset: ICoordinate) {
@@ -1365,7 +1368,7 @@ export default Vue.extend({
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
       TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
-      const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+      const paragraphs: IParagraph[] = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText)
       TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
     },
     onTextFocus() {
@@ -1380,7 +1383,8 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = []
         try {
-          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          // paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
         } catch (error) {
           console.log(error)
         }

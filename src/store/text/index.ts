@@ -63,27 +63,33 @@ const getDefaultState = (): ITextState => ({
   fontStore: [
     {
       name: '思源黑體',
-      face: 'NotoSansTC'
+      face: 'NotoSansTC',
+      loaded: true
     },
     {
       name: '標楷體',
-      face: 'cwTeXKai'
+      face: 'cwTeXKai',
+      loaded: true
     },
     {
       name: '獅尾四季春',
-      face: 'SweiSpringCJKtc-Regular'
+      face: 'SweiSpringCJKtc-Regular',
+      loaded: true
     },
     {
       name: '裝甲明朝',
-      face: 'SoukouMincho'
+      face: 'SoukouMincho',
+      loaded: true
     },
     {
       name: '瀨戶字體',
-      face: 'SetoFont'
+      face: 'SetoFont',
+      loaded: true
     },
     {
       name: '思源柔體',
-      face: 'GenJyuuGothicX-P-Regular'
+      face: 'GenJyuuGothicX-P-Regular',
+      loaded: true
     }
   ]
 })
@@ -108,7 +114,12 @@ const mutations: MutationTree<ITextState> = {
     })
   },
   UPDATE_fontFace(state: ITextState, data: IFont) {
-    state.fontStore.push(data)
+    const font = state.fontStore.find(font => font.face === data.face)
+    if (font) {
+      Object.assign(font, data)
+    } else {
+      state.fontStore.push(data)
+    }
   },
   SET_default (state: ITextState) {
     const defaultState = getDefaultState()
