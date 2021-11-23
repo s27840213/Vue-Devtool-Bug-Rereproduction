@@ -100,15 +100,14 @@ class AssetUtils {
     }
   }
 
-  addTemplate(json: any, attrs: IAssetProps = {}) {
+  async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     console.log('add template')
     console.log(json)
-    this.updateBackground(json).then((json) => {
-      PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
-      stepsUtils.record()
-    })
+    json = await this.updateBackground(json)
+    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    stepsUtils.record()
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
