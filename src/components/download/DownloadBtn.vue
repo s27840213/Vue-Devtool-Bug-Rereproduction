@@ -1,14 +1,14 @@
 <template lang="pug">
   div(class="download-btn")
-    btn(hasIcon
+    btn(:hasIcon="true"
       :iconName="'download'"
-      :iconWidth="'15px'"
+      :iconWidth="'18px'"
       :type="'primary-sm'"
-      class="rounded"
-      style="padding: 5px 40px;"
       :disabled="inprogress"
+      class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
-      span(v-if="!inprogress") 下 載
+      span(v-if="!inprogress"
+        class="ml-20") 下 載
     popup-download(v-if="show"
       class="download-btn__modal"
       :page-index="lastSelectedPageIndex"
@@ -50,6 +50,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .download-btn {
+    position: relative;
+    width: 90px;
     &__modal {
       position: absolute;
       top: 100%;
