@@ -658,12 +658,27 @@ export default Vue.extend({
           themes.forEach(id => {
             if (parseInt(id) !== 0) {
               const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === parseInt(id))
-              this.groupInfo.groupThemes[index].options.push(content.key_id)
+              if (index === -1) {
+                const theme = {
+                  id: parseInt(id),
+                  coverId: content.key_id,
+                  options: [content.key_id]
+                }
+                this.groupInfo.groupThemes.push(theme)
+              } else {
+                this.groupInfo.groupThemes[index].options.push(content.key_id)
+              }
             }
           })
         }
       })
+      // delete themes which are not set as theme_ids of templates
       this.groupInfo.groupThemes = this.groupInfo.groupThemes.filter(theme => theme.options.length > 0)
+
+      // sort theme_cover list by theme_id
+      this.groupInfo.groupThemes.sort((a, b) => a.id - b.id)
+
+      // if template of cover_ids is not exist, the value will be set to the first element of options
       this.groupInfo.groupThemes.forEach(theme => {
         if (theme.options.indexOf(theme.coverId) === -1) {
           theme.coverId = theme.options[0]
