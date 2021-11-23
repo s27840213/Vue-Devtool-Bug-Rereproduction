@@ -1,17 +1,23 @@
 <template lang="pug">
   div(class="editor-header")
-    span(class="body-3") 我的設計
-    span(class="body-3 ml-10 mr-5") /
-    input(class="body-3 text-gray-2" type="text"
-      placeholder="未命名設計"
-      maxlength="30"
-      :value="pagesName"
-      @change="setPagesName"
-      ref="pagesName")
-    svg-icon(:iconName="'upload-cloud'"
-      :iconWidth="'20px'"
-      :iconColor="'green-1'"
-      class="ml-10")
+    template(v-if="!isLogin")
+      span 若要儲存設計，請
+      a(:href="`/signup?redirect=${path}`") 註冊
+      span 或
+      a(:href="`/login?redirect=${path}`") 登入
+    template(v-else)
+      span(class="body-3") 我的設計
+      span(class="body-3 ml-10 mr-5") /
+      input(class="body-3 text-gray-2" type="text"
+        placeholder="未命名設計"
+        maxlength="30"
+        :value="pagesName"
+        @change="setPagesName"
+        ref="pagesName")
+      svg-icon(:iconName="'upload-cloud'"
+        :iconWidth="'20px'"
+        :iconColor="'green-1'"
+        class="ml-10")
 </template>
 
 <script lang="ts">
