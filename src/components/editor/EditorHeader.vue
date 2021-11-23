@@ -75,9 +75,6 @@ export default Vue.extend({
       _setModalInfo: 'modal/SET_MODAL_INFO',
       _setModalOpen: 'modal/SET_MODAL_OPEN'
     }),
-    setAdminMode() {
-      store.commit('user/SET_ADMIN_MODE', !this.adminMode)
-    },
     goToPage(pageName: string) {
       this.$router.push({ name: pageName })
     },
@@ -117,6 +114,7 @@ export default Vue.extend({
   align-items: center;
   box-sizing: border-box;
   box-shadow: 0px 2px 10px setColor(gray-2, 0.1);
+  pointer-events: auto;
   > span {
     height: 100%;
   }

@@ -9,12 +9,13 @@
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(class="page-preview pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
+    svg-icon(class="hover-effect pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
-    svg-icon(:iconName="'navPage'"
+    svg-icon(class="hover-effect"
+      :iconName="'navPage'"
       :iconColor="'gray-2'"
       :iconWidth="'24px'"
-      @click="switchNav(SidebarPanelType.page)")
+      @click.native="setDetailPageMode(!detailPageMode)")
 </template>
 
 <script lang="ts">
@@ -31,7 +32,8 @@ export default Vue.extend({
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      detailPageMode: 'page/getDeatilPageMode'
     }),
     ratioInPercent: {
       get(): number {
@@ -45,7 +47,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
+      _setDetailPageMode: 'page/SET_detailPageMode'
     }),
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
@@ -55,6 +58,9 @@ export default Vue.extend({
       if (!show) {
         pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
       }
+    },
+    setDetailPageMode(show: boolean) {
+      this._setDetailPageMode(show)
     }
   }
 })
@@ -77,13 +83,13 @@ export default Vue.extend({
       outline: none;
     }
   }
-  【 &__percentage {
+  &__percentage {
     // border: 1px solid setColor(gray-2, 0.3);
     width: 2.5rem;
   }
 }
 
-.page-preview {
+.hover-effect {
   &:hover {
     background-color: #d9dbe1;
   }

@@ -7,19 +7,20 @@
       ref="editorView")
     div(class="header-container")
       editor-header
-    div(class="body-2 relative")
-      //- div(class="editor-header__locale" @click="switchLocale()")
-      //-   span {{currLocale}}
-      div(v-if="!isLogin")
-        span 若要儲存設計，請
-        a(:href="`/signup?redirect=${path}`") 註冊
-        span 或
-        a(:href="`/login?redirect=${path}`") 登入
-      svg-icon(v-if="isAdmin"
-        :iconName="`user-admin${getAdminModeText}`"
-        :iconWidth="'20px'"
-        :iconColor="'gray-2'"
-        @click.native="setAdminMode()")
+    div(v-if="isAdmin" class="admin-options")
+      div(class="admin-options__sticky-container")
+        //- div(v-if="!isLogin")
+        //-   span 若要儲存設計，請
+        //-   a(:href="`/signup?redirect=${path}`") 註冊
+        //-   span 或
+        //-   a(:href="`/login?redirect=${path}`") 登入
+        span(class="ml-10 text-bold text-orange") {{templateText}}
+        span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
+        svg-icon(v-if="isAdmin"
+          :iconName="`user-admin${getAdminModeText}`"
+          :iconWidth="'20px'"
+          :iconColor="'gray-2'"
+          @click.native="setAdminMode()")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
@@ -62,7 +63,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -76,6 +77,7 @@ import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
+import store from '@/store'
 
 export default Vue.extend({
   components: {
@@ -161,7 +163,11 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
+      groupId: 'getGroupId',
       pages: 'getPages',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
@@ -199,14 +205,37 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
+    },
+    isLogin(): boolean {
+      return store.getters['user/isLogin']
+    },
+    isAdmin(): boolean {
+      return this.role === 0
+    },
+    getAdminModeText(): string {
+      return this.adminMode ? '' : '-disable'
+    },
+    path(): string {
+      return this.$route.path
+    },
+    templateText(): string {
+      if (this.groupId.length > 0) {
+        return '群組模板'
+      } else {
+        return '單頁模板'
+      }
     }
   },
   methods: {
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setPageScaleRatio: 'SET_pageScaleRatio'
+      setPageScaleRatio: 'SET_pageScaleRatio',
+      _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    setAdminMode() {
+      this._setAdminMode(!this.adminMode)
+    },
     outerClick(e: MouseEvent) {
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
@@ -576,12 +605,37 @@ $REULER_SIZE: 25px;
 }
 
 .header-container {
+  // must set to 100% or sticky div won't work
   height: 100%;
   position: absolute;
   top: 0;
   left: 50%;
   transform: translate3d(-50%, 0px, 0);
   z-index: setZindex("editor-header");
+  pointer-events: none;
+}
+
+.admin-options {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0px;
+  z-index: setZindex("editor-header");
+  font-size: 10px;
+  pointer-events: none;
+  &__sticky-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 0 0 0.25rem 0.25rem;
+    box-shadow: 0px 2px 10px setColor(gray-2, 0.1);
+    pointer-events: auto;
+  }
 }
 .corner-block {
   position: sticky;

@@ -88,9 +88,13 @@ export default Vue.extend({
     window.removeEventListener('beforeunload', this.beforeWindowUnload)
   },
   beforeRouteLeave(to, from, next) {
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+    if (uploadUtils.isLogin) {
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+        next()
+      })
+    } else {
       next()
-    })
+    }
     // const answer = this.confirmLeave()
     // if (answer) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)

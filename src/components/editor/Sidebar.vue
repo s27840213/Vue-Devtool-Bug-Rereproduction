@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="sidebar")
     div(class="logo")
-      svg-icon(:iconName="'logo-icon'"
+      svg-icon(class="pointer"
+        :iconName="'logo-icon'"
         :iconWidth="'30px'"
         @click.native="goToPage('Home')")
     div(class="nav")
