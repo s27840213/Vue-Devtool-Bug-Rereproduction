@@ -336,6 +336,10 @@ export default Vue.extend({
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
+    groupId: function() {
+      this.unsetThemeTemplate = []
+      this.groupErrorMsg = ''
+    },
     currentPageWidth: function (newVal) {
       this.pageWidth = newVal
       this.pageHeight = this.currentPageHeight
