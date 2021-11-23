@@ -113,7 +113,7 @@ export default Vue.extend({
     updateTextSize(): any {
       const config = this.config as IText
       return {
-        // paragraphs: config.paragraphs,
+        paragraphs: config.paragraphs,
         writingMode: config.styles.writingMode
       }
     },

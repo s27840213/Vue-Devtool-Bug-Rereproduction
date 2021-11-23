@@ -524,9 +524,7 @@ class TextUtils {
       height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
       body: body
     }
-    setTimeout(() => {
-      document.body.removeChild(body)
-    }, 3000)
+    document.body.removeChild(body)
     return textHW
   }
 
