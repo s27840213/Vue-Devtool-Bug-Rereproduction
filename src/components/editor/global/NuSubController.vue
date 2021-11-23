@@ -384,7 +384,7 @@ export default Vue.extend({
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
       TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
-      const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+      const paragraphs: IParagraph[] = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText)
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs })
     },
     onRightClick(event: MouseEvent) {
@@ -402,7 +402,7 @@ export default Vue.extend({
       return (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
         const text = this.$refs.text as HTMLElement
-        let paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText)
+        let paragraphs: IParagraph[] = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText)
         if (e.key !== 'Enter' && e.key !== 'Backspace') {
           paragraphs = TextUtils.newPropsHandler(paragraphs)
         }

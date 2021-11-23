@@ -422,7 +422,10 @@ const actions: ActionTree<IUserModule, unknown> = {
   // as private images expire, redraw these images
   async updateImages({ state, commit }, { assetSet }) {
     const { token } = state
-    const { data } = await userApis.getAssets(token, { asset_list: assetSet })
+    const { data } = await userApis.getAssets(token, {
+      asset_list: assetSet,
+      team_id: state.teamId || state.userId
+    })
     const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     if (urlSet) {
       for (const [assetId, urls] of Object.entries(urlSet)) {

@@ -1,12 +1,24 @@
 <template lang="pug">
   div(class="editor")
-    editor-header
-    sidebar
+    sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+      @toggleSidebarPanel="toggleSidebarPanel")
     section
       div(class="content")
-        sidebar-panel
+        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
         div(class="content__main")
           div(class="content__editor")
+            div(class="header-container")
+              editor-header
+            div(v-if="isAdmin" class="admin-options")
+              div(class="admin-options__sticky-container")
+                div(class="flex flex-column mr-10")
+                  span(class="ml-10 text-bold text-orange") {{templateText}}
+                  span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
+                svg-icon(v-if="isAdmin"
+                  :iconName="`user-admin${getAdminModeText}`"
+                  :iconWidth="'20px'"
+                  :iconColor="'gray-2'"
+                  @click.native="setAdminMode()")
             editor-view
             scale-ratio-editor(:style="scaleRatioEditorPos")
         div(class="content__panel"
@@ -29,9 +41,10 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
+import store from '@/store'
 
 export default Vue.extend({
   name: 'Editor',
@@ -48,11 +61,16 @@ export default Vue.extend({
   data() {
     return {
       FunctionPanelType,
-      isColorPanelOpen: false
+      isColorPanelOpen: false,
+      isSidebarPanelOpen: true
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
+      groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType'
@@ -77,6 +95,25 @@ export default Vue.extend({
       } : {
         'grid-template-rows': '1fr'
       }
+    },
+    isLogin(): boolean {
+      return store.getters['user/isLogin']
+    },
+    isAdmin(): boolean {
+      return this.role === 0
+    },
+    getAdminModeText(): string {
+      return this.adminMode ? '' : '-disable'
+    },
+    path(): string {
+      return this.$route.path
+    },
+    templateText(): string {
+      if (this.groupId.length > 0) {
+        return '群組模板'
+      } else {
+        return '單頁模板'
+      }
     }
   },
   created() {
@@ -87,9 +124,13 @@ export default Vue.extend({
     window.removeEventListener('beforeunload', this.beforeWindowUnload)
   },
   beforeRouteLeave(to, from, next) {
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+    if (uploadUtils.isLogin) {
+      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+        next()
+      })
+    } else {
       next()
-    })
+    }
     // const answer = this.confirmLeave()
     // if (answer) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
@@ -100,13 +141,20 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType',
+      _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    setAdminMode() {
+      this._setAdminMode(!this.adminMode)
+    },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
     },
     toggleColorPanel(bool: boolean) {
       this.isColorPanelOpen = bool
+    },
+    toggleSidebarPanel(bool: boolean) {
+      this.isSidebarPanelOpen = bool
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
@@ -133,7 +181,7 @@ export default Vue.extend({
   grid-template-columns: auto 1fr;
   > section:nth-child(2) {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: 1fr;
   }
 }
@@ -142,8 +190,7 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: auto 1fr auto;
-  padding-top: 50px;
-  height: calc(100% - 50px);
+  height: 100%;
   &__main {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
@@ -176,9 +223,43 @@ export default Vue.extend({
   }
 }
 
+.header-container {
+  // must set to 100% or sticky div won't work
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate3d(-50%, 0px, 0);
+  z-index: setZindex("editor-header");
+  pointer-events: none;
+}
+
+.admin-options {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 30px;
+  z-index: setZindex("editor-header");
+  font-size: 10px;
+  pointer-events: none;
+  &__sticky-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 0 0 0.25rem 0.25rem;
+    box-shadow: 0px 2px 10px setColor(gray-2, 0.1);
+    pointer-events: auto;
+  }
+}
+
 .scale-ratio-editor::v-deep {
   position: absolute;
-  bottom: 30px;
+  bottom: 0px;
   z-index: setZindex("scale-ratio-editor");
 }
 </style>

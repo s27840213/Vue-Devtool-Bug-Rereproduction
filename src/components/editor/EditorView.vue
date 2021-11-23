@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -60,9 +60,12 @@ import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
+import store from '@/store'
 
 export default Vue.extend({
   components: {
+    EditorHeader,
     RulerHr,
     RulerVr
   },
@@ -91,7 +94,7 @@ export default Vue.extend({
   },
   mounted() {
     StepsUtils.record()
-    this.editorView = document.querySelector('.editor-view') as HTMLElement
+    this.editorView = this.$refs.editorView as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     const editorViewBox = this.$el as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
@@ -144,7 +147,11 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
+      groupId: 'getGroupId',
       pages: 'getPages',
       getLastSelectedPageIndex: 'getLastSelectedPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
@@ -188,8 +195,12 @@ export default Vue.extend({
     ...mapMutations({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setPageScaleRatio: 'SET_pageScaleRatio'
+      setPageScaleRatio: 'SET_pageScaleRatio',
+      _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    setAdminMode() {
+      this._setAdminMode(!this.adminMode)
+    },
     outerClick(e: MouseEvent) {
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)

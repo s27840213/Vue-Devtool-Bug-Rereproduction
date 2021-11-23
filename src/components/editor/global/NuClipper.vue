@@ -30,7 +30,6 @@ export default Vue.extend({
           clipPath = layerPath
         }
       }
-
       switch (type) {
         case 'shape':
           width = `${this.config.vSize?.[0] ?? 0 + this.config.pDiff?.[0] ?? 0}px`

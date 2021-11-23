@@ -2,24 +2,34 @@
   div(class="home")
     nu-header
     div(class="home-content")
-      div(class="home-content-video")
-        div(class="home-content-video-img")
-          img(:src="require('@/assets/img/png/home-video.png')")
-        div(class="home-content-video-text")
-          div(class="heading-3 pb-15") 海量精美電商模板等您使用！
-          div(class="subtitle-1 pb-5"
-            style="font-weight: 400;") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
-          div(class="subtitle-1 pb-20"
-            style="font-weight: 400;") 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
-          btn(:type="'primary-mid'" class="rounded"
-            @click.native="newDesign()") 開 始 製 作
-            //- @click.native="goToPage('Editor')") 開 始 製 作
+      div(v-if="isLogin" class="home-content__top")
+        img(class="home-content__top-img"
+          style="height: 250px;")
+        div(class="home-content__top-title"
+          style="font-size: 30px;") 海量精美電商模板等您使用！
+        div(class="home-content__top-btns")
+          div(class="rounded home-btn"
+            @click="goToPage('TemplateCenter')") 瀏 覽 模 板
+          div(class="rounded home-btn"
+            @click="goToPage('MyDesign')") 我 的 設 計
+      div(v-else
+        class="home-content__top")
+        img(class="home-content__top-img"
+          style="height: 350px;")
+        div(class="home-content__top-title") 海量精美電商模板等您使用！
+        div(class="home-content__top-subtitle")
+          span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+          br
+          span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
+        div(class="home-content__top-btn rounded home-btn"
+          :type="'primary-lg'"
+          @click="newDesign()") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
-      div(class="home-content-size")
+      div(class="home-content-theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
       div(class="home-content-plaque")
-        img(:src="require('@/assets/img/png/home-plaque.png')")
+        img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
         div(class="home-content-plaque-subtitle") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
       div(class="home-content-feature")
@@ -121,23 +131,28 @@ export default Vue.extend({
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
-      latestTemplateList: []
+      latestTemplateList: [],
+      isTimerStop: false,
+      AutoPlayTimer: 0 as number,
+      CoolDownTimer: 0 as number
     }
   },
   computed: {
-    ...mapGetters('homeTemplate', [
-      'getApiResponse'
-    ]),
+    ...mapGetters({
+      isLogin: 'user/isLogin'
+    }),
     featureContent(): string {
       return this.featureList[this.featureSelected].content
     }
   },
   async mounted() {
-    window.setInterval(() => {
-      if (this.featureSelected === this.featureList.length - 1) {
-        this.featureSelected = 0
-      } else {
-        this.featureSelected++
+    this.AutoPlayTimer = setInterval(() => {
+      if (!this.isTimerStop) {
+        if (this.featureSelected === this.featureList.length - 1) {
+          this.featureSelected = 0
+        } else {
+          this.featureSelected++
+        }
       }
     }, 4000)
 
@@ -185,7 +200,12 @@ export default Vue.extend({
       })
     },
     featureItemClicked(idx: number) {
+      this.isTimerStop = true
       this.featureSelected = idx
+      window.clearInterval(this.CoolDownTimer) // use the latest cool down time
+      this.CoolDownTimer = setTimeout(() => {
+        this.isTimerStop = false
+      }, 10000)
     },
     openPopup() {
       this.showSizePopup = true
@@ -230,32 +250,48 @@ export default Vue.extend({
       white-space: nowrap;
     }
   }
-  &-video {
+  &__top {
+    position: relative;
     display: flex;
     justify-content: center;
-    padding: 5vw 0;
     &-img {
-      width: 40vw;
-      > img {
-        width: 100%;
-        height: 100%;
+      width: 100%;
+      background-size: cover;
+      background-image: url('~@/assets/img/jpg/homepage/home-top.jpg');
+    }
+    &-title {
+      position: absolute;
+      top: 60px;
+      color: setColor(dark-blue);
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.3;
+      @media screen and (max-width: 990px) {
+        font-size: 32px;
       }
     }
-    &-text {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: left;
-      font-family: Mulish;
-      padding-left: 5vw;
-      > button {
-        width: 40%;
-        height: 45px;
-        padding: 5px 30px;
+    &-subtitle {
+      position: absolute;
+      top: 125px;
+      font-size: 20px;
+      line-height: 2;
+      @media screen and (max-width: 990px) {
+        font-size: 16px;
       }
+    }
+    &-btns {
+      position: absolute;
+      top: 140px;
+      display: flex;
+      justify-content: space-evenly;
+      width: 500px;
+    }
+    &-btn {
+      position: absolute;
+      top: 240px;
     }
   }
-  &-size {
+  &-theme {
     padding: 0 10%;
   }
   &-plaque {
@@ -275,11 +311,13 @@ export default Vue.extend({
       font-size: 1.6vw;
       font-weight: 700;
       line-height: 1.3;
+      color: setColor(white);
     }
     &-subtitle {
       position: absolute;
       top: 57%;
       font-size: 1.1vw;
+      color: setColor(white);
     }
   }
   &-feature {
@@ -337,6 +375,23 @@ export default Vue.extend({
   }
   &-template {
     padding: 0 10%;
+  }
+}
+.home-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 200px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: 700;
+  color: setColor(white);
+  background: setColor(blue-1);
+  @media screen and (max-width: 990px) {
+    width: 160px;
+    height: 35px;
+    font-size: 16px;
   }
 }
 .x-scrollbar {

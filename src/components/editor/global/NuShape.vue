@@ -103,6 +103,7 @@ export default Vue.extend({
         }
       }
     }
+    // console.log(this.config.styleArray)
     const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
     this.styleNode = shapeUtils.addStyleTag(styleText)
     this.paramsReady = true

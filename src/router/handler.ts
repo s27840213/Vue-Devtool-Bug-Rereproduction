@@ -39,7 +39,16 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     }
     if (url) {
       store.commit('SET_currSidebarPanelType', -1)
-      fetch(`https://${url}`)
+      // e.g.: https://test.vivipic.com/editor?url=template.vivipic.com%2Fexport%2F9XBAb9yoKlJbzLiWNUVM%2F211123164456873giej3iKR%2Fpage_0.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
+      const hasToken = url.indexOf('&token=') !== -1
+      const src = url.substring(0, hasToken ? url.indexOf('&token=') : undefined)
+      if (hasToken) {
+        const token = url.substring((src + '&token=').length, url.indexOf('&team_id='))
+        const teamId = url.substr((src + '&token=' + token + '&team_id=').length)
+        store.commit('user/SET_STATE', { token, teamId })
+      }
+      console.log(src)
+      fetch(`https://${src}`)
         .then(response => response.json())
         .then(json => { assetUtils.addTemplate(json) })
     } else {

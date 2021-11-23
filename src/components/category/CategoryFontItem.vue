@@ -95,7 +95,7 @@ export default Vue.extend({
           const load = newFont.load()
             .then(newFont => {
               document.fonts.add(newFont)
-              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
             })
           await load
         }

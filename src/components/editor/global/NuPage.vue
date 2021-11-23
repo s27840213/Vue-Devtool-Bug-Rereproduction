@@ -250,7 +250,8 @@ export default Vue.extend({
       pages: 'getPages',
       getPage: 'getPage',
       getLayer: 'getLayer',
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      detailPageMode: 'page/getDeatilPageMode'
     }),
     ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
@@ -307,7 +308,7 @@ export default Vue.extend({
       return PageUtils.currFocusPageIndex
     },
     inPagePanel(): boolean {
-      return SidebarPanelType.page === this.currPanel
+      return this.detailPageMode
     },
     pageMarginStyles(): { [index: string]: string } {
       return {

@@ -1,33 +1,41 @@
 <template lang="pug">
   div(class="sidebar")
     div(class="logo")
+      svg-icon(class="pointer"
+        :iconName="'logo-icon'"
+        :iconWidth="'30px'"
+        @click.native="goToPage('Home')")
     div(class="nav")
       div(class="nav-container")
         div(class="nav-item pointer"
           v-for="(item,index) in navItem" :key="`icon-${index}`"
-          :class="currPanel === index ? 'bg-nav-active' : 'none'"
           @click="switchNav(index)")
           svg-icon(:iconName="item.icon"
             :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
             :iconWidth="'30px'")
           div(class="nav-item-text body-2"
             :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
-      div(class="nav-setting pointer"
-        @click="switchNav(SidebarPanelType.page)")
-        svg-icon(:iconName="'navPage'"
-          :iconColor="currPanel=== SidebarPanelType.page? 'blue-1' : 'gray-3'"
-          :iconWidth="'30px'")
-        div(class="nav-item-text body-3"
-        :class="currPanel=== SidebarPanelType.page ? 'text-blue-1' : 'text-gray-3'") 導覽頁
+    div(class="sidebar__chevron pointer"
+        :class="[{'rotate-hr': isSidebarPanelOpen}]"
+        @click="toggleSidebarPanel")
+      svg-icon(:iconName="'chevron-duo-right'"
+        :iconColor="'gray-3'"
+        :iconWidth="'30px'")
+    div(class="nav-setting pointer")
+      div(class="profile pointer text-white text-body-2")
+        span {{shortName}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
+  },
+  props: {
+    isSidebarPanelOpen: Boolean
   },
   data() {
     return {
@@ -35,6 +43,8 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role', 'shortName']),
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
@@ -47,9 +57,9 @@ export default Vue.extend({
         { icon: 'shape', text: `${this.$t('editor.objects')}` },
         { icon: 'bg', text: `${this.$t('editor.backgrounds')}` },
         { icon: 'text', text: `${this.$t('editor.texts')}` },
-        { icon: 'folder', text: `${this.$t('editor.myFile')}` },
-        { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
-        { icon: 'photo', text: 'Pexels' }
+        { icon: 'folder', text: `${this.$t('editor.myFile')}` }
+        // { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
+        // { icon: 'photo', text: 'Pexels' }
       ]
     }
   },
@@ -60,11 +70,17 @@ export default Vue.extend({
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
-
+      this.$emit('toggleSidebarPanel', true)
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
         pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
       }
+    },
+    goToPage(pageName: string) {
+      this.$router.push({ name: pageName })
+    },
+    toggleSidebarPanel() {
+      this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }
   }
 })
@@ -79,12 +95,15 @@ export default Vue.extend({
   grid-template-columns: 1fr;
   // box-shadow: 2px 0px 5px setColor(gray-4);
   z-index: setZindex(sidebar);
+  &__chevron {
+    @include flexCenter;
+    padding: 10px;
+    transition: transform 0.5s;
+  }
 }
 
 .logo {
-  width: 100%;
-  height: 50px;
-  background-color: setColor(blue-1);
+  padding: 20px 0px;
 }
 
 .nav {
@@ -101,7 +120,7 @@ export default Vue.extend({
 .nav-container {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(7, 1fr);
+  grid-auto-rows: auto;
   width: 100%;
 }
 .nav-item {
@@ -121,5 +140,16 @@ export default Vue.extend({
 .nav-setting {
   border-top: 1px solid #494e67;
   padding: 30px;
+}
+
+.profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  aspect-ratio: 1/1;
+  font-weight: 700;
+  background: #61aac2;
+  border-radius: 50%;
 }
 </style>

@@ -23,6 +23,14 @@ class StepsUtils {
     return popupUtils.isPopupOpen
   }
 
+  get isInFirstStep(): boolean {
+    return (this.currStep === 0) && (this.steps.length > 1)
+  }
+
+  get isInLastStep(): boolean {
+    return (this.currStep === (this.steps.length - 1)) && (this.steps.length > 1)
+  }
+
   timers: { [key: string]: number }
   constructor() {
     this.steps = []
@@ -33,7 +41,6 @@ class StepsUtils {
   }
 
   record() {
-    // console.trace()
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
     const modifiedPage = pageUtils.getPage(lastSelectedPageIndex) as IPage

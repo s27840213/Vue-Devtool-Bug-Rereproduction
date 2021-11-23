@@ -14,7 +14,7 @@ import { instrumentOutgoingRequests } from '@sentry/tracing/dist/browser'
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
-  get getCurrSel() { return (store.state as any).text.sel }
+  get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
   get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
 
   isArrowKey(e: KeyboardEvent): boolean {
@@ -183,7 +183,113 @@ class TextUtils {
     return config.paragraphs.length === 1 && config.paragraphs[0].spans.length === 1 && config.paragraphs[0].spans[0].text === ''
   }
 
-  textParser(text: HTMLElement, config: IText): IParagraph[] {
+  textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
+    const { start } = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection }
+    const { paragraphs } = config
+    let { pIndex, sIndex, offset } = start
+    console.warn(key)
+    switch (key) {
+      case 'Enter':
+        pIndex += 1
+        sIndex = 0
+        offset = 0
+        break
+      case 'Backspace': {
+        if (sIndex === 0 && offset === 0) {
+          const stash = paragraphs[pIndex]
+          pIndex -= 1
+          sIndex = paragraphs[pIndex].spans.length - 1
+          offset = paragraphs[pIndex].spans[sIndex].text.length
+          paragraphs[pIndex].spans.push(...stash.spans)
+          paragraphs.splice(pIndex + 1, 1)
+          return paragraphs
+        }
+        if (offset === 0) {
+          // @TODO
+          break
+        }
+        paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset - 1)
+          .concat(paragraphs[pIndex].spans[sIndex].text.substr(offset + 1))
+        return paragraphs
+      }
+      default:
+        offset++
+    }
+    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+
+    // const paragraphs: IParagraph[] = []
+    const div = text
+    const ps = div.childNodes
+    ps.forEach((p, pIndex) => {
+      const spans: ISpan[] = []
+      const spanStyleBuff = {} as ISpanStyle
+      for (const [sIndex, el] of p.childNodes.entries()) {
+        let spanEl: HTMLElement
+        if (el.nodeName === 'SPAN') {
+          spanEl = el as HTMLElement
+        } else {
+          let child = p
+          const span = document.createElement('span')
+          while (child.firstChild) {
+            child = child.firstChild
+          }
+
+          if (child.textContent) {
+            span.textContent = el.textContent
+          } else if (child.nodeName === 'BR') {
+            span.textContent = ''
+          } else {
+            throw console.error('wrong text node type:' + el.nodeName)
+          }
+          spanEl = span as HTMLElement
+        }
+
+        const text = spanEl.textContent as string
+        let spanStyle = {} as ISpanStyle
+
+        spanStyle = {
+          font: spanEl.style.fontFamily,
+          weight: spanEl.style.fontWeight,
+          size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+            : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
+          decoration: spanEl.style.textDecorationLine,
+          style: spanEl.style.fontStyle,
+          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
+          opacity: parseInt(spanEl.style.opacity)
+        } as ISpanStyle
+        // }
+
+        if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
+          spans[spans.length - 1].text += text
+        } else {
+          spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
+        }
+        Object.assign(spanStyleBuff, spanStyle)
+      }
+      for (let i = 0; i < spans.length; i++) {
+        if (!spans[i].text && spans.length !== 1) {
+          spans.splice(i, 1)
+          i--
+        }
+      }
+
+      if (spans.length) {
+        const pEl = p as HTMLElement
+        const floatNum = /[+-]?\d+(\.\d+)?/
+        const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
+        const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
+        const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+        const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
+        paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
+      }
+    })
+    return paragraphs
+  }
+
+  _textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
+    const { start, end } = this.getCurrSel
+    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    console.log('start: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
@@ -213,38 +319,36 @@ class TextUtils {
 
         const text = spanEl.textContent as string
         let spanStyle = {} as ISpanStyle
-        console.log(pIndex)
-        console.log(spanEl)
-        if (!spanEl.style.fontFamily) {
-          if (pIndex > 0) {
-            const a = div.childNodes[pIndex - 1]
-            console.log(a)
-            const leng = div.childNodes[pIndex - 1].childNodes.length
 
-            // const leng = div.
-            spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-            if (ps.length > config.paragraphs.length) {
-              Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
-            } else {
-              Object.assign(spanStyle, config.paragraphs[pIndex].spans[0].styles)
-            }
-          } else if (pIndex === 0 && sIndex === 0) {
-            Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
-          }
-        }
-        console.log(!Object.keys(spanStyle).length)
-        if (!Object.keys(spanStyle).length) {
-          spanStyle = {
-            font: spanEl.style.fontFamily,
-            weight: spanEl.style.fontWeight,
-            size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-              : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
-            decoration: spanEl.style.textDecorationLine,
-            style: spanEl.style.fontStyle,
-            color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
-            opacity: parseInt(spanEl.style.opacity)
-          } as ISpanStyle
-        }
+        // if (!spanEl.style.fontFamily) {
+        //   if (pIndex > 0) {
+        //     const a = div.childNodes[pIndex - 1]
+        //     const leng = div.childNodes[pIndex - 1].childNodes.length
+
+        //     // const leng = div.
+        //     spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
+        //     if (ps.length > config.paragraphs.length) {
+        //       Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
+        //     } else {
+        //       Object.assign(spanStyle, config.paragraphs[pIndex].spans[0].styles)
+        //     }
+        //   } else if (pIndex === 0 && sIndex === 0) {
+        //     Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
+        //   }
+        // }
+        // if (!Object.keys(spanStyle).length) {
+
+        spanStyle = {
+          font: spanEl.style.fontFamily,
+          weight: spanEl.style.fontWeight,
+          size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+            : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
+          decoration: spanEl.style.textDecorationLine,
+          style: spanEl.style.fontStyle,
+          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
+          opacity: parseInt(spanEl.style.opacity)
+        } as ISpanStyle
+        // }
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
           spans[spans.length - 1].text += text
@@ -380,7 +484,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(content: IText, widthLimit = -1): { width: number, height: number } {
+  getTextHW(content: IText, widthLimit = -1): { width: number, height: number, body: HTMLDivElement } {
     const body = document.createElement('div')
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
@@ -413,10 +517,12 @@ class TextUtils {
     body.style.textAlign = 'center'
     body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
+
     const scale = content.styles.scale ?? 1
     const textHW = {
       width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
-      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale)
+      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
+      body: body
     }
     document.body.removeChild(body)
     return textHW

@@ -57,6 +57,8 @@ import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
 import { IListServiceContentData } from '@/interfaces/api'
+import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   components: {
@@ -86,7 +88,7 @@ export default Vue.extend({
       ]
     ),
     widthValid(): boolean {
-      if (!this.isConfirmClicked) {
+      if (!this.isConfirmClicked || this.selectedFormat !== 'custom') {
         return true
       } else if (this.pageWidth === '0' || this.pageWidth === '') {
         return false
@@ -95,7 +97,7 @@ export default Vue.extend({
       }
     },
     heightValid(): boolean {
-      if (!this.isConfirmClicked) {
+      if (!this.isConfirmClicked || this.selectedFormat !== 'custom') {
         return true
       } else if (this.pageHeight === '0' || this.pageHeight === '') {
         return false
@@ -195,11 +197,31 @@ export default Vue.extend({
       this.$emit('close')
     },
     onConfirmClicked() {
-      console.log('confirm')
       this.isConfirmClicked = true
-      if (!this.widthValid || !this.heightValid) {
+      if (this.selectedFormat === 'custom' && (!this.widthValid || !this.heightValid)) {
         this.errorMsg = '請輸入大於 0 的數字'
+        return
       }
+
+      if (this.selectedFormat === 'custom') {
+        const item = {
+          width: this.pageWidth,
+          height: this.pageHeight
+        } as Itheme
+        this.newDesign(item)
+      } else {
+        const idx = this.selectedFormat.substr(7)
+        const item = {
+          width: this.recentlyUsed[parseInt(idx)].width,
+          height: this.recentlyUsed[parseInt(idx)].height
+        } as Itheme
+        this.newDesign(item)
+      }
+    },
+    newDesign(item: Itheme) {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign(item.width, item.height)
+      })
     }
   }
 })
@@ -216,7 +238,6 @@ export default Vue.extend({
     box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
     background-color: setColor(white);
     padding: 20px 50px;
-
     &__body {
       &-row {
         display: flex;
@@ -233,7 +254,6 @@ export default Vue.extend({
           justify-content: center;
         }
       }
-
       &__custom {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -257,7 +277,6 @@ export default Vue.extend({
           }
         }
       }
-
       &__hr {
         width: 100%;
         height: 1px;
@@ -268,21 +287,18 @@ export default Vue.extend({
         margin-bottom: 20px;
         padding: 0;
       }
-
       &__button {
         margin: 0 auto;
         width: 60%;
         padding-top: 30px;
       }
     }
-
     &__close {
       position: absolute;
       top: 20px;
       right: 20px;
     }
   }
-
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

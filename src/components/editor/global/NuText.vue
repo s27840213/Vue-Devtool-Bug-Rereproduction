@@ -22,17 +22,15 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { ISpanStyle, IText } from '@/interfaces/layer'
+import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { IFont } from '@/interfaces/text'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
-import TemplateUtils from '@/utils/templateUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import FontFaceObserver from 'fontfaceobserver'
-import font from '@/store/module/font'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -53,17 +51,31 @@ export default Vue.extend({
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
-        if (!fontStore.some(font => font.face === span.styles.font)) {
+        if (!fontStore.some(font => font.face === span.styles.font && font.loaded)) {
           isLoadedFont = true
-          const newFont = new FontFace(span.styles.font, this.getFontUrl(span.styles))
-          promises.push(new Promise<void>((resolve) => {
-            newFont.load()
-              .then(newFont => {
-                document.fonts.add(newFont)
-                resolve()
-              })
-          }))
-          TextUtils.updateFontFace({ name: newFont.family, face: newFont.family })
+          const font = fontStore.find(font => font.face === span.styles.font)
+          if (!font) {
+            const newFont = new FontFace(span.styles.font, this.getFontUrl(span.styles))
+            promises.push(new Promise<void>((resolve) => {
+              newFont.load()
+                .then(newFont => {
+                  document.fonts.add(newFont)
+                  TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
+                  resolve()
+                })
+            }))
+            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: false })
+          } else {
+            promises.push(new Promise<void>((resolve) => {
+              const checkLoaded = setInterval(() => {
+                if (font.loaded) {
+                  console.log('check if loaded')
+                  clearInterval(checkLoaded)
+                  resolve()
+                }
+              }, 100)
+            }))
+          }
         }
       }
     }
