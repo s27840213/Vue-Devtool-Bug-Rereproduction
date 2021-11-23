@@ -5,22 +5,6 @@
       @wheel="handleWheel"
       @mousewheel="handleWheel"
       ref="editorView")
-    div(class="header-container")
-      editor-header
-    div(v-if="isAdmin" class="admin-options")
-      div(class="admin-options__sticky-container")
-        //- div(v-if="!isLogin")
-        //-   span 若要儲存設計，請
-        //-   a(:href="`/signup?redirect=${path}`") 註冊
-        //-   span 或
-        //-   a(:href="`/login?redirect=${path}`") 登入
-        span(class="ml-10 text-bold text-orange") {{templateText}}
-        span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-        svg-icon(v-if="isAdmin"
-          :iconName="`user-admin${getAdminModeText}`"
-          :iconWidth="'20px'"
-          :iconColor="'gray-2'"
-          @click.native="setAdminMode()")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
@@ -205,25 +189,6 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
-    },
-    isLogin(): boolean {
-      return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
-    getAdminModeText(): string {
-      return this.adminMode ? '' : '-disable'
-    },
-    path(): string {
-      return this.$route.path
-    },
-    templateText(): string {
-      if (this.groupId.length > 0) {
-        return '群組模板'
-      } else {
-        return '單頁模板'
-      }
     }
   },
   methods: {
@@ -604,39 +569,6 @@ $REULER_SIZE: 25px;
   }
 }
 
-.header-container {
-  // must set to 100% or sticky div won't work
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate3d(-50%, 0px, 0);
-  z-index: setZindex("editor-header");
-  pointer-events: none;
-}
-
-.admin-options {
-  height: 100%;
-  position: absolute;
-  top: 0;
-  right: 0px;
-  z-index: setZindex("editor-header");
-  font-size: 10px;
-  pointer-events: none;
-  &__sticky-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    left: 0;
-    background-color: white;
-    padding: 5px 10px;
-    border-radius: 0 0 0.25rem 0.25rem;
-    box-shadow: 0px 2px 10px setColor(gray-2, 0.1);
-    pointer-events: auto;
-  }
-}
 .corner-block {
   position: sticky;
   top: 0;
