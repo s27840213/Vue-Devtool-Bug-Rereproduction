@@ -1,7 +1,10 @@
 <template lang="pug">
-  button(class="btn" :class="`btn-${buttonType}`" :disabled="disabled")
+  button(class="btn"
+      :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
+      :disabled="disabled" ref="btn")
     svg-icon(v-if="hasIcon"
       class="btn__icon"
+      :style="`margin-right: ${iconMargin}px`"
       :iconName="iconName"
       :iconColor="iconColor"
       :iconWidth="iconWidth")
@@ -32,6 +35,10 @@ export default Vue.extend({
       type: String,
       default: '15px'
     },
+    iconMargin: {
+      type: Number,
+      default: 0
+    },
     hasIcon: {
       type: Boolean,
       default: false
@@ -39,9 +46,21 @@ export default Vue.extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    squared: {
+      type: Boolean,
+      default: false
+    }
+  },
+  mounted() {
+    if (this.squared) {
+      (this.$el as HTMLElement).style.padding = (this.$el as HTMLElement).style.paddingTop
     }
   },
   computed: {
+    squaredPaddingClass(): string {
+      return this.squared ? `btn-squared-${this.type.split('-')[1]}` : ''
+    },
     buttonType(): string {
       const size = this.type.split('-')[1]
       return this.disabled ? `inactive-${size}` : this.type

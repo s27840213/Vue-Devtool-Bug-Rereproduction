@@ -100,13 +100,14 @@ class PopupUtils {
   }
 
   openPopup(type: string, properties?: Partial<IPopupProps>) {
-    const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template']
+    const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template', 'download']
     const targetMap: { [index: string]: string } = {
       order: '.layers-alt',
       align: '.btn-align',
       flip: '.btn-flip',
       slider: '.btn-opacity',
-      file: '.btn-file'
+      file: '.btn-file',
+      download: '.btn-download'
     }
     const onMousePos = ['layer', 'page', 'guideline']
     store.dispatch('popup/openPopup', {

@@ -1,14 +1,10 @@
 <template lang="pug">
   div(class="panel")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
-      component(v-if="isActive"
+      component(v-if="isSidebarPanelOpen"
         class="p-10 border-box"
         :style="panelStyles()"
         :is="panelComponents[currPanel]")
-    img(v-if="currPanel >= 0"
-      class="btn-pack"
-      :src="require('@/assets/img/svg/pack-up.svg')"
-      @click="togglePanel()")
 </template>
 
 <script lang="ts">
@@ -37,6 +33,9 @@ export default Vue.extend({
     PanelBrand,
     PanelPexels, // for testing purposes
     PanelPage
+  },
+  props: {
+    isSidebarPanelOpen: Boolean
   },
   data() {
     return {

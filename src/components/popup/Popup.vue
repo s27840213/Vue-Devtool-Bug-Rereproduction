@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="popup bg-white")
     component(:is="component"
-    v-click-outside="vcoConfig")
+    v-click-outside="vcoConfig"
+    :updateOptions="sharedUpdateOptions")
 </template>
 
 <script lang="ts">
@@ -13,12 +14,16 @@ import PopupLayer from '@/components/popup/PopupLayer.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
-import { mapActions, mapGetters } from 'vuex'
-import { IPopupComponent } from '@/interfaces/popup'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import pageUtils from '@/utils/pageUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -30,7 +35,8 @@ export default Vue.extend({
     PopupSlider,
     PopupFile,
     PopupLineTemplate,
-    PopupGuideline
+    PopupGuideline,
+    PopupDownload
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -47,12 +53,84 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapGetters({
       isPopupOpen: 'popup/isPopupOpen',
-      popupComponent: 'popup/getPopupComponent'
+      popupComponent: 'popup/getPopupComponent',
+      getPage: 'getPage',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      isLogin: 'user/isLogin',
+      groupId: 'getGroupId'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
+    },
+    hasDesignId(): boolean {
+      return this.getPage(this.lastSelectedPageIndex).designId !== ''
+    },
+    inAdminMode(): boolean {
+      return this.role === 0 && this.adminMode === true
+    },
+    sharedUpdateOptions(): Array<IPopupOptions> {
+      return [
+        {
+          icon: 'copy',
+          text: '上傳單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新單頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
+          action: () => {
+            uploadUtils.updateTemplate()
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳群組模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '刪除群組模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, true)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '測試用',
+          shortcutText: '',
+          condition: true,
+          action: () => {
+            generalUtils.test()
+          }
+        }
+      ]
     }
   },
   methods: {

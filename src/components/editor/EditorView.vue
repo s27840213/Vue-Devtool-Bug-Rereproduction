@@ -5,6 +5,21 @@
       @wheel="handleWheel"
       @mousewheel="handleWheel"
       ref="editorView")
+    div(class="header-container")
+      editor-header
+    div(class="body-2 relative")
+      //- div(class="editor-header__locale" @click="switchLocale()")
+      //-   span {{currLocale}}
+      div(v-if="!isLogin")
+        span 若要儲存設計，請
+        a(:href="`/signup?redirect=${path}`") 註冊
+        span 或
+        a(:href="`/login?redirect=${path}`") 登入
+      svg-icon(v-if="isAdmin"
+        :iconName="`user-admin${getAdminModeText}`"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click.native="setAdminMode()")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
@@ -60,9 +75,11 @@ import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
 
 export default Vue.extend({
   components: {
+    EditorHeader,
     RulerHr,
     RulerVr
   },
@@ -91,7 +108,7 @@ export default Vue.extend({
   },
   mounted() {
     StepsUtils.record()
-    this.editorView = document.querySelector('.editor-view') as HTMLElement
+    this.editorView = this.$refs.editorView as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     const editorViewBox = this.$el as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
@@ -558,6 +575,14 @@ $REULER_SIZE: 25px;
   }
 }
 
+.header-container {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate3d(-50%, 0px, 0);
+  z-index: setZindex("editor-header");
+}
 .corner-block {
   position: sticky;
   top: 0;

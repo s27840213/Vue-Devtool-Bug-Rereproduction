@@ -54,7 +54,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .svg-icon {
   width: 100%;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
   fill: currentColor;
   &:focus {
     outline: none;
