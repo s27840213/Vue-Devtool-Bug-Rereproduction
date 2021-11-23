@@ -489,7 +489,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       return ''
     }
   },
-  async recoverAll({ commit, getters }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
+  async recoverAll({ commit, dispatch, getters }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
     switch (getters.getCurrLocation) {
       case 't': // currently the only possible one
         for (const design of designs) {
@@ -517,6 +517,9 @@ const actions: ActionTree<IDesignState, unknown> = {
         }
         commit('SET_isErrorShowing', true)
         return ''
+      }
+      if (folders.length > 0) {
+        dispatch('fetchAllExpandedFolders')
       }
       return response.data.data.msg
     } catch (error) {
