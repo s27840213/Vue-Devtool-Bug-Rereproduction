@@ -160,8 +160,9 @@ export default Vue.extend({
   }
   &__folders {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     margin-bottom: 45px;
+    flex-wrap: wrap;
   }
   &__loading {
     display: flex;

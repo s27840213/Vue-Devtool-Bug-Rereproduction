@@ -21,25 +21,21 @@ import StepsUtils from '@/utils/stepsUtils'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
     return {
       ShortcutUtils,
-      StepsUtils,
-      download: false
+      StepsUtils
     }
-  },
-  components: {
-    PopupDownload
   },
   computed: {
     ...mapState('user', [
       'role',
       'adminMode']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+      groupId: 'getGroupId'
     }),
     isInFirstStep(): boolean {
       return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
@@ -64,6 +60,13 @@ export default Vue.extend({
     },
     pagesName(): string {
       return pageUtils.pagesName
+    },
+    templateText(): string {
+      if (this.groupId.length > 0) {
+        return '群組模板'
+      } else {
+        return '單頁模板'
+      }
     }
   },
   methods: {
@@ -86,26 +89,14 @@ export default Vue.extend({
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
     },
-    getInputTextWidth(el: HTMLInputElement): string {
-      const text = document.createElement('span')
-      document.body.appendChild(text)
-
-      text.style.font = el.style.font
-      text.style.fontSize = el.style.fontSize
-      text.style.height = 'auto'
-      text.style.width = 'auto'
-      text.style.position = 'absolute'
-      text.style.whiteSpace = 'no-wrap'
-      text.innerHTML = el.value
-
-      const formattedWidth = text.clientWidth + 'px'
-
-      return formattedWidth
-    },
-    onInput() {
-      const pagesNameInput = this.$refs.pagesName as HTMLInputElement
-      console.log(this.getInputTextWidth(pagesNameInput))
-      pagesNameInput.style.width = this.getInputTextWidth(pagesNameInput)
+    copyText(text: string) {
+      if (text.length === 0) {
+        return
+      }
+      GeneralUtils.copyText(text)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${text} 已複製` })
+        })
     }
   }
 })

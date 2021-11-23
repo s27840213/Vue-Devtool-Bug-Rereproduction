@@ -31,7 +31,7 @@
           div(v-if="menuItems.length > 0 && isMouseOver"
             class="folder-item__more"
             @click.stop="toggleMenu()")
-            svg-icon(iconName="more_horizontal"
+            svg-icon(iconName="more_vertical"
                     iconWidth="24px"
                     iconColor="gray-2")
           div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
@@ -203,7 +203,7 @@ export default Vue.extend({
       if (this.draggingType === 'design') {
         const design = this.draggingDesign as IDesign | undefined
         if (!design) return
-        if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+        if (this.isMultiSelected && this.selectedDesigns[design.asset_index.toString()]) {
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
@@ -254,7 +254,7 @@ export default Vue.extend({
       } else {
         if (this.editableName === '' || this.editableName === this.config.name) return
         this.checkNameLength()
-        designUtils.setFolderName(this.config, this.editableName, true)
+        designUtils.setFolderName(this.config, this.editableName, this.path as string[])
       }
     },
     checkNameEnter(e: KeyboardEvent) {
@@ -297,6 +297,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .folder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   &__block {
     position: relative;
     width: 63px;
@@ -424,7 +427,7 @@ export default Vue.extend({
     }
   }
   &__name {
-    width: 63px;
+    width: 120px;
     height: 40px;
     display: flex;
     align-items: start;
@@ -432,7 +435,7 @@ export default Vue.extend({
     > span {
       text-align: center;
       font-family: Mulish;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 400;
       color: setColor(gray-1);
       display: -webkit-box;
@@ -446,7 +449,7 @@ export default Vue.extend({
       width: 108px;
       text-align: center;
       font-family: Mulish;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 400;
       color: setColor(gray-1);
       padding: 0 5px;

@@ -192,6 +192,7 @@ export interface IUserDesignContentData {
   update_time: string,
   ver: number,
   width: number
+  signed_url?: {[key: string]: string}
 }
 
 export interface IUserFolderContentData {

@@ -200,10 +200,7 @@ class TextUtils {
           while (child.firstChild) {
             child = child.firstChild
           }
-          /**
-           * If child.textContent is truthy, means the correspond HTML tag is <Font>,
-           * else there should be an empty content correspond to <br>
-           */
+
           if (child.textContent) {
             span.textContent = el.textContent
           } else if (child.nodeName === 'BR') {
@@ -215,27 +212,17 @@ class TextUtils {
         }
 
         const text = spanEl.textContent as string
-        /**
-         * If the span is the same without changed, skip parse it
-         */
-        // if (config.paragraphs[pIndex] && config.paragraphs[pIndex].spans[sIndex] && text === config.paragraphs[pIndex].spans[sIndex].text) {
-        //   if (TextPropUtils.isSameSpanStyles(config.paragraphs[pIndex].spans[sIndex].styles, spanStyleBuff)) {
-        //     spans[spans.length - 1].text += text
-        //   } else {
-        //     spans.push(config.paragraphs[pIndex].spans[sIndex])
-        //   }
-        //   Object.assign(spanStyleBuff, config.paragraphs[pIndex].spans[sIndex].styles)
-        //   continue
-        // }
-
         let spanStyle = {} as ISpanStyle
+        console.log(pIndex)
+        console.log(spanEl)
         if (!spanEl.style.fontFamily) {
           if (pIndex > 0) {
+            const a = div.childNodes[pIndex - 1]
+            console.log(a)
             const leng = div.childNodes[pIndex - 1].childNodes.length
+
+            // const leng = div.
             spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-            // if (spanEl.nodeName !== 'SPAN') {
-            // Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
-            // }
             if (ps.length > config.paragraphs.length) {
               Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
             } else {
@@ -245,7 +232,7 @@ class TextUtils {
             Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
           }
         }
-
+        console.log(!Object.keys(spanStyle).length)
         if (!Object.keys(spanStyle).length) {
           spanStyle = {
             font: spanEl.style.fontFamily,

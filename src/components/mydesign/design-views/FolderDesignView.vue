@@ -45,7 +45,7 @@
           div(ref="more"
               class="folder-design-view__more__icon")
             svg-icon(class="header-icon"
-                    iconName="more_horizontal"
+                    iconName="more_vertical"
                     iconWidth="18px"
                     iconColor="gray-2")
           div(v-if="isFolderMenuOpen"
@@ -271,7 +271,7 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
-      designUtils.setFolderName(this.folder, this.editableFolderName)
+      designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
     },
     handleMenuAction(extraEvent: {event: string, payload: any}) {
       const { event, payload } = extraEvent
@@ -381,7 +381,6 @@ export default Vue.extend({
       font-size: 24px;
       font-weight: 700;
       line-height: 40px;
-      letter-spacing: 0.205em;
       color: setColor(bu);
       > button {
         display: flex;
@@ -495,6 +494,7 @@ export default Vue.extend({
       display: inline-block;
       text-overflow: ellipsis;
       cursor: pointer;
+      white-space: nowrap;
       &:hover {
         border-top: 1px solid transparent;
         border-bottom: 1px solid setColor(gray-2);

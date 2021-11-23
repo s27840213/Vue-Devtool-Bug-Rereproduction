@@ -8,7 +8,8 @@ export interface IDesign {
   createdTime: string,
   lastUpdatedTime: string,
   favorite: boolean,
-  ver: number
+  ver: number,
+  signedUrl?: {[key: string]: string}
 }
 
 export interface IFolder {

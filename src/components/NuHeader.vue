@@ -88,7 +88,7 @@ export default Vue.extend({
     ...mapState('user', [
       'role', 'shortName']),
     currentPage(): string {
-      return window.location.pathname
+      return '/' + window.location.pathname.split('/')[1]
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']

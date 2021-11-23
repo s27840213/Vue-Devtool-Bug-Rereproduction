@@ -28,7 +28,8 @@ class DesignUtils {
       lastUpdatedTime: design.update_time,
       favorite: design.favorite > 0,
       ver: design.ver,
-      thumbnail: ''
+      thumbnail: '',
+      signedUrl: design.signed_url
     }
   }
 
@@ -57,6 +58,9 @@ class DesignUtils {
     for (const [i, folder] of currentFolders.entries()) {
       if (countMap[folder.id] !== undefined) {
         countMap[folder.id].seen = true
+        if (countMap[folder.id].folder.name !== folder.name) {
+          folder.name = countMap[folder.id].folder.name
+        }
       } else {
         indicesToDelete.unshift(i)
       }
@@ -158,14 +162,6 @@ class DesignUtils {
         text: '建立副本'
       },
       {
-        icon: 'share-alt',
-        text: '分享'
-      },
-      {
-        icon: 'download',
-        text: '下載'
-      },
-      {
         icon: 'folder',
         text: '移至資料夾',
         extendable: true
@@ -175,6 +171,15 @@ class DesignUtils {
         text: '刪除'
       }
     ]
+    // ,
+    // {
+    //   icon: 'share-alt',
+    //   text: '分享'
+    // },
+    // {
+    //   icon: 'download',
+    //   text: '下載'
+    // }
   }
 
   makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
@@ -451,8 +456,8 @@ class DesignUtils {
     store.dispatch('design/setDesignName', { design, name })
   }
 
-  setFolderName(folder: IFolder, name: string, fromFolderItem = false) {
-    store.dispatch('design/setFolderName', { folder, name, fromFolderItem })
+  setFolderName(folder: IFolder, name: string, parents: string[]) {
+    store.dispatch('design/setFolderName', { folder, name, parents })
   }
 
   createFolder(parents: string[], folder: IFolder, name: string) {
@@ -489,11 +494,16 @@ class DesignUtils {
     })
   }
 
-  getDesignPreview(assetId: string, scale = 2 as 1 | 2, ver?: number): string {
-    const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
-    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
-    const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
-    return previewUrl
+  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: {'0_prev': string, '0_prev_2x': string}): string {
+    if (assetId !== undefined) {
+      const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
+      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
+      const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
+      return previewUrl
+    } else {
+      if (signedUrl) return scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']
+      return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
+    }
   }
 
   // Below function is used to update the page
@@ -513,10 +523,19 @@ class DesignUtils {
     }
   }
 
-  setDesign(design: IUserDesignContentData | IDesign) {
+  setDesign(design: IDesign) {
     // if(uploadUtils.assetId.length !== 0) {
     //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
     // }
+
+    pageUtils.setPages()
+
+    let isPrivate = false
+
+    if (design.id === undefined && design.signedUrl) {
+      isPrivate = true
+      design.id = this.getPrivateDesignId(design.signedUrl['config.json'])
+    }
 
     pageUtils.clearPagesInfo()
     if (this.isLogin) {
@@ -526,7 +545,15 @@ class DesignUtils {
       }
     }
 
-    uploadUtils.getDesign('design', design.id ?? '')
+    if (isPrivate) {
+      uploadUtils.getDesign('design-url', design.signedUrl?.['config.json'] ?? '')
+    } else {
+      uploadUtils.getDesign('design', design.id ?? '')
+    }
+  }
+
+  getPrivateDesignId(jsonUrl: string): string {
+    return jsonUrl.match(/.*design\/(.*)\/config\.json.*/)?.[1] ?? ''
   }
 }
 

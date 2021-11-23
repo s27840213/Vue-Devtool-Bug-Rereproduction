@@ -16,7 +16,11 @@ class TemplateCenterUtils {
         url: this.getPrevUrl(cover),
         id: cover.id,
         theme: cover.theme,
-        height: height / width * 100
+        prev_height: height / width * 100,
+        width: cover.width,
+        height: cover.height,
+        type: 6,
+        ver: cover.ver
       })
     }
     return res

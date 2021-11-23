@@ -419,10 +419,7 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     addPage() {
-      const page = GeneralUtils.deepCopy(layerUtils.getPage(this.pageIndex)) as IPage
-      // const { layers, types, index } = this.currSelectedInfo as ICurrSelectedInfo
       const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
-
       layerUtils.updateLayerProps(pageIndex, layerIndex, { active: false, shown: false })
       if (currLayer) {
         switch (currLayer.type) {
