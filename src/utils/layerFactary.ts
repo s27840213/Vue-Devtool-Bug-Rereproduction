@@ -374,14 +374,6 @@ class LayerFactary {
   newTemplate(config: any): any {
     const init = (layer: ILayer) => {
       switch (layer.type) {
-        case 'text': {
-          const text = layer as IText
-          if (text.widthLimit === -1) {
-            Object.assign(text.styles, textUtils.getTextHW(text, -1))
-          }
-        }
-      }
-      switch (layer.type) {
         case 'frame': {
           const frame = layer as IFrame
           if (!frame.clips[0].isFrameImg) {

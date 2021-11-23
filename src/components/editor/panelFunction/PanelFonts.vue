@@ -186,7 +186,7 @@ export default Vue.extend({
       }
     `
       document.head.appendChild(style)
-      TextUtils.updateFontFace({ name: fontName, face: fontName })
+      TextUtils.updateFontFace({ name: fontName, face: fontName, loaded: true })
     },
     handleLoadMore() {
       const { keyword } = this
