@@ -4,6 +4,7 @@ import router from '@/router'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import GeneralUtils from './generalUtils'
+import layerFactary from './layerFactary'
 import uploadUtils from './uploadUtils'
 
 class PageUtils {
@@ -90,7 +91,7 @@ class PageUtils {
         h: []
       }
     }
-    return Object.assign(defaultPage, pageData)
+    return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 
   newPages(pages: Array<IPage>) {

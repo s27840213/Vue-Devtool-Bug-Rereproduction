@@ -514,7 +514,6 @@ export default Vue.extend({
       this.confirmMessage = 'delete-all'
     },
     recoverAll() {
-      console.log(this.selectedDesigns, this.selectedFolders)
       designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders)).then((dest) => {
         if (dest === '') return
         this.handleRecoverItem({

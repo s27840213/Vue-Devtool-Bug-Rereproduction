@@ -106,6 +106,9 @@ import { IPopupOptions } from '@/interfaces/popup'
 import assetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
+  props: {
+    updateOptions: Object as () => Array<IPopupOptions>
+  },
   data() {
     return {
       typeMap: {
@@ -172,73 +175,6 @@ export default Vue.extend({
     },
     updateType(): string {
       return this.isTextGroup || this.isText ? 'text' : this.getType[0]
-    },
-    updateOptions(): Array<IPopupOptions> {
-      return [
-        {
-          icon: 'copy',
-          text: '上傳單頁模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadTemplate()
-          }
-        },
-        {
-          icon: 'copy',
-          text: '更新單頁模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.hasPageDesignId && this.isLogin,
-          action: () => {
-            uploadUtils.updateTemplate()
-          }
-        },
-        {
-          icon: 'copy',
-          text: '上傳群組模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(0)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '更新群組模板',
-          shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '刪除群組模板',
-          shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1, true)
-          }
-        },
-        {
-          icon: 'copy',
-          text: `上傳 ${this.typeMap[this.updateType]}`,
-          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
-          shortcutText: '',
-          action: () => {
-            uploadUtils.uploadLayer(this.updateType)
-          }
-        },
-        {
-          icon: 'copy',
-          text: `更新 ${this.typeMap[this.updateType]}`,
-          condition: this.hasLayerDesignId && this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
-          shortcutText: '',
-          action: () => {
-            uploadUtils.updateLayer(this.updateType)
-          }
-        }
-      ]
     },
     groupOption(): any {
       return {

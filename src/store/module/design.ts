@@ -666,34 +666,34 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('SET_isErrorShowing', true)
     }
   },
-  async setFolderName({ commit }, { folder, name, fromFolderItem }: {folder: IFolder, name: string, fromFolderItem: boolean}) {
+  async setFolderName({ commit }, { folder, name, parents }: {folder: IFolder, name: string, parents: string[]}) {
     const originalName = folder.name
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', null, folder.id, name)
       .then((response) => {
         if (response.data.flag !== 0) {
           console.log(response.data.msg)
-          folder.name = originalName
-          if (fromFolderItem) {
-            commit('UPDATE_deleteFolder', folder)
-            commit('UPDATE_addFolder', folder)
-          }
+          commit('UPDATE_setFolderName', {
+            parents,
+            folder,
+            name: originalName
+          })
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
         console.error(error)
-        folder.name = originalName
-        if (fromFolderItem) {
-          commit('UPDATE_deleteFolder', folder)
-          commit('UPDATE_addFolder', folder)
-        }
+        commit('UPDATE_setFolderName', {
+          parents,
+          folder,
+          name: originalName
+        })
         commit('SET_isErrorShowing', true)
       })
-    folder.name = name
-    if (fromFolderItem) {
-      commit('UPDATE_deleteFolder', folder)
-      commit('UPDATE_addFolder', folder)
-    }
+    commit('UPDATE_setFolderName', {
+      parents,
+      folder,
+      name
+    })
   },
   async moveFolder({ commit, getters }, { parents, folder, destination }: {parents: string[], folder: IDesign, destination: string[]}) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
@@ -997,6 +997,20 @@ const mutations: MutationTree<IDesignState> = {
       state.allDesigns.splice(index, 1)
     }
   },
+  UPDATE_setFolderName(state: IDesignState, updateInfo: {name: string, parents: string[], folder: IFolder}) {
+    const folder = designUtils.search(state.folders, designUtils.appendPath(updateInfo.parents, updateInfo.folder))
+    if (folder) {
+      folder.name = updateInfo.name
+    }
+    const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.folder.id)
+    if (index >= 0) {
+      const newFolder = state.allFolders[index]
+      state.allFolders.splice(index, 1)
+      newFolder.name = updateInfo.name
+      const newIndex = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, newFolder)
+      state.allFolders.splice(newIndex, 0, newFolder)
+    }
+  },
   UPDATE_addFolder(state: IDesignState, folder: IFolder) {
     const index = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
     state.allFolders.splice(index, 0, folder)
@@ -1034,10 +1048,10 @@ const mutations: MutationTree<IDesignState> = {
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {
-    Vue.set(state.selectedDesigns, design.id, design)
+    Vue.set(state.selectedDesigns, design.asset_index.toString(), design)
   },
   UPDATE_removeFromSelection(state: IDesignState, design: IDesign) {
-    Vue.delete(state.selectedDesigns, design.id)
+    Vue.delete(state.selectedDesigns, design.asset_index.toString())
   },
   UPDATE_addFolderToSelection(state: IDesignState, folder: IFolder) {
     Vue.set(state.selectedFolders, folder.id, folder)

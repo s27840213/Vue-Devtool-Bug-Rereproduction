@@ -117,7 +117,7 @@ export default Vue.extend({
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     draggedOverStyles() {
-      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': '#2C2F43' } : {}
+      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': 'rgba(78, 171, 230, 0.3)' } : {}
     },
     draggedFolderStyles(): {[key: string]: string} {
       if (this.isDragged) {
@@ -179,7 +179,7 @@ export default Vue.extend({
       if (this.draggingType === 'design') {
         const design = this.draggingDesign as IDesign | undefined
         if (!design) return
-        if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+        if (this.isMultiSelected && this.selectedDesigns[design.asset_index.toString()]) {
           designUtils.moveAll(Object.values(this.selectedDesigns), destination)
           this.$emit('moveItem', {
             type: 'multi',
@@ -238,7 +238,7 @@ export default Vue.extend({
       } else {
         if (this.editableName === '' || (this.editableName === this.folder.name)) return
         this.checkNameLength()
-        designUtils.setFolderName(this.folder, this.editableName)
+        designUtils.setFolderName(this.folder, this.editableName, this.parents as string[])
       }
     },
     handleShowHint(folderId: string) {

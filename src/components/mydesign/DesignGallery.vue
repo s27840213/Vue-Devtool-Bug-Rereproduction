@@ -17,7 +17,7 @@
                   :favorable="!limitFunctions"
                   :undraggable="limitFunctions"
                   :nameIneditable="limitFunctions"
-                  :isSelected="checkSelected(design.id)"
+                  :isSelected="checkSelected(design.asset_index.toString())"
                   :isAnySelected="isAnySelected"
                   :isMultiSelected="isMultiSelected"
                   :menuItemNum="menuItemSlots.length"
@@ -94,8 +94,8 @@ export default Vue.extend({
       addToFavorite: 'UPDATE_addToFavorite',
       removeFromFavorite: 'UPDATE_removeFromFavorite'
     }),
-    checkSelected(id: string): boolean {
-      return !!this.selectedDesigns[id]
+    checkSelected(assetIndex: string): boolean {
+      return !!this.selectedDesigns[assetIndex]
     },
     expansionIconStyles() {
       return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }

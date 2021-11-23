@@ -31,10 +31,10 @@ export default Vue.extend({
         }
       }
       switch (type) {
-        // case 'shape':
-        //   width = `${this.config.vSize[0] + this.config.pDiff ? this.config.pDiff[0] : 0}px`
-        //   height = `${this.config.vSize[1] + this.config.pDiff ? this.config.pDiff[1] : 0}px`
-        //   break
+        case 'shape':
+          width = `${this.config.vSize?.[0] ?? 0 + this.config.pDiff?.[0] ?? 0}px`
+          height = `${this.config.vSize?.[1] ?? 0 + this.config.pDiff?.[1] ?? 0}px`
+          break
         default:
           width = `${width / scale}px`
           height = `${height / scale}px`

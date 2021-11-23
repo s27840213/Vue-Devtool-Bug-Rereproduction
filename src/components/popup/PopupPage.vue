@@ -53,6 +53,9 @@ import { IPopupOptions } from '@/interfaces/popup'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
+  props: {
+    updateOptions: Object as () => Array<IPopupOptions>
+  },
   data() {
     return {
       baseBgImgConfig: {
@@ -104,64 +107,6 @@ export default Vue.extend({
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
-    },
-    updateOptions(): Array<IPopupOptions> {
-      return [
-        {
-          icon: 'copy',
-          text: '上傳單頁模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadTemplate()
-          }
-        },
-        {
-          icon: 'copy',
-          text: '更新單頁模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
-          action: () => {
-            uploadUtils.updateTemplate()
-          }
-        },
-        {
-          icon: 'copy',
-          text: '上傳群組模板',
-          shortcutText: '',
-          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
-          action: () => {
-            uploadUtils.uploadGroupDesign(0)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '更新群組模板',
-          shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '刪除群組模板',
-          shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1, true)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '測試用',
-          shortcutText: '',
-          condition: true,
-          action: () => {
-            GeneralUtils.test()
-          }
-        }
-      ]
     }
   },
   methods: {

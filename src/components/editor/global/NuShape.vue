@@ -53,7 +53,8 @@ export default Vue.extend({
     return {
       styleNode: null as any,
       transNode: null as any,
-      filterTemplate: ''
+      filterTemplate: '',
+      paramsReady: false
     }
   },
   async created() {
@@ -105,6 +106,7 @@ export default Vue.extend({
     // console.log(this.config.styleArray)
     const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
     this.styleNode = shapeUtils.addStyleTag(styleText)
+    this.paramsReady = true
   },
   watch: {
     'config.color': {
@@ -209,17 +211,25 @@ export default Vue.extend({
       return `${this.className}C`
     },
     viewBoxFormatter(): string {
-      if (this.config.category === 'D') {
-        return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
+      if (this.paramsReady) {
+        if (this.config.category === 'D') {
+          return shapeUtils.lineViewBoxFormatter(this.config.point, this.config.size[0])
+        }
+        // console.log(this.layerIndex)
+        // console.log(`0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`)
+        return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
+      } else {
+        return '0 0 0 0'
       }
-      // console.log(this.layerIndex)
-      // console.log(`0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`)
-      return `0 0 ${this.config.vSize[0] + this.config.pDiff[0]} ${this.config.vSize[1] + this.config.pDiff[1]}`
     },
     svgFormatter(): string {
-      const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap, this.config.trimOffset) : this.config.point
-      const svgParameters = (this.config.category === 'E') ? shapeUtils.svgParameters(this.config.shapeType, this.config.vSize, this.config.size) : []
-      return shapeUtils.svgFormatter(this.config.svg, this.className, this.config.styleArray.length, this.config.transArray?.length ?? 0, this.config.markerTransArray?.length ?? 0, point, svgParameters, this.config.pDiff)
+      if (this.paramsReady) {
+        const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap, this.config.trimOffset) : this.config.point
+        const svgParameters = (this.config.category === 'E') ? shapeUtils.svgParameters(this.config.shapeType, this.config.vSize, this.config.size) : []
+        return shapeUtils.svgFormatter(this.config.svg, this.className, this.config.styleArray.length, this.config.transArray?.length ?? 0, this.config.markerTransArray?.length ?? 0, point, svgParameters, this.config.pDiff)
+      } else {
+        return ''
+      }
     },
     filterFormatter(): string {
       let estFilterRad = Math.ceil((4 * 100 * this.config.ratio / (this.$store.getters.getPageScaleRatio * this.config.styles.scale) - 1) / 2)
@@ -299,9 +309,16 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      return {
-        width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
-        height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
+      if (this.paramsReady) {
+        return {
+          width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
+          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
+        }
+      } else {
+        return {
+          width: '0px',
+          height: '0px'
+        }
       }
     },
     getFilterTemplate(): string {

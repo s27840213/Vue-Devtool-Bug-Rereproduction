@@ -33,6 +33,12 @@
     align-items: center;
 }
 
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .pointer {
     cursor: pointer;
 }
@@ -168,4 +174,12 @@ $spacer: 5;
 
 .relative {
     position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.rotate-hr {
+    transform: rotate(180deg);
 }

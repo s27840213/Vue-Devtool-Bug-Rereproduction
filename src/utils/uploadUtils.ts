@@ -33,7 +33,8 @@ enum GroupDesignUpdateFlag {
 enum GetDesignType {
   TEMPLATE = 'template',
   TEXT = 'text',
-  ASSET_DESIGN = 'design'
+  ASSET_DESIGN = 'design',
+  PRIVATE_DESIGN = 'design-url'
 }
 /**
  * @todo do the house keeping for upload and update logic
@@ -56,6 +57,7 @@ class UploadUtils {
 
   getDesignInfo: {
     flag: number,
+    type: string,
     id: string
   }
 
@@ -74,6 +76,7 @@ class UploadUtils {
   constructor() {
     this.getDesignInfo = {
       flag: 0,
+      type: GetDesignType.ASSET_DESIGN,
       id: ''
     }
 
@@ -84,7 +87,7 @@ class UploadUtils {
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
     if (this.getDesignInfo.flag) {
-      this.getDesign(GetDesignType.ASSET_DESIGN, this.getDesignInfo.id)
+      this.getDesign(this.getDesignInfo.type, this.getDesignInfo.id)
     }
   }
 
@@ -780,10 +783,22 @@ class UploadUtils {
         if (!this.isLogin) {
           this.getDesignInfo.flag = 1
           this.getDesignInfo.id = designId
+          this.getDesignInfo.type = GetDesignType.ASSET_DESIGN
           return
         }
         jsonName = 'config.json'
         fetchTarget = `https://template.vivipic.com/${this.loginOutput.upload_map.path}asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        break
+      }
+      case GetDesignType.PRIVATE_DESIGN: {
+        if (!this.isLogin) {
+          this.getDesignInfo.flag = 1
+          this.getDesignInfo.id = designId
+          this.getDesignInfo.type = GetDesignType.PRIVATE_DESIGN
+          return
+        }
+        fetchTarget = designId
+        break
       }
     }
     fetch(fetchTarget)
@@ -815,6 +830,19 @@ class UploadUtils {
                 themeUtils.refreshTemplateState()
                 //
                 stepsUtils.reset()
+                break
+              }
+              case GetDesignType.PRIVATE_DESIGN: {
+                /**
+                 * @Todo add computableInfo if we need
+                 */
+                // await ShapeUtils.addComputableInfo(json.layers[0])
+                store.commit('SET_assetId', designId)
+                store.commit('SET_pages', json)
+                themeUtils.refreshTemplateState()
+                //
+                stepsUtils.reset()
+                break
               }
             }
           })

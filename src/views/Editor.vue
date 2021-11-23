@@ -1,10 +1,10 @@
 <template lang="pug">
   div(class="editor")
-    editor-header
-    sidebar
+    sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+      @toggleSidebarPanel="toggleSidebarPanel")
     section
       div(class="content")
-        sidebar-panel
+        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
         div(class="content__main")
           div(class="content__editor")
             editor-view
@@ -48,7 +48,8 @@ export default Vue.extend({
   data() {
     return {
       FunctionPanelType,
-      isColorPanelOpen: false
+      isColorPanelOpen: false,
+      isSidebarPanelOpen: true
     }
   },
   computed: {
@@ -108,6 +109,9 @@ export default Vue.extend({
     toggleColorPanel(bool: boolean) {
       this.isColorPanelOpen = bool
     },
+    toggleSidebarPanel(bool: boolean) {
+      this.isSidebarPanelOpen = bool
+    },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
@@ -133,7 +137,7 @@ export default Vue.extend({
   grid-template-columns: auto 1fr;
   > section:nth-child(2) {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: 1fr;
   }
 }
@@ -142,8 +146,7 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: auto 1fr auto;
-  padding-top: 50px;
-  height: calc(100% - 50px);
+  height: 100%;
   &__main {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
