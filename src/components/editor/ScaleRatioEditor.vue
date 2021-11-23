@@ -11,6 +11,10 @@
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
     svg-icon(class="page-preview pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
+    svg-icon(:iconName="'navPage'"
+      :iconColor="'gray-2'"
+      :iconWidth="'24px'"
+      @click="switchNav(SidebarPanelType.page)")
 </template>
 
 <script lang="ts">
@@ -60,12 +64,12 @@ export default Vue.extend({
 .scale-ratio-editor {
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: auto auto auto auto auto;
   background-color: setColor(white);
   align-items: center;
   box-shadow: 0px 0px 5px setColor(gray-2, 0.3);
   padding: 7px 14px;
-  border-radius: 7px;
+  border-radius: 7px 7px 0 0;
   column-gap: 5px;
   input[type="range"] {
     background: setColor(gray-6);

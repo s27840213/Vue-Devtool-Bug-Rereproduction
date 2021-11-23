@@ -181,7 +181,7 @@ export default Vue.extend({
 
 .scale-ratio-editor::v-deep {
   position: absolute;
-  bottom: 30px;
+  bottom: 0px;
   z-index: setZindex("scale-ratio-editor");
 }
 </style>
