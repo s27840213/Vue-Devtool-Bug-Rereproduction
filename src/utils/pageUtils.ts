@@ -225,13 +225,13 @@ class PageUtils {
     })
   }
 
-  appendPagesTo(pages: IPage[], index?: number) {
+  appendPagesTo(pages: IPage[], index?: number, replace?: boolean) {
     const currentPages = store.getters.getPages as IPage[]
     let currentPagesTmp = GeneralUtils.deepCopy(currentPages)
     if (typeof index === 'number') {
       currentPagesTmp = currentPagesTmp.slice(0, index)
         .concat(pages)
-        .concat(currentPagesTmp.slice(index))
+        .concat(currentPagesTmp.slice(replace ? index + 1 : index))
     } else {
       currentPagesTmp = currentPagesTmp.concat(pages)
     }
