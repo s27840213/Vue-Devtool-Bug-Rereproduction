@@ -2,10 +2,13 @@ import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
+import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
+import resizeUtils from './resizeUtils'
+import Vue from 'vue'
 
 interface Item {
   name: string,
@@ -521,6 +524,26 @@ class DesignUtils {
        */
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
     }
+  }
+
+  newDesignWithTemplae(width: number, height: number, json: any) {
+    assetUtils.addTemplate(json)
+    pageUtils.clearPagesInfo()
+    Vue.nextTick(() => {
+      resizeUtils.resizePage(0, json, { width, height })
+      store.commit('UPDATE_pageProps', {
+        pageIndex: 0,
+        props: { width, height }
+      })
+      themeUtils.refreshTemplateState()
+      if (this.isLogin) {
+        uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+        /**
+         * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
+         */
+        router.replace({ query: { type: 'design', design_id: uploadUtils.assetId } })
+      }
+    })
   }
 
   setDesign(design: IDesign) {

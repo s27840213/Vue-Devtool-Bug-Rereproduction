@@ -20,7 +20,8 @@ class TemplateCenterUtils {
         width: cover.width,
         height: cover.height,
         type: 6,
-        ver: cover.ver
+        ver: cover.ver,
+        content_ids: template.content_ids
       })
     }
     return res

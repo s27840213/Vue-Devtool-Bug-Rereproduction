@@ -15,6 +15,7 @@ import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
 import themeUtils from './themeUtils'
+import designUtils from './designUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -34,7 +35,8 @@ enum GetDesignType {
   TEMPLATE = 'template',
   TEXT = 'text',
   ASSET_DESIGN = 'design',
-  PRIVATE_DESIGN = 'design-url'
+  PRIVATE_DESIGN = 'design-url',
+  NEW_DESIGN_TEMPLATE = 'new-design-template',
 }
 /**
  * @todo do the house keeping for upload and update logic
@@ -769,7 +771,7 @@ class UploadUtils {
     return page
   }
 
-  async getDesign(type: string, designId: string) {
+  async getDesign(type: string, designId: string, params: {[key: string]: any} = {}) {
     let jsonName = ''
     let fetchTarget = ''
     switch (type) {
@@ -798,6 +800,10 @@ class UploadUtils {
           return
         }
         fetchTarget = designId
+        break
+      }
+      case GetDesignType.NEW_DESIGN_TEMPLATE: {
+        fetchTarget = `https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`
         break
       }
     }
@@ -841,6 +847,11 @@ class UploadUtils {
                 store.commit('SET_pages', json)
                 themeUtils.refreshTemplateState()
                 //
+                stepsUtils.reset()
+                break
+              }
+              case GetDesignType.NEW_DESIGN_TEMPLATE: {
+                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
                 stepsUtils.reset()
                 break
               }

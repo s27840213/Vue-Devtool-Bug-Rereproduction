@@ -56,6 +56,10 @@
             div(class="template-center__waterfall__column__template__container")
               img(:src="template.url")
             div(class="template-center__waterfall__column__template__theme") {{ template.theme }}
+            div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
+              svg-icon(iconName="multiple-file"
+                      iconWidth="24px"
+                      iconColor="gray-7")
       div(v-if="!isTemplateReady" class="template-center__loading")
         svg-icon(iconName="loading"
                 iconWidth="24px"
@@ -66,21 +70,63 @@
     transition(name="fade-scale")
       div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
         img(:src="require('@/assets/img/svg/to_top.svg')")
+    transition(name="fade-scale-center")
+      div(v-if="modal === 'pages'" class="template-center__multi"
+          v-click-outside="() => { modal = '' }")
+        div(class="template-center__multi__header")
+          div(class="template-center__multi__header__close"
+              @click="() => { modal = '' }")
+            svg-icon(iconName="close"
+                    iconWidth="20px"
+                    iconColor="gray-2")
+        div(class="template-center__multi__content")
+          div(class="template-center__multi__gallery")
+            div(v-for="content in content_ids" class="template-center__multi__gallery-item"
+                :style="`background-image: url(${getPrevUrl(content)})`"
+                @click="handleTemplateClick(content)")
+    transition(name="fade-scale-center")
+      div(v-if="modal === 'template'" class="template-center__multi-split"
+          v-click-outside="() => { modal = '' }")
+        div(class="template-center__multi__content-left")
+          div(class="template-center__multi__template"
+              :style="`background-image: url(${getPrevUrl(contentBuffer)})`")
+        div(class="template-center__multi__content-right")
+          div(class="template-center__multi__header")
+            div(class="template-center__multi__header__close"
+                @click="() => { modal = 'pages' }")
+              svg-icon(iconName="close"
+                      iconWidth="20px"
+                      iconColor="gray-2")
+          div(class="template-center__multi__title")
+            span 選擇設計主題：
+          div(class="template-center__multi__themes")
+            div(v-for="theme in matchedThemes" class="template-center__multi__themes__row"
+                :class="checkSelected(theme) ? 'selected' : ''"
+                @click="handleThemeSelect(theme)")
+              div(class="template-center__multi__themes__title")
+                span {{ theme.title }}
+              div(class="template-center__multi__themes__description")
+                span {{ `${theme.width}x${theme.height}` }}
+          div(class="template-center__multi__button"
+              :class="selectedTheme ? '' : 'disabled'"
+              @click="handleThemeSubmit")
+            span 使用此模板
+    div(v-if="modal !== ''" class="dim-background")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import vClickOutside from 'v-click-outside'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { ITemplate } from '@/interfaces/template'
+import { IContentTemplate, ITemplate } from '@/interfaces/template'
+import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
-import designUtils from '@/utils/designUtils'
-import assetUtils from '@/utils/assetUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   name: 'MyDesgin',
@@ -90,6 +136,9 @@ export default Vue.extend({
     NuFooter,
     HashtagCategoryRow,
     ObserverSentinel
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     const sortingCriteria = [
@@ -104,7 +153,13 @@ export default Vue.extend({
       sortingCriteria,
       selectedSorting: sortingCriteria[0],
       waterfallTemplates: [] as ITemplate[][],
-      isTemplateReady: false
+      isTemplateReady: false,
+      themes: [] as Itheme[],
+      matchedThemes: [] as Itheme[],
+      selectedTheme: undefined as Itheme | undefined,
+      content_ids: [] as IContentTemplate[],
+      contentBuffer: undefined as IContentTemplate | undefined,
+      modal: ''
     }
   },
   mounted() {
@@ -117,6 +172,9 @@ export default Vue.extend({
         }
       }
       this.composeKeyword()
+    })
+    themeUtils.checkThemeState().then(() => {
+      this.themes = themeUtils.themes
     })
   },
   computed: {
@@ -168,14 +226,21 @@ export default Vue.extend({
       this.composeKeyword()
     },
     handleClickWaterfall(template: ITemplate) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(template.width, template.height)
-        assetUtils.addAsset({
-          id: template.id,
-          type: template.type,
-          ver: template.ver
+      if (template.content_ids.length === 1) {
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: template.id,
+            width: template.width.toString(),
+            height: template.height.toString()
+          }
         })
-      })
+        window.open(route.href, '_blank')
+      } else {
+        this.content_ids = template.content_ids
+        this.modal = 'pages'
+      }
     },
     scrollToTop() {
       (this.$refs.body as HTMLElement).scrollTo({
@@ -215,6 +280,55 @@ export default Vue.extend({
         this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
         this.isTemplateReady = true
       })
+    },
+    handleTemplateClick(content: IContentTemplate) {
+      if (content.themes.length > 1) {
+        this.modal = 'template'
+        this.contentBuffer = content
+        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+        this.selectedTheme = undefined
+      } else {
+        const matchedTheme = this.themes.find(theme => theme.id.toString() === content.themes[0])
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: content.width.toString(),
+          height: content.height.toString()
+        }
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: content.id,
+            width: format.width,
+            height: format.height
+          }
+        })
+        window.open(route.href, '_blank')
+      }
+    },
+    handleThemeSelect(theme: Itheme) {
+      this.selectedTheme = theme
+    },
+    handleThemeSubmit() {
+      if (!this.selectedTheme || !this.contentBuffer) return
+      const route = this.$router.resolve({
+        name: 'Editor',
+        query: {
+          type: 'new-design-template',
+          design_id: this.contentBuffer.id,
+          width: this.selectedTheme.width.toString(),
+          height: this.selectedTheme.height.toString()
+        }
+      })
+      window.open(route.href, '_blank')
+    },
+    getPrevUrl(content: IContentTemplate): string {
+      return templateCenterUtils.getPrevUrl(content)
+    },
+    checkSelected(theme: Itheme): boolean {
+      return this.selectedTheme?.id === theme.id
     }
   }
 })
@@ -397,6 +511,13 @@ export default Vue.extend({
         &:hover &__theme {
           bottom: 0;
         }
+        &__multi {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 24px;
+          height: 24px;
+        }
       }
     }
   }
@@ -405,6 +526,182 @@ export default Vue.extend({
     right: 76px;
     bottom: 84px;
   }
+  &__multi {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 982px;
+    height: 560px;
+    background: #FFFFFF;
+    box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+    border-radius: 6px;
+    z-index: 20;
+    &-split {
+      @extend .template-center__multi;
+      display: flex;
+    }
+    &__header {
+      position: relative;
+      width: 100%;
+      height: 42px;
+      &__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+    }
+    &__content {
+      margin-top: 28px;
+      overflow-y: auto;
+      width: 100%;
+      height: calc(100% - 70px);
+    }
+    &__content-left {
+      width: 560px;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid setColor(gray-5);
+      box-sizing: border-box;
+    }
+    &__content-right {
+      width: calc(100% - 560px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    &__gallery {
+      display: grid;
+      margin: auto;
+      margin-bottom: 20px;
+      width: 860px;
+      grid-gap: 20px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    &__gallery-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 200px;
+      height: 200px;
+      background: white;
+      border: 1px solid setColor(gray-5);
+      box-sizing: border-box;
+      cursor: pointer;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+    &__template {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 456px;
+      height: 456px;
+      background: white;
+      border: 1px solid setColor(gray-5);
+      box-sizing: border-box;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+    &__title {
+      width: 312px;
+      height: 20px;
+      text-align: left;
+      > span {
+        font-family: Mulish;
+        font-weight: 400;
+        font-size: 14px;
+      }
+    }
+    &__themes {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      width: 312px;
+      height: 411px;
+      border: 2px solid setColor(gray-5);
+      border-radius: 3px;
+      &__row {
+        display: flex;
+        align-items: center;
+        height: 30px;
+        color: setColor(gray-2);
+        cursor: pointer;
+        &.selected {
+          color: setColor(blue-1);
+          background-color: setColor(gray-7);
+        }
+        &:hover {
+          background-color: setColor(gray-7);
+        }
+        > div {
+          display: flex;
+          align-items: center;
+          height: 20px;
+          text-align: left;
+          > span {
+            font-family: Mulish;
+            font-weight: 400;
+            font-size: 12px;
+          }
+        }
+      }
+      &__title {
+        margin-left: 17px;
+        width: 89px;
+      }
+      &__description {
+        transform-origin: left;
+        transform: scale(calc(5/6));
+      }
+    }
+    &__button {
+      margin-top: 18px;
+      width: 240px;
+      height: 36px;
+      background-color: setColor(blue-1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      > span {
+        font-family: 'NotoSansTC';
+        font-weight: 700;
+        font-size: 12px;
+        line-height: 18px;
+        letter-spacing: 1.21em;
+        text-indent: 1.21em;
+        color: white;
+      }
+      &.disabled {
+        background-color: setColor(gray-5);
+        cursor: not-allowed;
+        > span {
+          color: setColor(gray-3);
+        }
+      }
+    }
+  }
+}
+
+.dim-background {
+  position: fixed;
+  @include size(100%, 100%);
+  top: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.4);
+  transform-style: preserve-3d;
+  z-index: 19;
 }
 
 .fade-scale {
@@ -414,6 +711,17 @@ export default Vue.extend({
 
   &-enter, &-leave-to {
     transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+.fade-scale-center {
+  &-enter-active, &-leave-active  {
+    transition: .3s ease;
+  }
+
+  &-enter, &-leave-to {
+    transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
   }
 }

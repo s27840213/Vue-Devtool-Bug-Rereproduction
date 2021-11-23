@@ -2,12 +2,12 @@
   label(class="download-check-button")
     svg-icon(v-if="type === 'checkbox'"
       class="mr-5"
-      :iconColor="checked ? 'blue-1' : 'gray-7'"
+      :iconColor="checked ? 'blue-1' : 'light-gray'"
       :iconName="checked ? 'checkbox-checked' : 'checkbox'"
       :iconWidth="iconSize")
     svg-icon(v-else
       class="mr-5"
-      :iconColor="checked ? 'blue-1' : 'gray-7'"
+      :iconColor="checked ? 'blue-1' : 'light-gray'"
       :iconName="checked ? 'radio-checked' : 'radio'"
       :iconWidth="iconSize")
     slot
