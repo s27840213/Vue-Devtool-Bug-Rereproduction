@@ -200,9 +200,9 @@ export default Vue.extend({
       })
     },
     featureItemClicked(idx: number) {
-      window.clearInterval(this.CoolDownTimer)
       this.isTimerStop = true
       this.featureSelected = idx
+      window.clearInterval(this.CoolDownTimer) // use the latest cool down time
       this.CoolDownTimer = setTimeout(() => {
         this.isTimerStop = false
       }, 10000)
