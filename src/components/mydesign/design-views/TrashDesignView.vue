@@ -134,7 +134,6 @@ export default Vue.extend({
       font-size: 24px;
       font-weight: 700;
       line-height: 40px;
-      letter-spacing: 0.205em;
       color: setColor(bu);
     }
   }

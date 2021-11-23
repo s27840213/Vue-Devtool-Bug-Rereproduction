@@ -31,7 +31,7 @@
           div(v-if="isMouseOver"
             class="design-item__more"
             @click.stop="toggleMenu()")
-            svg-icon(iconName="more_horizontal"
+            svg-icon(iconName="more_vertical"
                     iconWidth="24px"
                     iconColor="gray-2")
           div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"

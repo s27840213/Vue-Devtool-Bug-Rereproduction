@@ -117,7 +117,7 @@ export default Vue.extend({
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     draggedOverStyles() {
-      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': '#2C2F43' } : {}
+      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': 'rgba(78, 171, 230, 0.3)' } : {}
     },
     draggedFolderStyles(): {[key: string]: string} {
       if (this.isDragged) {
