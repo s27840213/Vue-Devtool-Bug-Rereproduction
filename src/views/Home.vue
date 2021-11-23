@@ -131,7 +131,10 @@ export default Vue.extend({
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
-      latestTemplateList: []
+      latestTemplateList: [],
+      isTimerStop: false,
+      AutoPlayTimer: 0 as number,
+      CoolDownTimer: 0 as number
     }
   },
   computed: {
@@ -143,11 +146,13 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    window.setInterval(() => {
-      if (this.featureSelected === this.featureList.length - 1) {
-        this.featureSelected = 0
-      } else {
-        this.featureSelected++
+    this.AutoPlayTimer = setInterval(() => {
+      if (!this.isTimerStop) {
+        if (this.featureSelected === this.featureList.length - 1) {
+          this.featureSelected = 0
+        } else {
+          this.featureSelected++
+        }
       }
     }, 4000)
 
@@ -195,7 +200,12 @@ export default Vue.extend({
       })
     },
     featureItemClicked(idx: number) {
+      window.clearInterval(this.CoolDownTimer)
+      this.isTimerStop = true
       this.featureSelected = idx
+      this.CoolDownTimer = setTimeout(() => {
+        this.isTimerStop = false
+      }, 10000)
     },
     openPopup() {
       this.showSizePopup = true
