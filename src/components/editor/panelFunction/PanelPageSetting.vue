@@ -488,7 +488,7 @@ export default Vue.extend({
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = value
+      this.pageWidth = typeof value === 'string' ? parseInt(value) : value
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
