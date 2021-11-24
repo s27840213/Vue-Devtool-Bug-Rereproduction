@@ -1,10 +1,10 @@
 <template lang="pug">
   div(class="panel")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
-      component(v-if="isSidebarPanelOpen"
+      component(v-show="isSidebarPanelOpen"
         class="p-10 border-box"
         :style="panelStyles()"
-        :is="panelComponents[currPanel]")
+        :is="detailPageMode? 'panel-page' :panelComponents[currPanel]")
 </template>
 
 <script lang="ts">
@@ -61,7 +61,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      detailPageMode: 'page/getDeatilPageMode'
     })
   },
   methods: {
@@ -70,7 +71,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: this.currPanel === SidebarPanelType.page ? '200px' : '320px'
+        width: this.detailPageMode ? '200px' : '320px'
       }
     }
   }
@@ -83,14 +84,5 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   background-color: setColor(sidebar-panel);
-}
-
-.btn-pack {
-  width: 15px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate3d(100%, -70%, 0);
-  cursor: pointer;
 }
 </style>

@@ -30,14 +30,14 @@ export default Vue.extend({
     background: setColor(blue-1);
     color: setColor(white);
     border-radius: 5px;
-    height: 11px;
+    height: 12px;
     display: inline-flex;
     margin-left: 5px;
     justify-content: center;
     align-items: center;
   }
   &__label {
-    font-size: 16px;
+    font-size: 15px;
     transform: scale(0.625);
   }
 }

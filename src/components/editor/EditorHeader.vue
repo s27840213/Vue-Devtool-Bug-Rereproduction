@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="editor-header")
+  div(class="editor-header" ref="header"
+      :style="headerPosStyle")
     template(v-if="!isLogin")
       span 若要儲存設計，請
       a(:href="`/signup?redirect=${path}`") 註冊
@@ -28,6 +29,7 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import rulerUtils from '@/utils/rulerUtils'
 
 export default Vue.extend({
   data() {
@@ -72,6 +74,12 @@ export default Vue.extend({
         return '群組模板'
       } else {
         return '單頁模板'
+      }
+    },
+    headerPosStyle() {
+      const top = rulerUtils.showRuler ? `${rulerUtils.RULER_SIZE}px` : '0px'
+      return {
+        top
       }
     }
   },

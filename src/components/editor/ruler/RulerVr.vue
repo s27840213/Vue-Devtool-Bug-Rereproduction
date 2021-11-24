@@ -25,7 +25,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      RULER_SIZE: 25,
       rulerBodyOffset: 0
     }
   },
@@ -44,7 +43,7 @@ export default Vue.extend({
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
-        width: `${this.RULER_SIZE}px`,
+        width: `${rulerUtils.RULER_SIZE}px`,
         height: `${this.currFocusPage.height * (this.pageScaleRatio / 100)}px`,
         transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`,
         'grid-template-rows': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`

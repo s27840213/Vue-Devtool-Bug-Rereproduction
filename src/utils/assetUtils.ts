@@ -10,14 +10,11 @@ import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import GeneralUtils from './generalUtils'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
-import uploadUtils from './uploadUtils'
 import stepsUtils from './stepsUtils'
-import { IPage } from '@/interfaces/page'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -100,15 +97,14 @@ class AssetUtils {
     }
   }
 
-  addTemplate(json: any, attrs: IAssetProps = {}) {
+  async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     console.log('add template')
     console.log(json)
-    this.updateBackground(json).then((json) => {
-      PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
-      stepsUtils.record()
-    })
+    json = await this.updateBackground(json)
+    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    stepsUtils.record()
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
@@ -393,7 +389,6 @@ class AssetUtils {
   async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
     const { content_ids: contents = [], type, group_id: groupId } = item
     store.commit('SET_groupId', groupId)
-    const lastPageIndex = this.getPages.length
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)
@@ -406,10 +401,17 @@ class AssetUtils {
         return Promise.all(updatePromise)
       })
       .then(jsonDataList => {
-        PageUtils.appendPagesTo(jsonDataList, lastPageIndex)
+        const lastSelectedPage = this.getPage(this.lastSelectedPageIndex)
+        let targetIndex = this.getPages.length
+        let replace = false
+        if (lastSelectedPage && !lastSelectedPage.layers.length) {
+          targetIndex = this.lastSelectedPageIndex
+          replace = true
+        }
+        PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         stepsUtils.record()
         Vue.nextTick(() => {
-          PageUtils.scrollIntoPage(lastPageIndex)
+          PageUtils.scrollIntoPage(targetIndex)
         })
       })
   }

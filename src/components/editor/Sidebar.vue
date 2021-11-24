@@ -10,10 +10,11 @@
         div(class="nav-item pointer"
           v-for="(item,index) in navItem" :key="`icon-${index}`"
           @click="switchNav(index)")
-          svg-icon(:iconName="item.icon"
+          svg-icon(class="nav-item__icon"
+            :iconName="item.icon"
             :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
-            :iconWidth="'30px'")
-          div(class="nav-item-text body-2"
+            :iconWidth="'24px'")
+          div(class="nav-item-text body-3"
             :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
     div(class="sidebar__chevron pointer"
         :class="[{'rotate-hr': isSidebarPanelOpen}]"
@@ -88,7 +89,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .sidebar {
-  @include size(100px, 100%);
+  @include size(70px, 100%);
   background-color: setColor(nav);
   display: grid;
   grid-template-rows: auto 1fr;
@@ -121,6 +122,7 @@ export default Vue.extend({
   display: grid;
   grid-template-columns: 1fr;
   grid-auto-rows: auto;
+  row-gap: 10px;
   width: 100%;
 }
 .nav-item {
@@ -129,9 +131,9 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 15px 0px;
   box-sizing: border-box;
   transition: background-color 0.2s;
+  padding: 5px;
   &__text {
     transition: color 0.2s;
   }
@@ -139,7 +141,7 @@ export default Vue.extend({
 
 .nav-setting {
   border-top: 1px solid #494e67;
-  padding: 30px;
+  padding: 20px 20px 60px 20px;
 }
 
 .profile {

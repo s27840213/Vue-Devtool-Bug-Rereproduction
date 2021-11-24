@@ -24,10 +24,12 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const designId = urlParams.get('design_id')
     const panelIndex = urlParams.get('panel_index')
     const url = urlParams.get('url')
+    const width = urlParams.get('width')
+    const height = urlParams.get('height')
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
-        : await uploadUtils.getDesign(type, designId)
+        : await uploadUtils.getDesign(type, designId, { width, height })
     } else if (!url && from.name !== 'Home') {
       themeUtils.refreshTemplateState()
     }
