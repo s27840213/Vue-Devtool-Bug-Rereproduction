@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel")
+  div(class="function-panel scrollbar-gray")
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
@@ -14,13 +14,7 @@
       svg-icon(:iconName="'share-alt'"
         :iconWidth="'20px'"
         :iconColor="'gray-4'")
-      btn(:hasIcon="true"
-        :iconName="'download'"
-        :iconWidth="'18px'"
-        :iconMargin="20"
-        :type="'primary-sm'"
-        class="btn-download rounded full-height"
-        @click.native="openDownloadPopup") 下 載
+      download-btn
       btn(:hasIcon="true"
         :iconName="'menu'"
         :iconWidth="'25px'"
@@ -74,6 +68,7 @@ import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
+import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
@@ -91,7 +86,8 @@ export default Vue.extend({
     PanelPageSetting,
     PanelFonts,
     PanelShapeSetting,
-    PanelTextEffectSetting
+    PanelTextEffectSetting,
+    DownloadBtn
   },
   data() {
     return {
@@ -152,11 +148,6 @@ export default Vue.extend({
         posX: 'right'
       })
     },
-    openDownloadPopup() {
-      popupUtils.openPopup('download', {
-        posX: 'right'
-      })
-    },
     undo() {
       shotcutUtils.undo()
     },
@@ -171,6 +162,9 @@ export default Vue.extend({
 .function-panel {
   position: relative;
   @include size(300px, 100%);
+  @media (max-width: 1260px) {
+    @include size(270px, 100%);
+  }
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);

@@ -23,6 +23,7 @@ class RulerUtils {
   get showRuler() { return store.getters.getShowRuler }
   get showGuideline() { return store.getters.getShowGuideline }
 
+  RULER_SIZE = 20
   event: any
   eventHash: { [index: string]: (pagePos: number, pos: number, type: string, from?: number) => void }
   templates: {

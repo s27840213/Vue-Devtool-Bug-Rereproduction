@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view"
+  div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
@@ -61,7 +61,6 @@ import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
-import store from '@/store'
 
 export default Vue.extend({
   components: {
@@ -320,7 +319,10 @@ export default Vue.extend({
       if (this.isBackgroundImageControl) {
         return this.backgroundControllingPageIndex === index ? 1 : 0
       } else {
-        return this.pageNum - index
+        /**
+         * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
+         */
+        return PageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
       }
     },
     dragStartV(e: MouseEvent) {
@@ -436,7 +438,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-$REULER_SIZE: 25px;
+$REULER_SIZE: 20px;
 
 .editor-view {
   overflow: scroll;

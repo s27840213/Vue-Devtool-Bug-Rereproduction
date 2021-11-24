@@ -25,7 +25,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      RULER_SIZE: 25,
       rulerBodyOffset: 0
     }
   },
@@ -36,7 +35,8 @@ export default Vue.extend({
       currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      detailPageMode: 'page/getDeatilPageMode'
     }),
     currFocusPage(): IPage {
       const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
@@ -45,7 +45,7 @@ export default Vue.extend({
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
         width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
-        height: `${this.RULER_SIZE}px`,
+        height: `${rulerUtils.RULER_SIZE}px`,
         transform: `translate3d(${this.rulerBodyOffset}px,0px,0px)`,
         'grid-template-columns': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`
       }
@@ -69,6 +69,9 @@ export default Vue.extend({
       this.calcRulerBodyOffset()
     },
     currFocusPage() {
+      this.calcRulerBodyOffset()
+    },
+    detailPageMode() {
       this.calcRulerBodyOffset()
     }
   },
@@ -107,9 +110,6 @@ export default Vue.extend({
         border-left: 1px solid setColor(gray-3);
       }
       border-right: 1px solid setColor(gray-3);
-    }
-
-    &--float {
     }
   }
 
