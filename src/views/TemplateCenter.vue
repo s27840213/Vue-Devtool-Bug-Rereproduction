@@ -267,6 +267,7 @@ export default Vue.extend({
         res.push('tag::' + tags.join('&&'))
       }
       res.push('order_by::' + this.selectedSorting)
+      this.waterfallTemplates = []
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
         this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
