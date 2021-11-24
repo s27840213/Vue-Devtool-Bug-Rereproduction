@@ -248,8 +248,10 @@ export default Vue.extend({
       switch (flag) {
         case 0:
           this.progress = 100
-          DownloadUtil.downloadByUrl(url)
-          this.$emit('close')
+          setTimeout(() => {
+            DownloadUtil.downloadByUrl(url)
+            this.$emit('close')
+          }, 1000)
           break
         case 1:
           this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
