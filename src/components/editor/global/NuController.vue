@@ -131,19 +131,20 @@
               @mousedown.left.stop="moveStart")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
-              :style='lineControlPointStyles()'
               :src="require('@/assets/img/svg/rotate.svg')"
+              :style='lineControlPointStyles()'
               @mousedown.native.left.stop="lineRotateStart")
           template(v-else)
             div(class="control-point__controller-wrapper"
                 :style="`transform: scale(${100/scaleRatio})`")
               img(class="control-point__mover"
-                v-if="getLayerWidth < 50 || getLayerHeight < 50"
                 :src="require('@/assets/img/svg/move.svg')"
+                :style='controlPointStyles()'
                 @mousedown.left.stop="moveStart")
               svg-icon(class="control-point__rotater"
                 :iconName="'rotate'" :iconWidth="`${20}px`"
                 :src="require('@/assets/img/svg/rotate.svg')"
+                :style='controlPointStyles()'
                 @mousedown.native.left.stop="rotateStart")
 
 </template>
@@ -515,6 +516,11 @@ export default Vue.extend({
       const degree = angle / Math.PI * 180
       return {
         transform: `rotate(${-degree}deg)`
+      }
+    },
+    controlPointStyles() {
+      return {
+        transform: `rotate(${-this.config.styles.rotate}deg)`
       }
     },
     subControllerStyles(isImgControl: boolean) {
