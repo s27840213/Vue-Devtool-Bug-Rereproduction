@@ -1,7 +1,7 @@
 export interface ITemplate {
   url: string,
   id: string,
-  theme: string,
+  theme_id: string,
   width: number,
   height: number,
   prev_height: number,

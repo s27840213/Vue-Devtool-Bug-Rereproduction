@@ -15,7 +15,7 @@ class TemplateCenterUtils {
       res[index].push({
         url: this.getPrevUrl(cover),
         id: cover.id,
-        theme: cover.theme,
+        theme_id: cover.theme_id,
         prev_height: height / width * 100,
         width: cover.width,
         height: cover.height,

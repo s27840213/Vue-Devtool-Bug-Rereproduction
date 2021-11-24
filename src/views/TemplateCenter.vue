@@ -55,7 +55,7 @@
               @click="handleClickWaterfall(template)")
             div(class="template-center__waterfall__column__template__container")
               img(:src="template.url")
-            div(class="template-center__waterfall__column__template__theme") {{ template.theme }}
+            div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
             div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
               svg-icon(iconName="multiple-file"
                       iconWidth="24px"
@@ -227,13 +227,21 @@ export default Vue.extend({
     },
     handleClickWaterfall(template: ITemplate) {
       if (template.content_ids.length === 1) {
+        const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: template.width.toString(),
+          height: template.height.toString()
+        }
         const route = this.$router.resolve({
           name: 'Editor',
           query: {
             type: 'new-design-template',
             design_id: template.id,
-            width: template.width.toString(),
-            height: template.height.toString()
+            width: format.width,
+            height: format.height
           }
         })
         window.open(route.href, '_blank')
@@ -327,6 +335,10 @@ export default Vue.extend({
     },
     getPrevUrl(content: IContentTemplate): string {
       return templateCenterUtils.getPrevUrl(content)
+    },
+    getThemeTitle(themeId: string): string {
+      const theme = this.themes.find((theme) => theme.id.toString() === themeId)
+      return theme ? theme.title : '未指定主題'
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id
