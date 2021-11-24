@@ -108,16 +108,17 @@
           @click="copyText(id)") {{id}}
         div(v-if="isGetGroup")
           div(class="template-information__line")
-            span(class="body-1") Theme 封面設定
+            span(class="body-1") 封面設定
           div(class="square-wrapper text-center")
-            div(class="cover-option body-4")
-              span id
-              span Cover Id
-            template(v-for="(item, idx) in groupInfo.groupThemes")
-              div(v-if="item.options.length > 0" class="pt-5 cover-option")
-                span(class="body-1") {{item.id}}
-                select(class="template-information__cover-select" v-model="item.coverId")
-                  option(v-for="option in item.options" :value="option") {{option}}
+            div(class="pr-10 cover-option body-4")
+              span theme
+              span 封面頁碼
+            div(v-for="(item, idx) in groupInfo.groupThemes"
+              class="pt-5 pr-10 cover-option")
+              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+              select(class="template-information__cover-select text-center"
+                v-model="item.coverIndex")
+                option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
           div(class="template-information__line pt-10")
             div(style="width: 50%;")
               input(type="checkbox"
@@ -161,7 +162,7 @@
                 class="theme-option__check"
                 :disabled="isDisabled(item.width, item.height)"
                 v-model="templateThemes[item.id]")
-              span(class="body-1") {{item.title}}
+              span(class="body-1") {{item.id}}: {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
           div tags_tw
           div
@@ -537,7 +538,9 @@ export default Vue.extend({
           this.isGetTemplate = true
           this.templateInfo = res.data.data
           this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
-          this.themeList = res.data.data.themeList
+          if (this.themeList.length === 0) {
+            this.themeList = res.data.data.themeList
+          }
           this.userParentId = this.templateInfo.parent_id
         } else {
           this.$notify({ group: 'copy', text: '找不到模板資料' })
@@ -552,12 +555,13 @@ export default Vue.extend({
         return
       }
       const coverId = this.groupInfo.groupThemes.map(theme => {
-        return String(theme.id) + ':' + theme.coverId
+        return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
       })
       this.isLoading = true
       const data = {
         cover_ids: coverId.join()
       }
+
       const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
         this.$notify({ group: 'copy', text: '群組資料更新成功' })
@@ -642,16 +646,10 @@ export default Vue.extend({
       this.groupErrorMsg = ''
       this.groupInfo.cover_ids = data.data.cover_ids
       this.groupInfo.contents = data.data.contents
-      const coverList = this.groupInfo.cover_ids.split(',')
-      coverList.map((cover) => {
-        const theme = {
-          id: parseInt(cover.split(':')[0]),
-          coverId: cover.split(':')[1],
-          options: []
-        }
-        this.groupInfo.groupThemes.push(theme)
-      })
-      this.groupInfo.contents.forEach(content => {
+      this.themeList = data.data.themeList
+
+      // fill in contents
+      this.groupInfo.contents.forEach((content, idx) => {
         const themes = content.theme_ids.split(',')
         if (themes.length === 0 || themes[0] === '0') {
           // this.$notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
@@ -665,27 +663,48 @@ export default Vue.extend({
               if (index === -1) {
                 const theme = {
                   id: parseInt(id),
-                  coverId: content.key_id,
-                  options: [content.key_id]
+                  title: this.themeList[this.themeList.findIndex(theme => theme.id === parseInt(id))].title,
+                  coverIndex: idx,
+                  options: [{
+                    index: idx,
+                    key_id: content.key_id
+                  }]
                 }
                 this.groupInfo.groupThemes.push(theme)
               } else {
-                this.groupInfo.groupThemes[index].options.push(content.key_id)
+                this.groupInfo.groupThemes[index].options.push({
+                  index: idx,
+                  key_id: content.key_id
+                })
               }
             }
           })
         }
       })
+
+      // fill in cover_ids
+      const coverList = this.groupInfo.cover_ids.split(',')
+      coverList.map((cover) => {
+        const id = parseInt(cover.split(':')[0])
+        const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === id)
+        if (index !== -1) {
+          const keyId = cover.split(':')[1]
+          const pageIndex = this.groupInfo.contents.findIndex(x => x.key_id === keyId)
+          this.groupInfo.groupThemes[index].coverIndex = pageIndex
+        }
+      })
+
       // delete themes which are not set as theme_ids of templates
       this.groupInfo.groupThemes = this.groupInfo.groupThemes.filter(theme => theme.options.length > 0)
 
       // sort theme_cover list by theme_id
       this.groupInfo.groupThemes.sort((a, b) => a.id - b.id)
 
-      // if template of cover_ids is not exist, the value will be set to the first element of options
+      // if template in cover of theme is not exist, the value will be set to the first element of options
       this.groupInfo.groupThemes.forEach(theme => {
-        if (theme.options.indexOf(theme.coverId) === -1) {
-          theme.coverId = theme.options[0]
+        const keyId = this.groupInfo.contents[theme.coverIndex].key_id
+        if (theme.options.findIndex(option => option.key_id === keyId) === -1) {
+          theme.coverIndex = theme.options[0].index
         }
       })
     },
@@ -958,7 +977,6 @@ export default Vue.extend({
     height: 30px;
     font-size: 14px;
     border: 1px solid #d9dbe1;
-    padding-left: 5px;
   }
   &__select {
     width: 40%;
@@ -991,13 +1009,13 @@ export default Vue.extend({
     display: grid;
     align-items: center;
     grid-auto-flow: column;
-    grid-template-columns: 30px auto;
+    grid-template-columns: 140px auto;
   }
   .theme-option {
     display: grid;
     align-items: center;
     grid-auto-flow: column;
-    grid-template-columns: 40px 100px auto;
+    grid-template-columns: 40px 120px auto;
     &__check {
       margin: auto 0;
     }
