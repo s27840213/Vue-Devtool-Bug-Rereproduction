@@ -86,11 +86,30 @@ class AssetUtils {
         return Promise.resolve(asset)
       }
       default: {
+        let loaded = false
+        setTimeout(() => {
+          if (!loaded) {
+            Vue.notify({
+              group: 'error',
+              text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
+            })
+          }
+        }, 30000)
         return fetch(asset.urls.json + `?ver=${ver}`)
-          .then(response => response.json())
+          .then(response => {
+            loaded = true
+            return response.json()
+          })
           .then(jsonData => {
             asset.jsonData = jsonData
             store.commit('SET_assetJson', { [id]: asset })
+            return asset
+          })
+          .catch(() => {
+            Vue.notify({
+              group: 'error',
+              text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
+            })
             return asset
           })
       }
