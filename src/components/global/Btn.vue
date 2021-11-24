@@ -8,7 +8,7 @@
       :iconName="iconName"
       :iconColor="iconColor"
       :iconWidth="iconWidth")
-    span(class="btn__text")
+    span(class="btn__text" :style="btnTextStyle")
       slot
 </template>
 
@@ -50,6 +50,10 @@ export default Vue.extend({
     squared: {
       type: Boolean,
       default: false
+    },
+    fontFamily: {
+      type: String,
+      default: ''
     }
   },
   mounted() {
@@ -58,6 +62,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    btnTextStyle(): string {
+      return (this.fontFamily !== '') ? `font-family: ${this.fontFamily}` : ''
+    },
     squaredPaddingClass(): string {
       return this.squared ? `btn-squared-${this.type.split('-')[1]}` : ''
     },
