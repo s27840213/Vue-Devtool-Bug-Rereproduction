@@ -487,13 +487,17 @@ export default Vue.extend({
         const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
-        } else if (isFrame || isGroup) {
-          return (this.layerIndex + 1) * 1000
-        } else if (this.getLayerType === 'tmp') {
-          return 0
-        } else {
-          return this.config.styles.zindex + 1
         }
+        if (isFrame || isGroup) {
+          return (this.layerIndex + 1) * 1000
+        }
+        if (this.getLayerType === 'tmp') {
+          return 0
+        }
+        if (this.getLayerType === 'text' && this.isActive) {
+          return (this.layerIndex + 1) * 99
+        }
+        return this.config.styles.zindex + 1
       })()
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
@@ -1383,8 +1387,8 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = []
         try {
-          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
           // paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
         } catch (error) {
           console.log(error)
         }

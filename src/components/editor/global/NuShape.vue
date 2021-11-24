@@ -309,6 +309,7 @@ export default Vue.extend({
   },
   methods: {
     styles() {
+      console.log(this.config)
       if (this.paramsReady) {
         return {
           width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,

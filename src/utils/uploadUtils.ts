@@ -939,7 +939,7 @@ class UploadUtils {
     }
   }
 
-  private layerInfoFilter(layer: ILayer): any {
+  layerInfoFilter(layer: ILayer): any {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
@@ -970,6 +970,10 @@ class UploadUtils {
             }
           }
           case 'E':
+            styles.scale = 1
+            styles.initWidth = styles.width
+            styles.initHeight = styles.height
+            shape.vSize = [styles.initWidth, styles.initHeight]
             return {
               type,
               color,

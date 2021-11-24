@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -51,6 +52,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import pageUtils from '@/utils/pageUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   props: {
@@ -187,6 +189,19 @@ export default Vue.extend({
               }
             }
             layerUtils.addLayers(0, [layerFactary.newImage(config)])
+          }
+        },
+        {
+          icon: 'copy',
+          text: 'update test',
+          shortcutText: '',
+          action: () => {
+            const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex)) as IPage
+            page.layers
+              .forEach(l => {
+                uploadUtils.layerInfoFilter(l)
+              })
+            store.commit('ADD_page', page)
           }
         }
       ]

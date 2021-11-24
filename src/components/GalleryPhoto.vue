@@ -137,7 +137,8 @@ export default Vue.extend({
         photoAspectRatio,
         {
           pageIndex: this.lastSelectedPageIndex,
-          ...(this.inFilePanel && { assetIndex: photo.assetIndex }),
+          ...(this.inFilePanel && !photo.id && { assetIndex: photo.assetIndex }),
+          ...(this.inFilePanel && photo.id && { assetId: photo.id }),
           // The following props is used for preview image during polling process
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
