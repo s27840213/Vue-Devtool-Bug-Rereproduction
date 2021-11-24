@@ -105,7 +105,7 @@
               :marker-index="index"
               :style="Object.assign(end, {'cursor': 'pointer'})"
               @mousedown.left.stop="lineEndMoveStart")
-          div(v-for="(scaler, index) in (!isLine) ? controlPoints.scalers : []"
+          div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
               class="control-point scaler"
               :key="index"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
@@ -121,7 +121,7 @@
               @mousedown.left.stop="moveStart($event)")
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
-                :style="resizerBarStyles(resizer)")
+                :style="resizerBarStyles(resizer.styles)")
           div(class="control-point__line-controller-wrapper"
               v-if="isLine"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -138,6 +138,7 @@
             div(class="control-point__controller-wrapper"
                 :style="`transform: scale(${100/scaleRatio})`")
               img(class="control-point__mover"
+                v-if="config.type !== 'text' || !contentEditable"
                 :src="require('@/assets/img/svg/move.svg')"
                 :style='controlPointStyles()'
                 @mousedown.left.stop="moveStart")
@@ -176,7 +177,7 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 
 const LAYER_SIZE_MIN = 10
-const RESIZER_SHOWN_MIN = 40
+const RESIZER_SHOWN_MIN = 4000
 
 export default Vue.extend({
   props: {
@@ -399,14 +400,19 @@ export default Vue.extend({
     },
     resizer(controlPoints: any, textMoveBar = false) {
       let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
+      const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'text':
           if (textMoveBar) {
-            resizers = this.config.styles.writingMode.includes('vertical') ? controlPoints.resizers.slice(0, 2)
-              : controlPoints.resizers.slice(2, 4)
+            resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
+              : resizers.slice(2, 4)
           } else {
-            resizers = this.config.styles.writingMode.includes('vertical') ? controlPoints.resizers.slice(2, 4)
-              : controlPoints.resizers.slice(0, 2)
+            resizers = this.config.styles.writingMode.includes('vertical') ? (
+              tooNarrow ? resizers.slice(2, 3) : resizers.slice(2, 4)
+            ) : (
+              tooShort ? resizers.slice(1, 2) : resizers.slice(0, 2)
+            )
           }
           break
         case 'shape':
@@ -424,14 +430,27 @@ export default Vue.extend({
           }
       }
 
-      if (resizers && resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
-        resizers = resizers.filter(r => r.type !== 'H')
-      }
-      if (resizers && resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
-        resizers = resizers.filter(r => r.type !== 'V')
+      if (this.getLayerType !== 'text') {
+        if (tooShort) {
+          resizers = resizers.filter(r => r.type !== 'H')
+        }
+        if (tooNarrow) {
+          resizers = resizers.filter(r => r.type !== 'V')
+        }
       }
 
       return resizers
+    },
+    scaler(scalers: any) {
+      if (this.getLayerType === 'text') {
+        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
+        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
+        return (tooShort || tooNarrow) ? scalers.slice(0, 1) : scalers
+      } else {
+        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN / 2
+        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN / 2
+        return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      }
     },
     lineEnds(scalers: any, point: number[]) {
       const quadrant = shapeUtils.getLineQuadrant(point)
