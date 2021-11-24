@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="popup-download text-left"
     v-click-outside="handleClose")
-    div(v-if="polling && filename" class="popup-download__form popup-download__form--polling")
-      div(class="body-3 text-gray-3") {{ filename }}
+    div(v-if="polling && name" class="popup-download__form popup-download__form--polling")
+      div(class="body-3 text-gray-3") {{ name }}
       div(class="flex flex-between text-gray-2 items-center")
         span(class="body-2") 正在下載
         svg-icon(class="pointer"
@@ -94,6 +94,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
@@ -126,7 +127,6 @@ export default Vue.extend({
       saveSubmission: !!selectedTypeVal,
       polling: false,
       progress: -1,
-      filename: '',
       functionQueue: [] as Array<() => void>,
       exportId: '',
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
@@ -146,6 +146,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState(['name']),
     selectedType (): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
@@ -243,7 +244,7 @@ export default Vue.extend({
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress (response: any) {
-      const { flag, url, msg, progress, name } = response
+      const { flag, url, msg, progress } = response
       if ((this as any)._isDestroyed) return
       switch (flag) {
         case 0:
@@ -259,11 +260,8 @@ export default Vue.extend({
           break
         case 2:
           console.log('progress: ', progress)
-          if (name) {
-            this.progress = progress
-            this.filename = name
-            this.$emit('inprogress', true)
-          }
+          this.progress = progress
+          this.$emit('inprogress', true)
           setTimeout(() => {
             DownloadUtil
               .getFileStatus(url)
