@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel")
+  div(class="function-panel scrollbar-gray")
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
@@ -171,6 +171,9 @@ export default Vue.extend({
 .function-panel {
   position: relative;
   @include size(300px, 100%);
+  @media (max-width: 1260px) {
+    @include size(270px, 100%);
+  }
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);

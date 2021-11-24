@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view"
+  div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
@@ -436,7 +436,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-$REULER_SIZE: 25px;
+$REULER_SIZE: 20px;
 
 .editor-view {
   overflow: scroll;

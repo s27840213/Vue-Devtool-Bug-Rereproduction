@@ -1,0 +1,30 @@
+@import '@/assets/scss/base/typography.scss';
+@import '@/assets/scss/utils/mixins.scss';
+
+.scrollbar-white {
+	scrollbar-width: thin;
+	overscroll-behavior: contain;
+	&::-webkit-scrollbar {
+		width: 7px;
+		height: 7px;
+		background-color: unset;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 5px;
+		background-color: white;
+	}
+}
+
+.scrollbar-gray {
+	scrollbar-width: thin;
+	overscroll-behavior: contain;
+	&::-webkit-scrollbar {
+		width: 7px;
+		height: 7px;
+		background-color: unset;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 5px;
+		background-color: setColor(gray-3);
+	}
+}

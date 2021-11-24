@@ -10,7 +10,8 @@
             div(class="header-container")
               editor-header
             div(v-if="isAdmin" class="admin-options")
-              div(class="admin-options__sticky-container")
+              div(class="admin-options__sticky-container"
+                  :style="stickyTopPos")
                 div(class="flex flex-column mr-10")
                   span(class="ml-10 text-bold text-orange") {{templateText}}
                   span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
@@ -45,6 +46,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
+import rulerUtils from '@/utils/rulerUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -91,7 +93,7 @@ export default Vue.extend({
     },
     contentPanelStyles(): { [index: string]: string } {
       return this.isColorPanelOpen ? {
-        'grid-template-rows': '0.2fr 0.8fr'
+        'grid-template-rows': '1fr 1fr'
       } : {
         'grid-template-rows': '1fr'
       }
@@ -113,6 +115,12 @@ export default Vue.extend({
         return '群組模板'
       } else {
         return '單頁模板'
+      }
+    },
+    stickyTopPos(): { [index: string]: string } {
+      const top = rulerUtils.showRuler ? `${rulerUtils.RULER_SIZE}px` : '0px'
+      return {
+        top
       }
     }
   },
