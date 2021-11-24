@@ -92,11 +92,28 @@ export default Vue.extend({
           this.updateTextState({ pending: this.item.id })
           const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
 
+          let loaded = false
+
           const load = newFont.load()
             .then(newFont => {
+              loaded = true
               document.fonts.add(newFont)
               TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
             })
+            .catch(() => {
+              this.$notify({
+                group: 'error',
+                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
+              })
+            })
+          setTimeout(() => {
+            if (!loaded) {
+              this.$notify({
+                group: 'error',
+                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
+              })
+            }
+          }, 30000)
           await load
         }
         console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
