@@ -54,7 +54,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folderName }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 ${folder ? folder.author : ''} 創作 | ${allDesigns.length}個項目` }}
+              span {{ `由 ${folder ? folder.author : ''} 創作 | ${itemCount}個項目` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -134,8 +134,8 @@ export default Vue.extend({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
-    this.refreshFolders()
-    this.refreshDesigns()
+    this.refreshItems()
+    this.refreshItemCount()
   },
   components: {
     FolderGallery,
@@ -190,8 +190,8 @@ export default Vue.extend({
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
-      this.refreshDesigns()
-      this.refreshFolders()
+      this.refreshItems()
+      this.refreshItemCount()
     }
   },
   computed: {
@@ -204,7 +204,8 @@ export default Vue.extend({
       sortByField: 'getSortByField',
       sortByDescending: 'getSortByDescending',
       isDesignsLoading: 'getIsDesignsLoading',
-      isFoldersLoading: 'getIsFoldersLoading'
+      isFoldersLoading: 'getIsFoldersLoading',
+      itemCount: 'getItemCount'
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
@@ -237,6 +238,7 @@ export default Vue.extend({
     ...mapActions('design', {
       fetchFolderDesigns: 'fetchFolderDesigns',
       fetchFolderFolders: 'fetchFolderFolders',
+      fetchItemCount: 'fetchItemCount',
       fetchMoreFolderDesigns: 'fetchMoreFolderDesigns'
     }),
     ...mapMutations('design', {
@@ -298,8 +300,7 @@ export default Vue.extend({
     handleSortByClick(payload: [string, boolean]) {
       this.setSortByField(payload[0])
       this.setSortByDescending(payload[1])
-      this.refreshDesigns()
-      this.refreshFolders()
+      this.refreshItems()
     },
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
@@ -358,6 +359,15 @@ export default Vue.extend({
           path: this.path.slice(1).join(',')
         })
       })
+    },
+    refreshItemCount() {
+      this.fetchItemCount({
+        path: this.path.slice(1).join(',')
+      })
+    },
+    refreshItems() {
+      this.refreshDesigns()
+      this.refreshFolders()
     }
   }
 })
