@@ -35,7 +35,8 @@ export default Vue.extend({
       currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      detailPageMode: 'page/getDeatilPageMode'
     }),
     currFocusPage(): IPage {
       const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
@@ -68,6 +69,9 @@ export default Vue.extend({
       this.calcRulerBodyOffset()
     },
     currFocusPage() {
+      this.calcRulerBodyOffset()
+    },
+    detailPageMode() {
       this.calcRulerBodyOffset()
     }
   },
@@ -106,9 +110,6 @@ export default Vue.extend({
         border-left: 1px solid setColor(gray-3);
       }
       border-right: 1px solid setColor(gray-3);
-    }
-
-    &--float {
     }
   }
 
