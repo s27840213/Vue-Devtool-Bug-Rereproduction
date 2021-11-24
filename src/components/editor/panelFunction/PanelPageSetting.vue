@@ -93,7 +93,7 @@
       class="template-information")
       div(class="template-information__divider pb-10")
       btn(:type="'primary-sm'" class="rounded my-5"
-          style="padding: 8px 40px; margin-left: 6%; width: 88%;"
+          style="padding: 8px 0; margin-left: 6%; width: 88%;"
           @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
       div(v-if="groupId.length > 0"
         class="pt-10")
@@ -119,14 +119,9 @@
               select(class="template-information__cover-select text-center"
                 v-model="item.coverIndex")
                 option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
-          div(class="template-information__line pt-10")
-            div(style="width: 50%;")
-              input(type="checkbox"
-                class="template-information__check"
-                v-model="updateGroupChecked")
-              label 確定更新
+          div(class="pt-10")
             btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;"
+              style="padding: 8px 0; margin: 0 auto; width: 70%;"
               @click.native="updateGroupClicked()") 更新
       div(class="template-information__divider2")
       span(class="text-gray-1 label-lg") 模 板 資 訊
@@ -179,14 +174,9 @@
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_jp")
-          div(class="template-information__line pt-10")
-            div(style="width: 50%;")
-              input(type="checkbox"
-                class="template-information__check"
-                v-model="updateTemplateChecked")
-              label 確定更新
+          div(class="pt-10")
             btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;"
+              style="padding: 8px 0; margin: 0 auto; width: 70%;"
               @click.native="updateDataClicked()") 更新
           div(class="template-information__divider")
           div(class="template-information__line bg-blue")
@@ -272,8 +262,6 @@ export default Vue.extend({
       isLoading: false,
       isGetGroup: false,
       isGetTemplate: false,
-      updateGroupChecked: false,
-      updateTemplateChecked: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
       currentKeyId: '',
@@ -550,10 +538,6 @@ export default Vue.extend({
       this.isLoading = false
     },
     async updateGroupClicked() {
-      if (!this.updateGroupChecked) {
-        this.$notify({ group: 'copy', text: '請先勾選確定更新' })
-        return
-      }
       const coverId = this.groupInfo.groupThemes.map(theme => {
         return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
       })
@@ -582,10 +566,6 @@ export default Vue.extend({
       })
       const themeIds = arr.join()
 
-      if (!this.updateTemplateChecked) {
-        this.$notify({ group: 'copy', text: '請先勾選確定更新' })
-        return
-      }
       if (!this.templateInfo.key_id) {
         this.$notify({ group: 'copy', text: '請先取得模板資料' })
         return
@@ -632,8 +612,6 @@ export default Vue.extend({
       this.resetStatus()
     },
     resetStatus() {
-      this.updateGroupChecked = false
-      this.updateTemplateChecked = false
       this.updateParentIdChecked = false
     },
     setGroupInfo(data: any) {
