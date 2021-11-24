@@ -116,7 +116,7 @@
                 :key="index"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
             div(class="control-point resizer"
-                :style="Object.assign(resizer.styles, cursorStyles(resizer.cursor, getLayerRotate))")
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
             div(class="control-point__resize-bar control-point__move-bar"
@@ -391,6 +391,11 @@ export default Vue.extend({
         height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
+    },
+    resizerStyles(resizer: IResizer) {
+      const resizerStyle = { ...resizer }
+      resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      return resizerStyle
     },
     resizer(controlPoints: any, textMoveBar = false) {
       let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
