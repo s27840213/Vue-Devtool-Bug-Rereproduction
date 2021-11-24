@@ -297,7 +297,6 @@ export default Vue.extend({
   },
   watch: {
     key_id: function() {
-      this.isGetGroup = false
       this.isGetTemplate = false
       this.templateInfo = {
         key_id: '',
@@ -317,17 +316,17 @@ export default Vue.extend({
         grandparent_locale: '',
         grandchildren_id: []
       }
-      this.themeList = []
+      this.imgRandQuery = GeneralUtils.generateRandomString(5)
+    },
+    groupId: function() {
+      this.isGetGroup = false
+      this.unsetThemeTemplate = []
+      this.groupErrorMsg = ''
       this.groupInfo = {
         cover_ids: '',
         contents: [],
         groupThemes: []
       }
-      this.imgRandQuery = GeneralUtils.generateRandomString(5)
-    },
-    groupId: function() {
-      this.unsetThemeTemplate = []
-      this.groupErrorMsg = ''
     },
     currentPageWidth: function (newVal) {
       this.pageWidth = newVal
