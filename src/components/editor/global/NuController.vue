@@ -1636,6 +1636,7 @@ export default Vue.extend({
           }
         }
         Object.assign(clips[clipIndex].srcObj, currLayer.srcObj)
+        Object.assign(clips[clipIndex].styles.adjust, currLayer.styles.adjust)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
 
