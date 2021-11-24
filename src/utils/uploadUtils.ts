@@ -673,7 +673,6 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
-    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -933,7 +932,8 @@ class UploadUtils {
           imgX: styles.imgX,
           imgY: styles.imgY,
           imgWidth: styles.imgWidth,
-          imgHeight: styles.imgHeight
+          imgHeight: styles.imgHeight,
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       case 'text':
         return {

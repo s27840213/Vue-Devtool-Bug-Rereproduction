@@ -20,7 +20,7 @@
         :class="{'pb-70': type === 'theme'}")
         img(class="pointer item-image"
           :class="{'square': type === 'template'}"
-          :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+          :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
           @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
           @error="handleNotFound")
         div(v-if="type === 'theme'"
