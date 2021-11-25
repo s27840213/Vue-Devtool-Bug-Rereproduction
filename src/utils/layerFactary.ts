@@ -19,7 +19,7 @@ class LayerFactary {
         userId: config.srcObj.userId,
         assetId: config.srcObj.assetId
       },
-      id: GeneralUtils.generateRandomString(8),
+      id: config.id || GeneralUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
       active: false,
       shown: false,
@@ -107,7 +107,7 @@ class LayerFactary {
 
     return {
       type: 'frame',
-      id: GeneralUtils.generateRandomString(8),
+      id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: false,
@@ -157,7 +157,7 @@ class LayerFactary {
   newText(config: Partial<IText>): IText {
     const basicConfig = {
       type: 'text',
-      id: GeneralUtils.generateRandomString(8),
+      id: config.id || GeneralUtils.generateRandomString(8),
       widthLimit: -1,
       isTyping: false,
       active: false,
@@ -260,7 +260,7 @@ class LayerFactary {
       })
     return {
       type: 'group',
-      id: GeneralUtils.generateRandomString(8),
+      id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: false,
@@ -321,7 +321,7 @@ class LayerFactary {
     const { styles } = config
     const basicConfig = {
       type: 'shape',
-      id: GeneralUtils.generateRandomString(8),
+      id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       path: '',

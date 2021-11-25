@@ -34,7 +34,7 @@
               @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
               @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
               @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-              @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+              @keydown.meta.90.exact.stop.prevent.self="undo"
               @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
               @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
               @keydown.37.stop
@@ -62,7 +62,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
@@ -76,7 +76,6 @@ import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
-import { config } from 'vue/types/umd'
 import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
@@ -605,6 +604,12 @@ export default Vue.extend({
     },
     preventDefault(e: Event) {
       e.preventDefault()
+    },
+    undo() {
+      ShortcutUtils.undo()
+      LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+      setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
     }
   }
 })

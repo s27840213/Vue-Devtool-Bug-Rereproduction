@@ -18,7 +18,7 @@
         class="page-preview-page-content-more"
         @click="toggleMenu()")
         svg-icon(class="pb-5"
-          :iconName="'more_horizontal'"
+          :iconName="'more_vertical'"
           :iconWidth="'25px'")
       div(v-if="isMenuOpen && lastSelectedPageIndex === index"
         class="menu"
