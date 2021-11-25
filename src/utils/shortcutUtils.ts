@@ -319,9 +319,7 @@ class ShortcutUtils {
     const type = urlParams.get('type')
     const designId = urlParams.get('design_id')
 
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-      Vue.notify({ group: 'copy', text: '檔案資料已儲存' })
-    })
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
     if (!type || !designId) {
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
     }

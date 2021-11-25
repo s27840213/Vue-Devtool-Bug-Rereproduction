@@ -16,16 +16,16 @@
     div(v-if="info.tags && info.tags.length"
       class="photo-info__tags")
       span tag: {{ info.tags.join(', ') }}
-    div(class="photo-info__action")
-      svg-icon(:iconName="'folder'",
-        :iconColor="'gray-2'",
-        :iconWidth="'20px'")
-      span Add to My file
-    div(class="photo-info__action")
-      svg-icon(:iconName="'search'",
-        :iconColor="'gray-2'",
-        :iconWidth="'20px'")
-      span More ...
+    //- div(class="photo-info__action")
+    //-   svg-icon(:iconName="'folder'",
+    //-     :iconColor="'gray-2'",
+    //-     :iconWidth="'20px'")
+    //-   span Add to My file
+    //- div(class="photo-info__action")
+    //-   svg-icon(:iconName="'search'",
+    //-     :iconColor="'gray-2'",
+    //-     :iconWidth="'20px'")
+    //-   span More ...
 </template>
 
 <script lang="ts">
@@ -89,9 +89,6 @@ export default Vue.extend({
       display: block;
       margin-bottom: 5px;
       word-break: break-all;
-    }
-    &__tags {
-      margin-bottom: 20px;
     }
   }
 </style>

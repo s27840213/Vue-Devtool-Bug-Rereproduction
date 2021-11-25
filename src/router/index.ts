@@ -57,7 +57,7 @@ const routes: Array<RouteConfig> = [
           const designId = urlParams.get('design_id')
 
           if (type && designId) {
-            uploadUtils.getDesign(type, designId)
+            uploadUtils.getDesign(type, { designId })
           }
         }
       } catch (error) {
@@ -138,7 +138,7 @@ const routes: Array<RouteConfig> = [
           const designId = urlParams.get('design_id')
 
           if (type && designId) {
-            uploadUtils.getDesign(type, designId)
+            uploadUtils.getDesign(type, { designId })
           }
         }
       } catch (error) {

@@ -28,10 +28,10 @@ export default Vue.extend({
     groupItem: Object
   },
   computed: {
-    count (): number {
+    count(): number {
       return this.groupItem.content_ids.length
     },
-    contents (): Array<{ [key: string]: any }> {
+    contents(): Array<{ [key: string]: any }> {
       const { content_ids: ids } = this.groupItem
       return (ids as Array<{ [key: string]: any }>)
         .map(content => ({
@@ -41,7 +41,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    handleApplyGroupTemplate () {
+    handleApplyGroupTemplate() {
       assetUtils.addGroupTemplate(this.groupItem)
     }
   }

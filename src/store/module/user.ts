@@ -4,6 +4,8 @@ import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
 import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserFontContentData, IUserImageContentData } from '@/interfaces/api'
 import modalUtils from '@/utils/modalUtils'
+import Vue from 'vue'
+import themeUtils from '@/utils/themeUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -270,9 +272,9 @@ const mutations: MutationTree<IUserModule> = {
 }
 
 const actions: ActionTree<IUserModule, unknown> = {
-  async getAssets({ commit }, { token }) {
+  async getAllAssets({ commit }, { token }) {
     try {
-      const { data } = await userApis.getAssets(token)
+      const { data } = await userApis.getAllAssets(token)
       // console.warn(data)
       commit(SET_STATE, {
         pending: true,
@@ -289,30 +291,36 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const keyList = state.checkedAssets.join(',')
       const { data } = await userApis.deleteAssets(state.token, keyList)
-      dispatch('getAssets', { token: state.token })
+      dispatch('getAllAssets', { token: state.token })
       commit('CLEAR_CHECKED_ASSETS')
     } catch (error) {
       console.log(error)
     }
   },
-  async groupDesign({ commit }, params: IGroupDesignInputParams) {
+  async groupDesign({ commit, dispatch }, params: IGroupDesignInputParams) {
     try {
       const { data } = await userApis.groupDesign(params)
-      const { flag, msg } = data
+      const { flag, group_id: groupId, msg } = data
+      console.log(data)
       const isDelete = params.list?.length === 0 && params.update === 1
       modalUtils.setIsModalOpen(true)
       if (flag === 0) {
+        commit('SET_groupId', groupId, { root: true })
         if (!isDelete) {
-          modalUtils.setModalInfo('上傳成功', [`Group ID: ${params.group_id}`])
+          modalUtils.setModalInfo('上傳成功', [`Group ID: ${groupId}`])
         } else {
           modalUtils.setModalInfo('刪除成功', [])
+          commit('SET_groupId', '', { root: true })
         }
-        console.log(`Success: ${params.group_id}}`)
+        themeUtils.fetchTemplateContent()
+        console.log(`Success: ${groupId}}`)
       } else if (flag === 1) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        commit('SET_groupId', '', { root: true })
         console.log(`Failed: ${msg}`)
       } else if (flag === 2) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        commit('SET_groupId', '', { root: true })
         console.log(`Invalid token: ${msg}`)
       }
     } catch (error) {
@@ -332,12 +340,15 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { flag } = data
       if (flag === 0) {
         console.log('Put asset success')
-        dispatch('getAssets', { token: state.token })
+        dispatch('getAllAssets', { token: state.token })
+        Vue.notify({ group: 'copy', text: '檔案資料已儲存' })
       }
       if (flag === 1) {
         console.log('Put asset failed')
+        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
       } else if (flag === 2) {
         console.log('Token invalid!')
+        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
       }
     } catch (error) {
       console.log(error)
@@ -384,7 +395,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
-      dispatch('getAssets', { token: newToken })
+      dispatch('getAllAssets', { token: newToken })
     } else {
       console.log('login failed')
       commit('SET_TOKEN', '')
@@ -426,7 +437,7 @@ const actions: ActionTree<IUserModule, unknown> = {
     //   asset_list: assetSet
     //   // team_id: state.teamId || state.userId
     // })
-    const { data } = await userApis.getAssets(token, { asset_list: assetSet })
+    const { data } = await userApis.getAllAssets(token, { asset_list: assetSet })
     const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     if (urlSet) {
       for (const [assetId, urls] of Object.entries(urlSet)) {

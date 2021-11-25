@@ -21,7 +21,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
-        : await uploadUtils.getDesign(type, designId, { width, height })
+        : await uploadUtils.getDesign(type, { designId }, { width, height })
     } else if (!url && from.name !== 'Home') {
       themeUtils.refreshTemplateState()
     }

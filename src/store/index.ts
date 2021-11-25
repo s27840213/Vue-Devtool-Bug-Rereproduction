@@ -37,6 +37,7 @@ const getDefaultState = (): IEditorState => ({
   pages: [pageUtils.newPage({})],
   designId: '',
   groupId: '',
+  groupType: -1,
   assetId: '',
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
@@ -102,6 +103,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getGroupId(state: IEditorState): string {
     return state.groupId
+  },
+  getGroupType(state: IEditorState): number {
+    return state.groupType
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number } => {
@@ -231,6 +235,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_groupId(state: IEditorState, groupId: string) {
     state.groupId = groupId
+  },
+  SET_groupType(state: IEditorState, groupType: number) {
+    console.log('set group type' + groupType)
+    state.groupType = groupType
   },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
     state.pages[updateInfo.pageIndex].designId = updateInfo.designId
