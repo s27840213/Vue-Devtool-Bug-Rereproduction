@@ -400,13 +400,15 @@ export default Vue.extend({
       const tooSmall = this.getLayerType === 'text'
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort)
         : false
-      resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      if (!tooSmall) {
+        resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      }
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 20}px`
-          : (tooSmall ? `${(this.getLayerHeight - 20) * 0.16}px` : resizerStyle.width),
-        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 20}px`
-          : (tooSmall ? `${(this.getLayerWidth - 20) * 0.16}px` : resizerStyle.height)
+        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 10}px`
+          : (tooSmall ? `${(this.getLayerHeight - 10) * 0.16}px` : resizerStyle.width),
+        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 10}px`
+          : (tooSmall ? `${(this.getLayerWidth - 10) * 0.16}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
