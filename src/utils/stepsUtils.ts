@@ -71,7 +71,6 @@ class StepsUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
     }
-    // console.log(this.steps)
   }
 
   undo() {
@@ -97,7 +96,6 @@ class StepsUtils {
         }
       })
     }
-    console.log(store.getters)
 
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()

@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
@@ -62,16 +62,30 @@ export default Vue.extend({
       coordinateHeight: 0
     }
   },
-  created() {
-    fetch('https://template.vivipic.com/static/app.json')
+  async created() {
+    const defaultFonts: Array<Promise<void>> = []
+
+    await fetch('https://template.vivipic.com/static/app.json')
       .then(response => response.json())
       .then(json => {
         this.$store.commit('user/SET_STATE', {
           verUni: json.ver_uni,
           imgSizeMap: json.image_size_map
         })
-        console.log('static data loaded')
+
+        Object.entries(json)
+          .forEach(([k, v]) => {
+            if (['tw_default', 'jp_default', 'us_default'].includes(k)) {
+              defaultFonts.push(this.addFont({
+                type: 'public',
+                face: (v as { id: string }).id,
+                url: ''
+              }))
+            }
+          })
+        Promise.all(defaultFonts)
       })
+      .catch(e => console.error(e))
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
@@ -92,6 +106,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('text', ['addFont']),
     ...mapMutations({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'

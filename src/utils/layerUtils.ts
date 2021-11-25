@@ -127,7 +127,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean }) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,

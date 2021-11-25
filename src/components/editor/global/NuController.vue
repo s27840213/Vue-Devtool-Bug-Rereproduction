@@ -42,7 +42,7 @@
                 class="relative"
                 data-identifier="controller"
                 :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
-                :key="`group-controller-${index}`"
+                :key="`group-controller-${layer.id}`"
                 :pageIndex="pageIndex"
                 :layerIndex="index"
                 :primaryLayerIndex="layerIndex"

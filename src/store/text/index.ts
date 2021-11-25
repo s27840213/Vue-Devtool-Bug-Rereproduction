@@ -1,8 +1,9 @@
-import { IGroup, IText } from '@/interfaces/layer'
+import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
-import { ModuleTree, MutationTree, GetterTree } from 'vuex'
+import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
+const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const
 export interface ITextState {
   sel: { start: ISelection, end: ISelection },
   props: {
@@ -113,7 +114,7 @@ const mutations: MutationTree<ITextState> = {
       state.props[k] = v
     })
   },
-  UPDATE_fontFace(state: ITextState, data: IFont) {
+  [UPDATE_FONTFACE] (state: ITextState, data: IFont) {
     const font = state.fontStore.find(font => font.face === data.face)
     if (font) {
       Object.assign(font, data)
@@ -144,8 +145,52 @@ const mutations: MutationTree<ITextState> = {
   }
 }
 
+const actions: ActionTree<ITextState, unknown> = {
+  async addFont ({ state, commit }, data: { type: string, face: string, url: string }): Promise<void> {
+    const { face, type, url } = data
+    if (!state.fontStore.some(font => font.face === face && font.loaded)) {
+      const font = state.fontStore.find(font => font.face === face)
+      if (!font) {
+        const newFont = new FontFace(face, getFontUrl(type, url || face))
+        commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: false })
+        return new Promise<void>(resolve => {
+          newFont.load()
+            .then(newFont => {
+              document.fonts.add(newFont)
+              commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: true })
+              resolve()
+            })
+        })
+      } else {
+        return new Promise<void>(resolve => {
+          const checkLoaded = setInterval(() => {
+            console.log('check if loaded')
+            if (font.loaded) {
+              clearInterval(checkLoaded)
+              resolve()
+            }
+          }, 100)
+        })
+      }
+    }
+  }
+}
+
+const getFontUrl = (type: string, id: string): string => {
+  switch (type) {
+    case 'public':
+      return `url("https://template.vivipic.com/font/${id}/font")`
+    case 'private':
+      return ''
+    case 'URL':
+      return 'url("' + id + '")'
+  }
+  return `url("https://template.vivipic.com/font/${id}/font")`
+}
+
 export default {
   namespaced: true,
   state,
-  mutations
+  mutations,
+  actions
 } as ModuleTree<ITextState>

@@ -654,7 +654,7 @@ class TextUtils {
   }
 
   updateFontFace(font: IFont) {
-    store.commit('text/UPDATE_fontFace', font)
+    store.commit('text/UPDATE_FONTFACE', font)
   }
 
   initialParagraphsScale(data: { [key: string]: number }, paragraphs: any[]): any[] {

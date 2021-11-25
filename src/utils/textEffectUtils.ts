@@ -6,7 +6,7 @@ import store from '@/store'
 
 class Controller {
   private shadowScale = 0.2
-  private storkeScale = 0.3
+  private strokeScale = 0.08
   effects = {} as { [key: string]: any }
   constructor () {
     this.effects = this.getDefaultEffects()
@@ -26,13 +26,13 @@ class Controller {
         spread: 50
       }, // 模糊陰影
       hollow: {
-        stroke: 50,
+        stroke: 30,
         color: ''
       }, // 空心
       splice: {
         distance: 50,
         angle: 45,
-        stroke: 50,
+        stroke: 30,
         color: ''
       }, // 出竅
       echo: {
@@ -109,14 +109,14 @@ class Controller {
   convertTextEffect (effect: any) {
     const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor } = effect || {}
     const unit = this.shadowScale * fontSize
-    const storkeWidth = this.storkeScale * fontSize
+    // const storkeWidth = this.storkeScale * fontSize
+    const strokeWidth = Math.ceil(Math.max(stroke, 0.1) / 9) * 0.5 * this.strokeScale * fontSize
     const effectShadowOffset = distance * 0.01 * unit
     const effectBlur = blur * 0.01 * unit
     const effectSpread = spread * 0.6 * 0.01
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
-    const effectStroke = stroke * 0.01 + 0.1
+    const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
     const effectOpacity = opacity * 0.01
-
     switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
@@ -134,7 +134,7 @@ class Controller {
         )
       case 'hollow':
         return CssConverter.convertTextStorke(
-          effectStroke * storkeWidth,
+          effectStroke * strokeWidth,
           this.convertColor2rgba(color, 1),
           'transparent'
         )
@@ -147,7 +147,7 @@ class Controller {
             effectBlur
           ),
           ...CssConverter.convertTextStorke(
-            effectStroke * storkeWidth,
+            effectStroke * strokeWidth,
             this.convertColor2rgba(strokeColor, 1),
             'transparent'
           )
