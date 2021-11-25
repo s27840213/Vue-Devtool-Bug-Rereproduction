@@ -35,7 +35,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       let tokenKey = ''
       let src = url
       if (hasToken) {
-        tokenKey = url.match('&token') ? '&token' : '?token'
+        tokenKey = url.match('&token') ? '&token=' : '?token='
         src = url.substring(0, hasToken ? url.indexOf(tokenKey) : undefined)
         const token = url.substring((src + tokenKey).length, url.indexOf('&team_id='))
         const teamId = url.substr((src + tokenKey + token + '&team_id=').length)

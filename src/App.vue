@@ -75,7 +75,7 @@ export default Vue.extend({
 
         Object.entries(json)
           .forEach(([k, v]) => {
-            if (['tw_default', 'jp_default', 'us_default'].includes(k)) {
+            if (['tw_default', 'jp_default', 'us_default', 'emoji'].includes(k)) {
               defaultFonts.push(this.addFont({
                 type: 'public',
                 face: (v as { id: string }).id,
