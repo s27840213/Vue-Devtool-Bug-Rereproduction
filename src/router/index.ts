@@ -34,7 +34,8 @@ const SUPPORTED_LOCALES = [{
 }]
 
 const NON_MOBILE_ROUTES = [
-  'Editor'
+  'Editor',
+  'Settings'
 ]
 
 const routes: Array<RouteConfig> = [
