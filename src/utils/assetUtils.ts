@@ -17,6 +17,12 @@ import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 
+const STANDARD_TEXT_FONT: {[key: string]: string} = {
+  'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
+  'en-US': 'cRgaSK5ZVXnLDpWTL8MN',
+  'ja-JP': 'OyDbjZxjk9r14eZnPELb'
+}
+
 class AssetUtils {
   host = 'https://template.vivipic.com'
   data = 'config.json'
@@ -349,7 +355,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, pageIndex?: number) {
+  addStanardText(type: string, text?: string, locale = 'zh-TW', pageIndex?: number) {
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -360,6 +366,11 @@ class AssetUtils {
         } as { [key: string]: string }
         const field = fieldMap[type]
         const textLayer = GeneralUtils.deepCopy(jsonData.default)
+        textLayer.paragraphs[0].spans[0].text = text
+        if (locale === 'zh-TW') {
+          textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
+        }
+        textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
       })

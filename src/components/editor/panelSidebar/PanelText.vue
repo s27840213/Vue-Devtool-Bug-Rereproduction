@@ -21,7 +21,7 @@
             class="panel-text__text-button mb-10"
             :type="`text-${config.type.toLowerCase()}`"
             :fontFamily="'Mulish'"
-            @click.native="handleAddText(config.type)") {{ config.text }}
+            @click.native="handleAddText(config)") {{ config.text }}
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -44,6 +44,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapState, mapGetters } from 'vuex'
+import i18n from '@/i18n'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
@@ -90,13 +91,13 @@ export default Vue.extend({
         size: 174,
         list: [{
           type: 'Heading',
-          text: '新增主標題'
+          text: this.$t('editor.heading')
         }, {
           type: 'Subheading',
-          text: '新增副標題'
+          text: this.$t('editor.subheading')
         }, {
           type: 'Body',
-          text: '新增內文'
+          text: this.$t('editor.body')
         }]
       }]
     },
@@ -182,8 +183,8 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    async handleAddText (type: string) {
-      await AssetUtils.addStanardText(type.toLowerCase())
+    async handleAddText(config: {type: string, text: string}) {
+      await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
       ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {

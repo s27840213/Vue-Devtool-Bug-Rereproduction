@@ -8,7 +8,10 @@
     "text": "文字",
     "myFile": "我的檔案",
     "brandkit": "品牌工具",
-    "textSetting": "文字設定"
+    "textSetting": "文字設定",
+    "heading": "新增主標題",
+    "subheading": "新增副標題",
+    "body": "新增內文"
   },
   "textEffect": {
     "distance": "距離",
