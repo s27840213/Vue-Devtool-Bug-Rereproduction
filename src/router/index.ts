@@ -33,9 +33,9 @@ const SUPPORTED_LOCALES = [{
   name: 'Japan'
 }]
 
-const NON_MOBILE_ROUTES = [
-  'Editor',
-  'Settings'
+const MOBILE_ROUTES = [
+  'Home',
+  'TemplateCenter'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -173,7 +173,7 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  if (NON_MOBILE_ROUTES.includes(to.name ?? '')) {
+  if (!MOBILE_ROUTES.includes(to.name ?? '')) {
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       next({ name: 'Home', query: { isMobile: 'true' } })
       return
