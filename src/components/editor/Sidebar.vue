@@ -53,11 +53,11 @@ export default Vue.extend({
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
-        { icon: 'template', text: `${this.$t('editor.templates')}` },
-        { icon: 'photo', text: `${this.$t('editor.photos')}` },
-        { icon: 'shape', text: `${this.$t('editor.objects')}` },
-        { icon: 'bg', text: `${this.$t('editor.backgrounds')}` },
-        { icon: 'text', text: `${this.$t('editor.texts')}` },
+        { icon: 'template', text: `${this.$t('editor.template')}` },
+        { icon: 'photo', text: `${this.$t('editor.photo')}` },
+        { icon: 'shape', text: `${this.$t('editor.object')}` },
+        { icon: 'bg', text: `${this.$t('editor.background')}` },
+        { icon: 'text', text: `${this.$t('editor.text')}` },
         { icon: 'folder', text: `${this.$t('editor.myFile')}` }
         // { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
         // { icon: 'photo', text: 'Pexels' }

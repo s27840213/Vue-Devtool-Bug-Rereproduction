@@ -18,12 +18,12 @@
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()")
-        svg-icon(class="pointer mr-5"
-          :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-          @click.native="")
-        svg-icon(class="pointer mr-15"
-          :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-          @click.native="")
+        //- svg-icon(class="pointer mr-5"
+        //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+        //-   @click.native="")
+        //- svg-icon(class="pointer mr-15"
+        //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+        //-   @click.native="")
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()")
@@ -38,12 +38,12 @@
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
-        svg-icon(class="pointer mt-10"
-          :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-          @click.native="")
-        svg-icon(class="pointer mt-10"
-          :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-          @click.native="")
+        //- svg-icon(class="pointer mt-10"
+        //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+        //-   @click.native="")
+        //- svg-icon(class="pointer mt-10"
+        //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+        //-   @click.native="")
         svg-icon(class="pointer mt-15"
           :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="addPage()")

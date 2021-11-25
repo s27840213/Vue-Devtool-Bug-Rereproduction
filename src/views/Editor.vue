@@ -112,7 +112,7 @@ export default Vue.extend({
       return this.$route.path
     },
     templateText(): string {
-      if (this.groupType) {
+      if (this.groupType === 1) {
         return '詳情頁模板'
       } else if (this.groupId.length > 0) {
         return '群組模板'

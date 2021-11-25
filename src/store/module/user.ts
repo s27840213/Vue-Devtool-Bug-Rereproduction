@@ -257,9 +257,9 @@ const mutations: MutationTree<IUserModule> = {
   [ADD_CHECKED_ASSETS](state: IUserModule, id) {
     state.checkedAssets.push(id)
   },
-  [DELETE_CHECKED_ASSETS](state: IUserModule, id: string) {
-    const targetIndex = state.checkedAssets.findIndex((assetId) => {
-      return assetId === id
+  [DELETE_CHECKED_ASSETS](state: IUserModule, index: string) {
+    const targetIndex = state.checkedAssets.findIndex((assetIndex) => {
+      return assetIndex === index
     })
     state.checkedAssets.splice(targetIndex, 1)
   },
@@ -290,7 +290,16 @@ const actions: ActionTree<IUserModule, unknown> = {
   async deleteAssets({ commit, dispatch }) {
     try {
       const keyList = state.checkedAssets.join(',')
-      const { data } = await userApis.deleteAssets(state.token, keyList)
+      const params = {
+        token: state.token,
+        locale: state.locale,
+        team_id: state.teamId || state.userId,
+        type: 'image',
+        update_type: 'delete',
+        src_asset: keyList,
+        target: '1'
+      }
+      const { data } = await userApis.updateAsset({ ...params })
       dispatch('getAllAssets', { token: state.token })
       commit('CLEAR_CHECKED_ASSETS')
     } catch (error) {

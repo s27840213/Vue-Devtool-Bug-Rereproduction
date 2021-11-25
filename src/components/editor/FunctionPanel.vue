@@ -11,7 +11,8 @@
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
         @click.native="redo")
-      svg-icon(:iconName="'share-alt'"
+      svg-icon(class="visible-hidden"
+        :iconName="'share-alt'"
         :iconWidth="'20px'"
         :iconColor="'gray-4'")
       download-btn

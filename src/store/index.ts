@@ -624,6 +624,7 @@ const mutations: MutationTree<IEditorState> = {
     state.designId = ''
     state.assetId = ''
     state.groupId = ''
+    state.groupType = 0
     state.name = '我的設計'
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {

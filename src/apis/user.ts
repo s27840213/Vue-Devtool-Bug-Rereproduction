@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import axios from '@/apis'
-import { IGroupDesignInputParams } from '@/interfaces/api'
+import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { AxiosPromise } from 'axios'
 
 export default {
@@ -42,6 +42,12 @@ export default {
     data: {
       token,
       key_list: keyList
+    }
+  }),
+  updateAsset: (params: IUpdateAssetParams): AxiosPromise => axios('/update-asset', {
+    method: 'POST',
+    data: {
+      ...params
     }
   }),
   groupDesign: (params: IGroupDesignInputParams): AxiosPromise => axios('/group-design', {

@@ -12,7 +12,7 @@ import Vue from 'vue'
 
 export default Vue.extend({
   props: {
-    value: String,
+    value: [Number, String],
     checkedValues: Array
   },
   data() {

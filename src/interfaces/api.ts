@@ -192,7 +192,7 @@ export interface IUserDesignContentData {
   update_time: string,
   ver: number,
   width: number
-  signed_url?: {[key: string]: string}
+  signed_url?: { [key: string]: string }
 }
 
 export interface IUserFolderContentData {
@@ -309,4 +309,15 @@ export interface IHashtagServiceContentData {
   list: (IHashtagServiceContentDataTagItem | IHashtagServiceContentDataThemeItem)[]
   title: string
   type: string
+}
+
+export interface IUpdateAssetParams {
+  token: string,
+  locale: string,
+  team_id: string,
+  type: 'image' | 'font' | 'design' | string,
+  update_type: 'create' | 'copy' | 'move' | 'rename' | 'delete' | 'favor' | string,
+  src_asset?: string,
+  src_folder?: string,
+  target?: string
 }
