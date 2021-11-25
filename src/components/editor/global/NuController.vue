@@ -397,7 +397,9 @@ export default Vue.extend({
       const resizerStyle = { ...resizer }
       const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooSmall = this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort
+      const tooSmall = this.getLayerType === 'text'
+        ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort)
+        : false
       resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
