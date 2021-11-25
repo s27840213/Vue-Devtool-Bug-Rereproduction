@@ -6,29 +6,29 @@
           :iconName="'logo'"
           :iconWidth="'100px'"
           style="height: 50px;"
-          @click.native="goToPage('/')")
+          @click.native="goToPage('Home')")
       transition(name="fade" mode="out-in")
         div(v-if="!noNavigation" class="body-2" key="navigation")
           div
-            btn(@click.native="goToPage('/')"
+            btn(@click.native="goToPage('Home')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === '/'}") 建立設計
+              :class="{'text-blue-1': currentPage === 'Home'}") 建立設計
           div
-            btn(@click.native="goToPage('/templates')"
+            btn(@click.native="goToPage('TemplateCenter')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === '/templates'}") 模板中心
+              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") 模板中心
           div
-            btn(@click.native="goToPage('/toturial')"
+            btn(@click.native="goToPage('Toturial')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === '/toturial'}") 使用教學
+              :class="{'text-blue-1': currentPage === 'Toturial'}") 使用教學
           div
-            btn(@click.native="goToPage('/faq')"
+            btn(@click.native="goToPage('Faq')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === '/faq'}") 常見問題
+              :class="{'text-blue-1': currentPage === 'Faq'}") 常見問題
           div(v-if="isLogin")
-            btn(@click.native="goToPage('/mydesign')"
+            btn(@click.native="goToPage('MyDesign')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === '/mydesign'}") 我的設計
+              :class="{'text-blue-1': currentPage === 'MyDesign'}") 我的設計
         div(v-else class="body-2" key="no-navigation")
           div
           div
@@ -38,14 +38,15 @@
       div(class="body-2")
         div(style="width: 180px;")
           search-bar(v-if="!noSearchbar"
-          style="height: 28px; background-color: white; border-radius: 4px;"
-          placeholder="搜 尋")
+            class="nu-header__search"
+            placeholder="搜 尋"
+            @search="handleSearch")
         div(v-if="!isLogin")
-          btn(@click.native="goToPage('/login')"
+          btn(@click.native="goToPage('Login')"
           :type="'icon-mid text-blue-1'"
           class="rounded" style="padding: 5px 30px;") 登 入
         div(v-if="!isLogin")
-          btn(@click.native="goToPage('/signup')"
+          btn(@click.native="goToPage('SignUp')"
           :type="'primary-mid'"
           class="rounded" style="padding: 5px 30px;") 註 冊
         svg-icon(v-if="isLogin"
@@ -88,7 +89,7 @@ export default Vue.extend({
     ...mapState('user', [
       'role', 'shortName']),
     currentPage(): string {
-      return '/' + window.location.pathname.split('/')[1]
+      return this.$route.name || ''
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
@@ -98,21 +99,30 @@ export default Vue.extend({
     }
   },
   methods: {
-    goToPage(pageName = '' as string) {
+    goToPage(pageName = '' as string, queryString = '') {
       if (pageName === this.currentPage) {
         // this.$router.go(0)
-      } else if (pageName === '/login' || pageName === '/signup') {
-        this.$router.push({ path: pageName, query: { redirect: this.$route.path } })
+      } else if (pageName === 'Login' || pageName === 'SignUp') {
+        this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
         // Temporary setting ----
-      } else if (pageName === '/toturial' || pageName === '/faq') {
+      } else if (pageName === 'Toturial' || pageName === 'Faq') {
         window.location.href = 'https://www.facebook.com/vivipictw'
-      } else if (pageName === '/' || pageName === '/pricing' || pageName === '/mydesign' || pageName === '/templates') {
-        this.$router.push({ path: pageName })
+      } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
+        this.$router.push({ name: pageName })
+      } else if (pageName === 'TemplateCenter') {
+        if (queryString.length > 0) {
+          this.$router.push({ name: pageName, query: { q: queryString } })
+        } else {
+          this.$router.push({ name: pageName })
+        }
       } else {
         // this.$router.push({ path: pageName })
         this.$router.push({ name: 'Home' })
       }
       // ----------------------
+    },
+    handleSearch(keyword: string) {
+      this.goToPage('TemplateCenter', keyword)
     }
   }
 })
@@ -165,7 +175,11 @@ export default Vue.extend({
       }
     }
   }
-
+  &__search {
+    height: 28px;
+    background-color: white;
+    border-radius: 4px;
+  }
   &__account {
     position: absolute;
     top: 100%;

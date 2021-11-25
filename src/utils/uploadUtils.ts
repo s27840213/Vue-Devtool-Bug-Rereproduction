@@ -945,6 +945,11 @@ class UploadUtils {
           type: styles.type,
           userId: styles.userId
         }
+      case 'frame':
+        return {
+          ...general,
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
+        }
       default:
         return general
     }

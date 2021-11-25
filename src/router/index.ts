@@ -201,9 +201,11 @@ router.beforeEach(async (to, from, next) => {
       next()
     }
   } else {
-    const token = localStorage.getItem('token')
-    if (token && token.length > 0) {
-      await store.dispatch('user/login', { token: token })
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token && token.length > 0) {
+        await store.dispatch('user/login', { token: token })
+      }
     }
     next()
   }
