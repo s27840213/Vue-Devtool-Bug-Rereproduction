@@ -170,10 +170,7 @@ export default Vue.extend({
   mounted () {
     if (this.useExternelJSON) return
     const id = GeneralUtils.generateAssetId()
-    uploadUtils.uploadExportJSON(id)
-      .then(() => {
-        this.exportId = id
-      })
+    this.handleUploadJSON(id)
   },
   watch: {
     selectedType (type) {
@@ -187,6 +184,17 @@ export default Vue.extend({
     }
   },
   methods: {
+    handleUploadJSON (id: string) {
+      return uploadUtils.uploadExportJSON(id)
+        .then((res: any) => {
+          const { status } = res?.target
+          if (status === 204) {
+            this.exportId = id
+          } else {
+            this.handleUploadJSON(id)
+          }
+        })
+    },
     handleClose () {
       if (!this.polling) {
         this.$emit('close')
