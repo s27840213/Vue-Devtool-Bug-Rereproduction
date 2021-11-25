@@ -125,28 +125,28 @@
           div(class="control-point__line-controller-wrapper"
               v-if="isLine"
               :style="`transform: scale(${100/scaleRatio})`")
-            img(class="control-point__mover"
-              :src="require('@/assets/img/svg/move.svg')"
-              :style='lineControlPointStyles()'
-              @mousedown.left.stop="moveStart")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='lineControlPointStyles()'
               @mousedown.native.left.stop="lineRotateStart")
+            img(class="control-point__mover"
+              :src="require('@/assets/img/svg/move.svg')"
+              :style='lineControlPointStyles()'
+              @mousedown.left.stop="moveStart")
           template(v-else)
             div(class="control-point__controller-wrapper"
                 :style="`transform: scale(${100/scaleRatio})`")
-              img(class="control-point__mover"
-                v-if="config.type !== 'text' || !contentEditable"
-                :src="require('@/assets/img/svg/move.svg')"
-                :style='controlPointStyles()'
-                @mousedown.left.stop="moveStart")
               svg-icon(class="control-point__rotater"
                 :iconName="'rotate'" :iconWidth="`${20}px`"
                 :src="require('@/assets/img/svg/rotate.svg')"
                 :style='controlPointStyles()'
                 @mousedown.native.left.stop="rotateStart")
+              img(class="control-point__mover"
+                v-if="config.type !== 'text' || !contentEditable"
+                :src="require('@/assets/img/svg/move.svg')"
+                :style='controlPointStyles()'
+                @mousedown.left.stop="moveStart")
 
 </template>
 <script lang="ts">
@@ -395,8 +395,18 @@ export default Vue.extend({
     },
     resizerStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
+      const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooSmall = this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort
       resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
-      return resizerStyle
+      const HW = {
+        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 20}px`
+          : (tooSmall ? `${(this.getLayerHeight - 20) * 0.16}px` : resizerStyle.width),
+        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 20}px`
+          : (tooSmall ? `${(this.getLayerWidth - 20) * 0.16}px` : resizerStyle.height)
+      }
+      return Object.assign(resizerStyle, HW)
     },
     resizer(controlPoints: any, textMoveBar = false) {
       let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
@@ -409,9 +419,9 @@ export default Vue.extend({
               : resizers.slice(2, 4)
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
-              tooNarrow ? resizers.slice(2, 3) : resizers.slice(2, 4)
+              tooNarrow ? resizers.slice(3, 4) : resizers.slice(2, 4)
             ) : (
-              tooShort ? resizers.slice(1, 2) : resizers.slice(0, 2)
+              tooShort ? resizers.slice(0, 1) : resizers.slice(0, 2)
             )
           }
           break
@@ -444,15 +454,10 @@ export default Vue.extend({
       return resizers
     },
     scaler(scalers: any) {
-      if (this.getLayerType === 'text') {
-        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
-        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
-        return (tooShort || tooNarrow) ? scalers.slice(0, 1) : scalers
-      } else {
-        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN / 2
-        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN / 2
-        return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
-      }
+      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT
+      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     lineEnds(scalers: any, point: number[]) {
       const quadrant = shapeUtils.getLineQuadrant(point)
