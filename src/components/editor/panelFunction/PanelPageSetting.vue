@@ -157,7 +157,7 @@
                 class="theme-option__check"
                 :disabled="isDisabled(item.width, item.height)"
                 v-model="templateThemes[item.id]")
-              span(class="body-1") {{item.id}}: {{item.title}}
+              span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
           div tags_tw
           div
@@ -992,7 +992,7 @@ export default Vue.extend({
     display: grid;
     align-items: center;
     grid-auto-flow: column;
-    grid-template-columns: 40px 120px auto;
+    grid-template-columns: 40px 130px auto;
     &__check {
       margin: auto 0;
     }
