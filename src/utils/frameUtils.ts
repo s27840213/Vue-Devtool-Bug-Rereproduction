@@ -91,6 +91,15 @@ class FrameUtils {
       props
     })
   }
+
+  updateSubFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+    store.commit('SET_subFrameLayerStyles', {
+      pageIndex,
+      primaryLayerIndex,
+      subLayerIndex,
+      styles
+    })
+  }
 }
 
 export default new FrameUtils()
