@@ -1097,7 +1097,7 @@ class UploadUtils {
   }
 
   uploadExportJSON(exportId: string, json?: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
@@ -1115,10 +1115,9 @@ class UploadUtils {
       } else {
         formData.append('file', blob)
       }
+      xhr.onloadend = resolve
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
-      xhr.onload = resolve
-      xhr.onerror = reject
     })
   }
 

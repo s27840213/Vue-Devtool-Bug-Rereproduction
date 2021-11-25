@@ -170,10 +170,7 @@ export default Vue.extend({
   mounted () {
     if (this.useExternelJSON) return
     const id = GeneralUtils.generateAssetId()
-    uploadUtils.uploadExportJSON(id)
-      .then(() => {
-        this.exportId = id
-      })
+    this.handleUploadJSON(id)
   },
   watch: {
     selectedType (type) {
@@ -187,6 +184,17 @@ export default Vue.extend({
     }
   },
   methods: {
+    handleUploadJSON (id: string) {
+      return uploadUtils.uploadExportJSON(id)
+        .then((res: any) => {
+          const { status } = res?.target
+          if (status === 204) {
+            this.exportId = id
+          } else {
+            this.handleUploadJSON(id)
+          }
+        })
+    },
     handleClose () {
       if (!this.polling) {
         this.$emit('close')
@@ -239,6 +247,7 @@ export default Vue.extend({
       if (['spec', 'current'].includes(rangeType)) {
         fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
       }
+      this.$emit('inprogress', true)
       DownloadUtil
         .getFileUrl(fileInfo)
         .then(this.handleDownloadProgress)
@@ -261,7 +270,6 @@ export default Vue.extend({
         case 2:
           console.log('progress: ', progress)
           this.progress = progress
-          this.$emit('inprogress', true)
           setTimeout(() => {
             DownloadUtil
               .getFileStatus(url)
