@@ -24,13 +24,14 @@ import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { IFont } from '@/interfaces/text'
-import { mapState, mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import generalUtils from '@/utils/generalUtils'
+import { reject } from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -46,44 +47,23 @@ export default Vue.extend({
     }
   },
   async created() {
-    const fontStore = this.fontStore as Array<IFont>
-    let isLoadedFont = false
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
-        if (!fontStore.some(font => font.face === span.styles.font && font.loaded)) {
-          isLoadedFont = true
-          const font = fontStore.find(font => font.face === span.styles.font)
-          if (!font) {
-            const newFont = new FontFace(span.styles.font, this.getFontUrl(span.styles))
-            promises.push(new Promise<void>((resolve) => {
-              newFont.load()
-                .then(newFont => {
-                  document.fonts.add(newFont)
-                  TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-                  resolve()
-                })
-            }))
-            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: false })
-          } else {
-            promises.push(new Promise<void>((resolve) => {
-              const checkLoaded = setInterval(() => {
-                if (font.loaded) {
-                  console.log('check if loaded')
-                  clearInterval(checkLoaded)
-                  resolve()
-                }
-              }, 100)
-            }))
-          }
-        }
+        const promise = this.addFont({
+          type: span.styles.type,
+          face: span.styles.font,
+          url: span.styles.fontUrl
+        }).catch(e => console.error(e))
+
+        promises.push(promise)
       }
     }
 
     await Promise
       .all(promises)
 
-    if (isLoadedFont && !this.isDestroyed) {
+    if (!this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
@@ -141,6 +121,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('text', ['addFont']),
     styles(styles: any) {
       return CssConveter.convertFontStyle(styles)
     },
