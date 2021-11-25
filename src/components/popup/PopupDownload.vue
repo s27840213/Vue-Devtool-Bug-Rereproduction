@@ -239,6 +239,7 @@ export default Vue.extend({
       if (['spec', 'current'].includes(rangeType)) {
         fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
       }
+      this.$emit('inprogress', true)
       DownloadUtil
         .getFileUrl(fileInfo)
         .then(this.handleDownloadProgress)
@@ -261,7 +262,6 @@ export default Vue.extend({
         case 2:
           console.log('progress: ', progress)
           this.progress = progress
-          this.$emit('inprogress', true)
           setTimeout(() => {
             DownloadUtil
               .getFileStatus(url)
