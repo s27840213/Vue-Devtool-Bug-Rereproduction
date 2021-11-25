@@ -6,6 +6,6 @@ export interface IModalInfo {
   [key: string]: string | Array<string> | IModalButton
   title: string,
   content: Array<string>,
-  comfirmButton: IModalButton,
+  confirmButton: IModalButton,
   cancelButton: IModalButton
 }

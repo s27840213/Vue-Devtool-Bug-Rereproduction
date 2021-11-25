@@ -25,7 +25,7 @@ class ModalUtils {
     store.commit('modal/SET_MODAL_INFO', {
       title: '',
       content: [''],
-      comfirmButton: {
+      confirmButton: {
         msg: '',
         action: () => {
           return false
