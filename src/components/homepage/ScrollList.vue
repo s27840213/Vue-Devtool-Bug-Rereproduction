@@ -1,42 +1,67 @@
 <template lang="pug">
   div(class="scroll-list")
     div(v-if="prevIcon"
-        class="scroll-list-move scroll-list-move-left"
-        @click="handlePrev")
-        div
-          svg-icon(iconName="chevron-left" iconWidth="40px" iconColor="gray-3")
+      class="scroll-list-move scroll-list-move-left"
+      @click="handlePrev")
+      div
+        svg-icon(iconName="chevron-left"
+          iconWidth="40px"
+          iconColor="gray-3")
     div(v-if="nextIcon"
-        class="scroll-list-move scroll-list-move-right"
-        @click="handleNext")
-        div
-          svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
-    div(class="scroll-list-items" @scroll="handleScroll" ref="items")
-      div(v-if="type === 'theme'"
-        class="pointer scroll-list-plus")
-        img(:src="require('@/assets/img/png/plus-origin.png')"
-          @click="openPopup()")
-        div(class="pt-10 body-1") 自訂尺寸
-      div(v-for="item, idx in list" class="scroll-list-item py-10"
-        :class="{'pb-70': type === 'theme'}")
-        img(class="pointer item-image"
-          :class="{'square': type === 'template'}"
-          :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
-          @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
-          @error="handleNotFound")
+      class="scroll-list-move scroll-list-move-right"
+      @click="handleNext")
+      div
+        svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
+    div(class="px-10 scroll-list-items"
+      @scroll="handleScroll" ref="items")
+      template(v-if="type === 'design'")
+        design-item(v-for="design in list"
+          class="scroll-list-item"
+          :style="ItemStyle"
+          :key="design.id"
+          :config="design")
+        div(v-if="isLoading")
+            svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+        template(v-if="!isLoading && list.length === 0")
+          div(class="pt-20 pointer scroll-list-plus")
+            img(:src="require('@/assets/img/png/plus-origin.png')"
+              @click="newDesignSquare()")
+            div(class="pt-10 body-1") 點我製作
+          div(class="scroll-list-hint") 來設計自己第一款模板吧！肯定很有趣！
+      template(v-else)
         div(v-if="type === 'theme'"
-          class="pt-10 body-1") {{item.title}}
-        div(v-if="type === 'theme'"
-          class="pt-2 body-2 text-gray-2") {{item.description}}
+          class="pointer scroll-list-plus")
+          img(:src="require('@/assets/img/png/plus-origin.png')"
+            @click="openPopup()")
+          div(class="pt-10 body-1") 自訂尺寸
+        div(v-for="item, idx in list" class="scroll-list-item py-10"
+          :class="{'pb-70': type === 'theme'}")
+          img(class="pointer item-image"
+            :class="{'square': type === 'template'}"
+            :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
+            @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
+            @error="handleNotFound")
+          div(v-if="type === 'theme'"
+            class="pt-10 body-1") {{item.title}}
+          div(v-if="type === 'theme'"
+            class="pt-2 body-2 text-gray-2") {{item.description}}
 </template>
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
+import DesignItem from '@/components/homepage/DesignItem.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
+  components: {
+    DesignItem
+  },
   props: {
     list: Array,
-    type: String
+    type: String,
+    isLoading: Boolean
   },
   data() {
     return {
@@ -47,6 +72,9 @@ export default Vue.extend({
   computed: {
     items() {
       return this.$refs.items as HTMLElement
+    },
+    ItemStyle(): string {
+      return this.type === 'design' ? 'padding-bottom: 20px;' : ''
     }
   },
   methods: {
@@ -59,6 +87,11 @@ export default Vue.extend({
     newDesign(item: Itheme) {
       this.$router.push({ name: 'Editor' }).then(() => {
         designUtils.newDesign(item.width, item.height)
+      })
+    },
+    newDesignSquare() {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign(1080, 1080)
       })
     },
     handleNext() {
@@ -88,7 +121,6 @@ export default Vue.extend({
 .scroll-list {
   $this: &;
   position: relative;
-
   &-items {
     display: grid;
     column-gap: 30px;
@@ -100,16 +132,13 @@ export default Vue.extend({
     overflow-x: scroll;
     overflow-y: hidden;
     text-align: left;
-
     &::-webkit-scrollbar {
       display: none;
     }
   }
-
   &-plus {
     width: 100px;
     text-align: center;
-
     @media (min-width: 976px) {
       width: 140px;
     }
@@ -119,19 +148,20 @@ export default Vue.extend({
     @media (min-width: 1560px) {
       width: 200px;
     }
-
     > img:hover {
       transition: all 0.2s ease-in-out;
       box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
       transform: translate(0, -10px);
     }
   }
-
+  &-hint {
+    font-size: 16px;
+    color: setColor(gray-2);
+  }
   &-item {
     width: 100px;
     height: 100px;
     text-align: center;
-
     @media (min-width: 976px) {
       width: 140px;
       height: 140px;
@@ -144,7 +174,6 @@ export default Vue.extend({
       width: 200px;
       height: 200px;
     }
-
     .item-image {
       border-radius: 10px;
       height: 100%;
@@ -154,18 +183,15 @@ export default Vue.extend({
         transform: translate(0, -5px);
       }
     }
-
     .square {
       width: 100%;
       object-fit: contain;
       box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%);
     }
-
     &-title {
       padding-top: 10px;
     }
   }
-
   &-icon {
     display: flex;
     background: #ffffff;
@@ -173,7 +199,6 @@ export default Vue.extend({
     position: relative;
     box-shadow: 0px 3px 10px rgba(78, 171, 230, 0.3);
   }
-
   &-move {
     position: absolute;
     top: 0;
@@ -182,14 +207,12 @@ export default Vue.extend({
     align-items: center;
     z-index: 1;
     cursor: pointer;
-
     &-left {
       left: -75px;
       #{$this}__icon {
         left: 3px;
       }
     }
-
     &-right {
       right: -75px;
       #{$this}__icon {

@@ -28,11 +28,13 @@
       div(class="home-content-theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
-      div(class="home-content-plaque")
+      div(v-if="!isLogin"
+        class="home-content-plaque")
         img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
         div(class="home-content-plaque-title") 立即享受海量的精美電商模板
         div(class="home-content-plaque-subtitle") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
-      div(class="home-content-feature")
+      div(v-if="!isLogin"
+        class="home-content-feature")
         div(style="width: 100%;")
           div(style="height: 140px;" class="x-scrollbar")
             btn(v-for="item, idx in featureList" :type="'icon-mid'"
@@ -50,26 +52,34 @@
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
               //- @click.native="goToPage('Editor')") 開 始 製 作
+      div(v-if="isLogin")
+        div(class="home-content-title label-lg")
+          span 我的設計
+          span(class="pointer body-1 more"
+          @click="goToPage('MyDesign')") 更多
+        div(class="home-content__mydesign")
+          scroll-list(:list="allDesigns" type='design'
+            :isLoading="isDesignsLoading")
       div(class="home-content-title label-lg")
         div
-          template(v-for="tag in tags")
-            span(class="pointer mr-20"
-              @click="goToPage('Editor', tag)") {{'#' + tag}}
+          span(v-for="tag in tags"
+            class="pointer mr-20"
+            @click="goToPage('Editor', tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
           @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
-      div(class="home-content-template")
+      div(class="home-content__template")
         scroll-list(:list="tagTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
           @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
-      div(class="home-content-template")
+      div(class="home-content__template")
         scroll-list(:list="popularTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
           @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
-      div(class="home-content-template")
+      div(class="home-content__template")
         scroll-list(:list="latestTemplateList" type='template')
       nu-footer(class="mt-100")
       div(v-if="showSizePopup"
@@ -139,7 +149,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      allDesigns: 'design/getAllDesigns',
+      isDesignsLoading: 'design/getIsDesignsLoading'
     }),
     featureContent(): string {
       return this.featureList[this.featureSelected].content
@@ -156,6 +168,7 @@ export default Vue.extend({
       }
     }, 4000)
 
+    designUtils.fetchDesigns(this.fetchAllDesigns)
     const response = await this.getThemeList()
     this.themeList = response.data.content
 
@@ -181,11 +194,11 @@ export default Vue.extend({
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
   methods: {
-    ...mapActions('homeTemplate',
-      [
-        'getThemeList',
-        'getTagContent'
-      ]
+    ...mapActions({
+      getThemeList: 'homeTemplate/getThemeList',
+      getTagContent: 'homeTemplate/getTagContent',
+      fetchAllDesigns: 'design/fetchAllDesigns'
+    }
     ),
     goToPage(pageName: string, queryString = '') {
       if (queryString) {
@@ -245,7 +258,7 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     text-align: left;
-    padding: 4vw 10vw 1.5vw 10vw;
+    padding: 60px 10vw 20px 10vw;
     .more {
       white-space: nowrap;
     }
@@ -373,7 +386,7 @@ export default Vue.extend({
       color: white;
     }
   }
-  &-template {
+  &__mydesign, &__template {
     padding: 0 10%;
   }
 }
