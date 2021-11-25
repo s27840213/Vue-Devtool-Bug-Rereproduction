@@ -58,55 +58,7 @@ export default Vue.extend({
     }
   },
   async created() {
-    switch (this.config.category) {
-      case 'C': {
-        // should be deleted after the new json format stablize
-        if (!this.config.svg && this.config.designId) {
-          const shape = await shapeUtils.fetchSvg(this.config)
-          shape.color = this.config.color
-          shape.className = shapeUtils.classGenerator()
-          this.config.styles.initWidth = shape.vSize[0]
-          this.config.styles.initHeight = shape.vSize[1]
-          Object.assign(this.config, shape)
-        }
-        const transText = shapeUtils.transFormatter(this.className, this.config.transArray, {
-          cSize: this.config.cSize,
-          pSize: this.config.pSize,
-          pDiff: this.config.pDiff
-        })
-        this.transNode = shapeUtils.addStyleTag(transText)
-        this.filterTemplate = this.getFilterTemplate()
-        break
-      }
-      case 'D': {
-        if (!this.config.markerWidth) {
-          await shapeUtils.addComputableInfo(this.config)
-        }
-        const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
-        this.transNode = shapeUtils.addStyleTag(transText)
-        break
-      }
-      case 'E': {
-        if (!this.config.svg) {
-          shapeUtils.addComputableInfo(this.config)
-        }
-        break
-      }
-      default: {
-        if (!this.config.svg && this.config.designId) {
-          const shape = await shapeUtils.fetchSvg(this.config) as IShape
-          shape.color = this.config.color
-          shape.className = shapeUtils.classGenerator()
-          Object.assign(this.config, shape)
-          this.config.styles.initWidth = shape.vSize[0]
-          this.config.styles.initHeight = shape.vSize[1]
-        }
-      }
-    }
-    // console.log(this.config.styleArray)
-    const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-    this.styleNode = shapeUtils.addStyleTag(styleText)
-    this.paramsReady = true
+    await this.checkAndFetchSvg()
   },
   watch: {
     'config.color': {
@@ -192,6 +144,14 @@ export default Vue.extend({
         }
       },
       deep: true
+    },
+    'config.svg': {
+      handler: function (newVal) {
+        if (!newVal) {
+          this.paramsReady = false
+          this.checkAndFetchSvg(newVal)
+        }
+      }
     }
   },
   computed: {
@@ -318,6 +278,58 @@ export default Vue.extend({
           height: '0px'
         }
       }
+    },
+    async checkAndFetchSvg(svg?: string) {
+      svg = svg ?? this.config.svg
+      switch (this.config.category) {
+        case 'C': {
+          // should be deleted after the new json format stablize
+          if (!svg && this.config.designId) {
+            const shape = await shapeUtils.fetchSvg(this.config)
+            shape.color = this.config.color
+            shape.className = shapeUtils.classGenerator()
+            this.config.styles.initWidth = shape.vSize[0]
+            this.config.styles.initHeight = shape.vSize[1]
+            Object.assign(this.config, shape)
+          }
+          const transText = shapeUtils.transFormatter(this.className, this.config.transArray, {
+            cSize: this.config.cSize,
+            pSize: this.config.pSize,
+            pDiff: this.config.pDiff
+          })
+          this.transNode = shapeUtils.addStyleTag(transText)
+          this.filterTemplate = this.getFilterTemplate()
+          break
+        }
+        case 'D': {
+          if (!svg) {
+            await shapeUtils.addComputableInfo(this.config)
+          }
+          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
+          this.transNode = shapeUtils.addStyleTag(transText)
+          break
+        }
+        case 'E': {
+          if (!svg) {
+            shapeUtils.addComputableInfo(this.config)
+          }
+          break
+        }
+        default: {
+          if (!svg && this.config.designId) {
+            const shape = await shapeUtils.fetchSvg(this.config) as IShape
+            shape.color = this.config.color
+            shape.className = shapeUtils.classGenerator()
+            Object.assign(this.config, shape)
+            this.config.styles.initWidth = shape.vSize[0]
+            this.config.styles.initHeight = shape.vSize[1]
+          }
+        }
+      }
+      // console.log(this.config.styleArray)
+      const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
+      this.styleNode = shapeUtils.addStyleTag(styleText)
+      this.paramsReady = true
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
