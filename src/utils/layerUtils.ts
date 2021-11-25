@@ -270,6 +270,20 @@ class LayerUtils {
   updateImageLayerUrls(id: string, flag: 0 | 1) {
     store.commit('UPDATE_imageLayerUrl', { id, flag })
   }
+
+  getUpmostNonTextLayerIndex(layers: ILayer[]) {
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const layer = layers[i]
+      if (layer.type === 'text') continue
+      if (layer.type === 'group') {
+        const groupLayer = layer as IGroup
+        const types = groupLayer.layers.map(l => l.type)
+        if (types.includes('text')) continue
+      }
+      return i
+    }
+    return -1
+  }
 }
 
 const layerUtils = new LayerUtils()

@@ -15,6 +15,7 @@ import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
+import ZindexUtils from './zindexUtils'
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -156,7 +157,9 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
   }
 
   async addLine(json: any, attrs: IAssetProps = {}) {
@@ -190,7 +193,9 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
   }
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
@@ -227,7 +232,9 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
   }
 
   addFrame(json: any, attrs: IAssetProps = {}) {
@@ -251,7 +258,9 @@ class AssetUtils {
       },
       ...json
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newFrame(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
@@ -402,7 +411,9 @@ class AssetUtils {
       }
     }
     console.log(config)
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
   }
 
   async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
