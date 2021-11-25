@@ -186,10 +186,11 @@ class ImageAdjustUtil {
   }
 
   setAdjust (props: IAdjustProps) {
-    const { adjust, pageIndex, layerIndex } = props
+    const { adjust, pageIndex, layerIndex, subLayerIndex } = props
     store.commit('UPDATE_specLayerData', {
       pageIndex,
       layerIndex,
+      subLayerIndex,
       styles: { adjust },
       type: 'image'
     })

@@ -42,7 +42,7 @@ export default Vue.extend({
       modalUtils.clearModalInfo()
     },
     confirmAction() {
-      this.modalInfo.comfirmButton.action()
+      this.modalInfo.confirmButton.action()
       this.closePopup()
     },
     cancelAction() {

@@ -50,7 +50,7 @@ class DesignUtils {
   }
 
   updateFolders(currentFolders: IFolder[], newFolders: IFolder[]) {
-    const countMap = {} as {[key: string]: {seen: boolean, folder: IFolder}}
+    const countMap = {} as { [key: string]: { seen: boolean, folder: IFolder } }
     const indicesToDelete = []
     for (const folder of newFolders) {
       countMap[folder.id] = {
@@ -497,7 +497,7 @@ class DesignUtils {
     })
   }
 
-  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: {'0_prev': string, '0_prev_2x': string}): string {
+  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string {
     if (assetId !== undefined) {
       const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
       const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
@@ -548,17 +548,13 @@ class DesignUtils {
   }
 
   setDesign(design: IDesign) {
-    // if(uploadUtils.assetId.length !== 0) {
-    //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
-    // }
-
     pageUtils.setPages()
 
     let isPrivate = false
 
     if (design.id === undefined && design.signedUrl) {
       isPrivate = true
-      design.id = this.getPrivateDesignId(design.signedUrl['config.json'])
+      // design.id = this.getPrivateDesignId(design.signedUrl['config.json'])
     }
 
     pageUtils.clearPagesInfo()
@@ -568,16 +564,18 @@ class DesignUtils {
         router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id }) })
       }
     }
-
+    console.log(design.signedUrl?.['config.json'])
+    console.log(this.getPrivateDesignId(design.signedUrl?.['config.json'])
+    )
     if (isPrivate) {
-      uploadUtils.getDesign('design-url', design.signedUrl?.['config.json'] ?? '')
+      uploadUtils.getDesign('design', { signedUrl: design.signedUrl?.['config.json'] ?? '' })
     } else {
-      uploadUtils.getDesign('design', design.id ?? '')
+      uploadUtils.getDesign('design', { designId: design.id ?? '' })
     }
   }
 
-  getPrivateDesignId(jsonUrl: string): string {
-    return jsonUrl.match(/.*design\/(.*)\/config\.json.*/)?.[1] ?? ''
+  getPrivateDesignId(jsonUrl?: string): Array<string> {
+    return (jsonUrl ?? '').match(/design\/(.*)\/config\.json/) ?? []
   }
 }
 

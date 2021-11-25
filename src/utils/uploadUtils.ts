@@ -35,7 +35,6 @@ enum GetDesignType {
   TEMPLATE = 'template',
   TEXT = 'text',
   ASSET_DESIGN = 'design',
-  PRIVATE_DESIGN = 'design-url',
   NEW_DESIGN_TEMPLATE = 'new-design-template',
 }
 /**
@@ -89,7 +88,7 @@ class UploadUtils {
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
     if (this.getDesignInfo.flag) {
-      this.getDesign(this.getDesignInfo.type, this.getDesignInfo.id)
+      this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id })
     }
   }
 
@@ -316,7 +315,7 @@ class UploadUtils {
                     if (json.flag === 0) {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
-                      store.dispatch('getAssets', { token: this.token })
+                      store.dispatch('getAllAssets', { token: this.token })
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
@@ -340,7 +339,9 @@ class UploadUtils {
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+    console.log(putAssetDesignType, this.assetId)
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
+    console.log(this.assetId)
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 
@@ -576,9 +577,9 @@ class UploadUtils {
     }
   }
 
-  uploadGroupDesign(update: GroupDesignUpdateFlag, deleteGroup = false as boolean, coverId?: string) {
-    const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? generalUtils.generateRandomString(20) : this.groupId
-    store.commit('SET_groupId', groupId)
+  uploadGroupDesign(update: GroupDesignUpdateFlag, ecomm: 0 | 1, deleteGroup = false as boolean, coverId?: string) {
+    const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? '' : this.groupId
+    // store.commit('SET_groupId', groupId)
     const pages = pageUtils.getPages
     /**
      * @param {string} list - template id list (separate by comma)
@@ -590,7 +591,8 @@ class UploadUtils {
         token: this.token,
         update,
         list,
-        group_id: groupId
+        group_id: groupId,
+        ecomm
       } as IGroupDesignInputParams)
     }
 
@@ -772,9 +774,12 @@ class UploadUtils {
     return page
   }
 
-  async getDesign(type: string, designId: string, params: {[key: string]: any} = {}) {
+  async getDesign(type: string, designParams: { designId?: string, teamId?: string, signedUrl?: string }, params: { [key: string]: any } = {}) {
     let jsonName = ''
     let fetchTarget = ''
+    const designId = designParams.designId ?? ''
+    const teamId = designParams.teamId ?? ''
+    const signedUrl = designParams.signedUrl ?? ''
     switch (type) {
       case GetDesignType.TEMPLATE:
       case GetDesignType.TEXT: {
@@ -789,20 +794,27 @@ class UploadUtils {
           this.getDesignInfo.type = GetDesignType.ASSET_DESIGN
           return
         }
-        jsonName = 'config.json'
-        fetchTarget = `https://template.vivipic.com/${this.loginOutput.upload_map.path}asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
-        break
-      }
-      case GetDesignType.PRIVATE_DESIGN: {
-        if (!this.isLogin) {
-          this.getDesignInfo.flag = 1
-          this.getDesignInfo.id = designId
-          this.getDesignInfo.type = GetDesignType.PRIVATE_DESIGN
-          return
+        /**
+         * @Note isAdmin -> fetch the public design, else fetch the private design
+         */
+        if (this.isAdmin) {
+          jsonName = 'config.json'
+          fetchTarget = `https://template.vivipic.com/${this.loginOutput.upload_map.path}asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        } else {
+          fetchTarget = signedUrl
         }
-        fetchTarget = designId
         break
       }
+      // case GetDesignType.PRIVATE_DESIGN: {
+      //   if (!this.isLogin) {
+      //     this.getDesignInfo.flag = 1
+      //     this.getDesignInfo.id = designId
+      //     this.getDesignInfo.type = GetDesignType.PRIVATE_DESIGN
+      //     return
+      //   }
+      //   fetchTarget = signedUrl
+      //   break
+      // }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
         fetchTarget = `https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`
         break
@@ -832,18 +844,7 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                store.commit('SET_assetId', designId)
-                store.commit('SET_pages', json)
-                themeUtils.refreshTemplateState()
-                //
-                stepsUtils.reset()
-                break
-              }
-              case GetDesignType.PRIVATE_DESIGN: {
-                /**
-                 * @Todo add computableInfo if we need
-                 */
-                // await ShapeUtils.addComputableInfo(json.layers[0])
+                console.log('Set design id' + designId)
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', json)
                 themeUtils.refreshTemplateState()
@@ -946,6 +947,11 @@ class UploadUtils {
           textEffect: styles.textEffect,
           type: styles.type,
           userId: styles.userId
+        }
+      case 'frame':
+        return {
+          ...general,
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       default:
         return general

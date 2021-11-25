@@ -32,7 +32,10 @@
                   @search="handleSearch")
     div(class="template-center__content")
       div(class="template-center__filter")
-        hashtag-category-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
+        hashtag-category-row(v-for="hashtag in hashtags"
+                            :list="hashtag"
+                            :defaultSelection="hashtagSelections[hashtag.title].selection"
+                            @select="handleHashtagSelect")
       div(class="template-center__hr")
       div(class="template-center__sorter")
         div(class="template-center__sorter__left")
@@ -163,12 +166,37 @@ export default Vue.extend({
     }
   },
   mounted() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const q = urlParams.get('q')
+    const tags = urlParams.get('tags')
+    let tagStrs: string[] = []
+    const themes = urlParams.get('themes')
+    let themeIds: number[] = []
+    if (q) {
+      this.searchbarKeyword = q
+    }
+    if (tags) {
+      tagStrs = tags.split(',')
+    }
+    if (themes) {
+      themeIds = themes.split(',').map(Number)
+    }
     this.getHashtags().then(() => {
       this.hashtagSelections = {}
       for (const hashtag of this.hashtags) {
+        let selection: string[] = []
+        if (hashtag.type === 'theme') {
+          selection = hashtag.list
+            .filter((tag: {id: number}) => themeIds.includes(tag.id))
+            .map((tag: {id: number}) => tag.id.toString())
+        } else {
+          selection = hashtag.list
+            .filter((tag: {name: string}) => tagStrs.includes(tag.name))
+            .map((tag: {name: string}) => tag.name)
+        }
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
-          selection: []
+          selection
         }
       }
       this.composeKeyword()

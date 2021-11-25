@@ -8,7 +8,7 @@
       @update="handleCheck")
     svg-icon(class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
-      :iconName="'more_horizontal'"
+      :iconName="'more_vertical'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
     img(:src="previewSrc",

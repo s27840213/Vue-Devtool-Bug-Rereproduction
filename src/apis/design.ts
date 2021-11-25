@@ -13,6 +13,9 @@ export default {
   getUserId(): string {
     return store.getters['user/getUserId']
   },
+  getTeamId(): string {
+    return store.getters['user/getTeamId']
+  },
   getAssetIndex(design: IDesign): string {
     return design.asset_index.toString()
   },
@@ -22,7 +25,18 @@ export default {
   getFolderIds(folders: IFolder[]): string {
     return folders.map((folder) => folder.id).join(',')
   },
-  async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean, params: {[key: string]: any} = {}): Promise<any> {
+  async getPrivateDesign(teamId: string, assetId: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: this.getToken,
+        type: 'design',
+        team_id: teamId,
+        asset_id: assetId
+      }
+    }))
+  },
+  async getDesigns(token: string, path: string, data: number, sortByField: string, sortByDescending: boolean, params: { [key: string]: any } = {}): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',
       data: {

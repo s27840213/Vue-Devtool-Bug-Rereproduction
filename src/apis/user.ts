@@ -1,9 +1,10 @@
+/* eslint-disable camelcase */
 import axios from '@/apis'
 import { IGroupDesignInputParams } from '@/interfaces/api'
 import { AxiosPromise } from 'axios'
 
 export default {
-  getAssets: (token: string, attrs = {}): AxiosPromise => axios('/list-asset', {
+  getAllAssets: (token: string, attrs = {}): AxiosPromise => axios('/list-asset', {
     method: 'POST',
     data: {
       token,

@@ -10,14 +10,6 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     if (from.name === 'Home') {
       themeUtils.setTemplateThemes([])
     }
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      next({ name: 'Home', query: { isMobile: 'true' } })
-      return
-    }
-    if (window.screen.height > window.screen.width) {
-      next({ name: 'Home', query: { isMobile: 'true' } })
-      return
-    }
     next()
     const urlParams = new URLSearchParams(window.location.search)
     const type = urlParams.get('type')
@@ -29,7 +21,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     if (type && designId) {
       type === 'export'
         ? uploadUtils.getExport(urlParams)
-        : await uploadUtils.getDesign(type, designId, { width, height })
+        : await uploadUtils.getDesign(type, { designId }, { width, height })
     } else if (!url && from.name !== 'Home') {
       themeUtils.refreshTemplateState()
     }

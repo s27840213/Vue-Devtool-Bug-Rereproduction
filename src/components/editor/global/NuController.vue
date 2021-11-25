@@ -430,6 +430,8 @@ export default Vue.extend({
           }
       }
 
+      resizers = resizers ?? []
+
       if (this.getLayerType !== 'text') {
         if (tooShort) {
           resizers = resizers.filter(r => r.type !== 'H')

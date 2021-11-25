@@ -12,4 +12,5 @@ export interface IAdjustProps {
   adjust: IAdjustJsonProps
   pageIndex?: number
   layerIndex?: number
+  subLayerIndex?: number
 }

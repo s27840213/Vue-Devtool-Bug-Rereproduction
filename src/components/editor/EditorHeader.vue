@@ -69,13 +69,6 @@ export default Vue.extend({
     pagesName(): string {
       return pageUtils.pagesName
     },
-    templateText(): string {
-      if (this.groupId.length > 0) {
-        return '群組模板'
-      } else {
-        return '單頁模板'
-      }
-    },
     headerPosStyle() {
       const top = rulerUtils.showRuler ? `${rulerUtils.RULER_SIZE}px` : '0px'
       return {

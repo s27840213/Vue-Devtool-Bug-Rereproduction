@@ -7,6 +7,12 @@
         @click.native="$emit('close')")
       button(class="panel-group-template__apply lead-2"
         @click="handleApplyGroupTemplate") 加入全部 {{ count }} 個頁面
+      svg-icon(v-if="isAdmin"
+        class="my-5 panel-group-template__delete pointer"
+        iconName="trash"
+        iconWidth="30px"
+        iconColor="white"
+        @click.native="handleDeleteGroupTemplate")
     div(class="panel-group-template__list")
       category-template-item(v-for="(item, idx) in contents"
         class="panel-group-template__item"
@@ -18,8 +24,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import assetUtils from '@/utils/assetUtils'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   components: { CategoryTemplateItem },
@@ -28,10 +36,14 @@ export default Vue.extend({
     groupItem: Object
   },
   computed: {
-    count (): number {
+    ...mapGetters({
+      token: 'user/getToken',
+      isAdmin: 'user/isAdmin'
+    }),
+    count(): number {
       return this.groupItem.content_ids.length
     },
-    contents (): Array<{ [key: string]: any }> {
+    contents(): Array<{ [key: string]: any }> {
       const { content_ids: ids } = this.groupItem
       return (ids as Array<{ [key: string]: any }>)
         .map(content => ({
@@ -41,8 +53,29 @@ export default Vue.extend({
     }
   },
   methods: {
-    handleApplyGroupTemplate () {
+    handleApplyGroupTemplate() {
       assetUtils.addGroupTemplate(this.groupItem)
+    },
+    handleDeleteGroupTemplate() {
+      if (!this.isAdmin) return
+      modalUtils.setIsModalOpen(true)
+      modalUtils.setModalInfo(
+        '確認刪除群組模板？',
+        [],
+        {
+          msg: '',
+          action: () => {
+            this.$emit('close')
+            this.$store.dispatch('user/groupDesign', {
+              token: this.token,
+              update: 1,
+              list: '',
+              group_id: this.groupItem.group_id,
+              ecomm: 0
+            })
+          }
+        }
+      )
     }
   }
 })
@@ -94,6 +127,10 @@ export default Vue.extend({
   &__close {
     position: absolute;
     left: 0;
+  }
+  &__delete {
+    position: absolute;
+    right: 0;
   }
 }
 </style>
