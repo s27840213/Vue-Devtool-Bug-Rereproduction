@@ -191,7 +191,8 @@ export default Vue.extend({
           if (status === 204) {
             this.exportId = id
           } else {
-            this.handleUploadJSON(id)
+            this.$notify({ group: 'error', text: `設計上傳失敗，請重新點擊下載 (status: ${status})` })
+            this.$emit('close')
           }
         })
     },
