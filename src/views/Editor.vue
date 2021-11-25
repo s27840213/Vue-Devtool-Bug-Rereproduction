@@ -75,7 +75,8 @@ export default Vue.extend({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      groupType: 'getGroupType'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -111,7 +112,9 @@ export default Vue.extend({
       return this.$route.path
     },
     templateText(): string {
-      if (this.groupId.length > 0) {
+      if (this.groupType) {
+        return '詳情頁模板'
+      } else if (this.groupId.length > 0) {
         return '群組模板'
       } else {
         return '單頁模板'

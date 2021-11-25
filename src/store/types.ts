@@ -26,6 +26,7 @@ export interface IEditorState {
   designId: string,
   assetId: string,
   groupId: string,
+  groupType: number,
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,

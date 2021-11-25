@@ -63,7 +63,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isLogin: 'user/isLogin',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      detailPageMode: 'page/getDeatilPageMode'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
@@ -98,9 +99,9 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳群組模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          condition: !this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
-            uploadUtils.uploadGroupDesign(0)
+            uploadUtils.uploadGroupDesign(0, 0)
           }
         },
         {
@@ -109,7 +110,25 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
-            uploadUtils.uploadGroupDesign(1)
+            uploadUtils.uploadGroupDesign(1, 0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳詳情頁模板',
+          shortcutText: '',
+          condition: this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(0, 1)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新詳情頁模板',
+          shortcutText: '',
+          condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 1)
           }
         },
         {
@@ -118,7 +137,16 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
-            uploadUtils.uploadGroupDesign(1, true)
+            uploadUtils.uploadGroupDesign(1, 0, true)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '刪除詳情頁模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 1, true)
           }
         },
         {

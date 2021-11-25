@@ -17,8 +17,8 @@ interface IDesignState {
   draggingType: 'design' | 'folder' | '',
   draggingDesign: IDesign | undefined,
   draggingFolder: IPathedFolder | undefined,
-  selectedDesigns: {[key: string]: IDesign},
-  selectedFolders: {[key: string]: IFolder},
+  selectedDesigns: { [key: string]: IDesign },
+  selectedFolders: { [key: string]: IFolder },
   isDesignsLoading: boolean,
   isFoldersLoading: boolean,
   sortByField: string,
@@ -76,10 +76,10 @@ const getters: GetterTree<IDesignState, unknown> = {
   getDraggingDesign(state: IDesignState): IDesign | undefined {
     return state.draggingDesign
   },
-  getSelectedDesigns(state: IDesignState): {[key: string]: IDesign} {
+  getSelectedDesigns(state: IDesignState): { [key: string]: IDesign } {
     return state.selectedDesigns
   },
-  getSelectedFolders(state: IDesignState): {[key: string]: IFolder} {
+  getSelectedFolders(state: IDesignState): { [key: string]: IFolder } {
     return state.selectedFolders
   },
   getIsDesignsLoading(state: IDesignState): boolean {
@@ -107,6 +107,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     const { getSortByField, getSortByDescending } = getters
     try {
       const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, getSortByField, getSortByDescending)
+      console.log(data)
       commit('SET_designsPageIndex', data.next_page)
       const designs = data.data.design.content.map((design: IUserDesignContentData) => {
         return designUtils.apiDesign2IDesign(design)
@@ -373,7 +374,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
     }
   },
-  async setDesignName({ commit }, { design, name }: { design: IDesign, name: string}) {
+  async setDesignName({ commit }, { design, name }: { design: IDesign, name: string }) {
     const originalName = design.name
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', designApis.getAssetIndex(design), null, name)
@@ -434,7 +435,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteDesign', design)
     }
   },
-  async recoverDesign({ commit, dispatch, getters }, { design, deletionLocation }: {design: IDesign, deletionLocation?: string}) {
+  async recoverDesign({ commit, dispatch, getters }, { design, deletionLocation }: { design: IDesign, deletionLocation?: string }) {
     if (deletionLocation !== undefined) {
       if (getters.getCurrLocation === deletionLocation) {
         commit('UPDATE_addDesign', design)
@@ -489,7 +490,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       return ''
     }
   },
-  async recoverAll({ commit, dispatch, getters }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
+  async recoverAll({ commit, dispatch, getters }, { designs, folders }: { designs: IDesign[], folders: IFolder[] }) {
     switch (getters.getCurrLocation) {
       case 't': // currently the only possible one
         for (const design of designs) {
@@ -554,7 +555,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       })
     commit('UPDATE_deleteDesign', design)
   },
-  async deleteAllForever({ commit }, { designs, folders }: {designs: IDesign[], folders: IFolder[]}) {
+  async deleteAllForever({ commit }, { designs, folders }: { designs: IDesign[], folders: IFolder[] }) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', designApis.getAssetIndices(designs), designApis.getFolderIds(folders), '2')
       .then((response) => {
@@ -585,7 +586,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteFolder', folder)
     }
   },
-  async moveDesign({ commit, getters }, { design, destination }: {design: IDesign, destination: string[]}) {
+  async moveDesign({ commit, getters }, { design, destination }: { design: IDesign, destination: string[] }) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'move', designApis.getAssetIndex(design), null, destination.slice(1).join(','))
       .then((response) => {
@@ -607,7 +608,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('UPDATE_deleteDesign', design)
     }
   },
-  async moveDesigns({ commit, getters }, { designs, destination }: {designs: IDesign[], destination: string[]}) {
+  async moveDesigns({ commit, getters }, { designs, destination }: { designs: IDesign[], destination: string[] }) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'move', designApis.getAssetIndices(designs), null, destination.slice(1).join(','))
       .then((response) => {
@@ -635,7 +636,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
     }
   },
-  async createFolder({ commit, getters }, { path, folder, name }: {path: string, folder: IFolder, name: string}) {
+  async createFolder({ commit, getters }, { path, folder, name }: { path: string, folder: IFolder, name: string }) {
     folder.name = name
     let newFolder
     try {
@@ -669,7 +670,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       commit('SET_isErrorShowing', true)
     }
   },
-  async setFolderName({ commit }, { folder, name, parents }: {folder: IFolder, name: string, parents: string[]}) {
+  async setFolderName({ commit }, { folder, name, parents }: { folder: IFolder, name: string, parents: string[] }) {
     const originalName = folder.name
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', null, folder.id, name)
@@ -698,7 +699,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       name
     })
   },
-  async moveFolder({ commit, getters }, { parents, folder, destination }: {parents: string[], folder: IDesign, destination: string[]}) {
+  async moveFolder({ commit, getters }, { parents, folder, destination }: { parents: string[], folder: IDesign, destination: string[] }) {
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'move', null, folder.id, destination.slice(1).join(','))
       .then((response) => {
@@ -789,7 +790,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     }
     return (holder.content.length + holder.folder.length) === 0
   },
-  async recoverFolder({ commit, dispatch, getters }, { folder, deletionLocation }: {folder: IFolder, deletionLocation?: string }) {
+  async recoverFolder({ commit, dispatch, getters }, { folder, deletionLocation }: { folder: IFolder, deletionLocation?: string }) {
     if (deletionLocation !== undefined) {
       if (getters.getCurrLocation === deletionLocation) {
         commit('UPDATE_addFolder', folder)
@@ -897,13 +898,13 @@ const mutations: MutationTree<IDesignState> = {
     state.moveToFolderSelectInfo = selectInfo
     state.copiedFolders = folders
   },
-  SET_expand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
+  SET_expand(state: IDesignState, updateInfo: { path: string[], isExpanded: boolean }) {
     const targetFolder = designUtils.search(state.folders, updateInfo.path)
     if (targetFolder) {
       targetFolder.isExpanded = updateInfo.isExpanded
     }
   },
-  SET_copiedExpand(state: IDesignState, updateInfo: {path: string[], isExpanded: boolean}) {
+  SET_copiedExpand(state: IDesignState, updateInfo: { path: string[], isExpanded: boolean }) {
     const targetFolder = designUtils.search(state.copiedFolders, updateInfo.path)
     if (targetFolder) {
       targetFolder.isExpanded = updateInfo.isExpanded
@@ -952,7 +953,7 @@ const mutations: MutationTree<IDesignState> = {
   SET_isErrorShowing(state: IDesignState, isErrorShowing: boolean) {
     state.isErrorShowing = isErrorShowing
   },
-  UPDATE_folders(state: IDesignState, updateInfo: {path: string, folders: IFolder[]}) {
+  UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes
     if (updateInfo.path === 'root') {
       pathNodes = [designUtils.ROOT]
@@ -964,7 +965,7 @@ const mutations: MutationTree<IDesignState> = {
       targetFolder.subFolders = designUtils.updateFolders(targetFolder.subFolders, updateInfo.folders)
     }
   },
-  UPDATE_copiedFolders(state: IDesignState, updateInfo: {path: string, folders: IFolder[]}) {
+  UPDATE_copiedFolders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     const pathNodes = updateInfo.path.split(',')
     const targetFolder = designUtils.search(state.copiedFolders, pathNodes)
     if (targetFolder) {
@@ -990,7 +991,7 @@ const mutations: MutationTree<IDesignState> = {
     const index = designUtils.getInsertIndex(state.allDesigns, state.sortByField, state.sortByDescending, design)
     state.allDesigns.splice(index, 0, design)
   },
-  UPDATE_replaceDesign(state: IDesignState, updateInfo: {id: string, design: IDesign}) {
+  UPDATE_replaceDesign(state: IDesignState, updateInfo: { id: string, design: IDesign }) {
     const index = state.allDesigns.findIndex((design_) => design_.id === updateInfo.id)
     state.allDesigns.splice(index, 1, updateInfo.design)
   },
@@ -1000,7 +1001,7 @@ const mutations: MutationTree<IDesignState> = {
       state.allDesigns.splice(index, 1)
     }
   },
-  UPDATE_setFolderName(state: IDesignState, updateInfo: {name: string, parents: string[], folder: IFolder}) {
+  UPDATE_setFolderName(state: IDesignState, updateInfo: { name: string, parents: string[], folder: IFolder }) {
     const folder = designUtils.search(state.folders, designUtils.appendPath(updateInfo.parents, updateInfo.folder))
     if (folder) {
       folder.name = updateInfo.name
@@ -1039,7 +1040,7 @@ const mutations: MutationTree<IDesignState> = {
       targetFolder.subFolders.push(pathedFolder.folder)
     }
   },
-  UPDATE_replaceFolder(state: IDesignState, updateInfo: {parents: string[], id: string, folder: IFolder}) {
+  UPDATE_replaceFolder(state: IDesignState, updateInfo: { parents: string[], id: string, folder: IFolder }) {
     const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.id)
     if (index >= 0) {
       state.allFolders.splice(index, 1, updateInfo.folder)
