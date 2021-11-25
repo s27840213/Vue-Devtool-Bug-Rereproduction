@@ -16,11 +16,12 @@
             iconWidth="20px")
       template(v-slot:default-text="{ list }")
         div
-          btn(v-for="type in list"
-            :key="type"
+          btn(v-for="config in list"
+            :key="config.type"
             class="panel-text__text-button mb-10"
-            :type="`text-${type.toLowerCase()}`"
-            @click.native="handleAddText(type)") {{ type }}
+            :type="`text-${config.type.toLowerCase()}`"
+            :fontFamily="'Mulish'"
+            @click.native="handleAddText(config.type)") {{ config.text }}
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -87,7 +88,16 @@ export default Vue.extend({
         type: key,
         id: key,
         size: 174,
-        list: ['Heading', 'Subheading', 'Body']
+        list: [{
+          type: 'Heading',
+          text: '新增主標題'
+        }, {
+          type: 'Subheading',
+          text: '新增副標題'
+        }, {
+          type: 'Body',
+          text: '新增內文'
+        }]
       }]
     },
     listCategories(): any[] {

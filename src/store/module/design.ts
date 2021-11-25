@@ -24,7 +24,9 @@ interface IDesignState {
   sortByField: string,
   sortByDescending: boolean,
   designsPageIndex: number,
-  isErrorShowing: boolean
+  isErrorShowing: boolean,
+  folderDesignCount: number,
+  folderFolderCount: number
 }
 
 const getDefaultState = (): IDesignState => ({
@@ -44,7 +46,9 @@ const getDefaultState = (): IDesignState => ({
   sortByField: 'update',
   sortByDescending: true,
   designsPageIndex: 0,
-  isErrorShowing: false
+  isErrorShowing: false,
+  folderDesignCount: 0,
+  folderFolderCount: 0
 })
 
 const state = getDefaultState()
@@ -99,6 +103,9 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getIsErrorShowing(state: IDesignState): boolean {
     return state.isErrorShowing
+  },
+  getItemCount(state: IDesignState): number {
+    return state.folderDesignCount + state.folderFolderCount
   }
 }
 
@@ -156,6 +163,17 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
     }
     return folders
+  },
+  async fetchItemCount({ commit }, { path }) {
+    try {
+      const { data } = await designApis.getDesigns(designApis.getToken(), path, 3, 'update', true)
+      commit('SET_itemCount', {
+        designCount: data.data.design.file_count,
+        folderCount: data.data.design.folder_count
+      })
+    } catch (error) {
+      console.error(error)
+    }
   },
   async fetchStructuralFolders({ commit, dispatch }, { path }) {
     const folders = await dispatch('fetchFolders', { path })
@@ -952,6 +970,10 @@ const mutations: MutationTree<IDesignState> = {
   },
   SET_isErrorShowing(state: IDesignState, isErrorShowing: boolean) {
     state.isErrorShowing = isErrorShowing
+  },
+  SET_itemCount(state: IDesignState, updateInfo: { designCount: number, folderCount: number }) {
+    state.folderDesignCount = updateInfo.designCount
+    state.folderFolderCount = updateInfo.folderCount
   },
   UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes

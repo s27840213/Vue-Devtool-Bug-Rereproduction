@@ -100,8 +100,8 @@ class Controller {
           styles: {
             height: `${resizerLong}px`,
             width: `${resizerShort}px`,
-            left: `${-resizerShort - 1.5}px`,
-            transform: 'translate(0, -50%)'
+            left: '0',
+            transform: 'translate(-50%, -50%)'
           }
         },
         {
@@ -110,8 +110,8 @@ class Controller {
           styles: {
             height: `${resizerLong}px`,
             width: `${resizerShort}px`,
-            right: `${-resizerShort - 1.5}px`,
-            transform: 'translate(0, -50%)'
+            right: '0',
+            transform: 'translate(50%, -50%)'
           }
         },
         {
@@ -120,8 +120,8 @@ class Controller {
           styles: {
             width: `${resizerLong}px`,
             height: `${resizerShort}px`,
-            bottom: `${-resizerShort - 1.5}px`,
-            transform: 'translate(-50%, 0)'
+            bottom: '0',
+            transform: 'translate(-50%, 50%)'
           }
         },
         {
@@ -130,8 +130,8 @@ class Controller {
           styles: {
             width: `${resizerLong}px`,
             height: `${resizerShort}px`,
-            top: `${-resizerShort - 1.5}px`,
-            transform: 'translate(-50%, 0)'
+            top: '0',
+            transform: 'translate(-50%, -50%)'
           }
         }
       ],

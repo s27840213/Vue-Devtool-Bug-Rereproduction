@@ -443,9 +443,6 @@ export default Vue.extend({
           // TemplateUtils.updateTextInfo(this.config)
           this.textSizeRefresh(this.config)
           this.$nextTick(() => {
-            // const afterRender = (mutations: MutationRecord[], observer: MutationObserver) => {
-            LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: true })
-            StepsUtils.record()
             /**
              * TODO: For some reason while hit Enter the text block, the browser would
              * produce extra <p>, the following could temporarily fix this problem
@@ -509,6 +506,7 @@ export default Vue.extend({
             }
             TextUtils.updateSelection({ pIndex, sIndex, offset }, TextUtils.getNullSel())
             TextPropUtils.updateTextPropsState()
+            StepsUtils.record()
           })
         }
       }

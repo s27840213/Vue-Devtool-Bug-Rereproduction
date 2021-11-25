@@ -187,6 +187,7 @@ class TextUtils {
     const { start } = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection }
     const { paragraphs } = config
     let { pIndex, sIndex, offset } = start
+    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
     console.warn(key)
     switch (key) {
       case 'Enter':
@@ -206,10 +207,11 @@ class TextUtils {
         }
         if (offset === 0) {
           // @TODO
+
           break
         }
         paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset - 1)
-          .concat(paragraphs[pIndex].spans[sIndex].text.substr(offset + 1))
+          .concat(paragraphs[pIndex].spans[sIndex].text.substr(offset))
         return paragraphs
       }
       default:
@@ -288,8 +290,8 @@ class TextUtils {
 
   _textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
     const { start, end } = this.getCurrSel
-    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    console.log('start: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    // console.log('start: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes

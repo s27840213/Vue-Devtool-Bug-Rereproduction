@@ -22,11 +22,12 @@
 </template>
 
 <script lang="ts">
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IFrame } from '@/interfaces/layer'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import stepsUtils from '@/utils/stepsUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data () {
@@ -80,17 +81,29 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'getCurrSelectedLayers',
+      'getCurrSelectedTypes',
       'getCurrSelectedPageIndex',
-      'getCurrSelectedIndex'
+      'getCurrSelectedIndex',
+      'getCurrSubSelectedInfo'
     ]),
     currLayer (): any {
-      const layers = this.getCurrSelectedLayers as Array<IShape | IText | IImage | IGroup | ITmp>
+      const layers = this.getCurrSelectedLayers as Array<IShape | IText | IImage | IGroup | ITmp | IFrame>
+      const { index, type } = this.getCurrSubSelectedInfo
       const imageLayers = layers.flatMap(layer => {
         if (layer.type === 'image') {
           return layer
         }
+        if (layer.type === 'frame') {
+          return (layer as IFrame).clips[0]
+        }
         if (layer.type === 'group') {
-          return (layer.layers as IImage[]).find(l => l.type === 'image')
+          if (type === 'image') {
+            return (layer.layers as IImage[])[index]
+          }
+          if (type === 'frame') {
+            const frameLayer = (layer.layers as IFrame[])[index]
+            return frameLayer.active ? frameLayer.clips[0] : null
+          }
         }
         return null
       })
@@ -101,6 +114,9 @@ export default Vue.extend({
         prev[curr.name] = this.currLayer.styles.adjust[curr.name] || 0
         return prev
       }, {} as any)
+    },
+    isSubLayer (): boolean {
+      return this.getCurrSelectedTypes.has('group')
     }
   },
   methods: {
@@ -109,11 +125,41 @@ export default Vue.extend({
       const adjust = this.currLayerAdjust
       const fieldVal = Number.isNaN(+value) ? 0 : +value
       adjust[name] = fieldVal
-      ImageAdjustUtil.setAdjust({
-        adjust: { ...adjust },
-        pageIndex: this.getCurrSelectedPageIndex,
-        layerIndex: this.getCurrSelectedIndex
-      })
+      if (this.isSubLayer) {
+        const { index, type } = this.getCurrSubSelectedInfo
+        if (type === 'frame') {
+          frameUtils.updateSubFrameLayerStyles(
+            this.getCurrSelectedPageIndex,
+            this.getCurrSelectedIndex,
+            index,
+            { adjust: { ...adjust } }
+          )
+        }
+        if (type === 'image') {
+          ImageAdjustUtil.setAdjust({
+            adjust: { ...adjust },
+            pageIndex: this.getCurrSelectedPageIndex,
+            layerIndex: this.getCurrSelectedIndex,
+            subLayerIndex: index
+          })
+        }
+      } else {
+        // single image/frame layer
+        if (this.getCurrSelectedTypes.has('frame')) {
+          frameUtils.updateFrameLayerStyles(
+            this.getCurrSelectedPageIndex,
+            this.getCurrSelectedIndex,
+            0,
+            { adjust: { ...adjust } }
+          )
+        } else {
+          ImageAdjustUtil.setAdjust({
+            adjust: { ...adjust },
+            pageIndex: this.getCurrSelectedPageIndex,
+            layerIndex: this.getCurrSelectedIndex
+          })
+        }
+      }
     },
     handleChangeStop () {
       stepsUtils.record()

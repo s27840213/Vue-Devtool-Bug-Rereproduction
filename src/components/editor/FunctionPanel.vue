@@ -28,7 +28,7 @@
       panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
         @openFontsPanel="openFontsPanel()"
         v-on="$listeners")
-      panel-photo-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('image') && currSelectedInfo.types.size===1 && !isLocked")
+      panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
       panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
       panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
       panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -52,7 +52,7 @@
             @openFontsPanel="openFontsPanel()"
             v-on="$listeners")
           panel-text-effect-setting(v-on="$listeners")
-        panel-photo-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'image' && !isLocked")
+        panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
         panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
@@ -71,7 +71,7 @@ import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextE
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
@@ -127,6 +127,16 @@ export default Vue.extend({
     },
     isInLastStep(): boolean {
       return stepsUtils.isInLastStep
+    },
+    isFrameImage(): boolean {
+      const { layers, types } = this.currSelectedInfo
+      const frameLayer = layers[0] as IFrame
+      return types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    },
+    isSubLayerFrameImage(): boolean {
+      const { index } = this.currSubSelectedInfo
+      const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
+      return type === 'frame' && clips[0].srcObj.assetId
     }
   },
   watch: {

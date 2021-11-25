@@ -7,10 +7,17 @@ export interface Itheme {
     url: string
 }
 
+/* eslint-disable camelcase */
+export interface IContentTemplate {
+    key_id: string,
+    index: number
+}
+
 export interface ICoverTheme {
     id: number,
-    coverId: string,
-    options: string[]
+    title: string,
+    coverIndex: number,
+    options: IContentTemplate[]
 }
 
 /* eslint-disable camelcase */

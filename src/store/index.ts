@@ -539,6 +539,14 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
+  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
+    const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
+    if (groupLayer.type === 'group') {
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IFrame[]
+      Object.assign(clipsLayer[0].styles, styles)
+    }
+  },
   SET_assetJson(state: IEditorState, json: { [key: string]: any }) {
     Object.keys(json)
       .forEach(id => {

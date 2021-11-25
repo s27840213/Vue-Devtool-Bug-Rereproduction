@@ -105,7 +105,7 @@
               :marker-index="index"
               :style="Object.assign(end, {'cursor': 'pointer'})"
               @mousedown.left.stop="lineEndMoveStart")
-          div(v-for="(scaler, index) in (!isLine) ? controlPoints.scalers : []"
+          div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
               class="control-point scaler"
               :key="index"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
@@ -116,12 +116,12 @@
                 :key="index"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
             div(class="control-point resizer"
-                :style="Object.assign(resizer.styles, cursorStyles(resizer.cursor, getLayerRotate))")
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @mousedown.left.stop="moveStart($event)")
             div(class="control-point__resize-bar control-point__move-bar"
                 :key="index"
-                :style="resizerBarStyles(resizer)")
+                :style="resizerBarStyles(resizer.styles)")
           div(class="control-point__line-controller-wrapper"
               v-if="isLine"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -131,19 +131,21 @@
               @mousedown.left.stop="moveStart")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
-              :style='lineControlPointStyles()'
               :src="require('@/assets/img/svg/rotate.svg')"
+              :style='lineControlPointStyles()'
               @mousedown.native.left.stop="lineRotateStart")
           template(v-else)
             div(class="control-point__controller-wrapper"
                 :style="`transform: scale(${100/scaleRatio})`")
               img(class="control-point__mover"
-                v-if="getLayerWidth < 50 || getLayerHeight < 50"
+                v-if="config.type !== 'text' || !contentEditable"
                 :src="require('@/assets/img/svg/move.svg')"
+                :style='controlPointStyles()'
                 @mousedown.left.stop="moveStart")
               svg-icon(class="control-point__rotater"
                 :iconName="'rotate'" :iconWidth="`${20}px`"
                 :src="require('@/assets/img/svg/rotate.svg')"
+                :style='controlPointStyles()'
                 @mousedown.native.left.stop="rotateStart")
 
 </template>
@@ -175,7 +177,7 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 
 const LAYER_SIZE_MIN = 10
-const RESIZER_SHOWN_MIN = 40
+const RESIZER_SHOWN_MIN = 4000
 
 export default Vue.extend({
   props: {
@@ -391,16 +393,26 @@ export default Vue.extend({
       }
       return Object.assign(resizerStyle, HW)
     },
+    resizerStyles(resizer: IResizer) {
+      const resizerStyle = { ...resizer }
+      resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      return resizerStyle
+    },
     resizer(controlPoints: any, textMoveBar = false) {
       let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
+      const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'text':
           if (textMoveBar) {
-            resizers = this.config.styles.writingMode.includes('vertical') ? controlPoints.resizers.slice(0, 2)
-              : controlPoints.resizers.slice(2, 4)
+            resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
+              : resizers.slice(2, 4)
           } else {
-            resizers = this.config.styles.writingMode.includes('vertical') ? controlPoints.resizers.slice(2, 4)
-              : controlPoints.resizers.slice(0, 2)
+            resizers = this.config.styles.writingMode.includes('vertical') ? (
+              tooNarrow ? resizers.slice(2, 3) : resizers.slice(2, 4)
+            ) : (
+              tooShort ? resizers.slice(1, 2) : resizers.slice(0, 2)
+            )
           }
           break
         case 'shape':
@@ -418,14 +430,27 @@ export default Vue.extend({
           }
       }
 
-      if (resizers && resizers.some(r => r.type === 'H') && this.getLayerHeight < RESIZER_SHOWN_MIN) {
-        resizers = resizers.filter(r => r.type !== 'H')
-      }
-      if (resizers && resizers.some(r => r.type === 'V') && this.getLayerWidth < RESIZER_SHOWN_MIN) {
-        resizers = resizers.filter(r => r.type !== 'V')
+      if (this.getLayerType !== 'text') {
+        if (tooShort) {
+          resizers = resizers.filter(r => r.type !== 'H')
+        }
+        if (tooNarrow) {
+          resizers = resizers.filter(r => r.type !== 'V')
+        }
       }
 
       return resizers
+    },
+    scaler(scalers: any) {
+      if (this.getLayerType === 'text') {
+        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
+        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
+        return (tooShort || tooNarrow) ? scalers.slice(0, 1) : scalers
+      } else {
+        const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN / 2
+        const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN / 2
+        return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      }
     },
     lineEnds(scalers: any, point: number[]) {
       const quadrant = shapeUtils.getLineQuadrant(point)
@@ -487,13 +512,17 @@ export default Vue.extend({
         const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
-        } else if (isFrame || isGroup) {
-          return (this.layerIndex + 1) * 1000
-        } else if (this.getLayerType === 'tmp') {
-          return 0
-        } else {
-          return this.config.styles.zindex + 1
         }
+        if (isFrame || isGroup) {
+          return (this.layerIndex + 1) * 1000
+        }
+        if (this.getLayerType === 'tmp') {
+          return 0
+        }
+        if (this.getLayerType === 'text' && this.isActive) {
+          return (this.layerIndex + 1) * 99
+        }
+        return this.config.styles.zindex + 1
       })()
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       return {
@@ -511,6 +540,11 @@ export default Vue.extend({
       const degree = angle / Math.PI * 180
       return {
         transform: `rotate(${-degree}deg)`
+      }
+    },
+    controlPointStyles() {
+      return {
+        transform: `rotate(${-this.config.styles.rotate}deg)`
       }
     },
     subControllerStyles(isImgControl: boolean) {
@@ -1383,8 +1417,8 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = []
         try {
-          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
           // paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
         } catch (error) {
           console.log(error)
         }

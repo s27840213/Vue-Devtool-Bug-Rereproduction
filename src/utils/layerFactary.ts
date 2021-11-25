@@ -125,7 +125,7 @@ class LayerFactary {
         height: height,
         initWidth: initWidth,
         initHeight: initHeight,
-        zindex: -1,
+        zindex: styles.zindex ?? -1,
         opacity: 100,
         horizontalFlip: false,
         verticalFlip: false

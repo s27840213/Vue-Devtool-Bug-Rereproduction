@@ -15,14 +15,15 @@ import Vue from 'vue'
 
 export default Vue.extend({
   props: {
-    list: Object
+    list: Object,
+    defaultSelection: Array
   },
   mounted() {
-    this.selected = []
+    this.selected = this.defaultSelection as string[]
   },
   watch: {
     list() {
-      this.selected = []
+      this.selected = this.defaultSelection as string[]
     }
   },
   data() {

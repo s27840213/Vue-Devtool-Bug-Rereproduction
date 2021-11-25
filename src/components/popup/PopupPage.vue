@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -45,12 +46,13 @@ import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import clipTest from '@/assets/json/Img_clip.json'
 import frameTest from '@/assets/json/fram_test.json'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
 import layerFactary from '@/utils/layerFactary'
 import shapeUtils from '@/utils/shapeUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import pageUtils from '@/utils/pageUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   props: {
@@ -148,45 +150,17 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'update Doc',
+          text: 'update test',
           shortcutText: '',
           action: () => {
-            this.$store.commit('user/UPDATE_IMAGE_URLS', {
-              assetId: 2783,
-              urls: {
-                prev: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
-                full: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
-                larg: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
-                original: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
-                midd: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D',
-                smal: 'asset.vivipic.com/9XBAb9yoKlJbzLiWNUVM/asset/image/211117131047126ZIl5Yfgo/larg?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1637304573&Signature=VTt0r5LTJekzyiSw7xjU%2FN0XKak%3D'
-              }
-            })
-          }
-        },
-        {
-          icon: 'copy',
-          text: 'append test layer',
-          shortcutText: '',
-          action: () => {
-            const config = {
-              srcObj: {
-                type: 'private',
-                userId: '',
-                assetId: 2783
-              },
-              styles: {
-                x: 250,
-                y: 250,
-                width: 500,
-                height: 400,
-                initWidth: 500,
-                initHeight: 400,
-                imgWidth: 500,
-                imgHeight: 400
-              }
-            }
-            layerUtils.addLayers(0, [layerFactary.newImage(config)])
+            const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
+            page.width = parseInt(page.width)
+            page.height = parseInt(page.height)
+            page.layers
+              .forEach((l: ILayer) => {
+                uploadUtils.layerInfoFilter(l)
+              })
+            store.commit('ADD_page', page)
           }
         }
       ]

@@ -32,7 +32,10 @@
                   @search="handleSearch")
     div(class="template-center__content")
       div(class="template-center__filter")
-        hashtag-category-row(v-for="hashtag in hashtags" :list="hashtag" @select="handleHashtagSelect")
+        hashtag-category-row(v-for="hashtag in hashtags"
+                            :list="hashtag"
+                            :defaultSelection="hashtagSelections[hashtag.title].selection"
+                            @select="handleHashtagSelect")
       div(class="template-center__hr")
       div(class="template-center__sorter")
         div(class="template-center__sorter__left")
@@ -55,7 +58,7 @@
               @click="handleClickWaterfall(template)")
             div(class="template-center__waterfall__column__template__container")
               img(:src="template.url")
-            div(class="template-center__waterfall__column__template__theme") {{ template.theme }}
+            div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
             div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
               svg-icon(iconName="multiple-file"
                       iconWidth="24px"
@@ -163,12 +166,37 @@ export default Vue.extend({
     }
   },
   mounted() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const q = urlParams.get('q')
+    const tags = urlParams.get('tags')
+    let tagStrs: string[] = []
+    const themes = urlParams.get('themes')
+    let themeIds: number[] = []
+    if (q) {
+      this.searchbarKeyword = q
+    }
+    if (tags) {
+      tagStrs = tags.split(',')
+    }
+    if (themes) {
+      themeIds = themes.split(',').map(Number)
+    }
     this.getHashtags().then(() => {
       this.hashtagSelections = {}
       for (const hashtag of this.hashtags) {
+        let selection: string[] = []
+        if (hashtag.type === 'theme') {
+          selection = hashtag.list
+            .filter((tag: {id: number}) => themeIds.includes(tag.id))
+            .map((tag: {id: number}) => tag.id.toString())
+        } else {
+          selection = hashtag.list
+            .filter((tag: {name: string}) => tagStrs.includes(tag.name))
+            .map((tag: {name: string}) => tag.name)
+        }
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
-          selection: []
+          selection
         }
       }
       this.composeKeyword()
@@ -227,13 +255,21 @@ export default Vue.extend({
     },
     handleClickWaterfall(template: ITemplate) {
       if (template.content_ids.length === 1) {
+        const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: template.width.toString(),
+          height: template.height.toString()
+        }
         const route = this.$router.resolve({
           name: 'Editor',
           query: {
             type: 'new-design-template',
             design_id: template.id,
-            width: template.width.toString(),
-            height: template.height.toString()
+            width: format.width,
+            height: format.height
           }
         })
         window.open(route.href, '_blank')
@@ -327,6 +363,10 @@ export default Vue.extend({
     },
     getPrevUrl(content: IContentTemplate): string {
       return templateCenterUtils.getPrevUrl(content)
+    },
+    getThemeTitle(themeId: string): string {
+      const theme = this.themes.find((theme) => theme.id.toString() === themeId)
+      return theme ? theme.title : '未指定主題'
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id

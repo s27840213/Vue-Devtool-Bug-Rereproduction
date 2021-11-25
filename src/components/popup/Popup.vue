@@ -135,7 +135,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
+          condition: !this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0, true)
           }
@@ -144,7 +144,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除詳情頁模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
+          condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1, true)
           }

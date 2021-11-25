@@ -33,6 +33,11 @@ const SUPPORTED_LOCALES = [{
   name: 'Japan'
 }]
 
+const NON_MOBILE_ROUTES = [
+  'Editor',
+  'Settings'
+]
+
 const routes: Array<RouteConfig> = [
   {
     path: '',
@@ -168,6 +173,16 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
+  if (NON_MOBILE_ROUTES.includes(to.name ?? '')) {
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      next({ name: 'Home', query: { isMobile: 'true' } })
+      return
+    }
+    if (window.screen.height > window.screen.width) {
+      next({ name: 'Home', query: { isMobile: 'true' } })
+      return
+    }
+  }
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
@@ -186,9 +201,11 @@ router.beforeEach(async (to, from, next) => {
       next()
     }
   } else {
-    const token = localStorage.getItem('token')
-    if (token && token.length > 0) {
-      await store.dispatch('user/login', { token: token })
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token && token.length > 0) {
+        await store.dispatch('user/login', { token: token })
+      }
     }
     next()
   }
