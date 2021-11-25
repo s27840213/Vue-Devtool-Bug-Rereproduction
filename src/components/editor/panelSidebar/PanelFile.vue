@@ -6,18 +6,18 @@
     span(class="panel-file__title text-blue-1 label-lg") My File
     btn(class="full-width mb-20"
       :type="'primary-mid'"
-      @click.native="uploadImage()") Upload Image
+      @click.native="uploadImage()") 上傳圖片
     tmp-files(
       :inFilePanel="true")
     transition(name="panel-up")
       div(v-if="hasCheckedAssets"
           class="panel-file__menu")
         div
+          //- svg-icon(class="pointer"
+          //-   :iconName="'folder'"
+          //-   :iconColor="'white'"
+          //-   :iconWidth="'24px'")
           svg-icon(class="pointer"
-            :iconName="'folder'"
-            :iconColor="'white'"
-            :iconWidth="'24px'")
-          svg-icon(class="pointer ml-10"
             :iconName="'trash'"
             :iconColor="'white'"
             :iconWidth="'24px'"
@@ -32,8 +32,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import store from '@/store'
-import { IUserDesignContentData } from '@/interfaces/api'
 
 export default Vue.extend({
   components: {

@@ -115,24 +115,6 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: '上傳詳情頁模板',
-          shortcutText: '',
-          condition: this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
-          action: () => {
-            uploadUtils.uploadGroupDesign(0, 1)
-          }
-        },
-        {
-          icon: 'copy',
-          text: '更新詳情頁模板',
-          shortcutText: '',
-          condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1, 1)
-          }
-        },
-        {
-          icon: 'copy',
           text: '刪除群組模板',
           shortcutText: '',
           condition: !this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
@@ -140,15 +122,33 @@ export default Vue.extend({
             uploadUtils.uploadGroupDesign(1, 0, true)
           }
         },
-        {
-          icon: 'copy',
-          text: '刪除詳情頁模板',
-          shortcutText: '',
-          condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
-          action: () => {
-            uploadUtils.uploadGroupDesign(1, 1, true)
-          }
-        },
+        // {
+        //   icon: 'copy',
+        //   text: '上傳詳情頁模板',
+        //   shortcutText: '',
+        //   condition: this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+        //   action: () => {
+        //     uploadUtils.uploadGroupDesign(0, 1)
+        //   }
+        // },
+        // {
+        //   icon: 'copy',
+        //   text: '更新詳情頁模板',
+        //   shortcutText: '',
+        //   condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
+        //   action: () => {
+        //     uploadUtils.uploadGroupDesign(1, 1)
+        //   }
+        // },
+        // {
+        //   icon: 'copy',
+        //   text: '刪除詳情頁模板',
+        //   shortcutText: '',
+        //   condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
+        //   action: () => {
+        //     uploadUtils.uploadGroupDesign(1, 1, true)
+        //   }
+        // },
         {
           icon: 'copy',
           text: '測試用',

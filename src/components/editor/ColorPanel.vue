@@ -15,14 +15,14 @@
           class="pointer color-panel__color"
           :style="colorStyles(color)"
           @click="handleColorEvent(color)")
-    div(class="color-panel__colors mb-10")
-      div(class="text-left mb-5")
-        span(class="body-1") 品牌
-      div
-        div(v-for="color in brandColors"
-          class="pointer color-panel__color"
-          :style="colorStyles(color)"
-          @click="handleColorEvent(color)")
+    //- div(class="color-panel__colors mb-10")
+    //-   div(class="text-left mb-5")
+    //-     span(class="body-1") 品牌
+    //-   div
+    //-     div(v-for="color in brandColors"
+    //-       class="pointer color-panel__color"
+    //-       :style="colorStyles(color)"
+    //-       @click="handleColorEvent(color)")
     div(class="color-panel__colors")
       div(class="text-left mb-5")
         span(class="body-1") 預設

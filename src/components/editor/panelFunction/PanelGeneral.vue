@@ -27,12 +27,11 @@
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
         v-hint="'刪除'")
-      svg-icon(:class="{'pointer': !isLocked}"
-        iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native=""
-        v-hint="'複製樣式'")
+      //- svg-icon(:class="{'pointer': !isLocked}"
+      //-   iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+      //-   @click.native=""
+      //-   v-hint="'複製樣式'")
     div(class="panel-group__adjust")
-      btn(class="full-width" :type="'gray-mid'") 裁切
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") 位置對齊
       btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditing}"
@@ -189,13 +188,9 @@ export default Vue.extend({
   &__adjust {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
-    > button:nth-child(1) {
-      grid-column-start: 1;
-      grid-column-end: 3;
-    }
   }
 }
 

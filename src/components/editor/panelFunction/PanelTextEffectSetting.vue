@@ -15,7 +15,7 @@
         div(v-for="field in shadowFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ field }}
+          div(class="text-effect-setting__field-name") {{$t(`textEffect.${field}`)}}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
@@ -56,7 +56,7 @@
         div(v-for="field in shadowFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ field }}
+          div(class="text-effect-setting__field-name") {{ $t(`textEffect.${field}`) }}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
@@ -83,7 +83,7 @@
             v-click-outside="handleColorModal"
             :currentColor="currentStyle.textEffect.color"
             @update="handleColorUpdate")
-      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") Shape
+      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('textEffect.shape')}}
       div(class="flex-start text-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shapeOption"
           :key="`shape-${icon}`"
@@ -97,7 +97,7 @@
         div(v-for="field in shapeFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ field }}
+          div(class="text-effect-setting__field-name") {{$t(`textEffect.${field}`)}}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textShape[field]"
             :max="fieldRange[field].max"
@@ -248,7 +248,7 @@ export default Vue.extend({
       TextEffectUtils.setTextEffect(currentEffect, { color })
       this.recordChange()
     },
-    recordChange () {
+    recordChange() {
       stepsUtils.record()
     }
   }
@@ -291,6 +291,7 @@ export default Vue.extend({
     color: #18191f;
     text-align: left;
     text-transform: capitalize;
+    white-space: nowrap;
   }
   &__range-input {
     width: 120px;

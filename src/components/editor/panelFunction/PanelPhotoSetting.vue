@@ -29,14 +29,14 @@ import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
-  data () {
+  data() {
     return {
       show: '',
       btns: [
         { name: 'crop', label: '裁切', show: 'crop' },
-        { name: 'preset', label: '濾鏡', show: '' },
-        { name: 'adjust', label: '調整', show: 'popup-adjust' },
-        { name: 'remove-bg', label: '去背', show: '' }
+        // { name: 'preset', label: '濾鏡', show: '' },
+        { name: 'adjust', label: '調整', show: 'popup-adjust' }
+        // { name: 'remove-bg', label: '去背', show: '' }
       ]
     }
   },
@@ -59,14 +59,14 @@ export default Vue.extend({
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles'
     }),
-    handleShow (name: string) {
+    handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
         this.show = ''
       }
     },
-    handleOutside (event: PointerEvent) {
+    handleOutside(event: PointerEvent) {
       this.show = ''
       // const target = event.target as HTMLButtonElement
       // const btn = this.$refs.btn as HTMLDivElement
@@ -84,7 +84,7 @@ export default Vue.extend({
     margin-top: 15px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
   }

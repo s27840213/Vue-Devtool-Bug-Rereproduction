@@ -1,7 +1,5 @@
 <template lang="pug">
 div(class="popup-file")
-  div(class="popup-file__item")
-    span 檔案名稱
   div(class="popup-file__item text-gray-3")
     span {{pageSize.w}}像素 x {{pageSize.h}}像素
   div(class="popup-file__item" @click="save()")

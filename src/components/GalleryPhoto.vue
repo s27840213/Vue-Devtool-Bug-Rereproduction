@@ -3,10 +3,10 @@
     circle-checkbox(v-if="inFilePanel"
       class="gallery-photo__checkbox"
       :class="{show: hasCheckedAssets}"
-      :value="photo.id"
+      :value="photo.assetIndex"
       :checkedValues="checkedAssets"
       @update="handleCheck")
-    svg-icon(class="pointer gallery-photo__more"
+    svg-icon(v-if="!inFilePanel" class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
@@ -16,7 +16,7 @@
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
       @dragend="dragEnd"
-      @click="hasCheckedAssets ? modifyCheckedAssets(photo.id) : addImage(photo)")
+      @click="hasCheckedAssets ? modifyCheckedAssets(photo.assetIndex) : addImage(photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
       div(class="gallery-photo__progress-bar"
@@ -163,8 +163,8 @@ export default Vue.extend({
     handleCheck(value: Array<unknown>) {
       this.updateCheckedAssets(value)
     },
-    modifyCheckedAssets(id: string) {
-      this.checkedAssets.includes(id) ? this.deleteCheckedAssets(id) : this.addCheckedAssets(id)
+    modifyCheckedAssets(assetIndex: number) {
+      this.checkedAssets.includes(assetIndex) ? this.deleteCheckedAssets(assetIndex) : this.addCheckedAssets(assetIndex)
     }
   }
 })

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
       @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 label-lg") Text Setting
+    span(class="text-setting__title text-blue-1 label-lg") 文字設定
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
         img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")

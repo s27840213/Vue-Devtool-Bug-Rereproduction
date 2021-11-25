@@ -1,11 +1,24 @@
 {
+  "company": {},
   "editor": {
-    "templates": "模板",
-    "photos": "圖片",
-    "objects": "元素",
-    "backgrounds": "背景",
-    "texts": "文字",
+    "template": "模板",
+    "photo": "圖片",
+    "object": "元素",
+    "background": "背景",
+    "text": "文字",
     "myFile": "我的檔案",
-    "brandkit": "品牌工具"
+    "brandkit": "品牌工具",
+    "textSetting": "文字設定"
+  },
+  "textEffect": {
+    "distance": "距離",
+    "angle": "角度",
+    "blur": "模糊化",
+    "opacity": "透明度",
+    "color": "顏色",
+    "spread": "陰影大小",
+    "stroke": "描邊粗細",
+    "shape": "文字形狀",
+    "bend": "彎曲"
   }
 }
