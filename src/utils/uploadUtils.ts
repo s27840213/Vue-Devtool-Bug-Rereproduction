@@ -846,7 +846,7 @@ class UploadUtils {
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 console.log('Set design id' + designId)
                 store.commit('SET_assetId', designId)
-                store.commit('SET_pages', json)
+                store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 themeUtils.refreshTemplateState()
                 //
                 stepsUtils.reset()
