@@ -9,8 +9,8 @@ import Vue from 'vue'
 
 export default Vue.extend({
   mounted() {
-    this.shapeWidth = this.config.vSize[0] + this.config.pDiff[0]
-    this.shapeHeight = this.config.vSize[1] + this.config.pDiff[1]
+    this.shapeWidth = this.config.vSize?.[0] ?? 0 + this.config.pDiff?.[0] ?? 0
+    this.shapeHeight = this.config.vSize?.[1] ?? 0 + this.config.pDiff?.[1] ?? 0
   },
   data() {
     return {
