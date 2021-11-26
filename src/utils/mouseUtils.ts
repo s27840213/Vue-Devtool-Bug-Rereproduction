@@ -86,13 +86,10 @@ class MouseUtils {
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
-      if (layer.type === 'image') {
-        const index = LayerUtils.getUpmostNonTextLayerIndex(store.getters.getPage(pageIndex).layers) + 1
-        LayerUtils.addLayersToPos(pageIndex, [layer], index)
-        zindexUtils.reassignZindex(pageIndex)
-      } else {
-        LayerUtils.addLayers(pageIndex, [layer])
-      }
+      const index = LayerUtils.getUpmostNonTextLayerIndex(store.getters.getPage(pageIndex).layers) + 1
+      LayerUtils.addLayersToPos(pageIndex, [layer], index)
+      zindexUtils.reassignZindex(pageIndex)
+      StepsUtils.record()
       // if (layer.type === 'text') {
       //   TextUtils.updateTextPropsState()
       // }

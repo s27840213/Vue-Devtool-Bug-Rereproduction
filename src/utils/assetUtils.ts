@@ -169,6 +169,7 @@ class AssetUtils {
     const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   async addLine(json: any, attrs: IAssetProps = {}) {
@@ -205,6 +206,7 @@ class AssetUtils {
     const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
@@ -244,6 +246,7 @@ class AssetUtils {
     const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   addFrame(json: any, attrs: IAssetProps = {}) {
@@ -270,6 +273,7 @@ class AssetUtils {
     const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
@@ -356,6 +360,7 @@ class AssetUtils {
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
     LayerUtils.addLayers(targePageIndex, [newLayer])
+    stepsUtils.record()
   }
 
   addStanardText(type: string, text?: string, locale = 'zh-TW', pageIndex?: number) {
@@ -376,6 +381,7 @@ class AssetUtils {
         textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
+        stepsUtils.record()
       })
       .catch(() => {
         console.log('Cannot find the file')
@@ -428,6 +434,7 @@ class AssetUtils {
     const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
