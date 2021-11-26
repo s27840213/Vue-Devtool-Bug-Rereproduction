@@ -165,14 +165,6 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    const queryString = new URLSearchParams(window.location.search)
-    const keyword = queryString.get('search')
-    if (keyword) {
-      this.getTagContent({ keyword })
-      window.history.replaceState({}, document.title, window.location.pathname)
-    }
-    // await this.getCategories()
-    // this.getContent()
     this.$refs.list.$el.addEventListener('scroll', (event: Event) => {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
