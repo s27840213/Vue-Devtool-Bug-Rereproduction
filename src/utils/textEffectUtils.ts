@@ -145,7 +145,7 @@ class Controller {
           ...CssConverter.convertTextShadow(
             effectShadowOffset * Math.cos(angle * Math.PI / 180),
             effectShadowOffset * Math.sin(angle * Math.PI / 180),
-            this.convertColor2rgba(color, 0.6),
+            this.convertColor2rgba(color, 1),
             effectBlur
           ),
           ...CssConverter.convertTextStorke(
