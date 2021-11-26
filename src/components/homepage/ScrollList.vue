@@ -16,8 +16,7 @@
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
         design-item(v-for="design in list"
-          class="scroll-list-item"
-          :style="ItemStyle"
+          class="py-20 scroll-list-item"
           :key="design.id"
           :config="design")
         div(v-if="isLoading")
@@ -66,16 +65,17 @@ export default Vue.extend({
   data() {
     return {
       prevIcon: false,
-      nextIcon: true
+      nextIcon: false
     }
   },
   computed: {
     items() {
       return this.$refs.items as HTMLElement
-    },
-    ItemStyle(): string {
-      return this.type === 'design' ? 'padding-bottom: 20px;' : ''
     }
+  },
+  updated() {
+    const { scrollWidth, offsetWidth } = this.items
+    this.nextIcon = scrollWidth > offsetWidth
   },
   methods: {
     handleNotFound(event: Event) {
