@@ -66,7 +66,7 @@ export default Vue.extend({
   data() {
     return {
       prevIcon: false,
-      nextIcon: true
+      nextIcon: false
     }
   },
   computed: {
@@ -76,6 +76,10 @@ export default Vue.extend({
     ItemStyle(): string {
       return this.type === 'design' ? 'padding-bottom: 20px;' : ''
     }
+  },
+  updated() {
+    const { scrollWidth, offsetWidth } = this.items
+    this.nextIcon = scrollWidth > offsetWidth
   },
   methods: {
     handleNotFound(event: Event) {
