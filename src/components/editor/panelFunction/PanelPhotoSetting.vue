@@ -4,6 +4,7 @@
     div(class="photo-setting__grid")
       btn(v-for="btn in btns"
         class="full-width"
+        :class="btn.name === 'crop' && isCropping ? 'active' : ''"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
@@ -27,6 +28,9 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
+import imageUtils from '@/utils/imageUtils'
+import { IFrame } from '@/interfaces/layer'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data() {
@@ -53,7 +57,10 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo'
-    })
+    }),
+    isCropping(): boolean {
+      return imageUtils.isImgControl()
+    }
   },
   methods: {
     ...mapMutations({
@@ -62,7 +69,22 @@ export default Vue.extend({
     handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
-        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        } else {
+          let index
+          switch (layerUtils.getCurrLayer.type) {
+            case 'image':
+              layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+              break
+            case 'frame':
+              index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+              if (index >= 0) {
+                frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+              }
+              break
+          }
+        }
         this.show = ''
       }
     },
@@ -87,6 +109,14 @@ export default Vue.extend({
     grid-auto-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
+    > button {
+      border-radius: 4px;
+      &.active {
+        border: 2px solid setColor(blue-1);
+        color: setColor(blue-1);
+        padding: 8px 20px;
+      }
+    }
   }
 }
 </style>
