@@ -51,7 +51,6 @@
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
-              //- @click.native="goToPage('Editor')") 開 始 製 作
       div(v-if="isLogin")
         div(class="home-content-title label-lg")
           span 我的設計
@@ -64,21 +63,21 @@
         div
           span(v-for="tag in tags"
             class="pointer mr-20"
-            @click="goToPage('Editor', tag)") {{'#' + tag}}
+            @click="newDesign(tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
-          @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
+          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") 更多
       div(class="home-content__template")
         scroll-list(:list="tagTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
-          @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
+          @click="goToTemplateCenterSortBy('popular')") 更多
       div(class="home-content__template")
         scroll-list(:list="popularTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
-          @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
+          @click="goToTemplateCenterSortBy('recent')") 更多
       div(class="home-content__template")
         scroll-list(:list="latestTemplateList" type='template')
       nu-footer(class="mt-100")
@@ -207,10 +206,22 @@ export default Vue.extend({
         this.$router.push({ name: pageName })
       }
     },
-    newDesign() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign()
-      })
+    goToTemplateCenterSearch(search = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { q: search } })
+    },
+    goToTemplateCenterSortBy(sortBy = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { sort: sortBy } })
+    },
+    newDesign(search = '') {
+      if (search) {
+        this.$router.push({ name: 'Editor', query: { search: search } }).then(() => {
+          designUtils.newDesign()
+        })
+      } else {
+        this.$router.push({ name: 'Editor' }).then(() => {
+          designUtils.newDesign()
+        })
+      }
     },
     featureItemClicked(idx: number) {
       this.isTimerStop = true
