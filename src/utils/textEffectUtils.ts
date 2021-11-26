@@ -26,13 +26,13 @@ class Controller {
         spread: 50
       }, // 模糊陰影
       hollow: {
-        stroke: 30,
+        stroke: 17,
         color: ''
       }, // 空心
       splice: {
         distance: 50,
         angle: 45,
-        stroke: 30,
+        stroke: 17,
         color: ''
       }, // 出竅
       echo: {
@@ -156,7 +156,7 @@ class Controller {
         }
       case 'echo':
         return {
-          textShadow: [0.6, 0.3]
+          textShadow: [0.5, 0.2]
             .map((opacity, i) =>
               CssConverter.convertTextShadow(
                 effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1),
