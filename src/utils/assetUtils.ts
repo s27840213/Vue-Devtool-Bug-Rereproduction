@@ -104,6 +104,9 @@ class AssetUtils {
         }, 30000)
         return fetch(asset.urls.json + `?ver=${ver}`)
           .then(response => {
+            if (!response.ok) {
+              throw new Error('ErrorCode: ' + response.status.toString())
+            }
             loaded = true
             return response.json()
           })
@@ -112,10 +115,10 @@ class AssetUtils {
             store.commit('SET_assetJson', { [id]: asset })
             return asset
           })
-          .catch(() => {
+          .catch((error) => {
             Vue.notify({
               group: 'error',
-              text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
+              text: `網路異常，請確認網路正常後再嘗試。(${error.message.startsWith('ErrorCode:') ? error.message : 'ErrorCode: 1'})`
             })
             return asset
           })
