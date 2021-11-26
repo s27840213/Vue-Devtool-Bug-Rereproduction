@@ -211,7 +211,7 @@ export default Vue.extend({
       colorUtils.setCurrColor(this.currentStyle.textEffect.color)
     },
     onEffectClick(effectName: string): void {
-      TextEffectUtils.setTextEffect(effectName)
+      TextEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       this.recordChange()
     },
     onShapeClick(shapeName: string): void {
