@@ -116,6 +116,11 @@ export default Vue.extend({
     width: 100%;
     padding-top: 90%;
     position: relative;
+    &:hover {
+      transition: all 0.2s ease-in-out;
+      box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+      transform: translate(0, -5px);
+    }
   }
   &__img-container {
     display: flex;
