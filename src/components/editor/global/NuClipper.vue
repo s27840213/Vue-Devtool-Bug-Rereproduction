@@ -8,13 +8,35 @@ import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
+  mounted() {
+    this.shapeWidth = this.config.vSize[0] + this.config.pDiff[0]
+    this.shapeHeight = this.config.vSize[1] + this.config.pDiff[1]
+  },
   data() {
     return {
+      shapeWidth: 0,
+      shapeHeight: 0
     }
   },
   props: {
     config: Object,
     pageIndex: Number
+  },
+  watch: {
+    'config.pDiff': {
+      handler: function (newVal) {
+        this.shapeWidth = this.config.vSize[0] + newVal[0]
+        this.shapeHeight = this.config.vSize[1] + newVal[1]
+      },
+      deep: true
+    },
+    'config.vSize': {
+      handler: function (newVal) {
+        this.shapeWidth = newVal[0] + this.config.pDiff[0]
+        this.shapeHeight = newVal[1] + this.config.pDiff[1]
+      },
+      deep: true
+    }
   },
   methods: {
     styles() {
@@ -32,8 +54,8 @@ export default Vue.extend({
       }
       switch (type) {
         case 'shape':
-          width = `${this.config.vSize?.[0] ?? 0 + this.config.pDiff?.[0] ?? 0}px`
-          height = `${this.config.vSize?.[1] ?? 0 + this.config.pDiff?.[1] ?? 0}px`
+          width = `${this.shapeWidth}px`
+          height = `${this.shapeHeight}px`
           break
         default:
           width = `${width / scale}px`
