@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src || `https://template.vivipic.com/background/${item.id}/prev?ver=${item.ver}`"
+    :src="src || fallbackSrc || `https://template.vivipic.com/background/${item.id}/prev?ver=${item.ver}`"
     draggable="false"
     @click="addBackground"
     @error="handleNotFound")
@@ -15,9 +15,14 @@ export default Vue.extend({
     src: String,
     item: Object
   },
+  data() {
+    return {
+      fallbackSrc: ''
+    }
+  },
   methods: {
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
       AssetUtils.addAsset(this.item)

@@ -3,7 +3,7 @@
     div(class="relative")
       img(class="category-template-item__img pointer"
         draggable="true"
-        :src="src || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
         @error="handleNotFound"
         @dragstart="dragStart($event)"
         @click="addTemplate")
@@ -26,6 +26,11 @@ export default Vue.extend({
     showId: Boolean,
     groupItem: Object
   },
+  data() {
+    return {
+      fallbackSrc: ''
+    }
+  },
   computed: {
     previewImage (): string {
       const { match_cover: cover, ver, id } = this.item
@@ -34,7 +39,7 @@ export default Vue.extend({
   },
   methods: {
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
       const dataTransfer = event.dataTransfer as DataTransfer

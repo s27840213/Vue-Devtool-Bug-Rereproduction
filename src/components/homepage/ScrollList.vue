@@ -42,7 +42,7 @@
           :class="{'pb-70 item-theme': type === 'theme'}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
-            :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
+            :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
             @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
@@ -68,7 +68,8 @@ export default Vue.extend({
   data() {
     return {
       prevIcon: false,
-      nextIcon: false
+      nextIcon: false,
+      fallbackSrc: ''
     }
   },
   computed: {
@@ -82,7 +83,7 @@ export default Vue.extend({
   },
   methods: {
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     goToPage(pageName: string) {
       this.$router.push({ name: pageName })

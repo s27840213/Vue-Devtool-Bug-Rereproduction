@@ -2,11 +2,11 @@
   div(class="category-fonts pointer" draggable="false" @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="`${host}/${item.id}/${preview}`"
+        :src="fallbackSrc || `${host}/${item.id}/${preview}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="`${host}/${item.id}/${preview2}`"
+        :src="fallbackSrc || `${host}/${item.id}/${preview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -37,6 +37,11 @@ export default Vue.extend({
     preview: String,
     preview2: String,
     item: Object
+  },
+  data() {
+    return {
+      fallbackSrc: ''
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
@@ -77,7 +82,7 @@ export default Vue.extend({
       updateTextState: 'UPDATE_STATE'
     }),
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
     async setFont() {
