@@ -625,15 +625,19 @@ export default Vue.extend({
   &__colors {
     width: 100%;
     margin-top: 10px;
-    padding: 5px;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    @media (max-width: 1260px) {
+      gap: 18px;
+    }
   }
   &__color {
-    @include size(clamp(30px, 2vw, 50px), clamp(30px, 2vw, 50px));
-    margin: 5px;
+    width: 100%;
+    aspect-ratio: 1;
     border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
+    box-sizing: border-box;
     &:hover {
       box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
     }

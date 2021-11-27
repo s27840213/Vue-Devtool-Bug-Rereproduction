@@ -180,6 +180,7 @@ export default Vue.extend({
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
   overflow-y: scroll;
+  overflow-x: hidden;
   &__topbar {
     height: 60px;
     box-sizing: border-box;
