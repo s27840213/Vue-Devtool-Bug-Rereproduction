@@ -2,28 +2,34 @@
   div(class="home")
     nu-header
     div(class="home-content")
-      div(v-if="isLogin" class="home-content__top")
-        img(class="home-content__top-img"
-          style="height: 250px;")
-        div(class="home-content__top-title"
-          style="font-size: 30px;") 海量精美電商模板等您使用！
-        div(class="home-content__top-btns")
-          div(class="rounded home-btn"
-            @click="goToPage('TemplateCenter')") 瀏 覽 模 板
-          div(class="rounded home-btn"
-            @click="goToPage('MyDesign')") 我 的 設 計
-      div(v-else
-        class="home-content__top")
-        img(class="home-content__top-img"
-          style="height: 350px;")
-        div(class="home-content__top-title") 海量精美電商模板等您使用！
-        div(class="home-content__top-subtitle")
-          span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
-          br
-          span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
-        div(class="home-content__top-btn rounded home-btn"
-          :type="'primary-lg'"
-          @click="newDesign()") 開 始 製 作
+      template(v-if="isMobile")
+        div(class="home-content__top")
+          img(class="home-content__top-img"
+            style="height: 150px;")
+          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(class="home-content__top-mobile-subtitle")
+            div Vivipic 提供無數免費的專業模板，快立刻開始編輯吧！
+            div(class="pt-30") *僅供電腦版編輯
+      template(v-else)
+        div(class="home-content__top")
+          img(class="home-content__top-img"
+            :style="`height: ${isLogin ? '250px;' : '350px;'}`")
+          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(v-if="!isLogin"
+            class="home-content__top-subtitle")
+            span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+            br
+            span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
+          div(v-if="isLogin"
+            class="home-content__top-btns")
+            div(class="rounded home-btn"
+              @click="goToPage('TemplateCenter')") 瀏 覽 模 板
+            div(class="rounded home-btn"
+              @click="goToPage('MyDesign')") 我 的 設 計
+          div(v-else
+            class="home-content__top-btn rounded home-btn"
+            :type="'primary-lg'"
+            @click="newDesign()") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
       div(class="home-content-theme")
         scroll-list(:list="themeList" type='theme'
@@ -152,6 +158,9 @@ export default Vue.extend({
       allDesigns: 'design/getAllDesigns',
       isDesignsLoading: 'design/getIsDesignsLoading'
     }),
+    isMobile (): boolean {
+      return window.screen.width / window.screen.height < 1
+    },
     featureContent(): string {
       return this.featureList[this.featureSelected].content
     }
@@ -270,6 +279,10 @@ export default Vue.extend({
     justify-content: space-between;
     text-align: left;
     padding: 60px 10vw 20px 10vw;
+    @include layout-mobile {
+      font-size: 16px;
+      padding: 40px 5vw 20px 5vw;
+    }
     .more {
       white-space: nowrap;
     }
@@ -282,6 +295,9 @@ export default Vue.extend({
       width: 100%;
       background-size: cover;
       background-image: url('~@/assets/img/jpg/homepage/home-top.jpg');
+      @include layout-mobile {
+        background-image: url('~@/assets/img/jpg/homepage/home-top-mobile.jpg');
+      }
     }
     &-title {
       position: absolute;
@@ -293,6 +309,10 @@ export default Vue.extend({
       @media screen and (max-width: 990px) {
         font-size: 32px;
       }
+      @include layout-mobile {
+        top: 40px;
+        font-size: 16px;
+      }
     }
     &-subtitle {
       position: absolute;
@@ -302,6 +322,13 @@ export default Vue.extend({
       @media screen and (max-width: 990px) {
         font-size: 16px;
       }
+    }
+    &-mobile-subtitle {
+      position: absolute;
+      font-size: 12px;
+      color: setColor(gray-2);
+      top: 45%;
+      transform: scale(0.9);
     }
     &-btns {
       position: absolute;
