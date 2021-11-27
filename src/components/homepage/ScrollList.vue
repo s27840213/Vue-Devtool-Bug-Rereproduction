@@ -11,12 +11,15 @@
       class="scroll-list-move scroll-list-move-right"
       @click="handleNext")
       div
-        svg-icon(iconName="chevron-right" iconWidth="40px" iconColor="gray-3")
-    div(class="px-10 scroll-list-items"
+        svg-icon(iconName="chevron-right"
+          iconWidth="40px"
+          iconColor="gray-3")
+    div(class="px-10 scroll-list__items"
+      :class="{'items-theme': type === 'theme'}"
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
         design-item(v-for="design in list"
-          class="py-20 scroll-list-item"
+          class="py-20 scroll-list__item"
           :key="design.id"
           :config="design")
         div(v-if="isLoading")
@@ -24,28 +27,28 @@
               iconWidth="50px"
               iconColor="gray-3")
         template(v-if="!isLoading && list.length === 0")
-          div(class="pt-20 pointer scroll-list-plus")
+          div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
-            div(class="pt-10 body-1") 點我製作
-          div(class="scroll-list-hint") 來設計自己第一款模板吧！肯定很有趣！
+            div(class="pt-10 scroll-list__item-title") 點我製作
+          div(class="scroll-list__hint") 來設計自己第一款模板吧！肯定很有趣！
       template(v-else)
         div(v-if="type === 'theme'"
-          class="pointer scroll-list-plus")
+          class="pointer scroll-list__plus")
           img(:src="require('@/assets/img/png/plus-origin.png')"
             @click="openPopup()")
-          div(class="pt-10 body-1") 自訂尺寸
-        div(v-for="item, idx in list" class="scroll-list-item py-10"
-          :class="{'pb-70': type === 'theme'}")
-          img(class="pointer item-image"
+          div(class="pt-10 scroll-list__item-title") 自訂尺寸
+        div(v-for="item, idx in list" class="scroll-list__item py-10"
+          :class="{'pb-70 item-theme': type === 'theme'}")
+          img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
             @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
-            class="pt-10 body-1") {{item.title}}
+            class="pt-10 scroll-list__item-title") {{item.title}}
           div(v-if="type === 'theme'"
-            class="pt-2 body-2 text-gray-2") {{item.description}}
+            class="pt-2 scroll-list__item-subtitle") {{item.description}}
 </template>
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
@@ -121,7 +124,7 @@ export default Vue.extend({
 .scroll-list {
   $this: &;
   position: relative;
-  &-items {
+  &__items {
     display: grid;
     column-gap: 30px;
     grid-template-columns: auto;
@@ -132,11 +135,16 @@ export default Vue.extend({
     overflow-x: scroll;
     overflow-y: hidden;
     text-align: left;
+    &.items-theme {
+      @include layout-mobile {
+        column-gap: 0px;
+      }
+    }
     &::-webkit-scrollbar {
       display: none;
     }
   }
-  &-plus {
+  &__plus {
     width: 100px;
     text-align: center;
     @media (min-width: 976px) {
@@ -148,20 +156,32 @@ export default Vue.extend({
     @media (min-width: 1560px) {
       width: 200px;
     }
-    > img:hover {
-      transition: all 0.2s ease-in-out;
-      box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
-      transform: translate(0, -10px);
+    > img {
+      @include layout-mobile {
+        width: 60%;
+      }
+      &:hover {
+        transition: all 0.2s ease-in-out;
+        box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
+        transform: translate(0, -10px);
+      }
     }
   }
-  &-hint {
+  &__hint {
     font-size: 16px;
     color: setColor(gray-2);
+    @include layout-mobile {
+      font-size: 12px;
+    }
   }
-  &-item {
+  &__item {
     width: 100px;
     height: 100px;
     text-align: center;
+    @include layout-mobile {
+      width: 35vw;
+      height: 35vw;
+    }
     @media (min-width: 976px) {
       width: 140px;
       height: 140px;
@@ -174,12 +194,28 @@ export default Vue.extend({
       width: 200px;
       height: 200px;
     }
-    .item-image {
-      border-radius: 10px;
+    &-title {
+      font-size: 16px;
+      line-height: 26px;
+      font-weight: 400;
+      padding-top: 10px;
+      @include layout-mobile {
+        font-size: 14px;
+      }
+    }
+    &-subtitle {
+      color: setColor(gray-2);
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 400;
+      @include layout-mobile {
+        font-size: 12px;
+      }
+    }
+    &-image {
       height: 100%;
       &:hover {
         transition: all 0.2s ease-in-out;
-        box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
         transform: translate(0, -5px);
       }
     }
@@ -187,9 +223,16 @@ export default Vue.extend({
       width: 100%;
       object-fit: contain;
       box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%);
+      &:hover {
+        transition: all 0.2s ease-in-out;
+        box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+        transform: translate(0, -5px);
+      }
     }
-    &-title {
-      padding-top: 10px;
+    &.item-theme {
+      @include layout-mobile {
+        height: 45vw;
+      }
     }
   }
   &-icon {
@@ -209,14 +252,19 @@ export default Vue.extend({
     cursor: pointer;
     &-left {
       left: -75px;
-      #{$this}__icon {
-        left: 3px;
+      @include layout-mobile {
+        left: -5%;
+        width: 50px;
+        background: linear-gradient(90deg, #FFFFFF 60%, rgba(255, 255, 255, 0) 100%);
       }
     }
     &-right {
       right: -75px;
-      #{$this}__icon {
-        right: 3px;
+      @include layout-mobile {
+        justify-content: end;
+        right: -5%;
+        width: 50px;
+        background: linear-gradient(270deg, #FFFFFF 60%, rgba(255, 255, 255, 0) 100%);
       }
     }
   }
