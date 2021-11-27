@@ -381,7 +381,9 @@ export default Vue.extend({
           backgroundColor: origin,
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
         } : {
-          background: `url(${require('@/assets/img/png/multi-color.png')})`,
+          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
         }
       }
