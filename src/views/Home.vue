@@ -342,8 +342,11 @@ export default Vue.extend({
       top: 240px;
     }
   }
-  &-theme {
+  &-theme, &__mydesign, &__template {
     padding: 0 10%;
+    @include layout-mobile {
+      padding: 0 5%;
+    }
   }
   &-plaque {
     display: flex;
@@ -423,9 +426,6 @@ export default Vue.extend({
       background: #09467e;
       color: white;
     }
-  }
-  &__mydesign, &__template {
-    padding: 0 10%;
   }
 }
 .home-btn {
