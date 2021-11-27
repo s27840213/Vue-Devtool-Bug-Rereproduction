@@ -91,30 +91,15 @@ export default Vue.extend({
         if (!fontStore.some(font => font.face === this.item.id)) {
           this.updateTextState({ pending: this.item.id })
           const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-
-          let loaded = false
-
-          const load = newFont.load()
-            .then(newFont => {
-              loaded = true
-              document.fonts.add(newFont)
-              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-            })
-            .catch(() => {
-              this.$notify({
-                group: 'error',
-                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-              })
-            })
-          setTimeout(() => {
-            if (!loaded) {
-              this.$notify({
-                group: 'error',
-                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-              })
-            }
-          }, 30000)
-          await load
+          await Promise.race([
+            newFont.load(),
+            new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+          ]).then(() => {
+            document.fonts.add(newFont)
+            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
+          }).catch((error) => {
+            throw error
+          })
         }
         console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
         console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
@@ -164,6 +149,12 @@ export default Vue.extend({
         // TextPropUtils.updateTextPropsState()
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
+      } catch (error) {
+        const code = (error as Error).message === 'timeout' ? 2 : 1
+        this.$notify({
+          group: 'error',
+          text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`
+        })
       } finally {
         this.updateTextState({ pending: '' })
         const sel = window.getSelection()
