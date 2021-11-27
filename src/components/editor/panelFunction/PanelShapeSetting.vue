@@ -626,10 +626,10 @@ export default Vue.extend({
     width: 100%;
     margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 22px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
     @media (max-width: 1260px) {
-      gap: 18px;
+      gap: 10px;
     }
   }
   &__color {
