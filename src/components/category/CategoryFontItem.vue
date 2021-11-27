@@ -149,8 +149,8 @@ export default Vue.extend({
         // TextPropUtils.updateTextPropsState()
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
-      } catch (error) {
-        const code = (error as Error).message === 'timeout' ? 2 : 1
+      } catch (error: any) {
+        const code = error.message === 'timeout' ? 'timeout' : error.code
         this.$notify({
           group: 'error',
           text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`
