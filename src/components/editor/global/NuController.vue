@@ -1716,6 +1716,7 @@ export default Vue.extend({
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, clipIndex, { active: true })
+        StepsUtils.record()
       }
     },
     onFrameDragEnter(clipIndex: number) {
