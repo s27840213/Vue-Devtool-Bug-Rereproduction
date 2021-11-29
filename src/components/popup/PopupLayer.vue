@@ -2,7 +2,7 @@
   div(class=" popup-layer bg-gray-6"
       @click.stop="closePopup")
     //- for page and layer
-    template(v-for="option in updateOptions")
+    template(v-for="option in [...updateOptions, ...layerOptions]")
       template(v-if="option.condition")
         div(class="popup-layer__item"
             @click="option.action")
@@ -175,6 +175,28 @@ export default Vue.extend({
     },
     updateType(): string {
       return this.isTextGroup || this.isText ? 'text' : this.getType[0]
+    },
+    layerOptions(): Array<IPopupOptions> {
+      return [
+        {
+          icon: 'copy',
+          text: `上傳 ${this.typeMap[this.updateType]}`,
+          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          shortcutText: '',
+          action: () => {
+            uploadUtils.uploadLayer(this.updateType)
+          }
+        },
+        {
+          icon: 'copy',
+          text: `更新 ${this.typeMap[this.updateType]}`,
+          condition: this.hasLayerDesignId && this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          shortcutText: '',
+          action: () => {
+            uploadUtils.updateLayer(this.updateType)
+          }
+        }
+      ]
     },
     groupOption(): any {
       return {
