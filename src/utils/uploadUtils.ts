@@ -962,20 +962,22 @@ class UploadUtils {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles } = image
+        const { type, srcObj, styles, locked } = image
         return {
           type,
+          locked,
           srcObj,
           styles: this.styleFilter(styles, 'image')
         }
       }
       case 'shape': {
         const shape = layer as IShape
-        const { type, designId, ratio, color, styles, category } = shape
+        const { type, designId, ratio, color, styles, category, locked } = shape
         switch (shape.category) {
           case 'D': {
             return {
               type,
+              locked,
               color,
               ratio,
               category,
@@ -995,6 +997,7 @@ class UploadUtils {
             shape.vSize = [styles.initWidth, styles.initHeight]
             return {
               type,
+              locked,
               color,
               ratio,
               category,
@@ -1010,6 +1013,7 @@ class UploadUtils {
             if (designId) {
               return {
                 type,
+                locked,
                 category,
                 designId,
                 ratio,
@@ -1028,9 +1032,10 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles } = frame
+        const { type, designId, clips, decoration, decorationTop, styles, locked } = frame
         return {
           type,
+          locked,
           designId,
           clips: [
             ...clips.map(img => {
@@ -1057,9 +1062,10 @@ class UploadUtils {
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles } = text
+        const { type, widthLimit, isEdited, paragraphs, styles, locked } = text
         return {
           type,
+          locked,
           widthLimit,
           isEdited,
           paragraphs: paragraphs,
@@ -1068,26 +1074,28 @@ class UploadUtils {
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles } = group
+        const { type, layers, styles, locked } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
           type,
+          locked,
           layers: filteredLayers,
           styles: this.styleFilter(styles)
         }
       }
       case 'tmp': {
         const tmp = layer as ITmp
-        const { type, layers, styles } = tmp
+        const { type, layers, styles, locked } = tmp
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
           type: 'group',
+          locked,
           layers: filteredLayers,
           styles: this.styleFilter(styles)
 
