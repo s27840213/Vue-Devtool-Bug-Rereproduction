@@ -172,9 +172,6 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    console.log('width', document.body.clientWidth)
-    console.log('height', document.body.clientHeight)
-    console.log('isMobile', this.isMobile)
     this.AutoPlayTimer = setInterval(() => {
       if (!this.isTimerStop) {
         if (this.featureSelected === this.featureList.length - 1) {
