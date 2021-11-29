@@ -2,10 +2,10 @@
   div(class="nu-image"
       :style="styles()"
       draggable="false")
-    nu-adjust-image(v-if="isAdjustImage"
+    nu-adjust-image(v-show="isAdjustImage"
       :src="src"
       :styles="config.styles")
-    img(v-else class="nu-image__picture" :src="src" @error="onError()")
+    img(v-show="!isAdjustImage" class="nu-image__picture" :src="src" @error="onError()")
 </template>
 
 <script lang="ts">
