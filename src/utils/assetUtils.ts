@@ -94,20 +94,18 @@ class AssetUtils {
       }
       default: {
         return Promise.race([
-          fetch(asset.urls.json + `?ver=${ver}`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(response.status.toString())
-              }
-              return response.json()
-            })
-            .then(jsonData => {
-              asset.jsonData = jsonData
-              store.commit('SET_assetJson', { [id]: asset })
-              return asset
-            }),
-          new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000)).then(() => asset)
-        ]).catch((error) => {
+          fetch(asset.urls.json + `?ver=${ver}`),
+          new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+        ]).then((response: any) => {
+          if (!response.ok) {
+            throw new Error(response.status.toString())
+          }
+          return response.json()
+        }).then(jsonData => {
+          asset.jsonData = jsonData
+          store.commit('SET_assetJson', { [id]: asset })
+          return asset
+        }).catch((error) => {
           Vue.notify({
             group: 'error',
             text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
