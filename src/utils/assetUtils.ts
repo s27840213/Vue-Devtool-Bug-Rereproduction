@@ -16,6 +16,7 @@ import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
+import resizeUtils from './resizeUtils'
 
 const STANDARD_TEXT_FONT: {[key: string]: string} = {
   'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
@@ -117,12 +118,21 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
-    const { pageIndex } = attrs
+    const { pageIndex, width, height } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     console.log('add template')
     console.log(json)
     json = await this.updateBackground(json)
-    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    PageUtils.updateSpecPage(targePageIndex, newLayer)
+    // @TODO: resize page/layer before adding to the store.
+    if (width && height) {
+      resizeUtils.resizePage(targePageIndex, this.getPage(targePageIndex), { width, height })
+      store.commit('UPDATE_pageProps', {
+        pageIndex: targePageIndex,
+        props: { width, height }
+      })
+    }
     stepsUtils.record()
   }
 
@@ -427,17 +437,17 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     store.commit('SET_groupId', groupId)
     store.commit('SET_groupType', groupType)
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)
-    Promise.all(promises)
+    return Promise.all(promises)
       .then(assets => {
         const updatePromise = assets.map(asset =>
-          this.updateBackground(asset.jsonData || {})
+          this.updateBackground(GeneralUtils.deepCopy(asset.jsonData) || {})
             .then(json => LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
         )
         return Promise.all(updatePromise)
@@ -451,9 +461,17 @@ class AssetUtils {
           replace = true
         }
         PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
-        stepsUtils.record()
         Vue.nextTick(() => {
           PageUtils.scrollIntoPage(targetIndex)
+          // @TODO: resize page/layer before adding to the store.
+          if (resize) {
+            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+            store.commit('UPDATE_pageProps', {
+              pageIndex: targetIndex,
+              props: resize
+            })
+          }
+          stepsUtils.record()
         })
       })
   }
