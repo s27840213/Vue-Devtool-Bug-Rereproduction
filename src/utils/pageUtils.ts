@@ -166,7 +166,8 @@ class PageUtils {
     store.commit('CLEAR_pagesInfo')
   }
 
-  updateSpecPage(index: number, json: any): void {
+  updateSpecPage(index: number, json: Partial<IPage>): void {
+    console.log(json)
     const pages = store.getters.getPages
     const pagesTmp = GeneralUtils.deepCopy(pages)
     if (pagesTmp[index]) {
@@ -174,7 +175,7 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
-      store.commit('SET_pages', pagesTmp)
+      store.commit('SET_pages', this.newPages(pagesTmp))
     }
 
     console.log('Update spec page')
