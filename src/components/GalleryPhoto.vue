@@ -114,7 +114,9 @@ export default Vue.extend({
       }
       dataTransfer.setData('data', JSON.stringify(data))
       fetch(ImageUtils.getSrc(data as IImage))
-      fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type, data.styles.width, 'next')))
+      fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type,
+        ImageUtils.getSignificantDimension(data.styles.width, data.styles.height),
+        'next')))
       this.setCurrDraggedPhoto({
         srcObj: {
           ...data.srcObj

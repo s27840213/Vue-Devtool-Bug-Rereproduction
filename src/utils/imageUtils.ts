@@ -32,7 +32,10 @@ class ImageUtils {
   getSrc(config: IImage, size?: string | number): string {
     const { type, userId, assetId } = config.srcObj || config.src_obj
     if (typeof size === 'undefined') {
-      size = this.getSrcSize(type, config.styles ? config.styles.imgWidth : 0)
+      size = this.getSrcSize(
+        type,
+        config.styles ? this.getSignificantDimension(config.styles.imgWidth, config.styles.imgHeight) * store.getters.getPageScaleRatio / 100 : 0
+      )
     }
     switch (type) {
       case 'public':
@@ -69,12 +72,12 @@ class ImageUtils {
     }
   }
 
-  getSrcSize(type: string, width: number, preload = '') {
+  getSrcSize(type: string, dimension: number, preload = '') {
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
-      while (width < sizeMap[i].size && i < sizeMap.length - 1) {
+      while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
         i++
       }
       return preload
@@ -82,6 +85,10 @@ class ImageUtils {
         : sizeMap[i][key]
     }
     return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
+  }
+
+  getSignificantDimension(width: number, height: number) {
+    return Math.max(width, height)
   }
 
   getSrcType(src: string) {
