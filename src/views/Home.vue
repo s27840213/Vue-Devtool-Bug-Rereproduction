@@ -31,29 +31,35 @@
             :type="'primary-lg'"
             @click="newDesign()") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
-      div(class="home-content-theme")
+      div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
       div(v-if="!isLogin"
-        class="home-content-plaque")
+        class="home-content__plaque")
         img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
-        div(class="home-content-plaque-title") 立即享受海量的精美電商模板
-        div(class="home-content-plaque-subtitle") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
+        div(class="home-content__plaque-title") 立即享受海量的精美電商模板
+        div(class="home-content__plaque-subtitle"
+          class="px-20")
+          span(v-if="isMobile") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+          span(v-else) Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
       div(v-if="!isLogin"
-        class="home-content-feature")
+        class="home-content__feature")
         div(style="width: 100%;")
-          div(style="height: 140px;" class="x-scrollbar")
+          div(class="home-content__feature-items")
             btn(v-for="item, idx in featureList" :type="'icon-mid'"
-              class="home-content-feature-item"
+              class="home-content__feature-item"
               :class="{'selected': featureSelected === idx}"
               @click.native="featureItemClicked(idx)")
               svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
-                :iconWidth="'40px'")
-              div(class="pt-10 body-2") {{item.title}}
-        div(class="home-content-feature-content")
-          div(class="home-content-feature-img")
+                :iconWidth="isMobile ? '25px' : '40px'")
+              div(v-if="!isMobile"
+                class="pt-10 body-2") {{item.title}}
+        div(class="home-content__feature-content")
+          div(class="home-content__feature-img")
             img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
-          div(class="home-content-feature-text")
+          div(class="home-content__feature-text")
+            div(v-if="isMobile"
+                class="pt-30 home-content__feature-text-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
@@ -159,13 +165,16 @@ export default Vue.extend({
       isDesignsLoading: 'design/getIsDesignsLoading'
     }),
     isMobile (): boolean {
-      return window.screen.width / window.screen.height < 1
+      return document.body.clientWidth / document.body.clientHeight < 1
     },
     featureContent(): string {
       return this.featureList[this.featureSelected].content
     }
   },
   async mounted() {
+    console.log('width', document.body.clientWidth)
+    console.log('height', document.body.clientHeight)
+    console.log('isMobile', this.isMobile)
     this.AutoPlayTimer = setInterval(() => {
       if (!this.isTimerStop) {
         if (this.featureSelected === this.featureList.length - 1) {
@@ -294,6 +303,10 @@ export default Vue.extend({
     position: relative;
     display: flex;
     justify-content: center;
+    @include layout-mobile {
+      width: 100%;
+      height: 150px;
+    }
     &-img {
       width: 100%;
       background-size: cover;
@@ -330,7 +343,7 @@ export default Vue.extend({
       position: absolute;
       font-size: 12px;
       color: setColor(gray-2);
-      top: 45%;
+      top: 75px;
       transform: scale(0.9);
     }
     &-btns {
@@ -345,45 +358,74 @@ export default Vue.extend({
       top: 240px;
     }
   }
-  &-theme, &__mydesign, &__template {
+  &__theme, &__mydesign, &__feature, &__template {
     padding: 0 10%;
     @include layout-mobile {
       padding: 0 5%;
     }
   }
-  &-plaque {
+  &__plaque {
     display: flex;
     justify-content: center;
     position: relative;
-    padding: 36px 0;
-    @media screen and (min-width: 990px) {
-      padding: 56px 0;
-    }
+    padding: 50px 0;
     > img {
       width: 100%;
+      height: 150px;
+      @include layout-mobile {
+        height: 75px;
+      }
     }
     &-title {
       position: absolute;
-      top: 34%;
-      font-size: 1.6vw;
+      top: 95px;
+      font-size: 20px;
+      letter-spacing: 5px;
       font-weight: 700;
       line-height: 1.3;
       color: setColor(white);
+      @include layout-mobile {
+        top: 70px;
+        letter-spacing: 5px;
+        font-size: 16px;
+      }
     }
     &-subtitle {
       position: absolute;
-      top: 57%;
-      font-size: 1.1vw;
+      top: 135px;
+      font-size: 16px;
       color: setColor(white);
+      @include layout-mobile {
+        top: 95px;
+        font-size: 12px;
+        padding: 0;
+      }
     }
   }
-  &-feature {
+  &__feature {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
-    padding: 0 10%;
+    &-items {
+      display: grid;
+      column-gap: 30px;
+      grid-template-columns: auto;
+      grid-auto-flow: column;
+      scroll-behavior: smooth;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      text-align: left;
+      padding-bottom: 50px;
+      @include layout-mobile {
+        column-gap: 15px;
+        padding-bottom: 30px;
+      }
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
     &-item {
       cursor: pointer;
       width: 200px;
@@ -391,18 +433,28 @@ export default Vue.extend({
       border: 1px solid #f4f4f5;
       border-radius: 8px;
       padding: 24px 16px;
+      @include layout-mobile {
+        width: 50px;
+        height: 50px;
+      }
       &:hover {
         background: setColor("gray-5");
       }
     }
     &-content {
       display: flex;
+      flex-direction: row;
       justify-content: center;
       width: 100%;
-      padding-top: 2vw;
+      @include layout-mobile {
+        flex-direction: column;
+      }
     }
     &-img {
-      width: 35%;
+      width: 500px;
+      @include layout-mobile {
+        width: 100%;
+      }
       > img {
         width: 100%;
         filter: drop-shadow(0px 3px 15px rgba(0, 0, 0, 0.25));
@@ -419,10 +471,31 @@ export default Vue.extend({
       font-weight: 400;
       text-align: left;
       padding-left: 5vw;
+      @media screen and (max-width: 1260px) {
+        width: 45%;
+      }
+      @media screen and (max-width: 990px) {
+        width: 60%;
+      }
+      @include layout-mobile {
+        width: unset;
+        padding: 10px;
+      }
+      &-title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+      }
       > button {
-        width: 40%;
+        width: 150px;
         height: 45px;
+        font-size: 18px;
         padding: 5px 30px;
+        @include layout-mobile {
+          width: 60%;
+          padding: 0;
+          margin: 0 20%;
+        }
       }
     }
     .selected {
