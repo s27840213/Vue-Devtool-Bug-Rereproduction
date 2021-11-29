@@ -200,6 +200,9 @@ export default Vue.extend({
       line-height: 26px;
       font-weight: 400;
       padding-top: 10px;
+      @media (max-width: 976px) {
+        font-size: 14px;
+      }
       @include layout-mobile {
         font-size: 14px;
       }
