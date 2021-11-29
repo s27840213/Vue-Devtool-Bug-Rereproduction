@@ -132,7 +132,7 @@ export default Vue.extend({
     isFrameImage(): boolean {
       const { layers, types } = this.currSelectedInfo
       const frameLayer = layers[0] as IFrame
-      return types.has('frame') && frameLayer.clips[0].srcObj.assetId
+      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
     },
     isSubLayerFrameImage(): boolean {
       const { index } = this.currSubSelectedInfo
