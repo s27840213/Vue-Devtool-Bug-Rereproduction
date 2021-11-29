@@ -176,7 +176,10 @@ export default Vue.extend({
       }
     }, 4000)
 
-    designUtils.fetchDesigns(this.fetchAllDesigns)
+    if (this.isLogin) {
+      designUtils.fetchDesigns(this.fetchAllDesigns)
+    }
+
     const response = await this.getThemeList()
     this.themeList = response.data.content
 
@@ -188,7 +191,7 @@ export default Vue.extend({
     })
     const theme = squareTheme.join(',')
 
-    let keyword = this.tagString.replaceAll(',', ' ')
+    let keyword = this.tagString.replace(/,/gi, ' ')
     this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword, theme })
     this.tagTemplateList = tagTemplate.data.content[0].list
