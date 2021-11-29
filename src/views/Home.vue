@@ -55,11 +55,11 @@
               div(v-if="!isMobile"
                 class="pt-10 body-2") {{item.title}}
         div(class="home-content__feature-content")
+          div(v-if="isMobile"
+            class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
           div(class="home-content__feature-img")
             img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
           div(class="home-content__feature-text")
-            div(v-if="isMobile"
-                class="pt-30 home-content__feature-text-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
@@ -92,7 +92,7 @@
           @click="goToTemplateCenterSortBy('recent')") 更多
       div(class="home-content__template")
         scroll-list(:list="latestTemplateList" type='template')
-      nu-footer(class="mt-100")
+      nu-footer(class="mt-50")
       div(v-if="showSizePopup"
         class="home__size")
         popup-size(@close="closePopup()")
@@ -148,7 +148,7 @@ export default Vue.extend({
       ],
       showSizePopup: false,
       featureSelected: 0,
-      tagString: 'IG,母嬰,雙十一,特價',
+      tagString: '聖誕節,母嬰,雙十一,特價',
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
@@ -289,11 +289,12 @@ export default Vue.extend({
   &-title {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     text-align: left;
-    padding: 60px 10vw 20px 10vw;
+    padding: 40px 10vw 20px 10vw;
     @include layout-mobile {
-      font-size: 16px;
-      padding: 40px 5vw 20px 5vw;
+      font-size: 18px;
+      padding: 25px 5vw 20px 5vw;
     }
     .more {
       white-space: nowrap;
@@ -449,6 +450,13 @@ export default Vue.extend({
       @include layout-mobile {
         flex-direction: column;
       }
+      &-title {
+        color: setColor(dark-blue-2);
+        text-align: center;
+        font-size: 14px;
+        letter-spacing: 2px;
+        font-weight: 700;
+      }
     }
     &-img {
       width: 500px;
@@ -466,10 +474,10 @@ export default Vue.extend({
       flex-direction: column;
       justify-content: center;
       width: 30%;
-      font-size: 18px;
+      font-size: 14px;
       line-height: 40px;
       font-weight: 400;
-      text-align: left;
+      // text-align: left;
       padding-left: 5vw;
       @media screen and (max-width: 1260px) {
         width: 45%;
@@ -479,12 +487,7 @@ export default Vue.extend({
       }
       @include layout-mobile {
         width: unset;
-        padding: 10px;
-      }
-      &-title {
-        text-align: center;
-        font-size: 24px;
-        font-weight: 700;
+        padding: 20px 10px;
       }
       > button {
         width: 150px;
@@ -492,9 +495,9 @@ export default Vue.extend({
         font-size: 18px;
         padding: 5px 30px;
         @include layout-mobile {
-          width: 60%;
+          width: 50%;
           padding: 0;
-          margin: 0 20%;
+          margin: 0 25%;
         }
       }
     }
