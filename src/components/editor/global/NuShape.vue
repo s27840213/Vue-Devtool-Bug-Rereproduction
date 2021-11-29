@@ -287,17 +287,23 @@ export default Vue.extend({
           if (!svg && this.config.designId) {
             const shape = await shapeUtils.fetchSvg(this.config)
             shape.color = this.config.color
-            shape.className = shapeUtils.classGenerator()
             this.config.styles.initWidth = shape.vSize[0]
             this.config.styles.initHeight = shape.vSize[1]
             Object.assign(this.config, shape)
+            if (!this.config.className) {
+              this.config.className = shapeUtils.classGenerator()
+            }
           }
           const transText = shapeUtils.transFormatter(this.className, this.config.transArray, {
             cSize: this.config.cSize,
             pSize: this.config.pSize,
             pDiff: this.config.pDiff
           })
-          this.transNode = shapeUtils.addStyleTag(transText)
+          if (this.transNode) {
+            this.transNode.textContent = transText
+          } else {
+            this.transNode = shapeUtils.addStyleTag(transText)
+          }
           this.filterTemplate = this.getFilterTemplate()
           break
         }
@@ -306,7 +312,11 @@ export default Vue.extend({
             await shapeUtils.addComputableInfo(this.config)
           }
           const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
-          this.transNode = shapeUtils.addStyleTag(transText)
+          if (this.transNode) {
+            this.transNode.textContent = transText
+          } else {
+            this.transNode = shapeUtils.addStyleTag(transText)
+          }
           break
         }
         case 'E': {
@@ -319,8 +329,10 @@ export default Vue.extend({
           if (!svg && this.config.designId) {
             const shape = await shapeUtils.fetchSvg(this.config) as IShape
             shape.color = this.config.color
-            shape.className = shapeUtils.classGenerator()
             Object.assign(this.config, shape)
+            if (!this.config.className) {
+              this.config.className = shapeUtils.classGenerator()
+            }
             this.config.styles.initWidth = shape.vSize[0]
             this.config.styles.initHeight = shape.vSize[1]
           }
@@ -328,7 +340,11 @@ export default Vue.extend({
       }
       // console.log(this.config.styleArray)
       const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-      this.styleNode = shapeUtils.addStyleTag(styleText)
+      if (this.styleNode) {
+        this.styleNode.textContent = styleText
+      } else {
+        this.styleNode = shapeUtils.addStyleTag(styleText)
+      }
       this.paramsReady = true
     },
     getFilterTemplate(): string {
