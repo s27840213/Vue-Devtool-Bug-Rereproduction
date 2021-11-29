@@ -60,6 +60,14 @@ export default Vue.extend({
   async created() {
     await this.checkAndFetchSvg()
   },
+  destroyed () {
+    if (this.styleNode && this.styleNode.parentElement) {
+      this.styleNode.parentElement.remove()
+    }
+    if (this.transNode && this.transNode.parentElement) {
+      this.transNode.parentElement.remove()
+    }
+  },
   watch: {
     'config.color': {
       handler: function (newVal) {
