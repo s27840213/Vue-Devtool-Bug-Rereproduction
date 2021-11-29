@@ -24,13 +24,22 @@
     div(class="text-setting__row2")
       div(class="text-setting__color")
         div(class="color-slip record-selection"
-          :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000'}"
           @click="handleColorModal")
-        div(class="full-width text-left ml-10 overflow-hidden")
+          svg-icon(iconName="text-color"
+                  iconWidth="24px"
+                  iconColor="gray-1")
+          div(class="color-slip__bar"
+              :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
+        div(class="text-setting__color__hex text-left overflow-hidden")
           button(class="text-setting__range-input-button input-color" @click="handleColorModal")
             input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
             :value="props.color" @change="inputColor")
             //-  v-model.lazy="props.color v-model.lazy="props.color
+        svg-icon(class="text-setting__color__copy"
+                iconName="copy"
+                iconWidth="16px"
+                iconColor="gray-4"
+                @click.native="copyColor")
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
@@ -513,6 +522,13 @@ export default Vue.extend({
         posX: 'right',
         target: '.btn-ls'
       })
+    },
+    copyColor() {
+      console.log('a')
+      GeneralUtils.copyText(this.props.color)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+        })
     }
   }
 })
@@ -559,9 +575,27 @@ export default Vue.extend({
   &__color {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
+    width: 130px;
+    height: 50px;
+    gap: 3px;
+    box-sizing: border-box;
+    &__hex {
+      width: 62px;
+      > button {
+        padding: 0;
+        > input {
+          padding: 0;
+        }
+      }
+    }
+    &__copy{
+      cursor: pointer;
+      &:hover {
+        color: setColor(gray-3);
+      }
+    }
   }
   &__color-picker {
     position: absolute;
@@ -624,8 +658,21 @@ export default Vue.extend({
   }
 }
 .color-slip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   height: 100%;
-  width: 40%;
+  width: 42px;
+  cursor: pointer;
+  > svg {
+    margin-top: 10px;
+  }
+  &__bar {
+    margin-top: 2px;
+    width: 24px;
+    height: 4px;
+    box-sizing: border-box;
+  }
 }
 
 .center {
