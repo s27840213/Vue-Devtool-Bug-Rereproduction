@@ -37,9 +37,9 @@ class AssetUtils {
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
-  get(item: IListServiceContentDataItem): IAsset {
+  get(item: IListServiceContentDataItem): Promise<IAsset> {
     const asset = this.getAsset(item.id)
-    return (asset && asset.ver === item.ver) ? GeneralUtils.deepCopy(asset) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? Promise.resolve(GeneralUtils.deepCopy(asset)) : this.fetch(item)
   }
 
   getTypeCategory(type: number): string | undefined {

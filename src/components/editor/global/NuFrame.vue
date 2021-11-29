@@ -16,6 +16,8 @@ import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
+import layerFactary from '@/utils/layerFactary'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -50,7 +52,49 @@ export default Vue.extend({
         json.decorationTop.color = [...config.decorationTop.color]
         Object.assign(config.decorationTop, json.decorationTop)
       }
-      delete config.needFetch
+      config.needFetch = false
+    }
+  },
+  watch: {
+    'config.needFetch': function(newVal) {
+      if (newVal && this.config.designId) {
+        const asset = {
+          type: 8,
+          id: this.config.designId,
+          ver: this.getVerUni
+        } as IListServiceContentDataItem
+        AssetUtils.get(asset).then((res) => {
+          const json = res.jsonData as IFrame
+          this.config.clips = generalUtils.deepCopy(this.config.clips)
+          if (this.config.decoration && json.decoration) {
+            json.decoration.color = [...this.config.decoration.color] as [string]
+            this.config.decoration = layerFactary.newShape({
+              ...json.decoration,
+              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+              styles: {
+                width: this.config.styles.initWidth,
+                height: this.config.styles.initHeight,
+                initWidth: this.config.styles.initWidth,
+                initHeight: this.config.styles.initHeight
+              }
+            })
+          }
+          if (this.config.decorationTop && json.decorationTop) {
+            json.decorationTop.color = [...this.config.decorationTop.color] as [string]
+            this.config.decorationTop = layerFactary.newShape({
+              ...json.decorationTop,
+              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+              styles: {
+                width: this.config.styles.initWidth,
+                height: this.config.styles.initHeight,
+                initWidth: this.config.styles.initWidth,
+                initHeight: this.config.styles.initHeight
+              }
+            })
+          }
+          this.config.needFetch = false
+        })
+      }
     }
   },
   computed: {
