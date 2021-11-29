@@ -37,6 +37,8 @@ const SUPPORTED_LOCALES = [{
 const MOBILE_ROUTES = [
   'Home',
   'TemplateCenter',
+  'SignUp',
+  'Login',
   'MobileWarning'
 ]
 
