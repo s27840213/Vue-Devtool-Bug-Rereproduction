@@ -176,7 +176,10 @@ export default Vue.extend({
       }
     }, 4000)
 
-    designUtils.fetchDesigns(this.fetchAllDesigns)
+    if (this.isLogin) {
+      designUtils.fetchDesigns(this.fetchAllDesigns)
+    }
+
     const response = await this.getThemeList()
     this.themeList = response.data.content
 
