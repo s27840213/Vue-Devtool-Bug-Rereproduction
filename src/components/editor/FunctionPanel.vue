@@ -200,7 +200,7 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background-color: setColor(blue-1, 0.06);
+    background-color: setColor(blue-5);
     border-bottom: 2px solid setColor(gray-6);
     pointer-events: auto;
   }
