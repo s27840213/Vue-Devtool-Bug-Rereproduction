@@ -77,11 +77,19 @@ export default Vue.extend({
       return this.$refs.items as HTMLElement
     }
   },
-  updated() {
-    const { scrollWidth, offsetWidth } = this.items
-    this.nextIcon = scrollWidth > offsetWidth
+  mounted() {
+    this.initIcon(1)
   },
   methods: {
+    initIcon(times = 0) {
+      const { scrollWidth, offsetWidth } = this.items
+      if (scrollWidth === offsetWidth && times < 10) {
+        setTimeout(() => {
+          this.initIcon(times + 1)
+        }, 250)
+      }
+      this.nextIcon = scrollWidth > offsetWidth
+    },
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
