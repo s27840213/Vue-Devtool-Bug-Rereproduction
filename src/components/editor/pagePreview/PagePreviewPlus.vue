@@ -1,12 +1,11 @@
 <template lang="pug">
-  div(v-if="last" class="page-preview-plus-last")
-  div(v-else class="page-preview-plus"
-  @mouseover="pageMoveTo($event, 'mouse')"
-  @mouseout="pageMoveBack($event)"
-  @dragover="pageMoveTo($event, 'drag')"
-  @dragleave="pageMoveBack($event)"
-  @drop="handlePageDrop($event)")
-    div(v-if="actionType === 'mouse'"
+  div(class="page-preview-plus"
+    @mouseover="pageMoveTo($event, 'mouse')"
+    @mouseout="pageMoveBack($event)"
+    @dragover="pageMoveTo($event, 'drag')"
+    @dragleave="pageMoveBack($event)"
+    @drop="handlePageDrop($event)")
+    div(v-if="!last && actionType === 'mouse'"
       class="page-preview-plus-wrapper pointer"
       @click="addPage(index)")
         svg-icon(class="py-10"
@@ -50,6 +49,9 @@ export default Vue.extend({
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     pageMoveTo($event: any, type: string) {
+      if (this.last && type === 'mouse') {
+        return
+      }
       const target = $event.currentTarget as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {
@@ -136,11 +138,6 @@ export default Vue.extend({
         transform: scale(0.7);
       }
     }
-
-    &-last {
-      opacity: 0;
-    }
-
     &-drag {
       height: 100%;
       border-right: 3px solid setColor(blue-1);
