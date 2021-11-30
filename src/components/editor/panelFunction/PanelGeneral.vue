@@ -14,7 +14,7 @@
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="openOrderPopup()"
-        v-hint="'Align'")
+        v-hint="'圖層順序'")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')"
@@ -22,7 +22,7 @@
       svg-icon(class="pointer"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
-        v-hint="'解鎖'")
+        v-hint="'鎖定圖層'")
       svg-icon(:class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"

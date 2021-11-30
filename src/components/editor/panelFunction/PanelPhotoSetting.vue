@@ -1,10 +1,10 @@
 <template lang="pug">
   div(class="photo-setting")
     span(class="photo-setting__title text-blue-1 subtitle-1") 照片設定
-    div(class="photo-setting__grid")
+    div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="btn.name === 'crop' && isCropping ? 'active' : ''"
+        :class="show === btn.show || (btn.name === 'crop' && isCropping) ? 'active' : ''"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
