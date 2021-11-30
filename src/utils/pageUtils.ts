@@ -12,6 +12,8 @@ class PageUtils {
   get getPage() { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pagesName(): string { return store.getters.getPagesName }
+  get scaleRatio() { return store.getters.getPageScaleRatio }
+  get pageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -298,6 +300,15 @@ class PageUtils {
     } else {
       return middleIndex + this.searchMostCentralPageIndex(posArr.slice(middleIndex, posArr.length), centerLinePos, minDist, middleIndex)
     }
+  }
+
+  fitPage() {
+    const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.pageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.pageSize.height * (this.scaleRatio / 100))) * 0.8
+
+    editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+    store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+    this.findCentralPageIndexInfo()
   }
 }
 

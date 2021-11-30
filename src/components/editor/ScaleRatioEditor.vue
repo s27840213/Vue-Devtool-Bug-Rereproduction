@@ -11,10 +11,11 @@
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
     svg-icon(class="hover-effect pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
-    svg-icon(class="hover-effect"
+    svg-icon(:class="{'hover-effect': !isShowPagePreview}"
       :iconName="'navPage'"
-      :iconColor="'gray-2'"
+      :iconColor="isShowPagePreview ? 'gray-4' :'gray-2'"
       :iconWidth="'24px'"
+      :disabled="isShowPagePreview"
       @click.native="setDetailPageMode(!detailPageMode)")
 </template>
 

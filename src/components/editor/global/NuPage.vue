@@ -554,7 +554,6 @@ export default Vue.extend({
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
         this.initialPageHeight = (this.config as IPage).height
       }
-
       this.isShownScrollBar = isShownScrollbar
     },
     pageResizeEnd(e: MouseEvent) {
@@ -569,6 +568,7 @@ export default Vue.extend({
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
       })
+      pageUtils.findCentralPageIndexInfo()
     },
     pageNameFocused() {
       ShortcutUtils.deselect()
