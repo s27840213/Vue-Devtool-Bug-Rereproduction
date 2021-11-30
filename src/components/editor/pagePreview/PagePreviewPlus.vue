@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="page-preview-plus"
+    :style="styles()"
     @mouseover="pageMoveTo($event, 'mouse')"
     @mouseout="pageMoveBack($event)"
     @dragover="pageMoveTo($event, 'drag')"
@@ -31,14 +32,16 @@ export default Vue.extend({
   },
   data() {
     return {
-      actionType: ''
+      actionType: '',
+      isDragOver: false
     }
   },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getPage: 'getPage',
-      getPagesPerRow: 'page/getPagesPerRow'
+      getPagesPerRow: 'page/getPagesPerRow',
+      isDragged: 'page/getIsDragged'
     })
   },
   methods: {
@@ -48,8 +51,30 @@ export default Vue.extend({
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
+    styles() {
+      if (this.isDragged) {
+        return {
+          'z-index': '2',
+          width: '150px',
+          transform: 'translateX(-60px)'
+        }
+      } else {
+        return {
+          'z-index': 'unset',
+          width: '30px',
+          transform: ''
+        }
+      }
+    },
     pageMoveTo($event: any, type: string) {
-      if (this.last && type === 'mouse') {
+      if (type === 'drag') {
+        if (!this.isDragOver) {
+          this.isDragOver = true
+        } else {
+          return
+        }
+      }
+      if (type === 'mouse' && this.last) {
         return
       }
       const target = $event.currentTarget as HTMLElement
@@ -66,6 +91,7 @@ export default Vue.extend({
       this.actionType = type
     },
     pageMoveBack($event: any) {
+      this.isDragOver = false
       const target = $event.currentTarget as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {

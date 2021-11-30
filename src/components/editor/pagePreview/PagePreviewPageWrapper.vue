@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="page-preview-page"
+    :style="styles2()"
     :class="{'full-height': type === 'full'}")
     div(class="page-preview-page-content pointer"
       :style="styles()"
@@ -78,7 +79,6 @@ export default Vue.extend({
       ],
       isMouseOver: false,
       isMenuOpen: false,
-      isDragged: false,
       contentWidth: 0
     }
   },
@@ -91,7 +91,8 @@ export default Vue.extend({
     ]),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      getPage: 'getPage'
+      getPage: 'getPage',
+      isDragged: 'page/getIsDragged'
     }),
     scaleRatio(): number {
       return this.contentWidth / (this.config as IPage).width
@@ -111,6 +112,17 @@ export default Vue.extend({
         height: `${this.config.height * this.scaleRatio}px`
       }
     },
+    styles2() {
+      if (this.type === 'panel' &&
+        this.isDragged && this.index !== this.lastSelectedPageIndex) {
+        return {
+          'z-index': '-1'
+        }
+      } else {
+        return {
+        }
+      }
+    },
     hightlighterStyles() {
       return {
         width: `${this.contentWidth}px`,
@@ -121,7 +133,8 @@ export default Vue.extend({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
-      _setCurrActivePageIndex: 'SET_currActivePageIndex'
+      _setCurrActivePageIndex: 'SET_currActivePageIndex',
+      _setIsDragged: 'page/SET_IsDragged'
     }),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen
@@ -139,11 +152,11 @@ export default Vue.extend({
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
-        pageUtils.scrollIntoPage(this.index)
+        pageUtils.jumpIntoPage(this.index)
       }
     },
     handleDragStart(e: DragEvent) {
-      this.isDragged = true
+      this._setIsDragged(true)
       this.isMouseOver = false
       this._setLastSelectedPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
@@ -160,7 +173,7 @@ export default Vue.extend({
       document.addEventListener('dragover', this.preventDefaultDragOver, false)
     },
     handleDragEnd(e: DragEvent) {
-      this.isDragged = false
+      this._setIsDragged(false)
 
       const target = e.target as HTMLElement
       setTimeout(function() {
