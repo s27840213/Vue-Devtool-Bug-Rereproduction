@@ -80,7 +80,6 @@ export default Vue.extend({
       editorView: null as unknown as HTMLElement,
       guidelinesArea: null as unknown as HTMLElement,
       pageIndex: -1,
-      currActivePageIndex: -1,
       backgroundControllingPageIndex: -1,
       PageUtils,
       canvasRect: null as unknown as DOMRect,
@@ -101,7 +100,7 @@ export default Vue.extend({
 
     this.setPageScaleRatio(Math.round(this.pageScaleRatio * resizeRatio))
     this.$nextTick(() => {
-      this.currActivePageIndex = PageUtils.activeMostCentralPage()
+      PageUtils.findCentralPageIndexInfo()
     })
     document.addEventListener('blur', this.detectBlur, true)
 
@@ -250,9 +249,7 @@ export default Vue.extend({
         this.closeGuidelineH()
       }
 
-      if (this.geCurrActivePageIndex === -1) {
-        PageUtils.activeMostCentralPage()
-      }
+      PageUtils.findCentralPageIndexInfo()
     },
     selectEnd() {
       if (this.isSelecting) {
