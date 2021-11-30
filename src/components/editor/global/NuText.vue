@@ -12,26 +12,24 @@
           :key="p.id",
           :style="styles(p.styles)")
           template(v-for="(span, sIndex) in p.spans")
-            span(v-if="span.text" class="nu-text__span"
+            span(class="nu-text__span"
+              :data-sindex="sIndex"
               :key="span.id",
               :style="styles(span.styles)") {{ span.text }}
-            br(v-else)
+              br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
-import { IFont } from '@/interfaces/text'
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+import { ISpanStyle, IText } from '@/interfaces/layer'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import generalUtils from '@/utils/generalUtils'
-import { reject } from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -84,6 +82,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['fontStore']),
+    ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -123,7 +122,10 @@ export default Vue.extend({
   methods: {
     ...mapActions('text', ['addFont']),
     styles(styles: any) {
-      return CssConveter.convertFontStyle(styles)
+      const converted = CssConveter.convertFontStyle(styles)
+      return Object.assign(converted, {
+        'font-family': (converted['font-family'] + ',').concat(this.getDefaultFonts)
+      })
     },
     bodyStyles() {
       const isVertical = this.config.styles.writingMode.includes('vertical')

@@ -72,6 +72,9 @@ export default Vue.extend({
       this.fontUploadStatus = status
     })
   },
+  destroyed() {
+    TextUtils.setCurrTextInfo({ layerIndex: -1 })
+  },
   computed: {
     ...mapState(
       'font',

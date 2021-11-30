@@ -56,7 +56,7 @@
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
         :style="wrapperStyles()"
-        @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
+        @keydown.delete.exact.stop.prevent.self="delLayer()"
         @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
         @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
         @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
@@ -574,6 +574,13 @@ export default Vue.extend({
     redo() {
       ShortcutUtils.redo()
       this.$emit('stepChange')
+    },
+    delLayer() {
+      const currLayer = layerUtils.getCurrLayer
+      console.log(currLayer.editing)
+      // if (currLayer.type === 'text' && currLayer.editing) return
+      // if (currLayer.type === 'group' && (currLayer as IGroup).layers.some(l => l.type === 'text' && l.editing)) return
+      ShortcutUtils.del()
     }
   }
 })
