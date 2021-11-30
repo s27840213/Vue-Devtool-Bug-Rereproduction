@@ -58,6 +58,9 @@ class TextUtils {
         pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string)
       } as ISelection
 
+      /**
+       * For start container, the selected html tag could be: #text, SPAN
+       */
       let p = range.startContainer
       while (p.nodeName !== 'P' && p.parentElement) {
         p = p.parentElement
@@ -85,15 +88,36 @@ class TextUtils {
             }
         }
       } else {
-        console.log(new Error('wrong type node of the p.firstChild'))
+        console.log(new Error('wrong type node of the start container of p.firstChild'))
         return { div: undefined, start: this.getNullSel(), end: this.getNullSel() }
       }
 
       const isRanged = window.getSelection()?.toString() !== ''
-      let end = {
-        pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
-        sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
-        offset: isRanged ? range?.endOffset as number : NaN
+      /**
+       * For end container, the selected html tag could be: #text, SPAN, P
+       */
+      let endP = range.endContainer
+      let endSpan = range.endContainer
+      if (range.endContainer.nodeName === 'P') {
+        endSpan = endSpan.firstChild as Node
+      } else {
+        while (endP.nodeName !== 'P' && endP.parentElement) {
+          endP = endP.parentElement
+        }
+        while (endSpan.nodeName !== 'SPAN' && endSpan.parentElement) {
+          endSpan = endSpan.parentElement
+        }
+      }
+
+      let end = this.getNullSel()
+      if (endP && endSpan) {
+        end = {
+          pIndex: isRanged ? +((endP as HTMLElement).dataset.pindex as string) : NaN,
+          sIndex: isRanged ? +((endSpan as HTMLElement).dataset.sindex as string) : NaN,
+          offset: isRanged ? range?.endOffset as number : NaN
+        }
+      } else {
+        throw new Error('wrong type node of the end container')
       }
 
       if (this.startEqualEnd(start, end)) {
@@ -193,6 +217,10 @@ class TextUtils {
       const startSpan = paragraphs[start.pIndex].spans[start.sIndex]
       const endSpan = GeneralUtils.deepCopy(paragraphs[end.pIndex].spans[end.sIndex]) as ISpan
       const endRestSpans = paragraphs[end.pIndex].spans.slice(end.sIndex + 1)
+      if (paragraphs[start.pIndex].spans.length === 1 && start.offset === 1) {
+        // the ranged selection would treat the offset of <br> of 1
+        start.offset = 0
+      }
 
       paragraphs[start.pIndex].spans.splice(start.sIndex + 1)
       paragraphs.splice(start.pIndex + 1, end.pIndex - start.pIndex)
@@ -208,9 +236,10 @@ class TextUtils {
 
       if (key !== 'Backspace' && key !== 'Delete') {
         return this.noRangeHandler(mockConfig, start, key)
+      } else {
+        this.updateSelection(start, this.getNullSel())
       }
 
-      console.log(paragraphs)
       return paragraphs
     }
   }

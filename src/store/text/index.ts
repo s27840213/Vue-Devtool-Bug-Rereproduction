@@ -148,7 +148,7 @@ const actions: ActionTree<ITextState, unknown> = {
       } else {
         return new Promise<void>(resolve => {
           const checkLoaded = setInterval(() => {
-            console.log('check if loaded')
+            console.log('check if loaded', font.face)
             if (font.loaded) {
               clearInterval(checkLoaded)
               resolve()

@@ -1413,7 +1413,7 @@ export default Vue.extend({
         e.preventDefault()
         this.contentEditable = false
         const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
         updated = true
         this.$nextTick(() => {
           console.warn(e.isComposing)
@@ -1426,7 +1426,7 @@ export default Vue.extend({
       if (e.key !== 'CapsLock') e.preventDefault()
       if (TextUtils.getNoNPrintableKeys().includes(e.key)) return
       const paragraphs = TextUtils.textHandler(this.config, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.textSizeRefresh(this.config)
       this.$nextTick(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()))
     },
@@ -1439,7 +1439,7 @@ export default Vue.extend({
       e.preventDefault()
       this.contentEditable = false
       const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.$nextTick(() => {
         this.contentEditable = true
         TextUtils.focus(this.sel.start, this.sel.end)
