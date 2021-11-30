@@ -245,7 +245,9 @@ export default Vue.extend({
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
-    this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
+    this.$nextTick(() => {
+      this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
+    })
   },
   computed: {
     ...mapGetters({
@@ -464,7 +466,7 @@ export default Vue.extend({
       this.setPanelType(SidebarPanelType.template)
       GroupUtils.reset()
 
-      pageUtils.addPageToPos(pageUtils.newPage({}), this.pageIndex + 1)
+      pageUtils.addPageToPos(pageUtils.newPage({ width: this.config.width, height: this.config.height }), this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()

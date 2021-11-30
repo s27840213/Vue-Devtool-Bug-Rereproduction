@@ -254,7 +254,6 @@ export default Vue.extend({
       if (this.isShowGuidelineH && !RulerUtils.isDragging) {
         this.closeGuidelineH()
       }
-      console.log('scroll update')
       pageUtils.findCentralPageIndexInfo()
     },
     selectEnd() {

@@ -339,9 +339,7 @@ class UploadUtils {
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
-    console.log(putAssetDesignType, this.assetId)
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
-    console.log(this.assetId)
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 

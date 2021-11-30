@@ -11,9 +11,10 @@ class PageUtils {
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get getPage() { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get getPageSize() { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
-  get pageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -304,7 +305,7 @@ class PageUtils {
 
   fitPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.pageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.pageSize.height * (this.scaleRatio / 100))) * 0.8
+    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.currFocusPageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.currFocusPageSize.height * (this.scaleRatio / 100))) * 0.8
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
     store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))

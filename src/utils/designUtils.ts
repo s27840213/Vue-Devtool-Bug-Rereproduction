@@ -518,11 +518,12 @@ class DesignUtils {
     pageUtils.clearPagesInfo()
     themeUtils.refreshTemplateState()
     if (this.isLogin) {
-      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      /**
-       * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-       */
-      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
+      router.replace({ query: Object.assign({}) })
+      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+      // /**
+      //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
+      //  */
+      // router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
     }
   }
 
