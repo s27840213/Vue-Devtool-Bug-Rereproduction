@@ -69,6 +69,12 @@ class ThemeUtils {
     return recommendation.length ? recommendation : [...themes]
   }
 
+  compareThemesWithPage (themes: string, pageIndex?: number) {
+    const pageSize = this.getFocusPageSize(pageIndex)
+    const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
+    return pageThemes.some(theme => themes.includes(`${theme.id}`))
+  }
+
   private isSameDirection (targetRatio: number, ratio: number) {
     // @TODO 正方形
     return targetRatio === 1 || (Math.floor(targetRatio) === Math.floor(ratio))

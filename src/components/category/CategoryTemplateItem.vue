@@ -17,6 +17,9 @@ import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import themeUtils from '@/utils/themeUtils'
+import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: { ImageCarousel },
@@ -49,7 +52,35 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addTemplate() {
-      this.groupItem ? AssetUtils.addGroupTemplate(this.groupItem, this.item.id) : AssetUtils.addAsset(this.item)
+      const { match_cover: matchCover = {}, height, width } = this.item
+      const theme = themeUtils
+        .getThemesBySize(matchCover.width || width, matchCover.height || height)
+        .map(theme => theme.id).join(',')
+      const isSameTheme = themeUtils.compareThemesWithPage(theme)
+      const currLayer = pageUtils.getPage(pageUtils.currFocusPageIndex)
+      const cb = this.groupItem
+        ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
+        : (resize?: any) => AssetUtils.addAsset(this.item, resize)
+      if (!isSameTheme) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo(
+          '模板尺寸與頁面不同，請問要使用哪個尺寸',
+          [],
+          {
+            msg: '模板尺寸',
+            action: cb
+          },
+          {
+            msg: '頁面尺寸',
+            action: () => {
+              const resize = { width: currLayer.width, height: currLayer.height }
+              cb(resize)
+            }
+          }
+        )
+      } else {
+        cb()
+      }
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)

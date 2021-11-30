@@ -235,6 +235,7 @@ export default Vue.extend({
     }
     &.item-theme {
       @include layout-mobile {
+        width: 30vw;
         height: 45vw;
       }
     }

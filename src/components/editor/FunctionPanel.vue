@@ -5,12 +5,14 @@
         :iconName="'undo'"
         :iconWidth="'20px'"
         :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
-        @click.native="undo")
+        @click.native="undo"
+        v-hint="'復原'")
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
-        @click.native="redo")
+        @click.native="redo"
+        v-hint="'重做'")
       svg-icon(class="visible-hidden"
         :iconName="'share-alt'"
         :iconWidth="'20px'"

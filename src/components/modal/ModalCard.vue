@@ -13,8 +13,10 @@
         :iconWidth="'60px'")
     template(v-if='!pending')
       div(class="modal-card__button")
-        button(class="btn-primary-mid full-width" @click="confirmAction()") 確認
-        button(class="ml-10 btn-primary-mid full-width" @click="cancelAction()") 關閉
+        button(class="btn-primary-mid full-width"
+          @click="confirmAction()") {{ modalInfo.confirmButton.msg || '確認' }}
+        button(class="ml-10 btn-primary-mid full-width"
+          @click="cancelAction()") {{ modalInfo.cancelButton.msg || '關閉' }}
       div(class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")
 </template>

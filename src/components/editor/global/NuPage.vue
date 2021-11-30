@@ -17,7 +17,8 @@
         svg-icon(class="pointer btn-line-template mr-15"
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="openLineTemplatePopup()")
+          @click.native="openLineTemplatePopup()"
+          v-hint="'參考線版型'")
         //- svg-icon(class="pointer mr-5"
         //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
         //-   @click.native="")
@@ -26,14 +27,17 @@
         //-   @click.native="")
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="addPage()")
+          @click.native="addPage()"
+          v-hint="'新增頁面'")
         svg-icon(class="pointer"
           :class="[{'mr-10': getPageCount > 1}]"
           :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="duplicatePage()")
+          @click.native="duplicatePage()"
+          v-hint="'複製頁面'")
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="deletePage()")
+          @click.native="deletePage()"
+          v-hint="'刪除頁面'")
     div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
