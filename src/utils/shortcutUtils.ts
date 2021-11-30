@@ -315,14 +315,7 @@ class ShortcutUtils {
   }
 
   save() {
-    const urlParams = new URLSearchParams(window.location.search)
-    const type = urlParams.get('type')
-    const designId = urlParams.get('design_id')
-
     uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-    if (!type || !designId) {
-      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
-    }
   }
 
   selectAll() {

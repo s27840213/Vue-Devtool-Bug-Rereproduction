@@ -339,7 +339,12 @@ class UploadUtils {
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+    const type = router.currentRoute.query.type
+    const designId = router.currentRoute.query.design_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
+    if (!type || !designId) {
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId }) })
+    }
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 
