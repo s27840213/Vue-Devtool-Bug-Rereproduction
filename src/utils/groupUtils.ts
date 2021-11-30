@@ -221,6 +221,8 @@ class GroupUtils {
         LayerUtils.addLayersToPos(pageIndex, [tmp], currSelectedIndex)
       }
     }
+
+    store.commit('SET_currActivePageIndex', pageIndex)
   }
 
   selectAll() {

@@ -3,6 +3,7 @@
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
+      @scroll="scrollUpdate()"
       @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")
@@ -253,7 +254,7 @@ export default Vue.extend({
       if (this.isShowGuidelineH && !RulerUtils.isDragging) {
         this.closeGuidelineH()
       }
-
+      console.log('scroll update')
       pageUtils.findCentralPageIndexInfo()
     },
     selectEnd() {
@@ -265,7 +266,7 @@ export default Vue.extend({
        */
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
+        document.documentElement.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
