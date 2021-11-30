@@ -6,6 +6,9 @@
     "backgrounds": "Background",
     "texts": "Text",
     "myFile": "My File",
-    "brandkit": "Brandkit"
+    "brandkit": "Brandkit",
+    "heading": "Heading",
+    "subheading": "Subheading",
+    "body": "Body"
   }
 }

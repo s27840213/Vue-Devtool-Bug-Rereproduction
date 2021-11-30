@@ -1,16 +1,19 @@
 <template lang="pug">
-  div(class="function-panel scrollbar-gray")
+  div(class="function-panel scrollbar-gray"
+    :style="functionPanelStyles")
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
         :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
-        @click.native="undo")
+        @click.native="undo"
+        v-hint="'復原'")
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
-        @click.native="redo")
+        @click.native="redo"
+        v-hint="'重做'")
       svg-icon(class="visible-hidden"
         :iconName="'share-alt'"
         :iconWidth="'20px'"
@@ -24,38 +27,39 @@
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
     //- @Todo -> Simplify codes below ORZ
-    div(v-if="!isGroup" class="p-20")
-      panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-      panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
-        @openFontsPanel="openFontsPanel()"
-        v-on="$listeners")
-      panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
-      panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
-      panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-      panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-      panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked" v-on="$listeners")
-    //- case for Group layer for handle the sub selected layer
-    div(v-else class="function-panel p-20")
-      template(v-if="!hasSubSelectedLayer")
+    div(v-if="!isShowPagePreview")
+      div(v-if="!isGroup" class="p-20")
         panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-        panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
+        panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
           @openFontsPanel="openFontsPanel()"
           v-on="$listeners")
-        panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
-        panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
+        panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
+        panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
         panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-        panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
-      template(v-else)
-        panel-general
-        template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
-          panel-text-setting(
+        panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked" v-on="$listeners")
+      //- case for Group layer for handle the sub selected layer
+      div(v-else class="function-panel p-20")
+        template(v-if="!hasSubSelectedLayer")
+          panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
+          panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
             @openFontsPanel="openFontsPanel()"
             v-on="$listeners")
-          panel-text-effect-setting(v-on="$listeners")
-        panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
-        panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
-        panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+          panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
+          panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
+          panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+          panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
+        template(v-else)
+          panel-general
+          template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
+            panel-text-setting(
+              @openFontsPanel="openFontsPanel()"
+              v-on="$listeners")
+            panel-text-effect-setting(v-on="$listeners")
+          panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
+          panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 
 <script lang="ts">
@@ -99,8 +103,16 @@ export default Vue.extend({
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo'
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
+    functionPanelStyles(): { [index: string]: string } {
+      return this.isShowPagePreview ? {
+        'pointer-events': 'none'
+      } : {
+        'pointer-events': 'auto'
+      }
+    },
     selectedLayerNum(): number {
       return this.currSelectedInfo.layers.length
     },
@@ -132,7 +144,7 @@ export default Vue.extend({
     isFrameImage(): boolean {
       const { layers, types } = this.currSelectedInfo
       const frameLayer = layers[0] as IFrame
-      return types.has('frame') && frameLayer.clips[0].srcObj.assetId
+      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
     },
     isSubLayerFrameImage(): boolean {
       const { index } = this.currSubSelectedInfo
@@ -180,6 +192,7 @@ export default Vue.extend({
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
   overflow-y: scroll;
+  overflow-x: hidden;
   &__topbar {
     height: 60px;
     box-sizing: border-box;
@@ -189,6 +202,7 @@ export default Vue.extend({
     padding: 12px;
     background-color: setColor(blue-1, 0.06);
     border-bottom: 2px solid setColor(gray-6);
+    pointer-events: auto;
   }
 }
 </style>

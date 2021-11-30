@@ -9,7 +9,7 @@
         div(v-for="(scaler, index)  in controlPoints.scalers"
             class="controller-point"
             :key="index"
-            :style="Object.assign(scaler, cursorStyles(index, getPageRotate), pointerEvents())"
+            :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
             @mousedown.stop="scaleStart")
       div(class="nu-controller"
           :style="controllerStyles()")
@@ -51,9 +51,6 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPage: 'getPage'
     }),
-    getControlPoints(): any {
-      return this.config.controlPoints
-    },
     isActive(): boolean {
       return this.config.active
     },
@@ -97,8 +94,7 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale}px`,
-        outline: `${3 * (100 / this.scaleRatio)}px solid red`,
-        ...this.pointerEvents()
+        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -308,11 +304,6 @@ export default Vue.extend({
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
-    pointerEvents() {
-      return {
-        'pointer-events': this.config.pointerEvents ?? 'initial'
-      }
-    },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
       layer.style.cursor = cursor
@@ -333,7 +324,7 @@ export default Vue.extend({
   width: 10px;
   height: 10px;
   background-color: setColor(white);
-  border: 1.5px solid red;
+  border: 1.5px solid setColor(blue-2);
   border-radius: 30%;
 }
 

@@ -98,7 +98,7 @@ export default Vue.extend({
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
         height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
-        outline: `${3 * (100 / this.scaleRatio)}px solid red`,
+        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
         'pointer-events': this.config.pointerEvents ?? 'initial'
       }
     },
@@ -139,7 +139,7 @@ export default Vue.extend({
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
-        outline: `${3 * (100 / this.scaleRatio)}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
     updateLayerProps(prop: { [key: string]: string | boolean | number }) {
@@ -392,7 +392,7 @@ export default Vue.extend({
   width: 10px;
   height: 10px;
   background-color: setColor(white);
-  border: 1.5px solid red;
+  border: 1.5px solid setColor(blue-2);
   border-radius: 30%;
 }
 

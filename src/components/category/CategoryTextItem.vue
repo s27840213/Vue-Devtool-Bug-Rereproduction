@@ -1,6 +1,6 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     draggable="true"
     style="object-fit: contain;"
     @dragstart="dragStart($event)"
@@ -18,6 +18,11 @@ export default Vue.extend({
     src: String,
     item: Object
   },
+  data () {
+    return {
+      fallbackSrc: ''
+    }
+  },
   components: {},
   computed: {
     ...mapGetters({
@@ -26,7 +31,7 @@ export default Vue.extend({
   },
   methods: {
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
       const dataTransfer = event.dataTransfer as DataTransfer

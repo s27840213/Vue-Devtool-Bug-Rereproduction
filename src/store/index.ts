@@ -203,12 +203,12 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage> }) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
-      state.pages = pageUtils.newPages(newPages)
+      state.pages = newPages
     } else {
-      state.pages = pageUtils.newPages(newPages.pages)
+      state.pages = newPages.loadDesign ? pageUtils.newPages(newPages.pages) : newPages.pages
       state.name = newPages.name
     }
     // reset page index
@@ -625,7 +625,7 @@ const mutations: MutationTree<IEditorState> = {
     state.assetId = ''
     state.groupId = ''
     state.groupType = 0
-    state.name = '我的設計'
+    state.name = ''
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]

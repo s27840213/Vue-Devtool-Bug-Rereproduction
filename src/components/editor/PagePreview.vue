@@ -64,7 +64,7 @@ export default Vue.extend({
   width: calc(100% - 100px);
   grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
   grid-row-gap: 60px;
-  padding: 30px 0;
+  padding-top: 75px;
   margin-bottom: 50px;
 
   &-page-last {

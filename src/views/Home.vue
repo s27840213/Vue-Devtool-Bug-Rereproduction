@@ -2,76 +2,97 @@
   div(class="home")
     nu-header
     div(class="home-content")
-      div(v-if="isLogin" class="home-content__top")
-        img(class="home-content__top-img"
-          style="height: 250px;")
-        div(class="home-content__top-title"
-          style="font-size: 30px;") 海量精美電商模板等您使用！
-        div(class="home-content__top-btns")
-          div(class="rounded home-btn"
-            @click="goToPage('TemplateCenter')") 瀏 覽 模 板
-          div(class="rounded home-btn"
-            @click="goToPage('MyDesign')") 我 的 設 計
-      div(v-else
-        class="home-content__top")
-        img(class="home-content__top-img"
-          style="height: 350px;")
-        div(class="home-content__top-title") 海量精美電商模板等您使用！
-        div(class="home-content__top-subtitle")
-          span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
-          br
-          span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
-        div(class="home-content__top-btn rounded home-btn"
-          :type="'primary-lg'"
-          @click="newDesign()") 開 始 製 作
+      template(v-if="isMobile")
+        div(class="home-content__top")
+          img(class="home-content__top-img"
+            style="height: 150px;")
+          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(class="home-content__top-mobile-subtitle")
+            div Vivipic 提供無數免費的專業模板，快立刻開始編輯吧！
+            div(class="pt-30") *僅供電腦版編輯
+      template(v-else)
+        div(class="home-content__top")
+          img(class="home-content__top-img"
+            :style="`height: ${isLogin ? '250px;' : '350px;'}`")
+          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(v-if="!isLogin"
+            class="home-content__top-subtitle")
+            span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+            br
+            span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
+          div(v-if="isLogin"
+            class="home-content__top-btns")
+            div(class="rounded home-btn"
+              @click="goToPage('TemplateCenter')") 瀏 覽 模 板
+            div(class="rounded home-btn"
+              @click="goToPage('MyDesign')") 我 的 設 計
+          div(v-else
+            class="home-content__top-btn rounded home-btn"
+            :type="'primary-lg'"
+            @click="newDesign()") 開 始 製 作
       div(class="home-content-title label-lg") 開始設計圖片
-      div(class="home-content-theme")
+      div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
-      div(class="home-content-plaque")
+      div(v-if="!isLogin"
+        class="home-content__plaque")
         img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
-        div(class="home-content-plaque-title") 立即享受海量的精美電商模板
-        div(class="home-content-plaque-subtitle") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
-      div(class="home-content-feature")
+        div(class="home-content__plaque-title") 立即享受海量的精美電商模板
+        div(class="home-content__plaque-subtitle"
+          class="px-20")
+          span(v-if="isMobile") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+          span(v-else) Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
+      div(v-if="!isLogin"
+        class="home-content__feature")
         div(style="width: 100%;")
-          div(style="height: 140px;" class="x-scrollbar")
+          div(class="home-content__feature-items")
             btn(v-for="item, idx in featureList" :type="'icon-mid'"
-              class="home-content-feature-item"
+              class="home-content__feature-item"
               :class="{'selected': featureSelected === idx}"
               @click.native="featureItemClicked(idx)")
               svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
-                :iconWidth="'40px'")
-              div(class="pt-10 body-2") {{item.title}}
-        div(class="home-content-feature-content")
-          div(class="home-content-feature-img")
+                :iconWidth="isMobile ? '25px' : '40px'")
+              div(v-if="!isMobile"
+                class="pt-10 body-2") {{item.title}}
+        div(class="home-content__feature-content")
+          div(v-if="isMobile"
+            class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
+          div(class="home-content__feature-img")
             img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
-          div(class="home-content-feature-text")
+          div(class="home-content__feature-text")
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
-              //- @click.native="goToPage('Editor')") 開 始 製 作
+      div(v-if="isLogin")
+        div(class="home-content-title label-lg")
+          span 我的設計
+          span(class="pointer body-1 more"
+          @click="goToPage('MyDesign')") 更多
+        div(class="home-content__mydesign")
+          scroll-list(:list="allDesigns" type='design'
+            :isLoading="isDesignsLoading")
       div(class="home-content-title label-lg")
         div
-          template(v-for="tag in tags")
-            span(class="pointer mr-20"
-              @click="goToPage('Editor', tag)") {{'#' + tag}}
+          span(v-for="tag in tags"
+            class="pointer mr-20"
+            @click="newDesign(tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
-          @click="goToPage('Editor', tagString.replaceAll(',', ' '))") 更多
-      div(class="home-content-template")
+          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") 更多
+      div(class="home-content__template")
         scroll-list(:list="tagTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
-          @click="goToPage('Editor', 'locale::tw;;order_by::popular')") 更多
-      div(class="home-content-template")
+          @click="goToTemplateCenterSortBy('popular')") 更多
+      div(class="home-content__template")
         scroll-list(:list="popularTemplateList" type='template')
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
-          @click="goToPage('Editor', 'locale::tw;;order_by::time')") 更多
-      div(class="home-content-template")
+          @click="goToTemplateCenterSortBy('recent')") 更多
+      div(class="home-content__template")
         scroll-list(:list="latestTemplateList" type='template')
-      nu-footer(class="mt-100")
+      nu-footer(class="mt-50")
       div(v-if="showSizePopup"
         class="home__size")
         popup-size(@close="closePopup()")
@@ -127,7 +148,7 @@ export default Vue.extend({
       ],
       showSizePopup: false,
       featureSelected: 0,
-      tagString: 'IG,母嬰,雙十一,特價',
+      tagString: '聖誕節,母嬰,雙十一,特價',
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
@@ -139,8 +160,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      allDesigns: 'design/getAllDesigns',
+      isDesignsLoading: 'design/getIsDesignsLoading'
     }),
+    isMobile (): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
+    },
     featureContent(): string {
       return this.featureList[this.featureSelected].content
     }
@@ -156,6 +182,10 @@ export default Vue.extend({
       }
     }, 4000)
 
+    if (this.isLogin) {
+      designUtils.fetchDesigns(this.fetchAllDesigns)
+    }
+
     const response = await this.getThemeList()
     this.themeList = response.data.content
 
@@ -167,7 +197,7 @@ export default Vue.extend({
     })
     const theme = squareTheme.join(',')
 
-    let keyword = this.tagString.replaceAll(',', ' ')
+    let keyword = this.tagString.replace(/,/gi, ' ')
     this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword, theme })
     this.tagTemplateList = tagTemplate.data.content[0].list
@@ -181,11 +211,11 @@ export default Vue.extend({
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
   methods: {
-    ...mapActions('homeTemplate',
-      [
-        'getThemeList',
-        'getTagContent'
-      ]
+    ...mapActions({
+      getThemeList: 'homeTemplate/getThemeList',
+      getTagContent: 'homeTemplate/getTagContent',
+      fetchAllDesigns: 'design/fetchAllDesigns'
+    }
     ),
     goToPage(pageName: string, queryString = '') {
       if (queryString) {
@@ -194,10 +224,22 @@ export default Vue.extend({
         this.$router.push({ name: pageName })
       }
     },
-    newDesign() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign()
-      })
+    goToTemplateCenterSearch(search = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { q: search } })
+    },
+    goToTemplateCenterSortBy(sortBy = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { sort: sortBy } })
+    },
+    newDesign(search = '') {
+      if (search) {
+        this.$router.push({ name: 'Editor', query: { search: search } }).then(() => {
+          designUtils.newDesign()
+        })
+      } else {
+        this.$router.push({ name: 'Editor' }).then(() => {
+          designUtils.newDesign()
+        })
+      }
     },
     featureItemClicked(idx: number) {
       this.isTimerStop = true
@@ -244,8 +286,13 @@ export default Vue.extend({
   &-title {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     text-align: left;
-    padding: 4vw 10vw 1.5vw 10vw;
+    padding: 40px 10vw 20px 10vw;
+    @include layout-mobile {
+      font-size: 18px;
+      padding: 25px 5vw 20px 5vw;
+    }
     .more {
       white-space: nowrap;
     }
@@ -254,10 +301,17 @@ export default Vue.extend({
     position: relative;
     display: flex;
     justify-content: center;
+    @include layout-mobile {
+      width: 100%;
+      height: 150px;
+    }
     &-img {
       width: 100%;
       background-size: cover;
       background-image: url('~@/assets/img/jpg/homepage/home-top.jpg');
+      @include layout-mobile {
+        background-image: url('~@/assets/img/jpg/homepage/home-top-mobile.jpg');
+      }
     }
     &-title {
       position: absolute;
@@ -269,6 +323,10 @@ export default Vue.extend({
       @media screen and (max-width: 990px) {
         font-size: 32px;
       }
+      @include layout-mobile {
+        top: 40px;
+        font-size: 16px;
+      }
     }
     &-subtitle {
       position: absolute;
@@ -278,6 +336,13 @@ export default Vue.extend({
       @media screen and (max-width: 990px) {
         font-size: 16px;
       }
+    }
+    &-mobile-subtitle {
+      position: absolute;
+      font-size: 12px;
+      color: setColor(gray-2);
+      top: 75px;
+      transform: scale(0.9);
     }
     &-btns {
       position: absolute;
@@ -291,42 +356,74 @@ export default Vue.extend({
       top: 240px;
     }
   }
-  &-theme {
+  &__theme, &__mydesign, &__feature, &__template {
     padding: 0 10%;
+    @include layout-mobile {
+      padding: 0 5%;
+    }
   }
-  &-plaque {
+  &__plaque {
     display: flex;
     justify-content: center;
     position: relative;
-    padding: 36px 0;
-    @media screen and (min-width: 990px) {
-      padding: 56px 0;
-    }
+    padding: 50px 0;
     > img {
       width: 100%;
+      height: 150px;
+      @include layout-mobile {
+        height: 75px;
+      }
     }
     &-title {
       position: absolute;
-      top: 34%;
-      font-size: 1.6vw;
+      top: 95px;
+      font-size: 20px;
+      letter-spacing: 5px;
       font-weight: 700;
       line-height: 1.3;
       color: setColor(white);
+      @include layout-mobile {
+        top: 70px;
+        letter-spacing: 5px;
+        font-size: 16px;
+      }
     }
     &-subtitle {
       position: absolute;
-      top: 57%;
-      font-size: 1.1vw;
+      top: 135px;
+      font-size: 16px;
       color: setColor(white);
+      @include layout-mobile {
+        top: 95px;
+        font-size: 12px;
+        padding: 0;
+      }
     }
   }
-  &-feature {
+  &__feature {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
-    padding: 0 10%;
+    &-items {
+      display: grid;
+      column-gap: 30px;
+      grid-template-columns: auto;
+      grid-auto-flow: column;
+      scroll-behavior: smooth;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      text-align: left;
+      padding-bottom: 50px;
+      @include layout-mobile {
+        column-gap: 15px;
+        padding-bottom: 30px;
+      }
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
     &-item {
       cursor: pointer;
       width: 200px;
@@ -334,18 +431,35 @@ export default Vue.extend({
       border: 1px solid #f4f4f5;
       border-radius: 8px;
       padding: 24px 16px;
+      @include layout-mobile {
+        width: 50px;
+        height: 50px;
+      }
       &:hover {
         background: setColor("gray-5");
       }
     }
     &-content {
       display: flex;
+      flex-direction: row;
       justify-content: center;
       width: 100%;
-      padding-top: 2vw;
+      @include layout-mobile {
+        flex-direction: column;
+      }
+      &-title {
+        color: setColor(dark-blue-2);
+        text-align: center;
+        font-size: 14px;
+        letter-spacing: 2px;
+        font-weight: 700;
+      }
     }
     &-img {
-      width: 35%;
+      width: 500px;
+      @include layout-mobile {
+        width: 100%;
+      }
       > img {
         width: 100%;
         filter: drop-shadow(0px 3px 15px rgba(0, 0, 0, 0.25));
@@ -357,24 +471,37 @@ export default Vue.extend({
       flex-direction: column;
       justify-content: center;
       width: 30%;
-      font-size: 18px;
+      font-size: 14px;
       line-height: 40px;
       font-weight: 400;
-      text-align: left;
+      // text-align: left;
       padding-left: 5vw;
+      @media screen and (max-width: 1260px) {
+        width: 45%;
+      }
+      @media screen and (max-width: 990px) {
+        width: 60%;
+      }
+      @include layout-mobile {
+        width: unset;
+        padding: 20px 10px;
+      }
       > button {
-        width: 40%;
+        width: 150px;
         height: 45px;
+        font-size: 18px;
         padding: 5px 30px;
+        @include layout-mobile {
+          width: 50%;
+          padding: 0;
+          margin: 0 25%;
+        }
       }
     }
     .selected {
       background: #09467e;
       color: white;
     }
-  }
-  &-template {
-    padding: 0 10%;
   }
 }
 .home-btn {

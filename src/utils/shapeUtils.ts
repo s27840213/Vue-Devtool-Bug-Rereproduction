@@ -181,7 +181,7 @@ class ShapeUtils {
           theLayer.pSize = [0, 0]
           theLayer.cSize = [0, 0]
           theLayer.vSize = [0, 0]
-          theLayer.className = shapeUtils.classGenerator()
+          theLayer.className = theLayer.className ? theLayer.className : shapeUtils.classGenerator()
           break
         case 'E':
           theLayer.styleArray = ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])']
@@ -189,7 +189,7 @@ class ShapeUtils {
           theLayer.pDiff = [0, 0]
           theLayer.pSize = [0, 0]
           theLayer.cSize = [0, 0]
-          theLayer.className = shapeUtils.classGenerator()
+          theLayer.className = theLayer.className ? theLayer.className : shapeUtils.classGenerator()
           break
       }
     }

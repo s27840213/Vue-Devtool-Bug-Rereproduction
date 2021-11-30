@@ -71,7 +71,7 @@ export default Vue.extend({
         },
         {
           name: 'warm',
-          label: '溫暖',
+          label: '色溫',
           max: 100,
           min: -100
         }
@@ -182,6 +182,7 @@ export default Vue.extend({
   }
   &__label {
     flex: 1;
+    font-size: 14px;
     text-align: left;
     color: setColor(gray-2);
   }
@@ -213,7 +214,7 @@ export default Vue.extend({
       height: 15px;
       border-radius: 50%;
       background-color: #ffffff;
-      border: 2px solid #3c64b1;
+      border: 2px solid #4EABE6;
       transition: 0.2s;
       margin-top: -6.5px;
       position: relative;

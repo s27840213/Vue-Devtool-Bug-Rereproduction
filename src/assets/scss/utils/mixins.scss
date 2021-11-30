@@ -2,10 +2,13 @@
 	width: $w;
 	height: $h;
 }
-
-
 @mixin flexCenter(){
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+@mixin layout-mobile {
+    @media screen and (max-aspect-ratio: 1/1) {
+        @content;
+    }
 }

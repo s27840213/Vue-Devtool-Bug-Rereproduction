@@ -9,7 +9,8 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
-          iconColor="gray-2")
+          iconColor="gray-2"
+          v-hint="hintMap[`shadow-${icon}`]")
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -50,7 +51,8 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
-          iconColor="gray-2")
+          iconColor="gray-2"
+          v-hint="hintMap[`shadow-${icon}`]")
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -92,7 +94,8 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
           iconWidth="60px"
-          iconColor="gray-2")
+          iconColor="gray-2"
+          v-hint="hintMap[`shape-${icon}`]")
       div(class="w-full text-effect-setting__form")
         div(v-for="field in shapeFields"
           :key="field"
@@ -157,6 +160,16 @@ export default Vue.extend({
         spread: { max: 100, min: 0 },
         stroke: { max: 100, min: 0 },
         bend: { max: 100, min: -100 }
+      },
+      hintMap: {
+        'shadow-none': '無效果',
+        'shadow-shadow': '陰影',
+        'shadow-lift': '模糊陰影',
+        'shadow-hollow': '外框',
+        'shadow-splice': '外框分離',
+        'shadow-echo': '雙重陰影',
+        'shape-none': '無彎曲',
+        'shape-curve': '彎曲'
       }
     }
   },
@@ -211,7 +224,7 @@ export default Vue.extend({
       colorUtils.setCurrColor(this.currentStyle.textEffect.color)
     },
     onEffectClick(effectName: string): void {
-      TextEffectUtils.setTextEffect(effectName)
+      TextEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       this.recordChange()
     },
     onShapeClick(shapeName: string): void {

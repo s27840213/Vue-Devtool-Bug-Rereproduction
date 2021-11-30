@@ -8,6 +8,7 @@ import Home from '../views/Home.vue'
 import Pricing from '../views/Pricing.vue'
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
+import MobileWarning from '../views/MobileWarning.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -33,9 +34,12 @@ const SUPPORTED_LOCALES = [{
   name: 'Japan'
 }]
 
-const NON_MOBILE_ROUTES = [
-  'Editor',
-  'Settings'
+const MOBILE_ROUTES = [
+  'Home',
+  'TemplateCenter',
+  'SignUp',
+  'Login',
+  'MobileWarning'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -125,6 +129,11 @@ const routes: Array<RouteConfig> = [
     component: Settings
   },
   {
+    path: '/mobilewarning',
+    name: 'MobileWarning',
+    component: MobileWarning
+  },
+  {
     path: '/',
     name: 'Home',
     component: Home,
@@ -173,13 +182,13 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  if (NON_MOBILE_ROUTES.includes(to.name ?? '')) {
+  if (!MOBILE_ROUTES.includes(to.name ?? '')) {
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      next({ name: 'Home', query: { isMobile: 'true' } })
+      next({ name: 'MobileWarning', query: { isMobile: 'support_touch' } })
       return
     }
     if (window.screen.height > window.screen.width) {
-      next({ name: 'Home', query: { isMobile: 'true' } })
+      next({ name: 'MobileWarning', query: { isMobile: 'aspect_ratio' } })
       return
     }
   }

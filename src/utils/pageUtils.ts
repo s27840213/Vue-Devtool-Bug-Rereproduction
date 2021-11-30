@@ -1,6 +1,5 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import router from '@/router'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import GeneralUtils from './generalUtils'
@@ -12,7 +11,10 @@ class PageUtils {
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get getPage() { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get getPageSize() { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
+  get scaleRatio() { return store.getters.getPageScaleRatio }
+  get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
   get lastSelectedPageIndex(): number {
     return store.getters.getLastSelectedPageIndex
   }
@@ -39,6 +41,14 @@ class PageUtils {
       bottom,
       right
     }
+  }
+
+  topBound: number
+  bottomBound: number
+
+  constructor() {
+    this.topBound = -1
+    this.bottomBound = Number.MAX_SAFE_INTEGER
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -117,38 +127,20 @@ class PageUtils {
   }
 
   activeMostCentralPage(): number {
-    const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
-      const rect = (page as HTMLElement).getBoundingClientRect()
-      return {
-        top: rect.top,
-        bottom: rect.bottom
-      }
-    })
-    const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
-    if (container === undefined) {
-      return -1
-    }
-    const containerRect = container.getBoundingClientRect()
-    const centerLinePos = (containerRect.bottom - containerRect.top) / 2
-
-    let targetIndex = -1
-    let minDistance = Number.MAX_SAFE_INTEGER
-
-    pages.some((page: { top: number, bottom: number }, index: number) => {
-      if (page.top < centerLinePos && page.bottom > centerLinePos) {
-        targetIndex = index
-        return true
-      } else {
-        const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
-        if (minDistance > dist) {
-          targetIndex = index
-          minDistance = dist
-        }
-      }
-    })
-    FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
-    store.commit('SET_lastSelectedPageIndex', targetIndex)
-    return targetIndex
+    // pages.some((page: { top: number, bottom: number }, index: number) => {
+    //   if (page.top < centerLinePos && page.bottom > centerLinePos) {
+    //     targetIndex = index
+    //     return true
+    //   } else {
+    //     const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
+    //     if (minDistance > dist) {
+    //       targetIndex = index
+    //       minDistance = dist
+    //     }
+    //   }
+    // })
+    FocusUtils.focusElement(`.nu-page-${this.lastSelectedPageIndex}`, true)
+    return this.lastSelectedPageIndex
   }
 
   activeCurrActivePage(): void {
@@ -160,13 +152,15 @@ class PageUtils {
     currentPage.scrollIntoView({
       behavior: 'smooth'
     })
+    this.findCentralPageIndexInfo()
   }
 
   clearPagesInfo() {
     store.commit('CLEAR_pagesInfo')
   }
 
-  updateSpecPage(index: number, json: any): void {
+  updateSpecPage(index: number, json: Partial<IPage>): void {
+    console.log(json)
     const pages = store.getters.getPages
     const pagesTmp = GeneralUtils.deepCopy(pages)
     if (pagesTmp[index]) {
@@ -174,7 +168,7 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
-      store.commit('SET_pages', pagesTmp)
+      store.commit('SET_pages', this.newPages(pagesTmp))
     }
 
     console.log('Update spec page')
@@ -236,6 +230,86 @@ class PageUtils {
       currentPagesTmp = currentPagesTmp.concat(pages)
     }
     store.commit('SET_pages', currentPagesTmp)
+  }
+
+  findCentralPageIndexInfo() {
+    const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
+      const rect = (page as HTMLElement).getBoundingClientRect()
+      return {
+        top: rect.top,
+        bottom: rect.bottom
+      }
+    })
+    const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
+    if (container === undefined) {
+      return -1
+    }
+    const containerRect = container.getBoundingClientRect()
+    const centerLinePos = (containerRect.bottom - containerRect.top) / 2
+
+    const minDistance = Number.MAX_SAFE_INTEGER
+    const targetIndex = this.searchMostCentralPageIndex(pages, centerLinePos, minDistance, -1)
+    store.commit('SET_lastSelectedPageIndex', targetIndex)
+    this.activeMostCentralPage()
+    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
+    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+  }
+
+  findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
+    if (currIndex < 0 || currIndex >= posArr.length) {
+      return currIndex
+    }
+    if (toTop) {
+      if (posArr[currIndex].bottom < containerRect.top) {
+        return currIndex
+      } else {
+        return this.findBoundary(posArr, containerRect, currIndex - 1, toTop)
+      }
+    } else {
+      if (posArr[currIndex].top > containerRect.bottom) {
+        return currIndex
+      } else {
+        return this.findBoundary(posArr, containerRect, currIndex + 1, toTop)
+      }
+    }
+  }
+
+  isOutOfBound(pageIndex: number) {
+    return pageIndex <= this.topBound || pageIndex >= this.bottomBound
+  }
+
+  // Algorithm: Binary Search
+  searchMostCentralPageIndex(posArr: Array<{ top: number, bottom: number }>, centerLinePos: number, minDist: number, minIndex: number): number {
+    // get the middle inext of the posArr
+    const middleIndex = Math.floor(posArr.length / 2)
+    // if centerLinePos is exactly in the posArr, return the index
+    if (posArr[middleIndex].top < centerLinePos && posArr[middleIndex].bottom > centerLinePos) {
+      return middleIndex
+    }
+
+    // if remaining posArr number is equal to one and we still haven't get the target, return the middle index
+    if (posArr.length === 1) {
+      return middleIndex
+    }
+    const searchTopDir = posArr[middleIndex].top > centerLinePos
+    const dist = Math.min(Math.abs(centerLinePos - posArr[middleIndex].top), Math.abs(centerLinePos - posArr[middleIndex].bottom))
+    if (dist < minDist) {
+      minDist = dist
+    }
+    if (searchTopDir) {
+      return this.searchMostCentralPageIndex(posArr.slice(0, middleIndex), centerLinePos, minDist, middleIndex)
+    } else {
+      return middleIndex + this.searchMostCentralPageIndex(posArr.slice(middleIndex, posArr.length), centerLinePos, minDist, middleIndex)
+    }
+  }
+
+  fitPage() {
+    const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.currFocusPageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.currFocusPageSize.height * (this.scaleRatio / 100))) * 0.8
+
+    editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+    store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+    this.findCentralPageIndexInfo()
   }
 }
 

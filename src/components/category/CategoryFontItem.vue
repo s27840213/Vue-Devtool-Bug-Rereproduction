@@ -2,11 +2,11 @@
   div(class="category-fonts pointer" draggable="false" @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="`${host}/${item.id}/${preview}`"
+        :src="fallbackSrc || `${host}/${item.id}/${preview}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="`${host}/${item.id}/${preview2}`"
+        :src="fallbackSrc || `${host}/${item.id}/${preview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -38,6 +38,11 @@ export default Vue.extend({
     preview: String,
     preview2: String,
     item: Object
+  },
+  data() {
+    return {
+      fallbackSrc: ''
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
@@ -78,7 +83,7 @@ export default Vue.extend({
       updateTextState: 'UPDATE_STATE'
     }),
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
     async setFont() {
@@ -122,30 +127,15 @@ export default Vue.extend({
         if (!fontStore.some(font => font.face === this.item.id)) {
           this.updateTextState({ pending: this.item.id })
           const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-
-          let loaded = false
-
-          const load = newFont.load()
-            .then(newFont => {
-              loaded = true
-              document.fonts.add(newFont)
-              TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-            })
-            .catch(() => {
-              this.$notify({
-                group: 'error',
-                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-              })
-            })
-          setTimeout(() => {
-            if (!loaded) {
-              this.$notify({
-                group: 'error',
-                text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-              })
-            }
-          }, 30000)
-          await load
+          await Promise.race([
+            newFont.load(),
+            new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+          ]).then(() => {
+            document.fonts.add(newFont)
+            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
+          }).catch((error) => {
+            throw error
+          })
         }
 
         console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
@@ -192,6 +182,12 @@ export default Vue.extend({
         // TextPropUtils.updateTextPropsState()
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
+      } catch (error: any) {
+        const code = error.message === 'timeout' ? 'timeout' : error.code
+        this.$notify({
+          group: 'error',
+          text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`
+        })
       } finally {
         this.updateTextState({ pending: '' })
         const sel = window.getSelection()

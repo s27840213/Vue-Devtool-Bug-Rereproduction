@@ -15,6 +15,14 @@ import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
+import ZindexUtils from './zindexUtils'
+import resizeUtils from './resizeUtils'
+
+const STANDARD_TEXT_FONT: {[key: string]: string} = {
+  'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
+  'en-US': 'cRgaSK5ZVXnLDpWTL8MN',
+  'ja-JP': 'OyDbjZxjk9r14eZnPELb'
+}
 
 class AssetUtils {
   host = 'https://template.vivipic.com'
@@ -30,9 +38,9 @@ class AssetUtils {
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
-  get(item: IListServiceContentDataItem): IAsset {
+  get(item: IListServiceContentDataItem): Promise<IAsset> {
     const asset = this.getAsset(item.id)
-    return (asset && asset.ver === item.ver) ? GeneralUtils.deepCopy(asset) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? Promise.resolve(GeneralUtils.deepCopy(asset)) : this.fetch(item)
   }
 
   getTypeCategory(type: number): string | undefined {
@@ -86,43 +94,45 @@ class AssetUtils {
         return Promise.resolve(asset)
       }
       default: {
-        let loaded = false
-        setTimeout(() => {
-          if (!loaded) {
-            Vue.notify({
-              group: 'error',
-              text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-            })
+        return Promise.race([
+          fetch(asset.urls.json + `?ver=${ver}`),
+          new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+        ]).then((response: any) => {
+          if (!response.ok) {
+            throw new Error(response.status.toString())
           }
-        }, 30000)
-        return fetch(asset.urls.json + `?ver=${ver}`)
-          .then(response => {
-            loaded = true
-            return response.json()
+          return response.json()
+        }).then(jsonData => {
+          asset.jsonData = jsonData
+          store.commit('SET_assetJson', { [id]: asset })
+          return asset
+        }).catch((error) => {
+          Vue.notify({
+            group: 'error',
+            text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
           })
-          .then(jsonData => {
-            asset.jsonData = jsonData
-            store.commit('SET_assetJson', { [id]: asset })
-            return asset
-          })
-          .catch(() => {
-            Vue.notify({
-              group: 'error',
-              text: '網路異常，請確認網路正常後再嘗試。(ErrorCode: 1)'
-            })
-            return asset
-          })
+          return asset
+        })
       }
     }
   }
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
-    const { pageIndex } = attrs
+    const { pageIndex, width, height } = attrs
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     console.log('add template')
     console.log(json)
     json = await this.updateBackground(json)
-    PageUtils.updateSpecPage(targePageIndex, LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
+    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    PageUtils.updateSpecPage(targePageIndex, newLayer)
+    // @TODO: resize page/layer before adding to the store.
+    if (width && height) {
+      resizeUtils.resizePage(targePageIndex, newLayer, { width, height })
+      store.commit('UPDATE_pageProps', {
+        pageIndex: targePageIndex,
+        props: { width, height }
+      })
+    }
     stepsUtils.record()
   }
 
@@ -156,7 +166,10 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   async addLine(json: any, attrs: IAssetProps = {}) {
@@ -190,7 +203,10 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
@@ -227,7 +243,10 @@ class AssetUtils {
         ...styles
       }
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newShape(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   addFrame(json: any, attrs: IAssetProps = {}) {
@@ -251,7 +270,10 @@ class AssetUtils {
       },
       ...json
     }
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newFrame(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
@@ -338,9 +360,10 @@ class AssetUtils {
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
     LayerUtils.addLayers(targePageIndex, [newLayer])
+    stepsUtils.record()
   }
 
-  addStanardText(type: string, pageIndex?: number) {
+  addStanardText(type: string, text?: string, locale = 'zh-TW', pageIndex?: number) {
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -351,8 +374,14 @@ class AssetUtils {
         } as { [key: string]: string }
         const field = fieldMap[type]
         const textLayer = GeneralUtils.deepCopy(jsonData.default)
+        textLayer.paragraphs[0].spans[0].text = text
+        if (locale === 'zh-TW') {
+          textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
+        }
+        textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
+        stepsUtils.record()
       })
       .catch(() => {
         console.log('Cannot find the file')
@@ -402,20 +431,23 @@ class AssetUtils {
       }
     }
     console.log(config)
-    LayerUtils.addLayers(targePageIndex, [LayerFactary.newImage(config)])
+    const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
+    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
+    ZindexUtils.reassignZindex(targePageIndex)
+    stepsUtils.record()
   }
 
-  async addGroupTemplate(item: IListServiceContentDataItem, childId?: string) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     store.commit('SET_groupId', groupId)
     store.commit('SET_groupType', groupType)
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)
-    Promise.all(promises)
+    return Promise.all(promises)
       .then(assets => {
         const updatePromise = assets.map(asset =>
-          this.updateBackground(asset.jsonData || {})
+          this.updateBackground(GeneralUtils.deepCopy(asset.jsonData) || {})
             .then(json => LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
         )
         return Promise.all(updatePromise)
@@ -429,9 +461,17 @@ class AssetUtils {
           replace = true
         }
         PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
-        stepsUtils.record()
         Vue.nextTick(() => {
           PageUtils.scrollIntoPage(targetIndex)
+          // @TODO: resize page/layer before adding to the store.
+          if (resize) {
+            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+            store.commit('UPDATE_pageProps', {
+              pageIndex: targetIndex,
+              props: resize
+            })
+          }
+          stepsUtils.record()
         })
       })
   }

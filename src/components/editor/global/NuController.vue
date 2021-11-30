@@ -400,14 +400,18 @@ export default Vue.extend({
       const resizerStyle = { ...resizer }
       const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooSmall = this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort
-      resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      const tooSmall = this.getLayerType === 'text'
+        ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort)
+        : false
+      if (!tooSmall) {
+        resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      }
       const HW = {
         //  get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 20}px`
-          : (tooSmall ? `${(this.getLayerHeight - 20) * 0.16}px` : resizerStyle.width),
-        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 20}px`
-          : (tooSmall ? `${(this.getLayerWidth - 20) * 0.16}px` : resizerStyle.height)
+        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 10}px`
+          : (tooSmall ? `${(this.getLayerHeight - 10) * 0.16}px` : resizerStyle.width),
+        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 10}px`
+          : (tooSmall ? `${(this.getLayerWidth - 10) * 0.16}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -1720,6 +1724,7 @@ export default Vue.extend({
         const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         GroupUtils.set(this.pageIndex, newIndex, [this.config])
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, clipIndex, { active: true })
+        StepsUtils.record()
       }
     },
     onFrameDragEnter(clipIndex: number) {

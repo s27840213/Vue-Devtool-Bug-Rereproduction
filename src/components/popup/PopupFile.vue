@@ -3,7 +3,7 @@ div(class="popup-file")
   div(class="popup-file__item text-gray-3")
     span {{pageSize.w}}像素 x {{pageSize.h}}像素
   div(class="popup-file__item" @click="save()")
-    span 保存
+    span 儲存設計
   div(class="popup-file__item" @click="newDesign()")
     span 建立新設計
   hr(class="popup-file__hr")
@@ -114,7 +114,7 @@ export default Vue.extend({
     &:nth-child(1) {
       font-weight: bold;
     }
-    &:nth-child(n + 3) {
+    &:nth-child(n + 2) {
       &:hover {
         background-color: setColor(blue-3, 0.5);
       }

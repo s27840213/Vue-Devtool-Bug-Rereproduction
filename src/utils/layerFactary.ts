@@ -57,7 +57,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles } = GeneralUtils.deepCopy(config) as IFrame
+    const { designId, clips, decoration, decorationTop, styles, locked } = GeneralUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
@@ -110,7 +110,7 @@ class LayerFactary {
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
-      locked: false,
+      locked: locked ?? false,
       moved: false,
       dragging: false,
       designId: designId ?? '',
@@ -259,7 +259,7 @@ class LayerFactary {
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
-      locked: false,
+      locked: config.locked ?? false,
       moved: false,
       dragging: false,
       designId: config.designId,

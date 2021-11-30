@@ -13,7 +13,7 @@ class Controller {
     return {
       none: {},
       curve: {
-        bend: 40,
+        bend: 4,
         focus: false
       }
     }

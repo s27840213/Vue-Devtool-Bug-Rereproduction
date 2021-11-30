@@ -50,5 +50,7 @@ export interface IAssetProps {
   // the following props are used for preview image during polling process
   isPreview?: boolean,
   assetId?: string,
-  assetIndex?: number
+  assetIndex?: number,
+  width?: number,
+  height?: number
 }

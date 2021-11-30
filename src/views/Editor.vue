@@ -21,7 +21,8 @@
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
             editor-view
-            scale-ratio-editor(:style="scaleRatioEditorPos")
+            scale-ratio-editor(:style="scaleRatioEditorPos"
+              @toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
             :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")
@@ -135,7 +136,7 @@ export default Vue.extend({
     window.removeEventListener('beforeunload', this.beforeWindowUnload)
   },
   beforeRouteLeave(to, from, next) {
-    if (uploadUtils.isLogin) {
+    if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
         next()
       })

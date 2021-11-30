@@ -18,9 +18,19 @@ class ThemeUtils {
   }
 
   async fetchTemplateContent () {
+    const queryString = new URLSearchParams(window.location.search)
+    const keyword = queryString.get('search')
     store.dispatch('templates/resetContent')
-    await store.dispatch('templates/getCategories')
-    store.dispatch('templates/getContent')
+    if (keyword) {
+      queryString.delete('search')
+      store.dispatch('templates/getTagContent', { keyword })
+      window.history.replaceState({}, document.title, `${window.location.pathname}?${queryString.toString()}`)
+    } else {
+      await store.dispatch('templates/getCategories')
+      store.dispatch('templates/getContent')
+    }
+    // await this.getCategories()
+    // this.getContent()
   }
 
   refreshTemplateState (pageIndex?: number) {
@@ -57,6 +67,12 @@ class ThemeUtils {
       return this.isSimilarSize(themeRatio, ratio, 0.2)
     })
     return recommendation.length ? recommendation : [...themes]
+  }
+
+  compareThemesWithPage (themes: string, pageIndex?: number) {
+    const pageSize = this.getFocusPageSize(pageIndex)
+    const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
+    return pageThemes.some(theme => themes.includes(`${theme.id}`))
   }
 
   private isSameDirection (targetRatio: number, ratio: number) {

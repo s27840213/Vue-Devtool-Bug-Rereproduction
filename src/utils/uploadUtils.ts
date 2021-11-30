@@ -339,9 +339,12 @@ class UploadUtils {
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
-    console.log(putAssetDesignType, this.assetId)
+    const type = router.currentRoute.query.type
+    const designId = router.currentRoute.query.design_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
-    console.log(this.assetId)
+    if (!type || !designId) {
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId }) })
+    }
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 
@@ -659,6 +662,7 @@ class UploadUtils {
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
+      console.log(xhr)
       modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
@@ -675,13 +679,13 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
-    console.log('updated json:')
-    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
+
+    console.log(this.loginOutput.upload_map.fields)
 
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
@@ -703,7 +707,13 @@ class UploadUtils {
     modalUtils.setModalInfo('更新模板中')
     xhr.onload = () => {
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+      const status = xhr.status
+      if (status >= 200 && status < 300) {
+        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+      } else if (status >= 400 && status < 500) {
+        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
+        navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
+      }
     }
   }
 
@@ -846,7 +856,7 @@ class UploadUtils {
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 console.log('Set design id' + designId)
                 store.commit('SET_assetId', designId)
-                store.commit('SET_pages', json)
+                store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 themeUtils.refreshTemplateState()
                 //
                 stepsUtils.reset()
@@ -858,7 +868,7 @@ class UploadUtils {
                 break
               }
             }
-          })
+          }).then(() => pageUtils.fitPage())
         }
       })
       .catch((err) => {
@@ -1097,7 +1107,7 @@ class UploadUtils {
   }
 
   uploadExportJSON(exportId: string, json?: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
@@ -1115,10 +1125,9 @@ class UploadUtils {
       } else {
         formData.append('file', blob)
       }
+      xhr.onloadend = resolve
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
-      xhr.onload = resolve
-      xhr.onerror = reject
     })
   }
 

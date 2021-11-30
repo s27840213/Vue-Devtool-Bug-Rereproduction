@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="nu-header")
-    div(class="nu-header__container")
+    div(v-if="!isMobile"
+      class="nu-header__container")
       div(class="body-2")
         svg-icon(class="pointer"
           :iconName="'logo'"
@@ -59,21 +60,53 @@
         popup-account(v-if="isAccountPopup"
           class="nu-header__account"
           @close="() => (isAccountPopup = false)")
+    div(v-else
+      class="nu-header__container-mobile")
+      div(class="pl-15")
+        svg-icon(:iconName="'menu'"
+          :iconWidth="'25px'"
+          :iconColor="'gray-3'"
+          @click.native="openMenu")
+      div(class="flex-center")
+        svg-icon(class="pointer"
+          :iconName="'logo'"
+          :iconWidth="'90px'"
+          style="height: 45px;"
+          @click.native="goToPage('Home')")
+      div(class="pr-15 relative")
+        svg-icon(:iconName="'search'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click.native="onSearchClicked")
+        transition(name="fade-up")
+          search-bar(v-if="showSearchBar"
+              class="nu-header__search-mobile"
+              placeholder="搜 尋"
+              @search="handleSearch"
+              v-click-outside="() => { showSearchBar = false }")
     slot
+    div(v-if="isShowMenu"
+        class="nu-header__menu")
+        mobile-menu(v-click-outside="() => { isShowMenu = false }")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
+import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
 import { mapState } from 'vuex'
 import store from '@/store'
-
 export default Vue.extend({
   components: {
     SearchBar,
-    PopupAccount
+    PopupAccount,
+    MobileMenu
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   props: {
     noSearchbar: Boolean,
@@ -82,7 +115,9 @@ export default Vue.extend({
   data() {
     return {
       StepsUtils,
-      isAccountPopup: false
+      isAccountPopup: false,
+      showSearchBar: false,
+      isShowMenu: false
     }
   },
   computed: {
@@ -96,6 +131,9 @@ export default Vue.extend({
     },
     isAdmin(): boolean {
       return this.role === 0
+    },
+    isMobile (): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
     }
   },
   methods: {
@@ -123,6 +161,12 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.goToPage('TemplateCenter', keyword)
+    },
+    onSearchClicked() {
+      this.showSearchBar = true
+    },
+    openMenu() {
+      this.isShowMenu = true
     }
   }
 })
@@ -175,10 +219,28 @@ export default Vue.extend({
       }
     }
   }
+  &__container-mobile {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
   &__search {
     height: 28px;
     background-color: white;
     border-radius: 4px;
+  }
+  &__search-mobile {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    width: 150px;
+    height: 30px;
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid setColor(gray-4);
   }
   &__account {
     position: absolute;
@@ -186,6 +248,17 @@ export default Vue.extend({
     margin-top: 5px;
     right: 20px;
     width: 250px;
+  }
+  &__menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    background-color: #000000a1;
+    z-index: 999999;
   }
 }
 .profile {

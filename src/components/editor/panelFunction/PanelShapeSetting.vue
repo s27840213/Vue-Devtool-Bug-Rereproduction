@@ -381,7 +381,9 @@ export default Vue.extend({
           backgroundColor: origin,
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
         } : {
-          background: `url(${require('@/assets/img/png/multi-color.png')})`,
+          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
         }
       }
@@ -623,15 +625,19 @@ export default Vue.extend({
   &__colors {
     width: 100%;
     margin-top: 10px;
-    padding: 5px;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    @media (max-width: 1260px) {
+      gap: 10px;
+    }
   }
   &__color {
-    @include size(clamp(30px, 2vw, 50px), clamp(30px, 2vw, 50px));
-    margin: 5px;
+    width: 100%;
+    aspect-ratio: 1;
     border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
+    box-sizing: border-box;
     &:hover {
       box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
     }

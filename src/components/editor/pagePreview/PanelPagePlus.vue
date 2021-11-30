@@ -99,8 +99,9 @@ export default Vue.extend({
       StepsUtils.record()
     },
     addPage(position: number) {
+      const pageSize = pageUtils.getPageSize(position === 0 ? 0 : position - 1)
       this._addPageToPos({
-        newPage: pageUtils.newPage({}),
+        newPage: pageUtils.newPage({ width: pageSize.width, height: pageSize.height }),
         pos: position
       })
       this._setLastSelectedPageIndex(position)
@@ -111,38 +112,38 @@ export default Vue.extend({
 </script>
 <style lang="scss" scoped>
 .panel-page-plus {
-    position: relative;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  transition: 0.1s;
+
+  &-wrapper {
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 30px;
-    transition: 0.1s;
+    flex-direction: column;
+    width: 50px;
+    height: 50px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.15);
 
-    &-wrapper {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      width: 50px;
-      height: 50px;
-      font-size: 12px;
-      background: rgba(255, 255, 255, 0.15);
-
-      > span {
-        white-space: nowrap;
-        transform: scale(0.7);
-      }
+    > span {
+      white-space: nowrap;
+      transform: scale(0.7);
     }
+  }
 
-    &-last {
-      opacity: 0;
-    }
+  &-last {
+    opacity: 0;
+  }
 
-    &-drag {
-      width: 160px;
-      border-top: 3px solid setColor(blue-1);
-    }
+  &-drag {
+    width: 160px;
+    border-top: 3px solid setColor(blue-1);
+  }
 }
 </style>

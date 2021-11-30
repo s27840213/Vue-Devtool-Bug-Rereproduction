@@ -10,6 +10,7 @@ import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import uploadUtils from './uploadUtils'
 import { IPage } from '@/interfaces/page'
+import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -40,6 +41,44 @@ class StepsUtils {
     this.timers = {}
   }
 
+  filterForShapes(layer: ILayer): any {
+    let typedLayer
+    let newLayers
+    let needFetch = false
+    switch (layer.type) {
+      case 'shape':
+        return uploadUtils.layerInfoFilter(layer)
+      case 'tmp':
+      case 'group':
+        typedLayer = layer as IGroup
+        newLayers = typedLayer.layers.map(layer => this.filterForShapes(layer))
+        typedLayer.layers = newLayers
+        return typedLayer
+      case 'frame':
+        typedLayer = layer as any
+        if (typedLayer.decoration) {
+          typedLayer.decoration = { color: typedLayer.decoration.color }
+          needFetch = true
+        }
+        if (typedLayer.decorationTop) {
+          typedLayer.decorationTop = { color: typedLayer.decorationTop.color }
+          needFetch = true
+        }
+        typedLayer.needFetch = needFetch
+        return typedLayer
+      default:
+        return layer
+    }
+  }
+
+  filterForShapesInPages(pages: IPage[]): IPage[] {
+    for (const page of pages) {
+      const newLayers = page.layers.map(layer => this.filterForShapes(layer))
+      page.layers = newLayers
+    }
+    return pages
+  }
+
   record() {
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
@@ -51,7 +90,7 @@ class StepsUtils {
         modified: modifiedPage.modified !== undefined
       })
     }
-    const pages = GeneralUtils.deepCopy(store.getters.getPages)
+    const pages = this.filterForShapesInPages(GeneralUtils.deepCopy(store.getters.getPages))
     // Watch out! The deep cody method we use won't work on Set/Map object
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
 

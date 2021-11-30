@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
-      component(v-show="isSidebarPanelOpen"
+      component(v-show="isSidebarPanelOpen && !isShowPagePreview"
         class="p-10 border-box"
         :style="panelStyles()"
         :is="detailPageMode? 'panel-page' :panelComponents[currPanel]")
@@ -62,6 +62,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
+      isShowPagePreview: 'page/getIsShowPagePreview',
       detailPageMode: 'page/getDeatilPageMode'
     })
   },

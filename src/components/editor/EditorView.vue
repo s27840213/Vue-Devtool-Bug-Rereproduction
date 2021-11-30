@@ -3,6 +3,7 @@
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
+      @scroll="scrollUpdate()"
       @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")
@@ -52,7 +53,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
-import PageUtils from '@/utils/pageUtils'
+import pageUtils from '@/utils/pageUtils'
 import RulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
@@ -80,31 +81,32 @@ export default Vue.extend({
       editorView: null as unknown as HTMLElement,
       guidelinesArea: null as unknown as HTMLElement,
       pageIndex: -1,
-      currActivePageIndex: -1,
       backgroundControllingPageIndex: -1,
-      PageUtils,
+      pageUtils,
       canvasRect: null as unknown as DOMRect,
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
       scrollListener: null as unknown,
-      from: -1
+      from: -1,
+      screenWidth: document.documentElement.clientWidth,
+      screenHeight: document.documentElement.clientHeight
     }
   },
   mounted() {
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
-    const editorViewBox = this.$el as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
-    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.pageSize.width * (this.pageScaleRatio / 100)), editorViewBox.clientHeight / (this.pageSize.height * (this.pageScaleRatio / 100))) * 0.8
-
-    this.setPageScaleRatio(Math.round(this.pageScaleRatio * resizeRatio))
+    pageUtils.fitPage()
     this.$nextTick(() => {
-      this.currActivePageIndex = PageUtils.activeMostCentralPage()
+      pageUtils.findCentralPageIndexInfo()
     })
     document.addEventListener('blur', this.detectBlur, true)
-
+    window.onresize = () => {
+      this.screenWidth = document.documentElement.clientWidth
+      this.screenHeight = document.documentElement.clientHeight
+    }
     RulerUtils.on('showGuideline', (pagePos: number, pos: number, type: string, from?: number) => {
       const guidelineAreaRect = (this.guidelinesArea as HTMLElement).getBoundingClientRect()
       if (from !== undefined) {
@@ -143,6 +145,9 @@ export default Vue.extend({
         editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
         editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
       })
+    },
+    screenHeight() {
+      pageUtils.findCentralPageIndexInfo()
     }
   },
   computed: {
@@ -181,7 +186,7 @@ export default Vue.extend({
         .some(l => l.type === 'text' && l.isTyping)
     },
     currFocusPage(): IPage {
-      return this.PageUtils.currFocusPage
+      return this.pageUtils.currFocusPage
     },
     isDragging(): boolean {
       return RulerUtils.isDragging
@@ -203,8 +208,8 @@ export default Vue.extend({
     outerClick(e: MouseEvent) {
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
-      PageUtils.setBackgroundImageControlDefault()
-      PageUtils.activeMostCentralPage()
+      pageUtils.setBackgroundImageControlDefault()
+      pageUtils.activeMostCentralPage()
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -249,10 +254,7 @@ export default Vue.extend({
       if (this.isShowGuidelineH && !RulerUtils.isDragging) {
         this.closeGuidelineH()
       }
-
-      if (this.geCurrActivePageIndex === -1) {
-        PageUtils.activeMostCentralPage()
-      }
+      pageUtils.findCentralPageIndexInfo()
     },
     selectEnd() {
       if (this.isSelecting) {
@@ -263,7 +265,7 @@ export default Vue.extend({
        */
       this.$nextTick(() => {
         document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
+        document.documentElement.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         document.documentElement.removeEventListener('mouseup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
@@ -310,7 +312,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.$nextTick(() => {
           if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
-            this.geCurrActivePageIndex === -1 ? PageUtils.activeMostCentralPage() : PageUtils.activeCurrActivePage()
+            this.geCurrActivePageIndex === -1 ? pageUtils.activeMostCentralPage() : pageUtils.activeCurrActivePage()
           }
         })
       }, 0)
@@ -322,7 +324,7 @@ export default Vue.extend({
         /**
          * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
          */
-        return PageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
+        return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
       }
     },
     dragStartV(e: MouseEvent) {

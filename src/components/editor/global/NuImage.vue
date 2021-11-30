@@ -2,10 +2,10 @@
   div(class="nu-image"
       :style="styles()"
       draggable="false")
-    nu-adjust-image(v-if="isAdjustImage"
+    nu-adjust-image(v-show="isAdjustImage"
       :src="src"
       :styles="config.styles")
-    img(v-else class="nu-image__picture" :src="src" @error="onError()")
+    img(v-show="!isAdjustImage" class="nu-image__picture" :src="src" @error="onError()")
 </template>
 
 <script lang="ts">
@@ -15,7 +15,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -40,38 +40,37 @@ export default Vue.extend({
           default:
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
         }
-        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next'))
+        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
       }
     }
     nextImg.onload = () => {
       const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'pre'))
+      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
     }
 
-    nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.config.styles.width, 'next'))
+    nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
   },
   data() {
     return {
-      width: 0
     }
   },
   watch: {
-    getImgWidth() {
-      this.width = this.sizeMap(this.getImgWidth)
-    },
-    width() {
+    getImgDimension(newVal) {
       const { type } = this.config.srcObj
       if (type === 'background') return
       const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'pre'))
+      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'pre'))
       const nextImg = new Image()
-      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.width, 'next'))
+      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'next'))
     }
   },
   components: { NuAdjustImage },
   computed: {
-    getImgWidth(): number {
-      return this.config.styles.width
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio'
+    }),
+    getImgDimension(): number {
+      return ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)
     },
     src(): string {
       if (this.config.src) {

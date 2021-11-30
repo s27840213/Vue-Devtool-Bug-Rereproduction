@@ -56,8 +56,9 @@ export default Vue.extend({
       position: absolute;
       top: 100%;
       margin-top: 12px;
-      right: 0;
+      right: -50px;
       width: 210px;
+      z-index: 1;
     }
   }
 </style>

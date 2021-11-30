@@ -172,6 +172,7 @@ export default Vue.extend({
     let tagStrs: string[] = []
     const themes = urlParams.get('themes')
     let themeIds: number[] = []
+    const sortingCriterium = urlParams.get('sort')
     if (q) {
       this.searchbarKeyword = q
     }
@@ -180,6 +181,9 @@ export default Vue.extend({
     }
     if (themes) {
       themeIds = themes.split(',').map(Number)
+    }
+    if (sortingCriterium && this.sortingCriteria.includes(sortingCriterium)) {
+      this.selectedSorting = sortingCriterium
     }
     this.getHashtags().then(() => {
       this.hashtagSelections = {}

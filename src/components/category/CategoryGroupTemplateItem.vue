@@ -10,7 +10,7 @@
           img(:src="url" class="category-template-item__img")
       img(v-else
         class="category-template-item__img pointer"
-        :src="previewImage"
+        :src="fallbackSrc || previewImage"
         @error="handleNotFound")
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
     div(v-if="showId"
@@ -33,7 +33,8 @@ export default Vue.extend({
   data () {
     return {
       showCarousel: false,
-      carouselIdx: 0
+      carouselIdx: 0,
+      fallbackSrc: ''
     }
   },
   computed: {
@@ -47,7 +48,7 @@ export default Vue.extend({
   },
   methods: {
     handleNotFound(event: Event) {
-      (event.target as HTMLImageElement).src = require('@/assets/img/svg/image-preview.svg')
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)

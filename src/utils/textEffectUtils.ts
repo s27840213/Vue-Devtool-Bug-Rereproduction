@@ -6,7 +6,7 @@ import store from '@/store'
 
 class Controller {
   private shadowScale = 0.2
-  private strokeScale = 0.08
+  private strokeScale = 0.1
   effects = {} as { [key: string]: any }
   constructor () {
     this.effects = this.getDefaultEffects()
@@ -26,13 +26,13 @@ class Controller {
         spread: 50
       }, // 模糊陰影
       hollow: {
-        stroke: 30,
+        stroke: 17,
         color: ''
       }, // 空心
       splice: {
         distance: 50,
         angle: 45,
-        stroke: 30,
+        stroke: 17,
         color: ''
       }, // 出竅
       echo: {
@@ -107,16 +107,18 @@ class Controller {
   }
 
   convertTextEffect (effect: any) {
-    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor } = effect || {}
+    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
     const unit = this.shadowScale * fontSize
-    // const storkeWidth = this.storkeScale * fontSize
-    const strokeWidth = Math.ceil(Math.max(stroke, 0.1) / 9) * 0.5 * this.strokeScale * fontSize
+    let strokeWidth = this.strokeScale * fontSize
+    if (ver && ver === 'v1') {
+      strokeWidth = Math.ceil(Math.max(stroke, 0.1) / 9) * 0.5 * this.strokeScale * fontSize
+    }
     const effectShadowOffset = distance * 0.01 * unit
     const effectBlur = blur * 0.01 * unit
     const effectSpread = spread * 0.6 * 0.01
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
-    const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
     const effectOpacity = opacity * 0.01
+    const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
     switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
@@ -143,7 +145,7 @@ class Controller {
           ...CssConverter.convertTextShadow(
             effectShadowOffset * Math.cos(angle * Math.PI / 180),
             effectShadowOffset * Math.sin(angle * Math.PI / 180),
-            this.convertColor2rgba(color, 0.6),
+            this.convertColor2rgba(color, 1),
             effectBlur
           ),
           ...CssConverter.convertTextStorke(
@@ -154,7 +156,7 @@ class Controller {
         }
       case 'echo':
         return {
-          textShadow: [0.6, 0.3]
+          textShadow: [0.5, 0.2]
             .map((opacity, i) =>
               CssConverter.convertTextShadow(
                 effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1),
