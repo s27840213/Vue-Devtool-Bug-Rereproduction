@@ -21,7 +21,8 @@
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
             editor-view
-            scale-ratio-editor(:style="scaleRatioEditorPos")
+            scale-ratio-editor(:style="scaleRatioEditorPos"
+              @toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
             :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")

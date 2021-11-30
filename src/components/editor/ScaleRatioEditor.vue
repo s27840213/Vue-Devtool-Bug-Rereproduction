@@ -56,12 +56,16 @@ export default Vue.extend({
     },
     setIsShowPagePreview(show: boolean) {
       this._setIsShowPagePreview(show)
+      this.toggleSidebarPanel(!show)
       if (!show) {
         pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
       }
     },
     setDetailPageMode(show: boolean) {
       this._setDetailPageMode(show)
+    },
+    toggleSidebarPanel(open: boolean) {
+      this.$emit('toggleSidebarPanel', open)
     }
   }
 })
