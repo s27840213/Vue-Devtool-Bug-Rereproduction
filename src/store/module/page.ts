@@ -9,7 +9,7 @@ interface IPageState {
 
 const getDefaultState = (): IPageState => ({
   isShowPagePreview: false,
-  pagesPerRow: floor((window.screen.width - 130) / 180),
+  pagesPerRow: floor((document.body.clientWidth - 130) / 180),
   detailPageMode: false
 })
 
