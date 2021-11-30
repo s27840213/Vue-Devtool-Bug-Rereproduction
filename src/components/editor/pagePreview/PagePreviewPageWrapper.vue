@@ -210,19 +210,16 @@ export default Vue.extend({
   position: relative;
   transition: 0.25s ease-in-out;
   max-width: 100%;
-
   &-content {
     position: relative;
     box-sizing: border-box;
     transform-origin: 0 0;
     z-index: 1;
-
     &-more {
       position: absolute;
       right: 8px;
       top: 5px;
     }
-
     .menu {
       position: absolute;
       width: 100px;
@@ -237,7 +234,6 @@ export default Vue.extend({
       right: 8px;
       top: 35px;
     }
-
     .menu-item {
       position: relative;
       width: 100%;
@@ -250,19 +246,16 @@ export default Vue.extend({
       &:hover {
         background-color: setColor(blue-3);
       }
-
       &-icon {
         margin-left: 13px;
         display: flex;
         align-items: center;
         justify-content: center;
       }
-
       &-text {
         display: flex;
         align-items: center;
         justify-content: start;
-
         > span {
           font-weight: 400;
           font-size: 12px;
@@ -304,17 +297,13 @@ export default Vue.extend({
     font-size: 13px;
     font-weight: 600;
   }
-
   &__background {
-    // display: none;
     position: absolute;
     width: 100%;
     background: setColor(gray-3);
     z-index: -1;
   }
-
 }
-
 .focused {
   border: 3px solid setColor(blue-1);
   color: setColor(blue-1);
