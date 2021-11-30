@@ -127,7 +127,7 @@ class AssetUtils {
     PageUtils.updateSpecPage(targePageIndex, newLayer)
     // @TODO: resize page/layer before adding to the store.
     if (width && height) {
-      resizeUtils.resizePage(targePageIndex, this.getPage(targePageIndex), { width, height })
+      resizeUtils.resizePage(targePageIndex, newLayer, { width, height })
       store.commit('UPDATE_pageProps', {
         pageIndex: targePageIndex,
         props: { width, height }
