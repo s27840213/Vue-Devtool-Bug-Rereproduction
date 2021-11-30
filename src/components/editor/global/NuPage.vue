@@ -53,119 +53,125 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    div(class='pages-wrapper'
-        :class="`nu-page-${pageIndex}`"
-        :style="wrapperStyles()"
-        @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
-        @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-        @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-        @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-        @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-        @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-        @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-        @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
-        @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
-        @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-        @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-        @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-        @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-        @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-        @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-        @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.ctrl.90.exact.stop.prevent.self="undo()"
-        @keydown.meta.90.exact.stop.prevent.self="undo()"
-        @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
-        @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
-        @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
-        @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
-        @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
-        @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-        @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
-        @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
-        @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
-        @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
-        @mouseover="togglePageHighlighter(true)"
-        @mouseleave="togglePageHighlighter(false)"
-        tabindex="0")
-      div(class="scale-container relative" :style="`transform: scale(${scaleRatio/100})`")
-        page-content(:config="config" :pageIndex="pageIndex")
-        div(class="page-control" :style="styles('control')")
-          template(v-for="(layer, index) in config.layers")
-            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
-              data-identifier="controller"
-              :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-              :layerIndex="index"
-              :pageIndex="pageIndex"
-              :config="layer"
-              :snapUtils="snapUtils"
-              @setFocus="setFocus()"
-              @getClosestSnaplines="getClosestSnaplines"
-              @clearSnap="clearSnap")
-        div(v-if="ImageUtils.isImgControl(pageIndex)"
-            class="dim-background"
-            :style="styles('control')")
-          template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
-            nu-layer(:layerIndex="currSubSelectedInfo.index"
-              :pageIndex="pageIndex"
-              :config="getCurrSubSelectedLayerShown")
-            div(class="page-control" :style="Object.assign(styles('control'))")
-                nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-                                  :pageIndex="pageIndex"
-                                  :primaryLayerIndex="currSelectedInfo.index"
-                                  :config="Object.assign(getCurrSubSelectedLayer, { pointerEvents: 'none' })")
-          template(v-else)
-            nu-layer(:layerIndex="currSelectedIndex"
-              :pageIndex="pageIndex"
-              :config="getCurrLayer")
-            div(class="page-control" :style="Object.assign(styles('control'))")
-                nu-img-controller(:layerIndex="currSelectedIndex"
-                                  :pageIndex="pageIndex"
-                                  :config="getCurrLayer")
-        div(v-if="isBackgroundImageControl"
-            class="background-control"
-            :style="backgroundControlStyles()")
-          nu-image(:config="config.backgroundImage.config")
-          nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
-          div(:style="backgroundContorlClipStyles()")
+    template(v-if="!isOutOfBound")
+      div(class='pages-wrapper'
+          :class="`nu-page-${pageIndex}`"
+          :style="wrapperStyles()"
+          @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
+          @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+          @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+          @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
+          @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
+          @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+          @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+          @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
+          @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
+          @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+          @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+          @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
+          @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
+          @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+          @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+          @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+          @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+          @keydown.ctrl.90.exact.stop.prevent.self="undo()"
+          @keydown.meta.90.exact.stop.prevent.self="undo()"
+          @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
+          @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
+          @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+          @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+          @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+          @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
+          @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
+          @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
+          @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
+          @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
+          @mouseover="togglePageHighlighter(true)"
+          @mouseleave="togglePageHighlighter(false)"
+          tabindex="0")
+        div(class="scale-container relative"
+            :style="`transform: scale(${scaleRatio/100})`")
+          page-content(:config="config" :pageIndex="pageIndex")
+          div(class="page-control" :style="styles('control')")
+            template(v-for="(layer, index) in config.layers")
+              component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+                data-identifier="controller"
+                :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+                :layerIndex="index"
+                :pageIndex="pageIndex"
+                :config="layer"
+                :snapUtils="snapUtils"
+                @setFocus="setFocus()"
+                @getClosestSnaplines="getClosestSnaplines"
+                @clearSnap="clearSnap")
+          div(v-if="ImageUtils.isImgControl(pageIndex)"
+              class="dim-background"
+              :style="styles('control')")
+            template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
+              nu-layer(:layerIndex="currSubSelectedInfo.index"
+                :pageIndex="pageIndex"
+                :config="getCurrSubSelectedLayerShown")
+              div(class="page-control" :style="Object.assign(styles('control'))")
+                  nu-img-controller(:layerIndex="currSubSelectedInfo.index"
+                                    :pageIndex="pageIndex"
+                                    :primaryLayerIndex="currSelectedInfo.index"
+                                    :config="Object.assign(getCurrSubSelectedLayer, { pointerEvents: 'none' })")
+            template(v-else)
+              nu-layer(:layerIndex="currSelectedIndex"
+                :pageIndex="pageIndex"
+                :config="getCurrLayer")
+              div(class="page-control" :style="Object.assign(styles('control'))")
+                  nu-img-controller(:layerIndex="currSelectedIndex"
+                                    :pageIndex="pageIndex"
+                                    :config="getCurrLayer")
+          div(v-if="isBackgroundImageControl"
+              class="background-control"
+              :style="backgroundControlStyles()")
             nu-image(:config="config.backgroundImage.config")
-        div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-            class="dim-background"
-            :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
-    div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
-      class="page-highlighter"
-      :style="wrapperStyles()")
-    div(v-if="(currActivePageIndex === pageIndex && inPagePanel)"
-        class="page-resizer"
-        ref="pageResizer"
-        @mousedown.left.stop="pageResizeStart($event)"
-        @mouseenter="toggleResizerHint(true)"
-        @mouseleave="toggleResizerHint(false)")
-      svg-icon(class="page-resizer__resizer-bar"
-        :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
-      div(class="page-resizer__resizer-bar")
-      div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
-    div(class="snap-area"
-      :style="wrapperStyles()")
-      div(v-for="line in closestSnaplines.v"
-        class="snap-area__line snap-area__line--vr"
-        :style="snapLineStyles('v', line)")
-      div(v-for="line in closestSnaplines.h"
-        class="snap-area__line snap-area__line--hr"
-        :style="snapLineStyles('h', line)")
-      template(v-if="isShowGuideline && !inPagePanel")
-        div(v-for="(line,index) in guidelines.v"
+            nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
+            div(:style="backgroundContorlClipStyles()")
+              nu-image(:config="config.backgroundImage.config")
+          div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+              class="dim-background"
+              :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+      div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+        class="page-highlighter"
+        :style="wrapperStyles()")
+      div(v-if="(currActivePageIndex === pageIndex && inPagePanel)"
+          class="page-resizer"
+          ref="pageResizer"
+          @mousedown.left.stop="pageResizeStart($event)"
+          @mouseenter="toggleResizerHint(true)"
+          @mouseleave="toggleResizerHint(false)")
+        svg-icon(class="page-resizer__resizer-bar"
+          :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
+        div(class="page-resizer__resizer-bar")
+        div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
+      div(class="snap-area"
+        :style="wrapperStyles()")
+        div(v-for="line in closestSnaplines.v"
           class="snap-area__line snap-area__line--vr"
-          :style="snapLineStyles('v', line,true)"
-          @mouseover="showGuideline(line,'v',index)")
-        div(v-for="(line,index) in guidelines.h"
+          :style="snapLineStyles('v', line)")
+        div(v-for="line in closestSnaplines.h"
           class="snap-area__line snap-area__line--hr"
-          :style="snapLineStyles('h', line,true)"
-          @mouseover="showGuideline(line,'h',index)")
+          :style="snapLineStyles('h', line)")
+        template(v-if="isShowGuideline && !inPagePanel")
+          div(v-for="(line,index) in guidelines.v"
+            class="snap-area__line snap-area__line--vr"
+            :style="snapLineStyles('v', line,true)"
+            @mouseover="showGuideline(line,'v',index)")
+          div(v-for="(line,index) in guidelines.h"
+            class="snap-area__line snap-area__line--hr"
+            :style="snapLineStyles('h', line,true)"
+            @mouseover="showGuideline(line,'h',index)")
+    template(v-else)
+      div(class='pages-wrapper'
+        :class="`nu-page-${pageIndex}`"
+        :style="wrapperStyles()")
 </template>
 
 <script lang="ts">
@@ -182,16 +188,14 @@ import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
-import PageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
-import uploadUtils from '@/utils/uploadUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import frameUtils from '@/utils/frameUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -224,7 +228,8 @@ export default Vue.extend({
         v: [] as Array<number>,
         h: [] as Array<number>
       },
-      GeneralUtils
+      GeneralUtils,
+      pageUtils
     }
   },
   props: {
@@ -305,7 +310,7 @@ export default Vue.extend({
       return rulerUtils.showGuideline
     },
     currFocusPageIndex(): number {
-      return PageUtils.currFocusPageIndex
+      return pageUtils.currFocusPageIndex
     },
     inPagePanel(): boolean {
       return this.detailPageMode
@@ -314,6 +319,9 @@ export default Vue.extend({
       return {
         margin: this.inPagePanel ? '0px auto' : '25px auto'
       }
+    },
+    isOutOfBound(): boolean {
+      return pageUtils.isOutOfBound(this.pageIndex)
     }
   },
   watch: {
@@ -394,7 +402,7 @@ export default Vue.extend({
     },
     pageDblClickHandler(): void {
       if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
-        PageUtils.startBackgroundImageControl(this.pageIndex)
+        pageUtils.startBackgroundImageControl(this.pageIndex)
       }
     },
     setFocus(): void {
@@ -452,10 +460,9 @@ export default Vue.extend({
       this.setPanelType(SidebarPanelType.template)
       GroupUtils.reset()
 
-      PageUtils.addPageToPos(PageUtils.newPage({}), this.pageIndex + 1)
-      this.setLastSelectedPageIndex(this.pageIndex + 1)
+      pageUtils.addPageToPos(pageUtils.newPage({}), this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
-      this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
     },
     deletePage() {
@@ -474,10 +481,9 @@ export default Vue.extend({
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.designId = ''
-      PageUtils.addPageToPos(page, this.pageIndex + 1)
-      this.setLastSelectedPageIndex(this.pageIndex + 1)
+      pageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
-      this.$nextTick(() => { PageUtils.scrollIntoPage(this.pageIndex + 1) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
     },
     backgroundControlStyles() {
@@ -536,7 +542,7 @@ export default Vue.extend({
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-        PageUtils.updatePageProps({
+        pageUtils.updatePageProps({
           height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
         })
       } else {
@@ -550,7 +556,7 @@ export default Vue.extend({
     pageResizeEnd(e: MouseEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = false
-      PageUtils.updatePageProps({
+      pageUtils.updatePageProps({
         height: Math.round(this.config.height)
       })
       StepsUtils.record()
@@ -640,7 +646,9 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
-
+  &:empty {
+    background-color: setColor(gray-4);
+  }
   :focus {
     outline: none;
   }
@@ -764,5 +772,9 @@ export default Vue.extend({
   z-index: 1000;
   background-color: rgba(0, 0, 0, 0.6);
   color: white;
+}
+
+.skeleton {
+  background-color: setColor(white);
 }
 </style>
