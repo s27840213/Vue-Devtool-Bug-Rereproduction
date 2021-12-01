@@ -80,12 +80,14 @@ div(style="position: relative;")
           class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="flex"
+        :class="hideBackButton ? 'pt-20' : ''"
         style="justify-content: center;")
         btn(:type="'primary-mid'"
           class="btn-shadow body-1"
           style="width: 50%;"
           @click.native="onSendEmailClicked()") 確 定 發 送
-      div(class="flex"
+      div(v-if="!hideBackButton"
+        class="flex"
         style="justify-content: center;")
         btn(:type="'icon-mid'"
           class="bg-gray-3 text-white btn-shadow"
@@ -145,19 +147,19 @@ div(style="position: relative;")
             svg-icon(class="pointer"
               :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
         div(class="invalid-message")
-          div(class="flex align-center")
+          div
             svg-icon(class="pointer"
               :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
             span(class="ml-5"
               :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
-          div(class="flex align-center")
+          div
             svg-icon(class="pointer"
               :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
             span(class="ml-5"
               :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
-          div(class="flex align-center")
+          div
             svg-icon(class="pointer"
               :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
@@ -225,10 +227,18 @@ export default Vue.extend({
       confirmErrorMessage: '' as string,
       isResetClicked: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
+      hideBackButton: false,
       isLoading: false
     }
   },
   created() {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.has('type')) {
+      if (urlParams.get('type') === 'forgot') {
+        this.currentPageIndex = 1
+        this.hideBackButton = true
+      }
+    }
     if (this.$route.query.state) {
       const stateStr = this.$route.query.state as string
       const platform = JSON.parse(stateStr).platform
@@ -292,7 +302,7 @@ export default Vue.extend({
       }
     },
     passwordLengthValid(): boolean {
-      if (this.password.length >= 8 && this.password.length <= 18) {
+      if (this.password.length >= 8) {
         return true
       } else {
         return false
@@ -708,9 +718,12 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   font-size: 14px;
-  font-family: Mulish;
   color: setColor(red);
   padding-top: 5px;
+  > div {
+    display: flex;
+    align-items: center;
+  }
 }
 .btn-shadow {
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);

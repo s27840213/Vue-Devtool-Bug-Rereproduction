@@ -77,19 +77,19 @@ div(style="position:relative;")
             :style="`${passwordValid && !emailResponseError ? '' : 'color: #EB5757;'}`")
             span {{ passwordHint }}
           div(v-else class="invalid-message")
-            div(class="flex align-center")
+            div
               svg-icon(class="pointer"
                 :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
               span(class="ml-5 mt-2"
                 :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
-            div(class="flex align-center")
+            div
               svg-icon(class="pointer"
                 :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
               span(class="ml-5 mt-2"
                 :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
-            div(class="flex align-center")
+            div
               svg-icon(class="pointer"
                 :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
@@ -642,9 +642,12 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   font-size: 14px;
-  font-family: Mulish;
   color: setColor(red);
   padding-top: 10px;
+  > div {
+    display: flex;
+    align-items: center;
+  }
 }
 .btn-shadow {
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
