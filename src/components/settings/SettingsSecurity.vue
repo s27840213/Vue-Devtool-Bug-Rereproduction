@@ -1,11 +1,13 @@
 <template lang="pug">
 div(class="settings-security")
   div(class="settings-security__content")
-    div(class="settings-security__title") 更改密碼
-    div(class="settings-security__item")
-      span 您上一次密碼更新日期：
-      div(class="settings-security__button") 更 改
-    div(class="settings-security__divider")
+    div(v-if="showUpdatePassword")
+      div(class="settings-security__title") 更改密碼
+      div(class="settings-security__item")
+        span 您上一次密碼更新日期： {{lastUpdateText}}
+        div(class="settings-security__button"
+          @click="onChangeClicked()") 更 改
+      div(class="settings-security__divider")
     div(class="settings-security__title") 安全防護
     div(class="settings-security__item")
       span 從所有裝置上登出以結束所有作業階段。
@@ -16,19 +18,51 @@ div(class="settings-security")
       span 刪除帳號後，你將無法再存取任何設計或登入 Vivipic。
       div(class="settings-security__button") 刪 除 帳 號
   spinner(v-if="isLoading")
+  div(v-if="showVerifyPopup"
+    class="settings-security__popup-verify")
+    popup-verify(type="oldPass"
+      :account="account"
+      @close="closePopup()")
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import PopupVerify from '@/components/popup/PopupVerify.vue'
 
 export default Vue.extend({
+  components: {
+    PopupVerify
+  },
   data() {
     return {
-      isLoading: false
+      isLoading: false,
+      showUpdatePassword: false,
+      showVerifyPopup: false
     }
   },
   computed: {
+    ...mapGetters({
+      account: 'user/getAccount',
+      upassUpdate: 'user/getUpassUpdate'
+    }),
+    lastUpdateText(): string {
+      if (this.upassUpdate === '0000-00-00 00:00:00') {
+        return '未曾更新'
+      }
+      const s = new Date(this.upassUpdate)
+      return s.getFullYear() + ' 年 ' + (s.getMonth() + 1) + ' 月 ' + s.getDate() + ' 日'
+    }
+  },
+  mounted() {
+    this.showUpdatePassword = this.upassUpdate.length > 0
   },
   methods: {
+    onChangeClicked() {
+      this.showVerifyPopup = true
+    },
+    closePopup() {
+      this.showVerifyPopup = false
+    }
   }
 })
 </script>
@@ -75,6 +109,18 @@ export default Vue.extend({
     border-top: 2px solid setColor(gray-4);
     margin-top: 15px;
     padding-bottom: 25px;
+  }
+  &__popup-verify {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000a1;
+    z-index: 999999;
   }
 }
 </style>

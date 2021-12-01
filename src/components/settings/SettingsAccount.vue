@@ -38,16 +38,16 @@ div(class="settings-account")
         @click.native="onConfirmClicked()") 修 改 並 儲 存
   div(v-if="showVerifyPopup"
     class="settings-account__popup-verify")
-    popup-verify(@close="closePopup()"
-      @isVerified="verifyEmail()"
-      :account="inputAccount")
+    popup-verify(type="vcode"
+      :account="inputAccount"
+      @close="closePopup()"
+      @isVerified="verifyEmail()")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
-// import userApis from '@/apis/user'
 import store from '@/store'
 
 export default Vue.extend({
