@@ -103,10 +103,15 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        if (store.getters['user/isLogin']) {
-          next({ path: from.query.redirect as string || '/' })
-        } else {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.has('type')) {
           next()
+        } else {
+          if (store.getters['user/isLogin']) {
+            next({ path: from.query.redirect as string || '/' })
+          } else {
+            next()
+          }
         }
       } catch (error) {
         console.log(error)
