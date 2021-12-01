@@ -316,25 +316,24 @@ export default Vue.extend({
           subLayerIndex = undefined
         }
       }
-      console.log('start: p: ', this.sel.start.pIndex)
-      if (!TextUtils.isSel(this.sel.start)) {
-        const sel = TextUtils.getSelection()
-        start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-        end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 
-        if (!TextUtils.isSel(start) && config.type === 'text') {
-          start = TextUtils.selectAll(config as IText).start
-          end = TextUtils.selectAll(config as IText).end
-        }
-        TextUtils.updateSelection(start, end)
+      // if (!TextUtils.isSel(this.sel.start)) {
+      const sel = TextUtils.getSelection()
+      start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+      end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+
+      if (!TextUtils.isSel(start) && config.type === 'text') {
+        start = TextUtils.selectAll(config as IText).start
+        end = TextUtils.selectAll(config as IText).end
       }
+      TextUtils.updateSelection(start, end)
+      // }
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
       TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
-      /**
-       *  Only select with range or none selection exist, the prop-panel update.
-       * */
+
+      // Only select with range or none selection exist, the prop-panel update.
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
         TextPropUtils.updateTextPropsState()
       }

@@ -28,8 +28,8 @@ class TextPropUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
+  get getCurrTextProps(): { [key: string]: number | boolean | string } { return (text.state as any).props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (text.state as any).sel }
-  get getCurrTextProps() { return (text.state as any).props }
   get getTextState() { return text.state as ITextState }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
   get getTextInfo(): { config: IText | IGroup, layerIndex: number, subLayerIndex?: number } {
