@@ -124,9 +124,10 @@ const routes: Array<RouteConfig> = [
     component: TemplateCenter
   },
   {
-    path: '/settings',
+    path: '/settings/:view?',
     name: 'Settings',
-    component: Settings
+    component: Settings,
+    props: true
   },
   {
     path: '/mobilewarning',
