@@ -108,6 +108,14 @@ class MouseUtils {
     }
     const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
+
+    const pageSize = store.getters.getPageSize(pageIndex)
+    const resizeRatio = 0.8
+    const pageAspectRatio = pageSize.width / pageSize.height
+    const photoAspectRatio = data.styles.width / data.styles.height
+    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+
     let layer
     switch (data.type) {
       case 'image': {
@@ -127,10 +135,10 @@ class MouseUtils {
             scaleX: 1,
             scaleY: 1,
             rotate: 0,
-            width: data.styles.width,
-            height: data.styles.height,
-            initWidth: data.styles.initWidth ? data.styles.initWidth : data.styles.width,
-            initHeight: data.styles.initHeight ? data.styles.initHeight : data.styles.height,
+            width: photoWidth,
+            height: photoHeight,
+            initWidth: photoWidth,
+            initHeight: photoHeight,
             zindex: -1,
             opacity: 100,
             horizontalFlip: data.styles.horizontalFlip,

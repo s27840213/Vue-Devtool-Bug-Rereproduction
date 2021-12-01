@@ -1,154 +1,152 @@
 <template lang="pug">
-  keep-alive
-    div(class="nu-controller" ref="self")
-      div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
-        | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
-      div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
-        div(class="nu-controller__object-hint__icon")
-          svg-icon(iconName="angle"
-                  iconWidth="12px"
-                  iconColor="gray-2")
-        div(class="nu-controller__object-hint__text")
-          span {{ Math.round(hintAngle) % 360 }}
-      div(class="nu-controller__content"
-          ref="body"
-          :layer-index="`${layerIndex}`"
-          :style="styles(getLayerType)"
-          @drop="onDrop($event)"
-          @dragover.prevent,
-          @click.left="onClick"
-          @click.right.stop="onRightClick"
-          @contextmenu.prevent
-          @mousedown.left="moveStart"
-          @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
-          @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
-          @dblclick="onDblClick")
-        svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-          g(v-for="(clip, index) in config.clips"
-            v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-            :style="frameClipStyles(clip, index)"
-            @mouseenter="onFrameMouseEnter(index)"
-            @mouseleave="onFrameMouseLeave(index)"
-            @mouseup="onFrameMouseUp(index)"
-            @dragenter="onFrameDragEnter(index)",
-            @dragleave="onFrameDragLeave(index)",
-            @drop="onFrameDrop(index)",
-            @click="clickSubController(index)"
-            @dblclick="dblSubController(index)")
-        template(v-if="(['group','frame', 'tmp'].includes(getLayerType)) && isActive")
-          div(class="sub-controller")
-            template(v-for="(layer,index) in getLayers")
-              component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
-                class="relative"
-                data-identifier="controller"
-                :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
-                :key="`group-controller-${layer.id}`"
-                :pageIndex="pageIndex"
-                :layerIndex="index"
-                :primaryLayerIndex="layerIndex"
-                :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
-                :type="config.type"
-                @onFrameDrop="getLayerType === 'frame' ? onFrameDrop(index) : null"
-                @onFrameDragenter="onFrameDragEnter(index)",
-                @onFrameDragleave="onFrameDragLeave(index)",
-                @clickSubController="clickSubController"
-                @dblSubController="dblSubController")
-        template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-            div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-              @dragstart="preventDefault($event)"
-              :style="textBodyStyle()"
-              class="text__body"
-              :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
-              @focus="onTextFocus()"
-              @blur="onTextBlur()"
-              @compositionstart="composingStart"
-              @compositionend="composingEnd"
-              @keypress="onKeyPress"
-              @keydown="onKeyDown"
-              @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-              @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-              @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-              @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-              @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-              @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-              @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-              @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-              @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-              @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-              @keydown.37.stop
-              @keydown.38.stop
-              @keydown.39.stop
-              @keydown.40.stop
-              @keyup="onKeyUp")
-              p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-                :data-pindex="pIndex"
-                :key="p.id",
-                :style="textStyles(p.styles)")
-                template(v-for="(span, sIndex) in p.spans")
-                  span(class="text__span"
-                    :data-sindex="sIndex"
-                    :key="span.id",
-                    :style="textStyles(span.styles)") {{ span.text }}
-                    br(v-if="!span.text && p.spans.length === 1")
-        div(v-if="isActive && isLocked && (scaleRatio >20)"
-            class="nu-controller__lock-icon"
-            :style="lockIconStyles"
-            v-hint="'unlock'")
-          svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-            @click.native="MappingUtils.mappingIconAction('unlock')")
-      div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
-          class="nu-controller__ctrl-points"
-          :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-          div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
-              class="control-point"
+  div(class="nu-controller" ref="self")
+    div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
+      | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
+    div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
+      div(class="nu-controller__object-hint__icon")
+        svg-icon(iconName="angle"
+                iconWidth="12px"
+                iconColor="gray-2")
+      div(class="nu-controller__object-hint__text")
+        span {{ Math.round(hintAngle) % 360 }}
+    div(class="nu-controller__content"
+        ref="body"
+        :layer-index="`${layerIndex}`"
+        :style="styles(getLayerType)"
+        @drop.prevent="onDrop($event)"
+        @dragover.prevent,
+        @click.left="onClick"
+        @click.right.stop="onRightClick"
+        @contextmenu.prevent
+        @mousedown.left="moveStart"
+        @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
+        @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+        @dblclick="onDblClick")
+      svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+        g(v-for="(clip, index) in config.clips"
+          v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
+          :style="frameClipStyles(clip, index)"
+          @mouseenter="onFrameMouseEnter(index)"
+          @mouseleave="onFrameMouseLeave(index)"
+          @mouseup="onFrameMouseUp(index)"
+          @dragenter="onFrameDragEnter(index)",
+          @dragleave="onFrameDragLeave(index)",
+          @drop="onFrameDrop(index)",
+          @click="clickSubController(index)"
+          @dblclick="dblSubController(index)")
+      template(v-if="(['group','frame', 'tmp'].includes(getLayerType)) && isActive")
+        div(class="sub-controller")
+          template(v-for="(layer,index) in getLayers")
+            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+              class="relative"
+              data-identifier="controller"
+              :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
+              :key="`group-controller-${layer.id}`"
+              :pageIndex="pageIndex"
+              :layerIndex="index"
+              :primaryLayerIndex="layerIndex"
+              :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
+              :type="config.type"
+              @onFrameDrop="getLayerType === 'frame' ? onFrameDrop(index) : null"
+              @onFrameDragenter="onFrameDragEnter(index)",
+              @onFrameDragleave="onFrameDragLeave(index)",
+              @clickSubController="clickSubController"
+              @dblSubController="dblSubController")
+      template(v-if="config.type === 'text' && config.active")
+        div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+          div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
+            @dragstart="preventDefault($event)"
+            :style="textBodyStyle()"
+            class="text__body"
+            :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
+            @focus="onTextFocus()"
+            @blur="onTextBlur()"
+            @compositionstart="composingStart"
+            @compositionend="composingEnd"
+            @keypress="onKeyPress"
+            @keydown="onKeyDown"
+            @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+            @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+            @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            @keydown.37.stop
+            @keydown.38.stop
+            @keydown.39.stop
+            @keydown.40.stop
+            @keyup="onKeyUp")
+            p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+              :data-pindex="pIndex"
+              :key="p.id",
+              :style="textStyles(p.styles)")
+              template(v-for="(span, sIndex) in p.spans")
+                span(class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)") {{ span.text }}
+                  br(v-if="!span.text && p.spans.length === 1")
+      div(v-if="isActive && isLocked && (scaleRatio >20)"
+          class="nu-controller__lock-icon"
+          :style="lockIconStyles"
+          v-hint="'unlock'")
+        svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
+          @click.native="MappingUtils.mappingIconAction('unlock')")
+    div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
+        class="nu-controller__ctrl-points"
+        :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+        div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
+            class="control-point"
+            :key="index"
+            :marker-index="index"
+            :style="Object.assign(end, {'cursor': 'pointer'})"
+            @mousedown.left.stop="lineEndMoveStart")
+        div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
+            class="control-point scaler"
+            :key="index"
+            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
+            @mousedown.left.stop="scaleStart")
+        div(v-for="(resizer, index) in resizer(controlPoints)"
+            @mousedown.left.stop="resizeStart($event)")
+          div(class="control-point__resize-bar"
               :key="index"
-              :marker-index="index"
-              :style="Object.assign(end, {'cursor': 'pointer'})"
-              @mousedown.left.stop="lineEndMoveStart")
-          div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
-              class="control-point scaler"
+              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
+          div(class="control-point resizer"
+              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
+        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
+            @mousedown.left.stop="moveStart($event)")
+          div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
-              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
-              @mousedown.left.stop="scaleStart")
-          div(v-for="(resizer, index) in resizer(controlPoints)"
-              @mousedown.left.stop="resizeStart($event)")
-            div(class="control-point__resize-bar"
-                :key="index"
-                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
-            div(class="control-point resizer"
-                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
-          div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-              @mousedown.left.stop="moveStart($event)")
-            div(class="control-point__resize-bar control-point__move-bar"
-                :key="index"
-                :style="resizerBarStyles(resizer.styles)")
-          div(class="control-point__line-controller-wrapper"
-              v-if="isLine"
+              :style="resizerBarStyles(resizer.styles)")
+        div(class="control-point__line-controller-wrapper"
+            v-if="isLine"
+            :style="`transform: scale(${100/scaleRatio})`")
+          svg-icon(class="control-point__rotater"
+            :iconName="'rotate'" :iconWidth="`${20}px`"
+            :src="require('@/assets/img/svg/rotate.svg')"
+            :style='lineControlPointStyles()'
+            @mousedown.native.left.stop="lineRotateStart")
+          img(class="control-point__mover"
+            :src="require('@/assets/img/svg/move.svg')"
+            :style='lineControlPointStyles()'
+            @mousedown.left.stop="moveStart")
+        template(v-else)
+          div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
-              :style='lineControlPointStyles()'
-              @mousedown.native.left.stop="lineRotateStart")
+              :style='controlPointStyles()'
+              @mousedown.native.left.stop="rotateStart")
             img(class="control-point__mover"
+              v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
-              :style='lineControlPointStyles()'
+              :style='controlPointStyles()'
               @mousedown.left.stop="moveStart")
-          template(v-else)
-            div(class="control-point__controller-wrapper"
-                :style="`transform: scale(${100/scaleRatio})`")
-              svg-icon(class="control-point__rotater"
-                :iconName="'rotate'" :iconWidth="`${20}px`"
-                :src="require('@/assets/img/svg/rotate.svg')"
-                :style='controlPointStyles()'
-                @mousedown.native.left.stop="rotateStart")
-              img(class="control-point__mover"
-                v-if="config.type !== 'text' || !contentEditable"
-                :src="require('@/assets/img/svg/move.svg')"
-                :style='controlPointStyles()'
-                @mousedown.left.stop="moveStart")
-
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -176,6 +174,8 @@ import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
+import { SidebarPanelType } from '@/store/types'
+import uploadUtils from '@/utils/uploadUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -385,7 +385,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto',
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1333,6 +1334,12 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
+      const dt = e.dataTransfer
+      if (dt && dt.files.length !== 0) {
+        const files = dt.files
+        this.setCurrSidebarPanel(SidebarPanelType.file)
+        uploadUtils.uploadAsset('image', files, true)
+      }
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage

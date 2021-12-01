@@ -16,6 +16,7 @@ import router from '@/router'
 import { EventEmitter } from 'events'
 import themeUtils from './themeUtils'
 import designUtils from './designUtils'
+import { SidebarPanelType } from '@/store/types'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -59,7 +60,8 @@ class UploadUtils {
   getDesignInfo: {
     flag: number,
     type: string,
-    id: string
+    id: string,
+    teamId: string
   }
 
   event: any
@@ -78,7 +80,8 @@ class UploadUtils {
     this.getDesignInfo = {
       flag: 0,
       type: GetDesignType.ASSET_DESIGN,
-      id: ''
+      id: '',
+      teamId: ''
     }
 
     this.event = new EventEmitter()
@@ -88,7 +91,7 @@ class UploadUtils {
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
     if (this.getDesignInfo.flag) {
-      this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id })
+      this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id, teamId: this.getDesignInfo.teamId })
     }
   }
 
@@ -118,6 +121,7 @@ class UploadUtils {
   }
 
   uploadScreenShotImage(blob: Blob) {
+    store.commit('SET_currSidebarPanelType', SidebarPanelType.file)
     const reader = new FileReader()
     const assetId = generalUtils.generateAssetId()
     const fileName = `${generalUtils.generateRandomString(8)}.png`
@@ -196,6 +200,9 @@ class UploadUtils {
                     })
                     store.commit('user/UPDATE_IMAGE_URLS', { assetId })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
+                    // the reason why we record here is that if user refresh the window immediately after they succefully upload the screenshot
+                    // , the screenshot image in the page will get some problem
+                    stepsUtils.record()
                   } else if (json.flag === 1) {
                     modalUtils.setIsModalOpen(true)
                     modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`])
@@ -341,9 +348,10 @@ class UploadUtils {
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
     const type = router.currentRoute.query.type
     const designId = router.currentRoute.query.design_id
+    const teamId = router.currentRoute.query.team_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
-    if (!type || !designId) {
-      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId }) })
+    if (!type || !designId || !teamId) {
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
     }
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages)
@@ -788,7 +796,7 @@ class UploadUtils {
     let jsonName = ''
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
-    const teamId = designParams.teamId ?? ''
+    const teamId = designParams.teamId ?? this.teamId
     const signedUrl = designParams.signedUrl ?? ''
     switch (type) {
       case GetDesignType.TEMPLATE:
@@ -801,6 +809,7 @@ class UploadUtils {
         if (!this.isLogin) {
           this.getDesignInfo.flag = 1
           this.getDesignInfo.id = designId
+          this.getDesignInfo.teamId = teamId
           this.getDesignInfo.type = GetDesignType.ASSET_DESIGN
           return
         }
@@ -809,7 +818,7 @@ class UploadUtils {
          */
         if (this.isAdmin) {
           jsonName = 'config.json'
-          fetchTarget = `https://template.vivipic.com/${this.loginOutput.upload_map.path}asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+          fetchTarget = `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
         } else {
           fetchTarget = signedUrl
         }

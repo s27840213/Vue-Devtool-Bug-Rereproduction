@@ -1,18 +1,17 @@
 <template lang="pug">
-  keep-alive
-    div(class="nu-background-controller")
-      div(class="dim-background")
-      div(class="nu-controller__body"
-          ref="body"
-          :style="styles()"
-          @mousedown.left.stop="moveStart")
-        div(v-for="(scaler, index)  in controlPoints.scalers"
-            class="controller-point"
-            :key="index"
-            :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
-            @mousedown.stop="scaleStart")
-      div(class="nu-controller"
-          :style="controllerStyles()")
+  div(class="nu-background-controller")
+    div(class="dim-background")
+    div(class="nu-controller__body"
+        ref="body"
+        :style="styles()"
+        @mousedown.left.stop="moveStart")
+      div(v-for="(scaler, index)  in controlPoints.scalers"
+          class="controller-point"
+          :key="index"
+          :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
+          @mousedown.stop="scaleStart")
+    div(class="nu-controller"
+        :style="controllerStyles()")
 </template>
 
 <script lang="ts">
