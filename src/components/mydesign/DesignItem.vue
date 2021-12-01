@@ -125,7 +125,7 @@ export default Vue.extend({
   },
   watch: {
     config: {
-      handler: function() {
+      handler: function () {
         this.$nextTick(() => {
           this.isDragged = false
           this.checkImageSize()
@@ -264,7 +264,10 @@ export default Vue.extend({
       designUtils.setDesignName(this.config, this.editableName)
     },
     handleClick() {
-      if (this.isAnySelected) return
+      if (this.isAnySelected) {
+        this.$emit(this.isSelected ? 'deselect' : 'select')
+        return
+      }
       this.$router.push({ name: 'Editor' }).then(() => {
         designUtils.setDesign(this.config)
       })
