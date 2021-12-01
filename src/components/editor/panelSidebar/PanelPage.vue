@@ -9,11 +9,13 @@
         @click.native="addPage(lastSelectedPageIndex+1)") 新 增 頁 面
     div(class="panel-page-items")
       template(v-for="(page, idx) in getPages")
-        panel-page-plus(:index="idx" last=false
-          :class="{'pt-10': idx === 0}")
+        div(class="panel-page__plus")
+          panel-page-plus(:index="idx" last=false
+            :class="{'pt-10': idx === 0}")
         page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="page")
-        panel-page-plus(v-if="idx+1 === getPageCount"
-                        :index="idx+1" last=false)
+        div(v-if="idx+1 === getPageCount"
+          class="panel-page__plus")
+          panel-page-plus(:index="idx+1" last=false)
 </template>
 
 <script lang="ts">
@@ -90,6 +92,11 @@ export default Vue.extend({
         visibility: visible;
       }
     }
+  }
+  &__plus {
+    z-index: 2;
+    width: 140px;
+    height: 30px;
   }
 }
 </style>

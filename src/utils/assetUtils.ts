@@ -188,6 +188,7 @@ class AssetUtils {
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
     json.point = point
+    json.className = ShapeUtils.classGenerator()
 
     const config = {
       ...json,
@@ -221,6 +222,7 @@ class AssetUtils {
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
+    json.className = ShapeUtils.classGenerator()
 
     const config = {
       ...json,
