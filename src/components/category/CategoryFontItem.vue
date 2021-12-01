@@ -30,6 +30,7 @@ import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
+import text from '@/store/text'
 
 export default Vue.extend({
   props: {
@@ -90,8 +91,38 @@ export default Vue.extend({
       try {
         const fontStore = this.fontStore as Array<IFont>
         const { config, layerIndex, subLayerIndex } = TextPropUtils.getTextInfo
-        const { type } = layerUtils.getCurrLayer
+        const pageIndex = layerUtils.pageIndex
+        const { type, id } = layerUtils.getCurrLayer
         let { start, end } = generalUtils.deepCopy(this.sel)
+        if (!TextUtils.isSel(start)) {
+          switch (type) {
+            case 'text': {
+              const currLayer = layerUtils.getLayer(pageIndex, layerIndex) as IText
+              const endPidx = currLayer.paragraphs.length - 1
+              const endSidx = currLayer.paragraphs[endPidx].spans.length - 1
+              const endOff = currLayer.paragraphs[endPidx].spans[endSidx].text.length
+
+              start = { pIndex: 0, sIndex: 0, offset: 0 }
+              end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
+              break
+            }
+            default: {
+              if (typeof subLayerIndex === 'undefined' || type === 'tmp') {
+                break
+              }
+              if (typeof subLayerIndex === 'number' || type === 'group') {
+                const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+                const target = primaryLayer.layers[subLayerIndex] as IText
+                const endPidx = target.paragraphs.length - 1
+                const endSidx = target.paragraphs[endPidx].spans.length - 1
+                const endOff = target.paragraphs[endPidx].spans[endSidx].text.length
+
+                start = { pIndex: 0, sIndex: 0, offset: 0 }
+                end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
+              }
+            }
+          }
+        }
 
         if (!fontStore.some(font => font.face === this.item.id)) {
           this.updateTextState({ pending: this.item.id })
@@ -106,12 +137,9 @@ export default Vue.extend({
             throw error
           })
         }
+
         console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
         console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-        // if (!TextUtils.isSel(start) && config.type === 'text') {
-        //   start = TextUtils.selectAll(config as IText).start
-        //   end = TextUtils.selectAll(config as IText).end
-        // }
 
         const handler = (config: IText, start: ISelection, end: ISelection): {
           config: IText,
@@ -124,13 +152,13 @@ export default Vue.extend({
           }
         }
 
-        if (type === 'text') {
+        if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           // TextUtils.focus(newStart, newEnd, layerIndex)
         }
 
-        if (type === 'group' || type === 'tmp') {
+        if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           if (typeof subLayerIndex === 'undefined') {
             const layers = (config as IGroup).layers
             layers.forEach((l, idx) => {

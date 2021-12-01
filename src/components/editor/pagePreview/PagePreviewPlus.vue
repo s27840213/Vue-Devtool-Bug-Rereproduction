@@ -1,12 +1,12 @@
 <template lang="pug">
-  div(v-if="last" class="page-preview-plus-last")
-  div(v-else class="page-preview-plus"
-  @mouseover="pageMoveTo($event, 'mouse')"
-  @mouseout="pageMoveBack($event)"
-  @dragover="pageMoveTo($event, 'drag')"
-  @dragleave="pageMoveBack($event)"
-  @drop="handlePageDrop($event)")
-    div(v-if="actionType === 'mouse'"
+  div(class="page-preview-plus"
+    :style="styles()"
+    @mouseover="pageMoveTo($event, 'mouse')"
+    @mouseout="pageMoveBack($event)"
+    @dragover="pageMoveTo($event, 'drag')"
+    @dragleave="pageMoveBack($event)"
+    @drop="handlePageDrop($event)")
+    div(v-if="!last && actionType === 'mouse'"
       class="page-preview-plus-wrapper pointer"
       @click="addPage(index)")
         svg-icon(class="py-10"
@@ -32,14 +32,16 @@ export default Vue.extend({
   },
   data() {
     return {
-      actionType: ''
+      actionType: '',
+      isDragOver: false
     }
   },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getPage: 'getPage',
-      getPagesPerRow: 'page/getPagesPerRow'
+      getPagesPerRow: 'page/getPagesPerRow',
+      isDragged: 'page/getIsDragged'
     })
   },
   methods: {
@@ -49,7 +51,35 @@ export default Vue.extend({
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
+    styles() {
+      if (this.isDragged) {
+        return {
+          'z-index': '2',
+          width: '150px',
+          transform: 'translateX(-60px)'
+        }
+      } else {
+        return {
+          'z-index': 'unset',
+          width: '30px',
+          transform: ''
+        }
+      }
+    },
     pageMoveTo($event: any, type: string) {
+      if (type === 'drag') {
+        if (!this.isDragOver) {
+          this.isDragOver = true
+        } else {
+          return
+        }
+      }
+
+      // prevent from mouse hover event when dragging
+      // the last element will not show plus icon
+      if (type === 'mouse' && (this.isDragged || this.last)) {
+        return
+      }
       const target = $event.currentTarget as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {
@@ -64,6 +94,7 @@ export default Vue.extend({
       this.actionType = type
     },
     pageMoveBack($event: any) {
+      this.isDragOver = false
       const target = $event.currentTarget as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {
@@ -136,11 +167,6 @@ export default Vue.extend({
         transform: scale(0.7);
       }
     }
-
-    &-last {
-      opacity: 0;
-    }
-
     &-drag {
       height: 100%;
       border-right: 3px solid setColor(blue-1);

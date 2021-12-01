@@ -9,7 +9,6 @@ import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
-import { instrumentOutgoingRequests } from '@sentry/tracing/dist/browser'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -21,9 +20,16 @@ class TextUtils {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
   }
 
-  getSelection(): { div: Node, start: ISelection, end: ISelection } | undefined {
+  getSelection(): { div: Node | undefined, start: ISelection, end: ISelection } {
     const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return
+    if (!sel || sel.rangeCount === 0) {
+      return {
+        div: undefined,
+        start: this.getNullSel(),
+        end: this.getNullSel()
+      }
+    }
+
     const range = sel?.getRangeAt(0)
     if (range) {
       /**
@@ -56,43 +62,33 @@ class TextUtils {
       while (p.nodeName !== 'P' && p.parentElement) {
         p = p.parentElement
       }
-      if (p.firstChild) {
+      let s = range.startContainer
+      while (s.nodeName !== 'SPAN' && s.parentElement) {
+        s = s.parentElement
+      }
+
+      if (p.firstChild && s) {
         const pChild = p.firstChild
         switch (pChild.nodeName) {
           case 'SPAN':
             start = {
               pIndex: +((p as HTMLElement).dataset.pindex as string) ?? NaN,
-              sIndex: +(range.startContainer.parentElement?.dataset.sindex as string) ?? NaN,
-              offset: range.startOffset as number
-            }
-            break
-          case 'BR':
-            start = {
-              pIndex: +((p as HTMLElement).dataset.pindex as string),
-              sIndex: 0,
-              offset: 1
-            }
-            break
-          case '#text':
-            start = {
-              pIndex: +((p as HTMLElement).dataset.pindex as string) ?? NaN,
-              sIndex: 0,
+              sIndex: +((s as HTMLElement).dataset.sindex as string) ?? NaN,
               offset: range.startOffset as number
             }
             break
           default:
-            return div ? {
+            return {
               div,
               start: { ...this.getCurrSel.start } as ISelection,
               end: { ...this.getCurrSel.end } as ISelection
-            } : undefined
+            }
         }
       } else {
-        throw new Error('wrong type node of the p.firstChild')
+        console.log(new Error('wrong type node of the p.firstChild'))
+        return { div: undefined, start: this.getNullSel(), end: this.getNullSel() }
       }
 
-      if (!div || (div as HTMLElement).id.match('text') === null || !this.isSel(start) ||
-        !range || !range.startContainer || !range.endContainer) return undefined
       const isRanged = window.getSelection()?.toString() !== ''
       let end = {
         pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
@@ -110,6 +106,7 @@ class TextUtils {
         end
       }
     }
+    return { div: undefined, start: this.getNullSel(), end: this.getNullSel() }
   }
 
   selectAll(config: IText): { start: ISelection, end: ISelection } {
@@ -128,7 +125,7 @@ class TextUtils {
 
   startEqualEnd (start: ISelection, end: ISelection) {
     return (Object.keys(start) as Array<keyof ISelection>)
-      .every((k: keyof ISelection) => start[k] === end[k])
+      .every(k => (start[k] as any) === end[k])
   }
 
   focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = LayerUtils.layerIndex) {
@@ -183,115 +180,174 @@ class TextUtils {
     return config.paragraphs.length === 1 && config.paragraphs[0].spans.length === 1 && config.paragraphs[0].spans[0].text === ''
   }
 
-  textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
-    const { start } = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection }
-    const { paragraphs } = config
-    let { pIndex, sIndex, offset } = start
+  textHandler(config: IText, key = ''): IParagraph[] {
+    const { start, end } = this.getSelection()
     console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    console.warn(key)
+    console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+
+    if (!this.isSel(end)) {
+      return this.noRangeHandler(config, start, key)
+    } else {
+      const mockConfig = GeneralUtils.deepCopy(config) as IText
+      const { paragraphs } = mockConfig
+      const startSpan = paragraphs[start.pIndex].spans[start.sIndex]
+      const endSpan = GeneralUtils.deepCopy(paragraphs[end.pIndex].spans[end.sIndex]) as ISpan
+      const endRestSpans = paragraphs[end.pIndex].spans.slice(end.sIndex + 1)
+
+      paragraphs[start.pIndex].spans.splice(start.sIndex + 1)
+      paragraphs.splice(start.pIndex + 1, end.pIndex - start.pIndex)
+      startSpan.text = startSpan.text.substring(0, start.offset)
+
+      if (TextPropUtils.isSameSpanStyles(startSpan.styles, endSpan.styles)) {
+        startSpan.text += endSpan.text.substr(end.offset)
+      } else {
+        endSpan.text = endSpan.text.substr(end.offset)
+        paragraphs[start.pIndex].spans.push(endSpan)
+      }
+      paragraphs[start.pIndex].spans.push(...endRestSpans)
+
+      if (key !== 'Backspace' && key !== 'Delete') {
+        return this.noRangeHandler(mockConfig, start, key)
+      }
+
+      console.log(paragraphs)
+      return paragraphs
+    }
+  }
+
+  getNoNPrintableKeys(): Array<string> {
+    return [
+      'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+      'Tab', 'CapsLock', 'Shift', 'Control', 'Alt', 'Meta', 'ArrowRight', 'ArrowUp',
+      'ArrowLeft', 'ArrowDown'
+    ]
+  }
+
+  noRangeHandler(config: IText, start: ISelection, key: string): IParagraph[] {
+    const { paragraphs } = GeneralUtils.deepCopy(config) as IText
+    const { pIndex: oriPidx, sIndex: oriSidx, offset: oriOff } = start
+    let { pIndex, sIndex, offset } = start
+    const p = paragraphs[pIndex]
+    const s = p.spans[sIndex]
+
     switch (key) {
-      case 'Enter':
+      case 'Enter': {
+        const nextText = s.text.substr(offset)
+        s.text = s.text.substring(0, offset)
+        const restSpan = p.spans.slice(oriSidx + 1)
+        p.spans.splice(oriSidx + 1)
+        paragraphs.splice(pIndex + 1, 0, {
+          id: GeneralUtils.generateRandomString(8),
+          spans: [
+            {
+              id: GeneralUtils.generateRandomString(8),
+              text: nextText,
+              styles: { ...s.styles }
+            },
+            ...restSpan
+          ],
+          styles: { ...p.styles }
+        } as IParagraph)
         pIndex += 1
         sIndex = 0
         offset = 0
         break
+      }
       case 'Backspace': {
-        if (sIndex === 0 && offset === 0) {
-          const stash = paragraphs[pIndex]
+        if (oriSidx === 0 && oriOff === 0) {
+          const stash = GeneralUtils.deepCopy(p) as IParagraph
+          if (!oriPidx) { return paragraphs }
+
           pIndex -= 1
           sIndex = paragraphs[pIndex].spans.length - 1
-          offset = paragraphs[pIndex].spans[sIndex].text.length
+          offset = paragraphs[pIndex].spans[sIndex].text.length + 1
           paragraphs[pIndex].spans.push(...stash.spans)
           paragraphs.splice(pIndex + 1, 1)
-          return paragraphs
+          const preSpan = paragraphs[pIndex].spans[sIndex]
+          const currSpan = paragraphs[pIndex].spans[sIndex + 1]
+          if (TextPropUtils.isSameSpanStyles(preSpan.styles, currSpan.styles)) {
+            preSpan.text += currSpan.text
+            paragraphs[pIndex].spans.splice(sIndex + 1, 1)
+          }
         }
-        if (offset === 0) {
-          // @TODO
+        if (oriSidx !== 0 && oriOff === 0) {
+          const preSpan = p.spans[sIndex - 1]
+          if (preSpan.text.length > 1) {
+            preSpan.text = preSpan.text.substring(0, preSpan.text.length - 1)
+            if (TextPropUtils.isSameSpanStyles(s.styles, preSpan.styles)) {
+              preSpan.text += s.text
+              p.spans.splice(oriSidx, 1)
+            }
+            sIndex--
+          } else {
+            p.spans.splice(oriSidx - 1, 1)
+            sIndex--
+            if (oriSidx >= 2 && TextPropUtils.isSameSpanStyles(p.spans[oriSidx - 2].styles, s.styles)) {
+              p.spans[oriSidx - 2].text += s.text
+              p.spans.splice(sIndex--, 1)
+            }
+          }
+        } else {
+          if (oriOff === 1) {
+            const handler = () => {
+              if (s.text.length === 1) {
+                p.spans.splice(oriSidx, 1)
+              } else {
+                s.text = s.text.substr(1)
+              }
+            }
 
+            if (oriSidx === 0) {
+              offset = 0
+              sIndex = 0
+              handler()
+            } else if (oriSidx + 1 < p.spans.length &&
+              TextPropUtils.isSameSpanStyles(p.spans[oriSidx - 1].styles, p.spans[oriSidx + 1].styles)) {
+              handler()
+              offset = p.spans[oriSidx - 1].text.length
+              p.spans[oriSidx - 1].text += p.spans[oriSidx].text
+              p.spans.splice(oriSidx, 1)
+              sIndex = oriSidx - 1
+            } else {
+              sIndex = oriSidx - 1
+              offset = p.spans[sIndex].text.length
+              handler()
+            }
+            if (!p.spans.length) {
+              p.spans.push({
+                styles: { ...config.paragraphs[oriPidx].spans[0].styles },
+                text: ''
+              })
+            }
+          } else {
+            s.text = s.text.substring(0, offset - 1)
+              .concat(s.text.substr(offset))
+            offset--
+          }
+        }
+        break
+      }
+      default: {
+        if (oriSidx === 1 && oriOff === 0 && !p.spans[0].text) {
+          p.spans[0].text += key
+          sIndex = 0
+          offset = 1
           break
         }
-        paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset - 1)
-          .concat(paragraphs[pIndex].spans[sIndex].text.substr(offset))
-        return paragraphs
+        const preText = s.text.substring(0, oriOff)
+        const lastText = s.text.substr(oriOff)
+        s.text = preText + key + lastText
+        if (preText) {
+          offset++
+        } else offset = 1
       }
-      default:
-        offset++
     }
-    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-
-    // const paragraphs: IParagraph[] = []
-    const div = text
-    const ps = div.childNodes
-    ps.forEach((p, pIndex) => {
-      const spans: ISpan[] = []
-      const spanStyleBuff = {} as ISpanStyle
-      for (const [sIndex, el] of p.childNodes.entries()) {
-        let spanEl: HTMLElement
-        if (el.nodeName === 'SPAN') {
-          spanEl = el as HTMLElement
-        } else {
-          let child = p
-          const span = document.createElement('span')
-          while (child.firstChild) {
-            child = child.firstChild
-          }
-
-          if (child.textContent) {
-            span.textContent = el.textContent
-          } else if (child.nodeName === 'BR') {
-            span.textContent = ''
-          } else {
-            throw console.error('wrong text node type:' + el.nodeName)
-          }
-          spanEl = span as HTMLElement
-        }
-
-        const text = spanEl.textContent as string
-        let spanStyle = {} as ISpanStyle
-
-        spanStyle = {
-          font: spanEl.style.fontFamily,
-          weight: spanEl.style.fontWeight,
-          size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-            : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
-          decoration: spanEl.style.textDecorationLine,
-          style: spanEl.style.fontStyle,
-          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
-          opacity: parseInt(spanEl.style.opacity)
-        } as ISpanStyle
-        // }
-
-        if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
-          spans[spans.length - 1].text += text
-        } else {
-          spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
-        }
-        Object.assign(spanStyleBuff, spanStyle)
-      }
-      for (let i = 0; i < spans.length; i++) {
-        if (!spans[i].text && spans.length !== 1) {
-          spans.splice(i, 1)
-          i--
-        }
-      }
-
-      if (spans.length) {
-        const pEl = p as HTMLElement
-        const floatNum = /[+-]?\d+(\.\d+)?/
-        const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
-        const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
-        const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-        const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
-        paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
-      }
-    })
+    console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
+    this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
     return paragraphs
   }
 
   _textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
-    const { start, end } = this.getCurrSel
-    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    // console.log('start: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
@@ -322,24 +378,6 @@ class TextUtils {
         const text = spanEl.textContent as string
         let spanStyle = {} as ISpanStyle
 
-        // if (!spanEl.style.fontFamily) {
-        //   if (pIndex > 0) {
-        //     const a = div.childNodes[pIndex - 1]
-        //     const leng = div.childNodes[pIndex - 1].childNodes.length
-
-        //     // const leng = div.
-        //     spanEl = div.childNodes[pIndex - 1].childNodes[leng - 1] as HTMLElement
-        //     if (ps.length > config.paragraphs.length) {
-        //       Object.assign(spanStyle, config.paragraphs[pIndex - 1].spans[leng - 1].styles)
-        //     } else {
-        //       Object.assign(spanStyle, config.paragraphs[pIndex].spans[0].styles)
-        //     }
-        //   } else if (pIndex === 0 && sIndex === 0) {
-        //     Object.assign(spanStyle, config.paragraphs[0].spans[0].styles)
-        //   }
-        // }
-        // if (!Object.keys(spanStyle).length) {
-
         spanStyle = {
           font: spanEl.style.fontFamily,
           weight: spanEl.style.fontWeight,
@@ -350,7 +388,6 @@ class TextUtils {
           color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
           opacity: parseInt(spanEl.style.opacity)
         } as ISpanStyle
-        // }
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
           spans[spans.length - 1].text += text
@@ -496,7 +533,7 @@ class TextUtils {
         span.textContent = spanData.text
         Object.assign(span.style, CssConveter.convertFontStyle(spanData.styles))
         span.style.whiteSpace = 'pre-wrap'
-        p.appendChild(spanData.text ? span : document.createElement('br'))
+        p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
 
         if (spanData.styles.size > fontSize) {
           fontSize = spanData.styles.size

@@ -122,7 +122,7 @@ class UploadUtils {
     const assetId = generalUtils.generateAssetId()
     const fileName = `${generalUtils.generateRandomString(8)}.png`
     const formData = new FormData()
-    console.log(assetId)
+
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
     })
@@ -131,12 +131,12 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const file = new File([blob], fileName)
+    const file = new File([blob], fileName, { lastModified: Date.now() })
 
     if (formData.has('file')) {
-      formData.set('file', fileName)
+      formData.set('file', file)
     } else {
-      formData.append('file', fileName)
+      formData.append('file', file)
     }
 
     reader.onload = (evt) => {

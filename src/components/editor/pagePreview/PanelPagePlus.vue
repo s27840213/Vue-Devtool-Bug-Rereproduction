@@ -1,10 +1,11 @@
 <template lang="pug">
   div(class="panel-page-plus"
-  @mouseover="pageMoveTo($event, 'mouse')"
-  @mouseout="pageMoveBack($event)"
-  @dragover="pageMoveTo($event, 'drag')"
-  @dragleave="pageMoveBack($event)"
-  @drop="handlePageDrop($event)")
+    :style="styles()"
+    @mouseover="pageMoveTo($event, 'mouse')"
+    @mouseout="pageMoveBack($event)"
+    @dragover="pageMoveTo($event, 'drag')"
+    @dragleave="pageMoveBack($event)"
+    @drop="handlePageDrop($event)")
     div(v-if="actionType === 'mouse'"
       class="panel-page-plus-wrapper pointer"
       @click="addPage(index)")
@@ -31,14 +32,16 @@ export default Vue.extend({
   },
   data() {
     return {
-      actionType: ''
+      actionType: '',
+      isDragOver: false
     }
   },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getPage: 'getPage',
-      getPagesPerRow: 'page/getPagesPerRow'
+      getPagesPerRow: 'page/getPagesPerRow',
+      isDragged: 'page/getIsDragged'
     })
   },
   methods: {
@@ -48,8 +51,35 @@ export default Vue.extend({
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
+    styles() {
+      if (this.isDragged) {
+        return {
+          'z-index': '2',
+          height: '150px',
+          transform: 'translateY(-60px)'
+        }
+      } else {
+        return {
+          'z-index': 'unset',
+          height: '30px',
+          transform: ''
+        }
+      }
+    },
     pageMoveTo($event: any, type: string) {
-      const target = $event.currentTarget as HTMLElement
+      if (type === 'drag') {
+        if (!this.isDragOver) {
+          this.isDragOver = true
+        } else {
+          return
+        }
+      }
+
+      // prevent from mouse hover event when dragging
+      if (type === 'mouse' && this.isDragged) {
+        return
+      }
+      const target = $event.currentTarget.parentElement as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {
         prev.style.transform = 'translate(0, -20px)'
@@ -63,7 +93,8 @@ export default Vue.extend({
       this.actionType = type
     },
     pageMoveBack($event: any) {
-      const target = $event.currentTarget as HTMLElement
+      this.isDragOver = false
+      const target = $event.currentTarget.parentElement as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {
         prev.style.transform = ''

@@ -73,7 +73,9 @@ export default Vue.extend({
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
     },
     newDesign() {
-      designUtils.newDesign()
+      // designUtils.newDesign()
+      const path = `${window.location.origin}${window.location.pathname}`
+      window.open(path)
 
       this.closePopup()
     },

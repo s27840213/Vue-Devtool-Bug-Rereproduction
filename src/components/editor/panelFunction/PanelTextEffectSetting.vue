@@ -206,9 +206,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    colorUtils.on(ColorEventType.textEffect, (color: string) => {
-      this.handleColorUpdate(color)
-    })
+    colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
+  },
+  beforeDestroy() {
+    colorUtils.event.off(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
   },
   methods: {
     optionStyle(idx: number) {
@@ -235,20 +236,16 @@ export default Vue.extend({
       const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
-      window.requestAnimationFrame(() => {
-        TextEffectUtils.setTextEffect(currentEffect, {
-          [name]: value > max ? max : (value < min ? min : value)
-        })
+      TextEffectUtils.setTextEffect(currentEffect, {
+        [name]: value > max ? max : (value < min ? min : value)
       })
     },
     handleShapeUpdate(event: Event): void {
       const { currentShape, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
-      window.requestAnimationFrame(() => {
-        TextShapeUtils.setTextShape(currentShape, {
-          [name]: value > max ? max : (value < min ? min : value)
-        })
+      TextShapeUtils.setTextShape(currentShape, {
+        [name]: value > max ? max : (value < min ? min : value)
       })
     },
     handleShapeStatus(focus: boolean): void {

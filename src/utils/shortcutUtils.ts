@@ -228,9 +228,11 @@ class ShortcutUtils {
             continue
           }
           const newPara: IParagraph = {
+            id: GeneralUtils.generateRandomString(8),
             styles: GeneralUtils.deepCopy(paraStyles) as IParagraphStyle,
             spans: [
               {
+                id: GeneralUtils.generateRandomString(8),
                 text: pastedText,
                 styles: GeneralUtils.deepCopy(spanStyles) as ISpanStyle
               }

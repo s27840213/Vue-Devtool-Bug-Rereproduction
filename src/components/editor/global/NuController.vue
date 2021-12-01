@@ -62,8 +62,9 @@
               :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
               @focus="onTextFocus()"
               @blur="onTextBlur()"
-              @compositionstart="isComposing = true"
+              @compositionstart="composingStart"
               @compositionend="composingEnd"
+              @keypress="onKeyPress"
               @keydown="onKeyDown"
               @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
               @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
@@ -89,7 +90,7 @@
                     :data-sindex="sIndex"
                     :key="span.id",
                     :style="textStyles(span.styles)") {{ span.text }}
-                    br(v-if="!span.text")
+                    br(v-if="!span.text && p.spans.length === 1")
         div(v-if="isActive && isLocked && (scaleRatio >20)"
             class="nu-controller__lock-icon"
             :style="lockIconStyles"
@@ -217,6 +218,8 @@ export default Vue.extend({
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
+
+      paragraphs: [] as Array<IParagraph>,
       subControlerIndexs: []
     }
   },
@@ -229,6 +232,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
+    ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
@@ -339,7 +343,6 @@ export default Vue.extend({
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
-          TextUtils.setCurrTextInfo({ layerIndex: -1 })
         }
       } else {
         if (this.getLayerType === 'text') {
@@ -506,7 +509,8 @@ export default Vue.extend({
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
       Object.assign(textStyles, {
-        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000'
+        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
+        'font-family': (textStyles['font-family'] + ',').concat(this.getDefaultFonts)
       })
       return textStyles
     },
@@ -610,6 +614,17 @@ export default Vue.extend({
             dragging: true
           })
           if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+            if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+              if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+                const sel = TextUtils.getSelection()
+                if (sel) {
+                  const { start } = sel
+                  console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+                  TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
+                }
+              }
+              TextPropUtils.updateTextPropsState()
+            }
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
@@ -1340,6 +1355,9 @@ export default Vue.extend({
         if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
           const sel = TextUtils.getSelection()
           if (sel) {
+            const { start, end } = sel
+            console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+            console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
             TextUtils.updateSelection(sel.start, sel.end)
           }
         }
@@ -1347,60 +1365,85 @@ export default Vue.extend({
       }
     },
     onKeyDown(e: KeyboardEvent) {
-      if (this.config.type === 'text' && !e.ctrlKey && !e.metaKey) {
-        const text = this.$refs.text as HTMLElement
-        const sel = window.getSelection()
-        const start = {
-          pIndex: NaN,
-          sIndex: NaN,
-          offset: 0
+      let updated = false
+      const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
+        observer.disconnect()
+        const paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+        const config = GeneralUtils.deepCopy(this.config) as IText
+        config.paragraphs = paragraphs
+        this.paragraphs = paragraphs
+        this.textSizeRefresh(config)
+        if (!this.isComposing && e.key === 'Backspace' && !updated) {
+          /**
+           * this block is used for recall the composingEnd callback
+           * because the composingEnd callback will be triggered before this mutation callback
+           * this situation will happen if the composing is ended up by 'Backspace'
+           */
+          this.composingEnd()
         }
-        if (sel) {
-          const range = sel.getRangeAt(0)
-          if (range) {
-            const startContainer = range.startContainer
-            if (startContainer.nodeName === 'DIV') {
-              start.pIndex = 0
-              start.sIndex = 0
-            } else if (startContainer.nodeName === 'BR') {
-              start.pIndex = +(startContainer?.parentElement?.dataset.pindex as string)
-              start.sIndex = 0
-              start.offset = 1
-            } else {
-              // start.sIndex = +(startContainer?.parentElement?.dataset.sindex as string)
-              // start.pIndex = +(startContainer?.parentElement?.parentElement?.dataset.pindex as string)
-              Object.assign(start, this.sel.start)
-            }
-            TextUtils.updateSelection(start, TextUtils.getNullSel())
-
-            if (e.key === 'Backspace') {
-              const isEmptyText = (this.$refs.text as HTMLElement).childNodes[0].childNodes[0].nodeName === 'BR'
-              if (start.sIndex === 0 && start.pIndex > 0 && start.offset === 0 && this.config.paragraphs[start.pIndex - 1].spans.length === 1 &&
-                !this.config.paragraphs[start.pIndex - 1].spans[0].text) {
-                start.pIndex -= 1
-                TextUtils.updateSelection(start, TextUtils.getNullSel())
-              }
-              if ((start.sIndex === 0 && start.pIndex === 0 && sel.anchorOffset === 0 && sel.toString() === '') || isEmptyText) {
-                e.preventDefault()
-              } else {
-                if (e.key === 'Backspace' || e.key === ' ') {
-                  e.stopPropagation()
-                }
-              }
-            }
-          }
-        }
-        const observer = new MutationObserver(this.onTyping(e, this.isComposing))
-        observer.observe(text, {
-          characterData: true,
-          childList: true,
-          subtree: true,
-          attributes: false,
-          attributeOldValue: false,
-          characterDataOldValue: false
-        })
-        setTimeout(() => { observer.disconnect() }, 0)
       }
+
+      const observer = new MutationObserver(onTyping)
+      observer.observe(this.$refs.text as HTMLElement, {
+        characterData: true,
+        childList: true,
+        subtree: true,
+        attributes: false,
+        attributeOldValue: false,
+        characterDataOldValue: false
+      })
+      setTimeout(() => { observer.disconnect() }, 0)
+      if (this.isComposing) {
+        return
+      }
+
+      const sel = window.getSelection()
+      if (sel?.getRangeAt(0).toString()) {
+        console.log(e.key)
+        if (e.key === 'Backspace') {
+          observer.disconnect()
+          this.rangedHandler(e)
+        }
+        // Tab would lead to some default action -> lose the focus of the text
+        if (['Tab'].includes(e.key)) e.preventDefault()
+        return
+      }
+
+      if (['Enter', 'Backspace'].includes(e.key)) {
+        e.preventDefault()
+        this.contentEditable = false
+        const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+        updated = true
+        this.$nextTick(() => {
+          console.warn(e.isComposing)
+          this.contentEditable = true
+          TextUtils.focus(this.sel.start, this.sel.end)
+        })
+      }
+    },
+    rangedHandler(e: KeyboardEvent) {
+      if (e.key !== 'CapsLock') e.preventDefault()
+      if (TextUtils.getNoNPrintableKeys().includes(e.key)) return
+      const paragraphs = TextUtils.textHandler(this.config, e.key)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+      this.textSizeRefresh(this.config)
+      this.$nextTick(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()))
+    },
+    onKeyPress(e: KeyboardEvent) {
+      const sel = window.getSelection()
+      if (sel?.getRangeAt(0).toString()) {
+        this.rangedHandler(e)
+        return
+      }
+      e.preventDefault()
+      this.contentEditable = false
+      const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+      this.$nextTick(() => {
+        this.contentEditable = true
+        TextUtils.focus(this.sel.start, this.sel.end)
+      })
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
@@ -1409,15 +1452,23 @@ export default Vue.extend({
         TextPropUtils.updateTextPropsState()
       }
     },
+    composingStart() {
+      this.isComposing = true
+    },
     composingEnd() {
       this.isComposing = false
-      const start = TextUtils.getSelection()?.start
-      TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
-      const paragraphs: IParagraph[] = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText)
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
+      const { start } = TextUtils.getSelection()
+      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, this.paragraphs)
+      this.contentEditable = false
+      this.$nextTick(() => {
+        this.contentEditable = true
+        if (this.isActive) {
+          TextUtils.focus(start, TextUtils.getNullSel())
+        }
+      })
     },
     onTextFocus() {
-      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -1428,8 +1479,9 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = []
         try {
-          // paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
           paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          // paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          console.log(GeneralUtils.deepCopy(paragraphs))
         } catch (error) {
           console.log(error)
         }
@@ -1477,22 +1529,6 @@ export default Vue.extend({
           this.$nextTick(() => {
             // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
             StepsUtils.record()
-            /**
-             * TODO: For some reason while hit Enter the text block, the browser would
-             * produce extra <p>, the following could temporarily fix this problem
-             */
-            if (text.childNodes.length !== (this.config as IText).paragraphs.length) {
-              let isRemoved = false
-              for (const p of text.childNodes) {
-                const span = p.firstChild
-                if (span?.nodeName === 'SPAN' && span.firstChild?.nodeName !== '#text') {
-                  text.removeChild(p)
-                  isRemoved = true
-                  break
-                }
-              }
-              if (!isRemoved && text.lastChild) text.removeChild(text.lastChild)
-            }
             const sel = window.getSelection()
             if (sel) {
               const currPropsState = this.props
@@ -1511,35 +1547,7 @@ export default Vue.extend({
                 sIndex += 1
                 offset = 1
               }
-
-              if (isComposing) {
-                pIndex = this.sel.start.pIndex
-                sIndex = this.sel.start.sIndex
-                offset = this.sel.start.offset
-              } else if (TextUtils.isEmptyText(this.config)) {
-                [pIndex, sIndex, offset] = [0, 0, 0]
-              }
-              if (!Number.isNaN(pIndex)) {
-                const range = new Range()
-                if (text.childNodes[pIndex].firstChild?.nodeName === 'SPAN') {
-                  try {
-                    range.setStart(text.childNodes[pIndex].childNodes[sIndex].firstChild as Node, offset)
-                  } catch {
-                    throw new Error('can not focus at text node of SPAN at: (' + pIndex + ', ' + sIndex + ')')
-                  }
-                } else if (text.childNodes[pIndex].firstChild?.nodeName === 'BR') {
-                  try {
-                    range.setStart(text.childNodes[pIndex].firstChild as Node, 0)
-                  } catch {
-                    throw new Error('can not focus at text node of BR at: ' + pIndex)
-                  }
-                }
-                sel.removeAllRanges()
-                sel.addRange(range)
-              }
             }
-            TextUtils.updateSelection({ pIndex, sIndex, offset }, TextUtils.getNullSel())
-            TextPropUtils.updateTextPropsState()
           })
         }
       }

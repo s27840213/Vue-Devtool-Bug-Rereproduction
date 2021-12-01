@@ -106,9 +106,10 @@ class StepsUtils {
       }
       this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
-    }
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadDesign()
+      // Don't upload the design when initialize the steps
+      if (uploadUtils.isLogin) {
+        uploadUtils.uploadDesign()
+      }
     }
   }
 
