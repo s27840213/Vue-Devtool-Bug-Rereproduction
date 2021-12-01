@@ -39,9 +39,6 @@ export default Vue.extend({
     onLoadMore() {
       this.$emit('loadMore')
     }
-  },
-  mounted() {
-    console.log(this.list)
   }
 })
 </script>
