@@ -14,6 +14,7 @@ div(class="settings-account")
     property-bar(:class="{'input-invalid': !mailValid}")
       input(class="body-2 text-gray-2"
         v-model="inputAccount"
+        @input="onUpdate"
         type="email" name="email"
         placeholder="請輸入信箱")
     div(v-if="!mailValid"
@@ -77,7 +78,8 @@ export default Vue.extend({
       isLoading: false,
       isConfirmClicked: false as boolean,
       isEmailVerified: false,
-      showVerifyPopup: false
+      showVerifyPopup: false,
+      responseError: false
     }
   },
   watch: {
@@ -102,6 +104,8 @@ export default Vue.extend({
     mailValid(): boolean {
       if (!this.isConfirmClicked) {
         return true
+      } else if (this.responseError) {
+        return false
       } else if (this.inputAccount.length > 0) {
         return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this.inputAccount)
       } else {
@@ -129,8 +133,12 @@ export default Vue.extend({
     onSubscribeClicked() {
       this.inputSubscribe = !this.inputSubscribe
     },
+    onUpdate () {
+      this.responseError = false
+    },
     async onConfirmClicked() {
       this.isLoading = true
+      this.responseError = false
       this.isConfirmClicked = true
       if (!this.mailValid) {
         this.isLoading = false
@@ -154,7 +162,8 @@ export default Vue.extend({
           if (data.flag === 0) {
             this.showVerifyPopup = true
           } else {
-            console.log(data.msg)
+            this.responseError = true
+            this.accountErrorMessage = data.msg
           }
 
           this.isLoading = false
