@@ -56,12 +56,13 @@ const routes: Array<RouteConfig> = [
       try {
         next()
         const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('type') && urlParams.has('design_id')) {
+        if (urlParams.has('type') && urlParams.has('design_id') && urlParams.has('team_id')) {
           const type = urlParams.get('type')
           const designId = urlParams.get('design_id')
+          const teamId = urlParams.get('team_id')
 
-          if (type && designId) {
-            uploadUtils.getDesign(type, { designId })
+          if (type && designId && teamId) {
+            uploadUtils.getDesign(type, { designId, teamId })
           }
         }
       } catch (error) {
@@ -132,28 +133,6 @@ const routes: Array<RouteConfig> = [
     path: '/mobilewarning',
     name: 'MobileWarning',
     component: MobileWarning
-  },
-  {
-    path: '/',
-    name: 'Home',
-    component: Home,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: async (to, from, next) => {
-      try {
-        next()
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('type') && urlParams.has('design_id')) {
-          const type = urlParams.get('type')
-          const designId = urlParams.get('design_id')
-
-          if (type && designId) {
-            uploadUtils.getDesign(type, { designId })
-          }
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
   }
 ]
 

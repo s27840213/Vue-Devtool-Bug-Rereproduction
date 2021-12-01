@@ -19,6 +19,7 @@ class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = '我所有的設計'
   get isLogin(): boolean { return store.getters['user/isLogin'] }
+  get teamId(): string { return store.getters['user/getTeamId'] }
 
   apiDesign2IDesign(design: IUserDesignContentData): IDesign {
     return {
@@ -542,7 +543,7 @@ class DesignUtils {
           /**
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
-          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId } })
+          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } })
         }
       })
     })
@@ -562,7 +563,7 @@ class DesignUtils {
     if (this.isLogin) {
       store.commit('SET_assetId', design.id)
       if (router.currentRoute.query.design_id !== design.id) {
-        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id }) })
+        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
       }
     }
     console.log(design.signedUrl?.['config.json'])
@@ -571,7 +572,7 @@ class DesignUtils {
     if (isPrivate) {
       uploadUtils.getDesign('design', { signedUrl: design.signedUrl?.['config.json'] ?? '' })
     } else {
-      uploadUtils.getDesign('design', { designId: design.id ?? '' })
+      uploadUtils.getDesign('design', { designId: design.id ?? '', teamId: this.teamId })
     }
   }
 
