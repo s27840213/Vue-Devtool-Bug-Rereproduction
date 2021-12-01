@@ -5,7 +5,11 @@
     nu-adjust-image(v-show="isAdjustImage"
       :src="src"
       :styles="config.styles")
-    img(v-show="!isAdjustImage" class="nu-image__picture" :src="src" @error="onError()")
+    img(v-show="!isAdjustImage"
+      class="nu-image__picture"
+      draggable="false"
+      :src="src"
+      @error="onError()")
 </template>
 
 <script lang="ts">
