@@ -48,6 +48,7 @@ export default Vue.extend({
     if (!this.view) {
       router.replace({ path: 'settings/account' })
     }
+    this.currentView = this.view
   },
   methods: {
     switchView(view: string) {
