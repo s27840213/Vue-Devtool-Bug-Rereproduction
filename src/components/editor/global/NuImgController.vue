@@ -1,17 +1,16 @@
 <template lang="pug">
-  keep-alive
-    div(class="nu-img-controller")
-      div(class="nu-controller"
-        :style="controllerStyles()")
-      div(class="nu-controller__body"
-          ref="body"
-          :style="styles()"
-          @mousedown.left.stop="moveStart")
-        div(v-for="(scaler, index)  in controlPoints.scalers"
-            class="controller-point"
-            :key="index"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), pointerEvents())"
-            @mousedown.stop="scaleStart")
+  div(class="nu-img-controller")
+    div(class="nu-controller"
+      :style="controllerStyles()")
+    div(class="nu-controller__body"
+        ref="body"
+        :style="styles()"
+        @mousedown.left.stop="moveStart")
+      div(v-for="(scaler, index)  in controlPoints.scalers"
+          class="controller-point"
+          :key="index"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), pointerEvents())"
+          @mousedown.stop="scaleStart")
 </template>
 
 <script lang="ts">
