@@ -8,15 +8,15 @@
             div {{showUname}}
             div(class="text-gray-3") {{account}}
         div(class="nav-container__option"
-          :class="{'selected': optionSelected === 0}"
-          @click="switchNav(0)")
+          :class="{'selected': optionSelected === 'account'}"
+          @click="switchNav('account')")
           svg-icon(:iconName="'settings'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
           span 帳 號 設 定
         div(class="nav-container__option"
-          :class="{'selected': optionSelected === 1}"
-          @click="switchNav(1)")
+          :class="{'selected': optionSelected === 'security'}"
+          @click="switchNav('security')")
           svg-icon(:iconName="'lock'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
@@ -24,6 +24,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import router from '@/router'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
@@ -31,7 +32,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      optionSelected: 0
+      optionSelected: 'account'
     }
   },
   computed: {
@@ -39,11 +40,6 @@ export default Vue.extend({
       'shortName', 'uname']),
     ...mapGetters('user', {
       account: 'getAccount'
-    }),
-    ...mapGetters({
-      currPanel: 'getCurrSidebarPanelType',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     showUname(): string {
       if (this.uname.length > 10) {
@@ -54,13 +50,21 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
-    }),
-    switchNav(index: number): void {
-      this.optionSelected = index
-      this.$emit('switch', index)
+    switchNav(view: string): void {
+      if (this.optionSelected === view) {
+        return
+      }
+      this.optionSelected = view
+      let targetPath = '/settings/account'
+      switch (view) {
+        case 'account':
+          targetPath = '/settings/account'
+          break
+        case 'security':
+          targetPath = '/settings/security'
+          break
+      }
+      router.replace({ path: targetPath })
     }
   }
 })
