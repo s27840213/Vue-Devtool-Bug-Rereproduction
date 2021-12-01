@@ -13,7 +13,7 @@
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles(getLayerType)"
-        @drop="onDrop($event)"
+        @drop.prevent="onDrop($event)"
         @dragover.prevent,
         @click.left="onClick"
         @click.right.stop="onRightClick"
@@ -174,6 +174,8 @@ import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
+import { SidebarPanelType } from '@/store/types'
+import uploadUtils from '@/utils/uploadUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -383,7 +385,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto',
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1331,6 +1334,12 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
+      const dt = e.dataTransfer
+      if (dt && dt.files.length !== 0) {
+        const files = dt.files
+        this.setCurrSidebarPanel(SidebarPanelType.file)
+        uploadUtils.uploadAsset('image', files, true)
+      }
       switch (this.getLayerType) {
         case 'image': {
           const config = this.config as IImage
