@@ -172,15 +172,18 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    this.AutoPlayTimer = setInterval(() => {
-      if (!this.isTimerStop) {
-        if (this.featureSelected === this.featureList.length - 1) {
-          this.featureSelected = 0
-        } else {
-          this.featureSelected++
+    if (!this.isLogin) {
+      this.AutoPlayTimer = setInterval(() => {
+        console.log('ddd', this.featureSelected)
+        if (!this.isTimerStop) {
+          if (this.featureSelected === this.featureList.length - 1) {
+            this.featureSelected = 0
+          } else {
+            this.featureSelected++
+          }
         }
-      }
-    }, 4000)
+      }, 4000)
+    }
 
     if (this.isLogin) {
       designUtils.fetchDesigns(this.fetchAllDesigns)
@@ -209,6 +212,11 @@ export default Vue.extend({
     keyword = 'locale::tw;;order_by::time'
     const latestTemplate = await this.getTagContent({ keyword, theme })
     this.latestTemplateList = latestTemplate.data.content[0].list
+  },
+  destroyed() {
+    if (this.AutoPlayTimer) {
+      window.clearInterval(this.AutoPlayTimer)
+    }
   },
   methods: {
     ...mapActions({
