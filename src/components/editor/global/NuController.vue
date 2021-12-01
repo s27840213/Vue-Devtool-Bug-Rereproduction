@@ -1368,7 +1368,7 @@ export default Vue.extend({
       let updated = false
       const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
         observer.disconnect()
-        const paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+        const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = paragraphs
         this.paragraphs = paragraphs
@@ -1418,7 +1418,7 @@ export default Vue.extend({
         this.$nextTick(() => {
           console.warn(e.isComposing)
           this.contentEditable = true
-          TextUtils.focus(this.sel.start, this.sel.end)
+          setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
         })
       }
     },
@@ -1428,7 +1428,7 @@ export default Vue.extend({
       const paragraphs = TextUtils.textHandler(this.config, e.key)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.textSizeRefresh(this.config)
-      this.$nextTick(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()))
+      setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
     },
     onKeyPress(e: KeyboardEvent) {
       const sel = window.getSelection()
@@ -1442,7 +1442,8 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.$nextTick(() => {
         this.contentEditable = true
-        TextUtils.focus(this.sel.start, this.sel.end)
+        // TextUtils.focus(this.sel.start, this.sel.end)
+        setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
       })
     },
     onKeyUp(e: KeyboardEvent) {
@@ -1463,7 +1464,8 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.contentEditable = true
         if (this.isActive) {
-          TextUtils.focus(start, TextUtils.getNullSel())
+          // TextUtils.focus(start, TextUtils.getNullSel())
+          setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
         }
       })
     },
@@ -1479,7 +1481,7 @@ export default Vue.extend({
         const text = this.$refs.text as HTMLElement
         let paragraphs: IParagraph[] = []
         try {
-          paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
+          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
           // paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
           console.log(GeneralUtils.deepCopy(paragraphs))
         } catch (error) {

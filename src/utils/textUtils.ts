@@ -188,16 +188,11 @@ class TextUtils {
       }
     }
 
-    const setSelection = () => {
-      const sel = window.getSelection()
-      if (sel) {
-        sel.removeAllRanges()
-        sel.addRange(range)
-      }
+    const sel = window.getSelection()
+    if (sel) {
+      sel.removeAllRanges()
+      sel.addRange(range)
     }
-    setTimeout(() => {
-      setSelection()
-    }, 0)
   }
 
   isEmptyText(config: IText): boolean {
@@ -421,7 +416,7 @@ class TextUtils {
     return paragraphs
   }
 
-  _textParser(text: HTMLElement, config: IText, key = ''): IParagraph[] {
+  textParser(text: HTMLElement): IParagraph[] {
     const paragraphs: IParagraph[] = []
     const div = text
     const ps = div.childNodes
@@ -453,7 +448,7 @@ class TextUtils {
         let spanStyle = {} as ISpanStyle
 
         spanStyle = {
-          font: spanEl.style.fontFamily,
+          font: spanEl.style.fontFamily.split(',')[0],
           weight: spanEl.style.fontWeight,
           size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),

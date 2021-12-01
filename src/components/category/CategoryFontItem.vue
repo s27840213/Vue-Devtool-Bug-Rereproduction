@@ -138,9 +138,6 @@ export default Vue.extend({
           })
         }
 
-        console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-        console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-
         const handler = (config: IText, start: ISelection, end: ISelection): {
           config: IText,
           start: ISelection,
@@ -155,7 +152,7 @@ export default Vue.extend({
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          // TextUtils.focus(newStart, newEnd, layerIndex)
+          this.$nextTick(() => TextUtils.focus(newStart, newEnd))
         }
 
         if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
@@ -179,7 +176,7 @@ export default Vue.extend({
           }
         }
 
-        // TextPropUtils.updateTextPropsState()
+        TextPropUtils.updateTextPropsState({ font: this.item.id })
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
       } catch (error: any) {
