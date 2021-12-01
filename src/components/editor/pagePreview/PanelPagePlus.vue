@@ -74,6 +74,11 @@ export default Vue.extend({
           return
         }
       }
+
+      // prevent from mouse hover event when dragging
+      if (type === 'mouse' && this.isDragged) {
+        return
+      }
       const target = $event.currentTarget.parentElement as HTMLElement
       const prev = target.previousElementSibling as HTMLElement
       if (prev) {

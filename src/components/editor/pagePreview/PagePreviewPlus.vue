@@ -74,7 +74,10 @@ export default Vue.extend({
           return
         }
       }
-      if (type === 'mouse' && this.last) {
+
+      // prevent from mouse hover event when dragging
+      // the last element will not show plus icon
+      if (type === 'mouse' && (this.isDragged || this.last)) {
         return
       }
       const target = $event.currentTarget as HTMLElement
