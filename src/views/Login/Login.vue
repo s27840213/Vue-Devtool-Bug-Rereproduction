@@ -394,7 +394,7 @@ export default Vue.extend({
         this.$router.push({ path: this.redirect || '/' })
       } else {
         this.password = ''
-        this.passwordErrorMessage = data.msg
+        this.passwordErrorMessage = data.msg || '發生錯誤，請重試'
       }
       this.isLoading = false
     },
@@ -440,7 +440,7 @@ export default Vue.extend({
         this.currentPageIndex = 2
       } else {
         this.emailResponseError = true
-        this.mailErrorMessage = data.msg
+        this.mailErrorMessage = data.msg || '發生錯誤，請重試'
       }
       this.isLoading = false
     },
@@ -501,8 +501,7 @@ export default Vue.extend({
         this.isResetClicked = false
         this.token = data.token
       } else {
-        this.vcodeErrorMessage = data.msg
-        console.log(data.msg)
+        this.vcodeErrorMessage = data.msg || '發生錯誤，請重試'
       }
       this.isLoading = false
     },
@@ -525,13 +524,15 @@ export default Vue.extend({
       }
 
       const data = await store.dispatch('user/updateUser', { token: this.token, upass: this.password })
+      this.password = ''
+      this.confirmPassword = ''
       if (data.flag === 0) {
         this.email = ''
         this.currentPageIndex = 0
         this.isLoginClicked = false
+      } else {
+        this.confirmErrorMessage = data.msg || '發生錯誤，請重試'
       }
-      this.password = ''
-      this.confirmPassword = ''
       this.isLoading = false
     },
     onFacebookClicked() {

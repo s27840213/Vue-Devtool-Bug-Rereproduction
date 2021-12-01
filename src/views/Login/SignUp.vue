@@ -352,7 +352,7 @@ export default Vue.extend({
         this.isVcodeClicked = false
       } else {
         this.emailResponseError = true
-        this.passwordHint = response.msg
+        this.passwordHint = response.msg || '發生錯誤，請重試'
       }
       this.isLoading = false
     },
@@ -413,8 +413,7 @@ export default Vue.extend({
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
-        this.vcodeErrorMessage = data.msg
-        console.log(data.msg)
+        this.vcodeErrorMessage = data.msg || '發生錯誤，請重試'
       }
       this.isLoading = false
     },

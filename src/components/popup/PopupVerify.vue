@@ -40,6 +40,7 @@
         property-bar(:class="{'input-invalid': !oldPassValid}")
           input(class="body-2 text-gray-2"
             v-model="oldPass" type="password" name="oldPass"
+            @input="onUpdate"
             placeholder="請輸入原始密碼")
         div(class="popup-verify__forgot-pwd")
           div(class="invalid-message")
@@ -63,6 +64,7 @@
           input(class="body-2 text-gray-2"
             v-model="newPass" type="password" name="newPass"
             placeholder="請輸入新密碼"
+            @input="onUpdate"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
             svg-icon(class="pointer"
@@ -120,7 +122,7 @@ export default Vue.extend({
       oldPass: '',
       newPass: '',
       vcodeErrorMessage: '驗證碼錯誤' as string,
-      oldPassErrorMessage: '密碼錯誤' as string,
+      oldPassErrorMessage: '' as string,
       passwordHint: '密碼需包含大小寫英文字母、數字８碼以上。' as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
@@ -290,10 +292,15 @@ export default Vue.extend({
         this.isConfirmClicked = false
         this.currentPage = 'newPass'
       } else {
-        this.oldPassErrorMessage = data.msg
+        this.oldPass = ''
+        this.oldPassErrorMessage = data.msg || '發生錯誤，請重試'
         console.log(data.msg)
       }
       this.isLoading = false
+    },
+    onUpdate() {
+      this.isCheckPasswordClicked = false
+      this.isConfirmClicked = false
     },
     async onConfirmPasswordClicked() {
       this.isConfirmClicked = true
@@ -315,7 +322,7 @@ export default Vue.extend({
         this.closePopup()
       } else {
         this.isResponseError = true
-        this.passwordHint = data.msg
+        this.passwordHint = data.msg || '發生錯誤，請重試'
         console.log(data.msg)
       }
       this.isLoading = false
