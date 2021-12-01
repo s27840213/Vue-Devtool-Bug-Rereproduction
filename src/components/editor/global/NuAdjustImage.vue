@@ -17,8 +17,7 @@
       image(:xlink:href="src"
         :width="svgImageWidth"
         :height="svgImageHeight"
-        :filter="imageFilter"
-        crossorigin="anonymous")
+        :filter="imageFilter")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
       :is="elm.tag"

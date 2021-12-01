@@ -1,9 +1,11 @@
 import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
+import font from '../module/font'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const
+const UPDATE_DEFAULT_FONT = 'UPDATE_DEFAULT_FONT' as const
 export interface ITextState {
   sel: { start: ISelection, end: ISelection },
   props: {
@@ -22,6 +24,7 @@ export interface ITextState {
   },
   pending: string,
   fontStore: Array<IFont>,
+  defaultFonts: Array<IFont>,
   currTextInfo: {
     config: IText | IGroup,
     layerIndex: number,
@@ -61,40 +64,18 @@ const getDefaultState = (): ITextState => ({
     subLayerIndex: undefined
   },
   pending: '',
-  fontStore: [
-    {
-      name: '思源黑體',
-      face: 'NotoSansTC',
-      loaded: true
-    },
-    {
-      name: '標楷體',
-      face: 'cwTeXKai',
-      loaded: true
-    },
-    {
-      name: '獅尾四季春',
-      face: 'SweiSpringCJKtc-Regular',
-      loaded: true
-    },
-    {
-      name: '裝甲明朝',
-      face: 'SoukouMincho',
-      loaded: true
-    },
-    {
-      name: '瀨戶字體',
-      face: 'SetoFont',
-      loaded: true
-    },
-    {
-      name: '思源柔體',
-      face: 'GenJyuuGothicX-P-Regular',
-      loaded: true
-    }
-  ]
+  fontStore: [],
+  defaultFonts: []
 })
 const state = getDefaultState()
+
+const getters: GetterTree<ITextState, unknown> = {
+  getDefaultFonts (state): string {
+    return state.defaultFonts
+      .map(font => font.face).join(',')
+  }
+}
+
 const mutations: MutationTree<ITextState> = {
   UPDATE_selection (state: ITextState, data: { start: ISelection, end: ISelection }) {
     Object.assign(state.sel.start, data.start)
@@ -114,13 +95,16 @@ const mutations: MutationTree<ITextState> = {
       state.props[k] = v
     })
   },
-  [UPDATE_FONTFACE] (state: ITextState, data: IFont) {
-    const font = state.fontStore.find(font => font.face === data.face)
+  [UPDATE_FONTFACE] (state: ITextState, payload: IFont) {
+    const font = state.fontStore.find(font => font.face === payload.face)
     if (font) {
-      Object.assign(font, data)
+      Object.assign(font, payload)
     } else {
-      state.fontStore.push(data)
+      state.fontStore.push(payload)
     }
+  },
+  [UPDATE_DEFAULT_FONT] (state: ITextState, payload: { font: IFont, priority: number }) {
+    state.defaultFonts.splice(payload.priority, 0, payload.font)
   },
   SET_default (state: ITextState) {
     const defaultState = getDefaultState()
@@ -191,6 +175,7 @@ const getFontUrl = (type: string, id: string): string => {
 export default {
   namespaced: true,
   state,
+  getters,
   mutations,
   actions
 } as ModuleTree<ITextState>

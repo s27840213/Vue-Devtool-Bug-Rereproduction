@@ -234,18 +234,14 @@ class LayerFactary {
           }
         }
       })
-    }
 
-    (config as IText).paragraphs
-      .forEach(p => {
+      config.paragraphs.forEach(p => {
+        p.id = GeneralUtils.generateRandomString(8)
         p.spans.forEach(s => {
-          store.commit('UPDATE_documentColors', {
-            pageIndex: layerUtils.pageIndex,
-            colors: [{ color: s.styles.color, count: 1 }]
-          })
+          s.id = GeneralUtils.generateRandomString(8)
         })
       })
-
+    }
     return Object.assign(basicConfig, config)
   }
 

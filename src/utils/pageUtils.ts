@@ -155,6 +155,12 @@ class PageUtils {
     this.findCentralPageIndexInfo()
   }
 
+  jumpIntoPage(pageIndex: number): void {
+    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
+    currentPage.scrollIntoView()
+    this.findCentralPageIndexInfo()
+  }
+
   clearPagesInfo() {
     store.commit('CLEAR_pagesInfo')
   }

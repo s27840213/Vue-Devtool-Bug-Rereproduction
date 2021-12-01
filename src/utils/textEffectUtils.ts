@@ -168,7 +168,7 @@ class Controller {
             .join(',')
         }
       default:
-        return {}
+        return { textShadow: 'none' }
     }
   }
 

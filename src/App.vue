@@ -76,11 +76,13 @@ export default Vue.extend({
         Object.entries(json)
           .forEach(([k, v]) => {
             if (['tw_default', 'jp_default', 'us_default', 'emoji'].includes(k)) {
-              defaultFonts.push(this.addFont({
+              const font = {
                 type: 'public',
                 face: (v as { id: string }).id,
                 url: ''
-              }))
+              }
+              this.updateDefaultFonts({ priority: 0, font })
+              defaultFonts.push(this.addFont(font))
             }
           })
         Promise.all(defaultFonts)
@@ -107,6 +109,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('text', ['addFont']),
+    ...mapMutations('text', {
+      updateDefaultFonts: 'UPDATE_DEFAULT_FONT'
+    }),
     ...mapMutations({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'

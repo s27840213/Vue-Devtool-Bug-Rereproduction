@@ -91,7 +91,10 @@ export default Vue.extend({
         Object.assign(
           styles,
           TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {}),
-          { background: 'rgba(0, 0, 255, 0)' }
+          {
+            background: 'rgba(0, 0, 255, 0)',
+            willChange: 'text-shadow'
+          }
         )
       }
       return styles
