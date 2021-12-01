@@ -1,59 +1,58 @@
 <template lang="pug">
-  keep-alive
-    div(class="nu-sub-controller")
-      div(class="nu-sub-controller__content"
-          ref="body"
-          :layer-index="`${layerIndex}`"
-          :style="styles('')"
-          @dblclick="onDblClick()"
-          @click.left.stop="onClickEvent($event)"
-          @mousedown="onMousedown($event)")
-        svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-            :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-            g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-              :style="frameClipStyles()"
-              @drop="onFrameDrop()"
-              @dragenter="onDrageEnter()"
-              @dragleave="onDragLeave()")
-        template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()")
-            div(ref="text" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`" spellcheck="false"
-              @dragstart="preventDefault($event)"
-              :style="textBodyStyle()"
-              class="text__body"
-              :contenteditable="contentEditable"
-              @focus="onTextFocus()"
-              @blur="onTextBlur()"
-              @compositionstart="isComposing = true"
-              @compositionend="composingEnd"
-              @keydown="onKeyDown"
-              @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-              @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-              @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-              @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-              @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-              @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-              @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-              @keydown.meta.90.exact.stop.prevent.self="undo"
-              @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-              @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-              @keydown.37.stop
-              @keydown.38.stop
-              @keydown.39.stop
-              @keydown.40.stop
-              @keyup="onKeyUp")
-              p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-                :data-pindex="pIndex"
-                :key="p.id",
-                :style="textStyles(p.styles)")
-                template(v-for="(span, sIndex) in p.spans")
-                  span(v-if="span.text" class="text__span"
-                    :data-sindex="sIndex"
-                    :key="span.id",
-                    :style="textStyles(span.styles)") {{ span.text }}
-                  br(v-else
-                  :key="span.id"
-                  :data-sindex="sIndex")
+  div(class="nu-sub-controller")
+    div(class="nu-sub-controller__content"
+        ref="body"
+        :layer-index="`${layerIndex}`"
+        :style="styles('')"
+        @dblclick="onDblClick()"
+        @click.left.stop="onClickEvent($event)"
+        @mousedown="onMousedown($event)")
+      svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+          :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
+          g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
+            :style="frameClipStyles()"
+            @drop="onFrameDrop()"
+            @dragenter="onDrageEnter()"
+            @dragleave="onDragLeave()")
+      template(v-if="config.type === 'text' && config.active")
+        div(class="text text__wrapper" :style="textWrapperStyle()")
+          div(ref="text" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`" spellcheck="false"
+            @dragstart="preventDefault($event)"
+            :style="textBodyStyle()"
+            class="text__body"
+            :contenteditable="contentEditable"
+            @focus="onTextFocus()"
+            @blur="onTextBlur()"
+            @compositionstart="isComposing = true"
+            @compositionend="composingEnd"
+            @keydown="onKeyDown"
+            @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+            @keydown.meta.90.exact.stop.prevent.self="undo"
+            @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            @keydown.37.stop
+            @keydown.38.stop
+            @keydown.39.stop
+            @keydown.40.stop
+            @keyup="onKeyUp")
+            p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+              :data-pindex="pIndex"
+              :key="p.id",
+              :style="textStyles(p.styles)")
+              template(v-for="(span, sIndex) in p.spans")
+                span(v-if="span.text" class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)") {{ span.text }}
+                br(v-else
+                :key="span.id"
+                :data-sindex="sIndex")
 </template>
 <script lang="ts">
 import Vue from 'vue'

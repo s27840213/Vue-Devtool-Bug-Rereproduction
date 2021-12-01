@@ -4,35 +4,54 @@
     div(class="settings__content")
       sidebar(@switch="switchView")
       section(class="settings__view")
-        settings-account(v-if="currentViewIndex === 0")
+        settings-account(v-if="currentView === 'account'")
+        settings-security(v-if="currentView === 'security'")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import router from '@/router'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
+import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 
 export default Vue.extend({
   name: 'Settings',
+  props: {
+    view: String
+  },
   components: {
     Sidebar,
     NuHeader,
-    SettingsAccount
+    SettingsAccount,
+    SettingsSecurity
   },
   data() {
     return {
-      currentViewIndex: 0,
+      currentView: 'account',
       inputName: '',
       email: '',
       isSubscribed: true
     }
   },
+  watch: {
+    view() {
+      if (this.currentView !== this.view) {
+        this.currentView = this.view
+      }
+    }
+  },
   computed: {
   },
+  created() {
+    if (!this.view) {
+      router.replace({ path: 'settings/account' })
+    }
+  },
   methods: {
-    switchView(index: number) {
-      this.currentViewIndex = index
+    switchView(view: string) {
+      this.currentView = view
     }
   }
 })

@@ -58,6 +58,9 @@ class TextUtils {
         pIndex: parseInt(range.startContainer?.parentElement?.parentElement?.dataset.pindex as string)
       } as ISelection
 
+      /**
+       * For start container, the selected html tag could be: #text, SPAN
+       */
       let p = range.startContainer
       while (p.nodeName !== 'P' && p.parentElement) {
         p = p.parentElement
@@ -85,15 +88,36 @@ class TextUtils {
             }
         }
       } else {
-        console.log(new Error('wrong type node of the p.firstChild'))
+        console.log(new Error('wrong type node of the start container of p.firstChild'))
         return { div: undefined, start: this.getNullSel(), end: this.getNullSel() }
       }
 
       const isRanged = window.getSelection()?.toString() !== ''
-      let end = {
-        pIndex: isRanged ? parseInt(range.endContainer?.parentElement?.parentElement?.dataset.pindex as string) : NaN,
-        sIndex: isRanged ? parseInt(range.endContainer?.parentElement?.dataset.sindex as string) : NaN,
-        offset: isRanged ? range?.endOffset as number : NaN
+      /**
+       * For end container, the selected html tag could be: #text, SPAN, P
+       */
+      let endP = range.endContainer
+      let endSpan = range.endContainer
+      if (range.endContainer.nodeName === 'P') {
+        endSpan = endSpan.firstChild as Node
+      } else {
+        while (endP.nodeName !== 'P' && endP.parentElement) {
+          endP = endP.parentElement
+        }
+        while (endSpan.nodeName !== 'SPAN' && endSpan.parentElement) {
+          endSpan = endSpan.parentElement
+        }
+      }
+
+      let end = this.getNullSel()
+      if (endP && endSpan) {
+        end = {
+          pIndex: isRanged ? +((endP as HTMLElement).dataset.pindex as string) : NaN,
+          sIndex: isRanged ? +((endSpan as HTMLElement).dataset.sindex as string) : NaN,
+          offset: isRanged ? range?.endOffset as number : NaN
+        }
+      } else {
+        throw new Error('wrong type node of the end container')
       }
 
       if (this.startEqualEnd(start, end)) {
@@ -194,10 +218,17 @@ class TextUtils {
       const endSpan = GeneralUtils.deepCopy(paragraphs[end.pIndex].spans[end.sIndex]) as ISpan
       const endRestSpans = paragraphs[end.pIndex].spans.slice(end.sIndex + 1)
 
+      // The ranged selection would treat the offset of <br> of 1, for this case the offset should be set to 0
+      if (paragraphs[start.pIndex].spans.length === 1 && start.offset === 1 && !paragraphs[start.pIndex].spans[0].text) {
+        start.offset = 0
+      }
+
+      // Splice the selected range
       paragraphs[start.pIndex].spans.splice(start.sIndex + 1)
       paragraphs.splice(start.pIndex + 1, end.pIndex - start.pIndex)
       startSpan.text = startSpan.text.substring(0, start.offset)
 
+      // Merging spans
       if (TextPropUtils.isSameSpanStyles(startSpan.styles, endSpan.styles)) {
         startSpan.text += endSpan.text.substr(end.offset)
       } else {
@@ -208,9 +239,10 @@ class TextUtils {
 
       if (key !== 'Backspace' && key !== 'Delete') {
         return this.noRangeHandler(mockConfig, start, key)
+      } else {
+        this.updateSelection(start, this.getNullSel())
       }
 
-      console.log(paragraphs)
       return paragraphs
     }
   }
@@ -332,11 +364,53 @@ class TextUtils {
           p.spans[0].text += key
           sIndex = 0
           offset = 1
+          TextPropUtils.updateTextPropsState({
+            color: p.spans[0].styles.color,
+            decoration: p.spans[0].styles.decoration,
+            style: p.spans[0].styles.style,
+            weight: p.spans[0].styles.weight
+          })
           break
         }
         const preText = s.text.substring(0, oriOff)
         const lastText = s.text.substr(oriOff)
-        s.text = preText + key + lastText
+
+        const propsTable = ['color', 'decoration', 'weight', 'style']
+        const hasNewProps = (() => {
+          for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+            if (propsTable.includes(k) && v !== s.styles[k]) {
+              return true
+            }
+          }
+          return false
+        })()
+
+        if (hasNewProps) {
+          const newStyles = { ...s.styles }
+          for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+            if (propsTable.includes(k)) {
+              newStyles[k] = v as string
+            }
+          }
+
+          s.text = preText
+          p.spans.splice(oriSidx + 1, 0, {
+            text: key,
+            styles: newStyles
+          })
+          if (lastText) {
+            p.spans.splice(oriSidx + 2, 0, {
+              text: lastText,
+              styles: { ...s.styles }
+            })
+          }
+          sIndex = oriSidx + 1
+          offset = 1
+          break
+        } else {
+          s.text = preText + key + lastText
+        }
+
         if (preText) {
           offset++
         } else offset = 1
