@@ -217,6 +217,9 @@ export default Vue.extend({
     if (this.AutoPlayTimer) {
       window.clearInterval(this.AutoPlayTimer)
     }
+    if (this.CoolDownTimer) {
+      window.clearInterval(this.CoolDownTimer)
+    }
   },
   methods: {
     ...mapActions({
