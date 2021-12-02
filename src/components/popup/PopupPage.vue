@@ -32,7 +32,7 @@
         :iconName="'copy'"
         :iconWidth="'16px'"
         :iconColor="'gray-1'")
-      span(class="ml-10 body-2") Detach Image from Background
+      span(class="ml-10 body-2") 分離背景照片
 </template>
 
 <script lang="ts">
@@ -56,7 +56,7 @@ import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   props: {
-    updateOptions: Object as () => Array<IPopupOptions>
+    updateOptions: Array as () => Array<IPopupOptions>
   },
   data() {
     return {
@@ -126,7 +126,7 @@ export default Vue.extend({
       return [
         {
           icon: 'copy',
-          text: 'Copy',
+          text: '複製',
           shortcutText: 'Cmd+C',
           action: () => {
             ShortcutUtils.copy()
@@ -134,7 +134,7 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'Paste',
+          text: '貼上',
           shortcutText: 'Cmd+V',
           action: () => {
             ShortcutUtils.paste()
@@ -142,7 +142,7 @@ export default Vue.extend({
         },
         {
           icon: 'trash',
-          text: 'Delete',
+          text: '刪除',
           shortcutText: 'DEL',
           action: () => {
             this.deleteBackgroundImage()
@@ -162,35 +162,6 @@ export default Vue.extend({
               })
             store.commit('ADD_page', page)
           }
-        }
-      ]
-    },
-    orderMenu() {
-      const icons = this.mappingIcons('order')
-      return [
-        {
-          icon: icons[0],
-          text: 'Bring to Front',
-          shortcutText: 'Cmd+Alt+]',
-          action: this.mappingIconAction(icons[0])
-        },
-        {
-          icon: icons[1],
-          text: 'Bring Forward',
-          shortcutText: 'Cmd+]',
-          action: this.mappingIconAction(icons[1])
-        },
-        {
-          icon: icons[2],
-          text: 'Bring Backward',
-          shortcutText: 'Cmd+[',
-          action: this.mappingIconAction(icons[2])
-        },
-        {
-          icon: icons[3],
-          text: 'Bring to Back',
-          shortcutText: 'Cmd+Alt+]',
-          action: this.mappingIconAction(icons[3])
         }
       ]
     },

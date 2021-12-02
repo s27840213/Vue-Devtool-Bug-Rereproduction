@@ -4,6 +4,7 @@ import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import themeUtils from '@/utils/themeUtils'
+import designUtils from '@/utils/designUtils'
 
 export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
@@ -26,7 +27,13 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           break
         }
         case 'design': {
-          teamId && await uploadUtils.getDesign(type, { designId, teamId }, { width, height })
+          if (teamId) {
+            designUtils.fetchDesign(teamId, designId, { width, height })
+          }
+          break
+        }
+        default: {
+          await uploadUtils.getDesign(type, { designId }, { width, height })
         }
       }
     } else if (!url && from.name !== 'Home') {

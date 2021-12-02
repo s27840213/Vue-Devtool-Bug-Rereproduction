@@ -209,7 +209,7 @@ export default Vue.extend({
       GroupUtils.deselect()
       this.setCurrActivePageIndex(-1)
       pageUtils.setBackgroundImageControlDefault()
-      pageUtils.activeMostCentralPage()
+      pageUtils.findCentralPageIndexInfo()
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -312,7 +312,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.$nextTick(() => {
           if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
-            this.geCurrActivePageIndex === -1 ? pageUtils.activeMostCentralPage() : pageUtils.activeCurrActivePage()
+            this.geCurrActivePageIndex === -1 ? pageUtils.findCentralPageIndexInfo() : pageUtils.activeCurrActivePage()
           }
         })
       }, 0)

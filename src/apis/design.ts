@@ -25,11 +25,11 @@ export default {
   getFolderIds(folders: IFolder[]): string {
     return folders.map((folder) => folder.id).join(',')
   },
-  async getPrivateDesign(teamId: string, assetId: string): Promise<any> {
+  async getDesign(teamId: string, assetId: string): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',
       data: {
-        token: this.getToken,
+        token: this.getToken(),
         type: 'design',
         team_id: teamId,
         asset_id: assetId

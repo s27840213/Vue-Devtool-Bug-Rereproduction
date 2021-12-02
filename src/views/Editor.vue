@@ -4,7 +4,8 @@
       @toggleSidebarPanel="toggleSidebarPanel")
     section
       div(class="content")
-        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
+        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen"
+          @toggleColorPanel="toggleColorPanel")
         div(class="content__main")
           div(class="content__editor")
             div(class="header-container")
@@ -163,6 +164,7 @@ export default Vue.extend({
       this.setCurrFunctionPanel(type)
     },
     toggleColorPanel(bool: boolean) {
+      console.log('color panel open')
       this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {

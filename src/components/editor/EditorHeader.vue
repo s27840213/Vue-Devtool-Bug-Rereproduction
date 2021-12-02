@@ -7,7 +7,8 @@
       span 或
       a(:href="`/login?redirect=${path}`") 登入
     template(v-else)
-      span(class="body-3") 我的設計
+      span(class="body-3 pointer" @click="goToPage('MyDesign')") {{`我的設計${!folderInfo.isRoot ? '/...': ''}`}}
+      span(v-if="folderInfo.parentFolder" class="body-3 pointer" @click="goToParentFolder()") {{`/${folderInfo.parentFolder}`}}
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
         placeholder="未命名設計"
@@ -43,7 +44,8 @@ export default Vue.extend({
       'role',
       'adminMode']),
     ...mapGetters({
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      folderInfo: 'getFolderInfo'
     }),
     isInFirstStep(): boolean {
       return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
@@ -82,8 +84,15 @@ export default Vue.extend({
       _setModalInfo: 'modal/SET_MODAL_INFO',
       _setModalOpen: 'modal/SET_MODAL_OPEN'
     }),
-    goToPage(pageName: string) {
-      this.$router.push({ name: pageName })
+    goToPage(pageName: string, queryString = '') {
+      if (queryString) {
+        this.$router.push({ name: pageName, query: { search: queryString } })
+      } else {
+        this.$router.push({ name: pageName })
+      }
+    },
+    goToParentFolder() {
+      this.$router.push({ path: `/mydesign/${this.folderInfo.path.split(',').join('&')}` })
     },
     switchLocale() {
       const targetLocale = this.currLocale === 'en-US' ? 'zh-TW' : 'en-US'

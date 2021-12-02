@@ -27,6 +27,11 @@ export interface IEditorState {
   assetId: string,
   groupId: string,
   groupType: number,
+  folderInfo: {
+    isRoot: boolean,
+    parentFolder: string,
+    path: string
+  },
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,
@@ -90,7 +95,8 @@ export enum FunctionPanelType {
 export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
-  shape = 'setShapeColor'
+  shape = 'setShapeColor',
+  bg = 'setBgColor'
 }
 
 export enum PopupSliderEventType {
