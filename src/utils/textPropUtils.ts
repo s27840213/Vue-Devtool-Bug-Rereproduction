@@ -93,7 +93,11 @@ class TextPropUtils {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end)
+          if (TextUtils.isSel(selEnd)) {
+            Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+          } else {
+            setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
+          }
         }
       }
     }
@@ -224,7 +228,8 @@ class TextPropUtils {
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
-    } else if (!TextUtils.isSel(end)) {
+    }
+    if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       this.noRangedHandler(styles, propName, prop[propName])
       if (propName !== 'fontSize') {
@@ -266,7 +271,7 @@ class TextPropUtils {
     }
     TextUtils.updateSelection(start, end)
 
-    // sync updating text effect if the color changed
+    // Sync updating text effect if the color changed
     TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     return config
   }
@@ -458,6 +463,12 @@ class TextPropUtils {
     return isStartContainerDivided
   }
 
+  /**
+   *
+   * @param styles  The styles of span. This para is directly mutated in this function.
+   * @param propName
+   * @param value Specify the value of the target prop.
+   */
   noRangedHandler(styles: ISpanStyle, propName: string, value?: number | string) {
     switch (propName) {
       case 'fontSize':
@@ -465,7 +476,6 @@ class TextPropUtils {
         break
       case 'fontFamily':
         styles.font = value as string
-        // this.updateTextPropsState({ font: value as string })
         break
       case 'color':
         this.updateTextPropsState({ color: value as string })
@@ -473,30 +483,24 @@ class TextPropUtils {
       case 'bold': {
         if (this.getCurrTextProps?.weight === 'bold') {
           this.updateTextPropsState({ weight: 'normal' })
-          // styles.weight = 'normal'
         } else {
           this.updateTextPropsState({ weight: 'bold' })
-          // styles.weight = 'bold'
         }
         break
       }
       case 'italic': {
         if (this.getCurrTextProps?.style === 'italic') {
           this.updateTextPropsState({ style: 'normal' })
-          // styles.style = 'normal'
         } else {
           this.updateTextPropsState({ style: 'italic' })
-          // styles.style = 'italic'
         }
         break
       }
       case 'underline': {
         if (this.getCurrTextProps?.decoration === 'underline') {
           this.updateTextPropsState({ decoration: 'none' })
-          // styles.decoration = 'none'
         } else {
           this.updateTextPropsState({ decoration: 'underline' })
-          // styles.decoration = 'underline'
         }
       }
     }
@@ -640,30 +644,61 @@ class TextPropUtils {
    * @returns The desired props value accord to the current selection range.
    */
   propReader(propName: string): string | number | undefined {
-    if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
-      return this.propReadOfLayer(propName)
-    } else if (this.targetInfo.type === 'group' && this.targetInfo.subLayerIndex !== -1) {
-      try {
-        const layer = (LayerUtils.getCurrLayer as IGroup).layers[this.targetInfo.subLayerIndex]
-        return this.propReadOfLayer(propName, layer as IText)
-      } catch (error) {
-        console.log(error)
+    const currLayer = LayerUtils.getCurrLayer
+    switch (currLayer.type) {
+      case 'text': {
+        return this.propReadOfLayer(propName)
       }
-    } else {
-      const tmpLayerGroup = this.getCurrLayer as ITmp
-      let propBuff: number | string | undefined
-      for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
-        if (tmpLayerGroup.layers[i].type === 'text') {
-          const tmpLayer = tmpLayerGroup.layers[i] as IText
-          if (typeof propBuff === 'undefined') {
-            propBuff = this.propReadOfLayer(propName, tmpLayer)
-          } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
-            return undefined
+      case 'group': {
+        try {
+          const layer = (LayerUtils.getCurrLayer as IGroup).layers[this.targetInfo.subLayerIndex]
+          return this.propReadOfLayer(propName, layer as IText)
+        } catch (error) {
+          console.log(error)
+        }
+        break
+      }
+      case 'tmp': {
+        const tmpLayerGroup = this.getCurrLayer as ITmp
+        let propBuff: number | string | undefined
+        for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
+          if (tmpLayerGroup.layers[i].type === 'text') {
+            const tmpLayer = tmpLayerGroup.layers[i] as IText
+            if (typeof propBuff === 'undefined') {
+              propBuff = this.propReadOfLayer(propName, tmpLayer)
+            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+              return undefined
+            }
           }
         }
+        return propBuff
       }
-      return propBuff
     }
+
+    // if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
+    //   return this.propReadOfLayer(propName)
+    // } else if (this.targetInfo.type === 'group' && this.targetInfo.subLayerIndex !== -1) {
+    //   try {
+    //     const layer = (LayerUtils.getCurrLayer as IGroup).layers[this.targetInfo.subLayerIndex]
+    //     return this.propReadOfLayer(propName, layer as IText)
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // } else {
+    //   const tmpLayerGroup = this.getCurrLayer as ITmp
+    //   let propBuff: number | string | undefined
+    //   for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
+    //     if (tmpLayerGroup.layers[i].type === 'text') {
+    //       const tmpLayer = tmpLayerGroup.layers[i] as IText
+    //       if (typeof propBuff === 'undefined') {
+    //         propBuff = this.propReadOfLayer(propName, tmpLayer)
+    //       } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+    //         return undefined
+    //       }
+    //     }
+    //   }
+    //   return propBuff
+    // }
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
@@ -720,9 +755,8 @@ class TextPropUtils {
     }
     for (let pidx = start.pIndex; pidx <= end.pIndex && config.paragraphs[pidx]; pidx++) {
       const p = config.paragraphs[pidx]
-      /**
-       * For paragraphs props
-       */
+
+      // For paragraphs props
       if (prop === 'lineHeight' || prop === 'fontSpacing' || prop === 'textAlign') {
         const propsMap = {
           lineHeight: 'lineHeight',
@@ -735,9 +769,8 @@ class TextPropUtils {
         }
         continue
       }
-      /**
-       * For spans props
-       */
+
+      // For spans props
       for (let sidx = 0; sidx < p.spans.length; sidx++) {
         const span = p.spans[sidx]
         if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
