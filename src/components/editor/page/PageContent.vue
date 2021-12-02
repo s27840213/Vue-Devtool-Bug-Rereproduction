@@ -107,6 +107,8 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      this.setLastSelectedPageIndex(this.pageIndex)
+      this.setCurrActivePageIndex(this.pageIndex)
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {

@@ -36,6 +36,11 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
+  folderInfo: {
+    isRoot: true,
+    parentFolder: '',
+    path: 'root'
+  },
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
@@ -103,6 +108,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getGroupType(state: IEditorState): number {
     return state.groupType
+  },
+  getFolderInfo(state: IEditorState): { isRoot: boolean, parentFolder: string } {
+    return state.folderInfo
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number } => {
@@ -236,6 +244,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_groupType(state: IEditorState, groupType: number) {
     console.log('set group type' + groupType)
     state.groupType = groupType
+  },
+  SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
+    Object.assign(state.folderInfo, folderInfo)
   },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
     state.pages[updateInfo.pageIndex].designId = updateInfo.designId
@@ -634,6 +645,11 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.groupType = 0
     state.name = ''
+    Object.assign(state.folderInfo, {
+      isRoot: true,
+      parentFolder: '',
+      path: 'root'
+    })
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]

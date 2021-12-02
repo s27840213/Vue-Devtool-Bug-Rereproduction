@@ -27,6 +27,11 @@ export interface IEditorState {
   assetId: string,
   groupId: string,
   groupType: number,
+  folderInfo: {
+    isRoot: boolean,
+    parentFolder: string,
+    path: string
+  },
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,

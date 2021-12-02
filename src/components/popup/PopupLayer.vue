@@ -224,7 +224,7 @@ export default Vue.extend({
       return [
         {
           icon: 'copy',
-          text: 'Copy',
+          text: '複製',
           shortcutText: 'Cmd+C',
           action: () => {
             if (TextUtils.getSelection()) {
@@ -237,7 +237,7 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: 'Paste',
+          text: '貼上',
           shortcutText: 'Cmd+V',
           action: () => {
             if (TextUtils.getSelection()) {
@@ -250,7 +250,7 @@ export default Vue.extend({
         },
         {
           icon: 'trash',
-          text: 'Delete',
+          text: '刪除',
           shortcutText: 'DEL',
           action: () => {
             ShortcutUtils.del()
@@ -264,25 +264,25 @@ export default Vue.extend({
       return [
         {
           icon: icons[0],
-          text: 'Bring to Front',
+          text: '移至最前',
           shortcutText: 'Cmd+Alt+]',
           action: this.mappingIconAction(icons[0])
         },
         {
           icon: icons[1],
-          text: 'Bring Forward',
+          text: '前移',
           shortcutText: 'Cmd+]',
           action: this.mappingIconAction(icons[1])
         },
         {
           icon: icons[2],
-          text: 'Bring Backward',
+          text: '後移',
           shortcutText: 'Cmd+[',
           action: this.mappingIconAction(icons[2])
         },
         {
           icon: icons[3],
-          text: 'Bring to Back',
+          text: '移至最後',
           shortcutText: 'Cmd+Alt+]',
           action: this.mappingIconAction(icons[3])
         }

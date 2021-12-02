@@ -5,7 +5,7 @@ import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import Vue from 'vue'
 import router from '@/router'
-import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 
 interface IDesignState {
   currLocation: string,
@@ -110,6 +110,14 @@ const getters: GetterTree<IDesignState, unknown> = {
 }
 
 const actions: ActionTree<IDesignState, unknown> = {
+  async fetchDesign({ commit, getters }, { teamId, assetId }) {
+    try {
+      const { data } = await designApis.getDesign(teamId, assetId)
+      return data
+    } catch (error) {
+      console.error(error)
+    }
+  },
   async fetchDesigns({ commit, getters }, { path }) {
     const { getSortByField, getSortByDescending } = getters
     try {

@@ -4,6 +4,7 @@
       component(v-show="isSidebarPanelOpen && !isShowPagePreview"
         class="p-10 border-box"
         :style="panelStyles()"
+        v-on="$listeners"
         :is="detailPageMode? 'panel-page' :panelComponents[currPanel]")
 </template>
 
