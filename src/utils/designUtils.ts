@@ -1,4 +1,4 @@
-import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
@@ -480,6 +480,16 @@ class DesignUtils {
     return level >= 4
   }
 
+  async fetchDesign(teamId: string, assetId: string, params?: { [index: string]: any }) {
+    const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
+    store.commit('SET_folderInfo', {
+      isRoot: designData.is_root,
+      parentFolder: designData.parent_folder,
+      path: designData.path
+    })
+    await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
+  }
+
   fetchDesigns(fetcher: () => Promise<void>, clear = true) {
     if (clear) {
       store.commit('design/SET_allDesigns', [])
@@ -551,14 +561,11 @@ class DesignUtils {
 
   setDesign(design: IDesign) {
     pageUtils.setPages()
-
     let isPrivate = false
-
     if (design.id === undefined && design.signedUrl) {
       isPrivate = true
-      // design.id = this.getPrivateDesignId(design.signedUrl['config.json'])
+      design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
     }
-
     pageUtils.clearPagesInfo()
     if (this.isLogin) {
       store.commit('SET_assetId', design.id)
@@ -566,18 +573,16 @@ class DesignUtils {
         router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
       }
     }
-    console.log(design.signedUrl?.['config.json'])
-    console.log(this.getPrivateDesignId(design.signedUrl?.['config.json'])
-    )
+
     if (isPrivate) {
-      uploadUtils.getDesign('design', { signedUrl: design.signedUrl?.['config.json'] ?? '' })
+      this.fetchDesign(this.teamId, design.id ?? '')
     } else {
-      uploadUtils.getDesign('design', { designId: design.id ?? '', teamId: this.teamId })
+      this.fetchDesign(this.teamId, design.id ?? '')
     }
   }
 
-  getPrivateDesignId(jsonUrl?: string): Array<string> {
-    return (jsonUrl ?? '').match(/design\/(.*)\/config\.json/) ?? []
+  getPrivateDesignId(jsonUrl?: string): string {
+    return (jsonUrl ?? '').match(/design\/(.*)\/config\.json/)?.[1] ?? ''
   }
 }
 

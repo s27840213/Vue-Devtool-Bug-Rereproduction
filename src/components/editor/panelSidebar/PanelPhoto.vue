@@ -47,9 +47,6 @@ export default Vue.extend({
   mounted () {
     this.handleSearch()
   },
-  destroyed () {
-    // this.$store.unregisterModule(moduleName)
-  },
   activated () {
     if (this.$refs.gallery) {
       const list = (this.$refs.gallery as Vue).$el.children[0]

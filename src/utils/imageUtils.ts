@@ -80,6 +80,7 @@ class ImageUtils {
       while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
         i++
       }
+      i = Math.max(i - 1, 0)
       return preload
         ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
         : sizeMap[i][key]

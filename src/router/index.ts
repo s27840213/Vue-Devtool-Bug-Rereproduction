@@ -55,16 +55,6 @@ const routes: Array<RouteConfig> = [
       // to.params.locale = 'en'
       try {
         next()
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('type') && urlParams.has('design_id') && urlParams.has('team_id')) {
-          const type = urlParams.get('type')
-          const designId = urlParams.get('design_id')
-          const teamId = urlParams.get('team_id')
-
-          if (type && designId && teamId) {
-            uploadUtils.getDesign(type, { designId, teamId })
-          }
-        }
       } catch (error) {
         console.log(error)
       }

@@ -4,7 +4,7 @@
       ref="page")
     div(v-if="!inPagePanel"
       class="page-title text-left pb-10"
-      :style="{'width': `${config.width * (scaleRatio/100)}px`,}")
+      :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       span(class="pr-10") 第 {{pageIndex+1}} 頁
       input(
         type="text"
@@ -135,10 +135,10 @@
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config")
+            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
             nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
             div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
           div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
               class="dim-background"
               :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
@@ -200,6 +200,7 @@ import { IPage } from '@/interfaces/page'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
+import cssConverter from '@/utils/cssConverter'
 
 export default Vue.extend({
   components: {
@@ -308,6 +309,9 @@ export default Vue.extend({
     },
     isBackgroundImageControl(): boolean {
       return this.config.backgroundImage.config.imgControl
+    },
+    isAnyLayerActive(): boolean {
+      return (this.config as IPage).layers.some(l => l.active)
     },
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
@@ -508,6 +512,10 @@ export default Vue.extend({
         'pointer-events': 'none'
       }
     },
+    backgroundFlipStyles() {
+      const { horizontalFlip, verticalFlip } = this.config.backgroundImage.config.styles
+      return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
+    },
     showGuideline(pos: number, type: string, index: number) {
       if (!rulerUtils.isDragging) {
         rulerUtils.deleteGuideline(
@@ -610,7 +618,6 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   white-space: nowrap;
-  transform: translate3d(0, -100%, 99px);
   > span {
     font-size: 14px;
   }
@@ -652,7 +659,6 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
-  transform-style: preserve-3d;
   &:empty {
     background-color: setColor(gray-4);
   }
@@ -666,7 +672,6 @@ export default Vue.extend({
   position: relative;
   box-sizing: border-box;
   transform-origin: 0 0;
-  transform-style: preserve-3d;
 }
 
 /*

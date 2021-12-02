@@ -16,24 +16,16 @@
             iconWidth="20px")
       template(v-slot:default-background-colors)
         div
-          div(class="text-left py-5 text-white") Color
-          div(class="panel-bg__colors mb-15")
-            color-picker(v-if="openColorPicker"
-              v-click-outside="handleColorPicker"
-              class="panel-bg__color-picker"
-              :currentColor="currentPageColor"
-              :showColorSlip="true"
-              @update="setBgColor")
+          div(class="text-left py-5 text-white") 顏色
+          div(class="panel-bg__colors")
             div(class="panel-bg__color"
-              @click="handleColorPicker")
-              svg-icon(iconName="rainbow")
+              @click="handleColorModal")
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
               :style="colorStyles(color)"
               @click="setBgColor(color)")
             div(class="panel-bg__color"
               @click="setBgColor('#ffffff00')")
-              svg-icon(iconName="transparent")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -42,7 +34,8 @@
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
-              :item="item")
+              :item="item"
+              :locked="currentPageBackgroundLocked")
       template(v-slot:category-background-item="{ list, title }")
         div(class="panel-bg__items")
           div(v-if="title"
@@ -50,7 +43,8 @@
           category-background-item(v-for="item in list"
             class="panel-bg__item"
             :key="item.id"
-            :item="item")
+            :item="item"
+            :locked="currentPageBackgroundLocked")
 </template>
 
 <script lang="ts">
@@ -64,6 +58,8 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
+import colorUtils from '@/utils/colorUtils'
+import { ColorEventType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -148,7 +144,12 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     currentPageColor(): string {
-      return this.getPage(this.lastSelectedPageIndex).backgroundColor
+      const { backgroundColor } = this.getPage(this.lastSelectedPageIndex) || {}
+      return backgroundColor || ''
+    },
+    currentPageBackgroundLocked(): boolean {
+      const { backgroundImage } = this.getPage(this.lastSelectedPageIndex) || {}
+      return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any background for "${this.keyword}".` : ''
@@ -158,11 +159,20 @@ export default Vue.extend({
     (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
+    colorUtils.on(ColorEventType.background, (color: string) => {
+      this.setBgColor(color)
+    })
+
     await this.getCategories()
     this.getContent()
   },
   activated() {
-    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
+    const el = (this.$refs.list as Vue).$el
+    el.scrollTop = this.scrollTop
+    el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
   destroyed() {
     this.resetContent()
@@ -186,6 +196,9 @@ export default Vue.extend({
       }
     },
     setBgColor(color: string) {
+      if (this.currentPageBackgroundLocked) {
+        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      }
       this._setBgColor({
         pageIndex: this.lastSelectedPageIndex,
         color: color
@@ -208,8 +221,13 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    handleColorPicker() {
-      this.openColorPicker = !this.openColorPicker
+    handleColorModal(color: string) {
+      colorUtils.setCurrEvent(ColorEventType.background)
+      colorUtils.setCurrColor(color)
+      this.$emit('toggleColorPanel', true)
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })
@@ -250,16 +268,24 @@ export default Vue.extend({
   }
   &__colors {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    column-gap: 8px;
+    grid-template-columns: repeat(7, 1fr);
+    column-gap: 12px;
     row-gap: 10px;
     position: relative;
   }
   &__color {
-    @include size(clamp(42px, 2vw, 50px), clamp(42px, 2vw, 50px));
+    aspect-ratio: 1/1;
     border-radius: 4px;
     cursor: pointer;
     position: relative;
+    &:nth-child(1) {
+      background-image: url("~@/assets/img/svg/addColor.svg");
+      background-size: cover;
+    }
+    &:last-child {
+      background-image: url("~@/assets/img/svg/transparent.svg");
+      background-size: cover;
+    }
   }
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;

@@ -10,18 +10,15 @@ import user, { IUserModule } from '@/store/module/user'
 import color from '@/store/module/color'
 import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
-import markers from '@/store/module/markers'
 import templates from '@/store/module/templates'
-import layouts from '@/store/module/layouts'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
-import design from '@/store/module/design'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
-import hashtag from '@/store/module/hashtag'
+import design from '@/store/module/design'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -39,6 +36,11 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
+  folderInfo: {
+    isRoot: true,
+    parentFolder: '',
+    path: 'root'
+  },
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
@@ -106,6 +108,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getGroupType(state: IEditorState): number {
     return state.groupType
+  },
+  getFolderInfo(state: IEditorState): { isRoot: boolean, parentFolder: string } {
+    return state.folderInfo
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number } => {
@@ -240,6 +245,9 @@ const mutations: MutationTree<IEditorState> = {
     console.log('set group type' + groupType)
     state.groupType = groupType
   },
+  SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
+    Object.assign(state.folderInfo, folderInfo)
+  },
   SET_pageDesignId(state: IEditorState, updateInfo: { pageIndex: number, designId: string }) {
     state.pages[updateInfo.pageIndex].designId = updateInfo.designId
   },
@@ -303,6 +311,17 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.forEach((page) => {
       page.backgroundImage.config.imgControl = imgControl
     })
+  },
+  SET_backgroundOpacity(state: IEditorState, updateInfo: { pageIndex: number, opacity: number }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = updateInfo.opacity
+  },
+  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: any }) {
+    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.styles, updateInfo.styles)
+  },
+  REMOVE_background(state: IEditorState, updateInfo: { pageIndex: number }) {
+    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
+    state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = 100
   },
   SET_pageIsModified(state: IEditorState, { pageIndex, modified }) {
     state.pages[pageIndex].modified = modified
@@ -626,6 +645,11 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.groupType = 0
     state.name = ''
+    Object.assign(state.folderInfo, {
+      isRoot: true,
+      parentFolder: '',
+      path: 'root'
+    })
   },
   SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
     state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
@@ -649,17 +673,14 @@ export default new Vuex.Store({
     font,
     color,
     objects,
-    markers,
     templates,
-    layouts,
     textStock,
     background,
     modal,
     popup,
-    design,
     page,
     homeTemplate,
-    hashtag,
+    design,
     unsplash
   }
 })

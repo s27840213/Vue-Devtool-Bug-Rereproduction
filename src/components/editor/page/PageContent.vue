@@ -13,6 +13,7 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
+      nu-bg-image(:image="this.config.backgroundImage" :color="this.config.backgroundColor")
       nu-layer(v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
@@ -35,8 +36,10 @@ import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { SidebarPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
+import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 
 export default Vue.extend({
+  components: { NuBgImage },
   props: {
     config: {
       type: Object,
@@ -87,12 +90,7 @@ export default Vue.extend({
     styles() {
       return {
         width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
-        backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${this.config.backgroundImage.config.srcObj ? imageUtils.getSrc(this.config.backgroundImage.config) : this.config.backgroundImage.src})`,
-        backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-          : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
-        backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
+        height: `${this.config.height}px`
       }
     },
     togglePageHighlighter(isHover: boolean): void {
@@ -109,12 +107,17 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      this.setLastSelectedPageIndex(this.pageIndex)
+      this.setCurrActivePageIndex(this.pageIndex)
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
-      if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
+      const { srcObj, locked } = this.config.backgroundImage.config
+      if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
         stepsUtils.record()
+      } else {
+        this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
     }
   }

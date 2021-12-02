@@ -195,6 +195,19 @@ export interface IUserDesignContentData {
   signed_url?: { [key: string]: string }
 }
 
+export interface IAssetDesignParams {
+  flag: 0,
+  is_root: true,
+  parent_folder: string,
+  path: string,
+  url_map: {
+    '0_prev': string
+    '0_prev_2x': string
+    '0_prev_4x': string
+    'config.json': string
+  }
+}
+
 export interface IUserFolderContentData {
   author: string,
   create_time: string,

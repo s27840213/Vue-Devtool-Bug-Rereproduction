@@ -1,94 +1,245 @@
 <template lang="pug">
   div(class="bg-setting")
-    span(class="bg-setting__title text-blue-1 label-lg") Background Setting
-    div(class="bg-setting__tabs")
-      btn(v-for="(tab,index) in tabs"
-        :key="`tab-${index}`"
-        class="full-width"
-        :type="activeTab === tab ? 'primary-sm' : 'inactive-sm'" @click.native="toggleTab(tab)") {{tab}}
-    div(v-if="activeTab === 'Colors'" class="bg-setting__content")
-      div(class="bg-setting__colors")
-        div(class="bg-gray-1 pointer" @click="setBgColor('#18191F')")
-        div(class="bg-gray-2 pointer" @click="setBgColor('#474A57')")
-        div(class="bg-gray-3 pointer" @click="setBgColor('#969BAB')")
-        div(class="bg-gray-4 pointer" @click="setBgColor('#D9DBE1')")
-        div(class="bg-gray-5 pointer" @click="setBgColor('#EEEFF4')")
-        div(class="bg-gray-6 pointer" @click="setBgColor('#ffffff')")
-      property-bar
-        input(class="body-2 text-gray-2" max="100" min="0" value="100" step="1")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    div(v-if="activeTab === 'Photos'" class="bg-setting__content")
-      property-bar
-        input(class="body-2 text-gray-2" max="100" min="0" value="100" step="1")
-        svg-icon(class="pointer"
-          :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-      div(class="bg-setting__grid")
-        btn(class="full-width" :type="'primary-mid'") Replace
-        btn(class="full-width" :type="'primary-mid'") Crop
-        btn(class="full-width" :type="'primary-mid'") Filter
-        btn(class="full-width" :type="'primary-mid'") Adjust
-        btn(class="full-width" :type="'primary-mid'") BG Delete
+    span(class="bg-setting__title text-blue-1 label-lg") 背景設定
+    div(class="action-bar flex-evenly my-10")
+      svg-icon(class="btn-opacity pointer"
+        iconName="transparency" :iconWidth="'20px'"
+        :class="{ 'bg-setting__btn--disabled': backgroundLocked }"
+        :iconColor="backgroundLocked ? 'gray-4' : 'gray-2'"
+        @click.native="openSliderPopup()"
+        v-hint="'透明度'")
+      svg-icon(class="pointer"
+        :iconName="backgroundLocked ? 'unlock' : 'lock'"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click.native="handleLockBackground"
+        v-hint="'鎖定背景'")
+      svg-icon(class="pointer"
+        :class="{ 'bg-setting__btn--disabled': backgroundLocked }"
+        :iconColor="backgroundLocked ? 'gray-4' : 'gray-2'"
+        iconName="trash" :iconWidth="'20px'"
+        @click.native="handleDeleteBackground"
+        v-hint="'刪除'")
+    div(class="mb-10")
+      btn(class="full-width"
+        :class="backgroundImgControl ? 'active' : ''"
+        type="gray-mid"
+        :disabled="!isShowImage || backgroundLocked"
+        @click.native="() => handleControlBgImage()") 裁切
+    div(class="bg-setting__grid mb-10")
+      btn(class="full-width"
+        :class="show === 'popup-flip' ? 'active' : ''"
+        type="gray-mid"
+        :disabled="!isShowImage || backgroundLocked"
+        @click.native="() => handleShow('popup-flip')") 翻轉
+      btn(class="full-width"
+        :class="show === 'popup-adjust' ? 'active' : ''"
+        type="gray-mid"
+        :disabled="!isShowImage || backgroundLocked"
+        @click.native="handleShow('popup-adjust')") 調整
+    div(class="mb-10 text-left")
+      div(v-if="show === 'popup-flip'"
+        class="popup-flip"
+        v-click-outside="handleOutSide")
+        div(v-for="data in popupDatas"
+            :key="`popup-${data.icon}`"
+            class="popup-flip__item"
+            @click="() => handleImageFlip(data.icon)")
+          svg-icon(
+            class="pointer"
+            :iconName="data.icon"
+            :iconWidth="'12px'"
+            :iconColor="'gray-1'")
+          span(class="ml-5 body-2") {{data.text}}
+      popup-adjust(v-if="show === 'popup-adjust'"
+        :imageAdjust="backgroundAdjust"
+        @update="handleChangeBgAdjust"
+        v-click-outside="handleOutSide")
+    div
+      div(class="bg-setting__current-color"
+        @click="() => handleColorPicker()"
+        :class="colorPickerClass"
+        :style="colorPickerStyle")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import MappingUtils from '@/utils/mappingUtils'
+import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import MappingUtils from '@/utils/mappingUtils'
+import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import colorUtils from '@/utils/colorUtils'
+import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 
 export default Vue.extend({
-  components: {
-    SearchBar
+  components: { PopupAdjust },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
-      activeTab: 'Colors',
-      tabs: ['Colors', 'Photos']
+      show: '',
+      popupDatas: [
+        { icon: 'flip-h', text: '水平翻轉' },
+        { icon: 'flip-v', text: '垂直翻轉' }
+      ]
     }
   },
   computed: {
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
-    })
-    // opacity: {
-    //   get() {
-    //     return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex).styles.opacity
-    //   },
-    //   set(value) {
-    //     if (this.currSelectedInfo.layers.length === 1) {
-    //       this.$store.commit('UPDATE_layerStyles', {
-    //         pageIndex: this.lastSelectedPageIndex,
-    //         layerIndex: this.currSelectedIndex,
-    //         styles: {
-    //           opacity: value
-    //         }
-    //       })
-    //     } else {
-
-    //     }
-    //   }
-    // }
+      getPage: 'getPage'
+    }),
+    currPage (): IPage {
+      return this.getPage(this.lastSelectedPageIndex)
+    },
+    backgroundColor (): string {
+      return this.currPage.backgroundColor
+    },
+    backgroundOpacity (): number {
+      const { styles: { opacity } } = this.currPage.backgroundImage.config
+      return opacity
+    },
+    backgroundAdjust (): any {
+      const { styles: { adjust } } = this.currPage.backgroundImage.config
+      return adjust
+    },
+    backgroundLocked (): boolean {
+      const { locked } = this.currPage.backgroundImage.config
+      return locked
+    },
+    backgroundImage (): any {
+      return this.currPage.backgroundImage.config?.srcObj ?? {}
+    },
+    backgroundImgControl (): boolean {
+      return this.currPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundImgFlip (): boolean[] {
+      const { horizontalFlip = false, verticalFlip = false } = this.currPage.backgroundImage.config?.styles || {}
+      return [horizontalFlip, verticalFlip]
+    },
+    isShowImage (): boolean {
+      return this.backgroundImage.assetId
+    },
+    colorPickerStyle (): any {
+      if (this.backgroundColor && !this.backgroundImage.assetId) {
+        return { background: this.backgroundColor }
+      }
+      return {}
+    },
+    colorPickerClass (): any {
+      return {
+        'bg-setting__current-color--selected': this.colorPickerStyle.background,
+        'bg-setting__current-color--disabled': this.backgroundLocked
+      }
+    }
+  },
+  mounted () {
+    popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
+  },
+  beforeDestroy () {
+    popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
   },
   methods: {
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
-      _setBgColor: 'SET_backgroundColor'
+      setBgColor: 'SET_backgroundColor',
+      removeBg: 'REMOVE_background',
+      setBgOpacity: 'SET_backgroundOpacity',
+      setBgConfig: 'SET_backgroundImageConfig',
+      setBgImageControl: 'SET_backgroundImageControl',
+      setBgImageStyles: 'SET_backgroundImageStyles'
     }),
-    mappingIcons(type: string) {
-      return MappingUtils.mappingIconSet(type)
+    handleDeleteBackground () {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      this.removeBg({ pageIndex: this.lastSelectedPageIndex })
+      stepsUtils.record()
     },
-    toggleTab(tab: string) {
-      this.activeTab = tab
-    },
-    setBgColor(color: number) {
-      this._setBgColor({
+    handleLockBackground () {
+      this.setBgConfig({
         pageIndex: this.lastSelectedPageIndex,
-        color: color
+        config: {
+          locked: !this.backgroundLocked
+        }
       })
+      this.setBgImageControl({
+        pageIndex: this.lastSelectedPageIndex,
+        imgControl: false
+      })
+      stepsUtils.record()
+    },
+    handleChangeBgColor(color: string) {
+      this.setBgColor({
+        pageIndex: this.lastSelectedPageIndex,
+        color
+      })
+      stepsUtils.record()
+    },
+    handleChangeBgOpacity(opacity: number) {
+      this.setBgOpacity({
+        pageIndex: this.lastSelectedPageIndex,
+        opacity: `${opacity}`
+      })
+    },
+    handleControlBgImage() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      this.setBgImageControl({
+        pageIndex: this.lastSelectedPageIndex,
+        imgControl: !this.backgroundImgControl
+      })
+    },
+    handleChangeBgAdjust(adjust: any) {
+      this.setBgImageStyles({
+        pageIndex: this.lastSelectedPageIndex,
+        styles: {
+          adjust: { ...adjust }
+        }
+      })
+    },
+    openSliderPopup() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      const { backgroundOpacity } = this
+      popupUtils.setCurrEvent(PopupSliderEventType.opacity)
+      popupUtils.setSliderConfig(Object.assign({ value: backgroundOpacity, noText: false }, MappingUtils.mappingMinMax('opacity')))
+      popupUtils.openPopup('slider', {
+        posX: 'left',
+        target: '.btn-opacity'
+      })
+    },
+    openAdjustPopup() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+    },
+    handleShow(name: string) {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      this.show = this.show.includes(name) ? '' : name
+    },
+    handleColorPicker() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      colorUtils.setCurrEvent(ColorEventType.background)
+      colorUtils.setCurrColor(this.backgroundColor)
+      this.$emit('toggleColorPanel', true)
+    },
+    handleImageFlip(flipIcon: string) {
+      const [h, v] = this.backgroundImgFlip
+      this.setBgImageStyles({
+        pageIndex: this.lastSelectedPageIndex,
+        styles: {
+          horizontalFlip: flipIcon === 'flip-h' ? !h : h,
+          verticalFlip: flipIcon === 'flip-v' ? !v : v
+        }
+      })
+      stepsUtils.record()
+    },
+    handleLockedNotify() {
+      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+    },
+    handleOutSide () {
+      this.show = ''
     }
   }
 })
@@ -96,39 +247,53 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .bg-setting {
-  &__tabs {
-    display: flex;
-    > button {
-      margin: 0px 5px;
-    }
-  }
-  &__title {
-  }
-  > div:nth-child(n + 1) {
-    margin-top: 15px;
-  }
-  &__content {
-    > div:nth-child(n + 1) {
-      margin-top: 15px;
-    }
-  }
-  &__colors {
-    display: flex;
-    justify-content: space-between;
-    > div {
-      @include size(40px, 40px);
-    }
-  }
   &__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
+  }
+  &__current-color {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: center/contain no-repeat url("~@/assets/img/png/defaultColor.png");
+    &--selected {
+      box-shadow: rgb(128 128 128) 0px 0px 0px 2px, rgb(255 255 255) 0px 0px 0px 1.5px inset;
+    }
+    &--disabled {
+      opacity: .3;
+    }
+  }
+  .btn {
+    &.active {
+      border: 2px solid setColor(blue-1);
+      color: setColor(blue-1);
+      padding: 8px 20px;
+    }
+  }
+}
 
-    > button:nth-child(1) {
-      grid-column-start: 1;
-      grid-column-end: 3;
+.popup-flip {
+  display: inline-block;
+  border-radius: 5px;
+  box-shadow: 0px 0px 7px rgb(24 25 31 / 25%);
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
     }
   }
 }

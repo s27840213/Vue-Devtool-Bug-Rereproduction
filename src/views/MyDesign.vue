@@ -179,7 +179,7 @@ import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
-  name: 'MyDesgin',
+  name: 'MyDesign',
   components: {
     Sidebar,
     NuHeader,

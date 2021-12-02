@@ -34,7 +34,7 @@
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
-      div(v-if="!isLogin"
+      div(v-if="!isLogin && !isMobile"
         class="home-content__plaque")
         img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
         div(class="home-content__plaque-title") 立即享受海量的精美電商模板
@@ -43,7 +43,8 @@
           span(v-if="isMobile") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
           span(v-else) Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
       div(v-if="!isLogin"
-        class="home-content__feature")
+        class="home-content__feature"
+        :class="isMobile ? 'mt-10' : ''")
         div(style="width: 100%;")
           div(class="home-content__feature-items")
             btn(v-for="item, idx in featureList" :type="'icon-mid'"
@@ -55,11 +56,11 @@
               div(v-if="!isMobile"
                 class="pt-10 body-2") {{item.title}}
         div(class="home-content__feature-content")
-          div(v-if="isMobile"
-            class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
           div(class="home-content__feature-img")
             img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
           div(class="home-content__feature-text")
+            div(v-if="isMobile"
+              class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") 開 始 製 作
@@ -74,7 +75,7 @@
       div(class="home-content-title label-lg")
         div
           span(v-for="tag in tags"
-            class="pointer mr-20"
+            class="pointer mr-10"
             @click="newDesign(tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
           @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") 更多
@@ -107,6 +108,7 @@ import ScrollList from '@/components/homepage/ScrollList.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -174,7 +176,6 @@ export default Vue.extend({
   async mounted() {
     if (!this.isLogin) {
       this.AutoPlayTimer = setInterval(() => {
-        console.log('ddd', this.featureSelected)
         if (!this.isTimerStop) {
           if (this.featureSelected === this.featureList.length - 1) {
             this.featureSelected = 0
@@ -189,8 +190,9 @@ export default Vue.extend({
       designUtils.fetchDesigns(this.fetchAllDesigns)
     }
 
-    const response = await this.getThemeList()
-    this.themeList = response.data.content
+    themeUtils.checkThemeState().then(() => {
+      this.themeList = themeUtils.themes
+    })
 
     const squareTheme = [] as number[]
     this.themeList.forEach((theme: Itheme) => {
@@ -223,7 +225,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      getThemeList: 'homeTemplate/getThemeList',
       getTagContent: 'homeTemplate/getTagContent',
       fetchAllDesigns: 'design/fetchAllDesigns'
     }
@@ -367,11 +368,14 @@ export default Vue.extend({
       top: 240px;
     }
   }
-  &__theme, &__mydesign, &__feature, &__template {
+  &__theme, &__mydesign, &__template {
     padding: 0 10%;
     @include layout-mobile {
       padding: 0 5%;
     }
+  }
+  &__feature {
+    padding: 0 10%;
   }
   &__plaque {
     display: flex;
@@ -381,9 +385,6 @@ export default Vue.extend({
     > img {
       width: 100%;
       height: 150px;
-      @include layout-mobile {
-        height: 75px;
-      }
     }
     &-title {
       position: absolute;
@@ -393,22 +394,12 @@ export default Vue.extend({
       font-weight: 700;
       line-height: 1.3;
       color: setColor(white);
-      @include layout-mobile {
-        top: 70px;
-        letter-spacing: 5px;
-        font-size: 16px;
-      }
     }
     &-subtitle {
       position: absolute;
       top: 135px;
       font-size: 16px;
       color: setColor(white);
-      @include layout-mobile {
-        top: 95px;
-        font-size: 12px;
-        padding: 0;
-      }
     }
   }
   &__feature {
@@ -428,7 +419,6 @@ export default Vue.extend({
       text-align: left;
       padding-bottom: 50px;
       @include layout-mobile {
-        column-gap: 15px;
         padding-bottom: 30px;
       }
       &::-webkit-scrollbar {
@@ -461,9 +451,9 @@ export default Vue.extend({
       &-title {
         color: setColor(dark-blue-2);
         text-align: center;
-        font-size: 14px;
-        letter-spacing: 2px;
-        font-weight: 700;
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 28px;
       }
     }
     &-img {
@@ -482,10 +472,11 @@ export default Vue.extend({
       flex-direction: column;
       justify-content: center;
       width: 30%;
-      font-size: 14px;
+      text-align: left;
+      font-size: 18px;
       line-height: 40px;
       font-weight: 400;
-      // text-align: left;
+      color: setColor(gray-2);
       padding-left: 5vw;
       @media screen and (max-width: 1260px) {
         width: 45%;
@@ -495,6 +486,9 @@ export default Vue.extend({
       }
       @include layout-mobile {
         width: unset;
+        text-align: center;
+        font-size: 14px;
+        line-height: 20px;
         padding: 20px 10px;
       }
       > button {
@@ -531,21 +525,5 @@ export default Vue.extend({
     height: 35px;
     font-size: 16px;
   }
-}
-.x-scrollbar {
-  display: grid;
-  column-gap: 30px;
-  grid-template-columns: auto;
-  grid-auto-flow: column;
-  scroll-behavior: smooth;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  text-align: left;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-.x-scrollbar::-webkit-scrollbar {
-  display: none;
 }
 </style>

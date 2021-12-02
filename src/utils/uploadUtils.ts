@@ -357,7 +357,7 @@ class UploadUtils {
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page))
+      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -365,6 +365,7 @@ class UploadUtils {
           newPage.layers[i] = this.layerInfoFilter(layer)
         }
       }
+      newPage.backgroundImage.config.imgControl = false
       return newPage
     })
 
@@ -624,7 +625,11 @@ class UploadUtils {
   uploadTemplate() {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const pageIndex = store.getters.getLastSelectedPageIndex
+    /**
+     * @Todo check the index valid or not
+     */
+    // const pageIndex = store.getters.getLastSelectedPageIndex
+    const pageIndex = pageUtils.currFocusPageIndex
     const page = store.getters.getPage(pageIndex)
     const parentId = page.designId ?? ''
     store.commit('SET_pageDesignId', {
@@ -792,12 +797,12 @@ class UploadUtils {
     return page
   }
 
-  async getDesign(type: string, designParams: { designId?: string, teamId?: string, signedUrl?: string }, params: { [key: string]: any } = {}) {
+  async getDesign(type: string, designParams: { designId?: string, teamId?: string, signedUrl?: string, fetchTarget?: string }, params: { [index: string]: any } = {}) {
     let jsonName = ''
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
-    const signedUrl = designParams.signedUrl ?? ''
+
     switch (type) {
       case GetDesignType.TEMPLATE:
       case GetDesignType.TEXT: {
@@ -816,12 +821,8 @@ class UploadUtils {
         /**
          * @Note isAdmin -> fetch the public design, else fetch the private design
          */
-        if (this.isAdmin) {
-          jsonName = 'config.json'
-          fetchTarget = `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
-        } else {
-          fetchTarget = signedUrl
-        }
+        jsonName = 'config.json'
+        fetchTarget = designParams.fetchTarget ?? `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
         break
       }
       // case GetDesignType.PRIVATE_DESIGN: {

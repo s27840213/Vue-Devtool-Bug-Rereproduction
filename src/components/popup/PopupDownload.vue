@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="popup-download text-left"
     v-click-outside="handleClose")
-    div(v-if="polling && name" class="popup-download__form popup-download__form--polling")
-      div(class="body-3 text-gray-3") {{ name }}
+    div(v-if="polling" class="popup-download__form popup-download__form--polling")
+      div(class="body-3 text-gray-3") {{ name || '未命名設計' }}
       div(class="flex flex-between text-gray-2 items-center")
         span(class="body-2") 正在下載
         svg-icon(class="pointer"
