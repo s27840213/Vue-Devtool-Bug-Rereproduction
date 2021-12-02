@@ -176,7 +176,6 @@ export default Vue.extend({
   async mounted() {
     if (!this.isLogin) {
       this.AutoPlayTimer = setInterval(() => {
-        console.log('ddd', this.featureSelected)
         if (!this.isTimerStop) {
           if (this.featureSelected === this.featureList.length - 1) {
             this.featureSelected = 0
@@ -479,8 +478,9 @@ export default Vue.extend({
       flex-direction: column;
       justify-content: center;
       width: 30%;
-      font-size: 14px;
-      line-height: 20px;
+      text-align: left;
+      font-size: 18px;
+      line-height: 40px;
       font-weight: 400;
       color: setColor(gray-2);
       padding-left: 5vw;
@@ -492,6 +492,9 @@ export default Vue.extend({
       }
       @include layout-mobile {
         width: unset;
+        text-align: center;
+        font-size: 14px;
+        line-height: 20px;
         padding: 20px 10px;
       }
       > button {
@@ -528,21 +531,5 @@ export default Vue.extend({
     height: 35px;
     font-size: 16px;
   }
-}
-.x-scrollbar {
-  display: grid;
-  column-gap: 30px;
-  grid-template-columns: auto;
-  grid-auto-flow: column;
-  scroll-behavior: smooth;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  text-align: left;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-.x-scrollbar::-webkit-scrollbar {
-  display: none;
 }
 </style>
