@@ -169,7 +169,12 @@ export default Vue.extend({
     this.getContent()
   },
   activated() {
-    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
+    const el = (this.$refs.list as Vue).$el
+    el.scrollTop = this.scrollTop
+    el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
   destroyed() {
     this.resetContent()
@@ -220,6 +225,9 @@ export default Vue.extend({
     },
     handleColorPicker() {
       this.openColorPicker = !this.openColorPicker
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })

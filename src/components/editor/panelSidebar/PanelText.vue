@@ -144,15 +144,17 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
-    })
     await this.getCategories()
     this.getContent()
     this.loadDefaultFonts()
   },
   activated() {
-    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
+    const el = (this.$refs.list as Vue).$el
+    el.scrollTop = this.scrollTop
+    el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
   destroyed() {
     this.resetContent()
@@ -193,6 +195,9 @@ export default Vue.extend({
       newFont.load().then((font) => {
         document.fonts.add(font)
       })
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })
