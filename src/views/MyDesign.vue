@@ -165,6 +165,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import design from '@/store/module/design'
 import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
@@ -179,7 +180,7 @@ import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
-  name: 'MyDesgin',
+  name: 'MyDesign',
   components: {
     Sidebar,
     NuHeader,
@@ -195,6 +196,12 @@ export default Vue.extend({
   },
   props: {
     view: String
+  },
+  beforeCreate() {
+    this.$store.registerModule('design', design)
+  },
+  beforeDestroy() {
+    this.$store.unregisterModule('design')
   },
   async created() {
     this.setFolders(designUtils.makeDesignsForTesting())

@@ -227,6 +227,7 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import layouts from '@/store/module/layouts'
 import StepsUtils from '@/utils/stepsUtils'
 import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
@@ -248,6 +249,12 @@ export default Vue.extend({
     this.fetchLayouts()
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
+  },
+  beforeCreate() {
+    this.$store.registerModule('layouts', layouts)
+  },
+  beforeDestroy() {
+    this.$store.unregisterModule('layouts')
   },
   data() {
     return {

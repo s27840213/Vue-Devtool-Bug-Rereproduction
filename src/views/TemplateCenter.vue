@@ -34,7 +34,7 @@
       div(class="template-center__filter")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
-                            :defaultSelection="hashtagSelections[hashtag.title].selection"
+                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
                             @select="handleHashtagSelect")
       div(class="template-center__hr")
       div(class="template-center__sorter")
@@ -120,6 +120,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import hashtag from '@/store/module/hashtag'
 import vClickOutside from 'v-click-outside'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -132,7 +133,7 @@ import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
-  name: 'MyDesgin',
+  name: 'TemplateCenter',
   components: {
     NuHeader,
     SearchBar,
@@ -208,6 +209,12 @@ export default Vue.extend({
     themeUtils.checkThemeState().then(() => {
       this.themes = themeUtils.themes
     })
+  },
+  beforeCreate() {
+    this.$store.registerModule('hashtag', hashtag)
+  },
+  beforeDestroy() {
+    this.$store.unregisterModule('hashtag')
   },
   computed: {
     ...mapState('hashtag', {
