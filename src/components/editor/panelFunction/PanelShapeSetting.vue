@@ -160,15 +160,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
+import markers from '@/store/module/markers'
 import vClickOutside from 'v-click-outside'
+import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { IGroup, ILayer, IShape } from '@/interfaces/layer'
-import color from '@/store/module/color'
-import { Layer } from 'konva/types/Layer'
 import shapeUtils from '@/utils/shapeUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -247,6 +246,12 @@ export default Vue.extend({
     popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
       this.setLineWidth(value)
     })
+  },
+  beforeCreate() {
+    this.$store.registerModule('markers', markers)
+  },
+  beforeDestroy() {
+    this.$store.unregisterModule('markers')
   },
   computed: {
     ...mapGetters({

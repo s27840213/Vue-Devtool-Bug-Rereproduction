@@ -63,7 +63,8 @@
     div(v-else
       class="nu-header__container-mobile")
       div(class="pl-15")
-        svg-icon(:iconName="'menu'"
+        svg-icon(v-if="!isShowSearchBar"
+          :iconName="'menu'"
           :iconWidth="'25px'"
           :iconColor="'gray-3'"
           @click.native="openMenu")
@@ -74,20 +75,29 @@
           style="height: 45px;"
           @click.native="goToPage('Home')")
       div(class="pr-15 relative")
-        svg-icon(:iconName="'search'"
+        svg-icon(v-if="!isShowSearchBar"
+          :iconName="'search'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click.native="onSearchClicked")
-        transition(name="fade-up")
-          search-bar(v-if="showSearchBar"
-              class="nu-header__search-mobile"
-              placeholder="搜 尋"
-              @search="handleSearch"
-              v-click-outside="() => { showSearchBar = false }")
+          @click.native="() => { isShowSearchBar = true }")
+        svg-icon(v-else
+          :iconName="'close'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click.native="() => { isShowSearchBar = false }")
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
         mobile-menu(v-click-outside="() => { isShowMenu = false }")
+    div(v-if="isShowSearchBar"
+      class="nu-header__search-mobile")
+      search-bar(class="search"
+        placeholder="搜 尋"
+        @search="handleSearch")
+      div(class="pt-20 nu-header__search-mobile__title") 熱門搜尋：
+      div(class="pt-10 nu-header__search-mobile__options")
+        span(v-for="key in keys"
+          @click="handleSearch(key)") {{key}}
 </template>
 
 <script lang="ts">
@@ -115,8 +125,9 @@ export default Vue.extend({
   data() {
     return {
       StepsUtils,
+      keys: ['聖誕節', '雙十ㄧ', '電商商品圖', '公告'],
       isAccountPopup: false,
-      showSearchBar: false,
+      isShowSearchBar: false,
       isShowMenu: false
     }
   },
@@ -160,10 +171,11 @@ export default Vue.extend({
       // ----------------------
     },
     handleSearch(keyword: string) {
+      this.isShowSearchBar = false
+      if (this.currentPage === 'TemplateCenter') {
+        this.$emit('search', keyword)
+      }
       this.goToPage('TemplateCenter', keyword)
-    },
-    onSearchClicked() {
-      this.showSearchBar = true
     },
     openMenu() {
       this.isShowMenu = true
@@ -226,6 +238,9 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
+    :nth-child(1), :nth-child(3) {
+      width: 25px;
+    }
   }
   &__search {
     height: 28px;
@@ -234,13 +249,40 @@ export default Vue.extend({
   }
   &__search-mobile {
     position: absolute;
-    top: 0;
-    right: 10px;
-    width: 150px;
-    height: 30px;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 50px);
     background-color: white;
-    border-radius: 4px;
-    border: 1px solid setColor(gray-4);
+    padding: 20px;
+    .search {
+      width: calc(100% - 40px);
+      border: 1px solid setColor(gray-4);
+      box-sizing: border-box;
+      background-color: white;
+      border-radius: 3px;
+    }
+    &__title {
+      font-weight: normal;
+      font-size: 14px;
+      text-align: left;
+      color: setColor(gray-2);
+    }
+    &__options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 10px;
+      justify-content: start;
+      color: setColor(gray-2);
+      > span {
+        font-size: 14px;
+        background-color: white;
+        border: 1px solid #E0E0E0;
+        box-sizing: border-box;
+        border-radius: 100px;
+        padding: 5px 10px;
+      }
+    }
   }
   &__account {
     position: absolute;

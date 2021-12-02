@@ -164,13 +164,12 @@ export default Vue.extend({
         .map(theme => theme.id)
     }
   },
-  async mounted() {
-    this.$refs.list.$el.addEventListener('scroll', (event: Event) => {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
-    })
-  },
   activated() {
     this.$refs.list.$el.scrollTop = this.scrollTop
+    this.$refs.list.$el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    this.$refs.list.$el.removeEventListener('scroll', this.handleScrollTop)
   },
   watch: {
     currPageThemeIds (curr: number[]) {
@@ -234,6 +233,9 @@ export default Vue.extend({
       const { userId } = this
       this.showPrompt = false
       sessionStorage[`${userId}_theme_prompt`] = 'hidden'
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })

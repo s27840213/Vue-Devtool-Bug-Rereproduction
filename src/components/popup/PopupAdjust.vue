@@ -6,7 +6,7 @@
       div(class="popup-adjust__label")
         div {{ field.label }}
         input(class="popup-adjust__range-input"
-          :value="currLayerAdjust[field.name] || 0"
+          :value="adjustTmp[field.name] || 0"
           :max="field.max"
           :min="field.min"
           :name="field.name"
@@ -18,148 +18,88 @@
         :name="field.name"
         @input="handleField"
         @blur="handleChangeStop"
-        :value="currLayerAdjust[field.name] || 0")
+        :value="adjustTmp[field.name] || 0")
 </template>
 
 <script lang="ts">
-import { IShape, IText, IImage, IGroup, ITmp, IFrame } from '@/interfaces/layer'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import stepsUtils from '@/utils/stepsUtils'
-import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
-  data () {
-    return {
-      fields: [
-        {
-          name: 'brightness',
-          label: '亮度',
-          max: 100,
-          min: -100
-        },
-        {
-          name: 'contrast',
-          label: '對比度',
-          max: 100,
-          min: -100
-        },
-        {
-          name: 'saturate',
-          label: '飽和度',
-          max: 100,
-          min: -100
-        },
-        {
-          name: 'hue',
-          label: '色調',
-          max: 100,
-          min: -100
-        },
-        {
-          name: 'blur',
-          label: '模糊化',
-          max: 100,
-          min: -100
-        },
-        {
-          name: 'halation',
-          label: '暈影',
-          max: 100,
-          min: 0
-        },
-        {
-          name: 'warm',
-          label: '色溫',
-          max: 100,
-          min: -100
-        }
-      ]
+  props: {
+    imageAdjust: {
+      type: Object,
+      required: true
     }
   },
-  computed: {
-    ...mapGetters([
-      'getCurrSelectedLayers',
-      'getCurrSelectedTypes',
-      'getCurrSelectedPageIndex',
-      'getCurrSelectedIndex',
-      'getCurrSubSelectedInfo'
-    ]),
-    currLayer (): any {
-      const layers = this.getCurrSelectedLayers as Array<IShape | IText | IImage | IGroup | ITmp | IFrame>
-      const { index, type } = this.getCurrSubSelectedInfo
-      const imageLayers = layers.flatMap(layer => {
-        if (layer.type === 'image') {
-          return layer
-        }
-        if (layer.type === 'frame') {
-          return (layer as IFrame).clips[0]
-        }
-        if (layer.type === 'group') {
-          if (type === 'image') {
-            return (layer.layers as IImage[])[index]
-          }
-          if (type === 'frame') {
-            const frameLayer = (layer.layers as IFrame[])[index]
-            return frameLayer.active ? frameLayer.clips[0] : null
-          }
-        }
-        return null
-      })
-      return { ...imageLayers.find(l => !!l) }
-    },
-    currLayerAdjust (): any {
-      return this.fields.reduce((prev, curr) => {
-        prev[curr.name] = this.currLayer.styles.adjust[curr.name] || 0
+  data () {
+    const fields = [
+      {
+        name: 'brightness',
+        label: '亮度',
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'contrast',
+        label: '對比度',
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'saturate',
+        label: '飽和度',
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'hue',
+        label: '色調',
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'blur',
+        label: '模糊化',
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'halation',
+        label: '暈影',
+        max: 100,
+        min: 0
+      },
+      {
+        name: 'warm',
+        label: '色溫',
+        max: 100,
+        min: -100
+      }
+    ]
+    const adjustTmp = Object.assign(
+      fields.reduce((prev, curr) => {
+        prev[curr.name] = 0
         return prev
-      }, {} as any)
-    },
-    isSubLayer (): boolean {
-      return this.getCurrSelectedTypes.has('group')
+      }, {} as any),
+      this.imageAdjust
+    )
+    return {
+      adjustTmp,
+      fields
+    }
+  },
+  watch: {
+    imageAdjust (val) {
+      Object.assign(this.adjustTmp, val)
     }
   },
   methods: {
     handleField (e: Event) {
       const { value, name } = e.target as HTMLInputElement
-      const adjust = this.currLayerAdjust
       const fieldVal = Number.isNaN(+value) ? 0 : +value
-      adjust[name] = fieldVal
-      if (this.isSubLayer) {
-        const { index, type } = this.getCurrSubSelectedInfo
-        if (type === 'frame') {
-          frameUtils.updateSubFrameLayerStyles(
-            this.getCurrSelectedPageIndex,
-            this.getCurrSelectedIndex,
-            index,
-            { adjust: { ...adjust } }
-          )
-        }
-        if (type === 'image') {
-          ImageAdjustUtil.setAdjust({
-            adjust: { ...adjust },
-            pageIndex: this.getCurrSelectedPageIndex,
-            layerIndex: this.getCurrSelectedIndex,
-            subLayerIndex: index
-          })
-        }
-      } else {
-        // single image/frame layer
-        if (this.getCurrSelectedTypes.has('frame')) {
-          frameUtils.updateFrameLayerStyles(
-            this.getCurrSelectedPageIndex,
-            this.getCurrSelectedIndex,
-            0,
-            { adjust: { ...adjust } }
-          )
-        } else {
-          ImageAdjustUtil.setAdjust({
-            adjust: { ...adjust },
-            pageIndex: this.getCurrSelectedPageIndex,
-            layerIndex: this.getCurrSelectedIndex
-          })
-        }
-      }
+      this.adjustTmp[name] = fieldVal
+      this.$emit('update', this.adjustTmp)
     },
     handleChangeStop () {
       stepsUtils.record()

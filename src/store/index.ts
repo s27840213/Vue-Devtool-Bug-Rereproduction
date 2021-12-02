@@ -10,18 +10,14 @@ import user, { IUserModule } from '@/store/module/user'
 import color from '@/store/module/color'
 import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
-import markers from '@/store/module/markers'
 import templates from '@/store/module/templates'
-import layouts from '@/store/module/layouts'
 import textStock from '@/store/module/text'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
-import design from '@/store/module/design'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
-import hashtag from '@/store/module/hashtag'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -314,6 +310,17 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.forEach((page) => {
       page.backgroundImage.config.imgControl = imgControl
     })
+  },
+  SET_backgroundOpacity(state: IEditorState, updateInfo: { pageIndex: number, opacity: number }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = updateInfo.opacity
+  },
+  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: any }) {
+    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.styles, updateInfo.styles)
+  },
+  REMOVE_background(state: IEditorState, updateInfo: { pageIndex: number }) {
+    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
+    state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = 100
   },
   SET_pageIsModified(state: IEditorState, { pageIndex, modified }) {
     state.pages[pageIndex].modified = modified
@@ -665,17 +672,13 @@ export default new Vuex.Store({
     font,
     color,
     objects,
-    markers,
     templates,
-    layouts,
     textStock,
     background,
     modal,
     popup,
-    design,
     page,
     homeTemplate,
-    hashtag,
     unsplash
   }
 })

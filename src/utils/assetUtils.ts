@@ -73,6 +73,10 @@ class AssetUtils {
     return typeModuleMap[type]
   }
 
+  getFontMap(): { [key: string]: string} {
+    return STANDARD_TEXT_FONT
+  }
+
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
     const { id, type, ver, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)

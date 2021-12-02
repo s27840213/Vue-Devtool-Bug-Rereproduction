@@ -47,7 +47,9 @@ class StepsUtils {
     let needFetch = false
     switch (layer.type) {
       case 'shape':
-        return uploadUtils.layerInfoFilter(layer)
+        typedLayer = layer as IShape
+        typedLayer.svg = ''
+        return typedLayer
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup

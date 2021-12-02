@@ -1431,7 +1431,6 @@ export default Vue.extend({
     },
     rangedHandler(e: KeyboardEvent) {
       if (e.key !== 'CapsLock') e.preventDefault()
-      if (TextUtils.getNoNPrintableKeys().includes(e.key)) return
       const paragraphs = TextUtils.textHandler(this.config, e.key)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.textSizeRefresh(this.config)
