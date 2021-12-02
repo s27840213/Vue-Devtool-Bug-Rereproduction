@@ -445,6 +445,7 @@ class TextUtils {
         }
 
         const text = spanEl.textContent as string
+        console.log(text.toString())
         let spanStyle = {} as ISpanStyle
 
         spanStyle = {
@@ -461,6 +462,7 @@ class TextUtils {
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
           spans[spans.length - 1].text += text
         } else {
+          console.warn(text)
           spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
         }
         Object.assign(spanStyleBuff, spanStyle)

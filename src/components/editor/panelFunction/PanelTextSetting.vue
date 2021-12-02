@@ -219,12 +219,12 @@ export default Vue.extend({
         currLayer = currLayer as IText
         TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
         if (!TextUtils.isSel(this.sel.end)) {
-          TextUtils.focus(this.sel.start, this.sel.end)
+          setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end))
         }
       }
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const { config, subLayerIndex } = this.currTextInfo
+        const { subLayerIndex } = this.currTextInfo
         const primaryLayer = currLayer as IGroup
         if (typeof subLayerIndex === 'undefined') {
           for (let i = 0; i < primaryLayer.layers.length; i++) {

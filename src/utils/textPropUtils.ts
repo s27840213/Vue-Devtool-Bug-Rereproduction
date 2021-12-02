@@ -96,6 +96,8 @@ class TextPropUtils {
           if (TextUtils.isSel(selEnd)) {
             Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
+            console.log(this.getCurrSel.start.sIndex)
+            console.log(this.getCurrSel.start.offset)
             setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
           }
         }
@@ -231,9 +233,9 @@ class TextPropUtils {
     }
     if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName])
+      this.noRangedHandler(styles, propName, prop[propName], config)
       if (propName !== 'fontSize') {
-        [start, end] = this.spanMerger(config.paragraphs, start, end)
+        // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
     }
 
@@ -321,19 +323,13 @@ class TextPropUtils {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
     } else if (!TextUtils.isSel(end)) {
-      console.log('no sel end')
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, value)
+      this.noRangedHandler(styles, propName, value, config)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
       if (isGroupLayer) {
         TextUtils.updateSelectedParagraphs(tmpLayerIndex as number, config.paragraphs)
-        // LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, tmpLayerIndex,
-        //   {
-        //     paragraphs: config.paragraphs
-        //   }
-        // )
       } else {
         TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
@@ -368,29 +364,6 @@ class TextPropUtils {
     TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
 
-    // Below is used to re-select the caret-range after the props are applied
-    // Vue.nextTick(() => {
-    //   if (TextUtils.isSel(end)) {
-    //     TextUtils.focus(start, end)
-    //     // TextUtils.updateSelection(start, end)
-    //     this.updateTextPropsState()
-    //   } else {
-    //     const select = window.getSelection()
-    //     if (select) {
-    //       if (propName === 'fontFamily' || propName === 'fontSize') {
-    //         start.offset = 0
-    //         Object.assign(end, start)
-    //         end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-    //         this.updateTextPropsState()
-    //         TextUtils.focus(start, end)
-    //         TextUtils.updateSelection(start, end)
-    //       } else {
-    //         setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
-    //         TextUtils.updateSelection(start, TextUtils.getNullSel())
-    //       }
-    //     }
-    //   }
-    // })
     return { config, start, end }
   }
 
@@ -469,40 +442,64 @@ class TextPropUtils {
    * @param propName
    * @param value Specify the value of the target prop.
    */
-  noRangedHandler(styles: ISpanStyle, propName: string, value?: number | string) {
+  noRangedHandler(styles: ISpanStyle, propName: string, value?: number | string, config?: IText) {
+    let prop = {} as { [key: string]: string | number }
     switch (propName) {
       case 'fontSize':
         styles.size = value as number
-        break
+        return
       case 'fontFamily':
         styles.font = value as string
-        break
+        return
       case 'color':
-        this.updateTextPropsState({ color: value as string })
+        prop = { color: value as string }
         break
       case 'bold': {
         if (this.getCurrTextProps?.weight === 'bold') {
-          this.updateTextPropsState({ weight: 'normal' })
+          prop = { weight: 'normal' }
         } else {
-          this.updateTextPropsState({ weight: 'bold' })
+          prop = { weight: 'bold' }
         }
         break
       }
       case 'italic': {
         if (this.getCurrTextProps?.style === 'italic') {
-          this.updateTextPropsState({ style: 'normal' })
+          prop = { style: 'normal' }
         } else {
-          this.updateTextPropsState({ style: 'italic' })
+          prop = { style: 'italic' }
         }
         break
       }
       case 'underline': {
         if (this.getCurrTextProps?.decoration === 'underline') {
-          this.updateTextPropsState({ decoration: 'none' })
+          prop = { decoration: 'none' }
         } else {
-          this.updateTextPropsState({ decoration: 'underline' })
+          prop = { decoration: 'underline' }
         }
       }
+    }
+    this.updateTextPropsState(prop)
+
+    if (['color', 'italic', 'underline', 'bold'].includes(propName)) {
+      // TODO with subController
+      const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
+      const { pIndex, sIndex, offset } = this.getCurrSel.start
+
+      paragraphs[pIndex].spans.splice(sIndex + 1, 0, {
+        text: '',
+        styles: {
+          ...styles,
+          ...prop
+        }
+      })
+      paragraphs[pIndex].spans.splice(sIndex + 2, 0, {
+        text: paragraphs[pIndex].spans[sIndex].text.substr(offset),
+        styles: { ...styles }
+      })
+      paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
+      Object.assign(config?.paragraphs, paragraphs)
+      TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
+      console.warn(propName)
     }
   }
 
