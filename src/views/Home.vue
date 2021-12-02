@@ -108,6 +108,7 @@ import ScrollList from '@/components/homepage/ScrollList.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -189,8 +190,9 @@ export default Vue.extend({
       designUtils.fetchDesigns(this.fetchAllDesigns)
     }
 
-    const response = await this.getThemeList()
-    this.themeList = response.data.content
+    themeUtils.checkThemeState().then(() => {
+      this.themeList = themeUtils.themes
+    })
 
     const squareTheme = [] as number[]
     this.themeList.forEach((theme: Itheme) => {
@@ -223,7 +225,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      getThemeList: 'homeTemplate/getThemeList',
       getTagContent: 'homeTemplate/getTagContent',
       fetchAllDesigns: 'design/fetchAllDesigns'
     }

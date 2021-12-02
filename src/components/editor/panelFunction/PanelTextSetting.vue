@@ -4,8 +4,8 @@
     span(class="text-setting__title text-blue-1 label-lg") 文字設定
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
-        img(v-if="props.font !== 'multi-fonts'" class="text-setting__text-preview" :src="getFontPrev")
-        span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font }}
+        img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
+        span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="size-bar relative")
@@ -83,9 +83,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
+import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
-import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   components: {
@@ -103,8 +102,10 @@ export default Vue.extend({
       openSliderBar: 'center',
       fieldRange: {
         fontSize: { min: 6, max: 800 },
-        lineHeight: { min: 0, max: 300 },
+        lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
+        // fontSpacing: { min: -2, max: 8 },
+        // lineHeight: { min: 0, max: 300 },
         opacity: { min: 0, max: 100 }
       },
       fontSelectValue: fontSelectValue,
@@ -219,12 +220,12 @@ export default Vue.extend({
         currLayer = currLayer as IText
         TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
         if (!TextUtils.isSel(this.sel.end)) {
-          TextUtils.focus(this.sel.start, this.sel.end)
+          setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end))
         }
       }
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const { config, subLayerIndex } = this.currTextInfo
+        const { subLayerIndex } = this.currTextInfo
         const primaryLayer = currLayer as IGroup
         if (typeof subLayerIndex === 'undefined') {
           for (let i = 0; i < primaryLayer.layers.length; i++) {
@@ -465,24 +466,20 @@ export default Vue.extend({
       }
     },
     setSpacing(value: number) {
-      // let { value } = e.target as HTMLInputElement
-      if (this.isValidInt(value.toString())) {
-        value = parseInt(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
+      if (this.isValidFloat(value.toString())) {
+        value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
           TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000)
-          TextPropUtils.updateTextPropsState({ fontSpacing: value })
+          TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
     },
     setHeight(value: number, isInput?: boolean) {
-      if (isInput && this.isValidFloat(value.toString())) {
-        value = (parseFloat(value.toString()) * 100)
-      }
-      if (this.isValidInt(value.toString())) {
-        value = parseInt(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
+      if (this.isValidFloat(value.toString())) {
+        value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value / 100).toFixed(2)))
-          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value / 100).toFixed(2)) })
+          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value).toFixed(2)))
+          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }
     },
@@ -522,7 +519,7 @@ export default Vue.extend({
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, noText: false }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, noText: false, step: 0.01 }, MappingUtils.mappingMinMax('lineHeight')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-lh'
@@ -530,7 +527,7 @@ export default Vue.extend({
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, noText: false }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing / 1000, noText: false, step: 1 }, MappingUtils.mappingMinMax('letterSpacing')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-ls'

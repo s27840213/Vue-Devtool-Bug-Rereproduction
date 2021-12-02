@@ -15,18 +15,14 @@
             div(class="line")
           div(class="nu-footer-feature-items body-1 pt-30")
             a(:href="facebookPage") 關於我們
-            a(href="/editor") 模板中心
+            a(href="/templates") 模板中心
         div(class="nu-footer-feature-region")
           div(class="label-lg feature-title") CREATE
             div(class="line")
           div(class="nu-footer-feature-items body-1 pt-30")
-            a(href="/editor") Facebook
-            a(href="/editor") IG 貼文
-            a(href="/editor") IG 限時動態
-            a(href="/editor") Line 推播
-            a(href="/editor") 電商商品圖
-            a(href="/editor") 電商 Banner
-            a(href="/editor") 電商詳情頁
+            div(v-for="theme in themeList"
+              class="pointer"
+              @click="newDesign(theme)") {{theme.title}}
         div(class="nu-footer-feature-region")
           div(class="label-lg feature-title") LEGAL
             div(class="line")
@@ -53,6 +49,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { Itheme } from '@/interfaces/theme'
+import themeUtils from '@/utils/themeUtils'
+import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
   data() {
@@ -63,9 +62,22 @@ export default Vue.extend({
       blogPage: 'https://blog.vivipic.com/'
     }
   },
+  computed: {
+    isMobile (): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
+    },
+    themeList (): Itheme[] {
+      return themeUtils.themes
+    }
+  },
   methods: {
     goToPage(page: string) {
       window.location.href = page
+    },
+    newDesign(item: Itheme) {
+      this.$router.push({ name: 'Editor' }).then(() => {
+        designUtils.newDesign(item.width, item.height)
+      })
     }
   }
 })
@@ -75,26 +87,21 @@ export default Vue.extend({
 .nu-footer {
   width: 100%;
   background: #555;
-
   &-wrapper {
     display: grid;
     grid-template-columns: 30% 70%;
     justify-content: center;
     padding: 100px 5vw 0 12vw;
   }
-
   &-feature {
     display: grid;
     text-align: left;
     grid-template-columns: repeat(4, auto);
-
     &-region {
       display: flex;
       flex-direction: column;
-
       .feature-title {
         position: relative;
-
         .line {
           width: 100%;
           height: 75%;
@@ -111,22 +118,18 @@ export default Vue.extend({
       grid-template-rows: auto 1fr;
       row-gap: 10px;
       text-align: left;
-
       > a {
         color: white;
         text-decoration: none;
       }
     }
   }
-
   &-bottom {
     display: grid;
     grid-template-columns: 30% 45% 25%;
-
     &-left {
       display: flex;
       justify-content: center;
-
       > select {
         width: 40%;
         height: 30px;
@@ -139,13 +142,11 @@ export default Vue.extend({
         padding-right: 5px;
       }
     }
-
     &-center {
       display: flex;
       justify-content: center;
       align-items: center;
     }
-
     &-right {
       display: grid;
       grid-auto-flow: column;

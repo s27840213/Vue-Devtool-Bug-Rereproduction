@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-controller" ref="self")
+  div(:layer-index="`${layerIndex}`" class="nu-controller" ref="self")
     div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
       | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
     div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
@@ -85,7 +85,15 @@
               :key="p.id",
               :style="textStyles(p.styles)")
               template(v-for="(span, sIndex) in p.spans")
-                span(class="text__span"
+                span(v-if="!span.text && p.spans.length > 1 && sIndex !== 0" class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)")
+                  span(class="text__span"
+                  :data-sindex="sIndex"
+                  :key="span.id",
+                  :style="textStyles(span.styles)") {{ '&#8288' }}
+                span(v-else class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id",
                   :style="textStyles(span.styles)") {{ span.text }}
@@ -186,6 +194,10 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     snapUtils: Object
+  },
+  created() {
+    console.log(this.layerIndex)
+    console.log(this.config)
   },
   data() {
     return {
@@ -334,14 +346,28 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const { paragraphs } = this.config as IText
+          const { paragraphs } = GeneralUtils.deepCopy(this.config) as IText
           if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
             LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
             return
           }
-          if (this.currSelectedInfo.layers.length <= 1 && !this.isLocked) {
+          if (!this.isLocked) {
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+          }
+
+          for (const p of paragraphs) {
+            for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
+              if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
+                p.spans.splice(sIndex, 1)
+                if (TextPropUtils.isSameSpanStyles(p.spans[sIndex - 1].styles, p.spans[sIndex].styles)) {
+                  p.spans[sIndex - 1].text += p.spans[sIndex].text
+                  p.spans.splice(sIndex, 1)
+                  sIndex--
+                }
+                LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+              }
+            }
           }
         }
       } else {
@@ -593,7 +619,7 @@ export default Vue.extend({
         return 'none'
       }
     },
-    frameClipStyles(clip: any, index: number) {
+    frameClipStyles(clip: any) {
       return {
         transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
         fill: '#00000000',
