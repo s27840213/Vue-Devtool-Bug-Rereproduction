@@ -168,6 +168,7 @@ const actions: ActionTree<IDesignState, unknown> = {
         nextPage = data.next_page
       } catch (error) {
         console.error(error)
+        nextPage = -1
       }
     }
     return folders
