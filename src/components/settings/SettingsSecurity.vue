@@ -5,18 +5,18 @@ div(class="settings-security")
       div(class="settings-security__title") 更改密碼
       div(class="settings-security__item")
         span 您上一次密碼更新日期： {{lastUpdateText}}
-        div(class="settings-security__button"
+        div(class="settings-security__button ml-20"
           @click="onChangeClicked()") 更 改
       div(class="settings-security__divider")
     div(class="settings-security__title") 安全防護
     div(class="settings-security__item")
       span 從所有裝置上登出以結束所有作業階段。
-      div(class="settings-security__button") 從 裝 置 上 登 出
+      div(class="settings-security__button ml-20") 從 裝 置 上 登 出
     div(class="settings-security__divider")
     div(class="settings-security__title") 刪除帳號
     div(class="settings-security__item")
       span 刪除帳號後，你將無法再存取任何設計或登入 Vivipic。
-      div(class="settings-security__button") 刪 除 帳 號
+      div(class="settings-security__button ml-20") 刪 除 帳 號
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
     class="settings-security__popup-verify")
@@ -79,6 +79,10 @@ export default Vue.extend({
     width: 70%;
     padding-top: 50px;
     padding-left: 30px;
+    @media (max-width: 976px) {
+      width: 80%;
+      padding-left: 0;
+    }
   }
   &__title {
     text-align: left;
@@ -89,12 +93,14 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-align: left;
     font-size: 14px;
     padding: 20px 0;
   }
   &__button {
     cursor: pointer;
     border-radius: 7px;
+    white-space: nowrap;
     color: setColor(gray-2);
     background-color: setColor(gray-6);
     border: 1px solid setColor(gray-3);

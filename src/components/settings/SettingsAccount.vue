@@ -248,6 +248,9 @@ export default Vue.extend({
     flex-direction: column;
     text-align: left;
     width: 350px;
+    @media (max-width: 650px) {
+      width: 80%;
+    }
     .locale-select {
       width: 100%;
       height: 30px;
@@ -319,6 +322,10 @@ export default Vue.extend({
       border-radius: 5px;
       background: setColor(blue-1);
       padding: 5px 50px;
+      @media (max-width: 650px) {
+        width: 100%;
+        padding: 5px 0;
+      }
       &:disabled {
         background: setColor(gray-4);
       }
