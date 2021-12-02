@@ -2,11 +2,12 @@
   div(class="folder-item")
     div(class="folder-item__block"
         :class="isMouseOver ? 'block-over' : 'block'"
-        :draggable="!undraggable"
+        :style="{'cursor' : isTempFolder ? 'not-allowed' : ''}"
+        :draggable="!undraggable && !isTempFolder"
         @dragstart="handleDragStart"
         @drag="handleDragging"
         @dragend="handleDragEnd"
-        v-on="undroppable ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
+        v-on="undroppable || isTempFolder ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
         @dragover.prevent
@@ -66,9 +67,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
@@ -112,6 +113,9 @@ export default Vue.extend({
     },
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
+    },
+    isTempFolder(): boolean {
+      return this.config.id.endsWith('_new')
     }
   },
   watch: {
@@ -128,6 +132,7 @@ export default Vue.extend({
       deleteFolder: 'UPDATE_deleteFolder'
     }),
     emitGoto() {
+      if (this.isTempFolder) return
       this.$emit('goto')
     },
     draggedFolderStyles(): {[key: string]: string} {
@@ -190,6 +195,7 @@ export default Vue.extend({
       this.handleMouseLeave()
     },
     handleMouseEnter() {
+      if (this.isTempFolder) return
       this.isMouseOver = true
     },
     handleMouseLeave() {
@@ -289,7 +295,7 @@ export default Vue.extend({
       this.$emit('deselect')
     },
     folderUndroppable(): boolean {
-      return designUtils.isMaxLevelReached(this.path.length - 1) && this.draggingFolder
+      return (designUtils.isMaxLevelReached(this.path.length - 1) && this.draggingFolder) || this.isTempFolder
     }
   }
 })

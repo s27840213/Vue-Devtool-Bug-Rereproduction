@@ -3,7 +3,7 @@
     div(class="nav-folder"
         :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isCurrLocation}]"
         :style="draggedOverStyles()"
-        :draggable="!isNameEditing"
+        :draggable="!isNameEditing && !isTempFolder"
         :folderid="folder.id"
         @dragstart="handleDragStart"
         @drag="handleDragging"
@@ -101,6 +101,9 @@ export default Vue.extend({
     },
     realFolders(): IFolder[] {
       return designUtils.sortById([...this.folder.subFolders])
+    },
+    isTempFolder(): boolean {
+      return this.folder.id.endsWith('_new')
     }
   },
   methods: {
@@ -117,7 +120,10 @@ export default Vue.extend({
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
     },
     draggedOverStyles() {
-      return (this.isDraggedOver && !this.folder.isCurrLocation) ? { 'background-color': 'rgba(78, 171, 230, 0.3)' } : {}
+      return {
+        'background-color': (this.isDraggedOver && !this.folder.isCurrLocation) ? 'rgba(78, 171, 230, 0.3)' : '',
+        cursor: this.isTempFolder ? 'not-allowed' : ''
+      }
     },
     draggedFolderStyles(): {[key: string]: string} {
       if (this.isDragged) {
@@ -162,6 +168,7 @@ export default Vue.extend({
       e.preventDefault()
     },
     handleSelection() {
+      if (this.isTempFolder) return
       this.setCurrLocation(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
     },
     handleDragEnter() {
@@ -226,7 +233,7 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.folder.id.endsWith('_new')) {
+      if (this.isTempFolder) {
         if (this.editableName === '') {
           this.removeFolder({
             parents: this.parents,
@@ -270,7 +277,7 @@ export default Vue.extend({
       }
     },
     folderUndroppable(): boolean {
-      return designUtils.isMaxLevelReached(this.level) && this.draggingFolder
+      return (designUtils.isMaxLevelReached(this.level) && this.draggingFolder) || this.isTempFolder
     }
   }
 })

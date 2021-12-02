@@ -2,7 +2,7 @@
   div(class="design-item")
     div(class="design-item__block pointer"
       :style="blockStyles()"
-      :draggable="!undraggable"
+      :draggable="!undraggable && !isTempDesign"
       @dragstart="handleDragStart"
       @drag="handleDragging"
       @dragend="handleDragEnd"
@@ -149,6 +149,9 @@ export default Vue.extend({
     },
     appliedUrl(): string {
       return this.config.thumbnail !== '' ? this.config.thumbnail : this.previewPlaceholder
+    },
+    isTempDesign(): boolean {
+      return (this.config.id ?? '').endsWith('_new')
     }
   },
   methods: {
@@ -234,6 +237,7 @@ export default Vue.extend({
       e.preventDefault()
     },
     handleMouseEnter() {
+      if (this.isTempDesign) return
       this.isMouseOver = true
     },
     handleMouseLeave() {
