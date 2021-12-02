@@ -249,10 +249,12 @@ class ShapeUtils {
     style = style.replace(regTransXE, txme.toString())
     const regTransYE = new RegExp('\\$tyme', 'g')
     style = style.replace(regTransYE, tyme.toString())
-    const regFineTuneS = new RegExp('\\$finetunes', 'g')
-    style = style.replace(regFineTuneS, `translate(-${markerWidth[0] * scale}px, -${2 * scale}px)`)
-    const regFineTuneE = new RegExp('\\$finetunee', 'g')
-    style = style.replace(regFineTuneE, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
+    if (markerWidth && markerWidth.length > 1) {
+      const regFineTuneS = new RegExp('\\$finetunes', 'g')
+      style = style.replace(regFineTuneS, `translate(-${markerWidth[0] * scale}px, -${2 * scale}px)`)
+      const regFineTuneE = new RegExp('\\$finetunee', 'g')
+      style = style.replace(regFineTuneE, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
+    }
 
     return style
   }
