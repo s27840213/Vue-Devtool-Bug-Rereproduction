@@ -102,7 +102,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import design from '@/store/module/design'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
@@ -221,12 +220,6 @@ export default Vue.extend({
     if (this.CoolDownTimer) {
       window.clearInterval(this.CoolDownTimer)
     }
-  },
-  beforeCreate() {
-    this.$store.registerModule('design', design)
-  },
-  beforeDestroy() {
-    this.$store.unregisterModule('design')
   },
   methods: {
     ...mapActions({
