@@ -5,6 +5,7 @@
       v-model="value"
       :max="max"
       :min="min"
+      :step="step"
       v-ratio-change
       type="range"
       @mouseup="handleChangeStop")
@@ -38,6 +39,9 @@ export default Vue.extend({
     },
     max(): number {
       return popupUtils.sliderConfig.max
+    },
+    step(): number {
+      return popupUtils.sliderConfig.step
     },
     value: {
       get: function (): number {

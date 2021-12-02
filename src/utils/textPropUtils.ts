@@ -96,8 +96,6 @@ class TextPropUtils {
           if (TextUtils.isSel(selEnd)) {
             Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
-            console.log(this.getCurrSel.start.sIndex)
-            console.log(this.getCurrSel.start.offset)
             setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
           }
         }
@@ -923,7 +921,7 @@ class TextPropUtils {
         }
         case 'font': {
           const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : 'multi-fonts'
+          value = typeof font === 'string' ? font : '_多種字型'
           break
         }
         case 'color': {

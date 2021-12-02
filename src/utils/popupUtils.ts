@@ -1,5 +1,6 @@
 import { IPopupComponent, IPopupProps } from '@/interfaces/popup'
 import store from '@/store'
+import { PopupSliderEventType } from '@/store/types'
 import { EventEmitter } from 'events'
 import Vue from 'vue'
 import MouseUtils from './mouseUtils'
@@ -21,6 +22,7 @@ class PopupUtils {
     value: number
     min: number,
     max: number,
+    step: number,
     noText: boolean
   }
 
@@ -32,6 +34,7 @@ class PopupUtils {
       value: 0,
       min: 0,
       max: 0,
+      step: 1,
       noText: false
     }
   }

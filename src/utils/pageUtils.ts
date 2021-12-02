@@ -166,7 +166,6 @@ class PageUtils {
   }
 
   updateSpecPage(index: number, json: Partial<IPage>): void {
-    console.log(json)
     const pages = store.getters.getPages
     const pagesTmp = GeneralUtils.deepCopy(pages)
     if (pagesTmp[index]) {

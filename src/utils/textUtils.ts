@@ -201,8 +201,8 @@ class TextUtils {
 
   textHandler(config: IText, key = ''): IParagraph[] {
     const { start, end } = this.getSelection()
-    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
 
     if (!this.isSel(end)) {
       return this.noRangeHandler(config, start, key)
@@ -327,7 +327,7 @@ class TextUtils {
             if (oriSidx === 0) {
               offset = 0
               sIndex = 0
-              handler()
+              s.text = s.text.substr(1)
             } else if (oriSidx + 1 < p.spans.length &&
               TextPropUtils.isSameSpanStyles(p.spans[oriSidx - 1].styles, p.spans[oriSidx + 1].styles)) {
               handler()
@@ -370,48 +370,49 @@ class TextUtils {
         const preText = s.text.substring(0, oriOff)
         const lastText = s.text.substr(oriOff)
 
-        const propsTable = ['color', 'decoration', 'weight', 'style']
-        const hasNewProps = (() => {
-          for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-            if (propsTable.includes(k) && v !== s.styles[k]) {
-              return true
-            }
-          }
-          return false
-        })()
+        // const propsTable = ['color', 'decoration', 'weight', 'style']
+        // const hasNewProps = (() => {
+        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+        //     if (propsTable.includes(k) && v !== s.styles[k]) {
+        //       return true
+        //     }
+        //   }
+        //   return false
+        // })()
 
-        if (hasNewProps) {
-          const newStyles = { ...s.styles }
-          for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-            if (propsTable.includes(k)) {
-              newStyles[k] = v as string
-            }
-          }
+        // if (hasNewProps) {
+        //   const newStyles = { ...s.styles }
+        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+        //     if (propsTable.includes(k)) {
+        //       newStyles[k] = v as string
+        //     }
+        //   }
 
-          s.text = preText
-          p.spans.splice(oriSidx + 1, 0, {
-            text: key,
-            styles: newStyles
-          })
-          if (lastText) {
-            p.spans.splice(oriSidx + 2, 0, {
-              text: lastText,
-              styles: { ...s.styles }
-            })
-          }
-          sIndex = oriSidx + 1
-          offset = 1
-          break
-        } else {
-          s.text = preText + key + lastText
-        }
+        //   s.text = preText
+        //   p.spans.splice(oriSidx + 1, 0, {
+        //     text: key,
+        //     styles: newStyles
+        //   })
+        //   if (lastText) {
+        //     p.spans.splice(oriSidx + 2, 0, {
+        //       text: lastText,
+        //       styles: { ...s.styles }
+        //     })
+        //   }
+        //   sIndex = oriSidx + 1
+        //   offset = 1
+        //   break
+        // } else {
+        //   s.text = preText + key + lastText
+        // }
+        s.text = preText + key + lastText
 
         if (preText) {
           offset++
         } else offset = 1
       }
     }
-    console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
+    // console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
     this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
     return paragraphs
   }
@@ -445,7 +446,6 @@ class TextUtils {
         }
 
         const text = spanEl.textContent as string
-        console.log(text.toString())
         let spanStyle = {} as ISpanStyle
 
         spanStyle = {
@@ -462,7 +462,6 @@ class TextUtils {
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
           spans[spans.length - 1].text += text
         } else {
-          console.warn(text)
           spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
         }
         Object.assign(spanStyleBuff, spanStyle)

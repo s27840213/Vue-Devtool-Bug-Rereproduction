@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-controller" ref="self")
+  div(:layer-index="`${layerIndex}`" class="nu-controller" ref="self")
     div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
       | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
     div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
@@ -194,6 +194,10 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     snapUtils: Object
+  },
+  created() {
+    console.log(this.layerIndex)
+    console.log(this.config)
   },
   data() {
     return {
@@ -615,7 +619,7 @@ export default Vue.extend({
         return 'none'
       }
     },
-    frameClipStyles(clip: any, index: number) {
+    frameClipStyles(clip: any) {
       return {
         transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
         fill: '#00000000',
