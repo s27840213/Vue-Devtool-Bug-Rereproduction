@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-image"
-      :style="styles()"
-      draggable="false")
+    :style="styles()"
+    draggable="false")
     nu-adjust-image(v-show="isAdjustImage"
       :src="src"
       :styles="config.styles")
@@ -26,7 +26,8 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    inheritStyle: Object
   },
   created() {
     const { type } = this.config.srcObj
@@ -93,11 +94,13 @@ export default Vue.extend({
   methods: {
     ...mapActions('user', ['updateImages']),
     styles() {
+      const { inheritStyle = {} } = this
       const { styles } = this.config
       return {
         transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
         width: `${styles.imgWidth}px`,
-        height: `${styles.imgHeight}px`
+        height: `${styles.imgHeight}px`,
+        ...inheritStyle
       }
     },
     sizeMap(width: number) {
