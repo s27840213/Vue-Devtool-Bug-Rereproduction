@@ -6,7 +6,7 @@ class DownloadUtil {
   private fileAttrs = {
     jpg: {
       scale: 1,
-      quality: 80
+      quality: 90
     },
     png: {
       scale: 1,
