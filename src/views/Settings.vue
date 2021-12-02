@@ -2,7 +2,8 @@
   div(class="settings")
     nu-header
     div(class="settings__content")
-      sidebar(@switch="switchView")
+      sidebar(@switch="switchView"
+        :current="currentView")
       section(class="settings__view")
         settings-account(v-if="currentView === 'account'")
         settings-security(v-if="currentView === 'security'")
