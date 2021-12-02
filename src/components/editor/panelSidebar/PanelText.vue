@@ -15,12 +15,12 @@
             iconColor="white"
             iconWidth="20px")
       template(v-slot:default-text="{ list }")
-        div
+        div(class="panel-text__text-button-wrapper")
           btn(v-for="config in list"
             :key="config.type"
             class="panel-text__text-button mb-10"
             :type="`text-${config.type.toLowerCase()}`"
-            :fontFamily="'Mulish'"
+            :fontFamily="localeFont()"
             @click.native="handleAddText(config)") {{ config.text }}
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
@@ -189,6 +189,9 @@ export default Vue.extend({
       await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
       ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },
+    localeFont() {
+      return AssetUtils.getFontMap()[i18n.locale]
+    },
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
       const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
       const newFont = new FontFace(objectId, getFontUrl(objectId))
@@ -230,8 +233,13 @@ export default Vue.extend({
     padding: 10px 0;
     text-align: left;
   }
+  &__text-button-wrapper {
+    text-align: left;
+  }
   &__text-button {
-    width: 250px;
+    width: calc(100% - 10px);
+    background-color: setColor(gray-2);
+    border-radius: 3px;
   }
 }
 </style>
