@@ -727,9 +727,8 @@ class TextPropUtils {
     } else {
       return
     }
-    /**
-     * Selection is not a range (only caret)
-     */
+
+    // Selection is not a range (only caret)
     if (TextUtils.isSel(start) && !TextUtils.isSel(end)) {
       Object.assign(end, start)
     }

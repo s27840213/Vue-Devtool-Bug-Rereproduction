@@ -242,13 +242,13 @@ class TextUtils {
     }
   }
 
-  getNoNPrintableKeys(): Array<string> {
-    return [
-      'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
-      'Tab', 'CapsLock', 'Shift', 'Control', 'Alt', 'Meta', 'ArrowRight', 'ArrowUp',
-      'ArrowLeft', 'ArrowDown'
-    ]
-  }
+  // getNoNPrintableKeys(): Array<string> {
+  //   return [
+  //     'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+  //     'Tab', 'CapsLock', 'Shift', 'Control', 'Alt', 'Meta', 'ArrowRight', 'ArrowUp',
+  //     'ArrowLeft', 'ArrowDown'
+  //   ]
+  // }
 
   noRangeHandler(config: IText, start: ISelection, key: string): IParagraph[] {
     const { paragraphs } = GeneralUtils.deepCopy(config) as IText

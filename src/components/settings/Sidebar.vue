@@ -28,12 +28,16 @@ import router from '@/router'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
-  components: {
+  props: {
+    current: String
   },
   data() {
     return {
-      optionSelected: 'account'
+      optionSelected: ''
     }
+  },
+  created() {
+    this.optionSelected = this.current || 'account'
   },
   computed: {
     ...mapState('user', [

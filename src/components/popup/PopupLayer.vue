@@ -107,7 +107,7 @@ import assetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   props: {
-    updateOptions: Object as () => Array<IPopupOptions>
+    updateOptions: Array as () => Array<IPopupOptions>
   },
   data() {
     return {
@@ -162,7 +162,7 @@ export default Vue.extend({
       return this.getPage(this.lastSelectedPageIndex).designId !== ''
     },
     hasLayerDesignId(): boolean {
-      return this.currSelectedInfo.layers[0].designId !== ''
+      return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false
     },
     // the group which contain at least one text, but it can contain other type of layer
     isTextGroup(): boolean {

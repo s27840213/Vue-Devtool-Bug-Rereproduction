@@ -3,7 +3,6 @@ import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame } from '@/interfaces/layer'
-import { NumericDictionaryIteratee } from 'lodash'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 class FrameUtils {
@@ -60,16 +59,22 @@ class FrameUtils {
         assetId: ''
       }
       const { imgWidth, imgHeight, width, height } = clips[idx].styles
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
       LayerUtils.addLayers(LayerUtils.pageIndex, [layerFactary.newImage({
         srcObj,
         styles: {
           x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
           y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
-          width: imgWidth,
-          height: imgHeight
+          width: imgWidth * currLayer.styles.scale,
+          height: imgHeight * currLayer.styles.scale
         }
       })])
+      Object.assign(clips[idx].styles, {
+        imgWidth: currLayer.styles.initWidth,
+        imgHeight: currLayer.styles.initHeight,
+        imgX: 0,
+        imgY: 0
+      })
+      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
     }
     store.commit('SET_popupComponent', { layerIndex: -1 })
   }

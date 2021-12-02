@@ -56,7 +56,7 @@ import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   props: {
-    updateOptions: Object as () => Array<IPopupOptions>
+    updateOptions: Array as () => Array<IPopupOptions>
   },
   data() {
     return {

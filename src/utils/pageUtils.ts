@@ -314,7 +314,11 @@ class PageUtils {
     const resizeRatio = Math.min(editorViewBox.clientWidth / (this.currFocusPageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.currFocusPageSize.height * (this.scaleRatio / 100))) * 0.8
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
-    store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+    if ((store.state as any).user.userId === 'backendRendering') {
+      store.commit('SET_pageScaleRatio', 100)
+    } else {
+      store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+    }
     this.findCentralPageIndexInfo()
   }
 }

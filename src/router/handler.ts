@@ -57,6 +57,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
         .then(response => response.json())
         .then(json => { assetUtils.addTemplate(json) })
 
+      store.commit('user/SET_STATE', { userId: 'backendRendering' })
       store.commit('SET_currSidebarPanelType', -1)
     }
   } catch (error) {
