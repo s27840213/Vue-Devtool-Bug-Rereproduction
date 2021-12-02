@@ -58,21 +58,23 @@ class FrameUtils {
         userId: '',
         assetId: ''
       }
-      const { imgWidth, imgHeight, width, height } = clips[idx].styles
+      const { imgWidth, imgHeight, width, height, adjust } = clips[idx].styles
       LayerUtils.addLayers(LayerUtils.pageIndex, [layerFactary.newImage({
         srcObj,
         styles: {
           x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
           y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
           width: imgWidth * currLayer.styles.scale,
-          height: imgHeight * currLayer.styles.scale
+          height: imgHeight * currLayer.styles.scale,
+          adjust // inherit adjust to the new layer
         }
       })])
       Object.assign(clips[idx].styles, {
         imgWidth: currLayer.styles.initWidth,
         imgHeight: currLayer.styles.initHeight,
         imgX: 0,
-        imgY: 0
+        imgY: 0,
+        adjust: {}
       })
       LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
     }

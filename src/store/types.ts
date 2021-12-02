@@ -90,7 +90,8 @@ export enum FunctionPanelType {
 export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
-  shape = 'setShapeColor'
+  shape = 'setShapeColor',
+  background = 'setBackgroundColor'
 }
 
 export enum PopupSliderEventType {

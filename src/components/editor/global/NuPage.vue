@@ -135,10 +135,10 @@
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config")
+            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
             nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
             div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
           div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
               class="dim-background"
               :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
@@ -200,6 +200,7 @@ import { IPage } from '@/interfaces/page'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
+import cssConverter from '@/utils/cssConverter'
 
 export default Vue.extend({
   components: {
@@ -510,6 +511,10 @@ export default Vue.extend({
         clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
         'pointer-events': 'none'
       }
+    },
+    backgroundFlipStyles() {
+      const { horizontalFlip, verticalFlip } = this.config.backgroundImage.config.styles
+      return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
     },
     showGuideline(pos: number, type: string, index: number) {
       if (!rulerUtils.isDragging) {

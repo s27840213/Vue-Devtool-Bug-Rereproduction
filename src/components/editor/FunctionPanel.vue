@@ -38,6 +38,7 @@
         panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
         panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked" v-on="$listeners")
+        panel-background-setting(v-if="selectedLayerNum===0" v-on="$listeners")
       //- case for Group layer for handle the sub selected layer
       div(v-else class="function-panel p-20")
         template(v-if="!hasSubSelectedLayer")

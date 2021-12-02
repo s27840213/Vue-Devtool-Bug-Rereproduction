@@ -1,6 +1,8 @@
 <template lang="pug">
   div(class="nu-adjust-image")
     svg(:viewBox="svgViewBox"
+      :width="svgImageWidth"
+      :height="svgImageHeight"
       preserveAspectRatio="none"
       role="image")
       defs
@@ -15,8 +17,7 @@
               :is="child.tag"
               v-bind="child.attrs")
       image(:xlink:href="src"
-        :width="svgImageWidth"
-        :height="svgImageHeight"
+        v-bind="style"
         :filter="imageFilter")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -44,8 +45,7 @@ export default Vue.extend({
       return imgHeight
     },
     svgViewBox(): string {
-      const { svgImageWidth, svgImageHeight } = this
-      return `0 0 ${svgImageWidth} ${svgImageHeight}`
+      return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
     },
     svgFilterElms(): any[] {
       const { adjust } = this.styles
@@ -54,7 +54,7 @@ export default Vue.extend({
     cssFilterElms(): any[] {
       const { styles: { adjust }, svgImageWidth, svgImageHeight } = this
       // @TODO: only for halation now
-      if (Number.isNaN(adjust.halation) || adjust.halation === 0) {
+      if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
       }
       return ImageAdjustUtil.getHalation(adjust.halation, svgImageWidth, svgImageHeight)
@@ -68,6 +68,13 @@ export default Vue.extend({
         return `url(#${this.filterId})`
       }
       return ''
+    },
+    style(): { [key: string]: string } {
+      const { svgImageWidth, svgImageHeight } = this
+      if (svgImageWidth >= svgImageHeight) {
+        return { width: `${svgImageWidth}px` }
+      }
+      return { height: `${svgImageHeight}px` }
     }
   }
 })

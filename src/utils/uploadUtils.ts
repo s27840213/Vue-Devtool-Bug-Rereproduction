@@ -357,7 +357,7 @@ class UploadUtils {
     const pages = generalUtils.deepCopy(pageUtils.getPages)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page))
+      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -365,6 +365,7 @@ class UploadUtils {
           newPage.layers[i] = this.layerInfoFilter(layer)
         }
       }
+      newPage.backgroundImage.config.imgControl = false
       return newPage
     })
 

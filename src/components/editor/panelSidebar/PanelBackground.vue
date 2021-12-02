@@ -42,7 +42,8 @@
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
-              :item="item")
+              :item="item"
+              :locked="currentPageBackgroundLocked")
       template(v-slot:category-background-item="{ list, title }")
         div(class="panel-bg__items")
           div(v-if="title"
@@ -50,7 +51,8 @@
           category-background-item(v-for="item in list"
             class="panel-bg__item"
             :key="item.id"
-            :item="item")
+            :item="item"
+            :locked="currentPageBackgroundLocked")
 </template>
 
 <script lang="ts">
@@ -148,7 +150,12 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     currentPageColor(): string {
-      return this.getPage(this.lastSelectedPageIndex).backgroundColor
+      const { backgroundColor } = this.getPage(this.lastSelectedPageIndex) || {}
+      return backgroundColor || ''
+    },
+    currentPageBackgroundLocked(): boolean {
+      const { backgroundImage } = this.getPage(this.lastSelectedPageIndex) || {}
+      return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any background for "${this.keyword}".` : ''
@@ -162,7 +169,12 @@ export default Vue.extend({
     this.getContent()
   },
   activated() {
-    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
+    const el = (this.$refs.list as Vue).$el
+    el.scrollTop = this.scrollTop
+    el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
   destroyed() {
     this.resetContent()
@@ -186,6 +198,9 @@ export default Vue.extend({
       }
     },
     setBgColor(color: string) {
+      if (this.currentPageBackgroundLocked) {
+        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      }
       this._setBgColor({
         pageIndex: this.lastSelectedPageIndex,
         color: color
@@ -210,6 +225,9 @@ export default Vue.extend({
     },
     handleColorPicker() {
       this.openColorPicker = !this.openColorPicker
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })
