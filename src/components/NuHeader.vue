@@ -74,7 +74,8 @@
           :iconWidth="'90px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(class="pr-15 relative")
+      div(v-if="noSearchbar")
+      div(v-else class="pr-15 relative")
         svg-icon(v-if="!isShowSearchBar"
           :iconName="'search'"
           :iconColor="'gray-3'"
