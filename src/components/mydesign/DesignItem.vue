@@ -145,7 +145,7 @@ export default Vue.extend({
       return this.config.width / this.config.height
     },
     configPreview(): string {
-      return designUtils.getDesignPreview(this.config.id, 1, this.config.ver, this.config.signedUrl)
+      return designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl)
     },
     appliedUrl(): string {
       return this.config.thumbnail !== '' ? this.config.thumbnail : this.previewPlaceholder
