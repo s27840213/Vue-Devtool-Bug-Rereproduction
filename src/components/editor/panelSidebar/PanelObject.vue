@@ -110,7 +110,12 @@ export default Vue.extend({
     this.getCategories()
   },
   activated() {
-    (this.$refs.list as Vue).$el.scrollTop = this.scrollTop
+    const el = (this.$refs.list as Vue).$el
+    el.scrollTop = this.scrollTop
+    el.addEventListener('scroll', this.handleScrollTop)
+  },
+  deactivated() {
+    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
   destroyed() {
     this.resetContent()
@@ -139,6 +144,9 @@ export default Vue.extend({
     handleLoadMore() {
       console.log('object load more')
       this.getMoreContent()
+    },
+    handleScrollTop(event: Event) {
+      this.scrollTop = (event.target as HTMLElement).scrollTop
     }
   }
 })

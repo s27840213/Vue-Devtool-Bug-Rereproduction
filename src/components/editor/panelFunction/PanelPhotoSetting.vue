@@ -10,7 +10,9 @@
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
     component(:is="show || 'div'"
-      v-click-outside="handleOutside")
+      v-click-outside="handleOutside"
+      :imageAdjust="currLayerAdjust"
+      @update="handleAdjust")
     //- property-bar
     //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
     //-   svg-icon(class="pointer"
@@ -31,6 +33,7 @@ import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   data() {
@@ -56,10 +59,31 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo'
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currSelectedLayers: 'getCurrSelectedLayers'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
+    },
+    currLayer (): any {
+      const layers = this.currSelectedLayers as any[]
+      const { index, type } = this.currSubSelectedInfo
+      const imageLayers = layers.flatMap(layer => {
+        if (layer.type === 'image') return layer
+        if (layer.type === 'frame') return (layer as IFrame).clips[0]
+        if (layer.type === 'group') {
+          if (type === 'image') return layer.layers[index]
+          if (type === 'frame') {
+            const frameLayer = (layer.layers as IFrame[])[index]
+            return frameLayer.active ? frameLayer.clips[0] : null
+          }
+        }
+        return null
+      })
+      return { ...imageLayers.find(layer => !!layer) }
+    },
+    currLayerAdjust (): any {
+      return this.currLayer.styles.adjust
     }
   },
   methods: {
@@ -93,6 +117,34 @@ export default Vue.extend({
       // const target = event.target as HTMLButtonElement
       // const btn = this.$refs.btn as HTMLDivElement
       // if (!btns.contains(target)) {}
+    },
+    handleAdjust(adjust: any) {
+      const { types } = this.currSelectedInfo
+      const { index, type } = this.currSubSelectedInfo
+      if (types.has('frame') || (types.has('group') && type === 'frame')) {
+        if (types.has('frame')) {
+          return frameUtils.updateFrameLayerStyles(
+            this.lastSelectedPageIndex,
+            this.currSelectedIndex,
+            0,
+            { adjust: { ...adjust } }
+          )
+        }
+        return frameUtils.updateSubFrameLayerStyles(
+          this.lastSelectedPageIndex,
+          this.currSelectedIndex,
+          index,
+          { adjust: { ...adjust } }
+        )
+      }
+      if (types.has('image') || (types.has('group') && type === 'image')) {
+        return imageAdjustUtil.setAdjust({
+          adjust: { ...adjust },
+          pageIndex: this.lastSelectedPageIndex,
+          layerIndex: this.currSelectedIndex,
+          subLayerIndex: types.has('group') && index
+        })
+      }
     }
   }
 })

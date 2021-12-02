@@ -14,7 +14,7 @@
         svg-icon(iconName="chevron-right"
           iconWidth="40px"
           iconColor="gray-3")
-    div(class="px-10 scroll-list__items"
+    div(class="scroll-list__items"
       :class="{'items-theme': type === 'theme'}"
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
@@ -165,9 +165,13 @@ export default Vue.extend({
     @media (min-width: 1560px) {
       width: 200px;
     }
+    @include layout-mobile {
+      width: 60px;
+      padding-right: 10px;
+    }
     > img {
       @include layout-mobile {
-        width: 60%;
+        width: 100%;
       }
       &:hover {
         transition: all 0.2s ease-in-out;
@@ -212,7 +216,9 @@ export default Vue.extend({
         font-size: 14px;
       }
       @include layout-mobile {
-        font-size: 14px;
+        font-size: 12px;
+        line-height: unset;
+        transform: scale(0.9);
       }
     }
     &-subtitle {
@@ -222,6 +228,9 @@ export default Vue.extend({
       font-weight: 400;
       @include layout-mobile {
         font-size: 12px;
+        white-space: nowrap;
+        transform: scale(0.85);
+        padding: 0;
       }
     }
     &-image {
@@ -243,8 +252,8 @@ export default Vue.extend({
     }
     &.item-theme {
       @include layout-mobile {
-        width: 30vw;
-        height: 45vw;
+        width: 22vw;
+        height: 30vw;
       }
     }
   }
@@ -266,18 +275,13 @@ export default Vue.extend({
     &-left {
       left: -75px;
       @include layout-mobile {
-        left: -5%;
-        width: 50px;
-        background: linear-gradient(90deg, #FFFFFF 60%, rgba(255, 255, 255, 0) 100%);
+        display: none;
       }
     }
     &-right {
       right: -75px;
       @include layout-mobile {
-        justify-content: end;
-        right: -5%;
-        width: 50px;
-        background: linear-gradient(270deg, #FFFFFF 60%, rgba(255, 255, 255, 0) 100%);
+        display: none;
       }
     }
   }

@@ -300,6 +300,17 @@ const mutations: MutationTree<IEditorState> = {
       page.backgroundImage.config.imgControl = imgControl
     })
   },
+  SET_backgroundOpacity(state: IEditorState, updateInfo: { pageIndex: number, opacity: number }) {
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = updateInfo.opacity
+  },
+  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: any }) {
+    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.styles, updateInfo.styles)
+  },
+  REMOVE_background(state: IEditorState, updateInfo: { pageIndex: number }) {
+    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
+    state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = 100
+  },
   SET_pageIsModified(state: IEditorState, { pageIndex, modified }) {
     state.pages[pageIndex].modified = modified
   },

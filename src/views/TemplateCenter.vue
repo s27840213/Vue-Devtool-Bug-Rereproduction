@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center"
       @scroll="handleScroll")
-    nu-header(:noSearchbar="true" :noNavigation="snapToTop")
+    nu-header(:noSearchbar="true" :noNavigation="snapToTop" @search="handleSearch")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
