@@ -110,9 +110,12 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
-      if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
+      const { srcObj, locked } = this.config.backgroundImage.config
+      if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
         stepsUtils.record()
+      } else {
+        this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
     }
   }
