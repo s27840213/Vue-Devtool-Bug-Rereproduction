@@ -29,6 +29,7 @@ export interface IUserModule {
   adminMode: boolean,
   isAuthenticated: boolean,
   account: string,
+  upassUpdate: string,
   locale: string,
   subscribe: number,
   userAssets: IUserAssetsData,
@@ -50,6 +51,7 @@ const getDefaultState = (): IUserModule => ({
   adminMode: true,
   isAuthenticated: false,
   account: '',
+  upassUpdate: '',
   locale: '',
   subscribe: 1,
   userAssets: {
@@ -95,6 +97,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getAccount(state) {
     return state.account
+  },
+  getUpassUpdate(state) {
+    return state.upassUpdate
   },
   getLocale(state) {
     return state.locale
@@ -399,6 +404,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         userId: data.data.user_id,
         role: data.data.role,
         account: data.data.account,
+        upassUpdate: data.data.upass_update,
         locale: data.data.locale,
         subscribe: data.data.subscribe
       })

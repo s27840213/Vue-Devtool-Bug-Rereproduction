@@ -2,7 +2,8 @@
   div(class="settings")
     nu-header
     div(class="settings__content")
-      sidebar(@switch="switchView")
+      sidebar(@switch="switchView"
+        :current="currentView")
       section(class="settings__view")
         settings-account(v-if="currentView === 'account'")
         settings-security(v-if="currentView === 'security'")
@@ -48,6 +49,7 @@ export default Vue.extend({
     if (!this.view) {
       router.replace({ path: 'settings/account' })
     }
+    this.currentView = this.view
   },
   methods: {
     switchView(view: string) {

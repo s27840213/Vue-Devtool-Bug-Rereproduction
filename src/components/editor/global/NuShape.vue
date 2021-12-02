@@ -157,7 +157,7 @@ export default Vue.extend({
       handler: function (newVal) {
         if (!newVal) {
           this.paramsReady = false
-          this.checkAndFetchSvg(newVal)
+          this.checkAndFetchSvg(false)
         }
       }
     }
@@ -287,8 +287,8 @@ export default Vue.extend({
         }
       }
     },
-    async checkAndFetchSvg(svg?: string) {
-      svg = svg ?? this.config.svg
+    async checkAndFetchSvg(useConfig = true) {
+      const svg = useConfig ? this.config.svg : undefined
       switch (this.config.category) {
         case 'C': {
           // should be deleted after the new json format stablize
@@ -318,6 +318,7 @@ export default Vue.extend({
         case 'D': {
           if (!svg) {
             await shapeUtils.addComputableInfo(this.config)
+            console.log(this.config)
           }
           const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
           if (this.transNode) {
