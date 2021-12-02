@@ -25,18 +25,18 @@ export default Vue.extend({
   watch: {
     'config.pDiff': {
       handler: function (newVal) {
-        if (this.config.type === 'shape') {
-          this.shapeWidth = this.config.vSize[0] + newVal[0]
-          this.shapeHeight = this.config.vSize[1] + newVal[1]
+        if (this.config.type === 'shape' && newVal && newVal.length > 1) {
+          this.shapeWidth = this.config.vSize?.[0] ?? 0 + newVal[0]
+          this.shapeHeight = this.config.vSize?.[1] ?? 0 + newVal[1]
         }
       },
       deep: true
     },
     'config.vSize': {
       handler: function (newVal) {
-        if (this.config.type === 'shape') {
-          this.shapeWidth = newVal[0] + this.config.pDiff[0]
-          this.shapeHeight = newVal[1] + this.config.pDiff[1]
+        if (this.config.type === 'shape' && newVal && newVal.length > 1) {
+          this.shapeWidth = newVal[0] + this.config.pDiff?.[0] ?? 0
+          this.shapeHeight = newVal[1] + this.config.pDiff?.[1] ?? 0
         }
       },
       deep: true
