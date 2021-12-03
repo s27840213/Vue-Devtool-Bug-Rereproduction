@@ -115,7 +115,7 @@ export default Vue.extend({
       localeOptions: ['繁體中文(台灣)', '英文', '日文'],
       facebookPage: 'https://www.facebook.com/vivipictw',
       blogPage: 'https://blog.vivipic.com/',
-      featureExpand: [true, false, false, false] as boolean[]
+      featureExpand: [false, false, false, false] as boolean[]
     }
   },
   computed: {
