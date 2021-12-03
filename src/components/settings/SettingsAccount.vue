@@ -1,9 +1,8 @@
 <template lang="pug">
 div(class="settings-account")
-  div(class="settings-account__profile")
-    div(class="profile-img text-white") {{shortName}}
+  avatar(class="mt-30" :textSize="30" :avatarSize="75")
   div(class="settings-account__button pointer"
-    @click="onConfirmClicked()") 變更照片
+    @click="chooseAvatar()") 變更照片
   div(class="settings-account__info")
     div(class="settings-account__label my-10") 名稱
     property-bar
@@ -48,11 +47,14 @@ div(class="settings-account")
 import Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
+import Avatar from '@/components/Avatar.vue'
 import store from '@/store'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   components: {
-    PopupVerify
+    PopupVerify,
+    Avatar
   },
   data() {
     return {
@@ -114,9 +116,9 @@ export default Vue.extend({
     },
     isChanged() {
       if (this.inputName.trim() === this.uname.trim() &&
-          this.inputAccount.trim() === this.account.trim() &&
-          this.inputLocale === this.getLocaleText(this.locale) &&
-          this.inputSubscribe === (this.subscribe === 1)) {
+        this.inputAccount.trim() === this.account.trim() &&
+        this.inputLocale === this.getLocaleText(this.locale) &&
+        this.inputSubscribe === (this.subscribe === 1)) {
         return false
       } else {
         return true
@@ -133,7 +135,7 @@ export default Vue.extend({
     onSubscribeClicked() {
       this.inputSubscribe = !this.inputSubscribe
     },
-    onUpdate () {
+    onUpdate() {
       this.responseError = false
     },
     async onConfirmClicked() {
@@ -206,6 +208,9 @@ export default Vue.extend({
     },
     closePopup() {
       this.showVerifyPopup = false
+    },
+    chooseAvatar() {
+      uploadUtils.chooseAssets('avatar')
     }
   }
 })
@@ -219,21 +224,6 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
-  &__profile {
-    display: flex;
-    padding-top: 50px;
-    .profile-img {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 75px;
-      height: 75px;
-      font-size: 30px;
-      font-weight: 700;
-      background: #61aac2;
-      border-radius: 50%;
-    }
-  }
   &__button {
     color: setColor(gray-2);
     border-radius: 5px;
@@ -293,17 +283,17 @@ export default Vue.extend({
       display: none;
       box-sizing: border-box;
       padding: 0;
-      &:checked~.settings-account__subscribe__switch {
+      &:checked ~ .settings-account__subscribe__switch {
         background-color: setColor(blue-1);
       }
-      &:checked~.settings-account__subscribe__circle {
+      &:checked ~ .settings-account__subscribe__circle {
         transform: translateX(20px);
       }
     }
     &__switch {
       background-color: #d6d7d9;
       height: 100%;
-      transition: .3s;
+      transition: 0.3s;
       width: 100%;
     }
     &__circle {
@@ -313,7 +303,7 @@ export default Vue.extend({
       left: 2px;
       position: absolute;
       top: 2px;
-      transition: .3s;
+      transition: 0.3s;
       width: 16px;
     }
     &__text {

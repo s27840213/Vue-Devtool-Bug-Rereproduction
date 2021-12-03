@@ -103,13 +103,17 @@ class UploadUtils {
     this.event.emit('fontUploadStatus', status)
   }
 
-  chooseAssets(type: 'image' | 'font') {
+  chooseAssets(type: 'image' | 'font' | 'avatar') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-    const acceptType = type === 'image' ? '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic' : '.ttf,.ttc,.otf,.woff2'
+    const acceptHash = {
+      image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      font: '.ttf,.ttc,.otf,.woff2',
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+    }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', acceptType)
+    inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
@@ -198,7 +202,7 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
                     // the reason why we record here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
@@ -218,7 +222,7 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font', files: FileList, addToPage = false) {
+  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList, addToPage = false) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
@@ -229,7 +233,11 @@ class UploadUtils {
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
-      formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+      if (type === 'avatar') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+      } else {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+      }
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
@@ -296,7 +304,7 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
                         }
                       } else {
@@ -332,6 +340,36 @@ class UploadUtils {
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
+                    }
+                  })
+                }
+              })
+            }, 2000)
+          }
+        } else if (type === 'avatar') {
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          xhr.send(formData)
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setIsPending(true)
+          modalUtils.setModalInfo('上傳中')
+          xhr.onload = () => {
+            // polling the JSON file of uploaded image
+            const interval = setInterval(() => {
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json`
+              fetch(pollingTargetSrc).then((response) => {
+                if (response.status === 200) {
+                  clearInterval(interval)
+                  response.json().then((json: IUploadAssetResponse) => {
+                    if (json.flag === 0) {
+                      console.log('Successfully upload the file')
+                      store.commit('user/SET_STATE', {
+                        avatar: json.url
+                      })
+                      modalUtils.setIsPending(false)
+                      modalUtils.setModalInfo('變更頭像成功')
+                    } else {
+                      console.log('Failed to upload the file')
+                      modalUtils.setModalInfo('頭像上傳失敗')
                     }
                   })
                 }
@@ -584,7 +622,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        console.log(designId)
+        // console.log(designId)
       }
     }
   }
@@ -617,7 +655,7 @@ class UploadUtils {
         group_id: groupId,
         cover
       } as IGroupDesignInputParams).then(() => {
-        console.log(groupId)
+        // console.log(groupId)
       })
     }
   }
@@ -646,7 +684,6 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
-    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -675,7 +712,6 @@ class UploadUtils {
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      console.log(xhr)
       modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
@@ -697,8 +733,6 @@ class UploadUtils {
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
-
-    console.log(this.loginOutput.upload_map.fields)
 
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
@@ -864,7 +898,6 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                console.log('Set design id' + designId)
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 themeUtils.refreshTemplateState()

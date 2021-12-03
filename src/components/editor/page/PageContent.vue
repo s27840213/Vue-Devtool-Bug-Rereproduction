@@ -80,12 +80,12 @@ export default Vue.extend({
     }),
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
-      if (dt && dt.files.length !== 0) {
+      if (e.dataTransfer?.getData('data')) {
+        mouseUtils.onDrop(e, this.pageIndex)
+      } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
-      } else {
-        mouseUtils.onDrop(e, this.pageIndex)
       }
     },
     styles() {

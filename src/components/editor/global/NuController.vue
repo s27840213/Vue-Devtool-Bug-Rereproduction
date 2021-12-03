@@ -1357,21 +1357,22 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
-      if (dt && dt.files.length !== 0) {
+      if (e.dataTransfer?.getData('data')) {
+        switch (this.getLayerType) {
+          case 'image': {
+            const config = this.config as IImage
+            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+            break
+          }
+          case 'frame':
+            return
+          default:
+            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        }
+      } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
-      }
-      switch (this.getLayerType) {
-        case 'image': {
-          const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-          break
-        }
-        case 'frame':
-          return
-        default:
-          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
     onClick(e: MouseEvent) {
