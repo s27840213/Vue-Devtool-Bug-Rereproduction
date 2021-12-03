@@ -52,12 +52,17 @@ export default Vue.extend({
       return ImageAdjustUtil.convertAdjustToSvgFilter(adjust)
     },
     cssFilterElms(): any[] {
-      const { styles: { adjust }, svgImageWidth, svgImageHeight } = this
+      const { styles: { adjust, width, imgX, imgY, height } } = this
       // @TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
       }
-      return ImageAdjustUtil.getHalation(adjust.halation, svgImageWidth, svgImageHeight)
+      const position = {
+        width: width / 2,
+        x: Math.abs(imgX) + width / 2,
+        y: Math.abs(imgY) + height / 2
+      }
+      return ImageAdjustUtil.getHalation(adjust.halation, position)
     },
     filterId(): string {
       const randomId = GeneralUtils.generateRandomString(5)

@@ -149,6 +149,11 @@ const getters: GetterTree<IEditorState, unknown> = {
       return state.pages[pageIndex].backgroundImage
     }
   },
+  getBackgroundColor(state: IEditorState) {
+    return (pageIndex: number) => {
+      return state.pages[pageIndex].backgroundColor
+    }
+  },
   getLastSelectedPageIndex(state: IEditorState): number {
     return state.lastSelectedPageIndex
   },
