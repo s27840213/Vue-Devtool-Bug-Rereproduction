@@ -882,6 +882,7 @@ class UploadUtils {
         }
       })
       .catch((err) => {
+        type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
         console.error('fetch failed', err)
       })
   }
