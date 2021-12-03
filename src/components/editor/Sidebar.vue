@@ -34,7 +34,6 @@ import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
   components: {
-    Avatar
   },
   props: {
     isSidebarPanelOpen: Boolean

@@ -349,6 +349,9 @@ class UploadUtils {
         } else if (type === 'avatar') {
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setIsPending(true)
+          modalUtils.setModalInfo('上傳中')
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -362,8 +365,11 @@ class UploadUtils {
                       store.commit('user/SET_STATE', {
                         avatar: json.url
                       })
+                      modalUtils.setIsPending(false)
+                      modalUtils.setModalInfo('變更頭像成功')
                     } else {
                       console.log('Failed to upload the file')
+                      modalUtils.setModalInfo('頭像上傳失敗')
                     }
                   })
                 }

@@ -2,7 +2,7 @@
   div(class="popup-account text-left"
     v-click-outside="closePopup")
     div(class="popup-account__profile")
-      div(class="profile-img mr-10 text-body-2 text-white") {{shortName}}
+      avatar(class="mr-10" :textSize="14" :avatarSize="35")
       div(class="profile-text text-body-2")
         div {{showUname}}
         div(class="text-gray-3 body-3") {{showAccount}}
@@ -35,12 +35,16 @@
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapState, mapGetters } from 'vuex'
+import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
-  data () {
+  components: {
+    Avatar
+  },
+  data() {
     return {
     }
   },
@@ -84,59 +88,59 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .popup-account {
-    padding: 25px 20px;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr;
-    box-sizing: border-box;
-    border-radius: 5px;
-    box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-    background-color: setColor(white);
-    &__profile {
+.popup-account {
+  padding: 25px 20px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+  background-color: setColor(white);
+  &__profile {
+    display: flex;
+    padding-bottom: 10px;
+    .profile-img {
       display: flex;
-      padding-bottom: 10px;
-      .profile-img {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 40px;
-        height: 40px;
-        font-weight: 700;
-        background: #61aac2;
-        border-radius: 50%;
-      }
-      .profile-text {
-        display: flex;
-        text-align: left;
-        flex-direction: column;
-        justify-content: center;
-      }
-    }
-    &__hr {
-      width: 100%;
-      height: 1px;
-      background: setColor(gray-4);
-      margin-left: auto;
-      margin-right: auto;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      padding: 0;
-    }
-    &__option {
-      display: flex;
+      justify-content: center;
       align-items: center;
-      font-size: 14px;
-      line-height: 22px;
-      font-weight: 400;
-      cursor: pointer;
-      margin: 6px 0;
-      &:hover {
+      width: 40px;
+      height: 40px;
+      font-weight: 700;
+      background: #61aac2;
+      border-radius: 50%;
+    }
+    .profile-text {
+      display: flex;
+      text-align: left;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+  &__hr {
+    width: 100%;
+    height: 1px;
+    background: setColor(gray-4);
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0;
+  }
+  &__option {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    cursor: pointer;
+    margin: 6px 0;
+    &:hover {
+      color: setColor(blue-1);
+      > svg {
         color: setColor(blue-1);
-        > svg {
-          color: setColor(blue-1);
-        }
       }
     }
   }
+}
 </style>
