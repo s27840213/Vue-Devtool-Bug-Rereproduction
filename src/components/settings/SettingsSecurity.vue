@@ -1,11 +1,13 @@
 <template lang="pug">
 div(class="settings-security")
   div(class="settings-security__content")
-    div(v-if="showUpdatePassword")
+    div
       div(class="settings-security__title") 更改密碼
       div(class="settings-security__item")
-        span 您上一次密碼更新日期： {{lastUpdateText}}
-        div(class="settings-security__button"
+        span(v-if="showUpdatePassword") 您上一次密碼更新日期： {{lastUpdateText}}
+        span(v-else) 因採用Google/Facebook帳號登入，所以無法在此更改密碼，若要更改密碼，請至原平台修改。
+        div(v-if="showUpdatePassword"
+          class="settings-security__button"
           @click="onChangeClicked()") 更 改
       div(class="settings-security__divider")
     //- div(class="settings-security__title") 安全防護
