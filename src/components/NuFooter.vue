@@ -56,50 +56,47 @@
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items body-1"
             :class="isMobile & featureExpand[3] ? 'expand' : ''")
-            a(:href="facebookPage") 隱私權政策
-            a(:href="facebookPage") 使用條款
+            a(:href="servicePage") 服務條款
+            a(:href="privacyPage") 隱私權聲明
+            a(:href="agreementPage") 使用協議
     div(class="nu-footer__bottom")
       div(class="nu-footer__bottom-left")
         select(class="locale-select" v-model="locale")
           option(v-for="locale in localeOptions" :value="locale") {{locale}}
       div(class="nu-footer__bottom-center")
-        span COPYRIGHT Vivipic 2021 -
-        a(class="pl-5") {{'TERMS & CONDITIONS'}}
-        a(class="pl-5") PRIVACY POLICY
+        span COPYRIGHT Vivipic 2021
       div(class="nu-footer__bottom-right")
-        svg-icon(class="pointer"
-          :iconName="'facebook-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage(facebookPage)")
-        svg-icon(class="pointer"
-          :iconName="'instagram-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage(igPage)")
-        svg-icon(class="pointer"
-          :iconName="'mail-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage('/')")
+        a(:href="facebookPage")
+          svg-icon(class="pointer"
+            :iconName="'facebook-circle'"
+            :iconWidth="'25px'")
+        a(:href="igPage")
+          svg-icon(class="pointer"
+            :iconName="'instagram-circle'"
+            :iconWidth="'25px'")
+        a(:href="mailtoService")
+          svg-icon(class="pointer"
+            :iconName="'mail-circle'"
+            :iconWidth="'25px'")
     div(class="nu-footer__bottom-mobile")
       div(class="nu-footer__bottom-mobile-icons")
-        svg-icon(class="pointer"
-          :iconName="'facebook-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage(facebookPage)")
-        svg-icon(class="pointer ml-25"
-          :iconName="'instagram-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage(igPage)")
-        svg-icon(class="pointer ml-25"
-          :iconName="'mail-circle'"
-          :iconWidth="'25px'"
-          @click.native="goToPage('/')")
+        a(:href="facebookPage")
+          svg-icon(class="pointer"
+            :iconName="'facebook-circle'"
+            :iconWidth="'25px'")
+        a(:href="igPage")
+          svg-icon(class="pointer ml-25"
+            :iconName="'instagram-circle'"
+            :iconWidth="'25px'")
+        a(:href="mailtoService")
+          svg-icon(class="pointer ml-25"
+            :iconName="'mail-circle'"
+            :iconWidth="'25px'")
       div(class="nu-footer__bottom-mobile-locale")
         select(class="locale-select" v-model="locale")
           option(v-for="locale in localeOptions" :value="locale") {{locale}}
       div(class="nu-footer__bottom-mobile-copyright")
-        span COPYRIGHT Vivipic 2021 -
-        a(class="pl-5") {{'TERMS & CONDITIONS'}}
-        a(class="pl-5") PRIVACY POLICY
+        span COPYRIGHT Vivipic 2021
 </template>
 
 <script lang="ts">
@@ -112,10 +109,14 @@ export default Vue.extend({
   data() {
     return {
       locale: '繁體中文(台灣)',
-      localeOptions: ['繁體中文(台灣)', '英文', '日文'],
+      localeOptions: ['繁體中文(台灣)'],
+      blogPage: 'https://blog.vivipic.com/tw/',
+      servicePage: 'https://blog.vivipic.com/tw/tw-service-policy/',
+      privacyPage: 'https://blog.vivipic.com/tw/tw-privacy-policy/',
+      agreementPage: 'https://blog.vivipic.com/tw/tw-agreement/',
       facebookPage: 'https://www.facebook.com/vivipictw',
       igPage: 'https://www.instagram.com/vivipictw/',
-      blogPage: 'https://blog.vivipic.com/',
+      mailtoService: 'mailto:tw@vivipic.com',
       featureExpand: [false, false, false, false] as boolean[]
     }
   },
