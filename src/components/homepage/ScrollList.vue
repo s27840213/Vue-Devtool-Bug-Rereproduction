@@ -94,7 +94,10 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     goToPage(pageName: string) {
-      this.$router.push({ name: pageName })
+      // trigger newDesign method to reset the template themes. [Giambi 12/03]
+      this.$router.push({ name: pageName }).then(() => {
+        designUtils.newDesign()
+      })
     },
     newDesign(item: Itheme) {
       this.$router.push({ name: 'Editor' }).then(() => {

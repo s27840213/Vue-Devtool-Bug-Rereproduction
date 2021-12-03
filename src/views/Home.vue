@@ -52,9 +52,8 @@
               :class="{'selected': featureSelected === idx}"
               @click.native="featureItemClicked(idx)")
               svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
-                :iconWidth="isMobile ? '25px' : '40px'")
-              div(v-if="!isMobile"
-                class="pt-10 body-2") {{item.title}}
+                :iconWidth="isMobile ? '20px' : '40px'")
+              div(class="home-content__feature-item-title pt-10 body-2") {{item.title}}
         div(class="home-content__feature-content")
           div(class="home-content__feature-img")
             img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
@@ -409,16 +408,15 @@ export default Vue.extend({
     align-items: center;
     position: relative;
     &-items {
-      display: grid;
-      column-gap: 30px;
-      grid-template-columns: auto;
-      grid-auto-flow: column;
+      display: flex;
+      justify-content: center;
       scroll-behavior: smooth;
       overflow-x: scroll;
       overflow-y: hidden;
       text-align: left;
       padding-bottom: 50px;
       @include layout-mobile {
+        justify-content: space-between;
         padding-bottom: 30px;
       }
       &::-webkit-scrollbar {
@@ -427,17 +425,26 @@ export default Vue.extend({
     }
     &-item {
       cursor: pointer;
-      width: 200px;
-      height: 128px;
+      width: 180px;
+      height: 125px;
       border: 1px solid #f4f4f5;
       border-radius: 8px;
-      padding: 24px 16px;
+      padding: 10px !important;
+      margin-right: 50px;
       @include layout-mobile {
-        width: 50px;
-        height: 50px;
+        width: 12vw;
+        height: unset;
+        margin-right: 0;
       }
       &:hover {
         background: setColor("gray-5");
+      }
+      &-title {
+        font-size: 14px;
+        padding-top: 10px;
+        @include layout-mobile {
+          display: none;
+        }
       }
     }
     &-content {

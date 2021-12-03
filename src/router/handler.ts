@@ -8,9 +8,6 @@ import designUtils from '@/utils/designUtils'
 
 export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
-    if (from.name === 'Home') {
-      themeUtils.setTemplateThemes([])
-    }
     next()
     const urlParams = new URLSearchParams(window.location.search)
     const type = urlParams.get('type')
@@ -36,7 +33,8 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           await uploadUtils.getDesign(type, { designId }, { width, height })
         }
       }
-    } else if (!url && from.name !== 'Home') {
+    } else if (!url && !from.name) {
+      // refresh /editor page
       themeUtils.refreshTemplateState()
     }
 

@@ -37,6 +37,7 @@ const SUPPORTED_LOCALES = [{
 const MOBILE_ROUTES = [
   'Home',
   'TemplateCenter',
+  'Settings',
   'SignUp',
   'Login',
   'MobileWarning'
@@ -93,8 +94,7 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.has('type')) {
+        if (to.query.type) {
           next()
         } else {
           if (store.getters['user/isLogin']) {

@@ -377,29 +377,40 @@ export default Vue.extend({
     fontSizeSteppingHandler(step: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
       const { config, subLayerIndex } = this.currTextInfo
+      const { paragraphs } = GeneralUtils.deepCopy(config) as IText
       if (this.sel) {
-        const { start, end } = this.sel
-        // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-        // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+        const { start, end } = this.sel as { start: ISelection, end: ISelection }
+        console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
 
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
-        const currStart = {} as ISelection
-        const currEnd = {} as ISelection
+        let currStart = {} as ISelection
+        let currEnd = {} as ISelection
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-          const p = config.paragraphs[pidx]
+          const p = paragraphs[pidx]
           for (let sidx = 0; sidx < p.spans.length; sidx++) {
             const span = p.spans[sidx]
             if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
               continue
             }
+            let isDivided = false
 
             // PIndex, sIndex both are at the start-selection
             if (pidx === start.pIndex && sidx === start.sIndex) {
               // Start-selection and the end-selection are exactly at the same span
               if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
-                Object.assign(currStart, start)
-                Object.assign(currEnd, end)
+                const oriText = paragraphs[pidx].spans[sidx].text
+                paragraphs[pidx].spans[sidx].text = oriText.substring(0, start.offset)
+                paragraphs[pidx].spans.splice(sidx + 1, 0, {
+                  text: oriText.substring(start.offset, end.offset),
+                  styles: { ...paragraphs[pidx].spans[sidx].styles }
+                })
+                paragraphs[pidx].spans[sidx + 2].text = oriText.substring(start.offset)
+
+                currStart = { pIndex: pidx, sIndex: sidx + 1, offset: 0 }
+                currEnd = { pIndex: pidx, sIndex: sidx + 1, offset: end.offset - start.offset }
+                isDivided = true
               } else {
                 Object.assign(currStart, start)
                 Object.assign(currEnd, { ...start, offset: span.text.length })
@@ -413,7 +424,16 @@ export default Vue.extend({
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
-            TextPropUtils.fontSizeStepper(span.styles.size + step)
+            TextPropUtils.fontSizeStepper(span.styles.size + step, this.sel.start, this.sel.end)
+            // TextPropUtils.fontSizeStepper(span.styles.size + step, {
+            //   pIndex: pidx,
+            //   sIndex: sidx,
+            //   offset: 0
+            // }, {
+            //   pIndex: pidx,
+            //   sIndex: sidx,
+            //   offset: config.paragraphs[pidx].spans[sidx].text.length
+            // })
 
             if (Object.keys(finalStart).length === 0) {
               Object.assign(finalStart, this.sel.start)
@@ -423,7 +443,7 @@ export default Vue.extend({
         Object.assign(finalEnd, this.sel.end)
         const finalSel = TextPropUtils.spanMerger(config.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
-          TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex)
+          setTimeout(() => TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex), 0)
           TextUtils.updateSelection(finalSel[0], finalSel[1])
           TextPropUtils.updateTextPropsState()
         })

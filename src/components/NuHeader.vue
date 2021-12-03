@@ -89,7 +89,8 @@
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
-        mobile-menu(v-click-outside="() => { isShowMenu = false }")
+        mobile-menu(@closeMenu="() => { isShowMenu = false }"
+          v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchBar"
       class="nu-header__search-mobile")
       search-bar(class="search"
@@ -251,7 +252,7 @@ export default Vue.extend({
   &__search-mobile {
     position: absolute;
     top: 48px;
-    left: 0;
+    left: -2px;
     width: 100%;
     height: calc(100vh - 48px);
     background-color: white;

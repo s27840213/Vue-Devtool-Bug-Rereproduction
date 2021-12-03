@@ -2,7 +2,8 @@
   div(class="settings")
     nu-header
     div(class="settings__content")
-      sidebar(@switch="switchView"
+      sidebar(class="settings__sidebar"
+        @switch="switchView"
         :current="currentView")
       section(class="settings__view")
         settings-account(v-if="currentView === 'account'")
@@ -69,9 +70,18 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: auto 1fr;
+    @include layout-mobile {
+      grid-template-columns: auto;
+    }
+  }
+  &__sidebar {
+    @include layout-mobile {
+      display: none;
+    }
   }
   &__view {
     position: relative;
+    overflow-y: scroll;
   }
 }
 </style>

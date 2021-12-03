@@ -98,7 +98,6 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
-      console.log('pageClickHandler')
       groupUtils.deselect()
       this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)

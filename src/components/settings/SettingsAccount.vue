@@ -2,7 +2,7 @@
 div(class="settings-account")
   div(class="settings-account__profile")
     div(class="profile-img text-white") {{shortName}}
-  div(class="settings-account__button mt-20 mb-50 pointer"
+  div(class="settings-account__button pointer"
     @click="onConfirmClicked()") 變更照片
   div(class="settings-account__info")
     div(class="settings-account__label my-10") 名稱
@@ -239,6 +239,11 @@ export default Vue.extend({
     border-radius: 5px;
     border: 2px solid setColor(gray-3);
     padding: 5px 20px;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    @include layout-mobile {
+      margin-bottom: 20px;
+    }
     &:hover {
       background: setColor(gray-5);
     }
@@ -258,6 +263,7 @@ export default Vue.extend({
       color: setColor(gray-2);
       border-radius: 3px;
       border: 1px setColor(gray-4) solid;
+      background: white;
       padding-left: 8px;
       padding-right: 5px;
     }
@@ -272,6 +278,9 @@ export default Vue.extend({
   &__subscribe {
     display: flex;
     justify-content: space-between;
+    // @include layout-mobile {
+    //   align-items: center;
+    // }
     &__wrapper {
       border-radius: 10px;
       cursor: pointer;
@@ -309,14 +318,20 @@ export default Vue.extend({
     }
     &__text {
       width: 80%;
-      font-size: 15px;
-      line-height: 22px;
+      font-size: 14px;
+      line-height: 20px;
       font-weight: 400;
+      @include layout-mobile {
+        width: 85%;
+      }
     }
   }
   &__buttons {
     display: flex;
     justify-content: end;
+    @include layout-mobile {
+      padding-bottom: 30px;
+    }
     > button {
       color: setColor(white);
       border-radius: 5px;
