@@ -5,13 +5,15 @@
       div(class="profile-img mr-20 text-body-2 text-white") {{shortName}}
       div(class="name") {{uname}}
     div(class="popup-account__hr")
-    div(class="popup-account__option")
+    div(class="popup-account__option"
+      @click="goToPage('/settings/account')")
       svg-icon(class="pr-10"
         :iconName="'settings'"
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
       span 帳 號 設 定
-    div(class="popup-account__option")
+    div(class="popup-account__option"
+      @click="goToPage('/settings/security')")
       svg-icon(class="pr-10"
         :iconName="'lock'"
         :iconWidth="'15px'"
@@ -45,6 +47,12 @@ export default Vue.extend({
       'shortName', 'uname'])
   },
   methods: {
+    goToPage(path: string) {
+      if (this.$route.path !== path) {
+        this.$router.push({ path: path })
+      }
+      this.closePopup()
+    },
     onLogoutClicked() {
       localStorage.setItem('token', '')
       this.$router.go(0)
