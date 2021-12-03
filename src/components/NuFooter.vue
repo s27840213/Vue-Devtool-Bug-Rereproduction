@@ -85,11 +85,11 @@
           :iconName="'facebook-circle'"
           :iconWidth="'25px'"
           @click.native="goToPage(facebookPage)")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer pl-25"
           :iconName="'instagram-circle'"
           :iconWidth="'25px'"
           @click.native="goToPage('/')")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer pl-25"
           :iconName="'mail-circle'"
           :iconWidth="'25px'"
           @click.native="goToPage('/')")
@@ -267,7 +267,6 @@ export default Vue.extend({
       &-icons {
         display: flex;
         align-items: center;
-        column-gap: 25px;
         padding-left: 30px;
       }
       &-locale {

@@ -250,10 +250,10 @@ export default Vue.extend({
   }
   &__search-mobile {
     position: absolute;
-    top: 50px;
+    top: 48px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 48px);
     background-color: white;
     padding: 20px;
     .search {
@@ -272,7 +272,6 @@ export default Vue.extend({
     &__options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px 10px;
       justify-content: start;
       color: setColor(gray-2);
       > span {
@@ -282,6 +281,7 @@ export default Vue.extend({
         box-sizing: border-box;
         border-radius: 100px;
         padding: 5px 10px;
+        margin: 6px 5px;
       }
     }
   }
