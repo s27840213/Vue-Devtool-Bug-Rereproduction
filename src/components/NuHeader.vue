@@ -53,10 +53,7 @@
         svg-icon(v-if="isLogin"
           :iconName="`notify`"
           :iconWidth="'20px'")
-        div(v-if="isLogin"
-          class="profile pointer text-white text-body-2"
-          @click="isAccountPopup = true")
-          span {{shortName}}
+        avatar(:textSize="14" :avatarSize="35" @click.native="isAccountPopup = true")
         popup-account(v-if="isAccountPopup"
           class="nu-header__account"
           @close="() => (isAccountPopup = false)")
@@ -107,15 +104,17 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
+import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import store from '@/store'
 export default Vue.extend({
   components: {
     SearchBar,
     PopupAccount,
-    MobileMenu
+    MobileMenu,
+    Avatar
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -135,7 +134,10 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'role', 'shortName']),
+      'role']),
+    ...mapGetters('user', [
+      'getAvatar'
+    ]),
     currentPage(): string {
       return this.$route.name || ''
     },
@@ -145,7 +147,7 @@ export default Vue.extend({
     isAdmin(): boolean {
       return this.role === 0
     },
-    isMobile (): boolean {
+    isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     }
   },
@@ -240,7 +242,8 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    :nth-child(1), :nth-child(3) {
+    :nth-child(1),
+    :nth-child(3) {
       width: 25px;
     }
   }
@@ -278,7 +281,7 @@ export default Vue.extend({
       > span {
         font-size: 14px;
         background-color: white;
-        border: 1px solid #E0E0E0;
+        border: 1px solid #e0e0e0;
         box-sizing: border-box;
         border-radius: 100px;
         padding: 5px 10px;

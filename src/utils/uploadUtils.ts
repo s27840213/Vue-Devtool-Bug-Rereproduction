@@ -103,13 +103,17 @@ class UploadUtils {
     this.event.emit('fontUploadStatus', status)
   }
 
-  chooseAssets(type: 'image' | 'font') {
+  chooseAssets(type: 'image' | 'font' | 'avatar') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-    const acceptType = type === 'image' ? '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic' : '.ttf,.ttc,.otf,.woff2'
+    const acceptHash = {
+      image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      font: '.ttf,.ttc,.otf,.woff2',
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+    }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
-    inputNode.setAttribute('accept', acceptType)
+    inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
@@ -218,7 +222,7 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font', files: FileList, addToPage = false) {
+  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList, addToPage = false) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
@@ -229,7 +233,11 @@ class UploadUtils {
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
-      formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+      if (type === 'avatar') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+      } else {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+      }
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
@@ -332,6 +340,30 @@ class UploadUtils {
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
+                    }
+                  })
+                }
+              })
+            }, 2000)
+          }
+        } else if (type === 'avatar') {
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          xhr.send(formData)
+          xhr.onload = () => {
+            // polling the JSON file of uploaded image
+            const interval = setInterval(() => {
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json`
+              fetch(pollingTargetSrc).then((response) => {
+                if (response.status === 200) {
+                  clearInterval(interval)
+                  response.json().then((json: IUploadAssetResponse) => {
+                    if (json.flag === 0) {
+                      console.log('Successfully upload the file')
+                      store.commit('user/SET_STATE', {
+                        avatar: json.url
+                      })
+                    } else {
+                      console.log('Failed to upload the file')
                     }
                   })
                 }

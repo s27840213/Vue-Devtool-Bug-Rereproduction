@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
@@ -38,7 +39,12 @@ export interface IUserModule {
   images: Array<IAssetPhoto>,
   checkedAssets: Array<string>,
   verUni: number,
-  imgSizeMap: Array<{ [key: string]: string | number }>
+  imgSizeMap: Array<{ [key: string]: string | number }>,
+  avatar: {
+    prev: string,
+    prev_2x: string,
+    prev_4x: string
+  }
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -77,7 +83,12 @@ const getDefaultState = (): IUserModule => ({
   images: [],
   checkedAssets: [],
   verUni: 0,
-  imgSizeMap: []
+  imgSizeMap: [],
+  avatar: {
+    prev: '',
+    prev_2x: '',
+    prev_4x: ''
+  }
 })
 
 const state = getDefaultState()
@@ -145,6 +156,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   isAdmin(state) {
     return state.role === 0
+  },
+  getAvatar(state) {
+    return state.avatar
   }
 }
 
@@ -407,7 +421,8 @@ const actions: ActionTree<IUserModule, unknown> = {
         account: data.data.account,
         upassUpdate: data.data.upass_update,
         locale: data.data.locale,
-        subscribe: data.data.subscribe
+        subscribe: data.data.subscribe,
+        avatar: data.data.avatar
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
