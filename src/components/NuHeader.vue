@@ -89,7 +89,8 @@
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
-        mobile-menu(v-click-outside="() => { isShowMenu = false }")
+        mobile-menu(@closeMenu="() => { isShowMenu = false }"
+          v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchBar"
       class="nu-header__search-mobile")
       search-bar(class="search"

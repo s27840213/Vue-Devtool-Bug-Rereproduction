@@ -95,6 +95,7 @@ export default Vue.extend({
     goToPageByPath(path: string) {
       if (this.$route.path !== path) {
         this.$router.push({ path: path })
+        this.$emit('closeMenu')
       }
     },
     onLogoutClicked() {
