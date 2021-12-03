@@ -8,15 +8,15 @@ div(class="settings-security")
         div(class="settings-security__button"
           @click="onChangeClicked()") 更 改
       div(class="settings-security__divider")
-    div(class="settings-security__title") 安全防護
-    div(class="settings-security__item")
-      span 從所有裝置上登出以結束所有作業階段。
-      div(class="settings-security__button") 從 裝 置 上 登 出
-    div(class="settings-security__divider")
-    div(class="settings-security__title") 刪除帳號
-    div(class="settings-security__item")
-      span 刪除帳號後，你將無法再存取任何設計或登入 Vivipic。
-      div(class="settings-security__button") 刪 除 帳 號
+    //- div(class="settings-security__title") 安全防護
+    //- div(class="settings-security__item")
+    //-   span 從所有裝置上登出以結束所有作業階段。
+    //-   div(class="settings-security__button") 從 裝 置 上 登 出
+    //- div(class="settings-security__divider")
+    //- div(class="settings-security__title") 刪除帳號
+    //- div(class="settings-security__item")
+    //-   span 刪除帳號後，你將無法再存取任何設計或登入 Vivipic。
+    //-   div(class="settings-security__button") 刪 除 帳 號
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
     class="settings-security__popup-verify")
