@@ -74,7 +74,7 @@
         svg-icon(class="pointer"
           :iconName="'instagram-circle'"
           :iconWidth="'25px'"
-          @click.native="goToPage('/')")
+          @click.native="goToPage(igPage)")
         svg-icon(class="pointer"
           :iconName="'mail-circle'"
           :iconWidth="'25px'"
@@ -85,11 +85,11 @@
           :iconName="'facebook-circle'"
           :iconWidth="'25px'"
           @click.native="goToPage(facebookPage)")
-        svg-icon(class="pointer pl-25"
+        svg-icon(class="pointer ml-25"
           :iconName="'instagram-circle'"
           :iconWidth="'25px'"
-          @click.native="goToPage('/')")
-        svg-icon(class="pointer pl-25"
+          @click.native="goToPage(igPage)")
+        svg-icon(class="pointer ml-25"
           :iconName="'mail-circle'"
           :iconWidth="'25px'"
           @click.native="goToPage('/')")
@@ -114,6 +114,7 @@ export default Vue.extend({
       locale: '繁體中文(台灣)',
       localeOptions: ['繁體中文(台灣)', '英文', '日文'],
       facebookPage: 'https://www.facebook.com/vivipictw',
+      igPage: 'https://www.instagram.com/vivipictw/',
       blogPage: 'https://blog.vivipic.com/',
       featureExpand: [false, false, false, false] as boolean[]
     }
