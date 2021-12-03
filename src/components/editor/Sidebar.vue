@@ -23,7 +23,8 @@
         :iconColor="'gray-3'"
         :iconWidth="'30px'")
     div(class="nav-setting pointer")
-      div(class="profile pointer text-white text-body-2")
+      div(class="profile pointer text-white text-body-2"
+        @click="goToPage('Settings')")
         span {{shortName}}
 </template>
 <script lang="ts">
