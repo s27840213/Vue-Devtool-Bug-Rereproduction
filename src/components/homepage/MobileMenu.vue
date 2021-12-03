@@ -18,14 +18,30 @@
               :type="'icon-mid-body'"
               :class="{'text-blue-1': currentPage === 'Faq'}") 常見問題
     div(class="nav mobile-menu__bottom")
-      div(class="nav__option")
-        btn(@click.native="goToPage('Login')"
-          :type="'icon-mid-body'"
-          :class="{'text-blue-1': currentPage === 'Login'}") 登入
-      div(class="nav__option")
-        btn(@click.native="goToPage('SignUp')"
-          :type="'icon-mid-body'"
-          :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
+      template(v-if="!isLogin")
+        div(class="nav__option")
+          btn(@click.native="goToPage('Login')"
+            :type="'icon-mid-body'"
+            :class="{'text-blue-1': currentPage === 'Login'}") 登入
+        div(class="nav__option")
+          btn(@click.native="goToPage('SignUp')"
+            :type="'icon-mid-body'"
+            :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
+      template(v-else)
+        div(class="mobile-menu__bottom__profile")
+          div(class="profile-img mr-10 body-2 text-white") {{shortName}}
+          div(class="profile-text body-4")
+            div {{showUname}}
+            div(class="text-gray-3") {{account}}
+        div(class="nav__option"
+          @click="goToPageByPath('/settings/account')")
+          span 帳號設定
+        div(class="nav__option"
+          @click="goToPageByPath('/settings/security')")
+          span 登入與安全性
+        div(class="nav__option"
+          @click="onLogoutClicked()")
+          span 登出
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -46,12 +62,20 @@ export default Vue.extend({
       account: 'getAccount'
     }),
     ...mapGetters({
+      isLogin: 'user/isLogin',
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     currentPage(): string {
       return this.$route.name || ''
+    },
+    showUname(): string {
+      if (this.uname.length > 10) {
+        return this.uname.substring(0, 10).concat('...')
+      } else {
+        return this.uname
+      }
     }
   },
   methods: {
@@ -80,6 +104,15 @@ export default Vue.extend({
         this.$router.push({ name: 'Home' })
       }
       // ----------------------
+    },
+    goToPageByPath(path: string) {
+      if (this.$route.path !== path) {
+        this.$router.push({ path: path })
+      }
+    },
+    onLogoutClicked() {
+      localStorage.setItem('token', '')
+      this.$router.go(0)
     }
   }
 })
@@ -93,10 +126,31 @@ export default Vue.extend({
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   &__top {
-    padding-top: 30%;
+    padding-top: 10vh;
   }
   &__bottom {
-    padding-top: 100%;
+    padding-top: 45vh;
+    &__profile {
+      display: flex;
+      padding-left: 10px;
+      padding-bottom: 10px;
+      .profile-img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        font-weight: 700;
+        background: #61aac2;
+        border-radius: 50%;
+      }
+      .profile-text {
+        display: flex;
+        text-align: left;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
   }
 }
 .nav {
@@ -110,11 +164,14 @@ export default Vue.extend({
   &__option {
     display: flex;
     align-items: center;
-    width: calc(100% - 3px);
+    cursor: pointer;
     font-size: 14px;
     line-height: 22px;
     font-weight: 400;
-    cursor: pointer;
+    margin: 7px 0 7px 15px;
+    > button {
+      padding: 0;
+    }
   }
 }
 </style>
