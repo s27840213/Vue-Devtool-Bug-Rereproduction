@@ -108,15 +108,17 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .mobile-menu {
   @include size(200px, 100%);
-  background-color: setColor(gray-6);
+  position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
+  background-color: setColor(gray-6);
   &__top {
     padding-top: 10vh;
   }
   &__bottom {
-    padding-top: 45vh;
+    position: absolute;
+    top: 70%;
     &__profile {
       display: flex;
       align-items: center;
