@@ -25,7 +25,7 @@ const minMaxHash: { [index: string]: { min: number, max: number } } = {
     min: 6, max: 800
   },
   lineHeight: {
-    min: 0, max: 300
+    min: 0.5, max: 2.5
   },
   letterSpacing: {
     min: -200, max: 800

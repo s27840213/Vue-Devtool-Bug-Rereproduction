@@ -74,7 +74,8 @@
           :iconWidth="'90px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(class="pr-15 relative")
+      div(v-if="noSearchbar")
+      div(v-else class="pr-15 relative")
         svg-icon(v-if="!isShowSearchBar"
           :iconName="'search'"
           :iconColor="'gray-3'"
@@ -249,10 +250,10 @@ export default Vue.extend({
   }
   &__search-mobile {
     position: absolute;
-    top: 50px;
+    top: 48px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 48px);
     background-color: white;
     padding: 20px;
     .search {
@@ -271,7 +272,6 @@ export default Vue.extend({
     &__options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px 10px;
       justify-content: start;
       color: setColor(gray-2);
       > span {
@@ -281,6 +281,7 @@ export default Vue.extend({
         box-sizing: border-box;
         border-radius: 100px;
         padding: 5px 10px;
+        margin: 6px 5px;
       }
     }
   }

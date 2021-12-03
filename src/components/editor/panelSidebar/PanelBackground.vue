@@ -107,7 +107,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        size: 136
+        size: 150
       }]
     },
     listCategories(): any[] {
