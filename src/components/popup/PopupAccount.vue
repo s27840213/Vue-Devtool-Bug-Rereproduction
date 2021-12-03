@@ -74,7 +74,7 @@ export default Vue.extend({
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
-      this.$router.go(0)
+      window.location.href = '/'
     },
     closePopup() {
       this.$emit('close')
