@@ -37,7 +37,7 @@ div(style="position:relative;")
               svg-icon(class="pointer"
               iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-3'")
         span(class="text-blue-1") 建立您的帳號
-        button
+        button(@click="onCloseClicked")
               svg-icon(class="pointer"
                 iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
       div
@@ -467,6 +467,7 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #000000a1;
 }
 .signup {
   position: relative;
@@ -476,6 +477,7 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
+  background-color: white;
   padding: 32px;
   > div {
     margin-bottom: 2vh;

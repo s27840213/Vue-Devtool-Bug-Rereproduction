@@ -1,9 +1,13 @@
 import { ITemplate } from '@/interfaces/template'
 
 class TemplateCenterUtils {
-  generateWaterfall(templates: any): ITemplate[][] {
-    const res = [[], [], [], [], [], []] as ITemplate[][]
-    const ratios = [0, 0, 0, 0, 0, 0]
+  generateWaterfall(templates: any, columns: number): ITemplate[][] {
+    const res = [] as ITemplate[][]
+    const ratios = [] as number[]
+    for (let i = 0; i < columns; i++) {
+      res.push([])
+      ratios.push(0)
+    }
     console.log(templates)
     const list = templates.list ?? []
     for (const template of list) {
@@ -28,7 +32,7 @@ class TemplateCenterUtils {
   }
 
   getPrevUrl(item: {id: string, ver: number}): string {
-    return `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`
+    return `https://template.vivipic.com/template/${item.id}/prev_4x?ver=${item.ver}`
   }
 
   lowestColumn(ratios: number[]): number {

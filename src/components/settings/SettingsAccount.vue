@@ -258,6 +258,7 @@ export default Vue.extend({
       color: setColor(gray-2);
       border-radius: 3px;
       border: 1px setColor(gray-4) solid;
+      background: white;
       padding-left: 8px;
       padding-right: 5px;
     }

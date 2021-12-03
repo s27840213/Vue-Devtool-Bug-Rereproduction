@@ -7,13 +7,14 @@ div(class="overflow-container"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent,
-        @dragenter.prevent
+        @dragenter.prevent,
         @click.right.stop="onRightClick"
-        @click.left.self="pageClickHandler()"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
-      nu-bg-image(:image="this.config.backgroundImage" :color="this.config.backgroundColor")
+      nu-bg-image(:image="this.config.backgroundImage"
+        :color="this.config.backgroundColor"
+        @click.native.left="pageClickHandler()")
       nu-layer(v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
@@ -116,7 +117,8 @@ export default Vue.extend({
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
         stepsUtils.record()
-      } else {
+      }
+      if ((srcObj?.assetId ?? '') !== '' && locked) {
         this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
     }

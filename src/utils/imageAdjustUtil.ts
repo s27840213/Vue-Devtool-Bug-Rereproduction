@@ -141,12 +141,11 @@ class ImageAdjustUtil {
     ]
   }
 
-  getHalation (value: number, width: number, height: number) {
+  getHalation (value: number, position: { [key: string]: any }) {
+    const { width, x, y } = position
     const opacity = value * 0.7 / 100
-    const halfWidth = width / 2
-    const halfHeight = height / 2
     const style = {
-      background: `radial-gradient(${halfWidth}px at ${halfWidth}px ${halfHeight}px, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, ${opacity}) 130%)`,
+      background: `radial-gradient(${width}px at ${x}px ${y}px, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, ${opacity}) 130%)`,
       position: 'absolute',
       top: 0,
       left: 0,

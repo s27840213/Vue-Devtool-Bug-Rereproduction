@@ -1,19 +1,20 @@
 <template lang="pug">
   div(ref="body"
       class="template-center"
+      :class="{'mobile': isMobile}"
       @scroll="handleScroll")
-    nu-header(:noSearchbar="true" :noNavigation="snapToTop" @search="handleSearch")
+    nu-header(:noSearchbar="true" :noNavigation="snapToTop && !isMobile")
       transition(name="slide")
-        search-bar(v-if="snapToTop"
+        search-bar(v-if="snapToTop && !isMobile"
                 :style="absoluteSearchbarStyles()"
                 class="template-center__absolute-searchbar"
                 :clear="true"
                 :defaultKeyword="searchbarKeyword"
-                placeholder="Search from our templates"
+                placeholder="搜尋"
                 fontFamily="Mulish"
                 @update="handleUpdate"
                 @search="handleSearch")
-    div(class="template-center__search-container")
+    div(v-if="!isMobile" class="template-center__search-container")
       div(class="template-center__search")
         div(class="template-center__search__title")
           span 選擇一個心儀的模板著手設計吧！
@@ -26,18 +27,38 @@
                   :style="searchbarStyles()"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
-                  placeholder="Search from our templates"
+                  placeholder="搜尋"
                   fontFamily="Mulish"
                   @update="handleUpdate"
                   @search="handleSearch")
-    div(class="template-center__content")
-      div(class="template-center__filter")
+    div(class="template-center__content"
+        :class="{'mobile': isMobile}")
+      div(v-if="isMobile" class="template-center__mobile-search")
+        search-bar(ref="searchbar"
+                  class="template-center__mobile-search__searchbar"
+                  :clear="true"
+                  :defaultKeyword="searchbarKeyword"
+                  placeholder="搜尋"
+                  fontFamily="Mulish"
+                  @update="handleUpdate"
+                  @search="handleSearch")
+        div(class="template-center__mobile-search__options"
+            :class="{'active': isShowOptions}"
+            @click="isShowOptions = !isShowOptions")
+          svg-icon(iconName="advanced"
+                  iconWidth="22px"
+                  iconHeight="18.36px"
+                  iconColor="white")
+      div(class="template-center__filter"
+          :class="{'mobile': isMobile}"
+          :style="{'max-height': isShowOptions || !isMobile ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions || !isMobile ? '1' : '0'}")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+                            :isMobile="isMobile"
                             @select="handleHashtagSelect")
-      div(class="template-center__hr")
-      div(class="template-center__sorter")
+      div(v-if="!isMobile" class="template-center__hr")
+      div(v-if="!isMobile" class="template-center__sorter")
         div(class="template-center__sorter__left")
           div(class="template-center__sorter__title") Sort by:
           div(v-for="sortingCriterium in sortingCriteria"
@@ -50,26 +71,30 @@
           //-   svg-icon(iconName="chevron-down"
           //-           iconWidth="24px"
           //-           iconColor="gray-2")
-      div(class="template-center__waterfall")
-        div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
-          div(v-for="template in waterfallTemplate"
-              class="template-center__waterfall__column__template"
-              :style="templateStyles(template.prev_height)"
-              @click="handleClickWaterfall(template)")
-            div(class="template-center__waterfall__column__template__container")
-              img(:src="template.url")
-            div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-            div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
-              svg-icon(iconName="multiple-file"
-                      iconWidth="24px"
-                      iconColor="gray-7")
-      div(v-if="!isTemplateReady" class="template-center__loading")
-        svg-icon(iconName="loading"
-                iconWidth="24px"
-                iconColor="gray-2")
-      observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                        @callback="handleLoadMore")
-    nu-footer
+      div(class="template-center__waterfall-wrapper"
+          :class="{'mobile': isMobile}")
+        div(class="template-center__waterfall"
+            :class="{'mobile': isMobile}")
+          div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
+            div(v-for="template in waterfallTemplate"
+                class="template-center__waterfall__column__template"
+                :style="templateStyles(template.prev_height)"
+                @click="handleClickWaterfall(template)")
+              div(class="template-center__waterfall__column__template__container")
+                img(:src="template.url")
+              div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
+                svg-icon(iconName="multiple-file"
+                        iconWidth="24px"
+                        iconColor="gray-7")
+        div(v-if="!isTemplateReady" class="template-center__loading")
+          svg-icon(iconName="loading"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                          :target="isMobile ? '.template-center__content' : undefined"
+                          @callback="handleLoadMore")
+    nu-footer(v-if="!isMobile")
     transition(name="fade-scale")
       div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
         img(:src="require('@/assets/img/svg/to_top.svg')")
@@ -163,7 +188,8 @@ export default Vue.extend({
       selectedTheme: undefined as Itheme | undefined,
       content_ids: [] as IContentTemplate[],
       contentBuffer: undefined as IContentTemplate | undefined,
-      modal: ''
+      modal: '',
+      isShowOptions: false
     }
   },
   mounted() {
@@ -225,7 +251,10 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    })
+    }),
+    isMobile (): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
+    }
   },
   methods: {
     ...mapActions('hashtag', {
@@ -245,6 +274,7 @@ export default Vue.extend({
       return { paddingTop: `${heightPercent}%` }
     },
     handleScroll() {
+      if (this.isMobile) return
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= 50
       this.searchbarTop = searchbar.getBoundingClientRect().top
@@ -317,7 +347,7 @@ export default Vue.extend({
       this.waterfallTemplates = []
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
-        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
+        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates, this.isMobile ? 2 : 6)
         this.isTemplateReady = true
       })
     },
@@ -325,7 +355,7 @@ export default Vue.extend({
       console.log('load more')
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {
-        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates)
+        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates, this.isMobile ? 2 : 6)
         this.isTemplateReady = true
       })
     },
@@ -391,6 +421,10 @@ export default Vue.extend({
   @include size(100%, 100%);
   min-height: 100%;
   overflow-y: auto;
+  &.mobile {
+    overflow: unset;
+    height: unset;
+  }
   &__absolute-searchbar {
     position: absolute;
     left: 50%;
@@ -455,10 +489,22 @@ export default Vue.extend({
     margin: auto;
     width: 80%;
     min-width: calc(100% - 48px);
-    min-height: 100%;
+    &.mobile {
+      min-height: 100%;
+      min-width: calc(100% - 30px);
+      width: calc(100% - 30px);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
   }
   &__filter {
     margin-top: 36px;
+    &.mobile {
+      margin-top: unset;
+      margin-left: 5px;
+      transition: .2s ease;
+    }
   }
   &__hr {
     margin-top: 26px;
@@ -516,10 +562,24 @@ export default Vue.extend({
       justify-content: center;
     }
   }
+  &__waterfall-wrapper {
+    padding-bottom: 80px;
+    &.mobile {
+      height: 100%;
+      overflow-y: auto;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  }
   &__waterfall {
-    margin-bottom: 80px;
     display: flex;
     gap: 24px;
+    &.mobile {
+      gap: 15px;
+    }
     &__column {
       width: 100%;
       display: flex;
@@ -531,6 +591,7 @@ export default Vue.extend({
         border: 1px solid setColor(gray-5);
         overflow: hidden;
         cursor: pointer;
+        box-sizing: border-box;
         &__container {
           position: absolute;
           top: 0;
@@ -569,6 +630,44 @@ export default Vue.extend({
           right: 4px;
           width: 24px;
           height: 24px;
+        }
+      }
+    }
+  }
+  &__mobile-search {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    width: calc(100% - 10px);
+    height: 44px;
+    display: flex;
+    gap: 10px;
+    &__searchbar {
+      height: 44px;
+      width: unset;
+      background-color: white;
+      border: 1px solid setColor(gray-4);
+      border-radius: 3px;
+      box-sizing: border-box;
+      flex-grow: 1;
+    }
+    &__options {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid setColor(gray-4);
+      border-radius: 3px;
+      box-sizing: border-box;
+      flex-grow: 0;
+      flex-basis: 44px;
+      transition: background-color 0.2s;
+      &.active {
+        background-color: setColor(gray-4);
+        > svg {
+          color: setColor(gray-4);
         }
       }
     }
