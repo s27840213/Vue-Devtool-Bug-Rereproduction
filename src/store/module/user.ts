@@ -201,6 +201,7 @@ const mutations: MutationTree<IUserModule> = {
       width: imageFile.width,
       height: imageFile.height,
       id: assetId,
+      assetIndex: assetId,
       progress: 0,
       preview: {
         width: imageFile.width,
@@ -230,7 +231,6 @@ const mutations: MutationTree<IUserModule> = {
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
-
     const targetUrls = {
       prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
       full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : urls.full || '',
@@ -240,6 +240,7 @@ const mutations: MutationTree<IUserModule> = {
       smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
       tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
     }
+
     if (targetIndex === -1) {
       images.push({
         width: 500,

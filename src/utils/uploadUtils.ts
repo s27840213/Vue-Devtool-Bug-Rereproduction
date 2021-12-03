@@ -198,7 +198,7 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
                     // the reason why we record here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
@@ -296,7 +296,7 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId })
+                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
                         }
                       } else {
@@ -584,7 +584,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        console.log(designId)
+        // console.log(designId)
       }
     }
   }
@@ -617,7 +617,7 @@ class UploadUtils {
         group_id: groupId,
         cover
       } as IGroupDesignInputParams).then(() => {
-        console.log(groupId)
+        // console.log(groupId)
       })
     }
   }
@@ -646,7 +646,6 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
-    console.log(pageJSON)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
@@ -675,7 +674,6 @@ class UploadUtils {
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      console.log(xhr)
       modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
@@ -698,7 +696,6 @@ class UploadUtils {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    console.log(this.loginOutput.upload_map.fields)
 
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
@@ -864,7 +861,6 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                console.log('Set design id' + designId)
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 themeUtils.refreshTemplateState()
