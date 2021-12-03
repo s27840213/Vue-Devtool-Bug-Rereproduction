@@ -50,9 +50,9 @@
           btn(@click.native="goToPage('SignUp')"
           :type="'primary-mid'"
           class="rounded" style="padding: 5px 30px;") 註 冊
-        svg-icon(v-if="isLogin"
-          :iconName="`notify`"
-          :iconWidth="'20px'")
+        //- svg-icon(v-if="isLogin"
+        //-   :iconName="`notify`"
+        //-   :iconWidth="'20px'")
         div(v-if="isLogin"
           class="profile pointer text-white text-body-2"
           @click="isAccountPopup = true")
