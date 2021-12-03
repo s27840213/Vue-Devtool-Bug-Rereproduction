@@ -23,6 +23,7 @@ class ThemeUtils {
     store.dispatch('templates/resetContent')
     if (keyword) {
       queryString.delete('search')
+      store.commit('SET_currSidebarPanelType', 0)
       store.dispatch('templates/getTagContent', { keyword })
       window.history.replaceState({}, document.title, `${window.location.pathname}?${queryString.toString()}`)
     } else {
