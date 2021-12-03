@@ -63,8 +63,8 @@
             @blur="onTextBlur()"
             @compositionstart="composingStart"
             @compositionend="composingEnd"
-            @keypress="onKeyPress"
             @keydown="onKeyDown"
+            @keypress="onKeyPress"
             @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
             @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
             @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
@@ -356,7 +356,7 @@ export default Vue.extend({
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
 
-          for (const p of paragraphs) {
+          for (const p of this.paragraphs) {
             for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
               if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
                 p.spans.splice(sIndex, 1)
@@ -365,10 +365,10 @@ export default Vue.extend({
                   p.spans.splice(sIndex, 1)
                   sIndex--
                 }
-                LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
               }
             }
           }
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
         }
       } else {
         if (this.getLayerType === 'text') {
@@ -916,8 +916,6 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            // const clipPath = `M0,0h${width}v${height}h${-width}z`
-            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break
@@ -964,8 +962,6 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
-      // const body = this.$refs.body as HTMLElement
-      // body.classList.add('hover')
       this.setCursorStyle('initial')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
@@ -1399,7 +1395,9 @@ export default Vue.extend({
     },
     onKeyDown(e: KeyboardEvent) {
       let updated = false
+      console.warn(e.key)
       const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
+        console.log('mutation ')
         observer.disconnect()
         const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
         const config = GeneralUtils.deepCopy(this.config) as IText
@@ -1463,6 +1461,7 @@ export default Vue.extend({
       setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
     },
     onKeyPress(e: KeyboardEvent) {
+      console.log(e.key)
       const sel = window.getSelection()
       if (sel?.getRangeAt(0).toString()) {
         this.rangedHandler(e)
@@ -1474,7 +1473,7 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.$nextTick(() => {
         this.contentEditable = true
-        // TextUtils.focus(this.sel.start, this.sel.end)
+        TextUtils.focus(this.sel.start, this.sel.end)
         setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
       })
     },
