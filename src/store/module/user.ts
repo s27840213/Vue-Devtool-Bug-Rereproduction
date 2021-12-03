@@ -159,6 +159,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getAvatar(state) {
     return state.avatar
+  },
+  hasAvatar(): boolean {
+    return state.avatar.prev_2x !== undefined
   }
 }
 

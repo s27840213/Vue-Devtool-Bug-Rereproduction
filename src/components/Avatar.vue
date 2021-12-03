@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="avatar" :style="avatarStyle()")
-    span(v-if="avatar.prev_2x === ''" class="avatar__shortname text-white") {{shortName}}
+    span(v-if="hasAvatar"
+      class="avatar__shortname text-white") {{shortName}}
 </template>
 
 <script lang="ts">
@@ -35,7 +36,8 @@ export default Vue.extend({
     ...mapState('user', [
       'shortName', 'uname']),
     ...mapGetters({
-      avatar: 'user/getAvatar'
+      avatar: 'user/getAvatar',
+      hasAvatar: 'hasAvatar'
     })
   },
   methods: {
