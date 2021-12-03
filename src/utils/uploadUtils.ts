@@ -362,8 +362,14 @@ class UploadUtils {
                   response.json().then((json: IUploadAssetResponse) => {
                     if (json.flag === 0) {
                       console.log('Successfully upload the file')
+                      console.log(json)
+                      const targetUrls = this.isAdmin ? {
+                        prev: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev`,
+                        prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_2x`,
+                        prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_4x`
+                      } : json.url
                       store.commit('user/SET_STATE', {
-                        avatar: json.url
+                        avatar: targetUrls
                       })
                       modalUtils.setIsPending(false)
                       modalUtils.setModalInfo('變更頭像成功')

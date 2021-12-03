@@ -53,7 +53,7 @@
         svg-icon(v-if="isLogin"
           :iconName="`notify`"
           :iconWidth="'20px'")
-        avatar(:textSize="14" :avatarSize="35" @click.native="isAccountPopup = true")
+        avatar(v-if="isLogin" :textSize="14" :avatarSize="35" @click.native="isAccountPopup = true")
         popup-account(v-if="isAccountPopup"
           class="nu-header__account"
           @close="() => (isAccountPopup = false)")
