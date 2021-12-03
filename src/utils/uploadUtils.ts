@@ -696,7 +696,6 @@ class UploadUtils {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
