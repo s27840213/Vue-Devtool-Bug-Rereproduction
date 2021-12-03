@@ -251,7 +251,7 @@ export default Vue.extend({
   &__search-mobile {
     position: absolute;
     top: 48px;
-    left: 0;
+    left: -2px;
     width: 100%;
     height: calc(100vh - 48px);
     background-color: white;
