@@ -6,7 +6,7 @@
           div(class="profile-img mr-10 body-2 text-white") {{shortName}}
           div(class="profile-text body-4")
             div {{showUname}}
-            div(class="text-gray-3") {{account}}
+            div(class="text-gray-3") {{showAccount}}
         div(class="nav-container__option"
           :class="{'selected': optionSelected === 'account'}"
           @click="switchNav('account')")
@@ -50,6 +50,13 @@ export default Vue.extend({
         return this.uname.substring(0, 10).concat('...')
       } else {
         return this.uname
+      }
+    },
+    showAccount(): string {
+      if (this.account.length > 20) {
+        return this.account.substring(0, 20).concat('...')
+      } else {
+        return this.account
       }
     }
   },

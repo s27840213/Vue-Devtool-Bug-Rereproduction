@@ -2,8 +2,10 @@
   div(class="popup-account text-left"
     v-click-outside="closePopup")
     div(class="popup-account__profile")
-      div(class="profile-img mr-20 text-body-2 text-white") {{shortName}}
-      div(class="name") {{uname}}
+      div(class="profile-img mr-10 text-body-2 text-white") {{shortName}}
+      div(class="profile-text text-body-2")
+        div {{showUname}}
+        div(class="text-gray-3 body-3") {{showAccount}}
     div(class="popup-account__hr")
     div(class="popup-account__option"
       @click="goToPage('/settings/account')")
@@ -32,7 +34,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default Vue.extend({
   directives: {
@@ -44,7 +46,24 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'shortName', 'uname'])
+      'shortName', 'uname']),
+    ...mapGetters('user', {
+      account: 'getAccount'
+    }),
+    showUname(): string {
+      if (this.uname.length > 10) {
+        return this.uname.substring(0, 10).concat('...')
+      } else {
+        return this.uname
+      }
+    },
+    showAccount(): string {
+      if (this.account.length > 25) {
+        return this.account.substring(0, 25).concat('...')
+      } else {
+        return this.account
+      }
+    }
   },
   methods: {
     goToPage(path: string) {
@@ -66,7 +85,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .popup-account {
-    padding: 25px;
+    padding: 25px 20px;
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
@@ -74,23 +93,26 @@ export default Vue.extend({
     border-radius: 5px;
     box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
     background-color: setColor(white);
-
     &__profile {
       display: flex;
       padding-bottom: 10px;
-
       .profile-img {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 35px;
-        height: 35px;
+        width: 40px;
+        height: 40px;
         font-weight: 700;
         background: #61aac2;
         border-radius: 50%;
       }
+      .profile-text {
+        display: flex;
+        text-align: left;
+        flex-direction: column;
+        justify-content: center;
+      }
     }
-
     &__hr {
       width: 100%;
       height: 1px;
@@ -101,7 +123,6 @@ export default Vue.extend({
       margin-bottom: 10px;
       padding: 0;
     }
-
     &__option {
       display: flex;
       align-items: center;
@@ -110,14 +131,12 @@ export default Vue.extend({
       font-weight: 400;
       cursor: pointer;
       margin: 6px 0;
-
       &:hover {
         color: setColor(blue-1);
         > svg {
           color: setColor(blue-1);
         }
       }
-
     }
   }
 </style>

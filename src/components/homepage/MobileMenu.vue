@@ -29,10 +29,7 @@
             :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
       template(v-else)
         div(class="mobile-menu__bottom__profile")
-          div(class="profile-img mr-10 body-2 text-white") {{shortName}}
-          div(class="profile-text body-4")
-            div {{showUname}}
-            div(class="text-gray-3") {{account}}
+          div(class="profile-img body-2 text-white") {{shortName}}
         div(class="nav__option"
           @click="goToPageByPath('/settings/account')")
           span 帳號設定
@@ -58,9 +55,6 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'shortName', 'uname']),
-    ...mapGetters('user', {
-      account: 'getAccount'
-    }),
     ...mapGetters({
       isLogin: 'user/isLogin',
       currPanel: 'getCurrSidebarPanelType',
@@ -69,13 +63,6 @@ export default Vue.extend({
     }),
     currentPage(): string {
       return this.$route.name || ''
-    },
-    showUname(): string {
-      if (this.uname.length > 10) {
-        return this.uname.substring(0, 10).concat('...')
-      } else {
-        return this.uname
-      }
     }
   },
   methods: {
@@ -132,23 +119,19 @@ export default Vue.extend({
     padding-top: 45vh;
     &__profile {
       display: flex;
+      align-items: center;
       padding-left: 10px;
+      padding-right: 10px;
       padding-bottom: 10px;
       .profile-img {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         font-weight: 700;
         background: #61aac2;
         border-radius: 50%;
-      }
-      .profile-text {
-        display: flex;
-        text-align: left;
-        flex-direction: column;
-        justify-content: center;
       }
     }
   }
