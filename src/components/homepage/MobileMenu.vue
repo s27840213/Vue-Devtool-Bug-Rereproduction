@@ -119,7 +119,7 @@ export default Vue.extend({
   }
   &__bottom {
     position: absolute;
-    top: 70%;
+    top: 68%;
     &__profile {
       display: flex;
       align-items: center;
