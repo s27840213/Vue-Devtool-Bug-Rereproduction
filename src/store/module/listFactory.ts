@@ -118,7 +118,7 @@ export default function (this: any) {
     },
     [SET_CATEGORIES] (state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content
-      state.host = objects.host.endsWith('/') ? objects.host.slice(0, -1) : objects.host
+      state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       state.data = objects.data
       state.preview = objects.preview
       state.preview2 = objects.preview2

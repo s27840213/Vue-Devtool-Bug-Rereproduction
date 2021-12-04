@@ -49,6 +49,7 @@ import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -137,6 +138,7 @@ export default Vue.extend({
     window.removeEventListener('beforeunload', this.beforeWindowUnload)
   },
   beforeRouteLeave(to, from, next) {
+    stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
         next()

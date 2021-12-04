@@ -50,16 +50,21 @@
           btn(@click.native="goToPage('SignUp')"
           :type="'primary-mid'"
           class="rounded" style="padding: 5px 30px;") 註 冊
-        svg-icon(v-if="isLogin"
-          :iconName="`notify`"
-          :iconWidth="'20px'")
-        div(v-if="isLogin"
-          class="profile pointer text-white text-body-2"
-          @click="isAccountPopup = true")
-          span {{shortName}}
-        popup-account(v-if="isAccountPopup"
-          class="nu-header__account"
-          @close="() => (isAccountPopup = false)")
+        //- svg-icon(v-if="isLogin"
+        //-   :iconName="`notify`"
+        //-   :iconWidth="'20px'")
+        div(v-if="isLogin")
+          div(v-if="!hasAvatar")
+            div(class="nu-header__profile text-white pointer"
+              @click="isAccountPopup = true") {{shortName}}
+          avatar(v-else
+            class="pointer"
+            :textSize="14"
+            :avatarSize="35"
+            @click.native="isAccountPopup = true")
+          popup-account(v-if="isAccountPopup"
+            class="nu-header__account"
+            @close="() => (isAccountPopup = false)")
     div(v-else
       class="nu-header__container-mobile")
       div(class="pl-15")
@@ -89,7 +94,8 @@
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
-        mobile-menu(v-click-outside="() => { isShowMenu = false }")
+        mobile-menu(@closeMenu="() => { isShowMenu = false }"
+          v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchBar"
       class="nu-header__search-mobile")
       search-bar(class="search"
@@ -106,15 +112,17 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
+import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import store from '@/store'
 export default Vue.extend({
   components: {
     SearchBar,
     PopupAccount,
-    MobileMenu
+    MobileMenu,
+    Avatar
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -135,6 +143,9 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'role', 'shortName']),
+    ...mapGetters('user', [
+      'hasAvatar'
+    ]),
     currentPage(): string {
       return this.$route.name || ''
     },
@@ -144,7 +155,7 @@ export default Vue.extend({
     isAdmin(): boolean {
       return this.role === 0
     },
-    isMobile (): boolean {
+    isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     }
   },
@@ -232,6 +243,17 @@ export default Vue.extend({
       }
     }
   }
+  &__profile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+    font-weight: 700;
+    background: #61aac2;
+    border-radius: 50%;
+  }
   &__container-mobile {
     position: relative;
     display: flex;
@@ -239,7 +261,8 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    :nth-child(1), :nth-child(3) {
+    :nth-child(1),
+    :nth-child(3) {
       width: 25px;
     }
   }
@@ -250,10 +273,10 @@ export default Vue.extend({
   }
   &__search-mobile {
     position: absolute;
-    top: 50px;
-    left: 0;
+    top: 48px;
+    left: -2px;
     width: 100%;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 48px);
     background-color: white;
     padding: 20px;
     .search {
@@ -272,16 +295,16 @@ export default Vue.extend({
     &__options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px 10px;
       justify-content: start;
       color: setColor(gray-2);
       > span {
         font-size: 14px;
         background-color: white;
-        border: 1px solid #E0E0E0;
+        border: 1px solid #e0e0e0;
         box-sizing: border-box;
         border-radius: 100px;
         padding: 5px 10px;
+        margin: 6px 5px;
       }
     }
   }
@@ -304,17 +327,6 @@ export default Vue.extend({
     z-index: 999999;
   }
 }
-.profile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 35px;
-  height: 35px;
-  font-weight: 700;
-  background: #61aac2;
-  border-radius: 50%;
-}
-
 .fade {
   &-enter-active,
   &-leave-active {

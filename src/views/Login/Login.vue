@@ -582,6 +582,7 @@ export default Vue.extend({
   right: 0;
   bottom: 0;
   left: 0;
+  background-color: #000000a1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -594,6 +595,7 @@ export default Vue.extend({
   max-height: 100%;
   box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
+  background-color: white;
   padding: 32px;
   > div {
     margin-bottom: 2.5vh;

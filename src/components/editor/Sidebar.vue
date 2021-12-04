@@ -23,17 +23,27 @@
         :iconColor="'gray-3'"
         :iconWidth="'30px'")
     div(class="nav-setting pointer")
-      div(class="profile pointer text-white text-body-2")
+      div(v-if="!hasAvatar"
+        class="profile pointer text-white text-body-2"
+        @click="goToPage('Settings')")
         span {{shortName}}
+      avatar(v-else
+        class="mt-30"
+        :textSize="14"
+        :avatarSize="35"
+        :fitWidth="true"
+        @click.native="goToPage('Settings')")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
+import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
   components: {
+    Avatar
   },
   props: {
     isSidebarPanelOpen: Boolean
@@ -49,7 +59,8 @@ export default Vue.extend({
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      hasAvatar: 'user/hasAvatar'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
@@ -153,5 +164,6 @@ export default Vue.extend({
   font-weight: 700;
   background: #61aac2;
   border-radius: 50%;
+  box-sizing: border-box;
 }
 </style>

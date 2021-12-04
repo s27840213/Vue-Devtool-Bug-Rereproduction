@@ -365,10 +365,20 @@ class TextPropUtils {
     return { config, start, end }
   }
 
-  fontSizeStepper(value: number) {
+  fontSizeStepper(value: number, start: ISelection, end: ISelection) {
+    // const prop = { [fontPropsMap.fontSize]: value }
+    // const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
+    // console.log(start.pIndex)
+    // console.log(start.sIndex)
+    // const config = this.spanPropertyHandler('fontSize', prop, start, end, _config as IText)
+    // if (typeof subLayerIndex === 'undefined') {
+    //   LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: config.paragraphs })
+    // } else {
+    //   LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: config.paragraphs })
+    // }
     const prop = { [fontPropsMap.fontSize]: value }
     const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
-    const { start, end } = this.getCurrSel
+    // const { start, end } = this.getCurrSel
     const config = this.spanPropertyHandler('fontSize', prop, start, end, _config as IText)
     if (typeof subLayerIndex === 'undefined') {
       LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: config.paragraphs })

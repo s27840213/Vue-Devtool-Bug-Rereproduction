@@ -182,9 +182,14 @@ class StepsUtils {
   }
 
   reset() {
+    this.clearSteps()
+    this.record()
+  }
+
+  // When leave the route of editor, we may use this function alone without creating a new step
+  clearSteps() {
     this.steps = []
     this.currStep = -1
-    this.record()
   }
 }
 

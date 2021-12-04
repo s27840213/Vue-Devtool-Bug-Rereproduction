@@ -3,10 +3,15 @@
     div(class="nav")
       div(class="nav-container")
         div(class="nav-container__profile")
-          div(class="profile-img mr-10 body-2 text-white") {{shortName}}
+          div(v-if="!hasAvatar"
+            class="profile-img mr-10 body-2 text-white") {{shortName}}
+          avatar(v-else
+            class="mr-10"
+            :textSize="14"
+            :avatarSize="35")
           div(class="profile-text body-4")
             div {{showUname}}
-            div(class="text-gray-3") {{account}}
+            div(class="text-gray-3") {{showAccount}}
         div(class="nav-container__option"
           :class="{'selected': optionSelected === 'account'}"
           @click="switchNav('account')")
@@ -26,10 +31,14 @@
 import Vue from 'vue'
 import router from '@/router'
 import { mapState, mapGetters, mapMutations } from 'vuex'
+import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
   props: {
     current: String
+  },
+  components: {
+    Avatar
   },
   data() {
     return {
@@ -43,13 +52,21 @@ export default Vue.extend({
     ...mapState('user', [
       'shortName', 'uname']),
     ...mapGetters('user', {
-      account: 'getAccount'
+      account: 'getAccount',
+      hasAvatar: 'hasAvatar'
     }),
     showUname(): string {
       if (this.uname.length > 10) {
         return this.uname.substring(0, 10).concat('...')
       } else {
         return this.uname
+      }
+    },
+    showAccount(): string {
+      if (this.account.length > 20) {
+        return this.account.substring(0, 20).concat('...')
+      } else {
+        return this.account
       }
     }
   },

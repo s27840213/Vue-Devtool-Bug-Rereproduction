@@ -61,7 +61,7 @@
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
-          @keydown.delete.exact.stop.prevent.self="ShortcutUtils.del()"
+          @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
           @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
           @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
@@ -90,10 +90,10 @@
           @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
           @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
           @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-          @keydown.shift.37.exact.stop.prevent.self="ShortcutUtils.left(true)"
-          @keydown.shift.38.exact.stop.prevent.self="ShortcutUtils.up(true)"
-          @keydown.shift.39.exact.stop.prevent.self="ShortcutUtils.right(true)"
-          @keydown.shift.40.exact.stop.prevent.self="ShortcutUtils.down(true)"
+          @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
+          @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
+          @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
+          @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
           @mouseover="togglePageHighlighter(true)"
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")

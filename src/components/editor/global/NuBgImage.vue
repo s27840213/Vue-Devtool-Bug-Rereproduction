@@ -2,7 +2,7 @@
   div(class="nu-background-image"
     :style="mainStyles"
     draggable="false")
-    div(v-if="!isColorBackground && isAdjustImage" :style="bgStyles")
+    div(v-if="!isColorBackground && isAdjustImage" :style="frameStyles")
       nu-adjust-image(:src="src"
         :styles="image.config.styles")
     div(v-else :style="bgStyles")
@@ -62,11 +62,9 @@ export default Vue.extend({
     },
     mainStyles(): any {
       const { image, color } = this
-      const transform = `translate(${image.posX}px, ${image.posY}px)`
       return {
         opacity: image.config.styles.opacity / 100,
-        backgroundColor: color,
-        transform
+        backgroundColor: color
       }
     },
     isAdjustImage(): boolean {
@@ -74,6 +72,15 @@ export default Vue.extend({
       return Object
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
+    },
+    frameStyles(): { [key: string]: string | number } {
+      const { image, flipStyles } = this
+      return {
+        backgroundColor: '#ffffff',
+        width: `${image.config.styles.imgWidth}px`,
+        height: `${image.config.styles.imgHeight}px`,
+        transform: `translate(${image.posX}px, ${image.posY}px) ${flipStyles.transform}`
+      }
     },
     bgStyles(): { [key: string]: string | number } {
       const { image, color } = this
@@ -83,6 +90,7 @@ export default Vue.extend({
         width: `${image.config.styles.imgWidth}px`,
         height: `${image.config.styles.imgHeight}px`,
         backgroundSize: `${image.config.styles.imgWidth}px ${image.config.styles.imgHeight}px`,
+        backgroundPosition: image.posX === -1 ? 'center center' : `${image.posX}px ${image.posY}px`,
         ...this.flipStyles
       }
     }
@@ -119,7 +127,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-background-image {
-  will-change: 'opacity transform';
+  will-change: opacity, transform;
   position: absolute;
   top: 0;
   left: 0;

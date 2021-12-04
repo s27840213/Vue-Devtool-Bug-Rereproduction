@@ -19,7 +19,7 @@
           div(class="text-left py-5 text-white") 顏色
           div(class="panel-bg__colors")
             div(class="panel-bg__color"
-              @click="handleColorModal")
+              @click="handleColorModal(currBackgroundColor)")
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
               :style="colorStyles(color)"
@@ -60,6 +60,7 @@ import { IListServiceContentData, IListServiceContentDataItem } from '@/interfac
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -93,8 +94,12 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      defaultBgColor: 'color/getDefaultBgColors'
+      defaultBgColor: 'color/getDefaultBgColors',
+      getBackgroundColor: 'getBackgroundColor'
     }),
+    currBackgroundColor(): string {
+      return this.getBackgroundColor(pageUtils.currFocusPageIndex)
+    },
     defaultBackgroundColors(): any[] {
       const { keyword } = this
       if (keyword) { return [] }
@@ -102,7 +107,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        size: 136
+        size: 150
       }]
     },
     listCategories(): any[] {
@@ -174,6 +179,11 @@ export default Vue.extend({
   deactivated() {
     (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
   },
+  beforeDestroy() {
+    colorUtils.event.off(ColorEventType.background, (color: string) => {
+      this.setBgColor(color)
+    })
+  },
   destroyed() {
     this.resetContent()
   },
@@ -225,6 +235,7 @@ export default Vue.extend({
       colorUtils.setCurrEvent(ColorEventType.background)
       colorUtils.setCurrColor(color)
       this.$emit('toggleColorPanel', true)
+      console.log('handle')
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop

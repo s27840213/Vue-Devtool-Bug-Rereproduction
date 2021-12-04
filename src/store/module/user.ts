@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
@@ -38,7 +39,12 @@ export interface IUserModule {
   images: Array<IAssetPhoto>,
   checkedAssets: Array<string>,
   verUni: number,
-  imgSizeMap: Array<{ [key: string]: string | number }>
+  imgSizeMap: Array<{ [key: string]: string | number }>,
+  avatar: {
+    prev: string,
+    prev_2x: string,
+    prev_4x: string
+  }
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -77,7 +83,12 @@ const getDefaultState = (): IUserModule => ({
   images: [],
   checkedAssets: [],
   verUni: 0,
-  imgSizeMap: []
+  imgSizeMap: [],
+  avatar: {
+    prev: '',
+    prev_2x: '',
+    prev_4x: ''
+  }
 })
 
 const state = getDefaultState()
@@ -145,6 +156,12 @@ const getters: GetterTree<IUserModule, any> = {
   },
   isAdmin(state) {
     return state.role === 0
+  },
+  getAvatar(state) {
+    return state.avatar
+  },
+  hasAvatar(): boolean {
+    return state.avatar.prev_2x !== undefined
   }
 }
 
@@ -201,6 +218,7 @@ const mutations: MutationTree<IUserModule> = {
       width: imageFile.width,
       height: imageFile.height,
       id: assetId,
+      assetIndex: assetId,
       progress: 0,
       preview: {
         width: imageFile.width,
@@ -230,7 +248,6 @@ const mutations: MutationTree<IUserModule> = {
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
-
     const targetUrls = {
       prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
       full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : urls.full || '',
@@ -240,6 +257,7 @@ const mutations: MutationTree<IUserModule> = {
       smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
       tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
     }
+
     if (targetIndex === -1) {
       images.push({
         width: 500,
@@ -406,7 +424,8 @@ const actions: ActionTree<IUserModule, unknown> = {
         account: data.data.account,
         upassUpdate: data.data.upass_update,
         locale: data.data.locale,
-        subscribe: data.data.subscribe
+        subscribe: data.data.subscribe,
+        avatar: data.data.avatar
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)

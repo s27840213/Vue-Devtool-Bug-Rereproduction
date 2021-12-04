@@ -37,6 +37,10 @@ export default Vue.extend({
       fallbackSrc: ''
     }
   },
+  mounted () {
+    const preImg = new Image()
+    preImg.src = this.groupImages[0]
+  },
   computed: {
     groupImages (): string[] {
       return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev?ver=${content.ver}`)
