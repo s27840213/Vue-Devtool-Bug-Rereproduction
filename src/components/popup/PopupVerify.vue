@@ -98,6 +98,13 @@
             @click="closePopup()") 取 消
           div(class="popup-verify__btn btn-blue"
             @click="onConfirmPasswordClicked()") 確 認
+    div(v-if="currentPage === 'removeAvatar'")
+      div(class="label-lg pb-20 text-center") 確 定 移 除 ？
+      div(class="popup-verify__btns my-15")
+        div(class="popup-verify__btn btn-gray"
+          @click="closePopup()") 取 消
+        div(class="popup-verify__btn btn-red"
+          @click="onRemoveAvatarClicked()") 移除照片
     spinner(v-if="isLoading")
 </template>
 
@@ -105,6 +112,7 @@
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
+import userApis from '@/apis/user'
 import store from '@/store'
 
 export default Vue.extend({
@@ -142,7 +150,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('user', {
-      token: 'getToken'
+      token: 'getToken',
+      teamId: 'getTeamId'
     }),
     vcodeValid(): boolean {
       if (!this.isVcodeClicked) {
@@ -338,6 +347,21 @@ export default Vue.extend({
     },
     closePopup() {
       this.$emit('close')
+    },
+    onRemoveAvatarClicked() {
+      console.log('remmmove')
+      store.commit('user/SET_STATE', {
+        avatar: {}
+      })
+      const params = {
+        token: this.token,
+        team_id: this.teamId,
+        type: 'avatar',
+        update_type: 'delete',
+        locale: 'tw'
+      }
+      userApis.updateAsset({ ...params })
+      this.closePopup()
     }
   }
 })
@@ -459,6 +483,10 @@ export default Vue.extend({
     &.btn-gray {
       color: black;
       background-color: setColor(gray-4);
+    }
+    &.btn-red {
+      color: setColor(white);
+      background-color: setColor(red-1);
     }
   }
 }

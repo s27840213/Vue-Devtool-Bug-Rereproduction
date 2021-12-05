@@ -2,7 +2,12 @@
   div(class="popup-account text-left"
     v-click-outside="closePopup")
     div(class="popup-account__profile")
-      avatar(class="mr-10" :textSize="14" :avatarSize="35")
+      div(v-if="!hasAvatar"
+        class="profile-img mr-10") {{shortName}}
+      avatar(v-else
+        class="mr-10"
+        :textSize="14"
+        :avatarSize="35")
       div(class="profile-text text-body-2")
         div {{showUname}}
         div(class="text-gray-3 body-3") {{showAccount}}
@@ -52,7 +57,8 @@ export default Vue.extend({
     ...mapState('user', [
       'shortName', 'uname']),
     ...mapGetters('user', {
-      account: 'getAccount'
+      account: 'getAccount',
+      hasAvatar: 'hasAvatar'
     }),
     showUname(): string {
       if (this.uname.length > 10) {
@@ -106,6 +112,8 @@ export default Vue.extend({
       align-items: center;
       width: 40px;
       height: 40px;
+      color: white;
+      font-size: 18px;
       font-weight: 700;
       background: #61aac2;
       border-radius: 50%;

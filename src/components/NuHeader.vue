@@ -50,13 +50,21 @@
           btn(@click.native="goToPage('SignUp')"
           :type="'primary-mid'"
           class="rounded" style="padding: 5px 30px;") 註 冊
-        svg-icon(v-if="isLogin"
-          :iconName="`notify`"
-          :iconWidth="'20px'")
-        avatar(:textSize="14" :avatarSize="35" @click.native="isAccountPopup = true")
-        popup-account(v-if="isAccountPopup"
-          class="nu-header__account"
-          @close="() => (isAccountPopup = false)")
+        //- svg-icon(v-if="isLogin"
+        //-   :iconName="`notify`"
+        //-   :iconWidth="'20px'")
+        div(v-if="isLogin")
+          div(v-if="!hasAvatar")
+            div(class="nu-header__profile text-white pointer"
+              @click="isAccountPopup = true") {{shortName}}
+          avatar(v-else
+            class="pointer"
+            :textSize="14"
+            :avatarSize="35"
+            @click.native="isAccountPopup = true")
+          popup-account(v-if="isAccountPopup"
+            class="nu-header__account"
+            @close="() => (isAccountPopup = false)")
     div(v-else
       class="nu-header__container-mobile")
       div(class="pl-15")
@@ -134,9 +142,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'role']),
+      'role', 'shortName']),
     ...mapGetters('user', [
-      'getAvatar'
+      'hasAvatar'
     ]),
     currentPage(): string {
       return this.$route.name || ''
@@ -235,6 +243,17 @@ export default Vue.extend({
       }
     }
   }
+  &__profile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+    font-weight: 700;
+    background: #61aac2;
+    border-radius: 50%;
+  }
   &__container-mobile {
     position: relative;
     display: flex;
@@ -308,17 +327,6 @@ export default Vue.extend({
     z-index: 999999;
   }
 }
-.profile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 35px;
-  height: 35px;
-  font-weight: 700;
-  background: #61aac2;
-  border-radius: 50%;
-}
-
 .fade {
   &-enter-active,
   &-leave-active {

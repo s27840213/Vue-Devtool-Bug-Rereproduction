@@ -29,7 +29,12 @@
             :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
       template(v-else)
         div(class="mobile-menu__bottom__profile")
-          div(class="profile-img body-2 text-white") {{shortName}}
+          div(v-if="!hasAvatar"
+            class="profile-img body-2 text-white") {{shortName}}
+          avatar(v-else
+            class="mr-10"
+            :textSize="14"
+            :avatarSize="35")
         div(class="nav__option"
           @click="goToPageByPath('/settings/account')")
           span 帳號設定
@@ -43,9 +48,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapState, mapGetters, mapMutations } from 'vuex'
+import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
   components: {
+    Avatar
   },
   data() {
     return {
@@ -59,7 +66,8 @@ export default Vue.extend({
       isLogin: 'user/isLogin',
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      hasAvatar: 'user/hasAvatar'
     }),
     currentPage(): string {
       return this.$route.name || ''

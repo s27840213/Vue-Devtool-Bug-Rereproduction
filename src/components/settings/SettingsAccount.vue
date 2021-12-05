@@ -1,8 +1,18 @@
 <template lang="pug">
 div(class="settings-account")
-  avatar(class="mt-30" :textSize="30" :avatarSize="75")
-  div(class="settings-account__button pointer"
-    @click="chooseAvatar()") 變更照片
+  div(v-if="!hasAvatar"
+    class="settings-account__profile")
+    div(class="profile-img text-white") {{shortName}}
+  avatar(v-else
+    class="mt-30" :textSize="30" :avatarSize="75")
+  div(class="settings-account__buttons")
+    div(v-if="hasAvatar"
+      class="settings-account__button mr-30 pointer"
+      @click="onRemoveAvatarClicked()") 移 除 照 片
+    div(class="settings-account__button pointer"
+      @click="chooseAvatar()")
+      span(v-if="hasAvatar") 變 更 照 片
+      span(v-else) 新 增 個 人 照 片
   div(class="settings-account__info")
     div(class="settings-account__label my-10") 名稱
     property-bar
@@ -36,11 +46,15 @@ div(class="settings-account")
         :disabled="!isChanged"
         @click.native="onConfirmClicked()") 修 改 並 儲 存
   div(v-if="showVerifyPopup"
-    class="settings-account__popup-verify")
+    class="settings-account__popup")
     popup-verify(type="vcode"
       :account="inputAccount"
       @close="closePopup()"
       @isVerified="verifyEmail()")
+  div(v-if="showRemovePopup"
+    class="settings-account__popup")
+    popup-verify(type="removeAvatar"
+      @close="closePopup()")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
@@ -81,6 +95,7 @@ export default Vue.extend({
       isConfirmClicked: false as boolean,
       isEmailVerified: false,
       showVerifyPopup: false,
+      showRemovePopup: false,
       responseError: false
     }
   },
@@ -99,6 +114,7 @@ export default Vue.extend({
     ...mapGetters('user', {
       token: 'getToken',
       isLogin: 'isLogin',
+      hasAvatar: 'hasAvatar',
       account: 'getAccount',
       locale: 'getLocale',
       subscribe: 'getSubscribe'
@@ -208,9 +224,14 @@ export default Vue.extend({
     },
     closePopup() {
       this.showVerifyPopup = false
+      this.showRemovePopup = false
     },
     chooseAvatar() {
       uploadUtils.chooseAssets('avatar')
+    },
+    onRemoveAvatarClicked() {
+      this.showRemovePopup = true
+      // uploadUtils.chooseAssets('avatar')
     }
   }
 })
@@ -224,6 +245,25 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
+  &__profile {
+    display: flex;
+    padding-top: 50px;
+    .profile-img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 75px;
+      height: 75px;
+      font-size: 30px;
+      font-weight: 700;
+      background: #61aac2;
+      border-radius: 50%;
+    }
+  }
+  &__buttons {
+    display: flex;
+    justify-content: center;
+  }
   &__button {
     color: setColor(gray-2);
     border-radius: 5px;
@@ -336,7 +376,7 @@ export default Vue.extend({
       }
     }
   }
-  &__popup-verify {
+  &__popup {
     position: fixed;
     top: 0;
     left: 0;
@@ -347,6 +387,16 @@ export default Vue.extend({
     align-items: center;
     background-color: #000000a1;
     z-index: 999999;
+    &-remove {
+      position: relative;
+      width: 250px;
+      text-align: left;
+      box-sizing: border-box;
+      border-radius: 5px;
+      box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+      background-color: setColor(white);
+      padding: 20px 40px;
+    }
   }
 }
 .input-invalid {
