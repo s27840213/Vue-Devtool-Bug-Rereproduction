@@ -93,6 +93,7 @@ class TextPropUtils {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          store.commit('text/UPDATE_STATE', { paragraphs: config.paragraphs })
           if (TextUtils.isSel(selEnd)) {
             Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
