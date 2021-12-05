@@ -184,6 +184,7 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
+import colorUtils from '@/utils/colorUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -413,6 +414,9 @@ export default Vue.extend({
       setMoving: 'SET_moving',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCurrSidebarPanel: 'SET_currSidebarPanelType'
+    }),
+    ...mapMutations('text', {
+      updateTextState: 'UPDATE_STATE'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1357,62 +1361,130 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
-      if (e.dataTransfer?.getData('data')) {
-        switch (this.getLayerType) {
-          case 'image': {
-            const config = this.config as IImage
-            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-            break
-          }
-          case 'frame':
-            return
-          default:
-            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-        }
-      } else if (dt && dt.files.length !== 0) {
+      if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
+      }
+      switch (this.getLayerType) {
+        case 'image': {
+          const config = this.config as IImage
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+          break
+        }
+        case 'frame':
+          return
+        default:
+          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (!this.contentEditable) {
-        TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-      } else if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-          const sel = TextUtils.getSelection()
-          if (sel) {
-            const { start, end } = sel
-            console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-            console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
-            TextUtils.updateSelection(sel.start, sel.end)
-          }
-        }
-        TextPropUtils.updateTextPropsState()
+      // // e.preventDefault()
+      // // const sel = window.getSelection()
+      // // if (!sel?.rangeCount || !sel?.toString() || !this.config.isEdited) return
+
+      // // const range = sel?.getRangeAt(0)
+      // // const startContainer = range?.startContainer
+      // // const endContainer = range?.endContainer
+      // // let startP = startContainer
+      // // let endP = endContainer
+      // // let startS = startContainer
+      // // let endS = endContainer
+      // // while (startP?.nodeName !== 'P' && startP?.parentNode) {
+      // //   startP = startP?.parentNode as Node
+      // // }
+      // // while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
+      // //   startS = startS?.parentNode as Node
+      // // }
+      // // while (endP?.nodeName !== 'P' && endP?.parentNode) {
+      // //   endP = endP?.parentNode as Node
+      // // }
+      // // while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
+      // //   endS = endS?.parentNode as Node
+      // // }
+      // // const startSel = { } as ISelection
+      // // const endSel = { } as ISelection
+      // // const text = this.$refs.text as HTMLElement
+      // // text.childNodes
+      // //   .forEach((p, pidx) => {
+      // //     if (startP?.isSameNode(p)) {
+      // //       startSel.pIndex = pidx
+      // //       p.childNodes.forEach((s, sidx) => {
+      // //         if (startS?.isSameNode(s)) {
+      // //           startSel.sIndex = sidx
+      // //           startSel.offset = range?.startOffset as number
+      // //         }
+      // //       })
+      // //     }
+      // //     if (endP?.isSameNode(p) && !range?.collapsed) {
+      // //       endSel.pIndex = pidx
+      // //       p.childNodes.forEach((s, sidx) => {
+      // //         if (endS?.isSameNode(s)) {
+      // //           endSel.sIndex = sidx
+      // //           endSel.offset = range?.endOffset as number
+      // //         }
+      // //       })
+      // //     }
+      // //   })
+      // TextUtils.updateSelection(startSel, range?.collapsed ? TextUtils.getNullSel() : endSel)
+      // if (!range?.collapsed) {
+      //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+      //   this.$nextTick(() => {
+      //     while (text.childNodes.length > this.paragraphs.length) {
+      //       text.removeChild(text.lastChild as Node)
+      //     }
+      //     this.$nextTick(() => {
+      //       TextUtils.focus(startSel, endSel)
+      //     })
+      //   })
+      // }
+      if (this.config.isEdited) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+        const { start, end } = TextUtils.getSelection()
+        TextUtils.updateSelection(start, end)
+        this.$nextTick(() => {
+          TextUtils.focus(this.sel.start, this.sel.end)
+        })
       }
+      // if (!this.contentEditable) {
+      //   TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
+      // } else if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+      //   if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+      //     const sel = TextUtils.getSelection()
+      //     if (sel) {
+      //       const { start, end } = sel
+      //       console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+      //       console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+      //       TextUtils.updateSelection(sel.start, sel.end)
+      //     }
+      //   }
+      //   TextPropUtils.updateTextPropsState()
+      // }
     },
     onKeyDown(e: KeyboardEvent) {
-      let updated = false
-      console.warn(e.key)
+      console.log(e.key)
+      // let updated = false
       const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
-        console.log('mutation ')
         observer.disconnect()
         const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = paragraphs
         this.paragraphs = paragraphs
+
+        this.updateTextState({ paragraphs })
         this.textSizeRefresh(config)
-        if (!this.isComposing && e.key === 'Backspace' && !updated) {
-          /**
-           * this block is used for recall the composingEnd callback
-           * because the composingEnd callback will be triggered before this mutation callback
-           * this situation will happen if the composing is ended up by 'Backspace'
-           */
-          this.composingEnd()
-        }
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
+        // if (!this.isComposing && e.key === 'Backspace' && !updated) {
+        //   /**
+        //    * this block is used for recall the composingEnd callback
+        //    * because the composingEnd callback will be triggered before this mutation callback
+        //    * this situation will happen if the composing is ended up by 'Backspace'
+        //    */
+        //   this.composingEnd()
+        // }
       }
 
       const observer = new MutationObserver(onTyping)
@@ -1425,32 +1497,77 @@ export default Vue.extend({
         characterDataOldValue: false
       })
       setTimeout(() => { observer.disconnect() }, 0)
-      if (this.isComposing) {
-        return
-      }
 
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        console.log(e.key)
-        if (e.key === 'Backspace') {
-          observer.disconnect()
-          this.rangedHandler(e)
-        }
-        // Tab would lead to some default action -> lose the focus of the text
-        if (['Tab'].includes(e.key)) e.preventDefault()
-        return
-      }
+      // e.isComposing = true
+      // if (this.isComposing) {
+      //   return
+      // }
 
-      if (['Enter', 'Backspace'].includes(e.key)) {
+      // const sel = window.getSelection()
+      // if (sel?.getRangeAt(0).toString()) {
+      //   console.log(e.key)
+      //   if (e.key === 'Backspace') {
+      //     observer.disconnect()
+      //     this.rangedHandler(e)
+      //   }
+      //   // Tab would lead to some default action -> lose the focus of the text
+      //   if (['Tab'].includes(e.key)) e.preventDefault()
+      //   return
+      // }
+
+      // if (['Enter', 'Backspace'].includes(e.key)) {
+      //   e.preventDefault()
+      //   this.contentEditable = false
+      //   const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+      //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+      //   // updated = true
+      //   this.$nextTick(() => {
+      //     console.warn(e.isComposing)
+      //     this.contentEditable = true
+      //     setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
+      //   })
+      // }
+      if (['Enter', 'Backspace'].includes(e.key) && !e.isComposing) {
+        console.warn(e.isComposing)
         e.preventDefault()
-        this.contentEditable = false
-        const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+        const sel = window.getSelection()
+        if (!sel?.rangeCount) {
+          throw new Error('cant access selection')
+        }
+
+        const range = sel?.getRangeAt(0)
+        const startContainer = range?.startContainer
+        let startP = startContainer
+        let startS = startContainer
+        while (startP?.nodeName !== 'P' && startP?.parentNode) {
+          startP = startP?.parentNode as Node
+        }
+        while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
+          startS = startS?.parentNode as Node
+        }
+        const startSel = { } as ISelection
+        const text = this.$refs.text as HTMLElement
+        text.childNodes
+          .forEach((p, pidx) => {
+            if (startP?.isSameNode(p)) {
+              startSel.pIndex = pidx
+              p.childNodes.forEach((s, sidx) => {
+                if (startS?.isSameNode(s)) {
+                  startSel.sIndex = sidx
+                  startSel.offset = range?.startOffset as number
+                }
+              })
+            }
+          })
+        TextUtils.updateSelection(startSel, TextUtils.getNullSel())
+
+        const config = GeneralUtils.deepCopy(this.config) as IText
+        config.paragraphs = this.paragraphs
+        const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-        updated = true
+        this.textSizeRefresh(this.config)
         this.$nextTick(() => {
-          console.warn(e.isComposing)
-          this.contentEditable = true
-          setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
+          TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         })
       }
     },
@@ -1462,44 +1579,44 @@ export default Vue.extend({
       setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
     },
     onKeyPress(e: KeyboardEvent) {
-      console.log(e.key)
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        this.rangedHandler(e)
-        return
-      }
-      e.preventDefault()
-      this.contentEditable = false
-      const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.$nextTick(() => {
-        this.contentEditable = true
-        TextUtils.focus(this.sel.start, this.sel.end)
-        setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
-      })
+      // console.log(e.key)
+      // const sel = window.getSelection()
+      // if (sel?.getRangeAt(0).toString()) {
+      //   this.rangedHandler(e)
+      //   return
+      // }
+      // e.preventDefault()
+      // this.contentEditable = false
+      // const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+      // this.$nextTick(() => {
+      //   this.contentEditable = true
+      //   TextUtils.focus(this.sel.start, this.sel.end)
+      //   setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
+      // })
     },
     onKeyUp(e: KeyboardEvent) {
-      if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        const sel = TextUtils.getSelection()
-        TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
-        TextPropUtils.updateTextPropsState()
-      }
+      // if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
+      //   const sel = TextUtils.getSelection()
+      //   TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
+      //   TextPropUtils.updateTextPropsState()
+      // }
     },
     composingStart() {
       this.isComposing = true
     },
     composingEnd() {
       this.isComposing = false
-      const { start } = TextUtils.getSelection()
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, this.paragraphs)
-      this.contentEditable = false
-      this.$nextTick(() => {
-        this.contentEditable = true
-        if (this.isActive) {
-          // TextUtils.focus(start, TextUtils.getNullSel())
-          setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
-        }
-      })
+      // const { start } = TextUtils.getSelection()
+      // TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, this.paragraphs)
+      // this.contentEditable = false
+      // this.$nextTick(() => {
+      //   this.contentEditable = true
+      //   if (this.isActive) {
+      //     // TextUtils.focus(start, TextUtils.getNullSel())
+      //     setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
+      //   }
+      // })
     },
     onTextFocus() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })

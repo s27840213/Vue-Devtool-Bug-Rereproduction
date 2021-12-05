@@ -200,7 +200,8 @@ class TextUtils {
   }
 
   textHandler(config: IText, key = ''): IParagraph[] {
-    const { start, end } = this.getSelection()
+    // const { start, end } = this.getSelection()
+    const { start, end } = this.getCurrSel
     // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
     // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
 
@@ -483,6 +484,15 @@ class TextUtils {
         paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
       }
     })
+    // used for test
+    // const currlayer = LayerUtils.getCurrLayer as IText
+    // currlayer.paragraphs
+    //   .forEach((p, pidx) => {
+    //     paragraphs[pidx].id = p.id
+    //     p.spans.forEach((s, sidx) => {
+    //       paragraphs[pidx].spans[sidx].id = s.id
+    //     })
+    //   })
     return paragraphs
   }
 
