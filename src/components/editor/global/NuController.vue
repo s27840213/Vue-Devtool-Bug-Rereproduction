@@ -176,12 +176,10 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
-import color from '@/store/module/color'
 import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 
@@ -196,6 +194,7 @@ export default Vue.extend({
     snapUtils: Object
   },
   created() {
+    this.updateTextState({ paragraphs: this.config.paragraphs })
     console.log(this.layerIndex)
     console.log(this.config)
   },
@@ -230,8 +229,6 @@ export default Vue.extend({
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-
-      paragraphs: [] as Array<IParagraph>,
       subControlerIndexs: []
     }
   },
@@ -243,7 +240,7 @@ export default Vue.extend({
     window.removeEventListener('mousemove', this.moving)
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'paragraphs']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -346,8 +343,8 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const { paragraphs } = GeneralUtils.deepCopy(this.config) as IText
-          if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
+          const text = this.$refs.text as HTMLElement
+          if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
             LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
             return
           }
@@ -372,6 +369,7 @@ export default Vue.extend({
         }
       } else {
         if (this.getLayerType === 'text') {
+          this.updateTextState({ paragraphs: this.config.paragraphs })
           TextUtils.setCurrTextInfo({
             config: this.config as IText,
             layerIndex: this.layerIndex
@@ -413,6 +411,9 @@ export default Vue.extend({
       setMoving: 'SET_moving',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCurrSidebarPanel: 'SET_currSidebarPanelType'
+    }),
+    ...mapMutations('text', {
+      updateTextState: 'UPDATE_STATE'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1357,65 +1358,48 @@ export default Vue.extend({
     },
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
-      if (e.dataTransfer?.getData('data')) {
-        switch (this.getLayerType) {
-          case 'image': {
-            const config = this.config as IImage
-            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-            break
-          }
-          case 'frame':
-            return
-          default:
-            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-        }
-      } else if (dt && dt.files.length !== 0) {
+      if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
+      }
+      switch (this.getLayerType) {
+        case 'image': {
+          const config = this.config as IImage
+          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+          break
+        }
+        case 'frame':
+          return
+        default:
+          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
     onClick(e: MouseEvent) {
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (!this.contentEditable) {
-        TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-      } else if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-          const sel = TextUtils.getSelection()
-          if (sel) {
-            const { start, end } = sel
-            console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-            console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
-            TextUtils.updateSelection(sel.start, sel.end)
-          }
-        }
-        TextPropUtils.updateTextPropsState()
+      if (this.config.isEdited) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+        const { start, end } = TextUtils.getSelection()
+        TextUtils.updateSelection(start, end)
+        this.$nextTick(() => {
+          TextUtils.focus(this.sel.start, this.sel.end)
+        })
       }
     },
+    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
+      observer.disconnect()
+      const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
+      const config = GeneralUtils.deepCopy(this.config) as IText
+      config.paragraphs = paragraphs
+      this.paragraphs = paragraphs
+      this.updateTextState({ paragraphs })
+      this.textSizeRefresh(config)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
+    },
     onKeyDown(e: KeyboardEvent) {
-      let updated = false
-      console.warn(e.key)
-      const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
-        console.log('mutation ')
-        observer.disconnect()
-        const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-        const config = GeneralUtils.deepCopy(this.config) as IText
-        config.paragraphs = paragraphs
-        this.paragraphs = paragraphs
-        this.textSizeRefresh(config)
-        if (!this.isComposing && e.key === 'Backspace' && !updated) {
-          /**
-           * this block is used for recall the composingEnd callback
-           * because the composingEnd callback will be triggered before this mutation callback
-           * this situation will happen if the composing is ended up by 'Backspace'
-           */
-          this.composingEnd()
-        }
-      }
-
-      const observer = new MutationObserver(onTyping)
+      const observer = new MutationObserver(this.onTyping)
       observer.observe(this.$refs.text as HTMLElement, {
         characterData: true,
         childList: true,
@@ -1424,167 +1408,115 @@ export default Vue.extend({
         attributeOldValue: false,
         characterDataOldValue: false
       })
-      setTimeout(() => { observer.disconnect() }, 0)
-      if (this.isComposing) {
-        return
-      }
 
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        console.log(e.key)
-        if (e.key === 'Backspace') {
-          observer.disconnect()
-          this.rangedHandler(e)
-        }
-        // Tab would lead to some default action -> lose the focus of the text
-        if (['Tab'].includes(e.key)) e.preventDefault()
-        return
-      }
-
-      if (['Enter', 'Backspace'].includes(e.key)) {
+      if (['Enter', 'Backspace'].includes(e.key) && !e.isComposing) {
+        console.warn(e.isComposing)
         e.preventDefault()
-        this.contentEditable = false
-        const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
+
+        const sel = window.getSelection()
+        if (!sel?.rangeCount) {
+          throw new Error('cant access selection')
+        }
+
+        const range = sel?.getRangeAt(0)
+        const startContainer = range?.startContainer
+        const endContainer = range?.endContainer
+        let startP = startContainer
+        let startS = startContainer
+        let endP = endContainer
+        let endS = endContainer
+        const startSel = {} as ISelection
+        const endSel = TextUtils.getNullSel() as ISelection
+        const text = this.$refs.text as HTMLElement
+
+        if (startContainer.nodeName === 'DIV') {
+          Object.assign(startSel, { pIndex: 0, sIndex: 0, offset: 0 })
+          Object.assign(endSel, {
+            pIndex: text.childNodes.length - 1,
+            sIndex: (text.lastChild as Node).childNodes.length - 1,
+            offset: text.lastChild?.lastChild?.textContent?.length
+          })
+        } else {
+          while (startP?.nodeName !== 'P' && startP?.parentNode) {
+            startP = startP?.parentNode as Node
+          }
+          while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
+            startS = startS?.parentNode as Node
+          }
+          if (!range.collapsed) {
+            while (endP?.nodeName !== 'P' && endP?.parentNode) {
+              endP = endP?.parentNode as Node
+            }
+            while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
+              endS = endS?.parentNode as Node
+            }
+          }
+        }
+
+        text.childNodes
+          .forEach((p, pidx) => {
+            if (startP?.isSameNode(p)) {
+              startSel.pIndex = pidx
+              p.childNodes.forEach((s, sidx) => {
+                if (startS?.isSameNode(s)) {
+                  startSel.sIndex = sidx
+                  startSel.offset = range?.startOffset as number
+                }
+              })
+            }
+            if (!range.collapsed && endP?.isSameNode(p)) {
+              endSel.pIndex = pidx
+              p.childNodes.forEach((s, sidx) => {
+                if (endS?.isSameNode(s)) {
+                  endSel.sIndex = sidx
+                  endSel.offset = range?.endOffset as number
+                }
+              })
+            }
+          })
+
+        TextUtils.updateSelection(startSel, endSel)
+        const config = GeneralUtils.deepCopy(this.config) as IText
+        config.paragraphs = this.paragraphs
+
+        const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-        updated = true
+        this.textSizeRefresh(this.config)
         this.$nextTick(() => {
-          console.warn(e.isComposing)
-          this.contentEditable = true
-          setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
+          TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         })
       }
     },
-    rangedHandler(e: KeyboardEvent) {
+    rangedHandler(config: IText, e: KeyboardEvent) {
       if (e.key !== 'CapsLock') e.preventDefault()
-      const paragraphs = TextUtils.textHandler(this.config, e.key)
+      const paragraphs = TextUtils.textHandler(config, e.key)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.textSizeRefresh(this.config)
       setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
     },
     onKeyPress(e: KeyboardEvent) {
-      console.log(e.key)
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        this.rangedHandler(e)
-        return
-      }
-      e.preventDefault()
-      this.contentEditable = false
-      const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.$nextTick(() => {
-        this.contentEditable = true
-        TextUtils.focus(this.sel.start, this.sel.end)
-        setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
-      })
+      // console.log(e.key)
     },
     onKeyUp(e: KeyboardEvent) {
-      if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        const sel = TextUtils.getSelection()
-        TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
-        TextPropUtils.updateTextPropsState()
-      }
+      // console.log(e.key)
     },
     composingStart() {
       this.isComposing = true
     },
     composingEnd() {
       this.isComposing = false
-      const { start } = TextUtils.getSelection()
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, this.paragraphs)
-      this.contentEditable = false
-      this.$nextTick(() => {
-        this.contentEditable = true
-        if (this.isActive) {
-          // TextUtils.focus(start, TextUtils.getNullSel())
-          setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
-        }
-      })
+      const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
+      this.paragraphs = paragraphs
+      const config = GeneralUtils.deepCopy(this.config) as IText
+      config.paragraphs = paragraphs
+      this.textSizeRefresh(config)
+      this.updateTextState({ paragraphs })
     },
     onTextFocus() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-    },
-    onTyping(e: KeyboardEvent, isComposing: boolean) {
-      return (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const text = this.$refs.text as HTMLElement
-        let paragraphs: IParagraph[] = []
-        try {
-          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-          // paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
-          console.log(GeneralUtils.deepCopy(paragraphs))
-        } catch (error) {
-          console.log(error)
-        }
-        if (e.key !== 'Enter' && e.key !== 'Backspace') {
-          paragraphs = TextUtils.newPropsHandler(paragraphs)
-        }
-
-        const sel = TextUtils.getSelection()
-        let { pIndex, sIndex, offset } = this.sel.start
-        // if below condition is false, means some paragraph (p-node) is removed
-        if (sel && TextUtils.isSel(sel.start)) {
-          pIndex = sel.start.pIndex
-          sIndex = sel.start.sIndex
-          offset = sel.start.offset
-          if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
-            sIndex = 0
-            offset = 0
-          }
-          // Deleting the first span of the text, and moving the caret to the previous p
-          const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
-          if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
-            pIndex -= 1
-            sIndex = paragraphs[pIndex].spans.length - 1
-            offset = paragraphs[pIndex].spans[sIndex].text.length
-            // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-            if (pIndex < 0) {
-              [pIndex, sIndex, offset] = [0, 0, 0]
-            }
-          }
-        }
-        if (e.key === 'Enter') {
-          [sIndex, offset] = [0, 0]
-          pIndex += 1
-        }
-        if (this.isComposing) {
-          const config = GeneralUtils.deepCopy(this.config) as IText
-          Object.assign(config.paragraphs, paragraphs)
-          this.textSizeRefresh(config)
-        } else {
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-          // TemplateUtils.updateTextInfo(this.config)
-          // this.textSizeRefresh(Object.assign(GeneralUtils.deepCopy(this.config), { paragraphs }))
-          this.textSizeRefresh(this.config)
-          this.$nextTick(() => {
-            // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-            StepsUtils.record()
-            const sel = window.getSelection()
-            if (sel) {
-              const currPropsState = this.props
-              const isSameSpanStyles = (() => {
-                if (e.key !== 'Enter' && e.key !== 'Backspace' && !Number.isNaN(pIndex) && !Number.isNaN(sIndex)) {
-                  const props = ['weight', 'style', 'decoration', 'color']
-                  for (const k of props) {
-                    if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
-                      return false
-                    }
-                  }
-                }
-                return true
-              })()
-              if (!isSameSpanStyles) {
-                sIndex += 1
-                offset = 1
-              }
-            }
-          })
-        }
-      }
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

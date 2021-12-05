@@ -318,8 +318,10 @@ export default Vue.extend({
         }
       }
 
-      // if (!TextUtils.isSel(this.sel.start)) {
       const sel = TextUtils.getSelection()
+      console.log(sel.start.pIndex)
+      console.log(sel.start.sIndex)
+      console.log(sel.start.offset)
       start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
       end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 
@@ -328,7 +330,6 @@ export default Vue.extend({
         end = TextUtils.selectAll(config as IText).end
       }
       TextUtils.updateSelection(start, end)
-      // }
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {

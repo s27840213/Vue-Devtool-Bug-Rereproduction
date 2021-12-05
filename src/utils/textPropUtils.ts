@@ -93,6 +93,7 @@ class TextPropUtils {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          store.commit('text/UPDATE_STATE', { paragraphs: config.paragraphs })
           if (TextUtils.isSel(selEnd)) {
             Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
@@ -490,7 +491,9 @@ class TextPropUtils {
 
     if (['color', 'italic', 'underline', 'bold'].includes(propName)) {
       // TODO with subController
-      const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
+      // const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
+      const paragraphs = GeneralUtils.deepCopy((store.state as any).text.paragraphs) as IParagraph[]
+      console.log((store.state as any).text.paragraphs)
       const { pIndex, sIndex, offset } = this.getCurrSel.start
 
       paragraphs[pIndex].spans.splice(sIndex + 1, 0, {
@@ -507,7 +510,6 @@ class TextPropUtils {
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
       Object.assign(config?.paragraphs, paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
-      console.warn(propName)
     }
   }
 
