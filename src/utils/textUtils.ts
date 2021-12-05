@@ -7,7 +7,6 @@ import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
-import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 
 class TextUtils {
@@ -200,7 +199,6 @@ class TextUtils {
   }
 
   textHandler(config: IText, key = ''): IParagraph[] {
-    // const { start, end } = this.getSelection()
     const { start, end } = this.getCurrSel
     // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
     // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
@@ -218,7 +216,7 @@ class TextUtils {
       if (paragraphs[start.pIndex].spans.length === 1 && start.offset === 1 && !paragraphs[start.pIndex].spans[0].text) {
         start.offset = 0
       }
-
+      console.warn(end.offset)
       // Splice the selected range
       paragraphs[start.pIndex].spans.splice(start.sIndex + 1)
       paragraphs.splice(start.pIndex + 1, end.pIndex - start.pIndex)

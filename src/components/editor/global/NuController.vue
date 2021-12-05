@@ -347,8 +347,8 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const { paragraphs } = GeneralUtils.deepCopy(this.config) as IText
-          if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
+          const text = this.$refs.text as HTMLElement
+          if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
             LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
             return
           }
@@ -1391,19 +1391,18 @@ export default Vue.extend({
         })
       }
     },
+    onTyping (mutations: MutationRecord[], observer: MutationObserver) {
+      observer.disconnect()
+      const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
+      const config = GeneralUtils.deepCopy(this.config) as IText
+      config.paragraphs = paragraphs
+      this.paragraphs = paragraphs
+      this.updateTextState({ paragraphs })
+      this.textSizeRefresh(config)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
+    },
     onKeyDown(e: KeyboardEvent) {
-      const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-        const config = GeneralUtils.deepCopy(this.config) as IText
-        config.paragraphs = paragraphs
-        this.paragraphs = paragraphs
-        this.updateTextState({ paragraphs })
-        this.textSizeRefresh(config)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-      }
-
-      const observer = new MutationObserver(onTyping)
+      const observer = new MutationObserver(this.onTyping)
       observer.observe(this.$refs.text as HTMLElement, {
         characterData: true,
         childList: true,
@@ -1429,23 +1428,34 @@ export default Vue.extend({
         let startS = startContainer
         let endP = endContainer
         let endS = endContainer
-        while (startP?.nodeName !== 'P' && startP?.parentNode) {
-          startP = startP?.parentNode as Node
-        }
-        while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
-          startS = startS?.parentNode as Node
-        }
-        if (!range.collapsed) {
-          while (endP?.nodeName !== 'P' && endP?.parentNode) {
-            endP = endP?.parentNode as Node
-          }
-          while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
-            endS = endS?.parentNode as Node
-          }
-        }
         const startSel = { } as ISelection
         const endSel = TextUtils.getNullSel() as ISelection
         const text = this.$refs.text as HTMLElement
+
+        if (startContainer.nodeName === 'DIV') {
+          Object.assign(startSel, { pIndex: 0, sIndex: 0, offset: 0 })
+          Object.assign(endSel, {
+            pIndex: text.childNodes.length - 1,
+            sIndex: (text.lastChild as Node).childNodes.length - 1,
+            offset: text.lastChild?.lastChild?.textContent?.length
+          })
+        } else {
+          while (startP?.nodeName !== 'P' && startP?.parentNode) {
+            startP = startP?.parentNode as Node
+          }
+          while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
+            startS = startS?.parentNode as Node
+          }
+          if (!range.collapsed) {
+            while (endP?.nodeName !== 'P' && endP?.parentNode) {
+              endP = endP?.parentNode as Node
+            }
+            while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
+              endS = endS?.parentNode as Node
+            }
+          }
+        }
+
         text.childNodes
           .forEach((p, pidx) => {
             if (startP?.isSameNode(p)) {
@@ -1467,8 +1477,8 @@ export default Vue.extend({
               })
             }
           })
-        TextUtils.updateSelection(startSel, endSel)
 
+        TextUtils.updateSelection(startSel, endSel)
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = this.paragraphs
 
@@ -1510,85 +1520,6 @@ export default Vue.extend({
     },
     onTextBlur() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-    },
-    onTyping(e: KeyboardEvent, isComposing: boolean) {
-      return (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const text = this.$refs.text as HTMLElement
-        let paragraphs: IParagraph[] = []
-        try {
-          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-          // paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
-          console.log(GeneralUtils.deepCopy(paragraphs))
-        } catch (error) {
-          console.log(error)
-        }
-        if (e.key !== 'Enter' && e.key !== 'Backspace') {
-          paragraphs = TextUtils.newPropsHandler(paragraphs)
-        }
-
-        const sel = TextUtils.getSelection()
-        let { pIndex, sIndex, offset } = this.sel.start
-        // if below condition is false, means some paragraph (p-node) is removed
-        if (sel && TextUtils.isSel(sel.start)) {
-          pIndex = sel.start.pIndex
-          sIndex = sel.start.sIndex
-          offset = sel.start.offset
-          if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
-            sIndex = 0
-            offset = 0
-          }
-          // Deleting the first span of the text, and moving the caret to the previous p
-          const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
-          if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
-            pIndex -= 1
-            sIndex = paragraphs[pIndex].spans.length - 1
-            offset = paragraphs[pIndex].spans[sIndex].text.length
-            // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-            if (pIndex < 0) {
-              [pIndex, sIndex, offset] = [0, 0, 0]
-            }
-          }
-        }
-        if (e.key === 'Enter') {
-          [sIndex, offset] = [0, 0]
-          pIndex += 1
-        }
-        if (this.isComposing) {
-          const config = GeneralUtils.deepCopy(this.config) as IText
-          Object.assign(config.paragraphs, paragraphs)
-          this.textSizeRefresh(config)
-        } else {
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-          // TemplateUtils.updateTextInfo(this.config)
-          // this.textSizeRefresh(Object.assign(GeneralUtils.deepCopy(this.config), { paragraphs }))
-          this.textSizeRefresh(this.config)
-          this.$nextTick(() => {
-            // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-            StepsUtils.record()
-            const sel = window.getSelection()
-            if (sel) {
-              const currPropsState = this.props
-              const isSameSpanStyles = (() => {
-                if (e.key !== 'Enter' && e.key !== 'Backspace' && !Number.isNaN(pIndex) && !Number.isNaN(sIndex)) {
-                  const props = ['weight', 'style', 'decoration', 'color']
-                  for (const k of props) {
-                    if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
-                      return false
-                    }
-                  }
-                }
-                return true
-              })()
-              if (!isSameSpanStyles) {
-                sIndex += 1
-                offset = 1
-              }
-            }
-          })
-        }
-      }
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
