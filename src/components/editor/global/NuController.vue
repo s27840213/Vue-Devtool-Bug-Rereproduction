@@ -176,15 +176,12 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
-import color from '@/store/module/color'
 import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
-import colorUtils from '@/utils/colorUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -231,8 +228,7 @@ export default Vue.extend({
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-
-      paragraphs: [...this.config.paragraphs] as Array<IParagraph>,
+      paragraphs: this.config.type === 'text' ? [...this.config.paragraphs] : [] as Array<IParagraph>,
       subControlerIndexs: []
     }
   },
