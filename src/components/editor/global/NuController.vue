@@ -231,7 +231,7 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string }
       },
 
-      paragraphs: [...this.config.paragraphs] as Array<IParagraph>,
+      paragraphs: [] as Array<IParagraph>,
       subControlerIndexs: []
     }
   },

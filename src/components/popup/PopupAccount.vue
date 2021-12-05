@@ -2,10 +2,7 @@
   div(class="popup-account text-left"
     v-click-outside="closePopup")
     div(class="popup-account__profile")
-      div(v-if="!hasAvatar"
-        class="profile-img mr-10") {{shortName}}
-      avatar(v-else
-        class="mr-10"
+      avatar(class="mr-10"
         :textSize="14"
         :avatarSize="35")
       div(class="profile-text text-body-2")

@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="avatar" :style="avatarStyle()")
-    span(v-if="hasAvatar"
+    span(v-if="!hasAvatar"
       class="avatar__shortname text-white") {{shortName}}
 </template>
 
@@ -37,7 +37,7 @@ export default Vue.extend({
       'shortName', 'uname']),
     ...mapGetters({
       avatar: 'user/getAvatar',
-      hasAvatar: 'hasAvatar'
+      hasAvatar: 'user/hasAvatar'
     })
   },
   methods: {

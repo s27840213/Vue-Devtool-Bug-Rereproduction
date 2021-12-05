@@ -1,10 +1,6 @@
 <template lang="pug">
 div(class="settings-account")
-  div(v-if="!hasAvatar"
-    class="settings-account__profile")
-    div(class="profile-img text-white") {{shortName}}
-  avatar(v-else
-    class="mt-30" :textSize="30" :avatarSize="75")
+  avatar(class="mt-30" :textSize="30" :avatarSize="75")
   div(class="settings-account__buttons")
     div(v-if="hasAvatar"
       class="settings-account__button mr-30 pointer"

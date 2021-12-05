@@ -29,10 +29,7 @@
             :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
       template(v-else)
         div(class="mobile-menu__bottom__profile")
-          div(v-if="!hasAvatar"
-            class="profile-img body-2 text-white") {{shortName}}
-          avatar(v-else
-            class="mr-10"
+          avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
         div(class="nav__option"

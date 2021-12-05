@@ -54,11 +54,7 @@
         //-   :iconName="`notify`"
         //-   :iconWidth="'20px'")
         div(v-if="isLogin")
-          div(v-if="!hasAvatar")
-            div(class="nu-header__profile text-white pointer"
-              @click="isAccountPopup = true") {{shortName}}
-          avatar(v-else
-            class="pointer"
+          avatar(class="pointer"
             :textSize="14"
             :avatarSize="35"
             @click.native="isAccountPopup = true")

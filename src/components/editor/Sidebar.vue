@@ -23,11 +23,7 @@
         :iconColor="'gray-3'"
         :iconWidth="'30px'")
     div(class="nav-setting pointer")
-      div(v-if="!hasAvatar"
-        class="profile pointer text-white text-body-2"
-        @click="goToPage('Settings')")
-        span {{shortName}}
-      avatar(v-else
+      avatar(v-if="isLogin"
         class="mt-30"
         :textSize="14"
         :avatarSize="35"
@@ -60,7 +56,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      hasAvatar: 'user/hasAvatar'
+      hasAvatar: 'user/hasAvatar',
+      isLogin: 'user/isLogin'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [

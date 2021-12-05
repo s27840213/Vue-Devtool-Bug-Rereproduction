@@ -18,7 +18,7 @@ import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 import resizeUtils from './resizeUtils'
 
-const STANDARD_TEXT_FONT: {[key: string]: string} = {
+const STANDARD_TEXT_FONT: { [key: string]: string } = {
   'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
   'en-US': 'cRgaSK5ZVXnLDpWTL8MN',
   'ja-JP': 'OyDbjZxjk9r14eZnPELb'
@@ -73,7 +73,7 @@ class AssetUtils {
     return typeModuleMap[type]
   }
 
-  getFontMap(): { [key: string]: string} {
+  getFontMap(): { [key: string]: string } {
     return STANDARD_TEXT_FONT
   }
 

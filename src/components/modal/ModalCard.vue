@@ -15,7 +15,7 @@
       div(class="modal-card__button")
         button(class="btn-primary-mid full-width"
           @click="confirmAction()") {{ modalInfo.confirmButton.msg || '確認' }}
-        button(class="ml-10 btn-primary-mid full-width"
+        button(v-if="modalInfo.cancelButton.msg" class="ml-10 btn-primary-mid full-width"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || '關閉' }}
       div(class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")
@@ -64,6 +64,7 @@ export default Vue.extend({
   background-color: white;
   min-width: 350px;
   padding: 30px;
+  border-radius: 10px;
   &__close {
     position: absolute;
     top: 16px;
@@ -88,6 +89,8 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     > button {
+      transition: background-color 0.3s;
+      border-radius: 5px;
       max-width: 180px;
     }
   }

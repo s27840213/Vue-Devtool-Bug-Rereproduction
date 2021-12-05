@@ -103,7 +103,7 @@ export default Vue.extend({
         srcObj: {
           type,
           userId: ImageUtils.getUserId(src, type),
-          assetId: ImageUtils.getAssetId(src, type)
+          assetId: photo.assetIndex ?? ImageUtils.getAssetId(src, type)
         },
         styles: {
           x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),

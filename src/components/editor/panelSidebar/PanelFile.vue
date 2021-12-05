@@ -3,7 +3,7 @@
       @drop.stop.prevent="onDrop($event)"
       @dragover.prevent,
       @dragenter.prevent)
-    span(class="panel-file__title text-blue-1 label-lg") My File
+    span(class="panel-file__title text-blue-1 label-lg") 我的檔案
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") 上傳圖片
@@ -32,6 +32,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   components: {
@@ -62,13 +63,23 @@ export default Vue.extend({
       clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
     }),
     uploadImage() {
-      uploadUtils.chooseAssets('image')
+      if (uploadUtils.isLogin) {
+        uploadUtils.chooseAssets('image')
+      } else {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('請登入後，才可上傳檔案', [])
+      }
     },
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
       if (dt) {
         const files = dt.files
-        uploadUtils.uploadAsset('image', files)
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadAsset('image', files)
+        } else {
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setModalInfo('請登入後，才可上傳檔案', [])
+        }
       }
     }
   }
