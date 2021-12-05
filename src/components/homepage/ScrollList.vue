@@ -49,6 +49,10 @@
             class="pt-10 scroll-list__item-title") {{item.title}}
           div(v-if="type === 'theme'"
             class="pt-2 scroll-list__item-subtitle") {{item.description}}
+        div(v-if="isLoading")
+            svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
 </template>
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
