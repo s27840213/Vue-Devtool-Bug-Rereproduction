@@ -1382,65 +1382,6 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      // // e.preventDefault()
-      // // const sel = window.getSelection()
-      // // if (!sel?.rangeCount || !sel?.toString() || !this.config.isEdited) return
-
-      // // const range = sel?.getRangeAt(0)
-      // // const startContainer = range?.startContainer
-      // // const endContainer = range?.endContainer
-      // // let startP = startContainer
-      // // let endP = endContainer
-      // // let startS = startContainer
-      // // let endS = endContainer
-      // // while (startP?.nodeName !== 'P' && startP?.parentNode) {
-      // //   startP = startP?.parentNode as Node
-      // // }
-      // // while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
-      // //   startS = startS?.parentNode as Node
-      // // }
-      // // while (endP?.nodeName !== 'P' && endP?.parentNode) {
-      // //   endP = endP?.parentNode as Node
-      // // }
-      // // while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
-      // //   endS = endS?.parentNode as Node
-      // // }
-      // // const startSel = { } as ISelection
-      // // const endSel = { } as ISelection
-      // // const text = this.$refs.text as HTMLElement
-      // // text.childNodes
-      // //   .forEach((p, pidx) => {
-      // //     if (startP?.isSameNode(p)) {
-      // //       startSel.pIndex = pidx
-      // //       p.childNodes.forEach((s, sidx) => {
-      // //         if (startS?.isSameNode(s)) {
-      // //           startSel.sIndex = sidx
-      // //           startSel.offset = range?.startOffset as number
-      // //         }
-      // //       })
-      // //     }
-      // //     if (endP?.isSameNode(p) && !range?.collapsed) {
-      // //       endSel.pIndex = pidx
-      // //       p.childNodes.forEach((s, sidx) => {
-      // //         if (endS?.isSameNode(s)) {
-      // //           endSel.sIndex = sidx
-      // //           endSel.offset = range?.endOffset as number
-      // //         }
-      // //       })
-      // //     }
-      // //   })
-      // TextUtils.updateSelection(startSel, range?.collapsed ? TextUtils.getNullSel() : endSel)
-      // if (!range?.collapsed) {
-      //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
-      //   this.$nextTick(() => {
-      //     while (text.childNodes.length > this.paragraphs.length) {
-      //       text.removeChild(text.lastChild as Node)
-      //     }
-      //     this.$nextTick(() => {
-      //       TextUtils.focus(startSel, endSel)
-      //     })
-      //   })
-      // }
       if (this.config.isEdited) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
         const { start, end } = TextUtils.getSelection()
@@ -1471,9 +1412,11 @@ export default Vue.extend({
         attributeOldValue: false,
         characterDataOldValue: false
       })
+
       if (['Enter', 'Backspace'].includes(e.key) && !e.isComposing) {
         console.warn(e.isComposing)
         e.preventDefault()
+
         const sel = window.getSelection()
         if (!sel?.rangeCount) {
           throw new Error('cant access selection')
@@ -1481,15 +1424,27 @@ export default Vue.extend({
 
         const range = sel?.getRangeAt(0)
         const startContainer = range?.startContainer
+        const endContainer = range?.endContainer
         let startP = startContainer
         let startS = startContainer
+        let endP = endContainer
+        let endS = endContainer
         while (startP?.nodeName !== 'P' && startP?.parentNode) {
           startP = startP?.parentNode as Node
         }
         while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
           startS = startS?.parentNode as Node
         }
+        if (!range.collapsed) {
+          while (endP?.nodeName !== 'P' && endP?.parentNode) {
+            endP = endP?.parentNode as Node
+          }
+          while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
+            endS = endS?.parentNode as Node
+          }
+        }
         const startSel = { } as ISelection
+        const endSel = TextUtils.getNullSel() as ISelection
         const text = this.$refs.text as HTMLElement
         text.childNodes
           .forEach((p, pidx) => {
@@ -1502,11 +1457,21 @@ export default Vue.extend({
                 }
               })
             }
+            if (!range.collapsed && endP?.isSameNode(p)) {
+              endSel.pIndex = pidx
+              p.childNodes.forEach((s, sidx) => {
+                if (endS?.isSameNode(s)) {
+                  endSel.sIndex = sidx
+                  endSel.offset = range?.endOffset as number
+                }
+              })
+            }
           })
-        TextUtils.updateSelection(startSel, TextUtils.getNullSel())
+        TextUtils.updateSelection(startSel, endSel)
 
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = this.paragraphs
+
         const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
         this.textSizeRefresh(this.config)
@@ -1515,9 +1480,9 @@ export default Vue.extend({
         })
       }
     },
-    rangedHandler(e: KeyboardEvent) {
+    rangedHandler(config: IText, e: KeyboardEvent) {
       if (e.key !== 'CapsLock') e.preventDefault()
-      const paragraphs = TextUtils.textHandler(this.config, e.key)
+      const paragraphs = TextUtils.textHandler(config, e.key)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
       this.textSizeRefresh(this.config)
       setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
