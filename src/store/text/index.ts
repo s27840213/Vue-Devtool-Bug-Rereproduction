@@ -1,4 +1,4 @@
-import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 import font from '../module/font'
@@ -29,7 +29,8 @@ export interface ITextState {
     config: IText | IGroup,
     layerIndex: number,
     subLayerIndex?: number
-  }
+  },
+  paragraphs: Array<IParagraph>
 }
 
 const getDefaultState = (): ITextState => ({
@@ -65,7 +66,8 @@ const getDefaultState = (): ITextState => ({
   },
   pending: '',
   fontStore: [],
-  defaultFonts: []
+  defaultFonts: [],
+  paragraphs: []
 })
 const state = getDefaultState()
 

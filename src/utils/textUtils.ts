@@ -7,7 +7,6 @@ import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
-import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 
 class TextUtils {
@@ -200,7 +199,7 @@ class TextUtils {
   }
 
   textHandler(config: IText, key = ''): IParagraph[] {
-    const { start, end } = this.getSelection()
+    const { start, end } = this.getCurrSel
     // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
     // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
 
@@ -217,7 +216,7 @@ class TextUtils {
       if (paragraphs[start.pIndex].spans.length === 1 && start.offset === 1 && !paragraphs[start.pIndex].spans[0].text) {
         start.offset = 0
       }
-
+      console.warn(end.offset)
       // Splice the selected range
       paragraphs[start.pIndex].spans.splice(start.sIndex + 1)
       paragraphs.splice(start.pIndex + 1, end.pIndex - start.pIndex)
@@ -232,11 +231,15 @@ class TextUtils {
       }
       paragraphs[start.pIndex].spans.push(...endRestSpans)
 
-      if (key !== 'Backspace' && key !== 'Delete') {
+      // if (key !== 'Backspace' && key !== 'Delete') {
+      //   return this.noRangeHandler(mockConfig, start, key)
+      // } else {
+      //   this.updateSelection(start, this.getNullSel())
+      // }
+      if (key === 'Enter') {
         return this.noRangeHandler(mockConfig, start, key)
-      } else {
-        this.updateSelection(start, this.getNullSel())
       }
+      this.updateSelection(start, this.getNullSel())
 
       return paragraphs
     }
@@ -354,63 +357,63 @@ class TextUtils {
         }
         break
       }
-      default: {
-        if (oriSidx === 1 && oriOff === 0 && !p.spans[0].text) {
-          p.spans[0].text += key
-          sIndex = 0
-          offset = 1
-          TextPropUtils.updateTextPropsState({
-            color: p.spans[0].styles.color,
-            decoration: p.spans[0].styles.decoration,
-            style: p.spans[0].styles.style,
-            weight: p.spans[0].styles.weight
-          })
-          break
-        }
-        const preText = s.text.substring(0, oriOff)
-        const lastText = s.text.substr(oriOff)
+      // default: {
+      //   if (oriSidx === 1 && oriOff === 0 && !p.spans[0].text) {
+      //     p.spans[0].text += key
+      //     sIndex = 0
+      //     offset = 1
+      //     TextPropUtils.updateTextPropsState({
+      //       color: p.spans[0].styles.color,
+      //       decoration: p.spans[0].styles.decoration,
+      //       style: p.spans[0].styles.style,
+      //       weight: p.spans[0].styles.weight
+      //     })
+      //     break
+      //   }
+      //   const preText = s.text.substring(0, oriOff)
+      //   const lastText = s.text.substr(oriOff)
 
-        // const propsTable = ['color', 'decoration', 'weight', 'style']
-        // const hasNewProps = (() => {
-        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-        //     if (propsTable.includes(k) && v !== s.styles[k]) {
-        //       return true
-        //     }
-        //   }
-        //   return false
-        // })()
+      //   // const propsTable = ['color', 'decoration', 'weight', 'style']
+      //   // const hasNewProps = (() => {
+      //   //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+      //   //     if (propsTable.includes(k) && v !== s.styles[k]) {
+      //   //       return true
+      //   //     }
+      //   //   }
+      //   //   return false
+      //   // })()
 
-        // if (hasNewProps) {
-        //   const newStyles = { ...s.styles }
-        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-        //     if (propsTable.includes(k)) {
-        //       newStyles[k] = v as string
-        //     }
-        //   }
+      //   // if (hasNewProps) {
+      //   //   const newStyles = { ...s.styles }
+      //   //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
+      //   //     if (propsTable.includes(k)) {
+      //   //       newStyles[k] = v as string
+      //   //     }
+      //   //   }
 
-        //   s.text = preText
-        //   p.spans.splice(oriSidx + 1, 0, {
-        //     text: key,
-        //     styles: newStyles
-        //   })
-        //   if (lastText) {
-        //     p.spans.splice(oriSidx + 2, 0, {
-        //       text: lastText,
-        //       styles: { ...s.styles }
-        //     })
-        //   }
-        //   sIndex = oriSidx + 1
-        //   offset = 1
-        //   break
-        // } else {
-        //   s.text = preText + key + lastText
-        // }
-        s.text = preText + key + lastText
+      //   //   s.text = preText
+      //   //   p.spans.splice(oriSidx + 1, 0, {
+      //   //     text: key,
+      //   //     styles: newStyles
+      //   //   })
+      //   //   if (lastText) {
+      //   //     p.spans.splice(oriSidx + 2, 0, {
+      //   //       text: lastText,
+      //   //       styles: { ...s.styles }
+      //   //     })
+      //   //   }
+      //   //   sIndex = oriSidx + 1
+      //   //   offset = 1
+      //   //   break
+      //   // } else {
+      //   //   s.text = preText + key + lastText
+      //   // }
+      //   s.text = preText + key + lastText
 
-        if (preText) {
-          offset++
-        } else offset = 1
-      }
+      //   if (preText) {
+      //     offset++
+      //   } else offset = 1
+      // }
     }
     // console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
     this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
@@ -483,6 +486,15 @@ class TextUtils {
         paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
       }
     })
+    // used for test
+    // const currlayer = LayerUtils.getCurrLayer as IText
+    // currlayer.paragraphs
+    //   .forEach((p, pidx) => {
+    //     paragraphs[pidx].id = p.id
+    //     p.spans.forEach((s, sidx) => {
+    //       paragraphs[pidx].spans[sidx].id = s.id
+    //     })
+    //   })
     return paragraphs
   }
 
