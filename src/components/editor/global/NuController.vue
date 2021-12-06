@@ -227,7 +227,8 @@ export default Vue.extend({
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-      subControlerIndexs: []
+      subControlerIndexs: [],
+      hasChangeTextContent: false
     }
   },
   mounted() {
@@ -363,7 +364,10 @@ export default Vue.extend({
               }
             }
           }
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+          if (this.hasChangeTextContent) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+            this.hasChangeTextContent = false
+          }
         }
       } else {
         if (this.getLayerType === 'text') {
@@ -1393,6 +1397,7 @@ export default Vue.extend({
       config.paragraphs = paragraphs
       this.updateTextState({ paragraphs })
       this.textSizeRefresh(config)
+      this.hasChangeTextContent = true
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
     },
     onKeyDown(e: KeyboardEvent) {
@@ -1415,13 +1420,14 @@ export default Vue.extend({
           throw new Error('cant access selection')
         }
 
-        TextUtils.updateDynamicSel()
-        TextUtils.updateSelection(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
+        const { start, end } = TextUtils.getSelection()
+        TextUtils.updateSelection(start, end)
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = this.paragraphs
 
         const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+        this.hasChangeTextContent = false
         this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
         this.$nextTick(() => {
@@ -1460,6 +1466,7 @@ export default Vue.extend({
     },
     onTextBlur() {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
+      this.hasChangeTextContent = false
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

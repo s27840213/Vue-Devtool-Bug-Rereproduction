@@ -91,13 +91,21 @@ class TextPropUtils {
           break
         case textPropType.span: {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
-          const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
+          const _paragraphs = (store.state as any).text.paragraphs as Array<IParagraph>
+          const _config = GeneralUtils.deepCopy(config) as IText
+          _config.paragraphs = _paragraphs
+
+          const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, _config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           store.commit('text/UPDATE_STATE', { paragraphs: config.paragraphs })
+          const { start, end } = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection }
           if (TextUtils.isSel(selEnd)) {
-            Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+            // setTimeout(() => TextUtils.focus(start, end), 0)
+            Vue.nextTick(() => {
+              TextUtils.focus(start, end)
+            })
           } else {
-            setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
+            setTimeout(() => TextUtils.focus(start, end), 0)
           }
         }
       }
@@ -400,7 +408,7 @@ class TextPropUtils {
         } else if (pIndex === start.pIndex && sIndex === start.sIndex) {
           span.text = text.substr(0, start.offset)
 
-          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}), id: GeneralUtils.generateRandomString(8) }
           newSpan.text = text.substr(start.offset, text.length)
           Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
 
@@ -412,7 +420,7 @@ class TextPropUtils {
 
           if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
             newSpan.text = text.substring(start.offset, end.offset)
-            const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+            const thirdSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}), id: GeneralUtils.generateRandomString(8) }
             thirdSpan.text = text.substr(end.offset)
             Object.assign(thirdSpan.styles, this.spanStylesTransformer(span, {}))
             if (thirdSpan.text !== '') {
@@ -428,7 +436,7 @@ class TextPropUtils {
         } else if (pIndex === end.pIndex && sIndex === end.sIndex) {
           span.text = text.substr(end.offset)
 
-          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}) }
+          const newSpan: ISpan = { text: '', styles: this.spanStylesTransformer(undefined, {}), id: GeneralUtils.generateRandomString(8) }
           newSpan.text = text.substr(0, end.offset)
           Object.assign(newSpan.styles, this.spanStylesTransformer(span, prop))
           if (span.text === '') {
@@ -453,7 +461,6 @@ class TextPropUtils {
    */
   noRangedHandler(styles: ISpanStyle, propName: string, value?: number | string, config?: IText) {
     let prop = {} as { [key: string]: string | number }
-    console.log(value)
     switch (propName) {
       case 'fontSize':
         styles.size = value as number
