@@ -195,8 +195,6 @@ export default Vue.extend({
   },
   created() {
     this.updateTextState({ paragraphs: this.config.paragraphs })
-    console.log(this.layerIndex)
-    console.log(this.config)
   },
   data() {
     return {
@@ -1417,64 +1415,8 @@ export default Vue.extend({
           throw new Error('cant access selection')
         }
 
-        const range = sel?.getRangeAt(0)
-        const startContainer = range?.startContainer
-        const endContainer = range?.endContainer
-        let startP = startContainer
-        let startS = startContainer
-        let endP = endContainer
-        let endS = endContainer
-        const startSel = { } as ISelection
-        const endSel = TextUtils.getNullSel() as ISelection
-        const text = this.$refs.text as HTMLElement
-
-        if (startContainer.nodeName === 'DIV') {
-          Object.assign(startSel, { pIndex: 0, sIndex: 0, offset: 0 })
-          Object.assign(endSel, {
-            pIndex: text.childNodes.length - 1,
-            sIndex: (text.lastChild as Node).childNodes.length - 1,
-            offset: text.lastChild?.lastChild?.textContent?.length
-          })
-        } else {
-          while (startP?.nodeName !== 'P' && startP?.parentNode) {
-            startP = startP?.parentNode as Node
-          }
-          while (startS?.nodeName !== 'SPAN' && startS?.parentNode) {
-            startS = startS?.parentNode as Node
-          }
-          if (!range.collapsed) {
-            while (endP?.nodeName !== 'P' && endP?.parentNode) {
-              endP = endP?.parentNode as Node
-            }
-            while (endS?.nodeName !== 'SPAN' && endS?.parentNode) {
-              endS = endS?.parentNode as Node
-            }
-          }
-        }
-
-        text.childNodes
-          .forEach((p, pidx) => {
-            if (startP?.isSameNode(p)) {
-              startSel.pIndex = pidx
-              p.childNodes.forEach((s, sidx) => {
-                if (startS?.isSameNode(s)) {
-                  startSel.sIndex = sidx
-                  startSel.offset = range?.startOffset as number
-                }
-              })
-            }
-            if (!range.collapsed && endP?.isSameNode(p)) {
-              endSel.pIndex = pidx
-              p.childNodes.forEach((s, sidx) => {
-                if (endS?.isSameNode(s)) {
-                  endSel.sIndex = sidx
-                  endSel.offset = range?.endOffset as number
-                }
-              })
-            }
-          })
-
-        TextUtils.updateSelection(startSel, endSel)
+        TextUtils.updateDynamicSel()
+        TextUtils.updateSelection(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         const config = GeneralUtils.deepCopy(this.config) as IText
         config.paragraphs = this.paragraphs
 
@@ -1499,6 +1441,7 @@ export default Vue.extend({
     },
     onKeyUp(e: KeyboardEvent) {
       // console.log(e.key)
+      TextPropUtils.updateTextPropsState()
     },
     composingStart() {
       this.isComposing = true

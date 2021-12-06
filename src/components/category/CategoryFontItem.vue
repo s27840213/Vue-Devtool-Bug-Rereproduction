@@ -94,6 +94,7 @@ export default Vue.extend({
         const pageIndex = layerUtils.pageIndex
         const { type, id } = layerUtils.getCurrLayer
         let { start, end } = generalUtils.deepCopy(this.sel)
+        // Non selection applied
         if (!TextUtils.isSel(start)) {
           switch (type) {
             case 'text': {
