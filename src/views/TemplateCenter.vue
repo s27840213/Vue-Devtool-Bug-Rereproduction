@@ -60,11 +60,11 @@
       div(v-if="!isMobile" class="template-center__hr")
       div(v-if="!isMobile" class="template-center__sorter")
         div(class="template-center__sorter__left")
-          div(class="template-center__sorter__title") Sort by:
+          div(class="template-center__sorter__title") 排序方式:
           div(v-for="sortingCriterium in sortingCriteria"
               class="template-center__sorter__sort pointer"
-              :class="{'selected': selectedSorting === sortingCriterium}"
-              @click="handleSelectSorting(sortingCriterium)") {{ sortingCriterium }}
+              :class="{'selected': selectedSorting === sortingCriterium.key}"
+              @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
           //- div(class="template-center__sorter__color-title") Color
           //- div(class="template-center__sorter__color-down")
@@ -94,6 +94,7 @@
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           :target="isMobile ? '.template-center__content' : undefined"
                           @callback="handleLoadMore")
+        div(v-if="isMobile" class="template-center__scroll-space")
     nu-footer(v-if="!isMobile")
     transition(name="fade-scale")
       div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
@@ -112,6 +113,19 @@
             div(v-for="content in content_ids" class="template-center__multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content)})`"
                 @click="handleTemplateClick(content)")
+    transition(name="fade-slide")
+      div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
+        div(class="template-center__mobile-multi__content")
+          div(class="template-center__mobile-multi__gallery")
+            div(v-for="content in content_ids" class="template-center__mobile-multi__gallery-item"
+                :style="`background-image: url(${getPrevUrl(content)})`"
+                @click="handleTemplateClick(content)")
+            div(class="template-center__scroll-space")
+    div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
+        @click="() => { modal = '' }")
+      svg-icon(iconName="close"
+              iconWidth="25px"
+              iconColor="gray-3")
     transition(name="fade-scale-center")
       div(v-if="modal === 'template'" class="template-center__multi-split"
           v-click-outside="() => { modal = '' }")
@@ -139,7 +153,7 @@
               :class="selectedTheme ? '' : 'disabled'"
               @click="handleThemeSubmit")
             span 使用此模板
-    div(v-if="modal !== ''" class="dim-background")
+    div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
 </template>
 
 <script lang="ts">
@@ -171,8 +185,14 @@ export default Vue.extend({
   },
   data() {
     const sortingCriteria = [
-      'popular',
-      'recent'
+      {
+        key: 'popular',
+        text: '最受歡迎'
+      },
+      {
+        key: 'recent',
+        text: '最新'
+      }
     ]
     return {
       snapToTop: false,
@@ -180,7 +200,7 @@ export default Vue.extend({
       searchbarKeyword: '',
       hashtagSelections: {} as {[key: string]: {type: string, selection: string[]}},
       sortingCriteria,
-      selectedSorting: sortingCriteria[0],
+      selectedSorting: sortingCriteria[0].key,
       waterfallTemplates: [] as ITemplate[][],
       isTemplateReady: false,
       themes: [] as Itheme[],
@@ -209,7 +229,7 @@ export default Vue.extend({
     if (themes) {
       themeIds = themes.split(',').map(Number)
     }
-    if (sortingCriterium && this.sortingCriteria.includes(sortingCriterium)) {
+    if (sortingCriterium && [...this.sortingCriteria.map(s => s.key)].includes(sortingCriterium)) {
       this.selectedSorting = sortingCriterium
     }
     this.getHashtags().then(() => {
@@ -316,7 +336,11 @@ export default Vue.extend({
         window.open(route.href, '_blank')
       } else {
         this.content_ids = template.content_ids
-        this.modal = 'pages'
+        if (this.isMobile) {
+          this.modal = 'mobile-pages'
+        } else {
+          this.modal = 'pages'
+        }
       }
     },
     scrollToTop() {
@@ -360,6 +384,10 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
+      if (this.isMobile) {
+        this.$router.push({ name: 'MobileWarning', query: { isMobile: 'aspect-ratio' } })
+        return
+      }
       if (content.themes.length > 1) {
         this.modal = 'template'
         this.contentBuffer = content
@@ -843,6 +871,56 @@ export default Vue.extend({
       }
     }
   }
+  &__mobile-multi {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #FFFFFF;
+    z-index: 20;
+    &__close {
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 12.5px;
+      right: 15px;
+      width: 25px;
+      height: 25px;
+      z-index: 20;
+      cursor: pointer;
+    }
+    &__content {
+      overflow-y: auto;
+      width: 100%;
+      height: calc(100vh - 50px);
+    }
+    &__gallery {
+      display: grid;
+      margin: 20px;
+      grid-gap: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    &__gallery-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      aspect-ratio: 1;
+      background: white;
+      border: 1px solid setColor(gray-5);
+      box-sizing: border-box;
+      cursor: pointer;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+  }
+  &__scroll-space {
+    height: 10vh;
+    width: 100%;
+  }
 }
 
 .dim-background {
@@ -874,6 +952,16 @@ export default Vue.extend({
   &-enter, &-leave-to {
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
+  }
+}
+
+.fade-slide {
+  &-enter-active, &-leave-active  {
+    transition: .3s ease;
+  }
+
+  &-enter, &-leave-to {
+    left: 100%;
   }
 }
 </style>
