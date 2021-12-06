@@ -30,7 +30,7 @@ class ImageUtils {
   }
 
   getSrc(config: IImage, size?: string | number): string {
-    const { type, userId, assetId } = config.srcObj || config.src_obj
+    const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined') {
       size = this.getSrcSize(
         type,
