@@ -79,19 +79,22 @@
         span(class="pointer body-1 more"
           @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") 更多
       div(class="home-content__template")
-        scroll-list(:list="tagTemplateList" type='template')
+        scroll-list(:list="tagTemplateList" type='template'
+          :isLoading="tagTemplateList.length === 0")
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
           @click="goToTemplateCenterSortBy('popular')") 更多
       div(class="home-content__template")
-        scroll-list(:list="popularTemplateList" type='template')
+        scroll-list(:list="popularTemplateList" type='template'
+          :isLoading="popularTemplateList.length === 0")
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
           @click="goToTemplateCenterSortBy('recent')") 更多
       div(class="home-content__template")
-        scroll-list(:list="latestTemplateList" type='template')
+        scroll-list(:list="latestTemplateList" type='template'
+          :isLoading="latestTemplateList.length === 0")
       nu-footer(class="mt-50")
       div(v-if="showSizePopup"
         class="home__size")
@@ -189,10 +192,9 @@ export default Vue.extend({
       designUtils.fetchDesigns(this.fetchAllDesigns)
     }
 
-    themeUtils.checkThemeState().then(() => {
+    await themeUtils.checkThemeState().then(() => {
       this.themeList = themeUtils.themes
     })
-
     const squareTheme = [] as number[]
     this.themeList.forEach((theme: Itheme) => {
       if (theme.width / theme.height === 1) {

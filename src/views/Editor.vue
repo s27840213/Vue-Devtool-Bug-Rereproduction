@@ -70,6 +70,11 @@ export default Vue.extend({
       isSidebarPanelOpen: true
     }
   },
+  watch: {
+    isShowPagePreview() {
+      this.toggleSidebarPanel = this.isShowPagePreview
+    }
+  },
   computed: {
     ...mapState('user', [
       'role',
@@ -166,7 +171,6 @@ export default Vue.extend({
       this.setCurrFunctionPanel(type)
     },
     toggleColorPanel(bool: boolean) {
-      console.log('color panel open')
       this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {

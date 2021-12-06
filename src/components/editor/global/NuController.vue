@@ -1386,7 +1386,7 @@ export default Vue.extend({
         })
       }
     },
-    onTyping (mutations: MutationRecord[], observer: MutationObserver) {
+    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
       observer.disconnect()
       const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
       const config = GeneralUtils.deepCopy(this.config) as IText

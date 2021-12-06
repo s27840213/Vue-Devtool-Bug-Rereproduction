@@ -22,28 +22,28 @@ class HintUtils {
   }
 
   bind(el: HTMLElement, hint: string, timeInterval = 300) {
-    // el.addEventListener('mouseenter', () => {
-    //   this.timerId = setTimeout(() => {
-    //     this.openHint(el, hint)
-    //   }, timeInterval)
-    // })
-    // el.addEventListener('mouseleave', () => {
-    //   this.closeHint()
-    //   clearTimeout(this.timerId)
-    // })
+    el.addEventListener('mouseenter', () => {
+      this.timerId = setTimeout(() => {
+        this.openHint(el, hint)
+      }, timeInterval)
+    })
+    el.addEventListener('mouseleave', () => {
+      this.closeHint()
+      clearTimeout(this.timerId)
+    })
   }
 
   unbind(el: HTMLElement, hint: string, timeInterval = 300) {
-    // el.removeEventListener('mouseenter', () => {
-    //   this.timerId = setTimeout(() => {
-    //     this.openHint(el, hint)
-    //   }, timeInterval)
-    // })
-    // el.removeEventListener('mouseleave', () => {
-    //   clearTimeout(this.timerId)
-    // })
-    // clearTimeout(this.timerId)
-    // this.closeHint()
+    el.removeEventListener('mouseenter', () => {
+      this.timerId = setTimeout(() => {
+        this.openHint(el, hint)
+      }, timeInterval)
+    })
+    el.removeEventListener('mouseleave', () => {
+      clearTimeout(this.timerId)
+    })
+    clearTimeout(this.timerId)
+    this.closeHint()
   }
 
   private showHintUnderTarget(target: HTMLElement) {

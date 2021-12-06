@@ -43,12 +43,16 @@
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
-            @click="type === 'theme' ? newDesign(item) : goToPage('Editor')"
+            @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
             class="pt-10 scroll-list__item-title") {{item.title}}
           div(v-if="type === 'theme'"
             class="pt-2 scroll-list__item-subtitle") {{item.description}}
+        div(v-if="isLoading")
+            svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
 </template>
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
@@ -93,11 +97,22 @@ export default Vue.extend({
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
-    goToPage(pageName: string) {
-      // trigger newDesign method to reset the template themes. [Giambi 12/03]
-      this.$router.push({ name: pageName }).then(() => {
-        designUtils.newDesign()
+    newDesignWithTemplate(template: any) {
+      const route = this.$router.resolve({
+        name: 'Editor',
+        query: {
+          type: 'new-design-template',
+          design_id: template.match_cover.id,
+          width: template.match_cover.width,
+          height: template.match_cover.height
+        }
       })
+      window.open(route.href, '_blank')
+
+      // // trigger newDesign method to reset the template themes. [Giambi 12/03]
+      // this.$router.push({ name: pageName }).then(() => {
+      //   designUtils.newDesign()
+      // })
     },
     newDesign(item: Itheme) {
       this.$router.push({ name: 'Editor' }).then(() => {

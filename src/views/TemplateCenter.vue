@@ -565,7 +565,7 @@ export default Vue.extend({
   &__waterfall-wrapper {
     padding-bottom: 80px;
     &.mobile {
-      height: 100%;
+      height: 100vh;
       overflow-y: auto;
       &::-webkit-scrollbar {
         display: none;

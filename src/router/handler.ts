@@ -30,7 +30,6 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           break
         }
         default: {
-          console.log(type, designId)
           await uploadUtils.getDesign(type, { designId }, { width, height })
         }
       }

@@ -521,13 +521,13 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  newDesign(width?: number, height?: number) {
+  async newDesign(width?: number, height?: number) {
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
       height: height ?? 1080
     })])
     pageUtils.clearPagesInfo()
-    themeUtils.refreshTemplateState()
+    await themeUtils.refreshTemplateState()
     if (this.isLogin) {
       router.replace({ query: Object.assign({}) })
       // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)

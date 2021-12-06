@@ -83,7 +83,7 @@ export default Vue.extend({
       return { ...imageLayers.find(layer => !!layer) }
     },
     currLayerAdjust (): any {
-      return this.currLayer.styles.adjust
+      return this.currLayer.styles?.adjust ?? {}
     }
   },
   methods: {

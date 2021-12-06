@@ -33,7 +33,7 @@
           class="pointer color-panel__color"
           :style="colorStyles(color)"
           @click="handleColorEvent(color)")
-    color-picker(v-if="openColorPicker"
+    color-picker(v-if="isColorPickerOpen"
       class="color-panel__color-picker"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
@@ -50,6 +50,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import textUtils from '@/utils/textUtils'
 import layerUtils from '@/utils/layerUtils'
 import { FunctionPanelType } from '@/store/types'
+import color from '@/store/module/color'
 
 export default Vue.extend({
   components: {
@@ -107,6 +108,9 @@ export default Vue.extend({
     },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
+    },
+    isColorPickerOpen(): boolean {
+      return colorUtils.isColorPickerOpen
     }
   },
   methods: {
@@ -129,7 +133,7 @@ export default Vue.extend({
       colorUtils.setCurrColor(color)
     },
     handleColorModal(): void {
-      this.openColorPicker = !this.openColorPicker
+      colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)
     },
     middleware(event: MouseEvent): boolean {
       return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
