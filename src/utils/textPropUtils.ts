@@ -232,7 +232,7 @@ class TextPropUtils {
     }
     if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName], config)
+      this.noRangedHandler(styles, propName, prop[(fontPropsMap as any)[propName]], config)
       if (propName !== 'fontSize') {
         // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
@@ -453,6 +453,7 @@ class TextPropUtils {
    */
   noRangedHandler(styles: ISpanStyle, propName: string, value?: number | string, config?: IText) {
     let prop = {} as { [key: string]: string | number }
+    console.log(value)
     switch (propName) {
       case 'fontSize':
         styles.size = value as number
@@ -493,23 +494,33 @@ class TextPropUtils {
       // TODO with subController
       // const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
       const paragraphs = GeneralUtils.deepCopy((store.state as any).text.paragraphs) as IParagraph[]
-      console.log((store.state as any).text.paragraphs)
-      const { pIndex, sIndex, offset } = this.getCurrSel.start
+      let { pIndex, sIndex, offset } = this.getCurrSel.start
+      const text = paragraphs[pIndex].spans[sIndex].text
 
-      paragraphs[pIndex].spans.splice(sIndex + 1, 0, {
-        text: '',
-        styles: {
+      if (text.substring(0, offset)) {
+        paragraphs[pIndex].spans[sIndex].text = text.substring(0, offset)
+        paragraphs[pIndex].spans.splice(++sIndex, 0, {
+          text: '',
+          styles: {
+            ...styles,
+            ...prop
+          }
+        })
+      } else {
+        paragraphs[pIndex].spans[sIndex].styles = {
           ...styles,
           ...prop
         }
-      })
-      paragraphs[pIndex].spans.splice(sIndex + 2, 0, {
-        text: paragraphs[pIndex].spans[sIndex].text.substr(offset),
-        styles: { ...styles }
-      })
-      paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
+      }
+      if (text.substr(offset)) {
+        paragraphs[pIndex].spans.splice(sIndex + 1, 0, {
+          text: text.substr(offset),
+          styles: { ...styles }
+        })
+      }
+
       Object.assign(config?.paragraphs, paragraphs)
-      TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
+      TextUtils.updateSelection({ pIndex, sIndex: sIndex, offset: 1 }, TextUtils.getNullSel())
     }
   }
 
@@ -709,6 +720,7 @@ class TextPropUtils {
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
+    TextUtils.updateDynamicSel()
     const sel = TextUtils.isSel(this.getCurrSel.start)
       ? GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection } : TextUtils.getSelection()
     // If layer is assigned, means the current selected layer is a group/tmp layer

@@ -20,6 +20,7 @@ class ThemeUtils {
   async fetchTemplateContent () {
     const queryString = new URLSearchParams(window.location.search)
     const keyword = queryString.get('search')
+    console.log(keyword)
     store.dispatch('templates/resetContent')
     if (keyword) {
       queryString.delete('search')
@@ -36,7 +37,7 @@ class ThemeUtils {
 
   refreshTemplateState (pageIndex?: number) {
     this.setTemplateThemes([])
-    this.checkThemeState().then(() => {
+    return this.checkThemeState().then(() => {
       this.setPageThemes(pageIndex)
       this.fetchTemplateContent()
     })

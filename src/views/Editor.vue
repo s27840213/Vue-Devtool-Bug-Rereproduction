@@ -70,6 +70,11 @@ export default Vue.extend({
       isSidebarPanelOpen: true
     }
   },
+  watch: {
+    isShowPagePreview() {
+      this.toggleSidebarPanel = this.isShowPagePreview
+    }
+  },
   computed: {
     ...mapState('user', [
       'role',
