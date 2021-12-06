@@ -5,6 +5,7 @@
     div(class="page-preview-page-content pointer"
       :style="styles()"
       @click="clickPage()"
+      @dblclick="dbclickPage()"
       draggable="true",
       @dragstart="handleDragStart"
       @dragend="handleDragEnd"
@@ -134,7 +135,8 @@ export default Vue.extend({
       _deletePage: 'DELETE_page',
       _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
-      _setIsDragged: 'page/SET_IsDragged'
+      _setIsDragged: 'page/SET_IsDragged',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen
@@ -153,6 +155,14 @@ export default Vue.extend({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
         pageUtils.jumpIntoPage(this.index)
+      }
+    },
+    dbclickPage() {
+      this._setLastSelectedPageIndex(this.index)
+      this._setCurrActivePageIndex(this.index)
+      if (this.type === 'full') {
+        this._setIsShowPagePreview(false)
+        pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
