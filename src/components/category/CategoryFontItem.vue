@@ -152,6 +152,7 @@ export default Vue.extend({
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          this.updateTextState({ paragraphs: newConfig.paragraphs })
           this.$nextTick(() => TextUtils.focus(newStart, newEnd))
         }
 

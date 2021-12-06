@@ -85,14 +85,14 @@
               :key="p.id",
               :style="textStyles(p.styles)")
               template(v-for="(span, sIndex) in p.spans")
-                span(v-if="!span.text && p.spans.length > 1 && sIndex !== 0" class="text__span"
+                span(v-if="!span.text" class="text__span"
                   :data-sindex="sIndex"
-                  :key="span.id",
+                  :key="span.id"
                   :style="textStyles(span.styles)")
                   span(class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id",
-                  :style="textStyles(span.styles)") {{ '&#8288' }}
+                  :style="textStyles(span.styles)") {{ '\uFEFF' }}
                 span(v-else class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id",
@@ -1393,7 +1393,6 @@ export default Vue.extend({
       const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
       const config = GeneralUtils.deepCopy(this.config) as IText
       config.paragraphs = paragraphs
-      this.paragraphs = paragraphs
       this.updateTextState({ paragraphs })
       this.textSizeRefresh(config)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
@@ -1481,6 +1480,7 @@ export default Vue.extend({
 
         const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+        this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
         this.$nextTick(() => {
           TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
@@ -1736,8 +1736,10 @@ export default Vue.extend({
     onFrameDrop(clipIndex: number) {
       StepsUtils.record()
     },
-    preventDefault(e: Event) {
-      e.preventDefault()
+    decodeHtml (html: string) {
+      const txt = document.createElement('textarea')
+      txt.innerHTML = html
+      return txt.value
     }
   }
 })

@@ -200,10 +200,10 @@ class TextUtils {
   }
 
   textHandler(config: IText, key = ''): IParagraph[] {
-    // const { start, end } = this.getSelection()
-    const { start, end } = this.getCurrSel
-    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+    const { start, end } = this.getSelection()
+    // const { start, end } = this.getCurrSel
+    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
 
     if (!this.isSel(end)) {
       return this.noRangeHandler(config, start, key)
@@ -233,11 +233,6 @@ class TextUtils {
       }
       paragraphs[start.pIndex].spans.push(...endRestSpans)
 
-      // if (key !== 'Backspace' && key !== 'Delete') {
-      //   return this.noRangeHandler(mockConfig, start, key)
-      // } else {
-      //   this.updateSelection(start, this.getNullSel())
-      // }
       if (key === 'Enter') {
         return this.noRangeHandler(mockConfig, start, key)
       }
@@ -281,9 +276,14 @@ class TextUtils {
           ],
           styles: { ...p.styles }
         } as IParagraph)
+
+        if (!p.spans[p.spans.length - 1].text) {
+          p.spans.splice(-1, 1)
+        }
+
         pIndex += 1
         sIndex = 0
-        offset = 0
+        offset = nextText ? 0 : 1
         break
       }
       case 'Backspace': {
@@ -440,18 +440,10 @@ class TextUtils {
           while (child.firstChild) {
             child = child.firstChild
           }
-
-          if (child.textContent) {
-            span.textContent = el.textContent
-          } else if (child.nodeName === 'BR') {
-            span.textContent = ''
-          } else {
-            throw console.error('wrong text node type:' + el.nodeName)
-          }
           spanEl = span as HTMLElement
         }
 
-        const text = spanEl.textContent as string
+        const text = (spanEl.textContent as string).replace(/[\u200B-\u200D\uFEFF]/g, '')
         let spanStyle = {} as ISpanStyle
 
         spanStyle = {
@@ -465,19 +457,15 @@ class TextUtils {
           opacity: parseInt(spanEl.style.opacity)
         } as ISpanStyle
 
-        if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
-          spans[spans.length - 1].text += text
-        } else {
-          spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
-        }
+        spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
         Object.assign(spanStyleBuff, spanStyle)
       }
-      for (let i = 0; i < spans.length; i++) {
-        if (!spans[i].text && spans.length !== 1) {
-          spans.splice(i, 1)
-          i--
-        }
-      }
+      // for (let i = 0; i < spans.length; i++) {
+      //   if (!spans[i].text && spans.length !== 1) {
+      //     spans.splice(i, 1)
+      //     i--
+      //   }
+      // }
 
       if (spans.length) {
         const pEl = p as HTMLElement
