@@ -260,6 +260,9 @@ export default Vue.extend({
     :nth-child(1),
     :nth-child(3) {
       width: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
   &__search {
