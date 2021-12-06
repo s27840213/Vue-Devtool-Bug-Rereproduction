@@ -34,3 +34,16 @@
     }
   }
 }
+
+.feature-button {
+  border-radius: 3px;
+  &.disabled {
+    opacity: .3;
+  }
+  &.active {
+    background-color: setColor(blue-3);
+  }
+  &:not(.disabled):not(.active):hover {
+    background-color: setColor(blue-4);
+  }
+}

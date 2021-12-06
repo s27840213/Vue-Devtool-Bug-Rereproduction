@@ -48,6 +48,7 @@ export default Vue.extend({
         [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
         this.handleCurveSpan(this.spans)
       })
+      .catch(() => { console.log('font loading timeout') })
   },
   computed: {
     ...mapGetters({

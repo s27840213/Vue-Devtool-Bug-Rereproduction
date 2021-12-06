@@ -9,7 +9,8 @@
       span(class="text-gray-2") {{pageScaleRatio}}%
     svg-icon(class="pointer" @click.native="plus()"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(class="hover-effect pointer" @click.native="setIsShowPagePreview(!isShowPagePreview)"
+    svg-icon(class="hover-effect pointer"
+      @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
     svg-icon(:class="{'hover-effect': !isShowPagePreview}"
       :iconName="'navPage'"
@@ -62,6 +63,7 @@ export default Vue.extend({
       }
     },
     setDetailPageMode(show: boolean) {
+      this.toggleSidebarPanel(show)
       this._setDetailPageMode(show)
     },
     toggleSidebarPanel(open: boolean) {

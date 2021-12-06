@@ -42,6 +42,13 @@ module.exports = {
           ignore: ['node_modules', 'vue.config.js']
         }])
     }
+    if (process.env.BITBUCKET_BUILD_NUMBER) {
+      config.plugin('define').tap(args => {
+        let name = 'process.env'
+        args[0][name]['VUE_APP_BUILD_NUMBER'] = process.env.BITBUCKET_BUILD_NUMBER || ''
+        return args
+      })
+    }
   },
 
   css: {

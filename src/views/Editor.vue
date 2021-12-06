@@ -166,7 +166,6 @@ export default Vue.extend({
       this.setCurrFunctionPanel(type)
     },
     toggleColorPanel(bool: boolean) {
-      console.log('color panel open')
       this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {

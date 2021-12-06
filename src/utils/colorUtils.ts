@@ -8,12 +8,13 @@ class ColorUtils {
   eventHash: { [index: string]: (color: string) => void }
   currEvent: string
   currColor: string
-
+  isColorPickerOpen: boolean
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
     this.currEvent = ''
     this.currColor = '#ffffff'
+    this.isColorPickerOpen = false
   }
 
   on(type: string, callback: (color: string) => void) {
@@ -32,6 +33,10 @@ class ColorUtils {
 
   setCurrColor(color: string) {
     this.currColor = color
+  }
+
+  setIsColorPickerOpen(bool: boolean) {
+    this.isColorPickerOpen = bool
   }
 }
 

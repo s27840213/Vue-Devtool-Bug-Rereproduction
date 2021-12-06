@@ -172,7 +172,7 @@ export default Vue.extend({
     this.$refs.list.$el.removeEventListener('scroll', this.handleScrollTop)
   },
   watch: {
-    currPageThemeIds (curr: number[]) {
+    currPageThemeIds (curr: number[] = []) {
       const { theme, userId } = this
       if (theme && !sessionStorage[`${userId}_theme_prompt`]) {
         const themes = theme.split(',')

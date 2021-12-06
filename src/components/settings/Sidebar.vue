@@ -3,10 +3,7 @@
     div(class="nav")
       div(class="nav-container")
         div(class="nav-container__profile")
-          div(v-if="!hasAvatar"
-            class="profile-img mr-10 body-2 text-white") {{shortName}}
-          avatar(v-else
-            class="mr-10"
+          avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
           div(class="profile-text body-4")

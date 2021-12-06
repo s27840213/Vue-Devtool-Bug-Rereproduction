@@ -194,6 +194,7 @@ export default Vue.extend({
     snapUtils: Object
   },
   created() {
+    this.updateTextState({ paragraphs: this.config.paragraphs })
     console.log(this.layerIndex)
     console.log(this.config)
   },
@@ -228,7 +229,6 @@ export default Vue.extend({
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-      paragraphs: this.config.type === 'text' ? [...this.config.paragraphs] : [] as Array<IParagraph>,
       subControlerIndexs: []
     }
   },
@@ -240,7 +240,7 @@ export default Vue.extend({
     window.removeEventListener('mousemove', this.moving)
   },
   computed: {
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['sel', 'props', 'paragraphs']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -369,6 +369,7 @@ export default Vue.extend({
         }
       } else {
         if (this.getLayerType === 'text') {
+          this.updateTextState({ paragraphs: this.config.paragraphs })
           TextUtils.setCurrTextInfo({
             config: this.config as IText,
             layerIndex: this.layerIndex
@@ -1387,7 +1388,7 @@ export default Vue.extend({
         })
       }
     },
-    onTyping (mutations: MutationRecord[], observer: MutationObserver) {
+    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
       observer.disconnect()
       const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
       const config = GeneralUtils.deepCopy(this.config) as IText
@@ -1424,7 +1425,7 @@ export default Vue.extend({
         let startS = startContainer
         let endP = endContainer
         let endS = endContainer
-        const startSel = { } as ISelection
+        const startSel = {} as ISelection
         const endSel = TextUtils.getNullSel() as ISelection
         const text = this.$refs.text as HTMLElement
 
@@ -1515,7 +1516,7 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

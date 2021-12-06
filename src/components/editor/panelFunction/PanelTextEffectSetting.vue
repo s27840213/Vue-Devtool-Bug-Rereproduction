@@ -34,7 +34,7 @@
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") Color
+          div(class="text-effect-setting__field-name") 顏色
           div(class="text-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")
@@ -76,7 +76,7 @@
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") Color
+          div(class="text-effect-setting__field-name") 顏色
           div(class="text-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")

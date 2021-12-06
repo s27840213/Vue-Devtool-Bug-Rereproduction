@@ -86,7 +86,6 @@ class StepsUtils {
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
     const modifiedPage = pageUtils.getPage(lastSelectedPageIndex) as IPage
     if (modifiedPage.designId.length !== 0) {
-      console.log(modifiedPage.modified !== undefined)
       store.commit('SET_pageIsModified', {
         pageIndex: lastSelectedPageIndex,
         modified: modifiedPage.modified !== undefined

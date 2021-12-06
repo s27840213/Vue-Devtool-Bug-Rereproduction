@@ -206,6 +206,9 @@ export default Vue.extend({
       }
     },
     setBgColor(color: string) {
+      // if (colorUtils.isColorPickerOpen) {
+      //   colorUtils.setIsColorPickerOpen(false)
+      // }
       if (this.currentPageBackgroundLocked) {
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
@@ -235,7 +238,6 @@ export default Vue.extend({
       colorUtils.setCurrEvent(ColorEventType.background)
       colorUtils.setCurrColor(color)
       this.$emit('toggleColorPanel', true)
-      console.log('handle')
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop

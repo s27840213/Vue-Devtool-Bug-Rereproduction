@@ -38,6 +38,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { SidebarPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -85,7 +86,12 @@ export default Vue.extend({
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
-        uploadUtils.uploadAsset('image', files, true)
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadAsset('image', files, true)
+        } else {
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setModalInfo('請登入後，才可上傳檔案', [])
+        }
       }
     },
     styles() {

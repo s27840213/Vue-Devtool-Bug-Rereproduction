@@ -23,16 +23,14 @@
         :iconColor="'gray-3'"
         :iconWidth="'30px'")
     div(class="nav-setting pointer")
-      div(v-if="!hasAvatar"
-        class="profile pointer text-white text-body-2"
-        @click="goToPage('Settings')")
-        span {{shortName}}
-      avatar(v-else
+      avatar(v-if="isLogin"
         class="mt-30"
         :textSize="14"
         :avatarSize="35"
         :fitWidth="true"
         @click.native="goToPage('Settings')")
+    div(v-if="buildNumber"
+      class="text-white body-2 build-number") {{buildNumber}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -60,7 +58,9 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      hasAvatar: 'user/hasAvatar'
+      detailPageMode: 'page/getDeatilPageMode',
+      hasAvatar: 'user/hasAvatar',
+      isLogin: 'user/isLogin'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
@@ -73,16 +73,24 @@ export default Vue.extend({
         // { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
         // { icon: 'photo', text: 'Pexels' }
       ]
+    },
+    buildNumber (): string {
+      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
+      return buildNumber ? `v.${buildNumber}` : ''
     }
   },
   methods: {
     ...mapMutations({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
+      _setDetailPageMode: 'page/SET_detailPageMode'
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
       this.$emit('toggleSidebarPanel', true)
+      if (this.detailPageMode) {
+        this._setDetailPageMode(false)
+      }
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
         pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
@@ -92,6 +100,9 @@ export default Vue.extend({
       this.$router.push({ name: pageName })
     },
     toggleSidebarPanel() {
+      if (this.detailPageMode) {
+        this._setDetailPageMode(false)
+      }
       this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }
   }
@@ -165,5 +176,10 @@ export default Vue.extend({
   background: #61aac2;
   border-radius: 50%;
   box-sizing: border-box;
+}
+
+.build-number {
+  margin-top: -25px;
+  width: 70px;
 }
 </style>

@@ -10,20 +10,23 @@
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
-      svg-icon(class="layers-alt"
+      svg-icon(class="layers-alt feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="openOrderPopup()"
         v-hint="'圖層順序'")
-      svg-icon(:class="{'pointer': !isLocked}"
+      svg-icon(class="feature-button p-5"
+        :class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')"
         v-hint="'複製'")
-      svg-icon(class="pointer"
+      svg-icon(class="pointer feature-button p-5"
+        :class="{ active: isLocked }"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
         v-hint="'鎖定圖層'")
-      svg-icon(:class="{'pointer': !isLocked}"
+      svg-icon(class="feature-button p-5"
+        :class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
         v-hint="'刪除'")
@@ -198,5 +201,9 @@ export default Vue.extend({
   color: map-get($colors, gray-3);
   pointer-events: none;
   cursor: not-allowed;
+}
+
+.action-bar {
+  padding: 10px 15px;
 }
 </style>

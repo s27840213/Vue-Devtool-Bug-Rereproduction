@@ -7,8 +7,9 @@
       span 或
       a(:href="`/login?redirect=${path}`") 登入
     template(v-else)
-      span(class="body-3 pointer" @click="goToPage('MyDesign')") {{`我的設計${!folderInfo.isRoot ? '/...': ''}`}}
-      span(v-if="folderInfo.parentFolder" class="body-3 pointer" @click="goToParentFolder()") {{`/${folderInfo.parentFolder}`}}
+      span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{'我的設計'}}
+      span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}
+      span(v-if="folderInfo.parentFolder" class="body-3 pointer hover-effect" @click="goToParentFolder()") {{`/${folderInfo.parentFolder}`}}
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
         placeholder="未命名設計"
@@ -19,7 +20,8 @@
       svg-icon(:iconName="'upload-cloud'"
         :iconWidth="'20px'"
         :iconColor="'green-1'"
-        class="ml-10")
+        class="ml-10"
+        v-hint="'上傳成功'")
 </template>
 
 <script lang="ts">
@@ -133,6 +135,7 @@ export default Vue.extend({
   pointer-events: auto;
   > span {
     height: 100%;
+    transition: color 0.3s;
   }
   > input {
     width: auto;
@@ -154,6 +157,12 @@ export default Vue.extend({
         color: setColor(blue-1, 0.5);
       }
     }
+  }
+}
+
+.hover-effect {
+  &:hover {
+    color: setColor(blue-1);
   }
 }
 </style>

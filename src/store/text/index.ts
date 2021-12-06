@@ -75,6 +75,9 @@ const getters: GetterTree<ITextState, unknown> = {
   getDefaultFonts (state): string {
     return state.defaultFonts
       .map(font => font.face).join(',')
+  },
+  paragraphs (state): Array<IParagraph> {
+    return state.paragraphs
   }
 }
 
