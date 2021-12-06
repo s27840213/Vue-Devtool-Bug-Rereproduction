@@ -60,11 +60,11 @@
       div(v-if="!isMobile" class="template-center__hr")
       div(v-if="!isMobile" class="template-center__sorter")
         div(class="template-center__sorter__left")
-          div(class="template-center__sorter__title") Sort by:
+          div(class="template-center__sorter__title") 排序方式:
           div(v-for="sortingCriterium in sortingCriteria"
               class="template-center__sorter__sort pointer"
-              :class="{'selected': selectedSorting === sortingCriterium}"
-              @click="handleSelectSorting(sortingCriterium)") {{ sortingCriterium }}
+              :class="{'selected': selectedSorting === sortingCriterium.key}"
+              @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
           //- div(class="template-center__sorter__color-title") Color
           //- div(class="template-center__sorter__color-down")
@@ -171,8 +171,14 @@ export default Vue.extend({
   },
   data() {
     const sortingCriteria = [
-      'popular',
-      'recent'
+      {
+        key: 'popular',
+        text: '最受歡迎'
+      },
+      {
+        key: 'recent',
+        text: '最新'
+      }
     ]
     return {
       snapToTop: false,
@@ -180,7 +186,7 @@ export default Vue.extend({
       searchbarKeyword: '',
       hashtagSelections: {} as {[key: string]: {type: string, selection: string[]}},
       sortingCriteria,
-      selectedSorting: sortingCriteria[0],
+      selectedSorting: sortingCriteria[0].key,
       waterfallTemplates: [] as ITemplate[][],
       isTemplateReady: false,
       themes: [] as Itheme[],
@@ -209,7 +215,7 @@ export default Vue.extend({
     if (themes) {
       themeIds = themes.split(',').map(Number)
     }
-    if (sortingCriterium && this.sortingCriteria.includes(sortingCriterium)) {
+    if (sortingCriterium && [...this.sortingCriteria.map(s => s.key)].includes(sortingCriterium)) {
       this.selectedSorting = sortingCriterium
     }
     this.getHashtags().then(() => {
