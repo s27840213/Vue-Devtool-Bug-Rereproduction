@@ -29,6 +29,8 @@
         :avatarSize="35"
         :fitWidth="true"
         @click.native="goToPage('Settings')")
+    div(v-if="buildNumber"
+      class="text-white body-2 build-number") {{buildNumber}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -70,6 +72,10 @@ export default Vue.extend({
         // { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
         // { icon: 'photo', text: 'Pexels' }
       ]
+    },
+    buildNumber (): string {
+      const { BITBUCKET_BUILD_NUMBER: buildNumber } = process.env
+      return buildNumber ? `v.${buildNumber}` : ''
     }
   },
   methods: {
@@ -162,5 +168,10 @@ export default Vue.extend({
   background: #61aac2;
   border-radius: 50%;
   box-sizing: border-box;
+}
+
+.build-number {
+  margin-top: -25px;
+  width: 70px;
 }
 </style>
