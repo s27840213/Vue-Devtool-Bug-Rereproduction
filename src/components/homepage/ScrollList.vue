@@ -98,7 +98,6 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     newDesignWithTemplate(template: any) {
-      console.log(template)
       const route = this.$router.resolve({
         name: 'Editor',
         query: {
