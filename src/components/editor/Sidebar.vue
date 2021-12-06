@@ -93,7 +93,7 @@ export default Vue.extend({
       }
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
-        pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
+        pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
       }
     },
     goToPage(pageName: string) {
