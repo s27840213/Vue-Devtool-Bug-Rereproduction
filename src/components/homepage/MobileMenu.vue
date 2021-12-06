@@ -44,7 +44,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapState, mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
@@ -71,10 +71,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
-    }),
     goToPage(pageName = '' as string, queryString = '') {
       if (pageName === this.currentPage) {
         // this.$router.go(0)

@@ -58,6 +58,7 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      detailPageMode: 'page/getDeatilPageMode',
       hasAvatar: 'user/hasAvatar',
       isLogin: 'user/isLogin'
     }),
@@ -81,11 +82,15 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
+      _setDetailPageMode: 'page/SET_detailPageMode'
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
       this.$emit('toggleSidebarPanel', true)
+      if (this.detailPageMode) {
+        this._setDetailPageMode(false)
+      }
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
         pageUtils.scrollIntoPage(this.lastSelectedPageIndex)
@@ -95,6 +100,9 @@ export default Vue.extend({
       this.$router.push({ name: pageName })
     },
     toggleSidebarPanel() {
+      if (this.detailPageMode) {
+        this._setDetailPageMode(false)
+      }
       this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }
   }
