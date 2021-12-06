@@ -74,7 +74,7 @@ export default Vue.extend({
       ]
     },
     buildNumber (): string {
-      const { BITBUCKET_BUILD_NUMBER: buildNumber } = process.env
+      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
       return buildNumber ? `v.${buildNumber}` : ''
     }
   },
