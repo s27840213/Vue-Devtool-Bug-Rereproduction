@@ -208,7 +208,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-fonts {
-  @include size(100%, 100%);
+  @include size(100%, calc(100vh - 100px));
   display: flex;
   flex-direction: column;
   &__title {

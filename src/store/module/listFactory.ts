@@ -126,14 +126,21 @@ export default function (this: any) {
       state.nextPage = objects.next_page
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
-      state.content = objects.content.find(content => content.list.length) || {}
-      // state.content = objects.content[0] || {}
-      state.host = objects.host && objects.host.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
-      state.data = objects.data
-      state.preview = objects.preview
-      state.preview2 = objects.preview2
+      const {
+        content = [],
+        host = '',
+        data = '',
+        preview = '',
+        preview2 = '',
+        next_page: nextPage = 0
+      } = objects || {}
+      state.content = content.find(content => content.list.length) || {}
+      state.host = host.endsWith('/') ? host.slice(0, -1) : host
+      state.data = data
+      state.preview = preview
+      state.preview2 = preview2
       state.pending = false
-      state.nextPage = objects.next_page
+      state.nextPage = nextPage
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
