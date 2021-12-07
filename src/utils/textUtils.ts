@@ -340,10 +340,6 @@ class TextUtils {
           styles: { ...p.styles }
         } as IParagraph)
 
-        if (!p.spans[p.spans.length - 1].text) {
-          p.spans.splice(-1, 1)
-        }
-
         pIndex += 1
         sIndex = 0
         offset = nextText ? 0 : 1

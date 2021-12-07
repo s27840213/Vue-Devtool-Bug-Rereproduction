@@ -81,7 +81,6 @@
             @keyup="onKeyUp")
             p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
               :data-pindex="pIndex"
-              :key="p.id",
               :style="textStyles(p.styles)")
               template(v-for="(span, sIndex) in p.spans")
                 span(v-if="!span.text" class="text__span"
@@ -1439,7 +1438,6 @@ export default Vue.extend({
         this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
         this.$nextTick(() => {
-          console.log(config.paragraphs)
           TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         })
       }
@@ -1455,6 +1453,7 @@ export default Vue.extend({
       const { start, end } = TextUtils.getSelection()
       TextUtils.updateSelection(start, end)
       TextPropUtils.updateTextPropsState()
+      this.isComposeEndEnter = false
     },
     composingStart() {
       this.isComposing = true
