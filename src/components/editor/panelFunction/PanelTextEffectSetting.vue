@@ -284,9 +284,11 @@ export default Vue.extend({
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
-    &:hover,
+    &:not(&--selected):hover {
+      border-color: setColor(blue-1, 0.5);
+    }
     &--selected {
-      border-color: #3c64b1;
+      border-color: setColor(blue-1);
     }
   }
   &__field {
@@ -304,7 +306,7 @@ export default Vue.extend({
     white-space: nowrap;
   }
   &__range-input {
-    width: 120px;
+    width: 90px;
     appearance: none;
     outline: none;
     background: none;
@@ -318,7 +320,7 @@ export default Vue.extend({
       height: 12px;
       border-radius: 50%;
       background-color: #ffffff;
-      border: 2px solid #3c64b1;
+      border: 2px solid setColor(blue-1);
       transition: 0.2s;
       margin-top: -5px;
       position: relative;

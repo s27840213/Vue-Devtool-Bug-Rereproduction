@@ -2,21 +2,22 @@
   div(class="bg-setting")
     span(class="bg-setting__title text-blue-1 label-lg") 背景設定
     div(class="action-bar flex-evenly my-10")
-      svg-icon(class="btn-opacity pointer"
+      svg-icon(class="btn-opacity pointer p-5 feature-button"
         iconName="transparency" :iconWidth="'20px'"
-        :class="{ 'bg-setting__btn--disabled': backgroundLocked }"
-        :iconColor="backgroundLocked ? 'gray-4' : 'gray-2'"
+        :class="{ 'disabled': backgroundLocked }"
+        :iconColor="'gray-2'"
         @click.native="openSliderPopup()"
         v-hint="'透明度'")
-      svg-icon(class="pointer"
+      svg-icon(class="pointer p-5 feature-button"
+        :class="{ 'active': backgroundLocked }"
         :iconName="backgroundLocked ? 'unlock' : 'lock'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
         @click.native="handleLockBackground"
         v-hint="'鎖定背景'")
-      svg-icon(class="pointer"
-        :class="{ 'bg-setting__btn--disabled': backgroundLocked }"
-        :iconColor="backgroundLocked ? 'gray-4' : 'gray-2'"
+      svg-icon(class="pointer p-5 feature-button"
+        :class="{ 'disabled': backgroundLocked }"
+        :iconColor="'gray-2'"
         iconName="trash" :iconWidth="'20px'"
         @click.native="handleDeleteBackground"
         v-hint="'刪除'")
@@ -297,4 +298,9 @@ export default Vue.extend({
     }
   }
 }
+
+.action-bar {
+  padding: 10px 15px;
+}
+
 </style>
