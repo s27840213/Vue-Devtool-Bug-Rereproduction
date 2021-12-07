@@ -123,19 +123,19 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
-    const { pageIndex } = attrs
+    const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex || this.lastSelectedPageIndex
     const targetPage: IPage = this.getPage(targetPageIndex)
-    const width = attrs.width || targetPage.width
-    const height = attrs.height || targetPage.height
     json = await this.updateBackground(json)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     PageUtils.updateSpecPage(targetPageIndex, newLayer)
-    resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
-    store.commit('UPDATE_pageProps', {
-      pageIndex: targetPageIndex,
-      props: { width, height }
-    })
+    if (width && height) {
+      resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
+      store.commit('UPDATE_pageProps', {
+        pageIndex: targetPageIndex,
+        props: { width, height }
+      })
+    }
     stepsUtils.record()
   }
 
@@ -462,27 +462,20 @@ class AssetUtils {
         const lastSelectedPage: IPage = this.getPage(this.lastSelectedPageIndex)
         let targetIndex = this.lastSelectedPageIndex
         let replace = true
-        let targetSize: any = null
         if (!childId && lastSelectedPage && lastSelectedPage.layers.length) {
           // 多頁且當前頁面非空白 => 加入在最後頁面
           targetIndex = this.getPages.length
           replace = false
         }
-        if (childId && lastSelectedPage) {
-          targetSize = {
-            width: lastSelectedPage.width,
-            height: lastSelectedPage.height
-          }
-        }
         PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         Vue.nextTick(() => {
           PageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
-          if (resize || targetSize) {
-            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize || targetSize)
+          if (resize) {
+            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
             store.commit('UPDATE_pageProps', {
               pageIndex: targetIndex,
-              props: resize || targetSize
+              props: resize
             })
           }
           stepsUtils.record()

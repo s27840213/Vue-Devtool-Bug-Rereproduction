@@ -79,7 +79,8 @@ export default Vue.extend({
           }
         )
       } else {
-        cb()
+        const resize = { width: currLayer.width, height: currLayer.height }
+        cb(resize)
       }
     },
     copyId() {
