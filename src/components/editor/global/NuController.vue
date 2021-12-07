@@ -64,7 +64,6 @@
             @compositionstart="composingStart"
             @compositionend="composingEnd"
             @keydown="onKeyDown"
-            @keypress="onKeyPress"
             @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
             @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
             @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
@@ -365,6 +364,7 @@ export default Vue.extend({
             }
           }
           if (this.hasChangeTextContent) {
+            // this.contentEditable = false
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
             this.hasChangeTextContent = false
           }
@@ -1381,14 +1381,16 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.config.isEdited) {
+      if (this.config.isEdited && this.hasChangeTextContent) {
+        this.hasChangeTextContent = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
-        const { start, end } = TextUtils.getSelection()
-        TextUtils.updateSelection(start, end)
         this.$nextTick(() => {
           TextUtils.focus(this.sel.start, this.sel.end)
         })
       }
+      const { start, end } = TextUtils.getSelection()
+      TextUtils.updateSelection(start, end)
+      TextPropUtils.updateTextPropsState()
     },
     onTyping(mutations: MutationRecord[], observer: MutationObserver) {
       observer.disconnect()
@@ -1412,7 +1414,6 @@ export default Vue.extend({
       })
 
       if (['Enter', 'Backspace'].includes(e.key) && !e.isComposing) {
-        console.warn(e.isComposing)
         e.preventDefault()
 
         const sel = window.getSelection()
@@ -1431,6 +1432,7 @@ export default Vue.extend({
         this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
         this.$nextTick(() => {
+          console.log(config.paragraphs)
           TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         })
       }
@@ -1442,11 +1444,9 @@ export default Vue.extend({
       this.textSizeRefresh(this.config)
       setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
     },
-    onKeyPress(e: KeyboardEvent) {
-      // console.log(e.key)
-    },
     onKeyUp(e: KeyboardEvent) {
-      // console.log(e.key)
+      const { start, end } = TextUtils.getSelection()
+      TextUtils.updateSelection(start, end)
       TextPropUtils.updateTextPropsState()
     },
     composingStart() {
@@ -1465,8 +1465,12 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
-      this.hasChangeTextContent = false
+      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
+      // this.hasChangeTextContent = false
+      if (this.hasChangeTextContent) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
+        this.hasChangeTextContent = false
+      }
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

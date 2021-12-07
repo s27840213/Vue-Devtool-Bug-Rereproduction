@@ -4,7 +4,6 @@ import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import layerUtils from './layerUtils'
-import textUtils from './textUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -237,6 +236,7 @@ class LayerFactary {
 
       config.paragraphs.forEach(p => {
         p.id = GeneralUtils.generateRandomString(8)
+        p.styles.font = p.spans[0].styles.font
         p.spans.forEach(s => {
           s.id = GeneralUtils.generateRandomString(8)
         })

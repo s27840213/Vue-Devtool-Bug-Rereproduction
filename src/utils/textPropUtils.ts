@@ -100,7 +100,6 @@ class TextPropUtils {
           store.commit('text/UPDATE_STATE', { paragraphs: config.paragraphs })
           const { start, end } = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection }
           if (TextUtils.isSel(selEnd)) {
-            // setTimeout(() => TextUtils.focus(start, end), 0)
             Vue.nextTick(() => {
               TextUtils.focus(start, end)
             })
@@ -234,6 +233,12 @@ class TextPropUtils {
     let isStartContainerDivided = true
     if (TextUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
+      // @TODO should set to font of paragraph to the biggest size
+      if (propName === 'fontFamily') {
+        for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
+          config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
+        }
+      }
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
@@ -699,63 +704,36 @@ class TextPropUtils {
         return propBuff
       }
     }
-
-    // if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
-    //   return this.propReadOfLayer(propName)
-    // } else if (this.targetInfo.type === 'group' && this.targetInfo.subLayerIndex !== -1) {
-    //   try {
-    //     const layer = (LayerUtils.getCurrLayer as IGroup).layers[this.targetInfo.subLayerIndex]
-    //     return this.propReadOfLayer(propName, layer as IText)
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // } else {
-    //   const tmpLayerGroup = this.getCurrLayer as ITmp
-    //   let propBuff: number | string | undefined
-    //   for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
-    //     if (tmpLayerGroup.layers[i].type === 'text') {
-    //       const tmpLayer = tmpLayerGroup.layers[i] as IText
-    //       if (typeof propBuff === 'undefined') {
-    //         propBuff = this.propReadOfLayer(propName, tmpLayer)
-    //       } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
-    //         return undefined
-    //       }
-    //     }
-    //   }
-    //   return propBuff
-    // }
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
-    TextUtils.updateDynamicSel()
-    const sel = TextUtils.isSel(this.getCurrSel.start)
-      ? GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection } : TextUtils.getSelection()
-    // If layer is assigned, means the current selected layer is a group/tmp layer
+    const sel = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection }
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     let start
     let end
-    if (sel && TextUtils.isSel(sel.start)) {
+
+    if (TextUtils.isSel(sel.start)) {
       start = sel.start
       end = sel.end
-    } else if (!sel || (sel && !TextUtils.isSel(sel.start) && !TextUtils.isSel(sel.end) && config)) {
+    } else if (!TextUtils.isSel(sel.start)) {
       start = {
         pIndex: 0,
         sIndex: 0,
         offset: 0
       }
-      const pLeng = config.paragraphs.length
-      const sLeng = config.paragraphs[pLeng - 1].spans.length
+      const pIndex = config.paragraphs.length - 1
+      const sIndex = config.paragraphs[pIndex].spans.length - 1
       end = {
-        pIndex: pLeng - 1,
-        sIndex: sLeng - 1,
-        offset: config.paragraphs[pLeng - 1].spans[sLeng - 1].text.length
+        pIndex,
+        sIndex,
+        offset: config.paragraphs[pIndex].spans[sIndex].text.length
       }
     } else {
-      return
+      throw new Error('can not read the prop of the selection')
     }
 
     // Selection is not a range (only caret)
-    if (TextUtils.isSel(start) && !TextUtils.isSel(end)) {
+    if (!TextUtils.isSel(end)) {
       Object.assign(end, start)
     }
 

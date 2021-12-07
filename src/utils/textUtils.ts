@@ -519,7 +519,7 @@ class TextUtils {
           opacity: parseInt(spanEl.style.opacity)
         } as ISpanStyle
 
-        spans.push({ text, styles: spanStyle, id: GeneralUtils.generateRandomString(8) })
+        spans.push({ text, styles: spanStyle })
         Object.assign(spanStyleBuff, spanStyle)
       }
       // for (let i = 0; i < spans.length; i++) {
@@ -535,19 +535,17 @@ class TextUtils {
         const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
         const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
         const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-        const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
-        paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
+        const font = pEl.style.fontFamily.split(',')[0]
+        const pStyle: IParagraphStyle = {
+          font,
+          lineHeight,
+          fontSpacing,
+          size: fontSize,
+          align: pEl.style.textAlign.replace('text-align-', '')
+        }
+        paragraphs.push({ styles: pStyle, spans: spans })
       }
     })
-    // used for test
-    // const currlayer = LayerUtils.getCurrLayer as IText
-    // currlayer.paragraphs
-    //   .forEach((p, pidx) => {
-    //     paragraphs[pidx].id = p.id
-    //     p.spans.forEach((s, sidx) => {
-    //       paragraphs[pidx].spans[sidx].id = s.id
-    //     })
-    //   })
     return paragraphs
   }
 
