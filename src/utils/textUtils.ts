@@ -318,6 +318,7 @@ class TextUtils {
     const { pIndex: oriPidx, sIndex: oriSidx, offset: oriOff } = start
     let { pIndex, sIndex, offset } = start
     const p = paragraphs[pIndex]
+    if (!p) return paragraphs
     const s = p.spans[sIndex]
 
     switch (key) {
@@ -348,6 +349,7 @@ class TextUtils {
         offset = nextText ? 0 : 1
         break
       }
+      case 'Delete':
       case 'Backspace': {
         if (oriSidx === 0 && oriOff === 0) {
           const stash = GeneralUtils.deepCopy(p) as IParagraph
