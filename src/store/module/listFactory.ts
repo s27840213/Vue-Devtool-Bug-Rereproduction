@@ -2,6 +2,7 @@ import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
+import i18n from '@/i18n'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -22,14 +23,15 @@ export default function (this: any) {
     data: '',
     preview: '',
     preview2: '',
-    locale: 'tw',
+    locale: '',
     error: ''
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
     getCategories: async ({ commit, state }) => {
-      const { locale, theme } = state
-      commit(SET_STATE, { pending: true, categories: [] })
+      const { theme } = state
+      const locale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+      commit(SET_STATE, { pending: true, categories: [], locale })
       try {
         const { data } = await this.api({ locale, theme, listAll: 0 })
         commit(SET_CATEGORIES, data.data)
@@ -39,9 +41,10 @@ export default function (this: any) {
     },
 
     getContent: async ({ commit, state }, params = {}) => {
-      const { locale, theme } = state
+      const { theme } = state
       const { keyword } = params
-      commit(SET_STATE, { pending: true, keyword, content: {} })
+      const locale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
         commit(SET_CONTENT, data.data)
@@ -52,9 +55,9 @@ export default function (this: any) {
     },
 
     getThemeContent: async ({ commit, state }, params = {}) => {
-      const { locale } = state
       const { keyword, theme } = params
-      commit(SET_STATE, { pending: true, keyword, theme, content: {} })
+      const locale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+      commit(SET_STATE, { pending: true, keyword, theme, locale, content: {} })
       try {
         const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
         commit(SET_CONTENT, data.data)
@@ -65,9 +68,10 @@ export default function (this: any) {
     },
 
     getTagContent: async ({ commit, state }, params = {}) => {
-      const { locale, theme } = state
+      const { theme } = state
       const { keyword } = params
-      commit(SET_STATE, { pending: true, keyword, content: {} })
+      const locale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const { data } = await this.api({
           locale,
@@ -89,7 +93,6 @@ export default function (this: any) {
       try {
         const { data } = await this.api(nextParams)
         commit(SET_MORE_CONTENT, data.data)
-        console.log(data.data)
       } catch (error) {
         captureException(error)
       }

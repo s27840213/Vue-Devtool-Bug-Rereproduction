@@ -17,6 +17,7 @@ import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 import resizeUtils from './resizeUtils'
+import { IPage } from '@/interfaces/page'
 
 const STANDARD_TEXT_FONT: { [key: string]: string } = {
   'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
@@ -122,21 +123,19 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
-    const { pageIndex, width, height } = attrs
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
-    console.log('add template')
-    console.log(json)
+    const { pageIndex } = attrs
+    const targetPageIndex = pageIndex || this.lastSelectedPageIndex
+    const targetPage: IPage = this.getPage(targetPageIndex)
+    const width = attrs.width || targetPage.width
+    const height = attrs.height || targetPage.height
     json = await this.updateBackground(json)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    PageUtils.updateSpecPage(targePageIndex, newLayer)
-    // @TODO: resize page/layer before adding to the store.
-    if (width && height) {
-      resizeUtils.resizePage(targePageIndex, newLayer, { width, height })
-      store.commit('UPDATE_pageProps', {
-        pageIndex: targePageIndex,
-        props: { width, height }
-      })
-    }
+    PageUtils.updateSpecPage(targetPageIndex, newLayer)
+    resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
+    store.commit('UPDATE_pageProps', {
+      pageIndex: targetPageIndex,
+      props: { width, height }
+    })
     stepsUtils.record()
   }
 
@@ -459,22 +458,31 @@ class AssetUtils {
         return Promise.all(updatePromise)
       })
       .then(jsonDataList => {
-        const lastSelectedPage = this.getPage(this.lastSelectedPageIndex)
-        let targetIndex = this.getPages.length
-        let replace = false
-        if (lastSelectedPage && !lastSelectedPage.layers.length) {
-          targetIndex = this.lastSelectedPageIndex
-          replace = true
+        // 單頁: 取代, 多頁: 空白取代/加入後面
+        const lastSelectedPage: IPage = this.getPage(this.lastSelectedPageIndex)
+        let targetIndex = this.lastSelectedPageIndex
+        let replace = true
+        let targetSize: any = null
+        if (!childId && lastSelectedPage && lastSelectedPage.layers.length) {
+          // 多頁且當前頁面非空白 => 加入在最後頁面
+          targetIndex = this.getPages.length
+          replace = false
+        }
+        if (childId && lastSelectedPage) {
+          targetSize = {
+            width: lastSelectedPage.width,
+            height: lastSelectedPage.height
+          }
         }
         PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         Vue.nextTick(() => {
           PageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
-          if (resize) {
-            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+          if (resize || targetSize) {
+            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize || targetSize)
             store.commit('UPDATE_pageProps', {
               pageIndex: targetIndex,
-              props: resize
+              props: resize || targetSize
             })
           }
           stepsUtils.record()

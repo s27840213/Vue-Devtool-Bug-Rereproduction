@@ -1,6 +1,6 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
-
+import i18n from '@/i18n'
 import photos from '@/apis/photos'
 import { IPhotoItem } from '@/interfaces/api'
 
@@ -25,15 +25,15 @@ const getDefaultState = (): IPhotoState => ({
 
 const actions: ActionTree<IPhotoState, unknown> = {
   async getPhotos({ commit }, params = {}) {
-    commit(SET_STATE, { pending: true, list: [] })
-    let { locale = 'tw', pageIndex = 1, keyword } = params
+    const browserLocale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+    let { locale = browserLocale, pageIndex = 1, keyword } = params
     // if japanese keyword
     keyword && REGEX_JAPANESE.test(keyword) && (locale = 'ja')
+    commit(SET_STATE, { pending: true, locale, list: [] })
     try {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit(SET_STATE, {
         list: new Array(pageIndex - 1).fill([]).concat(data.content[0].list),
-        locale,
         pageIndex,
         keyword,
         pending: false
