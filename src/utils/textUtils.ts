@@ -347,7 +347,7 @@ class TextUtils {
       }
       case 'Delete':
       case 'Backspace': {
-        if (oriSidx === 0 && oriOff === 0) {
+        if ((oriSidx === 0 && oriOff === 0) || (p.spans.length === 1 && s.text === '')) {
           const stash = GeneralUtils.deepCopy(p) as IParagraph
           if (!oriPidx) { return paragraphs }
 
@@ -381,7 +381,7 @@ class TextUtils {
             }
           }
         } else {
-          if (oriOff === 1) {
+          if (oriOff === 1 && (p.spans.length > 1 || s.text !== '')) {
             const handler = () => {
               if (s.text.length === 1) {
                 p.spans.splice(oriSidx, 1)
@@ -478,7 +478,7 @@ class TextUtils {
       //   } else offset = 1
       // }
     }
-    // console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
+    console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
     this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
     return paragraphs
   }
