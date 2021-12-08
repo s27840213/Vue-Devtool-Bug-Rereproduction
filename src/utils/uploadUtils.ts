@@ -691,6 +691,9 @@ class UploadUtils {
       }
     }
 
+    pageJSON.width = parseInt(pageJSON.width.toString(), 10)
+    pageJSON.height = parseInt(pageJSON.height.toString(), 10)
+
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
@@ -734,6 +737,9 @@ class UploadUtils {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       }
     }
+
+    pageJSON.width = parseInt(pageJSON.width.toString(), 10)
+    pageJSON.height = parseInt(pageJSON.height.toString(), 10)
 
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {

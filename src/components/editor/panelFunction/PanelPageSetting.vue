@@ -495,7 +495,7 @@ export default Vue.extend({
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = value
+      this.pageHeight = typeof value === 'string' ? parseInt(value) : value
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {

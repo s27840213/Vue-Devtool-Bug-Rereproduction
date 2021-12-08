@@ -235,11 +235,13 @@ class LayerFactary {
       })
 
       config.paragraphs.forEach(p => {
-        p.id = GeneralUtils.generateRandomString(8)
-        p.styles.font = p.spans[0].styles.font
-        p.spans.forEach(s => {
-          s.id = GeneralUtils.generateRandomString(8)
-        })
+        if (p.spans.length) {
+          p.id = GeneralUtils.generateRandomString(8)
+          p.styles.font = p.spans[0].styles.font
+          p.spans.forEach(s => {
+            s.id = GeneralUtils.generateRandomString(8)
+          })
+        }
       })
     }
     return Object.assign(basicConfig, config)

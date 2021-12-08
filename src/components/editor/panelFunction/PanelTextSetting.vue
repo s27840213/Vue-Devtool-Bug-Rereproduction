@@ -72,7 +72,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, ISpan, IText } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -319,9 +319,6 @@ export default Vue.extend({
       }
 
       const sel = TextUtils.getSelection()
-      console.log(sel.start.pIndex)
-      console.log(sel.start.sIndex)
-      console.log(sel.start.offset)
       start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
       end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 
@@ -351,10 +348,16 @@ export default Vue.extend({
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
       const { config, subLayerIndex } = this.currTextInfo
+      let { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
+        start: ISelection,
+        end: ISelection
+      }
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            this.fontSizeSteppingHandler(step)
+            const { start: _start, end: _end } = this.fontSizeSteppingHandler(start, end, step)
+            start = _start
+            end = _end
             TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
           } catch (error) {
             console.error(error)
@@ -366,8 +369,12 @@ export default Vue.extend({
 
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
+        const { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
+          start: ISelection,
+          end: ISelection
+        }
         if (new Date().getTime() - startTime < 500) {
-          this.fontSizeSteppingHandler(step)
+          this.fontSizeSteppingHandler(start, end, step)
         }
         clearInterval(interval)
         StepsUtils.record()
@@ -375,19 +382,18 @@ export default Vue.extend({
 
       window.addEventListener('mouseup', onmouseup)
     },
-    fontSizeSteppingHandler(step: number) {
+    fontSizeSteppingHandler(start: ISelection, end: ISelection, step: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      const { config, subLayerIndex } = this.currTextInfo
-      const { paragraphs } = GeneralUtils.deepCopy(config) as IText
+      const { config: _config, subLayerIndex } = this.currTextInfo
+      const { paragraphs } = _config
       if (this.sel) {
-        const { start, end } = this.sel as { start: ISelection, end: ISelection }
-        console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-        console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+        // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
 
         const finalStart = {} as ISelection
         const finalEnd = {} as ISelection
-        let currStart = {} as ISelection
-        let currEnd = {} as ISelection
+        const currStart = {} as ISelection
+        const currEnd = {} as ISelection
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           const p = paragraphs[pidx]
           for (let sidx = 0; sidx < p.spans.length; sidx++) {
@@ -395,23 +401,13 @@ export default Vue.extend({
             if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
               continue
             }
-            let isDivided = false
-
             // PIndex, sIndex both are at the start-selection
             if (pidx === start.pIndex && sidx === start.sIndex) {
               // Start-selection and the end-selection are exactly at the same span
               if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
-                const oriText = paragraphs[pidx].spans[sidx].text
-                paragraphs[pidx].spans[sidx].text = oriText.substring(0, start.offset)
-                paragraphs[pidx].spans.splice(sidx + 1, 0, {
-                  text: oriText.substring(start.offset, end.offset),
-                  styles: { ...paragraphs[pidx].spans[sidx].styles }
-                })
-                paragraphs[pidx].spans[sidx + 2].text = oriText.substring(start.offset)
-
-                currStart = { pIndex: pidx, sIndex: sidx + 1, offset: 0 }
-                currEnd = { pIndex: pidx, sIndex: sidx + 1, offset: end.offset - start.offset }
-                isDivided = true
+                Object.assign(currStart, start)
+                Object.assign(currEnd, end)
+                sidx++
               } else {
                 Object.assign(currStart, start)
                 Object.assign(currEnd, { ...start, offset: span.text.length })
@@ -425,32 +421,38 @@ export default Vue.extend({
               Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
               Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
             }
-            TextPropUtils.fontSizeStepper(span.styles.size + step, this.sel.start, this.sel.end)
-            // TextPropUtils.fontSizeStepper(span.styles.size + step, {
-            //   pIndex: pidx,
-            //   sIndex: sidx,
-            //   offset: 0
-            // }, {
-            //   pIndex: pidx,
-            //   sIndex: sidx,
-            //   offset: config.paragraphs[pidx].spans[sidx].text.length
-            // })
+            // TextPropUtils.fontSizeStepper(span.styles.size + step, this.sel.start, this.sel.end)
+            TextPropUtils.fontSizeStepper(_config, span.styles.size + step, currStart, currEnd)
+            console.log(GeneralUtils.deepCopy(_config.paragraphs))
 
             if (Object.keys(finalStart).length === 0) {
               Object.assign(finalStart, this.sel.start)
             }
+            Object.assign(finalEnd, currEnd)
           }
         }
-        Object.assign(finalEnd, this.sel.end)
-        const finalSel = TextPropUtils.spanMerger(config.paragraphs, finalStart, finalEnd)
+        // Object.assign(finalEnd, this.sel.end)
+        // const finalSel = TextPropUtils.spanMerger(_config.paragraphs, finalStart, finalEnd)
         this.$nextTick(() => {
-          setTimeout(() => TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex), 0)
-          TextUtils.updateSelection(finalSel[0], finalSel[1])
+          // TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex)
+          // TextUtils.updateSelection(finalSel[0], finalSel[1])
+          TextUtils.focus(finalStart, finalEnd)
           TextPropUtils.updateTextPropsState()
         })
+        return { start: { ...finalStart }, end: { ...finalEnd } }
       } else {
         TextUtils.updateLayerTextSize({ diff: step })
         TextPropUtils.updateTextPropsState()
+        const endP = _config.paragraphs.length - 1
+        const endS = _config.paragraphs[endP].spans.length - 1
+        return {
+          start: { pIndex: 0, sIndex: 0, offset: 0 },
+          end: {
+            pIndex: endP,
+            sIndex: endS,
+            offset: _config.paragraphs[endP].spans[endS].offset
+          }
+        }
       }
     },
     isValidInt(value: string) {
@@ -555,7 +557,6 @@ export default Vue.extend({
       })
     },
     copyColor() {
-      console.log('a')
       GeneralUtils.copyText(this.props.color)
         .then(() => {
           this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })

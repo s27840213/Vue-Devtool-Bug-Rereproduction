@@ -137,7 +137,7 @@ const mutations: MutationTree<ITextState> = {
 const actions: ActionTree<ITextState, unknown> = {
   async addFont ({ state, commit }, data: { type: string, face: string, url: string }): Promise<void> {
     const { face, type, url } = data
-    if (!state.fontStore.some(font => font.face === face && font.loaded)) {
+    if (face && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
         const newFont = new FontFace(face, getFontUrl(type, url || face))

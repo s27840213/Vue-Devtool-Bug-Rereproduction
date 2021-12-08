@@ -180,6 +180,7 @@ import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
