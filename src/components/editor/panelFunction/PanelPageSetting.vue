@@ -107,8 +107,23 @@
           class="pt-5 text-red body-2"
           @click="copyText(id)") {{id}}
         div(v-if="isGetGroup")
-          div(class="template-information__line")
-            span(class="body-1") 封面設定
+          div(v-if="showDbGroup"
+            class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
+          div(v-if="showDbGroup"
+            class="template-information__line")
+            span(class="body-1 text-red-1") 原設定內容
+          div(v-if="showDbGroup"
+            class="mb-10 square-wrapper wrong text-center")
+            div(class="pr-10 cover-option body-4")
+              span theme
+              span 封面頁碼
+            div(v-for="(item, idx) in dbGroupThemes"
+              class="pt-5 pr-10 cover-option")
+              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+              span 第{{item.coverIndex+1}}頁
+          div(v-if="showDbGroup"
+            class="template-information__line")
+            span(class="body-1 ") 修正版
           div(class="square-wrapper text-center")
             div(class="pr-10 cover-option body-4")
               span theme
@@ -298,6 +313,8 @@ export default Vue.extend({
         contents: [] as IThemeTemplate[],
         groupThemes: [] as ICoverTheme[]
       },
+      showDbGroup: false,
+      dbGroupThemes: [] as ICoverTheme[],
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[]
     }
@@ -327,6 +344,8 @@ export default Vue.extend({
     },
     groupId: function() {
       this.isGetGroup = false
+      this.showDbGroup = false
+      this.dbGroupThemes = []
       this.unsetThemeTemplate = []
       this.groupErrorMsg = ''
       this.groupInfo = {
@@ -626,6 +645,8 @@ export default Vue.extend({
         contents: [],
         groupThemes: []
       }
+      this.showDbGroup = false
+      this.dbGroupThemes = []
       this.unsetThemeTemplate = []
       this.groupErrorMsg = ''
       this.groupInfo.cover_ids = data.data.cover_ids
@@ -676,6 +697,12 @@ export default Vue.extend({
           const pageIndex = this.groupInfo.contents.findIndex(x => x.key_id === keyId)
           this.groupInfo.groupThemes[index].coverIndex = pageIndex
         }
+        this.dbGroupThemes.push({
+          id: id,
+          title: this.themeList[this.themeList.findIndex(theme => theme.id === id)].title,
+          coverIndex: this.groupInfo.contents.findIndex(theme => theme.key_id === cover.split(':')[1]),
+          options: []
+        })
       })
 
       // delete themes which are not set as theme_ids of templates
@@ -683,6 +710,7 @@ export default Vue.extend({
 
       // sort theme_cover list by theme_id
       this.groupInfo.groupThemes.sort((a, b) => a.id - b.id)
+      this.dbGroupThemes.sort((a, b) => a.id - b.id)
 
       // if template in cover of theme is not exist, the value will be set to the first element of options
       this.groupInfo.groupThemes.forEach(theme => {
@@ -691,6 +719,16 @@ export default Vue.extend({
           theme.coverIndex = theme.options[0].index
         }
       })
+
+      const groupThemesString = this.groupInfo.groupThemes.map(theme => {
+        return theme.id
+      }).join(',')
+      const dbThemesString = this.dbGroupThemes.map(theme => {
+        return theme.id
+      }).join(',')
+      if (groupThemesString !== dbThemesString) {
+        this.showDbGroup = true
+      }
     },
     copyText(text: string) {
       if (text.length === 0) {
@@ -988,6 +1026,9 @@ export default Vue.extend({
     border: 1px #000 solid;
     border-radius: 5px;
     padding: 5px 0;
+    &.wrong {
+      border: 1px setColor(red-1) solid;
+    }
   }
   .cover-option {
     display: grid;
