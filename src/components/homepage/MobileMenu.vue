@@ -57,14 +57,8 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'shortName', 'uname']),
     ...mapGetters({
-      isLogin: 'user/isLogin',
-      currPanel: 'getCurrSidebarPanelType',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      isShowPagePreview: 'page/getIsShowPagePreview',
-      hasAvatar: 'user/hasAvatar'
+      isLogin: 'user/isLogin'
     }),
     currentPage(): string {
       return this.$route.name || ''
