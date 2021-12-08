@@ -81,7 +81,6 @@
             @keyup="onKeyUp")
             p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
               :data-pindex="pIndex"
-              :key="p.id",
               :style="textStyles(p.styles)")
               template(v-for="(span, sIndex) in p.spans")
                 span(v-if="!span.text && p.spans.length !== 1" class="text__span"
@@ -225,6 +224,7 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
+      isComposeEndEnter: false,
       isSnapping: false,
       contentEditable: true,
       clipedImgBuff: {} as {
@@ -1378,6 +1378,7 @@ export default Vue.extend({
       }
     },
     onClick(e: MouseEvent) {
+      if (!['text', 'group', 'tmp'].includes(this.config.type)) return
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
@@ -1413,7 +1414,13 @@ export default Vue.extend({
         characterDataOldValue: false
       })
 
-      if (['Enter', 'Backspace'].includes(e.key) && !e.isComposing) {
+      if (this.isComposeEndEnter) {
+        this.isComposeEndEnter = false
+        return
+      }
+
+      if (['Enter', 'Backspace', 'Delete'].includes(e.key) && !e.isComposing) {
+        console.warn(e.isComposing)
         e.preventDefault()
 
         const sel = window.getSelection()
@@ -1448,12 +1455,14 @@ export default Vue.extend({
       const { start, end } = TextUtils.getSelection()
       TextUtils.updateSelection(start, end)
       TextPropUtils.updateTextPropsState()
+      this.isComposeEndEnter = false
     },
     composingStart() {
       this.isComposing = true
     },
     composingEnd() {
       this.isComposing = false
+      this.isComposeEndEnter = true
       const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
       this.paragraphs = paragraphs
       const config = GeneralUtils.deepCopy(this.config) as IText

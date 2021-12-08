@@ -75,7 +75,9 @@
           :class="{'mobile': isMobile}")
         div(class="template-center__waterfall"
             :class="{'mobile': isMobile}")
-          div(v-for="waterfallTemplate in waterfallTemplates" class="template-center__waterfall__column")
+          div(v-for="waterfallTemplate in waterfallTemplates"
+              class="template-center__waterfall__column"
+              :class="{'mobile': isMobile}")
             div(v-for="template in waterfallTemplate"
                 class="template-center__waterfall__column__template"
                 :style="templateStyles(template.prev_height)"
@@ -613,6 +615,9 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       gap: 24px;
+      &.mobile {
+        gap: 15px;
+      }
       &__template {
         position: relative;
         width: 100%;

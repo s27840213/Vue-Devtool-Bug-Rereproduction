@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211116"
+  version: "20211208"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -438,6 +438,9 @@ definitions:
       type:
         type: number
         description: type
+      locale:
+        type: string
+        description: locale
   assetMap:
     type: object
     properties:
@@ -792,7 +795,16 @@ definitions:
             description: user locale
           subscribe:
             type: number
-            description: is subscribe
+            description: is subscribed
+          view_guide:
+            type: number
+            description: is guide viewed
+          logout:
+            type: number
+            description: to logout
+          delete:
+            type: number
+            description: to delete
   googleLoginInput:
     type: object
     required:
@@ -983,6 +995,9 @@ definitions:
           asset_list:
             type: string
             description: ${assetType}:${teamId}:${assetId} separate by comma
+          asset_id:
+            type: string
+            description: asset id for retriving asset presigned url
           path:
             type: string
             description: >-

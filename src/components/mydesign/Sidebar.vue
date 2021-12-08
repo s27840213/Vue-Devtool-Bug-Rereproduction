@@ -109,9 +109,9 @@ export default Vue.extend({
     draggedOverStyles(type: string) {
       switch (type) {
         case 'a':
-          return (this.isAllDraggedOver && this.currLocation !== 'a') ? { 'background-color': '#2C2F43' } : {}
+          return (this.isAllDraggedOver && this.currLocation !== 'a') ? { 'background-color': 'rgba(78, 171, 230, 0.3)' } : {}
         case 't':
-          return (this.isTrashDraggedOver && this.currLocation !== 't') ? { 'background-color': '#2C2F43' } : {}
+          return (this.isTrashDraggedOver && this.currLocation !== 't') ? { 'background-color': 'rgba(78, 171, 230, 0.3)' } : {}
       }
     },
     hintArrowStyles() {

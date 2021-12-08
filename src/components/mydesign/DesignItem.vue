@@ -533,20 +533,22 @@ export default Vue.extend({
 .dragged-thumbnail {
   display: none;
   position: fixed;
-  transform: translate(-50%, -50%) scale(0.5);
+  transform: translate(-50%, -50%) scale(0.25);
   pointer-events: none;
   z-index: 1000;
   > div {
     background-color: white;
     > img {
+      border-radius: 10px;
       display: block;
     }
   }
   &__stack {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 20px;
+    left: 20px;
     background-color: setColor(gray-3);
+    border-radius: 10px;
     z-index: -1;
   }
 }

@@ -10,7 +10,7 @@ import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import uploadUtils from './uploadUtils'
 import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape, ITmp } from '@/interfaces/layer'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -122,11 +122,27 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
-    store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
+    store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
-    GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
+    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
+    let layers
+    if (pages[pageIndex]) {
+      const selectedLayer = pages[pageIndex].layers[index]
+      if (selectedLayer) {
+        if (selectedLayer.type === 'tmp') {
+          layers = selectedLayer.layers
+        } else {
+          layers = [selectedLayer]
+        }
+      } else {
+        layers = []
+      }
+    } else {
+      layers = []
+    }
+    GroupUtils.set(pageIndex, index, layers)
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
@@ -161,11 +177,27 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
-    store.commit('SET_pages', GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
+    store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    const { pageIndex, index, layers } = this.steps[this.currStep].currSelectedInfo
-    GroupUtils.set(pageIndex, index, GeneralUtils.deepCopy(layers))
+    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
+    let layers
+    if (pages[pageIndex]) {
+      const selectedLayer = pages[pageIndex].layers[index]
+      if (selectedLayer) {
+        if (selectedLayer.type === 'tmp') {
+          layers = selectedLayer.layers
+        } else {
+          layers = [selectedLayer]
+        }
+      } else {
+        layers = []
+      }
+    } else {
+      layers = []
+    }
+    GroupUtils.set(pageIndex, index, layers)
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }

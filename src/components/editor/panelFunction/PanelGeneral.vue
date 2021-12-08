@@ -107,6 +107,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     iconAction(icon: string) {
+      if (this.isLocked && icon !== 'unlock') return
       MappingUtils.mappingIconAction(icon)
     },
     openOrderPopup() {
@@ -116,6 +117,7 @@ export default Vue.extend({
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
+      if (this.isLocked) return
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
