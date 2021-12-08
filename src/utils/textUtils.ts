@@ -92,7 +92,7 @@ class TextUtils {
         return { div: undefined, start: this.getNullSel(), end: this.getNullSel() }
       }
 
-      const isRanged = window.getSelection()?.toString() !== ''
+      // const isRanged = window.getSelection()?.toString() !== ''
       /**
        * For end container, the selected html tag could be: #text, SPAN, P
        */
@@ -112,9 +112,9 @@ class TextUtils {
       let end = this.getNullSel()
       if (endP && endSpan) {
         end = {
-          pIndex: isRanged ? +((endP as HTMLElement).dataset.pindex as string) : NaN,
-          sIndex: isRanged ? +((endSpan as HTMLElement).dataset.sindex as string) : NaN,
-          offset: isRanged ? range?.endOffset as number : NaN
+          pIndex: !range.collapsed ? +((endP as HTMLElement).dataset.pindex as string) : NaN,
+          sIndex: !range.collapsed ? +((endSpan as HTMLElement).dataset.sindex as string) : NaN,
+          offset: !range.collapsed ? range?.endOffset as number : NaN
         }
       } else {
         throw new Error('wrong type node of the end container')
@@ -215,6 +215,9 @@ class TextUtils {
   }
 
   focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = LayerUtils.layerIndex) {
+    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+    // console.log('focus text')
     let text: HTMLElement
     const range = new Range()
     if (typeof subLayerIndex !== 'undefined') {
@@ -263,10 +266,6 @@ class TextUtils {
 
   textHandler(config: IText, key = ''): IParagraph[] {
     const { start, end } = this.getSelection()
-    // const { start, end } = this.getCurrSel
-    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
-
     if (!this.isSel(end)) {
       return this.noRangeHandler(config, start, key)
     } else {
@@ -304,14 +303,6 @@ class TextUtils {
       return paragraphs
     }
   }
-
-  // getNoNPrintableKeys(): Array<string> {
-  //   return [
-  //     'Escape', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
-  //     'Tab', 'CapsLock', 'Shift', 'Control', 'Alt', 'Meta', 'ArrowRight', 'ArrowUp',
-  //     'ArrowLeft', 'ArrowDown'
-  //   ]
-  // }
 
   noRangeHandler(config: IText, start: ISelection, key: string): IParagraph[] {
     const { paragraphs } = GeneralUtils.deepCopy(config) as IText
@@ -736,6 +727,8 @@ class TextUtils {
   }
 
   updateSelection(start: ISelection, end: ISelection) {
+    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
     if (this.startEqualEnd(start, end)) {
       end = this.getNullSel()
     }

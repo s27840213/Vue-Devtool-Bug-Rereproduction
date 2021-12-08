@@ -92,7 +92,7 @@
                     :key="span.id",
                     :style="textStyles(span.styles)"
                     v-text="'\uFEFF'")
-                span(v-else-if="!span.text && p.spans.length === 1"
+                span(v-else-if="!span.text && p.spans.length === 1" class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id",
                   :style="textStyles(span.styles)")
@@ -1435,7 +1435,6 @@ export default Vue.extend({
 
         const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-        console.warn(GeneralUtils.deepCopy(this.config))
         this.hasChangeTextContent = false
         this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
@@ -1464,7 +1463,6 @@ export default Vue.extend({
       this.isComposing = false
       this.isComposeEndEnter = true
       const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-      this.paragraphs = paragraphs
       const config = GeneralUtils.deepCopy(this.config) as IText
       config.paragraphs = paragraphs
       this.textSizeRefresh(config)
@@ -1474,7 +1472,6 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
     },
     onTextBlur() {
-      // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
       if (this.hasChangeTextContent) {
         this.contentEditable = false
         this.hasChangeTextContent = false
@@ -1486,20 +1483,25 @@ export default Vue.extend({
 
       let layerX = this.getLayerPos.x
       let layerY = this.getLayerPos.y
-      const textHW = TextUtils.getTextHW(text, this.config.widthLimit)
+      let textHW = TextUtils.getTextHW(text, this.config.widthLimit)
+      let widthLimit = this.config.widthLimit
 
       if (this.config.widthLimit === -1) {
         const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
         const currTextWidth = textHW.width
+
         layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
-        if (layerX <= 0) {
+        const reachLeftLimit = layerX <= 0
+        const reachRightLimit = layerX + currTextWidth >= pageWidth
+
+        if (reachLeftLimit && reachRightLimit) {
+          textHW = TextUtils.getTextHW(text, pageWidth)
           layerX = 0
-          textHW.width = this.getLayerWidth
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-        } else if (layerX + currTextWidth >= pageWidth) {
-          layerX = pageWidth - this.getLayerWidth
-          textHW.width = this.getLayerWidth
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+          widthLimit = pageWidth
+        } else if (reachLeftLimit || reachRightLimit) {
+          widthLimit = this.getLayerWidth
+          textHW = TextUtils.getTextHW(text, widthLimit)
+          layerX = reachLeftLimit ? 0 : pageWidth - widthLimit
         }
       } else {
         const initData = {
@@ -1518,17 +1520,13 @@ export default Vue.extend({
         layerY = trans.y
       }
 
-      if (isVertical && textHW.width < 5) {
-        textHW.width = this.getLayerWidth
-      } else if (!isVertical && textHW.height < 5) {
-        const config = GeneralUtils.deepCopy(text) as IText
-        config.paragraphs[0].spans[0].text = '|'
-        config.paragraphs.splice(1)
-        textHW.height = TextUtils.getTextHW(config).height
-      }
-
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        width: textHW.width,
+        height: textHW.height,
+        x: layerX,
+        y: layerY
+      })
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return

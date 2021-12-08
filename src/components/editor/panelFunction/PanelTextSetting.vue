@@ -304,6 +304,7 @@ export default Vue.extend({
       return origin
     },
     textInfoRecorder() {
+      console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
       let start
