@@ -379,7 +379,7 @@ class TextPropUtils {
     return { config, start, end }
   }
 
-  fontSizeStepper(value: number, start: ISelection, end: ISelection) {
+  fontSizeStepper(_config: IText, value: number, start: ISelection, end: ISelection) {
     // const prop = { [fontPropsMap.fontSize]: value }
     // const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
     // console.log(start.pIndex)
@@ -391,7 +391,8 @@ class TextPropUtils {
     //   LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: config.paragraphs })
     // }
     const prop = { [fontPropsMap.fontSize]: value }
-    const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
+    const { layerIndex, subLayerIndex } = this.getTextInfo
+    // const { layerIndex, subLayerIndex, config: _config } = this.getTextInfo
     // const { start, end } = this.getCurrSel
     const config = this.spanPropertyHandler('fontSize', prop, start, end, _config as IText)
     if (typeof subLayerIndex === 'undefined') {
@@ -609,7 +610,7 @@ class TextPropUtils {
 
   paragraphPropsHandler(propName: string, value: string | number = '') {
     const currLayer = LayerUtils.getCurrLayer
-    const { layerIndex, subLayerIndex } = this.getTextInfo
+    const { layerIndex, subLayerIndex, config } = this.getTextInfo
     const { start, end } = this.getCurrSel
 
     const prop:{ [key: string]: string | number } = {}
@@ -624,7 +625,6 @@ class TextPropUtils {
         prop.align = propName.substr('text-align-'.length)
     }
 
-    //  group handler
     if (currLayer.type === 'group' || currLayer.type === 'tmp') {
       if (typeof subLayerIndex === 'undefined') {
         for (let subIdx = 0; subIdx < (currLayer as IGroup).layers.length; subIdx++) {
@@ -663,6 +663,8 @@ class TextPropUtils {
         } else {
           this.updateParagraphStyles(this.pageIndex, layerIndex, start.pIndex, prop)
         }
+        const { width, height } = TextUtils.getTextHW(config as IText, (config as IText).widthLimit)
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, { width, height })
       }
       handler(prop)
     }

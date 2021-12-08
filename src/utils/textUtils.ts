@@ -264,8 +264,8 @@ class TextUtils {
   textHandler(config: IText, key = ''): IParagraph[] {
     const { start, end } = this.getSelection()
     // const { start, end } = this.getCurrSel
-    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
+    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
 
     if (!this.isSel(end)) {
       return this.noRangeHandler(config, start, key)
@@ -340,9 +340,13 @@ class TextUtils {
           styles: { ...p.styles }
         } as IParagraph)
 
+        if (!p.spans[p.spans.length - 1].text && p.spans.length !== 1) {
+          p.spans.splice(-1, 1)
+        }
+
         pIndex += 1
         sIndex = 0
-        offset = nextText ? 0 : 1
+        offset = nextText || (paragraphs[pIndex].spans.length === 1 && !paragraphs[pIndex].spans[0].text) ? 0 : 1
         break
       }
       case 'Delete':
@@ -420,63 +424,6 @@ class TextUtils {
         }
         break
       }
-      // default: {
-      //   if (oriSidx === 1 && oriOff === 0 && !p.spans[0].text) {
-      //     p.spans[0].text += key
-      //     sIndex = 0
-      //     offset = 1
-      //     TextPropUtils.updateTextPropsState({
-      //       color: p.spans[0].styles.color,
-      //       decoration: p.spans[0].styles.decoration,
-      //       style: p.spans[0].styles.style,
-      //       weight: p.spans[0].styles.weight
-      //     })
-      //     break
-      //   }
-      //   const preText = s.text.substring(0, oriOff)
-      //   const lastText = s.text.substr(oriOff)
-
-      //   // const propsTable = ['color', 'decoration', 'weight', 'style']
-      //   // const hasNewProps = (() => {
-      //   //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-      //   //     if (propsTable.includes(k) && v !== s.styles[k]) {
-      //   //       return true
-      //   //     }
-      //   //   }
-      //   //   return false
-      //   // })()
-
-      //   // if (hasNewProps) {
-      //   //   const newStyles = { ...s.styles }
-      //   //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-      //   //     if (propsTable.includes(k)) {
-      //   //       newStyles[k] = v as string
-      //   //     }
-      //   //   }
-
-      //   //   s.text = preText
-      //   //   p.spans.splice(oriSidx + 1, 0, {
-      //   //     text: key,
-      //   //     styles: newStyles
-      //   //   })
-      //   //   if (lastText) {
-      //   //     p.spans.splice(oriSidx + 2, 0, {
-      //   //       text: lastText,
-      //   //       styles: { ...s.styles }
-      //   //     })
-      //   //   }
-      //   //   sIndex = oriSidx + 1
-      //   //   offset = 1
-      //   //   break
-      //   // } else {
-      //   //   s.text = preText + key + lastText
-      //   // }
-      //   s.text = preText + key + lastText
-
-      //   if (preText) {
-      //     offset++
-      //   } else offset = 1
-      // }
     }
     console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
     this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
@@ -520,12 +467,6 @@ class TextUtils {
         spans.push({ text, styles: spanStyle })
         Object.assign(spanStyleBuff, spanStyle)
       }
-      // for (let i = 0; i < spans.length; i++) {
-      //   if (!spans[i].text && spans.length !== 1) {
-      //     spans.splice(i, 1)
-      //     i--
-      //   }
-      // }
 
       if (spans.length) {
         const pEl = p as HTMLElement
@@ -654,7 +595,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(content: IText, widthLimit = -1): { width: number, height: number, body: HTMLDivElement } {
+  getTextHW(content: IText, widthLimit = -1): { width: number, height: number } {
     const body = document.createElement('div')
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
@@ -691,8 +632,7 @@ class TextUtils {
     const scale = content.styles.scale ?? 1
     const textHW = {
       width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
-      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
-      body: body
+      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale)
     }
     document.body.removeChild(body)
     return textHW

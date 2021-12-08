@@ -23,7 +23,7 @@
             :contenteditable="contentEditable"
             @focus="onTextFocus()"
             @blur="onTextBlur()"
-            @compositionstart="isComposing = true"
+            @compositionstart="composingStart"
             @compositionend="composingEnd"
             @keydown="onKeyDown"
             @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
@@ -377,7 +377,9 @@ export default Vue.extend({
         setTimeout(() => { observer.disconnect() }, 0)
       }
     },
-
+    composingStart() {
+      this.isComposing = true
+    },
     composingEnd() {
       this.isComposing = false
       const start = TextUtils.getSelection()?.start
