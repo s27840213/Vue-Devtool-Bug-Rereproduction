@@ -84,19 +84,25 @@
               :key="p.id",
               :style="textStyles(p.styles)")
               template(v-for="(span, sIndex) in p.spans")
-                span(v-if="!span.text" class="text__span"
+                span(v-if="!span.text && p.spans.length !== 1" class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id"
                   :style="textStyles(span.styles)")
                   span(class="text__span"
+                    :data-sindex="sIndex"
+                    :key="span.id",
+                    :style="textStyles(span.styles)"
+                    v-text="'\uFEFF'")
+                span(v-else-if="!span.text && p.spans.length === 1"
                   :data-sindex="sIndex"
                   :key="span.id",
-                  :style="textStyles(span.styles)") {{ '\uFEFF' }}
+                  :style="textStyles(span.styles)")
+                  br
                 span(v-else class="text__span"
                   :data-sindex="sIndex"
                   :key="span.id",
-                  :style="textStyles(span.styles)") {{ span.text }}
-                  br(v-if="!span.text && p.spans.length === 1")
+                  :style="textStyles(span.styles)"
+                  v-text="span.text")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles"
@@ -362,11 +368,6 @@ export default Vue.extend({
                 }
               }
             }
-          }
-          if (this.hasChangeTextContent) {
-            // this.contentEditable = false
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
-            this.hasChangeTextContent = false
           }
         }
       } else {
@@ -649,7 +650,6 @@ export default Vue.extend({
                 const sel = TextUtils.getSelection()
                 if (sel) {
                   const { start } = sel
-                  console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
                   TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
                 }
               }
@@ -1381,7 +1381,7 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.config.isEdited && this.hasChangeTextContent) {
+      if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
         this.hasChangeTextContent = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
         this.$nextTick(() => {
@@ -1428,11 +1428,11 @@ export default Vue.extend({
 
         const paragraphs = TextUtils.textHandler(config, e.key)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+        console.warn(GeneralUtils.deepCopy(this.config))
         this.hasChangeTextContent = false
         this.updateTextState({ paragraphs })
         this.textSizeRefresh(this.config)
         this.$nextTick(() => {
-          console.log(config.paragraphs)
           TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
         })
       }
@@ -1466,10 +1466,10 @@ export default Vue.extend({
     },
     onTextBlur() {
       // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
-      // this.hasChangeTextContent = false
       if (this.hasChangeTextContent) {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
+        this.contentEditable = false
         this.hasChangeTextContent = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
       }
     },
     textSizeRefresh(text: IText) {
