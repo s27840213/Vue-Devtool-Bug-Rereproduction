@@ -1378,6 +1378,7 @@ export default Vue.extend({
       }
     },
     onClick(e: MouseEvent) {
+      if (!['text', 'group', 'tmp'].includes(this.config.type)) return
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
