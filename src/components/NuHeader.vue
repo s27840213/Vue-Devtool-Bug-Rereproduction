@@ -40,7 +40,7 @@
         div(style="width: 180px;")
           search-bar(v-if="!noSearchbar"
             class="nu-header__search"
-            placeholder="搜 尋"
+            :placeholder="$t('NN0037')"
             @search="handleSearch")
         div(v-if="!isLogin")
           btn(@click.native="goToPage('Login')"
@@ -95,7 +95,7 @@
     div(v-if="isShowSearchBar"
       class="nu-header__search-mobile")
       search-bar(class="search"
-        placeholder="搜 尋"
+        :placeholder="$t('NN0037')"
         @search="handleSearch")
       div(class="pt-20 nu-header__search-mobile__title") 熱門搜尋：
       div(class="pt-10 nu-header__search-mobile__options")
