@@ -101,6 +101,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
+import { mapGetters } from 'vuex'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
@@ -129,12 +131,22 @@ export default Vue.extend({
   watch: {
     inputLocale() {
       if (this.getLocaleValue(this.inputLocale) !== this.$i18n.locale) {
+        if (this.isLogin) {
+          store.dispatch('user/updateUser', {
+            token: this.token,
+            locale: this.getLocaleValue(this.inputLocale)
+          })
+        }
         this.$i18n.locale = this.getLocaleValue(this.inputLocale) as string
         this.$router.go(0)
       }
     }
   },
   computed: {
+    ...mapGetters('user', {
+      token: 'getToken',
+      isLogin: 'isLogin'
+    }),
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
