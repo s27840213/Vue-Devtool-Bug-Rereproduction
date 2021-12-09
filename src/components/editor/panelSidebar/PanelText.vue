@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-text")
     search-bar(class="mb-15"
-      placeholder="Search from our text"
+      :placeholder="`${$t('NN0092', {target: $tc('NN0005',1)})}`"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
@@ -91,13 +91,13 @@ export default Vue.extend({
         size: 174,
         list: [{
           type: 'Heading',
-          text: this.$t('editor.heading')
+          text: this.$t('NN0011')
         }, {
           type: 'Subheading',
-          text: this.$t('editor.subheading')
+          text: this.$t('NN0012')
         }, {
           type: 'Body',
-          text: this.$t('editor.body')
+          text: this.$t('NN0013')
         }]
       }]
     },
@@ -185,7 +185,7 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    async handleAddText(config: {type: string, text: string}) {
+    async handleAddText(config: { type: string, text: string }) {
       await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
       ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },

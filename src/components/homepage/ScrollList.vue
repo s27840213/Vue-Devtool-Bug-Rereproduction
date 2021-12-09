@@ -37,7 +37,7 @@
           class="pointer scroll-list__plus")
           img(:src="require('@/assets/img/png/plus-origin.png')"
             @click="openPopup()")
-          div(class="pt-10 scroll-list__item-title") 自訂尺寸
+          div(class="pt-10 scroll-list__item-title") {{$t('NN0023')}}
         div(v-for="item, idx in list" class="scroll-list__item py-10"
           :class="{'pb-70 item-theme': type === 'theme'}")
           img(class="pointer scroll-list__item-image"

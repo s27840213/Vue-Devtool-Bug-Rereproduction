@@ -6,7 +6,7 @@
         div(class="home-content__top")
           img(class="home-content__top-img"
             style="height: 150px;")
-          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(class="home-content__top-title") {{$t('NN0148')}}
           div(class="home-content__top-mobile-subtitle")
             div Vivipic 提供無數免費的專業模板，快立刻開始編輯吧！
             div(class="pt-30") *僅供電腦版編輯
@@ -14,7 +14,7 @@
         div(class="home-content__top")
           img(class="home-content__top-img"
             :style="`height: ${isLogin ? '250px;' : '350px;'}`")
-          div(class="home-content__top-title") 海量精美電商模板等您使用！
+          div(class="home-content__top-title") {{$t('NN0148')}}
           div(v-if="!isLogin"
             class="home-content__top-subtitle")
             span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
@@ -23,14 +23,14 @@
           div(v-if="isLogin"
             class="home-content__top-btns")
             div(class="rounded home-btn"
-              @click="goToPage('TemplateCenter')") 瀏 覽 模 板
+              @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
             div(class="rounded home-btn"
-              @click="goToPage('MyDesign')") 我 的 設 計
+              @click="goToPage('MyDesign')") {{$t('NN0080')}}
           div(v-else
             class="home-content__top-btn rounded home-btn"
             :type="'primary-lg'"
             @click="newDesign()") 開 始 製 作
-      div(class="home-content-title label-lg") 開始設計圖片
+      div(class="home-content-title label-lg") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
@@ -65,9 +65,9 @@
               @click.native="newDesign()") 開 始 製 作
       div(v-if="isLogin")
         div(class="home-content-title label-lg")
-          span 我的設計
+          span {{$t('NN0080')}}
           span(class="pointer body-1 more"
-          @click="goToPage('MyDesign')") 更多
+          @click="goToPage('MyDesign')") {{$t('NN0082')}}
         div(class="home-content__mydesign")
           scroll-list(:list="allDesigns" type='design'
             :isLoading="isDesignsLoading")
@@ -77,21 +77,21 @@
             class="pointer mr-10"
             @click="newDesign(tag)") {{'#' + tag}}
         span(class="pointer body-1 more"
-          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") 更多
+          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") {{$t('NN0082')}}
       div(class="home-content__template")
         scroll-list(:list="tagTemplateList" type='template'
           :isLoading="tagTemplateList.length === 0")
       div(class="home-content-title label-lg")
         span 熱門模板
         span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('popular')") 更多
+          @click="goToTemplateCenterSortBy('popular')") {{$t('NN0082')}}
       div(class="home-content__template")
         scroll-list(:list="popularTemplateList" type='template'
           :isLoading="popularTemplateList.length === 0")
       div(class="home-content-title label-lg")
         span 最新模板
         span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('recent')") 更多
+          @click="goToTemplateCenterSortBy('recent')") {{$t('NN0082')}}
       div(class="home-content__template")
         scroll-list(:list="latestTemplateList" type='template'
           :isLoading="latestTemplateList.length === 0")
@@ -168,7 +168,7 @@ export default Vue.extend({
       allDesigns: 'design/getAllDesigns',
       isDesignsLoading: 'design/getIsDesignsLoading'
     }),
-    isMobile (): boolean {
+    isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
     featureContent(): string {
@@ -321,9 +321,9 @@ export default Vue.extend({
     &-img {
       width: 100%;
       background-size: cover;
-      background-image: url('~@/assets/img/jpg/homepage/home-top.jpg');
+      background-image: url("~@/assets/img/jpg/homepage/home-top.jpg");
       @include layout-mobile {
-        background-image: url('~@/assets/img/jpg/homepage/home-top-mobile.jpg');
+        background-image: url("~@/assets/img/jpg/homepage/home-top-mobile.jpg");
       }
     }
     &-title {
@@ -369,7 +369,9 @@ export default Vue.extend({
       top: 240px;
     }
   }
-  &__theme, &__mydesign, &__template {
+  &__theme,
+  &__mydesign,
+  &__template {
     padding: 0 10%;
     @include layout-mobile {
       padding: 0 5%;

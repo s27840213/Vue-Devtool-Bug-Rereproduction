@@ -32,47 +32,47 @@ export default Vue.extend({
       required: true
     }
   },
-  data () {
+  data() {
     const fields = [
       {
         name: 'brightness',
-        label: '亮度',
+        label: `${this.$t('NN0055')}`,
         max: 100,
         min: -100
       },
       {
         name: 'contrast',
-        label: '對比度',
+        label: `${this.$t('NN0056')}`,
         max: 100,
         min: -100
       },
       {
         name: 'saturate',
-        label: '飽和度',
+        label: `${this.$t('NN0057')}`,
         max: 100,
         min: -100
       },
       {
         name: 'hue',
-        label: '色調',
+        label: `${this.$t('NN0058')}`,
         max: 100,
         min: -100
       },
       {
         name: 'blur',
-        label: '模糊化',
+        label: `${this.$t('NN0059')}`,
         max: 100,
         min: -100
       },
       {
         name: 'halation',
-        label: '暈影',
+        label: `${this.$t('NN0060')}`,
         max: 100,
         min: 0
       },
       {
         name: 'warm',
-        label: '色溫',
+        label: `${this.$t('NN0061')}`,
         max: 100,
         min: -100
       }
@@ -90,18 +90,18 @@ export default Vue.extend({
     }
   },
   watch: {
-    imageAdjust (val) {
+    imageAdjust(val) {
       Object.assign(this.adjustTmp, val)
     }
   },
   methods: {
-    handleField (e: Event) {
+    handleField(e: Event) {
       const { value, name } = e.target as HTMLInputElement
       const fieldVal = Number.isNaN(+value) ? 0 : +value
       this.adjustTmp[name] = fieldVal
       this.$emit('update', this.adjustTmp)
     },
-    handleChangeStop () {
+    handleChangeStop() {
       stepsUtils.record()
     }
   }
@@ -154,7 +154,7 @@ export default Vue.extend({
       height: 15px;
       border-radius: 50%;
       background-color: #ffffff;
-      border: 2px solid #4EABE6;
+      border: 2px solid #4eabe6;
       transition: 0.2s;
       margin-top: -6.5px;
       position: relative;

@@ -115,18 +115,18 @@ const routes: Array<RouteConfig> = [
     props: true
   },
   {
-    path: '/templates',
+    path: 'templates',
     name: 'TemplateCenter',
     component: TemplateCenter
   },
   {
-    path: '/settings/:view?',
+    path: 'settings/:view?',
     name: 'Settings',
     component: Settings,
     props: true
   },
   {
-    path: '/mobilewarning',
+    path: 'mobilewarning',
     name: 'MobileWarning',
     component: MobileWarning
   }

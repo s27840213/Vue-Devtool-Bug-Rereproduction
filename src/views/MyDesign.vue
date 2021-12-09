@@ -40,7 +40,7 @@
                   img(v-if="isFavDelMouseOver" class="my-design__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
                 transition(name="slide-fade-text")
                   div(v-if="isFavDelMouseOver" class="my-design__info__text")
-                    span 刪除後會將原始檔案一併移除。
+                    span {{$t('NN0243')}}
                 div(ref="recover"
                     v-if="mydesignView === 'trash-design-view'"
                     class="my-design__multi__icon"
@@ -80,7 +80,7 @@
               div(class="my-design__message__text")
                 span {{ `${messageItemName(deletedQueue[0])}已移至垃圾桶` }}
               div(class="my-design__message__button" @click="recover")
-                span 復原
+                span {{$t('NN0119')}}
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
@@ -93,7 +93,7 @@
           transition(name="slide-fade")
             div(v-if="isErrorShowing" class="my-design__message")
               div(class="my-design__message__text")
-                span 發生問題，請稍後再試
+                span {{$t('NN0242')}}
         div(v-if="isMoveToFolderPanelOpen"
             class="my-design__change-folder"
             :class="{centered: isMovingSingleToFolder}"
@@ -101,7 +101,7 @@
           div(class="my-design__change-folder__container")
             div(class="my-design__change-folder__header")
               div(class="my-design__change-folder__title")
-                span 移至資料夾
+                span {{$t('NN0206')}}
               div(class="my-design__change-folder__hr")
             div(class="my-design__change-folder__folders")
               structure-folder(v-for="folder in realFolders"
@@ -112,49 +112,49 @@
               div(class="my-design__change-folder__buttons")
                 div(class="my-design__change-folder__cancel"
                     @click="isMoveToFolderPanelOpen = false")
-                  span 取消
+                  span {{$t('NN0203')}}
                 div(class="my-design__change-folder__confirm"
                     :class="{'disabled': moveToFolderSelectInfo === ''}"
                     @click="handleMoveToFolder")
-                  span 移至資料夾
+                  span {{$t('NN0206')}}
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-all-message")
           div(class="delete-all-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-all-message__text")
-            span 確定要刪除這些設計？
+            span {{$t('NN0244')}}
           div(class="delete-all-message__buttons")
             div(class="delete-all-message__cancel" @click="closeConfirmMessage")
-              span 取消
+              span {{$t('NN0203')}}
             div(class="delete-all-message__confirm" @click="deleteAllConfirmed")
-              span 刪除
+              span {{$t('NN0034')}}
       div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-folder-message")
           div(class="delete-folder-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
           div
             div(class="delete-folder-message__text")
-              span(class="first-line") 此資料夾含有多項設計/資料夾
-              span 是否要全部刪除？
+              span(class="first-line") {{$t('NN0245')}}
+              span {{$t('NN0246')}}
             div(class="delete-folder-message__buttons")
               div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
-                span 取消
+                span {{$t('NN0203')}}
               div(class="delete-folder-message__confirm" @click="deleteFolder(pathedFolderBuffer)")
-                span 刪除
+                span {{$t('NN0034')}}
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
         div(class="delete-forever-message")
           div(class="delete-forever-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-forever-message__text")
-            span 確定要永久刪除？
+            span {{$t('NN0202')}}
           div(class="delete-forever-message__description")
-            span 將立即刪除此檔案，無法還原此步驟。
+            span {{$t('NN0201')}}
           div(class="delete-forever-message__buttons")
             div(class="delete-forever-message__cancel" @click="closeConfirmMessage")
-              span 取消
+              span {{$t('NN0203')}}
             div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
-              span 永久刪除
+              span {{$t('NN0200')}}
       div(v-if="confirmMessage === 'download'" class="dim-background")
         popup-download(class="my-design__download"
           :useExternelJSON="true"
@@ -283,13 +283,13 @@ export default Vue.extend({
       if (newVal) {
         this.$nextTick(() => {
           if (this.mydesignView === 'trash-design-view') {
-            hintUtils.bind(this.$refs.recover as HTMLElement, '還原', 500)
-            hintUtils.bind(this.$refs.delForever as HTMLElement, '永久刪除', 500)
+            hintUtils.bind(this.$refs.recover as HTMLElement, `${this.$t('NN0204')}`, 500)
+            hintUtils.bind(this.$refs.delForever as HTMLElement, `${this.$t('NN0200')}`, 500)
           } else {
-            hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? '取消最愛' : '加入最愛', 500)
-            hintUtils.bind(this.$refs.delDesign as HTMLElement, '刪除', 500)
+            hintUtils.bind(this.$refs.tgFav as HTMLElement, this.mydesignView === 'favorite-design-view' ? `${this.$t('NN0207')}` : `${this.$t('NN0205')}`, 500)
+            hintUtils.bind(this.$refs.delDesign as HTMLElement, `${this.$t('NN0034')}`, 500)
             if (this.mydesignView !== 'favorite-design-view') {
-              hintUtils.bind(this.$refs.mvFolder as HTMLElement, '移至資料夾', 500)
+              hintUtils.bind(this.$refs.mvFolder as HTMLElement, `${this.$t('NN0206')}`, 500)
             }
           }
         })
@@ -406,7 +406,7 @@ export default Vue.extend({
     handleMoveItem(item: IQueueItem) {
       this.handlePushItem(item, this.movedQueue, this.showMoveMessage)
     },
-    handleDeleteFolder(payload: {pathedFolder: IPathedFolder, empty: boolean}) {
+    handleDeleteFolder(payload: { pathedFolder: IPathedFolder, empty: boolean }) {
       const { pathedFolder, empty } = payload
       if (empty) {
         this.deleteFolder(pathedFolder, () => {
@@ -646,7 +646,7 @@ export default Vue.extend({
     gap: 14px;
     padding-left: 8px;
     padding-right: 10px;
-    background-color: #373B53;
+    background-color: #373b53;
     border-radius: 10px;
     &__img {
       width: 32px;
@@ -731,7 +731,7 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       > span {
-        font-family: 'NotoSansTC';
+        font-family: "NotoSansTC";
         font-size: 14px;
         font-weight: 700;
         line-height: 20px;
@@ -852,7 +852,7 @@ export default Vue.extend({
 
 .design-view {
   height: 100%;
-  width: 100%
+  width: 100%;
 }
 
 .dim-background {
@@ -1041,50 +1041,60 @@ $messageTypes: delete-all, delete-folder, delete-forever;
 }
 
 .slide-fade-enter-active {
-  transition: .3s ease;
+  transition: 0.3s ease;
 }
 
 .slide-fade-leave-active {
-  transition: .5s ease;
+  transition: 0.5s ease;
 }
 
-.slide-fade-enter, .slide-fade-leave-to {
+.slide-fade-enter,
+.slide-fade-leave-to {
   transform: translateY(-5px);
   opacity: 0;
 }
 
-.slide-down-fade-enter-active, .slide-down-fade-leave-active {
-  transition: .2s;
+.slide-down-fade-enter-active,
+.slide-down-fade-leave-active {
+  transition: 0.2s;
 }
 
-.slide-down-fade-enter, .slide-down-fade-leave-to {
+.slide-down-fade-enter,
+.slide-down-fade-leave-to {
   top: -55px;
   opacity: 0;
 }
 
-.scale-fade-enter-active, .scale-fade-leave-active {
-  transition: .05s;
+.scale-fade-enter-active,
+.scale-fade-leave-active {
+  transition: 0.05s;
 }
 
-.scale-fade-enter, .scale-fade-leave-to {
+.scale-fade-enter,
+.scale-fade-leave-to {
   opacity: 0;
   transform: scale(0.8);
 }
 
-.slide-fade-img, .slide-fade-text {
-  &-enter-active, &-leave-active {
-    transition: .2s;
+.slide-fade-img,
+.slide-fade-text {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }
 
-.slide-fade-img-enter, .slide-fade-img-leave-to {
-  left: 100%
+.slide-fade-img-enter,
+.slide-fade-img-leave-to {
+  left: 100%;
 }
 
-.slide-fade-text-enter, .slide-fade-text-leave-to {
+.slide-fade-text-enter,
+.slide-fade-text-leave-to {
   left: calc(100% + 9px);
 }
 </style>

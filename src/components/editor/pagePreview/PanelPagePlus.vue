@@ -13,7 +13,7 @@
             :iconColor="'white'"
             :iconName="'plus-origin'"
             :iconWidth="'15px'")
-        span(class="text-white") 新增頁面
+        span(class="text-white") {{$t('NN0139')}}
     div(v-if="actionType === 'drag'")
       div(class="panel-page-plus-drag")
 </template>

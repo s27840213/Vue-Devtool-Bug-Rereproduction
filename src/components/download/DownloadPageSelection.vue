@@ -3,10 +3,10 @@
     dropdown(ref="dropdown"
       isCustomOptions
       @open="handleReset")
-      span(class="download-page-selection__label") {{ rangeLabel }} 頁
+      span(class="download-page-selection__label") {{ rangeLabel }} {{$t('NN0128')}}
       template(v-slot:custom)
         div(class="download-page-selection__options py-10 px-15 flex")
-          div(class="mb-10 pointer" @click.self="handleCancel") 取消所有選取
+          div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
           download-check-button(v-for="(status, idx) in preSelected"
             class="mb-10"
             type="checkbox"
@@ -16,7 +16,7 @@
             @change="({ checked }) => handleSelect(idx, checked)")
           div
             btn(class="full-width body-3 rounded"
-              @click.native="handleSubmit") 完成
+              @click.native="handleSubmit") {{$t('NN0133')}}
 </template>
 
 <script lang="ts">
@@ -25,14 +25,14 @@ import { mapGetters } from 'vuex'
 import DownloadCheckButton from './DownloadCheckButton.vue'
 
 export default Vue.extend({
-  data () {
+  data() {
     return {
       selected: [] as boolean[],
       preSelected: [] as boolean[],
       rangeLabel: ''
     }
   },
-  mounted () {
+  mounted() {
     const { pages } = this
     const initialStatus = new Array(pages.length).fill(false)
     this.preSelected = [...initialStatus]
@@ -47,21 +47,21 @@ export default Vue.extend({
     })
   },
   methods: {
-    handleSelect (pageIndex: number, checked: boolean) {
+    handleSelect(pageIndex: number, checked: boolean) {
       this.preSelected = this.preSelected.map((status, idx) => idx === pageIndex ? checked : status)
     },
-    handleCancel () {
+    handleCancel() {
       this.preSelected = this.preSelected.map(() => false)
     },
-    handleReset () {
+    handleReset() {
       this.preSelected = [...this.selected]
     },
-    handleSubmit () {
+    handleSubmit() {
       (this.$refs.dropdown as any).handleClose()
       this.handleLabel()
       this.$emit('confirm', this.preSelected)
     },
-    handleLabel () {
+    handleLabel() {
       const { preSelected } = this
       // covert array of boolean to [[1,2,3], [5,6], [8]]
       const pageSelectedGroup = preSelected
@@ -83,25 +83,25 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .download-page-selection {
-    &__label {
-      width: 40px;
-      display: inline-block;
-      vertical-align: top;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    &__options {
-      white-space: nowrap;
-      flex-direction: column;
-      cursor: default;
-    }
+.download-page-selection {
+  &__label {
+    width: 40px;
+    display: inline-block;
+    vertical-align: top;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
-  .btn {
-    padding: 3px 10px;
-    font-size: 12px;
-    line-height: 22px;
-    min-width: 100px;
+  &__options {
+    white-space: nowrap;
+    flex-direction: column;
+    cursor: default;
   }
+}
+.btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  line-height: 22px;
+  min-width: 100px;
+}
 </style>

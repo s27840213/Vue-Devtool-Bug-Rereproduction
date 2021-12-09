@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="photo-setting")
-    span(class="photo-setting__title text-blue-1 subtitle-1") 照片設定
+    span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
@@ -40,10 +40,10 @@ export default Vue.extend({
     return {
       show: '',
       btns: [
-        { name: 'crop', label: '裁切', show: 'crop' },
-        // { name: 'preset', label: '濾鏡', show: '' },
-        { name: 'adjust', label: '調整', show: 'popup-adjust' }
-        // { name: 'remove-bg', label: '去背', show: '' }
+        { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
+        // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
+        // { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: '' }
       ]
     }
   },
@@ -65,7 +65,7 @@ export default Vue.extend({
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
-    currLayer (): any {
+    currLayer(): any {
       const layers = this.currSelectedLayers as any[]
       const { index, type } = this.currSubSelectedInfo
       const imageLayers = layers.flatMap(layer => {
@@ -82,7 +82,7 @@ export default Vue.extend({
       })
       return { ...imageLayers.find(layer => !!layer) }
     },
-    currLayerAdjust (): any {
+    currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     }
   },

@@ -2,9 +2,9 @@
   div(class="popup-download text-left"
     v-click-outside="handleClose")
     div(v-if="polling" class="popup-download__form popup-download__form--polling")
-      div(class="body-3 text-gray-3") {{ name || '未命名設計' }}
+      div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
       div(class="flex flex-between text-gray-2 items-center")
-        span(class="body-2") 正在下載
+        span(class="body-2") {{$t('NN0216')}}
         svg-icon(class="pointer"
           iconName="close"
           iconWidth="16px"
@@ -13,7 +13,7 @@
       div(class="popup-download__progress mt-5")
         div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
     div(v-else class="popup-download__form")
-      div(class="body-3 mb-10") 檔案類型
+      div(class="body-3 mb-10") {{$t('NN0121')}}
       dropdown(class="mb-10"
         :options="typeOptions"
         @select="handleSelectType")
@@ -26,19 +26,19 @@
         div(v-if="'omitBackground' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
-            label="透明背景"
+            :label="`${$t('NN0215')}`"
             @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
         div(v-if="'scale' in selected"
           class="flex items-center mb-10")
-          span 尺寸 x
+          span {{`${$t('NN0122')} x`}}
           dropdown(class="mx-5 popup-download__size-scale"
             :options="scaleOptions"
             @select="option => handleUpdate('scale', option)") {{ selected.scale }}
-          span 倍
+          span {{$t('NN0123')}}
         div(v-if="'quality' in selected"
           class="flex flex-column items-center mb-10")
           div(class="flex items-center full-width mb-5")
-            span 品質
+            span {{$t('NN0132')}}
             property-bar(class="popup-download__size-scale ml-15")
               input(class="px-0"
                 type="text"
@@ -49,19 +49,19 @@
             min="1"
             v-ratio-change
             type="range")
-        div(class="mb-10 pt-5") 選擇頁面
+        div(class="mb-10 pt-5") {{$t('NN0124')}}
         div
           download-check-button(type="radio"
             class="mb-10"
             group-name="range"
-            :label="`目前頁面（第${currentPageIndex + 1}頁）`"
+            :label="`${$t('NN0125')}（第${currentPageIndex + 1}頁）`"
             value="current"
             :default-checked="rangeType === 'current'"
             @change="handleRangeType")
           download-check-button(type="radio"
             class="mb-10"
             group-name="range"
-            label="所有頁面"
+            :label="`${$t('NN0126')}`"
             value="all"
             :default-checked="rangeType === 'all'"
             @change="handleRangeType")
@@ -69,7 +69,7 @@
             download-check-button(type="radio"
               group-name="range"
               value="spec"
-              label="範圍"
+              :label="`${$t('NN0127')}`"
               :default-checked="rangeType === 'spec'"
               @change="handleRangeType")
             download-page-selection(class="ml-5 w-75"
@@ -77,7 +77,7 @@
         hr(class="popup-download__hr my-15")
         download-check-button(type="checkbox"
           class="mb-20"
-          label="儲存以上設定"
+          :label="`${$t('NN0129')}`"
           :default-checked="saveSubmission"
           @change="({ checked }) => handleSubmission(checked)")
       div
@@ -89,7 +89,7 @@
             iconName="loading"
             iconColor="white"
             iconWidth="20px")
-          span(v-else) 下載
+          span(v-else) {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
@@ -119,7 +119,7 @@ export default Vue.extend({
     useExternelJSON: Boolean,
     pageIndex: Number
   },
-  data () {
+  data() {
     const { selectedTypeVal, ...prevSubmission } = JSON.parse(localStorage.getItem(submission) || '{}')
     const currentPageIndex = this.pageIndex || 0
     return {
@@ -135,8 +135,8 @@ export default Vue.extend({
       selectedTypeVal: selectedTypeVal || 'png',
       scaleOptions: [0.5, 1, 1.5, 2, 2.5, 3],
       typeOptions: [
-        { value: 'png', name: 'PNG', desc: '品質影像：高 - 適用於透明底圖', tag: '建議' },
-        { value: 'jpg', name: 'JPG', desc: '品質影像：一般。' }
+        { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
+        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
         // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
         // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
@@ -147,36 +147,36 @@ export default Vue.extend({
   },
   computed: {
     ...mapState(['name']),
-    selectedType (): ITypeOption {
+    selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
     },
     selectedTypeQuality: {
-      get (): number {
+      get(): number {
         return this.selected.quality || 80
       },
-      set (curr: string) {
+      set(curr: string) {
         if (!Number.isNaN(+curr) && +curr > 0 && +curr <= 100) {
           this.selected.quality = +curr
         }
       }
     },
-    isButtonDisabled (): boolean {
+    isButtonDisabled(): boolean {
       const { rangeType, pageRange } = this
       const noPagesSelected = rangeType === 'spec' && pageRange.length === 0
       return this.polling || noPagesSelected
     }
   },
-  mounted () {
+  mounted() {
     if (this.useExternelJSON) return
     const id = GeneralUtils.generateAssetId()
     this.handleUploadJSON(id)
   },
   watch: {
-    selectedType (type) {
+    selectedType(type) {
       type && (this.selected = DownloadUtil.getTypeAttrs(type.value))
     },
-    exportId (id) {
+    exportId(id) {
       if (id) {
         const func = this.functionQueue.shift()
         typeof func === 'function' && func()
@@ -184,7 +184,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    handleUploadJSON (id: string) {
+    handleUploadJSON(id: string) {
       return uploadUtils.uploadExportJSON(id)
         .then((res: any) => {
           const { status } = res?.target
@@ -196,35 +196,35 @@ export default Vue.extend({
           }
         })
     },
-    handleClose () {
+    handleClose() {
       if (!this.polling) {
         this.$emit('close')
       }
     },
-    handleSelectType (type: ITypeOption) {
+    handleSelectType(type: ITypeOption) {
       this.selectedTypeVal = type.value
     },
-    handleRangeType (data: { [key: string]: any }) {
+    handleRangeType(data: { [key: string]: any }) {
       const { value } = data
       this.rangeType = value
     },
-    handleUpdate (field: string, option: string | number) {
+    handleUpdate(field: string, option: string | number) {
       Object.assign(this.selected, { [field]: option })
     },
-    handleRangeConfirm (range: boolean[]) {
+    handleRangeConfirm(range: boolean[]) {
       this.rangeType = 'spec'
       this.pageRange = range
         .map((status: boolean, idx: number) => status ? idx : -1)
         .filter(idx => idx >= 0)
     },
-    handleSubmission (checked: boolean) {
+    handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleSubmit () {
+    handleSubmit() {
       this.polling = true
       this.exportId ? this.handleDownload() : (this.functionQueue = [this.handleDownload])
     },
-    async handleDownload () {
+    async handleDownload() {
       this.polling = true
       const {
         exportId,
@@ -253,7 +253,7 @@ export default Vue.extend({
         .getFileUrl(fileInfo)
         .then(this.handleDownloadProgress)
     },
-    handleDownloadProgress (response: any) {
+    handleDownloadProgress(response: any) {
       const { flag, url, msg, progress } = response
       if ((this as any)._isDestroyed) return
       switch (flag) {
@@ -284,100 +284,100 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .popup-download {
-    padding: 18px;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr;
-    box-sizing: border-box;
-    border-radius: 5px;
-    box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-    background-color: setColor(white);
-    &__form {
-      min-height: 340px;
-      transition: .3s;
-      &--polling {
-        min-height: 50px;
-      }
-    }
-    &__type {
-      padding: 5px 10px 0;
-      line-height: 18px;
-      cursor: pointer;
-      &:hover {
-        background-color: setColor(gray-5);
-      }
-    }
-    &__type-desc {
-      font-size: 18px;
-      color: setColor(gray-3);
-      white-space: nowrap;
-      transform: scale(0.5);
-      transform-origin: left;
-      width: 0;
-    }
-    &__hr {
-      border: none;
-      border-top: 1px solid setColor(gray-4);
-    }
-    &__range-input {
-      appearance: none;
-      outline: none;
-      background: none;
-      flex: 1;
-      &::-webkit-slider-runnable-track {
-        height: 2px;
-        background-color: setColor(gray-4);
-      }
-      &::-webkit-slider-thumb {
-        appearance: none;
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        background-color: setColor(white);
-        border: 2px solid #3c64b1;
-        transition: 0.2s;
-        margin-top: -6.5px;
-        position: relative;
-        cursor: pointer;
-      }
-    }
-    &__size-scale {
-      width: 65px;
-    }
-    &__progress {
-      width: 100%;
-      height: 8px;
-      position: relative;
-      border-radius: 4px;
-      overflow: hidden;
-      background-color: #f1f1f1;
-    }
-    &__progress-value {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      transition: .3s;
-      border-radius: 4px;
-      background-color: setColor(blue-1);
-    }
-    .property-bar,
-    .btn {
-      padding: 3px 10px;
-    }
-    .property-bar {
-      box-sizing: border-box;
-    }
-    .btn,
-    .property-bar,
-    input {
-      font-family: 'Mulish';
-      font-size: 12px;
-      line-height: 22px;
-    }
-    input {
-      padding: 0;
+.popup-download {
+  padding: 18px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+  background-color: setColor(white);
+  &__form {
+    min-height: 340px;
+    transition: 0.3s;
+    &--polling {
+      min-height: 50px;
     }
   }
+  &__type {
+    padding: 5px 10px 0;
+    line-height: 18px;
+    cursor: pointer;
+    &:hover {
+      background-color: setColor(gray-5);
+    }
+  }
+  &__type-desc {
+    font-size: 18px;
+    color: setColor(gray-3);
+    white-space: nowrap;
+    transform: scale(0.5);
+    transform-origin: left;
+    width: 0;
+  }
+  &__hr {
+    border: none;
+    border-top: 1px solid setColor(gray-4);
+  }
+  &__range-input {
+    appearance: none;
+    outline: none;
+    background: none;
+    flex: 1;
+    &::-webkit-slider-runnable-track {
+      height: 2px;
+      background-color: setColor(gray-4);
+    }
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: setColor(white);
+      border: 2px solid #3c64b1;
+      transition: 0.2s;
+      margin-top: -6.5px;
+      position: relative;
+      cursor: pointer;
+    }
+  }
+  &__size-scale {
+    width: 65px;
+  }
+  &__progress {
+    width: 100%;
+    height: 8px;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f1f1f1;
+  }
+  &__progress-value {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transition: 0.3s;
+    border-radius: 4px;
+    background-color: setColor(blue-1);
+  }
+  .property-bar,
+  .btn {
+    padding: 3px 10px;
+  }
+  .property-bar {
+    box-sizing: border-box;
+  }
+  .btn,
+  .property-bar,
+  input {
+    font-family: "Mulish";
+    font-size: 12px;
+    line-height: 22px;
+  }
+  input {
+    padding: 0;
+  }
+}
 </style>

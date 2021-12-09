@@ -4,8 +4,8 @@
       btn(class="full-width mr-10 rounded"
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
-        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup?'取消群組':'群組'}}
-      div(class="border-gray-4 p-5 btn-opacity"  v-hint="'透明度'")
+        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
+      div(class="border-gray-4 p-5 btn-opacity"  v-hint="$t('NN0030')")
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
@@ -14,31 +14,31 @@
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="openOrderPopup()"
-        v-hint="'圖層順序'")
+        v-hint="$t('NN0031')")
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')"
-        v-hint="'複製'")
+        v-hint="$t('NN0032')")
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
-        v-hint="'鎖定圖層'")
+        v-hint="$t('NN0033')")
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
-        v-hint="'刪除'")
+        v-hint="$t('NN0034')")
       //- svg-icon(:class="{'pointer': !isLocked}"
       //-   iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
       //-   @click.native=""
       //-   v-hint="'複製樣式'")
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
-        @click.native="openAlignPopup") 位置對齊
+        @click.native="openAlignPopup") {{$t('NN0044')}}
       btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditing}"
-        @click.native="openFlipPopup") 翻轉
+        @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
 
 <script lang="ts">

@@ -1,22 +1,22 @@
 <template lang="pug">
 div(class="popup-file")
   div(class="popup-file__item text-gray-3")
-    span {{pageSize.w}}像素 x {{pageSize.h}}像素
+    span {{pageSize.w}}{{$t('NN0220')}} x {{pageSize.h}}{{$t('NN0220')}}
   div(class="popup-file__item" @click="save()")
-    span 儲存設計
+    span {{$t('NN0009')}}
   div(class="popup-file__item" @click="newDesign()")
-    span 建立新設計
+    span {{$t('NN0072')}}
   hr(class="popup-file__hr")
   div(class="popup-file__item " @click="togglerRuler()")
-    span 顯示尺規
+    span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
       :iconName="'done'"
       :iconColor="'gray-2'"
       :iconWidth="'14px'")
   div(class="popup-file__item" @click="toggleGuideline()")
-    span {{showGuideline ?'隱藏所有參考線':'顯示所有參考線'}}
+    span {{showGuideline ?$t('NN0074'):$t('NN0075')}}
   div(class="popup-file__item" @click="clearGuideline()")
-    span 刪除所有參考線
+    span {{$t('NN0075')}}
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -30,7 +30,6 @@ import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
-import designUtils from '@/utils/designUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 
 export default Vue.extend({
@@ -76,7 +75,6 @@ export default Vue.extend({
       // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
-
       this.closePopup()
     },
     save() {

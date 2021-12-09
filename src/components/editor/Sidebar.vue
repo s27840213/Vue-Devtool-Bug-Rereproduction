@@ -27,7 +27,6 @@
         class="mt-30"
         :textSize="14"
         :avatarSize="35"
-        :fitWidth="true"
         @click.native="goToPage('Settings')")
     div(v-if="buildNumber"
       class="text-white body-2 build-number") {{buildNumber}}
@@ -64,17 +63,17 @@ export default Vue.extend({
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
-        { icon: 'template', text: `${this.$t('editor.template')}` },
-        { icon: 'photo', text: `${this.$t('editor.photo')}` },
-        { icon: 'shape', text: `${this.$t('editor.object')}` },
-        { icon: 'bg', text: `${this.$t('editor.background')}` },
-        { icon: 'text', text: `${this.$t('editor.text')}` },
-        { icon: 'folder', text: `${this.$t('editor.myFile')}` }
-        // { icon: 'brand', text: `${this.$t('editor.brandkit')}` },
+        { icon: 'template', text: `${this.$tc('NN0001', 0)}` },
+        { icon: 'photo', text: `${this.$tc('NN0002', 0)}` },
+        { icon: 'shape', text: `${this.$tc('NN0003', 0)}` },
+        { icon: 'bg', text: `${this.$tc('NN0004', 0)}` },
+        { icon: 'text', text: `${this.$tc('NN0005', 0)}` },
+        { icon: 'folder', text: `${this.$tc('NN0006')}` }
+        // { icon: 'brand', text: `${this.$t('NN0007')}` },
         // { icon: 'photo', text: 'Pexels' }
       ]
     },
-    buildNumber (): string {
+    buildNumber(): string {
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
       return buildNumber ? `v.${buildNumber}` : ''
     }
@@ -111,7 +110,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .sidebar {
-  @include size(70px, 100%);
+  height: 100%;
   background-color: setColor(nav);
   display: grid;
   grid-template-rows: auto 1fr;

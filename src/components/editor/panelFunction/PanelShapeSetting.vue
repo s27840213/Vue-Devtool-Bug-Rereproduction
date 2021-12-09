@@ -25,10 +25,10 @@
             svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
           template(class="pointer" v-slot:g1i0)
             svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") 方形
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
           template(class="pointer" v-slot:g1i1)
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") 圓角
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
       div(class="vertical-rule")
       div(class="shape-setting__line-action-wrapper pointer"
           @click="handleValueModal('start-marker')")
@@ -121,10 +121,10 @@
                       buttonHeight="26")
             template(class="pointer" v-slot:g0i0)
               svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") 空心
+              div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
             template(class="pointer" v-slot:g0i1)
               svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") 實心
+              div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
       label-with-range(:value="corRadPercentage" :min="0" :max="100"
                       @update="handleBasicShapeCorRadPercentUpdate"
                       :event="corRadEvent"
@@ -132,7 +132,7 @@
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
-            div 導圓角
+            div {{$t('NN0086')}}
     div(class="shape-setting__colors")
       div(v-if="inGrouped"
         class="shape-setting__color"
@@ -340,7 +340,7 @@ export default Vue.extend({
     currSelectedIndex: function () {
       this.initilizeRecord()
     },
-    getColors: function() {
+    getColors: function () {
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         if ((currLayer as IGroup).layers

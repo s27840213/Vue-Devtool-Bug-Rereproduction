@@ -16,8 +16,8 @@
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items body-1"
             :class="isMobile & featureExpand[0] ? 'expand' : ''")
-            a(:href="blogPage") 使用教學
-            a(:href="blogPage") 幫助中心
+            a(:href="blogPage") {{$t('NN0146')}}
+            a(:href="blogPage") {{$t('NN0157')}}
         div(class="nu-footer__feature-region")
           div(class="label-lg nu-footer__feature-title"
             @click="expandItems(1, !featureExpand[1])")
@@ -29,8 +29,8 @@
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items body-1"
             :class="isMobile & featureExpand[1] ? 'expand' : ''")
-            a(:href="facebookPage") 關於我們
-            a(href="/templates") 模板中心
+            a(:href="facebookPage") {{$t('NN0158')}}
+            a(href="/templates") {{$t('NN0145')}}
         div(class="nu-footer__feature-region")
           div(class="label-lg nu-footer__feature-title"
             @click="expandItems(2, !featureExpand[2])")
@@ -56,9 +56,9 @@
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items body-1"
             :class="isMobile & featureExpand[3] ? 'expand' : ''")
-            a(:href="servicePage") 服務條款
-            a(:href="privacyPage") 隱私權聲明
-            a(:href="agreementPage") 使用協議
+            a(:href="servicePage") {{$t('NN0160')}}
+            a(:href="privacyPage") {{$t('NN0161')}}
+            a(:href="agreementPage") {{$t('NN0162')}}
     div(class="nu-footer__bottom")
       div(class="nu-footer__bottom-left")
         select(class="locale-select" v-model="locale")
@@ -121,10 +121,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    isMobile (): boolean {
+    isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
-    themeList (): Itheme[] {
+    themeList(): Itheme[] {
       return themeUtils.themes
     }
   },
@@ -171,7 +171,7 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       @include layout-mobile {
-        border-bottom: 1px solid #666B82;
+        border-bottom: 1px solid #666b82;
         padding-top: 20px;
         padding-bottom: 10px;
       }
@@ -222,7 +222,8 @@ export default Vue.extend({
         display: flex;
         flex-direction: column;
       }
-      > a,div {
+      > a,
+      div {
         color: white;
         text-decoration: none;
         text-align: left;

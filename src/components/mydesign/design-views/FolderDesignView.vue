@@ -54,7 +54,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folderName }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `由 ${folder ? folder.author : ''} 創作 | ${itemCount}個項目` }}
+              span {{ `${$t('NN0196',{name:folder ? folder.author : '' })} | ${$t('NN0197', {num:itemCount })}` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
@@ -63,14 +63,14 @@
                           iconWidth="15px"
                           iconColor="gray-2")
                 div(class="more-menu-text")
-                  span 重新命名
+                  span {{$t('NN0198')}}
               div(@click="handleDeleteFolder")
                 div(class="more-menu-icon")
                   svg-icon(iconName="trash"
                           iconWidth="15px"
                           iconColor="gray-2")
                 div(class="more-menu-text")
-                  span 刪除資料夾
+                  span {{$t('NN0199')}}
         div(ref="newFolder"
             class="folder-design-view__new-folder"
             :style="newFolderStyles()"
@@ -86,7 +86,7 @@
                   iconName="sequence"
                   iconWidth="18px"
                   iconColor="gray-2")
-          span(class="header-sort") 排序方式
+          span(class="header-sort") {{$t('NN0191')}}
           div(v-if="isSortMenuOpen"
               class="folder-design-view__sort-by__menu"
               @click.stop)
@@ -117,7 +117,7 @@
                   @loadMore="handleLoadMore")
     div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
       img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
-      span(class="folder-design-view__empty__text") 此資料夾是空的
+      span(class="folder-design-view__empty__text") {{$t('NN0239')}}
 </template>
 
 <script lang="ts">
@@ -132,8 +132,8 @@ import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
   mounted() {
-    hintUtils.bind(this.$refs.more as HTMLElement, '顯示更多', 500)
-    hintUtils.bind(this.$refs.newFolder as HTMLElement, '新增資料夾', 500)
+    hintUtils.bind(this.$refs.more as HTMLElement, `${this.$t('NN0225')}`, 500)
+    hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)
     this.refreshItems()
     this.refreshItemCount()
   },
@@ -155,25 +155,25 @@ export default Vue.extend({
         {
           icon: 'chevron-duo-left',
           style: 'transform: rotate(-90deg)',
-          text: '名稱 ( 遞增 )',
+          text: `${this.$t('NN0192')}`,
           payload: ['name', false]
         },
         {
           icon: 'chevron-duo-left',
           style: 'transform: rotate(90deg)',
-          text: '名稱 ( 遞減 )',
+          text: `${this.$t('NN0193')}`,
           payload: ['name', true]
         },
         {
           icon: 'clock',
           style: '',
-          text: '修改日期 ( 新到舊 )',
+          text: `${this.$t('NN0194')}`,
           payload: ['update', true]
         },
         {
           icon: 'clock',
           style: '',
-          text: '修改日期 ( 舊到新 )',
+          text: `${this.$t('NN0195')}`,
           payload: ['update', false]
         }
       ]
@@ -275,7 +275,7 @@ export default Vue.extend({
       this.checkNameLength()
       designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
     },
-    handleMenuAction(extraEvent: {event: string, payload: any}) {
+    handleMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
@@ -509,7 +509,7 @@ export default Vue.extend({
         border-top: 1px solid transparent;
         border-bottom: 1px solid setColor(gray-2);
       }
-      @media(min-width: 1360px) {
+      @media (min-width: 1360px) {
         max-width: 10vw;
       }
     }
@@ -598,7 +598,7 @@ export default Vue.extend({
             width: 15px;
             height: 15px;
           }
-          > .more-menu-text{
+          > .more-menu-text {
             height: 16px;
             display: flex;
             align-items: center;
@@ -663,7 +663,7 @@ export default Vue.extend({
           width: 15px;
           height: 15px;
         }
-        > .sort-menu-text{
+        > .sort-menu-text {
           height: 16px;
           display: flex;
           align-items: center;
@@ -707,7 +707,7 @@ export default Vue.extend({
   }
 }
 
-.header-icon{
+.header-icon {
   cursor: pointer;
   &:hover {
     color: setColor(blue-1);
@@ -732,10 +732,12 @@ export default Vue.extend({
 }
 
 .fade {
-  &-enter-active, &-leave-active {
-    transition: .2s;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }

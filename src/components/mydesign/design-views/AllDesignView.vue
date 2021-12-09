@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="all-design-view")
-    div(class="all-design-view__folder-name") 我所有設計
+    div(class="all-design-view__folder-name") {{$t('NN0187')}}
     div(class="horizontal-rule")
     design-gallery(:noHeader="true"
                   :menuItems="menuItems"
@@ -48,7 +48,7 @@ export default Vue.extend({
       fetchAllDesigns: 'fetchAllDesigns',
       fetchMoreAllDesigns: 'fetchMoreAllDesigns'
     }),
-    handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
+    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

@@ -13,23 +13,23 @@
           div
             btn(@click.native="goToPage('Home')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Home'}") 建立設計
+              :class="{'text-blue-1': currentPage === 'Home'}") {{$t('NN0144')}}
           div
             btn(@click.native="goToPage('TemplateCenter')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") 模板中心
+              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") {{$t('NN0145')}}
           div
             btn(@click.native="goToPage('Toturial')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Toturial'}") 使用教學
+              :class="{'text-blue-1': currentPage === 'Toturial'}") {{$t('NN0146')}}
           div
             btn(@click.native="goToPage('Faq')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Faq'}") 常見問題
+              :class="{'text-blue-1': currentPage === 'Faq'}") {{$t('NN0147')}}
           div(v-if="isLogin")
             btn(@click.native="goToPage('MyDesign')"
               style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'MyDesign'}") 我的設計
+              :class="{'text-blue-1': currentPage === 'MyDesign'}") {{$t('NN0080')}}
         div(v-else class="body-2" key="no-navigation")
           div
           div

@@ -35,7 +35,7 @@
             :iconName="uploadStatusIcon"
             :iconWidth="'30px'"
             :iconColor="'green-2'")
-          span {{fontUploadStatus === 'uploading' ? '上傳中' : '上傳成功'}}
+          span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
       btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
         :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>

@@ -17,7 +17,7 @@ function loadLocaleMessages(): LocaleMessages {
 }
 
 export default new VueI18n({
-  locale: 'zh-TW',
-  fallbackLocale: 'zh-TW',
+  locale: 'tw',
+  fallbackLocale: 'tw',
   messages: loadLocaleMessages()
 })

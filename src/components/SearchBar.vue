@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -30,7 +31,7 @@ export default Vue.extend({
   props: {
     placeholder: {
       type: String,
-      default: 'Search from our template'
+      default: `${i18n.t('NN0092')}`
     },
     clear: {
       type: Boolean
@@ -44,13 +45,13 @@ export default Vue.extend({
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       keyword: this.defaultKeyword
     }
   },
   watch: {
-    defaultKeyword (val) {
+    defaultKeyword(val) {
       this.keyword = val
     }
   },
@@ -58,15 +59,15 @@ export default Vue.extend({
     inputStyles() {
       return { fontFamily: this.fontFamily }
     },
-    onSearch (event: Event) {
+    onSearch(event: Event) {
       event.preventDefault()
       this.$emit('search', this.keyword)
     },
-    onClear () {
+    onClear() {
       this.keyword = ''
       this.$emit('search', '')
     },
-    onUpdate () {
+    onUpdate() {
       this.$emit('update', this.keyword)
     }
   }

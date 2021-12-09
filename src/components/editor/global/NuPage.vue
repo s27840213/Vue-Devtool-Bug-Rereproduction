@@ -5,11 +5,12 @@
     div(v-if="!inPagePanel"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
-      span(class="pr-10") 第 {{pageIndex+1}} 頁
+      //- span(class="pr-10") 第 {{pageIndex+1}} 頁
+      span(class="pr-10") {{$t('NN0134', {num:`${pageIndex+1}`})}}
       input(
         type="text"
         v-model="pageName"
-        placeholder="新增頁面標題"
+        :placeholder="`${$t('NN0081')}`"
         @focus="pageNameFocused()"
         @blur="stepRecord()")
       div(class="nu-page__icons"
@@ -18,7 +19,7 @@
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()"
-          v-hint="'參考線版型'")
+          v-hint="`${$t('NN0138')}`")
         //- svg-icon(class="pointer mr-5"
         //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
         //-   @click.native="")
@@ -28,16 +29,16 @@
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()"
-          v-hint="'新增頁面'")
+          v-hint="`${$t('NN0139')}`")
         svg-icon(class="pointer"
           :class="[{'mr-10': getPageCount > 1}]"
           :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="duplicatePage()"
-          v-hint="'複製頁面'")
+          v-hint="`${$t('NN0140')}`")
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()"
-          v-hint="'刪除頁面'")
+          v-hint="`${$t('NN0141')}`")
     div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")

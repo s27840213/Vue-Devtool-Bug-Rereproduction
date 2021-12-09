@@ -67,7 +67,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
-  data () {
+  data() {
     return {
       recentlyUsed: [] as ILayout[],
       selectedFormat: 'custom',
@@ -105,7 +105,7 @@ export default Vue.extend({
         return true
       }
     },
-    isLockDisabled () {
+    isLockDisabled() {
       if (this.selectedFormat === 'custom' && this.pageWidth > 0 && this.pageHeight > 0) {
         return false
       } else {
@@ -113,7 +113,7 @@ export default Vue.extend({
       }
     }
   },
-  mounted () {
+  mounted() {
     this.fetchLayouts()
   },
   methods: {
@@ -173,7 +173,7 @@ export default Vue.extend({
       this.recentlyUsed = []
       this.getCategories().then(() => {
         for (const category of this.categories as IListServiceContentData[]) {
-          if (category.title === '最近使用') {
+          if (category.title === `${this.$t('NN0024')}`) {
             this.recentlyUsed = category.list.map(item => ({
               id: item.id,
               width: item.width ?? 0,
@@ -228,77 +228,77 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .popup-size {
-    position: relative;
-    width: 500px;
-    display: grid;
-    grid-template-columns: 1fr;
-    box-sizing: border-box;
-    border-radius: 5px;
-    box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-    background-color: setColor(white);
-    padding: 20px 50px;
-    &__body {
-      &-row {
-        display: flex;
-        justify-content: start;
-        width: 87%;
-        margin-left: auto;
-        margin-top: 15px;
-        margin-right: 10px;
-        align-items: center;
-        &-center {
-          margin-top: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-      }
-      &__custom {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        grid-template-rows: auto;
-        column-gap: 5px;
-        align-items: center;
-        width: 85%;
-        &__box {
-          height: 26px;
-          box-sizing: border-box;
-          padding: 5px 5px;
-          & input {
-            line-height: 16px;
-            background-color: transparent;
-          }
-          &.border-blue-1 {
-            @extend .border-blue-1;
-          }
-          &.border-white {
-            @extend .border-white;
-          }
-        }
-      }
-      &__hr {
-        width: 100%;
-        height: 1px;
-        background: setColor(gray-4);
-        margin-left: auto;
-        margin-right: auto;
+.popup-size {
+  position: relative;
+  width: 500px;
+  display: grid;
+  grid-template-columns: 1fr;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+  background-color: setColor(white);
+  padding: 20px 50px;
+  &__body {
+    &-row {
+      display: flex;
+      justify-content: start;
+      width: 87%;
+      margin-left: auto;
+      margin-top: 15px;
+      margin-right: 10px;
+      align-items: center;
+      &-center {
         margin-top: 20px;
-        margin-bottom: 20px;
-        padding: 0;
-      }
-      &__button {
-        margin: 0 auto;
-        width: 60%;
-        padding-top: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
-    &__close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    &__custom {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      grid-template-rows: auto;
+      column-gap: 5px;
+      align-items: center;
+      width: 85%;
+      &__box {
+        height: 26px;
+        box-sizing: border-box;
+        padding: 5px 5px;
+        & input {
+          line-height: 16px;
+          background-color: transparent;
+        }
+        &.border-blue-1 {
+          @extend .border-blue-1;
+        }
+        &.border-white {
+          @extend .border-white;
+        }
+      }
+    }
+    &__hr {
+      width: 100%;
+      height: 1px;
+      background: setColor(gray-4);
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      padding: 0;
+    }
+    &__button {
+      margin: 0 auto;
+      width: 60%;
+      padding-top: 30px;
     }
   }
+  &__close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+}
 .input-invalid {
   border: 1px solid setColor(red) !important;
 }

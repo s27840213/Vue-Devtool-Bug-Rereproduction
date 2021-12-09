@@ -10,24 +10,24 @@
                 class="template-center__absolute-searchbar"
                 :clear="true"
                 :defaultKeyword="searchbarKeyword"
-                placeholder="搜尋"
+                :placeholder="`${$t('NN0037')}`"
                 fontFamily="Mulish"
                 @update="handleUpdate"
                 @search="handleSearch")
     div(v-if="!isMobile" class="template-center__search-container")
       div(class="template-center__search")
         div(class="template-center__search__title")
-          span 選擇一個心儀的模板著手設計吧！
+          span {{$t('NN0185')}}
         div(class="template-center__search__text")
-          span 特別設計過的電商模板能讓您簡單又快速的做出電商所需要的圖片。
-          br
-          span 沒有設計底子也沒問題！只需要輕鬆點擊幾下，一張專屬於品牌的精美圖片馬上出爐！
+          i18n(path="NN0186" tag="span")
+            template(#newline)
+              br
         search-bar(ref="searchbar"
                   class="template-center__search__searchbar"
                   :style="searchbarStyles()"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
-                  placeholder="搜尋"
+                  :placeholder="`${$t('NN0037')}`"
                   fontFamily="Mulish"
                   @update="handleUpdate"
                   @search="handleSearch")
@@ -38,7 +38,7 @@
                   class="template-center__mobile-search__searchbar"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
-                  placeholder="搜尋"
+                  :placeholder="`${$t('NN0037')}`"
                   fontFamily="Mulish"
                   @update="handleUpdate"
                   @search="handleSearch")
@@ -60,7 +60,7 @@
       div(v-if="!isMobile" class="template-center__hr")
       div(v-if="!isMobile" class="template-center__sorter")
         div(class="template-center__sorter__left")
-          div(class="template-center__sorter__title") 排序方式:
+          div(class="template-center__sorter__title") {{$t('NN0191')}}:
           div(v-for="sortingCriterium in sortingCriteria"
               class="template-center__sorter__sort pointer"
               :class="{'selected': selectedSorting === sortingCriterium.key}"
@@ -142,7 +142,7 @@
                       iconWidth="20px"
                       iconColor="gray-2")
           div(class="template-center__multi__title")
-            span 選擇設計主題：
+            span {{$t('NN0228')}}：
           div(class="template-center__multi__themes")
             div(v-for="theme in matchedThemes" class="template-center__multi__themes__row"
                 :class="checkSelected(theme) ? 'selected' : ''"
@@ -154,7 +154,7 @@
           div(class="template-center__multi__button"
               :class="selectedTheme ? '' : 'disabled'"
               @click="handleThemeSubmit")
-            span 使用此模板
+            span {{$t('NN0229')}}
     div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
 </template>
 
@@ -200,7 +200,7 @@ export default Vue.extend({
       snapToTop: false,
       searchbarTop: 0,
       searchbarKeyword: '',
-      hashtagSelections: {} as {[key: string]: {type: string, selection: string[]}},
+      hashtagSelections: {} as { [key: string]: { type: string, selection: string[] } },
       sortingCriteria,
       selectedSorting: sortingCriteria[0].key,
       waterfallTemplates: [] as ITemplate[][],
@@ -240,12 +240,12 @@ export default Vue.extend({
         let selection: string[] = []
         if (hashtag.type === 'theme') {
           selection = hashtag.list
-            .filter((tag: {id: number}) => themeIds.includes(tag.id))
-            .map((tag: {id: number}) => tag.id.toString())
+            .filter((tag: { id: number }) => themeIds.includes(tag.id))
+            .map((tag: { id: number }) => tag.id.toString())
         } else {
           selection = hashtag.list
-            .filter((tag: {name: string}) => tagStrs.includes(tag.name))
-            .map((tag: {name: string}) => tag.name)
+            .filter((tag: { name: string }) => tagStrs.includes(tag.name))
+            .map((tag: { name: string }) => tag.name)
         }
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
@@ -274,7 +274,7 @@ export default Vue.extend({
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
     }),
-    isMobile (): boolean {
+    isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     }
   },
@@ -308,7 +308,7 @@ export default Vue.extend({
       this.searchbarKeyword = keyword
       this.composeKeyword()
     },
-    handleHashtagSelect(selectinfo: {title: string, selection: string[]}) {
+    handleHashtagSelect(selectinfo: { title: string, selection: string[] }) {
       this.hashtagSelections[selectinfo.title].selection = selectinfo.selection
       this.composeKeyword()
     },
@@ -470,7 +470,7 @@ export default Vue.extend({
     padding-top: 28%;
     background-size: cover;
     background-position: center center;
-    background-image: url('~@/assets/img/jpg/templates/search_background.jpeg');
+    background-image: url("~@/assets/img/jpg/templates/search_background.jpeg");
   }
   &__search {
     position: absolute;
@@ -496,7 +496,7 @@ export default Vue.extend({
         letter-spacing: 0.255em;
         text-indent: 0.255em;
         display: block;
-        color: #373F41;
+        color: #373f41;
       }
     }
     &__text {
@@ -533,7 +533,7 @@ export default Vue.extend({
     &.mobile {
       margin-top: unset;
       margin-left: 5px;
-      transition: .2s ease;
+      transition: 0.2s ease;
     }
   }
   &__hr {
@@ -549,7 +549,8 @@ export default Vue.extend({
     justify-content: space-between;
     width: 100%;
     height: 56px;
-    &__left, &__right {
+    &__left,
+    &__right {
       display: flex;
       align-items: center;
       height: 100%;
@@ -584,7 +585,7 @@ export default Vue.extend({
       font-size: 14px;
       line-height: 24px;
       text-align: right;
-      color: #373F41;
+      color: #373f41;
     }
     &__color-down {
       display: flex;
@@ -600,8 +601,8 @@ export default Vue.extend({
       &::-webkit-scrollbar {
         display: none;
       }
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
     }
   }
   &__waterfall {
@@ -717,7 +718,7 @@ export default Vue.extend({
     transform: translate(-50%, -50%);
     width: 982px;
     height: 560px;
-    background: #FFFFFF;
+    background: #ffffff;
     box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
     border-radius: 6px;
     z-index: 20;
@@ -844,7 +845,7 @@ export default Vue.extend({
       }
       &__description {
         transform-origin: left;
-        transform: scale(calc(5/6));
+        transform: scale(calc(5 / 6));
       }
     }
     &__button {
@@ -859,7 +860,7 @@ export default Vue.extend({
       text-align: center;
       cursor: pointer;
       > span {
-        font-family: 'NotoSansTC';
+        font-family: "NotoSansTC";
         font-weight: 700;
         font-size: 12px;
         line-height: 18px;
@@ -882,7 +883,7 @@ export default Vue.extend({
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #FFFFFF;
+    background: #ffffff;
     z-index: 20;
     &__close {
       position: fixed;
@@ -939,33 +940,39 @@ export default Vue.extend({
 }
 
 .fade-scale {
-  &-enter-active, &-leave-active  {
-    transition: .3s ease;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
   }
 
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     transform: scale(0.8);
     opacity: 0;
   }
 }
 
 .fade-scale-center {
-  &-enter-active, &-leave-active  {
-    transition: .3s ease;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
   }
 
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
   }
 }
 
 .fade-slide {
-  &-enter-active, &-leave-active  {
-    transition: .3s ease;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
   }
 
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     left: 100%;
   }
 }

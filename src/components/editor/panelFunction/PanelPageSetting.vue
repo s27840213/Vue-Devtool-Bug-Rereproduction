@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="page-setting")
     div(class="page-setting-row page-setting__title")
-      span(class="text-gray-2 label-mid") 頁面尺寸
+      span(class="text-gray-2 label-mid") {{$t('NN0021')}}
     div(class="page-setting-row page-setting__size")
       property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
         span(class="body-3 text-gray-2") {{ currentPageWidth }}
@@ -14,7 +14,7 @@
         span(class="body-4 text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
-      span(class="page-setting__apply__text") 調 整 尺 寸
+      span(class="page-setting__apply__text") {{$t('NN0022')}}
     transition(name="slide-fade")
       div(v-if="isPanelOpen"
         class="page-setting__suggestion-panel")
@@ -52,7 +52,7 @@
                     :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'") H
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
           div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 最近使用
+            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0024')}}
           div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
             svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
           div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row pointer"
@@ -66,7 +66,7 @@
                   @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
           div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 常用尺寸
+            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0025')}}
           div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
             svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
           div(v-for="(format, index) in formatList" class="page-setting__suggestion-panel__body-row pointer"
@@ -83,7 +83,7 @@
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
                 @click="applySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") 調整尺寸
+              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
                 @click="copyAndApplySelectedFormat")
@@ -320,7 +320,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    key_id: function() {
+    key_id: function () {
       this.isGetTemplate = false
       this.templateInfo = {
         key_id: '',
@@ -342,7 +342,7 @@ export default Vue.extend({
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
-    groupId: function() {
+    groupId: function () {
       this.isGetGroup = false
       this.showDbGroup = false
       this.dbGroupThemes = []
@@ -746,7 +746,7 @@ export default Vue.extend({
       if (themeAspectRatio === templateAspectRatio) {
         return false
       } else if ((themeWidth === this.templateInfo.width || themeWidth === '0') &&
-                    (themeHeight === this.templateInfo.height || themeHeight === '0')) {
+        (themeHeight === this.templateInfo.height || themeHeight === '0')) {
         return false
       } else {
         return true
@@ -757,8 +757,11 @@ export default Vue.extend({
       this.formatList = []
       this.recentlyUsed = []
       this.getCategories().then(() => {
+        /**
+         * @Todo TingAn -handle the sizz missing problem when intergate the i18n
+         */
         for (const category of this.categories as IListServiceContentData[]) {
-          if (category.title === '常用尺寸') {
+          if (category.title === `${this.$t('NN0025')}`) {
             this.formatList = category.list.map(item => ({
               id: item.id,
               width: item.width ?? 0,
@@ -767,7 +770,7 @@ export default Vue.extend({
               description: item.description ?? ''
             }))
           }
-          if (category.title === '最近使用') {
+          if (category.title === `${this.$t('NN0024')}`) {
             this.recentlyUsed = category.list.map(item => ({
               id: item.id,
               width: item.width ?? 0,
@@ -1061,11 +1064,13 @@ export default Vue.extend({
   }
 }
 
-.slide-fade-enter-active, .slide-fade-leave-active  {
-  transition: .3s ease;
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: 0.3s ease;
 }
 
-.slide-fade-enter, .slide-fade-leave-to {
+.slide-fade-enter,
+.slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;
 }

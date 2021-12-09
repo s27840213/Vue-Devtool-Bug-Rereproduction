@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
       @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 label-lg") 文字設定
+    span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
         img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
@@ -22,7 +22,7 @@
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
     div(class="text-setting__row2")
-      div(class="text-setting__color" v-hint="'文字顏色'")
+      div(class="text-setting__color" v-hint="`${$t('NN0099')}`")
         div(class="color-slip record-selection"
           @click="handleColorModal")
           svg-icon(iconName="text-color"
@@ -44,11 +44,11 @@
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-hint="'字間距'")
+          v-hint="`${$t('NN0109')}`")
         svg-icon(class="pointer record-selection btn-ls"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-hint="'行距'")
+          v-hint="`${$t('NN0110')}`")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="pointer record-selection"
@@ -111,14 +111,14 @@ export default Vue.extend({
       fontSelectValue: fontSelectValue,
       isOpenFontPanel: false,
       hintMap: {
-        bold: '粗體',
-        underline: '底線',
-        italic: '斜體',
-        'font-vertical': '垂直文字',
-        'text-align-left': '左對齊',
-        'text-align-center': '文字置中',
-        'text-align-right': '右對齊',
-        'text-align-justify': '兩端對齊'
+        bold: `${this.$t('NN0101')}`,
+        underline: `${this.$t('NN0102')}`,
+        italic: `${this.$t('NN0103')}`,
+        'font-vertical': `${this.$t('NN0104')}`,
+        'text-align-left': `${this.$t('NN0105')}`,
+        'text-align-center': `${this.$t('NN0106')}`,
+        'text-align-right': `${this.$t('NN0107')}`,
+        'text-align-justify': `${this.$t('NN0108')}`
       }
     }
   },
@@ -623,7 +623,7 @@ export default Vue.extend({
         }
       }
     }
-    &__copy{
+    &__copy {
       cursor: pointer;
       &:hover {
         color: setColor(gray-3);

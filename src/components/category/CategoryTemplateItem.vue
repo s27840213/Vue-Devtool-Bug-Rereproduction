@@ -35,7 +35,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    previewImage (): string {
+    previewImage(): string {
       const { match_cover: cover, ver, id } = this.item
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
     }
@@ -64,14 +64,14 @@ export default Vue.extend({
       if (!isSameTheme) {
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
-          '模板尺寸與頁面不同，請問要使用哪個尺寸',
+          `${this.$t('NN0209')}`,
           [],
           {
-            msg: '模板尺寸',
+            msg: `${this.$t('NN0208')}`,
             action: cb
           },
           {
-            msg: '頁面尺寸',
+            msg: `${this.$t('NN0021')}`,
             action: () => {
               const resize = { width: currLayer.width, height: currLayer.height }
               cb(resize)
@@ -94,35 +94,35 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .category-template-item {
-    &__img {
-      object-fit: contain;
-      height: 145px;
-      width: 145px;
-      vertical-align: top;
-    }
-    &__id {
-      color: #ffffff;
-      font-size: 20px;
-      line-height: 40px;
-      text-align: left;
-      transform: scale(.5);
-      transform-origin: left top;
-      cursor: pointer;
-    }
-    &__index {
-      position: absolute;
-      bottom: 2px;
-      right: 4px;
-      font-size: 20px;
-      color: #ffffff;
-      padding: 4px 8px;
-      width: 70px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      background: rgba(24, 25, 31, 0.7);
-      transform: scale(0.4);
-      transform-origin: bottom right;
-    }
+.category-template-item {
+  &__img {
+    object-fit: contain;
+    height: 145px;
+    width: 145px;
+    vertical-align: top;
   }
+  &__id {
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 40px;
+    text-align: left;
+    transform: scale(0.5);
+    transform-origin: left top;
+    cursor: pointer;
+  }
+  &__index {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 20px;
+    color: #ffffff;
+    padding: 4px 8px;
+    width: 70px;
+    border-radius: 20px;
+    box-sizing: border-box;
+    background: rgba(24, 25, 31, 0.7);
+    transform: scale(0.4);
+    transform-origin: bottom right;
+  }
+}
 </style>

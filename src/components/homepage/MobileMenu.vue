@@ -4,29 +4,29 @@
         div(class="nav__option")
           btn(@click.native="goToPage('Home')"
             :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'Home'}") 建立設計
+            :class="{'text-blue-1': currentPage === 'Home'}") {{$t('NN0144')}}
         div(class="nav__option")
           btn(@click.native="goToPage('TemplateCenter')"
               :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") 模板中心
+              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") {{$t('NN0145')}}
         div(class="nav__option")
           btn(@click.native="goToPage('Toturial')"
               :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Toturial'}") 使用教學
+              :class="{'text-blue-1': currentPage === 'Toturial'}") {{$t('NN0146')}}
         div(class="nav__option")
           btn(@click.native="goToPage('Faq')"
               :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Faq'}") 常見問題
+              :class="{'text-blue-1': currentPage === 'Faq'}") {{$t('NN0147')}}
     div(class="nav mobile-menu__bottom")
       template(v-if="!isLogin")
         div(class="nav__option")
           btn(@click.native="goToPage('Login')"
             :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'Login'}") 登入
+            :class="{'text-blue-1': currentPage === 'Login'}") {{$t('NN0168')}}
         div(class="nav__option")
           btn(@click.native="goToPage('SignUp')"
             :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'SignUp'}") 註冊
+            :class="{'text-blue-1': currentPage === 'SignUp'}") {{$t('NN0169')}}
       template(v-else)
         div(class="mobile-menu__bottom__profile")
           avatar(class="mr-10"
@@ -34,13 +34,13 @@
             :avatarSize="35")
         div(class="nav__option"
           @click="goToPageByPath('/settings/account')")
-          span 帳號設定
+          span {{$t('NN0165')}}
         div(class="nav__option"
           @click="goToPageByPath('/settings/security')")
-          span 登入與安全性
+          span {{$t('NN0166')}}
         div(class="nav__option"
           @click="onLogoutClicked()")
-          span 登出
+          span {{$t('NN0167')}}
 </template>
 <script lang="ts">
 import Vue from 'vue'

@@ -7,8 +7,7 @@
       :disabled="inprogress"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
-      span(v-if="!inprogress"
-        class="ml-20") 下 載
+      span(v-if="!inprogress") {{$t('NN0010')}}
     popup-download(v-if="show"
       class="download-btn__modal"
       :page-index="lastSelectedPageIndex"
@@ -37,10 +36,10 @@ export default Vue.extend({
     })
   },
   methods: {
-    handleInprogress (inprogress: boolean) {
+    handleInprogress(inprogress: boolean) {
       this.inprogress = inprogress
     },
-    handleShowPopup (show: boolean) {
+    handleShowPopup(show: boolean) {
       this.show = show || false
       !show && (this.inprogress = false)
     }
@@ -49,16 +48,16 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .download-btn {
-    position: relative;
-    width: 90px;
-    &__modal {
-      position: absolute;
-      top: 100%;
-      margin-top: 12px;
-      right: -50px;
-      width: 210px;
-      z-index: 1;
-    }
+.download-btn {
+  position: relative;
+  width: 90px;
+  &__modal {
+    position: absolute;
+    top: 100%;
+    margin-top: 12px;
+    right: -50px;
+    width: 210px;
+    z-index: 1;
   }
+}
 </style>

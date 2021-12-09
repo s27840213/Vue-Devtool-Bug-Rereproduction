@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="favorite-design-view")
-    div(class="favorite-design-view__folder-name") 我的最愛
+    div(class="favorite-design-view__folder-name")  {{$t('NN0188')}}
     div(class="horizontal-rule")
     design-gallery(:noHeader="true"
                   :menuItems="menuItems"
@@ -47,7 +47,7 @@ export default Vue.extend({
       fetchFavoriteDesigns: 'fetchFavoriteDesigns',
       fetchMoreFavoriteDesigns: 'fetchMoreFavoriteDesigns'
     }),
-    handleDesignMenuAction(extraEvent: {event: string, payload: any}) {
+    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

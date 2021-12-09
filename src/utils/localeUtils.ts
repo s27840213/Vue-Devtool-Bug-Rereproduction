@@ -14,30 +14,30 @@ class LocaleUtils {
   constructor() {
     this.SUPPORTED_LOCALES = [{
       abbreviation: 'en',
-      code: 'en-US',
+      code: 'en',
       base: '/en',
       name: 'English'
     },
     {
       abbreviation: 'tw',
-      code: 'zh-TW',
+      code: 'tw',
       base: '',
       name: '繁體中文'
     },
     {
       abbreviation: 'jp',
-      code: 'ja-JP',
+      code: 'jp',
       base: '/jp',
       name: 'Français'
     }]
 
     this.localeMap = {
-      tw: 'zh-TW',
-      en: 'en-US',
-      jp: 'ja-JP'
+      tw: 'tw',
+      en: 'en',
+      jp: 'jp'
     }
 
-    this.defaultLocale = 'zh-TW'
+    this.defaultLocale = 'tw'
   }
 
   isDefaultLocale(): boolean {
@@ -49,7 +49,7 @@ class LocaleUtils {
   }
 
   getLocaleRegex(): string {
-    let reg = ''
+    let reg = '|'
     this.SUPPORTED_LOCALES.forEach((locale, index) => {
       reg = `${reg}${locale.abbreviation}${index !== this.SUPPORTED_LOCALES.length - 1 ? '|' : ''}`
     })
@@ -57,8 +57,6 @@ class LocaleUtils {
   }
 
   getLocaleInfo(): ILocale {
-    console.log(i18n.locale)
-    console.log(this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.locale))
     return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.locale) as ILocale
   }
 }

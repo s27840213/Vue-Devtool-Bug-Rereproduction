@@ -26,18 +26,18 @@
         :class="backgroundImgControl ? 'active' : ''"
         type="gray-mid"
         :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleControlBgImage()") 裁切
+        @click.native="() => handleControlBgImage()") {{$t('NN0040')}}
     div(class="bg-setting__grid mb-10")
       btn(class="full-width"
         :class="show === 'popup-flip' ? 'active' : ''"
         type="gray-mid"
         :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleShow('popup-flip')") 翻轉
+        @click.native="() => handleShow('popup-flip')") {{$t('NN0038')}}
       btn(class="full-width"
         :class="show === 'popup-adjust' ? 'active' : ''"
         type="gray-mid"
         :disabled="!isShowImage || backgroundLocked"
-        @click.native="handleShow('popup-adjust')") 調整
+        @click.native="handleShow('popup-adjust')") {{$t('NN0042')}}
     div(class="mb-10 text-left")
       div(v-if="show === 'popup-flip'"
         class="popup-flip"
@@ -94,55 +94,55 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       getPage: 'getPage'
     }),
-    currPage (): IPage {
+    currPage(): IPage {
       return this.getPage(this.lastSelectedPageIndex)
     },
-    backgroundColor (): string {
+    backgroundColor(): string {
       return this.currPage.backgroundColor
     },
-    backgroundOpacity (): number {
+    backgroundOpacity(): number {
       const { styles: { opacity } } = this.currPage.backgroundImage.config
       return opacity
     },
-    backgroundAdjust (): any {
+    backgroundAdjust(): any {
       const { styles: { adjust } } = this.currPage.backgroundImage.config
       return adjust
     },
-    backgroundLocked (): boolean {
+    backgroundLocked(): boolean {
       const { locked } = this.currPage.backgroundImage.config
       return locked
     },
-    backgroundImage (): any {
+    backgroundImage(): any {
       return this.currPage.backgroundImage.config?.srcObj ?? {}
     },
-    backgroundImgControl (): boolean {
+    backgroundImgControl(): boolean {
       return this.currPage.backgroundImage.config?.imgControl ?? false
     },
-    backgroundImgFlip (): boolean[] {
+    backgroundImgFlip(): boolean[] {
       const { horizontalFlip = false, verticalFlip = false } = this.currPage.backgroundImage.config?.styles || {}
       return [horizontalFlip, verticalFlip]
     },
-    isShowImage (): boolean {
+    isShowImage(): boolean {
       return this.backgroundImage.assetId
     },
-    colorPickerStyle (): any {
+    colorPickerStyle(): any {
       if (this.backgroundColor && !this.backgroundImage.assetId) {
         return { background: this.backgroundColor }
       }
       return {}
     },
-    colorPickerClass (): any {
+    colorPickerClass(): any {
       return {
         'bg-setting__current-color--selected': this.colorPickerStyle.background,
         'bg-setting__current-color--disabled': this.backgroundLocked
       }
     }
   },
-  mounted () {
+  mounted() {
     popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
     colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
   },
-  beforeDestroy () {
+  beforeDestroy() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
     colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
   },
@@ -156,12 +156,12 @@ export default Vue.extend({
       setBgImageControl: 'SET_backgroundImageControl',
       setBgImageStyles: 'SET_backgroundImageStyles'
     }),
-    handleDeleteBackground () {
+    handleDeleteBackground() {
       if (this.backgroundLocked) return this.handleLockedNotify()
       this.removeBg({ pageIndex: this.lastSelectedPageIndex })
       stepsUtils.record()
     },
-    handleLockBackground () {
+    handleLockBackground() {
       this.setBgConfig({
         pageIndex: this.lastSelectedPageIndex,
         config: {
@@ -239,7 +239,7 @@ export default Vue.extend({
     handleLockedNotify() {
       this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     },
-    handleOutSide () {
+    handleOutSide() {
       this.show = ''
     }
   }
@@ -260,12 +260,14 @@ export default Vue.extend({
     height: 40px;
     border-radius: 4px;
     cursor: pointer;
-    background: center/contain no-repeat url("~@/assets/img/png/defaultColor.png");
+    background: center/contain no-repeat
+      url("~@/assets/img/png/defaultColor.png");
     &--selected {
-      box-shadow: rgb(128 128 128) 0px 0px 0px 2px, rgb(255 255 255) 0px 0px 0px 1.5px inset;
+      box-shadow: rgb(128 128 128) 0px 0px 0px 2px,
+        rgb(255 255 255) 0px 0px 0px 1.5px inset;
     }
     &--disabled {
-      opacity: .3;
+      opacity: 0.3;
     }
   }
   .btn {
@@ -302,5 +304,4 @@ export default Vue.extend({
 .action-bar {
   padding: 10px 15px;
 }
-
 </style>

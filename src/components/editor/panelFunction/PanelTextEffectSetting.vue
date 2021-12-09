@@ -16,7 +16,7 @@
         div(v-for="field in shadowFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`textEffect.${field}`)}}
+          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
@@ -34,7 +34,7 @@
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") 顏色
+          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
           div(class="text-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")
@@ -58,7 +58,7 @@
         div(v-for="field in shadowFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ $t(`textEffect.${field}`) }}
+          div(class="text-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
@@ -76,7 +76,7 @@
             type="number")
         div(v-if="canChangeColor"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") 顏色
+          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
           div(class="text-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")
@@ -85,7 +85,7 @@
             v-click-outside="handleColorModal"
             :currentColor="currentStyle.textEffect.color"
             @update="handleColorUpdate")
-      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('textEffect.shape')}}
+      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('NN0070')}}
       div(class="flex-start text-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shapeOption"
           :key="`shape-${icon}`"
@@ -100,7 +100,7 @@
         div(v-for="field in shapeFields"
           :key="field"
           class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`textEffect.${field}`)}}
+          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
           input(class="text-effect-setting__range-input"
             :value="currentStyle.textShape[field]"
             :max="fieldRange[field].max"
@@ -148,6 +148,17 @@ export default Vue.extend({
         splice: ['stroke', 'distance', 'angle', 'color'],
         echo: ['distance', 'angle', 'color']
       } as { [key: string]: string[] },
+      effectI18nMap: {
+        distance: 'NN0063',
+        angle: 'NN0064',
+        blur: 'NN0065',
+        opacity: 'NN0066',
+        color: 'NN0067',
+        spread: 'NN0068',
+        stroke: 'NN0069',
+        shape: 'NN0070',
+        bend: 'NN00671'
+      },
       shapes: {
         none: [],
         curve: ['bend']
@@ -162,14 +173,14 @@ export default Vue.extend({
         bend: { max: 100, min: -100 }
       },
       hintMap: {
-        'shadow-none': '無效果',
-        'shadow-shadow': '陰影',
-        'shadow-lift': '模糊陰影',
-        'shadow-hollow': '外框',
-        'shadow-splice': '外框分離',
-        'shadow-echo': '雙重陰影',
-        'shape-none': '無彎曲',
-        'shape-curve': '彎曲'
+        'shadow-none': `${this.$t('NN0111')}`,
+        'shadow-shadow': `${this.$t('NN0112')}`,
+        'shadow-lift': `${this.$t('NN0113')}`,
+        'shadow-hollow': `${this.$t('NN0114')}`,
+        'shadow-splice': `${this.$t('NN0115')}`,
+        'shadow-echo': `${this.$t('NN0116')}`,
+        'shape-none': `${this.$t('NN0117')}`,
+        'shape-curve': `${this.$t('NN0118')}`
       }
     }
   },

@@ -9,6 +9,7 @@ import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
 import Vue from 'vue'
+import i18n from '@/i18n'
 
 interface Item {
   name: string,
@@ -190,15 +191,15 @@ class DesignUtils {
     return [
       {
         icon: 'share-alt',
-        text: '分享'
+        text: `${i18n.t('NN0214')}`
       },
       {
         icon: 'download',
-        text: '下載'
+        text: `${i18n.t('NN0010')}`
       },
       {
         icon: 'trash',
-        text: '刪除'
+        text: `${i18n.t('NN0034')}`
       }
     ]
   }
@@ -207,11 +208,11 @@ class DesignUtils {
     return [
       {
         icon: 'reduction',
-        text: '還原'
+        text: `${i18n.t('NN0204')}`
       },
       {
         icon: 'trash',
-        text: '永久刪除'
+        text: `${i18n.t('NN0200')}`
       }
     ]
   }

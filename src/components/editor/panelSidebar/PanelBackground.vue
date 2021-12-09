@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-bg")
     search-bar(class="mb-15"
-      placeholder="Search from our background"
+      :placeholder="`${$t('NN0092', {target: $tc('NN0004',1)})}`"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
@@ -16,7 +16,7 @@
             iconWidth="20px")
       template(v-slot:default-background-colors)
         div
-          div(class="text-left py-5 text-white") 顏色
+          div(class="text-left py-5 text-white") {{$t('NN0017')}}
           div(class="panel-bg__colors")
             div(class="panel-bg__color"
               @click="handleColorModal(currBackgroundColor)")

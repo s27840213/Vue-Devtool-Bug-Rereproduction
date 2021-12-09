@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-objects")
     search-bar(class="mb-15"
-      placeholder="Search from our objects"
+      :placeholder="`${$t('NN0092', {target: $tc('NN0003',1)})}`"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
@@ -47,7 +47,7 @@ export default Vue.extend({
     CategoryListRows,
     CategoryObjectItem
   },
-  data () {
+  data() {
     return {
       scrollTop: 0
     }

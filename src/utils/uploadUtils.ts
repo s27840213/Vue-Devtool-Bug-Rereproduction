@@ -17,6 +17,7 @@ import { EventEmitter } from 'events'
 import themeUtils from './themeUtils'
 import designUtils from './designUtils'
 import { SidebarPanelType } from '@/store/types'
+import i18n from '@/i18n'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -372,10 +373,10 @@ class UploadUtils {
                         avatar: targetUrls
                       })
                       modalUtils.setIsPending(false)
-                      modalUtils.setModalInfo('變更頭像成功')
+                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`)
                     } else {
                       console.log('Failed to upload the file')
-                      modalUtils.setModalInfo('頭像上傳失敗')
+                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`)
                     }
                   })
                 }

@@ -4,7 +4,7 @@
       div {{title}}
       div(class="category-list-rows__action pointer"
         @click="onAction(title)")
-        slot(name="action") 更多
+        slot(name="action") {{$t('NN0082')}}
     category-list-row
       div(v-for="item in list" :key="item.id")
         slot(name="preview" :item="item")

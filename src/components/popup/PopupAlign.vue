@@ -2,7 +2,7 @@
   div(class="popup-align bg-white")
     div(class="popup-align__group")
       div
-        span 元件對齊
+        span {{$t('NN0045')}}
       div
         div(v-for="(data,index) in alignDatas()"
             :key="`popup-${index}`"
@@ -17,7 +17,7 @@
     hr(v-if="layerNum >=3" class="popup-align__hr")
     div(v-if="layerNum >=3" class="popup-align__group")
       div
-        span 平均分配間距
+        span {{$t('NN0219')}}
       div
         div(v-for="(data,index) in distributeDatas()"
             :key="`popup-${index}`"
@@ -57,7 +57,8 @@ export default Vue.extend({
     },
     alignDatas() {
       const icons = this.mappingIcons('align')
-      const texts = ['靠左', '水平置中', '靠右', '靠上', '垂直置中', '靠下']
+      const texts = [`${this.$t('NN0046')}`, `${this.$t('NN0047')}`, `${this.$t('NN0048')}`, `${this.$t('NN0049')}`, `${this.$t('NN0050')}`, `${this.$t('NN0051')}`]
+
       return icons.map((icon: string, index: number) => {
         return {
           icon: icon,
@@ -67,7 +68,7 @@ export default Vue.extend({
     },
     distributeDatas() {
       const icons = this.mappingIcons('distribute')
-      const texts = ['水平分布', '垂直分布']
+      const texts = [`${this.$t('NN0221')}`, `${this.$t('NN0222')}`]
       return icons.map((icon: string, index: number) => {
         return {
           icon: icon,

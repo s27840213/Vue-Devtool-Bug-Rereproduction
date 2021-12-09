@@ -7,12 +7,12 @@
       span 或
       a(:href="`/login?redirect=${path}`") 登入
     template(v-else)
-      span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{'我的設計'}}
+      span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{$t('NN0080')}}
       span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}
       span(v-if="folderInfo.parentFolder" class="body-3 pointer hover-effect" @click="goToParentFolder()") {{`/${folderInfo.parentFolder}`}}
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
-        placeholder="未命名設計"
+        :placeholder="`${$t('NN0079')}`"
         maxlength="30"
         :value="pagesName"
         @change="setPagesName"
@@ -21,7 +21,7 @@
         :iconWidth="'20px'"
         :iconColor="'green-1'"
         class="ml-10"
-        v-hint="'上傳成功'")
+        v-hint="`${$t('NN0135')}`")
 </template>
 
 <script lang="ts">
@@ -97,7 +97,7 @@ export default Vue.extend({
       this.$router.push({ path: `/mydesign/${this.folderInfo.path.split(',').join('&')}` })
     },
     switchLocale() {
-      const targetLocale = this.currLocale === 'en-US' ? 'zh-TW' : 'en-US'
+      const targetLocale = this.currLocale === 'en' ? 'tw' : 'en'
       this.$i18n.locale = targetLocale
     },
     setPagesName(event: Event) {

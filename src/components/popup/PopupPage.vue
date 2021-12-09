@@ -126,7 +126,7 @@ export default Vue.extend({
       return [
         {
           icon: 'copy',
-          text: '複製',
+          text: this.$t('NN0032'),
           shortcutText: 'Cmd+C',
           action: () => {
             ShortcutUtils.copy()
@@ -134,7 +134,7 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: '貼上',
+          text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {
             ShortcutUtils.paste()
@@ -142,27 +142,27 @@ export default Vue.extend({
         },
         {
           icon: 'trash',
-          text: '刪除',
+          text: this.$t('NN0034'),
           shortcutText: 'DEL',
           action: () => {
             this.deleteBackgroundImage()
           }
-        },
-        {
-          icon: 'copy',
-          text: 'update test',
-          shortcutText: '',
-          action: () => {
-            const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
-            page.width = parseInt(page.width)
-            page.height = parseInt(page.height)
-            page.layers
-              .forEach((l: ILayer) => {
-                uploadUtils.layerInfoFilter(l)
-              })
-            store.commit('ADD_page', page)
-          }
         }
+        // {
+        //   icon: 'copy',
+        //   text: 'update test',
+        //   shortcutText: '',
+        //   action: () => {
+        //     const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
+        //     page.width = parseInt(page.width)
+        //     page.height = parseInt(page.height)
+        //     page.layers
+        //       .forEach((l: ILayer) => {
+        //         uploadUtils.layerInfoFilter(l)
+        //       })
+        //     store.commit('ADD_page', page)
+        //   }
+        // }
       ]
     },
     deleteBackgroundImage() {

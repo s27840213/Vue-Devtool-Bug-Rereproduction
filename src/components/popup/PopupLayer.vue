@@ -224,7 +224,7 @@ export default Vue.extend({
       return [
         {
           icon: 'copy',
-          text: '複製',
+          text: this.$t('NN0032'),
           shortcutText: 'Cmd+C',
           action: () => {
             if (TextUtils.getSelection()) {
@@ -237,7 +237,7 @@ export default Vue.extend({
         },
         {
           icon: 'copy',
-          text: '貼上',
+          text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {
             if (TextUtils.getSelection()) {
@@ -250,7 +250,7 @@ export default Vue.extend({
         },
         {
           icon: 'trash',
-          text: '刪除',
+          text: this.$t('NN0034'),
           shortcutText: 'DEL',
           action: () => {
             ShortcutUtils.del()
@@ -264,25 +264,25 @@ export default Vue.extend({
       return [
         {
           icon: icons[0],
-          text: '移至最前',
+          text: this.$t('NN0231'),
           shortcutText: 'Cmd+Alt+]',
           action: this.mappingIconAction(icons[0])
         },
         {
           icon: icons[1],
-          text: '前移',
+          text: this.$t('NN0232'),
           shortcutText: 'Cmd+]',
           action: this.mappingIconAction(icons[1])
         },
         {
           icon: icons[2],
-          text: '後移',
+          text: this.$t('NN0233'),
           shortcutText: 'Cmd+[',
           action: this.mappingIconAction(icons[2])
         },
         {
           icon: icons[3],
-          text: '移至最後',
+          text: this.$t('NN0234'),
           shortcutText: 'Cmd+Alt+]',
           action: this.mappingIconAction(icons[3])
         }
@@ -291,7 +291,7 @@ export default Vue.extend({
     detachImage(): any {
       return {
         icon: 'copy',
-        text: 'Detach Image',
+        text: this.$t('NN0098'),
         shortcutText: '',
         action: () => {
           frameUtils.detachImage(this.popupComponent.properties.layerIndex ?? -1)
@@ -301,7 +301,7 @@ export default Vue.extend({
     updateImageAsFrame(): any {
       return {
         icon: 'copy',
-        text: 'Update image as Frame',
+        text: this.$t('NN0096'),
         shortcutText: '',
         action: () => {
           const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage

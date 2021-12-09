@@ -13,7 +13,7 @@
             :iconColor="'blue-1'"
             :iconName="'plus-origin'"
             :iconWidth="'18px'")
-        span 新增頁面
+        span {{$t('NN0139')}}
     div(v-if="actionType === 'drag'"
       class="page-preview-plus-drag")
 </template>
@@ -143,33 +143,33 @@ export default Vue.extend({
 </script>
 <style lang="scss" scoped>
 .page-preview-plus {
-    position: relative;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 30px;
+  transition: 0.25s ease-in-out;
+
+  &-wrapper {
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    width: 40px;
+    height: 60px;
+    font-size: 12px;
+    background: setColor(gray-5);
+
+    > span {
+      white-space: nowrap;
+      transform: scale(0.7);
+    }
+  }
+  &-drag {
     height: 100%;
-    width: 30px;
-    transition: 0.25s ease-in-out;
-
-    &-wrapper {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      width: 40px;
-      height: 60px;
-      font-size: 12px;
-      background: setColor(gray-5);
-
-      > span {
-        white-space: nowrap;
-        transform: scale(0.7);
-      }
-    }
-    &-drag {
-      height: 100%;
-      border-right: 3px solid setColor(blue-1);
-    }
+    border-right: 3px solid setColor(blue-1);
+  }
 }
 </style>

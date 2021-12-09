@@ -9,7 +9,7 @@
               svg-icon(iconName="plus-origin"
                   iconColor="gray-4"
                   iconWidth="18px")
-            div(class="nav-item-new-folder__text") 新建資料夾
+            div(class="nav-item-new-folder__text") {{$t('NN0190')}}
         div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'a')}"
             :style="draggedOverStyles('a')"
             @dragenter="handleDragEnter('a')"
@@ -22,13 +22,13 @@
               iconWidth="20px"
               style="pointer-events: none")
           div(class="nav-item__text"
-              style="pointer-events: none") 我所有設計
+              style="pointer-events: none") {{$t('NN0187')}}
         div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'h')}"
             @click="handleSelection('h')")
           svg-icon(iconName="heart"
               iconColor="white"
               iconWidth="20px")
-          div(class="nav-item__text") 我的最愛
+          div(class="nav-item__text")  {{$t('NN0188')}}
         sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
                       @moveItem="handleMoveItem"
                       @showHint="handleShowHint")
@@ -44,7 +44,7 @@
               iconWidth="20px"
               style="pointer-events: none")
           div(class="nav-item__text"
-              style="pointer-events: none") 垃圾桶
+              style="pointer-events: none")  {{$t('NN0189')}}
         transition(name="fade")
           svg-icon(v-if="isShowHint"
                   class="nav-item__name-hint-arrow"
@@ -267,7 +267,7 @@ export default Vue.extend({
   margin-bottom: 10px;
   cursor: pointer;
   &__text {
-    font-family: 'NotoSansTC';
+    font-family: "NotoSansTC";
     text-align: left;
     color: white;
     font-size: 14px;
@@ -346,7 +346,7 @@ export default Vue.extend({
     justify-content: center;
   }
   &__text {
-    font-family: 'NotoSansTC';
+    font-family: "NotoSansTC";
     text-align: left;
     color: white;
     font-size: 14px;
@@ -356,10 +356,12 @@ export default Vue.extend({
 }
 
 .fade {
-  &-enter-active, &-leave-active {
-    transition: .2s;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }

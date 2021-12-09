@@ -3,10 +3,10 @@
       @drop.stop.prevent="onDrop($event)"
       @dragover.prevent,
       @dragenter.prevent)
-    span(class="panel-file__title text-blue-1 label-lg") 我的檔案
+    span(class="panel-file__title text-blue-1 label-lg") {{$t('NN0006')}}
     btn(class="full-width mb-20"
       :type="'primary-mid'"
-      @click.native="uploadImage()") 上傳圖片
+      @click.native="uploadImage()") {{$t('NN0014')}}
     tmp-files(
       :inFilePanel="true")
     transition(name="panel-up")

@@ -2,7 +2,7 @@
   div(class="panel-template")
     div(v-if="showPrompt"
       class="panel-template__prompt body-2")
-      span ⬅️ 設計尺寸與模板尺寸不相同，可點選更新
+      span ${{$t('NN0247')}}
       svg-icon(class="pointer"
         iconColor="gray-2"
         iconName="close"
@@ -15,7 +15,7 @@
     div
       div(class="panel-template__search")
         search-bar(class="mb-15"
-          placeholder="Search from our templates"
+          :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
           clear
           :defaultKeyword="keyword"
           @search="handleSearch")
@@ -86,7 +86,7 @@ export default Vue.extend({
     CategoryGroupTemplateItem,
     PanelGroupTemplate
   },
-  data () {
+  data() {
     return {
       showPrompt: false,
       showTheme: false,
@@ -111,10 +111,10 @@ export default Vue.extend({
     ...mapGetters({
       currActivePageIndex: 'getCurrActivePageIndex'
     }),
-    showTemplateId (): boolean {
+    showTemplateId(): boolean {
       return (this.role === 0) && this.adminMode
     },
-    itemHeight (): number {
+    itemHeight(): number {
       return this.showTemplateId ? 179 : 155
     },
     listCategories(): any[] {
@@ -136,7 +136,7 @@ export default Vue.extend({
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx * 2, idx * 2 + 2)
-          const title = !keyword && !idx ? '所有模板' : ''
+          const title = !keyword && !idx ? `${this.$t('NN0083')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-template-item',
@@ -157,7 +157,7 @@ export default Vue.extend({
       const { keyword, pending, listResult } = this
       return !pending && !listResult.length ? (keyword ? `Sorry, we couldn't find any templates for "${this.keyword}".` : 'Sorry, we couldn\'t find any templates') : ''
     },
-    currPageThemeIds (): number[] {
+    currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
       return themeUtils
         .getThemesBySize(pageSize.width, pageSize.height)
@@ -172,7 +172,7 @@ export default Vue.extend({
     this.$refs.list.$el.removeEventListener('scroll', this.handleScrollTop)
   },
   watch: {
-    currPageThemeIds (curr: number[] = []) {
+    currPageThemeIds(curr: number[] = []) {
       const { theme, userId } = this
       if (theme && !sessionStorage[`${userId}_theme_prompt`]) {
         const themes = theme.split(',')
@@ -288,7 +288,7 @@ export default Vue.extend({
     left: 0;
     right: 0;
     z-index: 1;
-    background: rgba(0, 0, 0, .8);
+    background: rgba(0, 0, 0, 0.8);
   }
   &__prompt {
     position: absolute;

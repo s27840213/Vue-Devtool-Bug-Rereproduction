@@ -20,9 +20,9 @@ import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 
 const STANDARD_TEXT_FONT: { [key: string]: string } = {
-  'zh-TW': 'OOcHgnEpk9RHYBOiWllz',
-  'en-US': 'cRgaSK5ZVXnLDpWTL8MN',
-  'ja-JP': 'OyDbjZxjk9r14eZnPELb'
+  tw: 'OOcHgnEpk9RHYBOiWllz',
+  en: 'cRgaSK5ZVXnLDpWTL8MN',
+  jp: 'OyDbjZxjk9r14eZnPELb'
 }
 
 class AssetUtils {
@@ -368,7 +368,7 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addStanardText(type: string, text?: string, locale = 'zh-TW', pageIndex?: number) {
+  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number) {
     const targePageIndex = pageIndex || this.lastSelectedPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -380,7 +380,7 @@ class AssetUtils {
         const field = fieldMap[type]
         const textLayer = GeneralUtils.deepCopy(jsonData.default)
         textLayer.paragraphs[0].spans[0].text = text
-        if (locale === 'zh-TW') {
+        if (locale === 'tw') {
           textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
         }
         textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]

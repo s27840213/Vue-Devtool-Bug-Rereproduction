@@ -121,7 +121,7 @@ export default Vue.extend({
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0, true)
           }
-        },
+        }
         // {
         //   icon: 'copy',
         //   text: '上傳詳情頁模板',
@@ -149,15 +149,15 @@ export default Vue.extend({
         //     uploadUtils.uploadGroupDesign(1, 1, true)
         //   }
         // },
-        {
-          icon: 'copy',
-          text: '測試用',
-          shortcutText: '',
-          condition: true,
-          action: () => {
-            generalUtils.test()
-          }
-        }
+        // {
+        //   icon: 'copy',
+        //   text: '測試用',
+        //   shortcutText: '',
+        //   condition: true,
+        //   action: () => {
+        //     generalUtils.test()
+        //   }
+        // }
       ]
     }
   },

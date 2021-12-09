@@ -7,7 +7,7 @@
     class="mb-10")
     div(class="color-panel__colors mb-10")
       div(class="text-left mb-5")
-        span(class="body-1") 文件顏色
+        span(class="body-1") {{$t('NN0091')}}
       div
         div(class="color-panel__add-color pointer"
           @click="handleColorModal")
@@ -25,7 +25,7 @@
     //-       @click="handleColorEvent(color)")
     div(class="color-panel__colors")
       div(class="text-left mb-5")
-        span(class="body-1") 預設
+        span(class="body-1") {{$t('NN0089')}}
       div
         div(class="color-panel__add-color pointer"
           @click="handleColorModal")
