@@ -2,7 +2,7 @@
   div(class="trash-design-view")
     div(class="trash-design-view__title")
       div(class="trash-design-view__folder-name")
-        span 垃圾桶
+        span {{ $t('NN0189') }}
       div(class="trash-design-view__info"
           @click="toggleInfo()"
           v-click-outside="closeInfo")

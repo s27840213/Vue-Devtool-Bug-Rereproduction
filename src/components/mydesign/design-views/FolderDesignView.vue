@@ -54,7 +54,7 @@
             div(class="folder-design-view__more__menu__title")
               span {{ folderName }}
             div(class="folder-design-view__more__menu__text")
-              span {{ `${$t('NN0196',{name:folder ? folder.author : '' })} | ${$t('NN0197', {num:itemCount })}` }}
+              span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
             div(class="folder-design-view__more__menu__divider")
             div(class="folder-design-view__more__menu__actions")
               div(@click="handleFolderNameClick")
