@@ -398,9 +398,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async register({ commit }, { uname, account, upass }) {
+  async register({ commit }, { uname, account, upass, locale }) {
     try {
-      const meta = { uname: uname, account: account, upass: upass }
+      const meta = { uname: uname, account: account, upass: upass, locale: locale }
       const { data } = await userApis.register('token', JSON.stringify(meta))
       return Promise.resolve(data)
     } catch (error) {
@@ -436,9 +436,9 @@ const actions: ActionTree<IUserModule, unknown> = {
     }
   },
   /* eslint-disable camelcase */
-  async sendVcode({ commit }, { uname, account, upass, register, vcode_only, type, token }) {
+  async sendVcode({ commit }, { uname, account, upass, register, vcode_only, type, token, locale }) {
     try {
-      const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token)
+      const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token, locale)
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)
