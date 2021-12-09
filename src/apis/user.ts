@@ -64,7 +64,7 @@ export default {
     }
   }),
   /* eslint-disable camelcase */
-  sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string, type: number, token: string): AxiosPromise => axios('/send-vcode', {
+  sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string, type: number, token: string, locale: string): AxiosPromise => axios('/send-vcode', {
     method: 'POST',
     data: {
       uname,
@@ -73,7 +73,8 @@ export default {
       register,
       vcode_only,
       type,
-      token
+      token,
+      locale
     }
   }),
   verifyVcode: (account: string, vcode: string, token: string): AxiosPromise => axios('/verify-vcode', {

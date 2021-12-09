@@ -90,18 +90,38 @@
                   span(class="text__span"
                     :data-sindex="sIndex"
                     :key="span.id",
+                    :id="`pIndex-${pIndex}-sIndex-${sIndex}`"
                     :style="textStyles(span.styles)"
                     v-text="'\uFEFF'")
                 span(v-else-if="!span.text && p.spans.length === 1" class="text__span"
                   :data-sindex="sIndex"
+                  :id="`pIndex-${pIndex}-sIndex-${sIndex}`"
                   :key="span.id",
                   :style="textStyles(span.styles)")
                   br
                 span(v-else class="text__span"
                   :data-sindex="sIndex"
+                  :id="`pIndex-${pIndex}-sIndex-${sIndex}`"
                   :key="span.id",
                   :style="textStyles(span.styles)"
                   v-text="span.text")
+            //- p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
+            //-   :data-pindex="pIndex"
+            //-   :style="textStyles(p.styles)")
+            //-   template(v-for="(span, sIndex) in p.spans")
+            //-     span(v-if="!span.text && p.spans.length !== 1" class="text__span"
+            //-       :data-sindex="sIndex"
+            //-       :key="span.id"
+            //-       :style="textStyles(span.styles)")
+            //-       span(class="text__span"
+            //-       :data-sindex="sIndex"
+            //-       :key="span.id",
+            //-       :style="textStyles(span.styles)") {{ '\uFEFF' }}
+            //-     span(v-else class="text__span"
+            //-       :data-sindex="sIndex"
+            //-       :key="span.id",
+            //-       :style="textStyles(span.styles)") {{ span.text }}
+            //-       br(v-if="!span.text && p.spans.length === 1")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles"
@@ -1382,7 +1402,8 @@ export default Vue.extend({
       this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
-      if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
+      // if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
+      if (this.config.isEdited && this.hasChangeTextContent && window.getSelection()?.toString()) {
         this.hasChangeTextContent = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
         this.$nextTick(() => {
@@ -1413,6 +1434,7 @@ export default Vue.extend({
         attributeOldValue: false,
         characterDataOldValue: false
       })
+      setTimeout(() => observer.disconnect(), 0)
 
       if (this.isComposeEndEnter) {
         this.isComposeEndEnter = false
@@ -1443,18 +1465,19 @@ export default Vue.extend({
         })
       }
     },
-    rangedHandler(config: IText, e: KeyboardEvent) {
-      if (e.key !== 'CapsLock') e.preventDefault()
-      const paragraphs = TextUtils.textHandler(config, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.textSizeRefresh(this.config)
-      setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
-    },
     onKeyUp(e: KeyboardEvent) {
+      this.isComposeEndEnter = false
+      if (window.getSelection()?.toString()) {
+        console.log('on key up')
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+        this.hasChangeTextContent = false
+        this.$nextTick(() => {
+          TextUtils.focus(this.sel.start, this.sel.end)
+        })
+      }
       const { start, end } = TextUtils.getSelection()
       TextUtils.updateSelection(start, end)
       TextPropUtils.updateTextPropsState()
-      this.isComposeEndEnter = false
     },
     composingStart() {
       this.isComposing = true
