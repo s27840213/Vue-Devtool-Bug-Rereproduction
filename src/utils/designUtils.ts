@@ -18,7 +18,7 @@ interface Item {
 
 class DesignUtils {
   ROOT = '$ROOT$'
-  ROOT_DISPLAY = '我所有的設計'
+  ROOT_DISPLAY = i18n.t('NN0187')
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
 
@@ -168,12 +168,12 @@ class DesignUtils {
       },
       {
         icon: 'folder',
-        text: '移至資料夾',
+        text: `${i18n.t('NN0206')}`,
         extendable: true
       },
       {
         icon: 'trash',
-        text: '刪除'
+        text: `${i18n.t('NN0034')}`
       }
     ]
     // ,
@@ -190,18 +190,18 @@ class DesignUtils {
   makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
     return [
       {
-        icon: 'share-alt',
-        text: `${i18n.t('NN0214')}`
-      },
-      {
-        icon: 'download',
-        text: `${i18n.t('NN0010')}`
-      },
-      {
         icon: 'trash',
         text: `${i18n.t('NN0034')}`
       }
     ]
+    // {
+    //   icon: 'share-alt',
+    //   text: `${i18n.t('NN0214')}`
+    // },
+    // {
+    //   icon: 'download',
+    //   text: `${i18n.t('NN0010')}`
+    // },
   }
 
   makeTrashMenuItems(): { icon: string, text: string }[] {
