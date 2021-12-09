@@ -61,8 +61,8 @@
             a(:href="agreementPage") {{$t('NN0162')}}
     div(class="nu-footer__bottom")
       div(class="nu-footer__bottom-left")
-        select(class="locale-select" v-model="locale")
-          option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        select(class="locale-select" v-model="inputLocale")
+          option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-center")
         span COPYRIGHT Vivipic 2021
       div(class="nu-footer__bottom-right")
@@ -93,8 +93,8 @@
             :iconName="'mail-circle'"
             :iconWidth="'25px'")
       div(class="nu-footer__bottom-mobile-locale")
-        select(class="locale-select" v-model="locale")
-          option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        select(class="locale-select" v-model="inputLocale")
+          option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright")
         span COPYRIGHT Vivipic 2021
 </template>
@@ -104,20 +104,34 @@ import Vue from 'vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
+import localeUtils, { ILocale } from '@/utils/localeUtils'
 
 export default Vue.extend({
   data() {
     return {
-      locale: '繁體中文(台灣)',
-      localeOptions: ['繁體中文(台灣)'],
-      blogPage: 'https://blog.vivipic.com/tw/',
-      servicePage: 'https://blog.vivipic.com/tw/tw-service-policy/',
-      privacyPage: 'https://blog.vivipic.com/tw/tw-privacy-policy/',
-      agreementPage: 'https://blog.vivipic.com/tw/tw-agreement/',
-      facebookPage: 'https://www.facebook.com/vivipictw',
-      igPage: 'https://www.instagram.com/vivipictw/',
-      mailtoService: 'mailto:tw@vivipic.com',
+      inputLocale: '',
+      localeOptions: [] as Array<ILocale>,
+      blogPage: '',
+      servicePage: '',
+      privacyPage: '',
+      agreementPage: '',
+      facebookPage: '',
+      igPage: '',
+      mailtoService: '',
       featureExpand: [false, false, false, false] as boolean[]
+    }
+  },
+  created() {
+    this.localeOptions = localeUtils.SUPPORTED_LOCALES
+    this.inputLocale = this.getLocaleText(this.currLocale) as string
+    this.switchUrl(this.currLocale)
+  },
+  watch: {
+    inputLocale() {
+      if (this.getLocaleValue(this.inputLocale) !== this.$i18n.locale) {
+        this.$i18n.locale = this.getLocaleValue(this.inputLocale) as string
+        this.$router.go(0)
+      }
     }
   },
   computed: {
@@ -126,6 +140,9 @@ export default Vue.extend({
     },
     themeList(): Itheme[] {
       return themeUtils.themes
+    },
+    currLocale(): string {
+      return this.$i18n.locale
     }
   },
   methods: {
@@ -139,6 +156,35 @@ export default Vue.extend({
     },
     expandItems(index: number, expand: boolean) {
       Vue.set(this.featureExpand, index, expand)
+    },
+    getLocaleText(value: string) {
+      return this.localeOptions.find(x => x.code === value)?.name
+    },
+    getLocaleValue(text: string) {
+      return this.localeOptions.find(x => x.name === text)?.code
+    },
+    switchUrl(locale: string) {
+      switch (locale) {
+        case 'us':
+          this.blogPage = 'https://blog.vivipic.com/'
+          this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
+          this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+          this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+          this.facebookPage = 'https://www.facebook.com/vivipicus'
+          this.igPage = 'https://www.instagram.com/vivipicus'
+          this.mailtoService = 'mailto:tw@vivipic.com'
+          break
+        case 'tw':
+        case 'jp':
+          this.blogPage = 'https://blog.vivipic.com/' + locale
+          this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
+          this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+          this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+          this.facebookPage = 'https://www.facebook.com/vivipic' + locale
+          this.igPage = 'https://www.instagram.com/vivipic' + locale
+          this.mailtoService = 'mailto:' + locale + '@vivipic.com'
+          break
+      }
     }
   }
 })
