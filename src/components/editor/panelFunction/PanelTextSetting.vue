@@ -320,6 +320,7 @@ export default Vue.extend({
       }
 
       const sel = TextUtils.getSelection()
+      console.log(sel.start.pIndex)
       start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
       end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 

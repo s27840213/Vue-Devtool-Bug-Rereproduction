@@ -95,6 +95,7 @@ class TextPropUtils {
           const _config = GeneralUtils.deepCopy(config) as IText
           _config.paragraphs = _paragraphs
 
+          TextUtils.printCurrSel(selStart, selEnd)
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, _config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           store.commit('text/UPDATE_STATE', { paragraphs: config.paragraphs })

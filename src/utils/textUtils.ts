@@ -215,48 +215,62 @@ class TextUtils {
   }
 
   focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = LayerUtils.layerIndex) {
-    // console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-    // console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
-    // console.log('focus text')
     let text: HTMLElement
-    const range = new Range()
-    if (typeof subLayerIndex !== 'undefined') {
-      text = document.getElementById(`text-sub-${layerIndex}-${subLayerIndex}`) as HTMLElement
-    } else {
-      text = document.getElementById(`text-${layerIndex}`) as HTMLElement
-    }
-
-    if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
-      start = {} as ISelection
-      Object.assign(start, this.getCurrSel.start)
-    } else if (!this.isSel(this.getCurrSel.start)) {
-      return
-    }
-    start = start as ISelection
-    if (text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild) {
-      range.setStart(text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node, start.offset)
-    } else {
-      /**
-       * else case for <p> <br></br> </p>
-       */
-      range.setStart(text.childNodes[start.pIndex].firstChild as Node, 0)
-    }
-
-    if (end && this.isSel(end)) {
-      if (text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild) {
-        range.setEnd(text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node, end.offset)
+    // const range = new Range()
+    const range = document.createRange()
+    try {
+      if (typeof subLayerIndex !== 'undefined') {
+        text = document.getElementById(`text-sub-${layerIndex}-${subLayerIndex}`) as HTMLElement
       } else {
-        /**
-         * else case for <p> <br></br> </p>
-         */
-        range.setEnd(text.childNodes[end.pIndex].firstChild as Node, 0)
+        text = document.getElementById(`text-${layerIndex}`) as HTMLElement
       }
-    }
 
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(range)
+      if ((!start || !this.isSel(start)) && (this.getCurrSel && this.isSel(this.getCurrSel.start))) {
+        start = {} as ISelection
+        Object.assign(start, this.getCurrSel.start)
+      } else if (!this.isSel(this.getCurrSel.start)) {
+        return
+      }
+      start = start as ISelection
+      if (text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild) {
+        range.setStart(text.childNodes[start.pIndex].childNodes[start.sIndex].firstChild as Node, start.offset)
+        // const startNode = document.getElementById(`pIndex-${start.pIndex}-sIndex-${start.sIndex}`)?.firstChild as Node
+        // console.log(startNode)
+        // range.setStart(startNode, start.offset)
+      }
+      // else {
+      //   /**
+      //    * else case for <p> <br></br> </p>
+      //    */
+      //   range.setStart(text.childNodes[start.pIndex].firstChild as Node, 0)
+      // }
+
+      if (end && this.isSel(end)) {
+        if (text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild) {
+          range.setEnd(text.childNodes[end.pIndex].childNodes[end.sIndex].firstChild as Node, end.offset)
+          // const endNode = document.getElementById(`pIndex-${end.pIndex}-sIndex-${end.sIndex}`)?.firstChild as Node
+          // console.log(endNode)
+          // range.setEnd(endNode, start.offset)
+        } else {
+          /**
+           * else case for <p> <br></br> </p>
+           */
+          range.setEnd(text.childNodes[end.pIndex].firstChild as Node, 0)
+        }
+      }
+
+      const sel = window.getSelection()
+      if (sel) {
+        console.warn('focus')
+        this.printCurrSel(start, end)
+        sel.removeAllRanges()
+        sel.addRange(range)
+        console.log(range)
+        console.log(range.startContainer.nodeName)
+        console.log(range.endContainer.nodeName)
+      }
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -788,6 +802,11 @@ class TextUtils {
         }
       })
     }
+  }
+
+  printCurrSel(start = this.getCurrSel.start, end = this.getCurrSel.end) {
+    console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
+    console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
   }
 }
 
