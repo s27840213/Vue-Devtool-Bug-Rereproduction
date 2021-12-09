@@ -96,10 +96,6 @@ export default Vue.extend({
     goToParentFolder() {
       this.$router.push({ path: `/mydesign/${this.folderInfo.path.split(',').join('&')}` })
     },
-    switchLocale() {
-      const targetLocale = this.currLocale === 'en' ? 'tw' : 'en'
-      this.$i18n.locale = targetLocale
-    },
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)

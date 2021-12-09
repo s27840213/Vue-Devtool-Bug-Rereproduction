@@ -40,7 +40,7 @@ const minMaxHash: { [index: string]: { min: number, max: number } } = {
 
 const langMap: { [index: string]: string } = {
   tw: 'zh-TW',
-  en: 'en-US',
+  us: 'en-US',
   jp: 'ja-JP'
 }
 

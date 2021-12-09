@@ -18,8 +18,8 @@ import localeUtils from '@/utils/localeUtils'
 Vue.use(VueRouter)
 
 const SUPPORTED_LOCALES = [{
-  code: 'en',
-  base: '/en',
+  code: 'us',
+  base: '/us',
   flag: 'us',
   name: 'English'
 }, {

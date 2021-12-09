@@ -63,11 +63,11 @@ export default Vue.extend({
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
-        { icon: 'template', text: `${this.$tc('NN0001', 0)}` },
-        { icon: 'photo', text: `${this.$tc('NN0002', 0)}` },
-        { icon: 'shape', text: `${this.$tc('NN0003', 0)}` },
-        { icon: 'bg', text: `${this.$tc('NN0004', 0)}` },
-        { icon: 'text', text: `${this.$tc('NN0005', 0)}` },
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
+        { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
         { icon: 'folder', text: `${this.$tc('NN0006')}` }
         // { icon: 'brand', text: `${this.$t('NN0007')}` },
         // { icon: 'photo', text: 'Pexels' }

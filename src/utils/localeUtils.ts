@@ -13,9 +13,9 @@ class LocaleUtils {
   defaultLocale: string
   constructor() {
     this.SUPPORTED_LOCALES = [{
-      abbreviation: 'en',
-      code: 'en',
-      base: '/en',
+      abbreviation: 'us',
+      code: 'us',
+      base: '/us',
       name: 'English'
     },
     {
@@ -33,7 +33,7 @@ class LocaleUtils {
 
     this.localeMap = {
       tw: 'tw',
-      en: 'en',
+      us: 'us',
       jp: 'jp'
     }
 
