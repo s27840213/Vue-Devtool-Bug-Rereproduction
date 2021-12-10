@@ -6,7 +6,9 @@ import uploadUtils from './uploadUtils'
 
 class LogUtils {
   uploadLog() {
-    uploadUtils.uploadLog(this.getLog() ?? '')
+    if (uploadUtils.isLogin) {
+      uploadUtils.uploadLog(this.getLog() ?? '')
+    }
     // this.consoleLog()
     this.clearLog()
   }
