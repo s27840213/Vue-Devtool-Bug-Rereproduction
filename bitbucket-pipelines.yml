@@ -51,62 +51,40 @@ pipelines:
                 HOST: 'smtp.gmail.com'
                 SUBJECT: 'NEW TEST DEPLOYED'
       - step:
-          name: 'Deploy to S3 test2 environment'
-          deployment: test2
+          name: 'Deploy to S3 edit environment'
+          deployment: staging
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:0.5.0
               variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                S3_BUCKET: $AWS_BUCKET_TEST2
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_EDIT
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_EDIT
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
+                S3_BUCKET: $AWS_BUCKET_EDIT
                 LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
-            #no cache for test environment (since free cloudflare can not remove cache by host)
+            #remove cache in cloudflare after successfully sync S3
+            - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
             - pipe: atlassian/email-notify:0.4.5
               variables:
                 USERNAME: 'nuphoto.mail@gmail.com'
                 PASSWORD: $EMAIL_NOTIFY_PASSWORD
                 FROM: 'nuphoto.mail@gmail.com'
-                TO: 'nuphoto.bruce.486idj@zapiermail.com'
+                TO: 'deploy-edit.486idj@zapiermail.com'
                 HOST: 'smtp.gmail.com'
-                SUBJECT: 'NEW TEST2 DEPLOYED'
-    - step:
-        name: 'Deploy to S3 edit environment'
-        deployment: staging
-        trigger: manual
-        script:
-          - pipe: atlassian/aws-s3-deploy:0.5.0
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_EDIT
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_EDIT
-              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
-              S3_BUCKET: $AWS_BUCKET_EDIT
-              LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
-              EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
-          #remove cache in cloudflare after successfully sync S3
-          - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
-          - pipe: atlassian/email-notify:0.4.5
-            variables:
-              USERNAME: 'nuphoto.mail@gmail.com'
-              PASSWORD: $EMAIL_NOTIFY_PASSWORD
-              FROM: 'nuphoto.mail@gmail.com'
-              TO: 'deploy-edit.486idj@zapiermail.com'
-              HOST: 'smtp.gmail.com'
-              SUBJECT: 'NEW EDIT DEPLOYED'
-    - step:
-        name: 'Deploy to S3 prod environment'
-        deployment: production
-        trigger: manual
-        script:
-          - pipe: atlassian/aws-s3-deploy:0.5.0
-            variables:
-              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
-              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
-              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
-              S3_BUCKET: $AWS_BUCKET_PROD
-              LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
-              EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
-          #remove cache in cloudflare after successfully sync S3
-          - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+                SUBJECT: 'NEW EDIT DEPLOYED'
+      - step:
+          name: 'Deploy to S3 prod environment'
+          deployment: production
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
+                S3_BUCKET: $AWS_BUCKET_PROD
+                LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
+            #remove cache in cloudflare after successfully sync S3
+            - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
