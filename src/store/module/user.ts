@@ -44,7 +44,8 @@ export interface IUserModule {
     prev: string,
     prev_2x: string,
     prev_4x: string
-  }
+  },
+  viewGuide: number
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -88,7 +89,8 @@ const getDefaultState = (): IUserModule => ({
     prev: '',
     prev_2x: '',
     prev_4x: ''
-  }
+  },
+  viewGuide: +localStorage.guest_view_guide || 0
 })
 
 const state = getDefaultState()
@@ -162,6 +164,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   hasAvatar(): boolean {
     return state.avatar.prev_2x !== undefined
+  },
+  getViewGuide(state): number {
+    return state.viewGuide
   }
 }
 
@@ -413,8 +418,18 @@ const actions: ActionTree<IUserModule, unknown> = {
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
+      const guestViewGuide = localStorage.guest_view_guide
+      let userViewGuide = data.data.view_guide
       Sentry.setTag('user_name', uname)
       Sentry.setTag('user_id', data.data.user_id)
+
+      if (['1', '2'].includes(guestViewGuide) && userViewGuide === 0) {
+        // 如果先看完導覽(2)/略過(1)再登入, 且原使用者狀態為沒看過(0), 則更新狀態
+        userViewGuide = +guestViewGuide
+        localStorage.removeItem('guest_view_guide')
+        userApis.updateUserViewGuide(newToken, userViewGuide)
+      }
+
       commit('SET_STATE', {
         downloadUrl: data.data.download_url,
         uname: uname,
@@ -425,7 +440,8 @@ const actions: ActionTree<IUserModule, unknown> = {
         upassUpdate: data.data.upass_update,
         locale: data.data.locale,
         subscribe: data.data.subscribe,
-        avatar: data.data.avatar
+        avatar: data.data.avatar,
+        viewGuide: userViewGuide
       })
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)

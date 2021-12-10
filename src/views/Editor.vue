@@ -32,6 +32,7 @@
               @toggleColorPanel="toggleColorPanel")
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
+    tour-guide(v-if="showEditorGuide")
 </template>
 
 <script lang="ts">
@@ -44,12 +45,14 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
+import TourGuide from '@/components/editor/TourGuide.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import logUtils from '@/utils/logUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -61,7 +64,8 @@ export default Vue.extend({
     ScaleRatioEditor,
     FunctionPanel,
     ColorPanel,
-    PagePreview
+    PagePreview,
+    TourGuide
   },
   data() {
     return {
@@ -78,7 +82,8 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'role',
-      'adminMode']),
+      'adminMode',
+      'viewGuide']),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -133,6 +138,9 @@ export default Vue.extend({
       return {
         top
       }
+    },
+    showEditorGuide(): boolean {
+      return this.viewGuide === 0
     }
   },
   created() {
@@ -146,9 +154,12 @@ export default Vue.extend({
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
+        uploadUtils.hasGottenDesign = false
+        logUtils.setLog('Leave editor')
         next()
       })
     } else {
+      logUtils.setLog('Leave editor')
       next()
     }
     // const answer = this.confirmLeave()

@@ -27,7 +27,7 @@ div(class="settings-account")
       span {{ accountErrorMessage }}
     div(class="settings-account__label my-10") 語系
     select(class="locale-select" v-model="inputLocale")
-      option(v-for="locale in localeOptions" :value="locale.text") {{locale.text}}
+      option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
     div(class="settings-account__subscribe mt-40 mb-10")
       div(class="settings-account__subscribe__wrapper"
         @click="onSubscribeClicked()")
@@ -60,6 +60,7 @@ import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
+import localeUtils, { ILocale } from '@/utils/localeUtils'
 
 export default Vue.extend({
   components: {
@@ -73,19 +74,7 @@ export default Vue.extend({
       inputLocale: '',
       inputSubscribe: true,
       subscribeText: '我願意收到來自 Vivipic 的設計技巧、熱門模板、電商趨勢、促銷訊息等電子信。',
-      localeOptions: [
-        {
-          value: 'tw',
-          text: '繁體中文(台灣)'
-        },
-        {
-          value: 'us',
-          text: '英文'
-        },
-        {
-          value: 'jp',
-          text: '日文'
-        }],
+      localeOptions: [] as Array<ILocale>,
       accountErrorMessage: 'Email 格式錯誤',
       isLoading: false,
       isConfirmClicked: false as boolean,
@@ -112,9 +101,11 @@ export default Vue.extend({
       isLogin: 'isLogin',
       hasAvatar: 'hasAvatar',
       account: 'getAccount',
-      locale: 'getLocale',
       subscribe: 'getSubscribe'
     }),
+    currLocale(): string {
+      return this.$i18n.locale
+    },
     mailValid(): boolean {
       if (!this.isConfirmClicked) {
         return true
@@ -129,7 +120,7 @@ export default Vue.extend({
     isChanged() {
       if (this.inputName.trim() === this.uname.trim() &&
         this.inputAccount.trim() === this.account.trim() &&
-        this.inputLocale === this.getLocaleText(this.locale) &&
+        this.inputLocale === this.getLocaleText(this.currLocale) &&
         this.inputSubscribe === (this.subscribe === 1)) {
         return false
       } else {
@@ -140,7 +131,8 @@ export default Vue.extend({
   mounted() {
     this.inputName = this.uname
     this.inputAccount = this.account
-    this.inputLocale = this.getLocaleText(this.locale) as string
+    this.localeOptions = localeUtils.SUPPORTED_LOCALES
+    this.inputLocale = this.getLocaleText(this.currLocale) as string
     this.inputSubscribe = this.subscribe === 1
   },
   methods: {
@@ -186,7 +178,7 @@ export default Vue.extend({
           updateValue.account = this.inputAccount.trim()
         }
       }
-      if (this.inputLocale !== this.getLocaleText(this.locale)) {
+      if (this.inputLocale !== this.getLocaleText(this.currLocale)) {
         updateValue.locale = this.getLocaleValue(this.inputLocale)
       }
       if (this.inputSubscribe !== (this.subscribe === 1)) {
@@ -198,9 +190,13 @@ export default Vue.extend({
         store.commit('user/SET_STATE', {
           uname: data.data.uname,
           account: data.data.account,
-          locale: data.data.locale,
           subscribe: data.data.subscribe
         })
+
+        if (this.inputLocale !== this.getLocaleText(this.currLocale)) {
+          this.$i18n.locale = this.getLocaleValue(this.inputLocale) as string
+          this.$router.go(0)
+        }
         this.isConfirmClicked = false
         this.isEmailVerified = false
       }
@@ -208,10 +204,10 @@ export default Vue.extend({
       this.isLoading = false
     },
     getLocaleText(value: string) {
-      return this.localeOptions.find(x => x.value === value)?.text
+      return this.localeOptions.find(x => x.code === value)?.name
     },
     getLocaleValue(text: string) {
-      return this.localeOptions.find(x => x.text === text)?.value
+      return this.localeOptions.find(x => x.name === text)?.code
     },
     verifyEmail() {
       this.isEmailVerified = true

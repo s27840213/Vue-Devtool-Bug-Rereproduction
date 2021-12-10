@@ -18,6 +18,7 @@ import themeUtils from './themeUtils'
 import designUtils from './designUtils'
 import { SidebarPanelType } from '@/store/types'
 import i18n from '@/i18n'
+import logUtils from './logUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -67,6 +68,7 @@ class UploadUtils {
 
   event: any
   eventHash: { [index: string]: (color: string) => void }
+  hasGottenDesign: boolean
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
@@ -84,7 +86,7 @@ class UploadUtils {
       id: '',
       teamId: ''
     }
-
+    this.hasGottenDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
   }
@@ -390,16 +392,50 @@ class UploadUtils {
     }
   }
 
+  uploadLog(logContent: string) {
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_log_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_log_map.fields[key])
+    })
+
+    const logName = `log-${generalUtils.generateTimeStamp()}.txt`
+    formData.append('key', `${this.loginOutput.upload_log_map.path}${this.userId}/${logName}`)
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
+    formData.append('x-amz-meta-tn', this.userId)
+    const xhr = new XMLHttpRequest()
+
+    const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })
+
+    formData.append('file', blob)
+
+    xhr.open('POST', this.loginOutput.upload_log_map.url, true)
+    xhr.send(formData)
+    xhr.onload = () => {
+      // console.log(xhr)
+    }
+  }
+
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+    const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     const type = router.currentRoute.query.type
     const designId = router.currentRoute.query.design_id
     const teamId = router.currentRoute.query.team_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
+
+    if (designId && teamId && type && !this.hasGottenDesign) {
+      return
+    }
     if (!type || !designId || !teamId) {
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
     }
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages)
+    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+
+    logUtils.setLog(`Upload Design:
+      Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
+      AssetId: ${assetId},
+      TeamId: ${teamId}
+      PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
       const newPage = this.default(generalUtils.deepCopy(page)) as IPage
@@ -439,6 +475,7 @@ class UploadUtils {
     await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
       .then(() => {
         if (putAssetDesignType !== undefined) {
+          logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
           store.dispatch('user/putAssetDesign', {
             assetId,
             type: putAssetDesignType
@@ -850,6 +887,10 @@ class UploadUtils {
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
 
+    logUtils.setLog(`Get Design
+      Type: ${type}
+      DesignId: ${designId}
+      TeamId: ${teamId}`)
     switch (type) {
       case GetDesignType.TEMPLATE:
       case GetDesignType.TEXT: {
@@ -893,17 +934,21 @@ class UploadUtils {
           /**
            * @Note remove the designId and type query if 404
            */
+          logUtils.setLog('Fail to get design')
+          themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
         } else {
           response.json().then(async (json) => {
             switch (type) {
               case GetDesignType.TEMPLATE: {
                 assetUtils.addTemplate(json)
+                logUtils.setLog('Successfully get template design')
                 break
               }
               case GetDesignType.TEXT: {
                 await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_pages', [json])
+                logUtils.setLog('Successfully get text design')
                 break
               }
               case GetDesignType.ASSET_DESIGN: {
@@ -913,6 +958,7 @@ class UploadUtils {
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_assetId', designId)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
+                logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
                 //
                 stepsUtils.reset()
@@ -920,15 +966,22 @@ class UploadUtils {
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
                 designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
+                logUtils.setLog('Successfully get new design template')
                 stepsUtils.reset()
                 break
               }
             }
-          }).then(() => pageUtils.fitPage())
+          }).then(() => {
+            this.hasGottenDesign = true
+            pageUtils.fitPage()
+          })
         }
       })
       .catch((err) => {
+        router.replace({ query: Object.assign({}) })
+        this.hasGottenDesign = true
         type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
+        logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)
       })
   }

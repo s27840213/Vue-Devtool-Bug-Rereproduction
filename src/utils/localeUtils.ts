@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import { EventEmitter } from 'events'
-interface ILocale {
+export interface ILocale {
   abbreviation: string,
   code: string,
   base: string,
@@ -13,9 +13,9 @@ class LocaleUtils {
   defaultLocale: string
   constructor() {
     this.SUPPORTED_LOCALES = [{
-      abbreviation: 'en',
-      code: 'en',
-      base: '/en',
+      abbreviation: 'us',
+      code: 'us',
+      base: '/us',
       name: 'English'
     },
     {
@@ -28,12 +28,12 @@ class LocaleUtils {
       abbreviation: 'jp',
       code: 'jp',
       base: '/jp',
-      name: 'Français'
+      name: '日本語'
     }]
 
     this.localeMap = {
       tw: 'tw',
-      en: 'en',
+      us: 'us',
       jp: 'jp'
     }
 

@@ -40,6 +40,17 @@ class GeneralUtils {
     return year + month + _date + hours + mins + sec + msec + this.generateRandomString(8)
   }
 
+  generateTimeStamp() {
+    const date = new Date()
+    const year = this.formatStr((date.getFullYear()).toString(), 4)
+    const month = this.formatStr((date.getMonth() + 1).toString(), 2)
+    const _date = this.formatStr((date.getDate()).toString(), 2)
+    const hours = this.formatStr((date.getHours()).toString(), 2)
+    const mins = this.formatStr((date.getMinutes()).toString(), 2)
+    const sec = this.formatStr((date.getSeconds()).toString(), 2)
+    return `${year}-${month}-${_date}-${hours}-${mins}-${sec}`
+  }
+
   generateRandomString(length: number) {
     let result = ''
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
