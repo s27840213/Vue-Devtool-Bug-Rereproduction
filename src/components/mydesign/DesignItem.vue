@@ -28,7 +28,7 @@
           div(v-if="!isSelected && (isMouseOver || isAnySelected)"
             class="design-item__checkbox"
             @click.stop="emitSelect")
-          div(v-if="isMouseOver"
+          div(v-if="isMouseOver && !isMultiSelected"
             class="design-item__more"
             @click.stop="toggleMenu()")
             svg-icon(iconName="more_vertical"
@@ -38,7 +38,7 @@
               class="design-item__menu"
               v-click-outside="closeMenu")
             slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-          div(v-if="favorable" class="design-item__favorite" @click.stop="emitLike")
+          div(v-if="favorable && !isMultiSelected" class="design-item__favorite" @click.stop="emitLike")
             svg-icon(v-if="isMouseOver && !config.favorite"
                     iconName="favorites"
                     iconWidth="20px"
