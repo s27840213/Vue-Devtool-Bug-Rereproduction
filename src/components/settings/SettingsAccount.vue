@@ -109,6 +109,9 @@ export default Vue.extend({
     mailValid(): boolean {
       if (!this.isConfirmClicked) {
         return true
+      } else if (this.account.length === 0 && this.inputAccount.length === 0) {
+        // no account and needn't add case
+        return true
       } else if (this.responseError) {
         return false
       } else if (this.inputAccount.length > 0) {
