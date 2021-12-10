@@ -5,7 +5,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-2'
-import StarterKit from '@tiptap/starter-kit'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import TextStyle from '@tiptap/extension-text-style'
+import NuTextStyle from '@/utils/nuTextStyle'
 
 export default Vue.extend({
   components: {
@@ -20,11 +24,24 @@ export default Vue.extend({
     }
   },
   mounted() {
+    // content: this.initText ?? '',
+    // content: '<p><span style="font-weight: bold">test</span></p>',
     this.editor = new Editor({
       content: this.initText ?? '',
       extensions: [
-        StarterKit
-      ]
+        Document,
+        Paragraph,
+        Text,
+        TextStyle,
+        NuTextStyle
+      ],
+      autofocus: 'start',
+      onFocus({ editor }) {
+        editor.commands.selectAll()
+      },
+      onUpdate({ editor }) {
+        console.log(editor.getJSON())
+      }
     })
   },
   destroyed() {

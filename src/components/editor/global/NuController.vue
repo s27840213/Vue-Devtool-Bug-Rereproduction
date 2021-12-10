@@ -64,16 +64,16 @@
           //-   @compositionstart="composingStart"
           //-   @compositionend="composingEnd"
           //-   @keydown="onKeyDown"
-          //-   @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-          //-   @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-          //-   @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-          //-   @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-          //-   @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-          //-   @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-          //-   @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-          //-   @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-          //-   @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-          //-   @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            //- @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            //- @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
+            //- @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            //- @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
+            //- @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            //- @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
+            //- @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+            //- @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
+            //- @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
+            //- @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
           //-   @keydown.37.stop
           //-   @keydown.38.stop
           //-   @keydown.39.stop
@@ -106,7 +106,17 @@
             @keydown.native.37.stop
             @keydown.native.38.stop
             @keydown.native.39.stop
-            @keydown.native.40.stop)
+            @keydown.native.40.stop
+            @keydown.native.ctrl.67.exact.stop.self
+            @keydown.native.meta.67.exact.stop.self
+            @keydown.native.ctrl.86.exact.stop.self
+            @keydown.native.meta.86.exact.stop.self
+            @keydown.native.ctrl.65.exact.stop.self
+            @keydown.native.meta.65.exact.stop.self
+            @keydown.native.ctrl.90.exact.stop.self
+            @keydown.native.meta.90.exact.stop.self
+            @keydown.native.ctrl.shift.90.exact.stop.self
+            @keydown.native.meta.shift.90.exact.stop.self)
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles"
@@ -346,12 +356,12 @@ export default Vue.extend({
       }
     },
     textHtml(): string {
-      return (this.config.paragraphs as IParagraph[]).map((p, pIndex) => {
+      return (this.config.paragraphs as IParagraph[]).map((p) => {
         return `
-          <p class="text__p" data-pindex="${pIndex}">
-            ${(p.spans.map((span, sIndex) => {
+          <p style="${this.textStyles(p.styles)}">
+            ${(p.spans.map((span) => {
               return `
-                <span class="text__span" data-sindex="${sIndex}">
+                <span style="${this.textStyles(span.styles)}">
                   ${(!span.text && p.spans.length === 1) ? '<br/>' : span.text}
                 </span>
               `
@@ -371,42 +381,42 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const text = this.$refs.text as HTMLElement
-          if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
-            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-            return
-          }
+          // const text = this.$refs.text as HTMLElement
+          // if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
+          //   LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
+          //   return
+          // }
           if (!this.isLocked) {
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
 
-          for (const p of this.paragraphs) {
-            for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
-              if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
-                p.spans.splice(sIndex, 1)
-                if (TextPropUtils.isSameSpanStyles(p.spans[sIndex - 1].styles, p.spans[sIndex].styles)) {
-                  p.spans[sIndex - 1].text += p.spans[sIndex].text
-                  p.spans.splice(sIndex, 1)
-                  sIndex--
-                }
-              }
-            }
-          }
+          // for (const p of this.paragraphs) {
+          //   for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
+          //     if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
+          //       p.spans.splice(sIndex, 1)
+          //       if (TextPropUtils.isSameSpanStyles(p.spans[sIndex - 1].styles, p.spans[sIndex].styles)) {
+          //         p.spans[sIndex - 1].text += p.spans[sIndex].text
+          //         p.spans.splice(sIndex, 1)
+          //         sIndex--
+          //       }
+          //     }
+          //   }
+          // }
         }
       } else {
         if (this.getLayerType === 'text') {
-          this.updateTextState({ paragraphs: this.config.paragraphs })
-          TextUtils.setCurrTextInfo({
-            config: this.config as IText,
-            layerIndex: this.layerIndex
-          })
+          // this.updateTextState({ paragraphs: this.config.paragraphs })
+          // TextUtils.setCurrTextInfo({
+          //   config: this.config as IText,
+          //   layerIndex: this.layerIndex
+          // })
         }
       }
 
       if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && val) {
-        this.$store.commit('text/SET_default')
-        TextPropUtils.updateTextPropsState()
+        // this.$store.commit('text/SET_default')
+        // TextPropUtils.updateTextPropsState()
       }
     },
     isTextEditing(editing) {
@@ -414,9 +424,9 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
-        if (editing && !this.config.isEdited) {
-          ShortcutUtils.textSelectAll(this.layerIndex)
-        }
+        // if (editing && !this.config.isEdited) {
+        //   ShortcutUtils.textSelectAll(this.layerIndex)
+        // }
       }
     }
   },
@@ -561,13 +571,13 @@ export default Vue.extend({
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    textStyles(styles: any) {
+    textStyles(styles: any): string {
       const textStyles = CssConveter.convertFontStyle(styles)
-      Object.assign(textStyles, {
-        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
+      // 'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
+      const finalStyles = Object.assign(textStyles, {
         'font-family': (textStyles['font-family'] + ',').concat(this.getDefaultFonts)
       })
-      return textStyles
+      return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       if (this.isLine) return
@@ -669,16 +679,16 @@ export default Vue.extend({
             dragging: true
           })
           if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-            if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-              if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-                const sel = TextUtils.getSelection()
-                if (sel) {
-                  const { start } = sel
-                  TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
-                }
-              }
-              TextPropUtils.updateTextPropsState()
-            }
+            // if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
+            //   if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+            //     const sel = TextUtils.getSelection()
+            //     if (sel) {
+            //       const { start } = sel
+            //       TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
+            //     }
+            //   }
+            //   TextPropUtils.updateTextPropsState()
+            // }
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
@@ -1865,6 +1875,9 @@ export default Vue.extend({
   }
   &__wrapper {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   &__body {
     outline: none;
