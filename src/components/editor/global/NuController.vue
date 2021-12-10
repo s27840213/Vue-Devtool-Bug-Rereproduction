@@ -54,54 +54,6 @@
               @dblSubController="dblSubController")
       template(v-if="config.type === 'text' && config.active")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          //- div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-          //-   @dragstart="preventDefault($event)"
-          //-   :style="textBodyStyle()"
-          //-   class="text__body"
-          //-   :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
-          //-   @focus="onTextFocus()"
-          //-   @blur="onTextBlur()"
-          //-   @compositionstart="composingStart"
-          //-   @compositionend="composingEnd"
-          //-   @keydown="onKeyDown"
-            //- @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-            //- @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-            //- @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-            //- @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-            //- @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-            //- @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-            //- @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-            //- @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-            //- @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-            //- @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-          //-   @keydown.37.stop
-          //-   @keydown.38.stop
-          //-   @keydown.39.stop
-          //-   @keydown.40.stop
-          //-   @keyup="onKeyUp")
-          //-   p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-          //-     :data-pindex="pIndex"
-          //-     :style="textStyles(p.styles)")
-          //-     template(v-for="(span, sIndex) in p.spans")
-          //-       span(v-if="!span.text && p.spans.length !== 1" class="text__span"
-          //-         :data-sindex="sIndex"
-          //-         :key="span.id"
-          //-         :style="textStyles(span.styles)")
-          //-         span(class="text__span"
-          //-           :data-sindex="sIndex"
-          //-           :key="span.id",
-          //-           :style="textStyles(span.styles)"
-          //-           v-text="'\uFEFF'")
-          //-       span(v-else-if="!span.text && p.spans.length === 1" class="text__span"
-          //-         :data-sindex="sIndex"
-          //-         :key="span.id",
-          //-         :style="textStyles(span.styles)")
-          //-         br
-          //-       span(v-else class="text__span"
-          //-         :data-sindex="sIndex"
-          //-         :key="span.id",
-          //-         :style="textStyles(span.styles)"
-          //-         v-text="span.text")
           nu-text-editor(:initText="textHtml"
             @keydown.native.37.stop
             @keydown.native.38.stop
@@ -116,7 +68,8 @@
             @keydown.native.ctrl.90.exact.stop.self
             @keydown.native.meta.90.exact.stop.self
             @keydown.native.ctrl.shift.90.exact.stop.self
-            @keydown.native.meta.shift.90.exact.stop.self)
+            @keydown.native.meta.shift.90.exact.stop.self
+            @update="handleTextChange")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles"
@@ -1511,6 +1464,10 @@ export default Vue.extend({
         this.hasChangeTextContent = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
       }
+    },
+    handleTextChange(paragraphs: IParagraph[]) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+      this.textSizeRefresh(this.config)
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

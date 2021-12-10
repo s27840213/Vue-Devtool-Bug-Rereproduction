@@ -1,15 +1,12 @@
 <template lang="pug">
-  editor-content(:editor="editor")
+  editor-content(:editor="tiptapUtils.editor")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-2'
-import Document from '@tiptap/extension-document'
-import Paragraph from '@tiptap/extension-paragraph'
-import Text from '@tiptap/extension-text'
-import TextStyle from '@tiptap/extension-text-style'
-import NuTextStyle from '@/utils/nuTextStyle'
+import { EditorContent } from '@tiptap/vue-2'
+import tiptapUtils from '@/utils/tiptapUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -20,34 +17,36 @@ export default Vue.extend({
   },
   data() {
     return {
-      editor: undefined as Editor | undefined
+      tiptapUtils,
+      isComposing: false
     }
   },
   mounted() {
-    // content: this.initText ?? '',
     // content: '<p><span style="font-weight: bold">test</span></p>',
-    this.editor = new Editor({
-      content: this.initText ?? '',
-      extensions: [
-        Document,
-        Paragraph,
-        Text,
-        TextStyle,
-        NuTextStyle
-      ],
-      autofocus: 'start',
-      onFocus({ editor }) {
-        editor.commands.selectAll()
-      },
-      onUpdate({ editor }) {
-        console.log(editor.getJSON())
+    tiptapUtils.init(this.initText)
+    tiptapUtils.on('update', ({ editor }) => {
+      this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
+      if (!this.isComposing) {
+        this.$nextTick(() => {
+          stepsUtils.record()
+        })
+      }
+    })
+    tiptapUtils.on('create', ({ editor }) => {
+      const editorDiv = (editor.options.element as HTMLElement).firstElementChild
+      if (editorDiv) {
+        editorDiv.addEventListener('compositionstart', () => {
+          this.isComposing = true
+        })
+        editorDiv.addEventListener('compositionend', () => {
+          this.isComposing = false
+          stepsUtils.record()
+        })
       }
     })
   },
   destroyed() {
-    if (this.editor) {
-      this.editor.destroy()
-    }
+    tiptapUtils.destroy()
   }
 })
 </script>
