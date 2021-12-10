@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="category-template-item" @click="handleClickGroup")
     div(class="relative pointer"
-      @mouseover="showCarousel = true"
+      @mouseover="() => handleCarouse()"
       @mouseleave="showCarousel = false")
       image-carousel(v-if="showCarousel"
         :imgs="groupImages"
@@ -65,6 +65,9 @@ export default Vue.extend({
     },
     handleClickGroup () {
       this.$emit('click', this.item)
+    },
+    handleCarouse () {
+      this.showCarousel = true
     }
   }
 })
@@ -77,6 +80,7 @@ export default Vue.extend({
       height: 145px;
       width: 145px;
       vertical-align: top;
+      pointer-events: none;
     }
     &__id {
       color: #ffffff;

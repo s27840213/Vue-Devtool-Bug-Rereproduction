@@ -19,6 +19,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   components: {
@@ -32,7 +33,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      isLogin: 'user/isLogin'
     })
   },
   methods: {
@@ -40,8 +42,13 @@ export default Vue.extend({
       this.inprogress = inprogress
     },
     handleShowPopup(show: boolean) {
-      this.show = show || false
-      !show && (this.inprogress = false)
+      if (this.isLogin) {
+        this.show = show || false
+        !show && (this.inprogress = false)
+      } else {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('請註冊/登入後才能下載', [])
+      }
     }
   }
 })
