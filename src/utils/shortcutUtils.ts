@@ -13,6 +13,7 @@ import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
 import router from '@/router'
+import logUtils from './logUtils'
 
 class ShortcutUtils {
   get currSelectedPageIndex() {
@@ -316,8 +317,9 @@ class ShortcutUtils {
     console.log('cut')
   }
 
-  save() {
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+  async save() {
+    await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    logUtils.uploadLog()
   }
 
   selectAll() {

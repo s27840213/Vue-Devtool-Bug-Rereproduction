@@ -15,6 +15,7 @@ import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
 import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 Vue.use(VueRouter)
 
 const SUPPORTED_LOCALES = [{
@@ -143,6 +144,10 @@ const router = new VueRouter({
         render(h) { return h('router-view') }
       },
       beforeEnter(to, from, next) {
+        if (logUtils.getLog()) {
+          logUtils.uploadLog()
+        }
+        logUtils.setLog('App Start')
         const locale = localeUtils.localeMap[to.params.locale]
         if (locale) {
           i18n.locale = locale
