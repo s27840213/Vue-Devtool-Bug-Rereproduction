@@ -935,6 +935,7 @@ class UploadUtils {
            * @Note remove the designId and type query if 404
            */
           logUtils.setLog('Fail to get design')
+          themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
         } else {
           response.json().then(async (json) => {

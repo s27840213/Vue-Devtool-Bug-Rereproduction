@@ -32,6 +32,7 @@
               @toggleColorPanel="toggleColorPanel")
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
+    tour-guide(v-if="showEditorGuide")
 </template>
 
 <script lang="ts">
@@ -44,6 +45,7 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
+import TourGuide from '@/components/editor/TourGuide.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
@@ -62,7 +64,8 @@ export default Vue.extend({
     ScaleRatioEditor,
     FunctionPanel,
     ColorPanel,
-    PagePreview
+    PagePreview,
+    TourGuide
   },
   data() {
     return {
@@ -79,7 +82,8 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'role',
-      'adminMode']),
+      'adminMode',
+      'viewGuide']),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -134,6 +138,9 @@ export default Vue.extend({
       return {
         top
       }
+    },
+    showEditorGuide(): boolean {
+      return this.viewGuide === 0
     }
   },
   created() {

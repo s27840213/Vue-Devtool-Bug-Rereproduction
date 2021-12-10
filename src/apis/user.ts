@@ -109,5 +109,12 @@ export default {
       code,
       redirect_uri
     }
+  }),
+  updateUserViewGuide: (token: string, view_guide: number): AxiosPromise => axios('/update-user', {
+    method: 'POST',
+    data: {
+      token,
+      view_guide
+    }
   })
 }

@@ -81,15 +81,6 @@ class ImageAdjustUtil {
           attrs: { result: 'preblur' }
         }),
         this.createSvgFilter({
-          tag: 'feComponentTransfer',
-          child: [
-            this.createSvgFilter({
-              tag: 'feFuncA',
-              attrs: { type: 'linear', slope: 0, intercept: 1 }
-            })
-          ]
-        }),
-        this.createSvgFilter({
           tag: 'feGaussianBlur',
           attrs: { stdDeviation: 1.2 }
         }),
@@ -107,15 +98,6 @@ class ImageAdjustUtil {
       ]
     }
     return [
-      this.createSvgFilter({
-        tag: 'feComponentTransfer',
-        child: [
-          this.createSvgFilter({
-            tag: 'feFuncA',
-            attrs: { type: 'linear', slope: 0, intercept: 1 }
-          })
-        ]
-      }),
       this.createSvgFilter({
         tag: 'feGaussianBlur',
         attrs: { stdDeviation: 0.1 * value }
