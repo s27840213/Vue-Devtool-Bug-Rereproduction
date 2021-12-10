@@ -79,7 +79,7 @@
         :iconName="'copy'"
         :iconWidth="'16px'"
         :iconColor="'gray-1'")
-      span(class="ml-10 body-2") Set Image as Background
+      span(class="ml-10 body-2") {{$t('NN0097')}}
 </template>
 
 <script lang="ts">
@@ -188,7 +188,7 @@ export default Vue.extend({
           }
         },
         {
-          icon: 'copy',
+          icon: 'update',
           text: `更新 ${this.typeMap[this.updateType]}`,
           condition: this.hasLayerDesignId && this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
           shortcutText: '',
@@ -200,8 +200,8 @@ export default Vue.extend({
     },
     groupOption(): any {
       return {
-        icon: 'copy',
-        text: this.isGroup ? 'Ungroup' : 'Group',
+        icon: this.isGroup ? 'ungroup' : 'group',
+        text: this.isGroup ? this.$t('NN0212') : this.$t('NN0029'),
         shortcutText: this.isGroup ? 'Cmd+Shift+G' : 'Cmd+G',
         action: () => {
           this.isGroup ? groupUtils.ungroup() : groupUtils.group()
@@ -236,7 +236,7 @@ export default Vue.extend({
           }
         },
         {
-          icon: 'copy',
+          icon: 'paste',
           text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {

@@ -314,10 +314,12 @@ class ShortcutUtils {
   }
 
   cut() {
-    console.log('cut')
+    this.copy()
+    this.del()
   }
 
   async save() {
+    console.log('save')
     await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
     logUtils.uploadLog()
   }

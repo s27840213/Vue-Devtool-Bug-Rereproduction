@@ -150,7 +150,9 @@ class PageUtils {
   scrollIntoPage(pageIndex: number): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
     currentPage.scrollIntoView({
-      behavior: 'smooth'
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center'
     })
     this.findCentralPageIndexInfo()
   }

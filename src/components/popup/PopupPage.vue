@@ -32,27 +32,18 @@
         :iconName="'copy'"
         :iconWidth="'16px'"
         :iconColor="'gray-1'")
-      span(class="ml-10 body-2") 分離背景照片
+      span(class="ml-10 body-2") {{$t('NN0275')}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import store from '@/store'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import clipTest from '@/assets/json/Img_clip.json'
-import frameTest from '@/assets/json/fram_test.json'
-import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
-import layerFactary from '@/utils/layerFactary'
-import shapeUtils from '@/utils/shapeUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IPopupOptions } from '@/interfaces/popup'
-import pageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   props: {
@@ -133,7 +124,7 @@ export default Vue.extend({
           }
         },
         {
-          icon: 'copy',
+          icon: 'paste',
           text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {

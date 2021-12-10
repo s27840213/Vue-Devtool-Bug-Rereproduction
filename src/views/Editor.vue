@@ -79,6 +79,14 @@ export default Vue.extend({
       this.toggleSidebarPanel = this.isShowPagePreview
     }
   },
+  mounted() {
+    const type = this.$router.currentRoute.query.type
+    const designId = this.$router.currentRoute.query.design_id
+    const teamId = this.$router.currentRoute.query.team_id
+    if (!type || !designId || !teamId) {
+      uploadUtils.hasGottenDesign = true
+    }
+  },
   computed: {
     ...mapState('user', [
       'role',

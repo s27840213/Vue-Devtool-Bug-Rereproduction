@@ -422,6 +422,7 @@ class UploadUtils {
     const teamId = router.currentRoute.query.team_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
+    console.log(designId && teamId && type && !this.hasGottenDesign)
     if (designId && teamId && type && !this.hasGottenDesign) {
       return
     }

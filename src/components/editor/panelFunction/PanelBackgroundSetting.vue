@@ -1,26 +1,26 @@
 <template lang="pug">
   div(class="bg-setting")
-    span(class="bg-setting__title text-blue-1 label-lg") 背景設定
+    span(class="bg-setting__title text-blue-1 label-lg") {{$t('NN0142')}}
     div(class="action-bar flex-evenly my-10")
       svg-icon(class="btn-opacity pointer p-5 feature-button"
         iconName="transparency" :iconWidth="'20px'"
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         @click.native="openSliderPopup()"
-        v-hint="'透明度'")
+        v-hint="`${$t('NN0030')}`")
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'active': backgroundLocked }"
         :iconName="backgroundLocked ? 'unlock' : 'lock'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
         @click.native="handleLockBackground"
-        v-hint="'鎖定背景'")
+        v-hint="`${$t('NN0142')}`")
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         iconName="trash" :iconWidth="'20px'"
         @click.native="handleDeleteBackground"
-        v-hint="'刪除'")
+        v-hint="`${$t('NN0034')}`")
     div(class="mb-10")
       btn(class="full-width"
         :class="backgroundImgControl ? 'active' : ''"
