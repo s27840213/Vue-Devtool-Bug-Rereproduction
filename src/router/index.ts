@@ -148,11 +148,16 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        const locale = localeUtils.localeMap[to.params.locale]
-        if (locale) {
+        let locale = localStorage.getItem('locale')
+        if (locale === '' || !locale) {
+          locale = to.params.locale
+        }
+        if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
           i18n.locale = locale
+          localStorage.setItem('locale', locale)
         }
         next()
+        router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
       },
       children: routes
     }

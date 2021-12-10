@@ -129,15 +129,17 @@ export default Vue.extend({
     this.switchUrl(this.currLocale)
   },
   watch: {
-    inputLocale() {
+    async inputLocale() {
       if (this.getLocaleValue(this.inputLocale) !== this.$i18n.locale) {
         if (this.isLogin) {
-          store.dispatch('user/updateUser', {
+          await store.dispatch('user/updateUser', {
             token: this.token,
             locale: this.getLocaleValue(this.inputLocale)
           })
         }
-        this.$i18n.locale = this.getLocaleValue(this.inputLocale) as string
+        const newLocale = this.getLocaleValue(this.inputLocale) as string
+        localStorage.setItem('locale', newLocale)
+        this.$i18n.locale = newLocale
         this.$router.go(0)
       }
     }

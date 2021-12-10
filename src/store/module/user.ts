@@ -7,6 +7,7 @@ import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserFontContent
 import modalUtils from '@/utils/modalUtils'
 import Vue from 'vue'
 import themeUtils from '@/utils/themeUtils'
+import i18n from '@/i18n'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -438,11 +439,17 @@ const actions: ActionTree<IUserModule, unknown> = {
         role: data.data.role,
         account: data.data.account,
         upassUpdate: data.data.upass_update,
-        locale: data.data.locale,
         subscribe: data.data.subscribe,
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
+
+      // locale settings
+      const locale = localStorage.getItem('locale') as string
+      if (locale !== data.data.locale) {
+        i18n.locale = data.data.locale
+        localStorage.setItem('locale', data.data.locale)
+      }
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('getAllAssets', { token: newToken })
