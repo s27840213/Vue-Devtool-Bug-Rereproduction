@@ -1023,11 +1023,11 @@ const mutations: MutationTree<IDesignState> = {
     state.allDesigns.splice(index, 0, design)
   },
   UPDATE_replaceDesign(state: IDesignState, updateInfo: { id: string, design: IDesign }) {
-    const index = state.allDesigns.findIndex((design_) => design_.id === updateInfo.id)
+    const index = state.allDesigns.findIndex((design_) => design_.id === updateInfo.id) // placeholder design uses special id, so replace by id
     state.allDesigns.splice(index, 1, updateInfo.design)
   },
   UPDATE_deleteDesign(state: IDesignState, design: IDesign) {
-    const index = state.allDesigns.findIndex((design_) => design_.id === design.id)
+    const index = state.allDesigns.findIndex((design_) => design_.asset_index === design.asset_index)
     if (index >= 0) {
       state.allDesigns.splice(index, 1)
     }

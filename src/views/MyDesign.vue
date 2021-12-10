@@ -467,7 +467,7 @@ export default Vue.extend({
       if (!currentShowing) return false
       if (item.type !== currentShowing.type) return false
       if (item.type === 'design') {
-        return (item.data as IDesign).id === (currentShowing.data as IDesign).id
+        return (item.data as IDesign).asset_index === (currentShowing.data as IDesign).asset_index
       }
       if (item.type === 'folder') {
         return (item.data as IFolder).id === (currentShowing.data as IFolder).id

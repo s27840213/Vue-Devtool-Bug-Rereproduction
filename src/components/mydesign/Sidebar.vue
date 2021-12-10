@@ -185,7 +185,7 @@ export default Vue.extend({
           if (this.draggingType === 'design') {
             const design = this.draggingDesign as IDesign | undefined
             if (!design) return
-            if (this.isMultiSelected && this.selectedDesigns[design.id]) {
+            if (this.isMultiSelected && this.selectedDesigns[design.asset_index.toString()]) {
               this.$emit('deleteAll')
             } else {
               designUtils.delete(design)

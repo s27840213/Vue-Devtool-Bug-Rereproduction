@@ -12,7 +12,7 @@
         span 設計
     div(v-if="isExpanded" class="design-gallery__designs")
       design-item(v-for="design in allDesigns"
-                  :key="design.id"
+                  :key="design.asset_index"
                   :config="design"
                   :favorable="!limitFunctions"
                   :undraggable="limitFunctions"
