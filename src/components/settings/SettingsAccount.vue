@@ -194,7 +194,9 @@ export default Vue.extend({
         })
 
         if (this.inputLocale !== this.getLocaleText(this.currLocale)) {
-          this.$i18n.locale = this.getLocaleValue(this.inputLocale) as string
+          const newLocale = this.getLocaleValue(this.inputLocale) as string
+          localStorage.setItem('locale', newLocale)
+          this.$i18n.locale = newLocale
           this.$router.go(0)
         }
         this.isConfirmClicked = false
