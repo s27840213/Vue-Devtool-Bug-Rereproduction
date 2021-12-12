@@ -1457,7 +1457,7 @@ export default Vue.extend({
     handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config)
-      if (payload.isSetContentRequired) {
+      if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
             editor.chain().setContent(tiptapUtils.toHTML(payload.paragraphs)).selectPrevious().run()

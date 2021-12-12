@@ -39,7 +39,7 @@ export default Extension.create({
         selection: { from, to }
       })
       const currChangeCount = (this.editor.view as any).domChangeCount
-      if (currChangeCount === this.storage.prevChangeCount) {
+      if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
           selection: { from, to }
         })
