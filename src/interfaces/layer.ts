@@ -1,6 +1,7 @@
 import { SrcObj } from './gallery'
+import { ITiptapSelection } from './text'
 
-export const jsonVer = '1.0.3'
+export const jsonVer = '1.0.4'
 export interface IStyle {
   [key: string]: number | string | boolean | undefined,
   x: number,
@@ -83,7 +84,8 @@ export interface IText extends ILayer<ITextStyle> {
   isHeading?: boolean,
   isSubheading?: boolean,
   isBody?: boolean,
-  isEdited: boolean
+  isEdited: boolean,
+  selection: ITiptapSelection
 }
 
 export interface IShape extends ILayer<IStyle> {

@@ -207,7 +207,11 @@ class LayerFactary {
             }
           ]
         }
-      ]
+      ],
+      selection: {
+        from: 0,
+        to: 0
+      }
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles

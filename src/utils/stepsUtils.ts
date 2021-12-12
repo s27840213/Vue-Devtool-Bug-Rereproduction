@@ -1,4 +1,3 @@
-// import store from '@/store'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -209,6 +208,14 @@ class StepsUtils {
 
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
+    }
+  }
+
+  updateHead(pageIndex: number, layerIndex: number, props: any) {
+    const pages = this.steps[this.currStep].pages
+    const layer = pages[pageIndex].layers[layerIndex]
+    for (const [key, value] of Object.entries(props)) {
+      layer[key] = value
     }
   }
 

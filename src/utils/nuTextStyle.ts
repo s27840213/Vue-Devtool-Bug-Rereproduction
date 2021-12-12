@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
 import tiptapUtils from './tiptapUtils'
@@ -8,6 +9,7 @@ declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nuTextStyle: {
       selectPrevious: () => ReturnType,
+      sync: () => ReturnType
     }
   }
 }
@@ -18,7 +20,8 @@ export default Extension.create({
     return {
       spanStyle: undefined,
       from: undefined,
-      to: undefined
+      to: undefined,
+      prevChangeCount: 0
     }
   },
   onSelectionUpdate() {
@@ -28,8 +31,20 @@ export default Extension.create({
     }
     const selectionRanges = this.editor.view.state.selection.ranges
     if (selectionRanges.length > 0) {
-      this.storage.from = selectionRanges[0].$from.pos
-      this.storage.to = selectionRanges[0].$to.pos
+      const from = selectionRanges[0].$from.pos
+      const to = selectionRanges[0].$to.pos
+      this.storage.from = from
+      this.storage.to = to
+      layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
+        selection: { from, to }
+      })
+      const currChangeCount = (this.editor.view as any).domChangeCount
+      if (currChangeCount === this.storage.prevChangeCount) {
+        stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
+          selection: { from, to }
+        })
+      }
+      this.storage.prevChangeCount = currChangeCount
     }
   },
   addGlobalAttributes() {
@@ -80,28 +95,36 @@ export default Extension.create({
     return {
       'Mod-z': ({ editor }) => {
         stepsUtils.undo()
-        const paragraphs = (layerUtils.getCurrLayer as IText).paragraphs
-        editor.chain().setContent(tiptapUtils.toHTML(paragraphs)).selectPrevious().run()
+        Vue.nextTick(() => {
+          if (!tiptapUtils.editor) return
+          editor.commands.sync()
+        })
         return true
       },
       'Shift-Mod-z': ({ editor }) => {
         stepsUtils.redo()
-        const paragraphs = (layerUtils.getCurrLayer as IText).paragraphs
-        editor.chain().setContent(tiptapUtils.toHTML(paragraphs)).selectPrevious().run()
+        Vue.nextTick(() => {
+          if (!tiptapUtils.editor) return
+          editor.commands.sync()
+        })
         return true
       },
 
       // Russian keyboard layouts
       'Mod-я': ({ editor }) => {
         stepsUtils.undo()
-        const paragraphs = (layerUtils.getCurrLayer as IText).paragraphs
-        editor.chain().setContent(tiptapUtils.toHTML(paragraphs)).selectPrevious().run()
+        Vue.nextTick(() => {
+          if (!tiptapUtils.editor) return
+          editor.commands.sync()
+        })
         return true
       },
       'Shift-Mod-я': ({ editor }) => {
         stepsUtils.redo()
-        const paragraphs = (layerUtils.getCurrLayer as IText).paragraphs
-        editor.chain().setContent(tiptapUtils.toHTML(paragraphs)).selectPrevious().run()
+        Vue.nextTick(() => {
+          if (!tiptapUtils.editor) return
+          editor.commands.sync()
+        })
         return true
       }
     }
@@ -111,8 +134,13 @@ export default Extension.create({
       selectPrevious: () => ({ commands }) => {
         const from = this.storage.from ?? 0
         const to = this.storage.to ?? 0
-        console.log(from, to)
         return commands.setTextSelection({ from, to })
+      },
+      sync: () => ({ chain }) => {
+        const currLayer = layerUtils.getCurrLayer as IText
+        const paragraphs = currLayer.paragraphs
+        const selection = currLayer.selection
+        return chain().setContent(tiptapUtils.toHTML(paragraphs)).setTextSelection(selection).run()
       }
     }
   }

@@ -12,6 +12,7 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
 import Vue from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
+import { ITiptapSelection } from '@/interfaces/text'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -107,7 +108,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> | ITiptapSelection }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
