@@ -31,6 +31,7 @@ import layerUtils from '@/utils/layerUtils'
 import { IGroup, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import text from '@/store/text'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -151,10 +152,7 @@ export default Vue.extend({
         }
 
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
-          const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
-          layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          this.updateTextState({ paragraphs: newConfig.paragraphs })
-          this.$nextTick(() => TextUtils.focus(newStart, newEnd))
+          tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-family': tiptapUtils.getFontFamily(this.item.id) }).run())
         }
 
         if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {

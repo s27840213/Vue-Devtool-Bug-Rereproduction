@@ -22,7 +22,7 @@ class TiptapUtils {
         NuTextStyle
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
-      onFocus({ editor }) {
+      onCreate({ editor }) {
         editor.commands.selectAll()
       }
     })
@@ -61,9 +61,13 @@ class TiptapUtils {
   textStyles(styles: any): string {
     const textStyles = cssConveter.convertFontStyle(styles)
     const finalStyles = Object.assign(textStyles, {
-      'font-family': (textStyles['font-family'] + ',').concat(store.getters['text/getDefaultFonts'])
+      'font-family': this.getFontFamily(textStyles['font-family'])
     })
     return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
+  }
+
+  getFontFamily(font: string): string {
+    return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
   toHTML(paragraphs: IParagraph[]): string {
@@ -71,12 +75,8 @@ class TiptapUtils {
       return `
         <p style="${this.textStyles(p.styles)}"${p.spanStyle ? ` data-span-style="${p.spanStyle}"` : ''}>
           ${(p.spans.map((span) => {
-            return `
-              <span style="${this.textStyles(span.styles)}">
-                ${(!span.text && p.spans.length === 1) ? '<br/>' : span.text}
-              </span>
-            `
-          })).join('\n')}
+            return `<span style="${this.textStyles(span.styles)}">${(!span.text && p.spans.length === 1) ? '<br/>' : span.text}</span>`
+          })).join('')}
         </p>
       `
     }).join('\n')

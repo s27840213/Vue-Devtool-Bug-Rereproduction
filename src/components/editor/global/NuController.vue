@@ -323,11 +323,11 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          // const text = this.$refs.text as HTMLElement
-          // if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
-          //   LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-          //   return
-          // }
+          const text = tiptapUtils.editor?.view?.dom as HTMLElement
+          if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
+            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
+            return
+          }
           if (!this.isLocked) {
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -621,16 +621,16 @@ export default Vue.extend({
             dragging: true
           })
           if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-            // if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-            //   if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-            //     const sel = TextUtils.getSelection()
-            //     if (sel) {
-            //       const { start } = sel
-            //       TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
-            //     }
-            //   }
-            //   TextPropUtils.updateTextPropsState()
-            // }
+            if (this.getLayerType === 'text' && this.isActive && (tiptapUtils.editor?.view?.dom as HTMLElement).contains(e.target as Node)) {
+              if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+                const sel = TextUtils.getSelection()
+                if (sel) {
+                  const { start } = sel
+                  TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
+                }
+              }
+              TextPropUtils.updateTextPropsState()
+            }
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
@@ -1371,7 +1371,7 @@ export default Vue.extend({
     },
     onTyping(mutations: MutationRecord[], observer: MutationObserver) {
       observer.disconnect()
-      const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
+      const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
       const config = GeneralUtils.deepCopy(this.config) as IText
       config.paragraphs = paragraphs
       this.updateTextState({ paragraphs })
@@ -1381,7 +1381,7 @@ export default Vue.extend({
     },
     onKeyDown(e: KeyboardEvent) {
       const observer = new MutationObserver(this.onTyping)
-      observer.observe(this.$refs.text as HTMLElement, {
+      observer.observe(tiptapUtils.editor?.view?.dom as HTMLElement, {
         characterData: true,
         childList: true,
         subtree: true,
@@ -1438,7 +1438,7 @@ export default Vue.extend({
     composingEnd() {
       this.isComposing = false
       this.isComposeEndEnter = true
-      const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
+      const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
       const config = GeneralUtils.deepCopy(this.config) as IText
       config.paragraphs = paragraphs
       this.textSizeRefresh(config)

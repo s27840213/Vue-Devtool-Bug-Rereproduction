@@ -9,7 +9,8 @@ declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nuTextStyle: {
       selectPrevious: () => ReturnType,
-      sync: () => ReturnType
+      sync: () => ReturnType,
+      setSpanProps: (props:{[key: string]: string}) => ReturnType
     }
   }
 }
@@ -141,6 +142,34 @@ export default Extension.create({
         const paragraphs = currLayer.paragraphs
         const selection = currLayer.selection
         return chain().setContent(tiptapUtils.toHTML(paragraphs)).setTextSelection(selection).run()
+      },
+      setSpanProps: (props: {[key: string]: string}) => ({ editor, commands }) => {
+        let updateOnSpan = true
+        let currStyles
+        const spanStyles = editor.getAttributes('textStyle')
+        if (spanStyles.style) {
+          currStyles = spanStyles.style
+        } else {
+          updateOnSpan = false
+          const paragraphStyles = editor.getAttributes('paragraph')
+          if (paragraphStyles.spanStyle) {
+            currStyles = paragraphStyles.spanStyle
+          } else {
+            currStyles = editor.storage.nuTextStyle.spanStyle
+          }
+        }
+        // copy CSSStyleDeclaration
+        const el = document.createElement('div')
+        el.style.cssText = currStyles.cssText
+        currStyles = el.style
+        for (const [key, value] of Object.entries(props)) {
+          currStyles.setProperty(key, value)
+        }
+        if (updateOnSpan) {
+          return commands.updateAttributes('textStyle', { style: currStyles })
+        } else {
+          return commands.updateAttributes('paragraph', { spanStyle: currStyles })
+        }
       }
     }
   }
