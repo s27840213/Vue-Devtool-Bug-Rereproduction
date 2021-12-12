@@ -155,6 +155,7 @@ import popupUtils from '@/utils/popupUtils'
 import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -309,19 +310,7 @@ export default Vue.extend({
       }
     },
     textHtml(): string {
-      return (this.config.paragraphs as IParagraph[]).map((p) => {
-        return `
-          <p style="${this.textStyles(p.styles)}">
-            ${(p.spans.map((span) => {
-              return `
-                <span style="${this.textStyles(span.styles)}">
-                  ${(!span.text && p.spans.length === 1) ? '<br/>' : span.text}
-                </span>
-              `
-            })).join('\n')}
-          </p>
-        `
-      }).join('\n')
+      return tiptapUtils.toHTML(this.config.paragraphs)
     }
   },
   watch: {
@@ -1465,9 +1454,16 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
       }
     },
-    handleTextChange(paragraphs: IParagraph[]) {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+    handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config)
+      if (payload.isSetContentRequired) {
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            editor.chain().setContent(tiptapUtils.toHTML(payload.paragraphs)).selectPrevious().run()
+          })
+        })
+      }
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')

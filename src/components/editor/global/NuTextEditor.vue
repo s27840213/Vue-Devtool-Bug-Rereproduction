@@ -17,29 +17,23 @@ export default Vue.extend({
   },
   data() {
     return {
-      tiptapUtils,
-      isComposing: false
+      tiptapUtils
     }
   },
   mounted() {
-    // content: '<p><span style="font-weight: bold">test</span></p>',
     tiptapUtils.init(this.initText)
     tiptapUtils.on('update', ({ editor }) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
-      if (!this.isComposing) {
+      if (!editor.view.composing) {
         this.$nextTick(() => {
           stepsUtils.record()
         })
       }
     })
     tiptapUtils.on('create', ({ editor }) => {
-      const editorDiv = (editor.options.element as HTMLElement).firstElementChild
+      const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
-        editorDiv.addEventListener('compositionstart', () => {
-          this.isComposing = true
-        })
         editorDiv.addEventListener('compositionend', () => {
-          this.isComposing = false
           stepsUtils.record()
         })
       }
