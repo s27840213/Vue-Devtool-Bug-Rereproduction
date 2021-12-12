@@ -24,11 +24,12 @@ export default Vue.extend({
     tiptapUtils.init(this.initText)
     tiptapUtils.on('update', ({ editor }) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
-      if (!editor.view.composing) {
+      if (!editor.view.composing && (tiptapUtils.prevText !== editor.getText())) {
         this.$nextTick(() => {
           stepsUtils.record()
         })
       }
+      tiptapUtils.prevText = editor.getText()
     })
     tiptapUtils.on('create', ({ editor }) => {
       const editorDiv = editor.view.dom as HTMLDivElement

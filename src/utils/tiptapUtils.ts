@@ -10,6 +10,7 @@ import { IParagraph, IParagraphStyle, ISpan, ISpanStyle } from '@/interfaces/lay
 
 class TiptapUtils {
   editor: Editor | undefined = undefined
+  prevText: string | undefined = undefined
 
   init(content: string) {
     this.editor = new Editor({
@@ -22,8 +23,9 @@ class TiptapUtils {
         NuTextStyle
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
-      onCreate({ editor }) {
+      onCreate: ({ editor }) => {
         editor.commands.selectAll()
+        this.prevText = editor.getText()
       }
     })
   }

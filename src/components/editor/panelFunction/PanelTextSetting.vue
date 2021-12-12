@@ -85,6 +85,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -213,15 +214,12 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      let currLayer = LayerUtils.getCurrLayer
+      const currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
 
       if (currLayer.type === 'text') {
-        currLayer = currLayer as IText
-        TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
-        if (!TextUtils.isSel(this.sel.end)) {
-          setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end))
-        }
+        StepsUtils.record()
+        tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ color }).run())
       }
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
@@ -331,7 +329,23 @@ export default Vue.extend({
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
-      TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+      if (iconName === 'font-vertical') {
+        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+      } else {
+        tiptapUtils.agent(editor => {
+          switch (iconName) {
+            case 'bold':
+              editor.chain().focus().setSpanProps({ 'font-weight': 'bold' }).run()
+              break
+            case 'underline':
+              editor.chain().focus().setSpanProps({ 'text-decoration': 'underline' }).run()
+              break
+            case 'italic':
+              editor.chain().focus().setSpanProps({ 'font-style': 'italic' }).run()
+              break
+          }
+        })
+      }
 
       // Only select with range or none selection exist, the prop-panel update.
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
@@ -340,7 +354,23 @@ export default Vue.extend({
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
-      TextPropUtils.paragraphPropsHandler(iconName)
+      // TextPropUtils.paragraphPropsHandler(iconName)
+      tiptapUtils.agent(editor => {
+        switch (iconName) {
+          case 'text-align-left':
+            editor.chain().focus().setParagraphProps({ 'text-align': 'left' }).run()
+            break
+          case 'text-align-center':
+            editor.chain().focus().setParagraphProps({ 'text-align': 'center' }).run()
+            break
+          case 'text-align-right':
+            editor.chain().focus().setParagraphProps({ 'text-align': 'right' }).run()
+            break
+          case 'text-align-justify':
+            editor.chain().focus().setParagraphProps({ 'text-align': 'justify' }).run()
+            break
+        }
+      })
       if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
         TextPropUtils.updateTextPropsState()
       }
@@ -493,7 +523,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000)
+          tiptapUtils.agent(editor => editor.chain().focus().setParagraphProps({ 'letter-spacing': `${value / 1000}em` }).run())
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -502,7 +532,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value).toFixed(2)))
+          tiptapUtils.agent(editor => editor.chain().focus().setParagraphProps({ 'line-height': `${toNumber((value).toFixed(2))}em` }).run())
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }

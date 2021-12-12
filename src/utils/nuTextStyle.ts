@@ -10,7 +10,8 @@ declare module '@tiptap/core' {
     nuTextStyle: {
       selectPrevious: () => ReturnType,
       sync: () => ReturnType,
-      setSpanProps: (props:{[key: string]: string}) => ReturnType
+      setSpanProps: (props:{[key: string]: string}) => ReturnType,
+      setParagraphProps: (props:{[key: string]: string}) => ReturnType
     }
   }
 }
@@ -170,6 +171,17 @@ export default Extension.create({
         } else {
           return commands.updateAttributes('paragraph', { spanStyle: currStyles })
         }
+      },
+      setParagraphProps: (props: {[key: string]: string}) => ({ editor, commands }) => {
+        let currStyles = editor.getAttributes('paragraph').style
+        // copy CSSStyleDeclaration
+        const el = document.createElement('div')
+        el.style.cssText = currStyles.cssText
+        currStyles = el.style
+        for (const [key, value] of Object.entries(props)) {
+          currStyles.setProperty(key, value)
+        }
+        return commands.updateAttributes('paragraph', { style: currStyles })
       }
     }
   }

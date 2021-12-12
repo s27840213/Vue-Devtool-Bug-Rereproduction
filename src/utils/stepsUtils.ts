@@ -81,6 +81,7 @@ class StepsUtils {
   }
 
   record() {
+    console.trace()
     const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
     const modifiedPage = pageUtils.getPage(lastSelectedPageIndex) as IPage
