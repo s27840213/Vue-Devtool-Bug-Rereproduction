@@ -125,7 +125,12 @@ class TiptapUtils {
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
-          const spanStyle = paragraph.attrs.spanStyle as CSSStyleDeclaration
+          let spanStyle: CSSStyleDeclaration
+          if (paragraph.attrs.spanStyle) {
+            spanStyle = paragraph.attrs.spanStyle
+          } else {
+            spanStyle = defaultStyle
+          }
           const sStyles = this.generateSpanStyle(spanStyle)
           spans.push({ text: span.text, styles: sStyles })
         }
