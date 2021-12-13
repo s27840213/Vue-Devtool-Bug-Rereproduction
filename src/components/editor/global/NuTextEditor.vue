@@ -35,7 +35,12 @@ export default Vue.extend({
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
-          stepsUtils.record()
+          this.$nextTick(() => {
+            stepsUtils.record()
+            tiptapUtils.agent(editor => {
+              editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
+            })
+          })
         })
       }
     })

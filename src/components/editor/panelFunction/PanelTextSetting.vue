@@ -253,8 +253,12 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      const newFontSize = `${value * 1.3333}px`
-      tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-size': newFontSize }).setParagraphProps({ 'font-size': newFontSize }).run())
+      tiptapUtils.agent(
+        editor => editor.chain().focus()
+          .updateAttributes('textStyle', { size: value })
+          .updateAttributes('paragraph', { size: value })
+          .run()
+      )
       tiptapUtils.agent(editor => {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
         StepsUtils.record()
@@ -332,13 +336,13 @@ export default Vue.extend({
         tiptapUtils.agent(editor => {
           switch (iconName) {
             case 'bold':
-              editor.chain().focus().setSpanProps({ 'font-weight': 'bold' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { weight: 'bold' }).run()
               break
             case 'underline':
-              editor.chain().focus().setSpanProps({ 'text-decoration': 'underline' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { decoration: 'underline' }).run()
               break
             case 'italic':
-              editor.chain().focus().setSpanProps({ 'font-style': 'italic' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { style: 'italic' }).run()
               break
           }
         })
@@ -355,16 +359,16 @@ export default Vue.extend({
       tiptapUtils.agent(editor => {
         switch (iconName) {
           case 'text-align-left':
-            editor.chain().focus().setParagraphProps({ 'text-align': 'left' }).run()
+            editor.chain().focus().updateAttributes('paragraph', { align: 'left' }).run()
             break
           case 'text-align-center':
-            editor.chain().focus().setParagraphProps({ 'text-align': 'center' }).run()
+            editor.chain().focus().updateAttributes('paragraph', { align: 'center' }).run()
             break
           case 'text-align-right':
-            editor.chain().focus().setParagraphProps({ 'text-align': 'right' }).run()
+            editor.chain().focus().updateAttributes('paragraph', { align: 'right' }).run()
             break
           case 'text-align-justify':
-            editor.chain().focus().setParagraphProps({ 'text-align': 'justify' }).run()
+            editor.chain().focus().updateAttributes('paragraph', { align: 'justify' }).run()
             break
         }
       })
@@ -503,8 +507,12 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          const newFontSize = `${parseFloat(value) * 1.3333}px`
-          tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-size': newFontSize }).setParagraphProps({ 'font-size': newFontSize }).run())
+          tiptapUtils.agent(
+            editor => editor.chain().focus()
+              .updateAttributes('textStyle', { size: value })
+              .updateAttributes('paragraph', { size: value })
+              .run()
+          )
           tiptapUtils.agent(editor => {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
