@@ -4,6 +4,7 @@ import { Extension } from '@tiptap/core'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
+import textPropUtils from './textPropUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -29,6 +30,7 @@ export default Extension.create({
     if (Object.keys(spanAttrs).length) {
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     }
+    textPropUtils.updateTextPropsState()
     const selectionRanges = this.editor.view.state.selection.ranges
     if (selectionRanges.length > 0) {
       const from = selectionRanges[0].$from.pos
@@ -38,6 +40,23 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
+      // const startNode = selectionRanges[0].$from.node()
+      // if (from === to && startNode.content.size === 0) {
+      //   let spanStyle: string
+      //   if (this.editor.getAttributes('paragraph').spanStyle) {
+      //     spanStyle = this.editor.getAttributes('paragraph').spanStyle
+      //   } else {
+      //     spanStyle = this.storage.spanStyle
+      //   }
+      //   const el = document.createElement('div')
+      //   el.style.cssText = spanStyle
+      //   const sStyles = tiptapUtils.generateSpanStyle(el.style)
+      //   if (this.editor.isActive('textStyle')) {
+      //     this.editor.chain().focus().unsetAllMarks().setMark('textStyle', sStyles).run()
+      //   } else {
+      //     this.editor.chain().focus().setMark('textStyle', sStyles).run()
+      //   }
+      // }
       const currChangeCount = (this.editor.view as any).domChangeCount
       if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {

@@ -622,14 +622,14 @@ export default Vue.extend({
           })
           if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
             if (this.getLayerType === 'text' && this.isActive && (tiptapUtils.editor?.view?.dom as HTMLElement).contains(e.target as Node)) {
-              if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-                const sel = TextUtils.getSelection()
-                if (sel) {
-                  const { start } = sel
-                  TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
-                }
-              }
-              TextPropUtils.updateTextPropsState()
+              // if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
+              //   const sel = TextUtils.getSelection()
+              //   if (sel) {
+              //     const { start } = sel
+              //     TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
+              //   }
+              // }
+              // TextPropUtils.updateTextPropsState()
             }
             return
           } else if (!this.isActive) {
@@ -1354,8 +1354,8 @@ export default Vue.extend({
       }
     },
     onClick(e: MouseEvent) {
-      if (!['text', 'group', 'tmp'].includes(this.config.type)) return
-      this.textClickHandler(e)
+      // if (!['text', 'group', 'tmp'].includes(this.config.type)) return
+      // this.textClickHandler(e)
     },
     textClickHandler(e: MouseEvent) {
       if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {

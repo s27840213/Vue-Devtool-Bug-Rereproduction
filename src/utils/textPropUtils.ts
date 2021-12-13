@@ -8,14 +8,18 @@ import LayerUtils from './layerUtils'
 import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
+import tiptapUtils from './tiptapUtils'
 
-const fontPropsMap = {
+const fontPropsMap: {[key: string]: string} = {
   fontSize: 'size',
   fontFamily: 'font',
   bold: 'weight',
   italic: 'style',
   underline: 'decoration',
-  color: 'color'
+  color: 'color',
+  lineHeight: 'lineHeight',
+  fontSpacing: 'fontSpacing',
+  textAlign: 'align'
 }
 
 enum textPropType {
@@ -709,88 +713,85 @@ class TextPropUtils {
   }
 
   propReadOfLayer(prop: string, layer?: IText) {
-    const sel = GeneralUtils.deepCopy(this.getCurrSel) as { start: ISelection, end: ISelection }
-    const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
-    let start
-    let end
+    let res
+    prop = fontPropsMap[prop]
+    tiptapUtils.agent(editor => {
+      let isMulti = false
+      const selectionRanges = editor.view.state.selection.ranges
+      if (selectionRanges.length > 0) {
+        const range = selectionRanges[0]
+        const startPIndex = range.$from.index(0)
+        const startSIndex = range.$from.index(1)
+        const endPIndex = range.$to.index(0)
+        let endSIndex = range.$to.index(1)
+        const tiptapJSON = editor.getJSON()
+        const paragraphs = tiptapJSON.content ?? []
+        let origin
 
-    if (TextUtils.isSel(sel.start)) {
-      start = sel.start
-      end = sel.end
-    } else if (!TextUtils.isSel(sel.start)) {
-      start = {
-        pIndex: 0,
-        sIndex: 0,
-        offset: 0
-      }
-      const pIndex = config.paragraphs.length - 1
-      const sIndex = config.paragraphs[pIndex].spans.length - 1
-      end = {
-        pIndex,
-        sIndex,
-        offset: config.paragraphs[pIndex].spans[sIndex].text.length
-      }
-    } else {
-      throw new Error('can not read the prop of the selection')
-    }
-
-    // Selection is not a range (only caret)
-    if (!TextUtils.isSel(end)) {
-      Object.assign(end, start)
-    }
-
-    let isMulti = false
-    let origin: string | number = ''
-    switch (prop) {
-      case 'fontSpacing':
-        origin = config.paragraphs[start.pIndex].styles.fontSpacing
-        break
-      case 'lineHeight':
-        origin = config.paragraphs[start.pIndex].styles.lineHeight
-        break
-      case 'textAlign':
-        origin = config.paragraphs[start.pIndex].styles.align
-        break
-      default:
-        if (Object.keys(fontPropsMap).includes(prop)) {
-          const i = Object.keys(fontPropsMap).indexOf(prop)
-          const v = Object.values(fontPropsMap)[i]
-          origin = config.paragraphs[start.pIndex].spans[start.sIndex].styles[v] as string | number
+        if (!(startPIndex === endPIndex && startSIndex === endSIndex)) {
+          endSIndex--
         }
-    }
-    for (let pidx = start.pIndex; pidx <= end.pIndex && config.paragraphs[pidx]; pidx++) {
-      const p = config.paragraphs[pidx]
 
-      // For paragraphs props
-      if (prop === 'lineHeight' || prop === 'fontSpacing' || prop === 'textAlign') {
-        const propsMap = {
-          lineHeight: 'lineHeight',
-          fontSpacing: 'fontSpacing',
-          textAlign: 'align'
-        }
-        if (p.styles[propsMap[prop]] !== origin) {
-          isMulti = true
-          break
-        }
-        continue
-      }
-
-      // For spans props
-      for (let sidx = 0; sidx < p.spans.length; sidx++) {
-        const span = p.spans[sidx]
-        if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) continue
-        if (Object.keys(fontPropsMap).includes(prop)) {
-          const i = Object.keys(fontPropsMap).indexOf(prop)
-          const v = Object.values(fontPropsMap)[i]
-          if (origin !== span.styles[v]) {
-            isMulti = true
-            break
+        if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) {
+          origin = (paragraphs[startPIndex].attrs ?? {})[prop]
+        } else {
+          let startStyles
+          const startP = paragraphs[startPIndex].content
+          if (startP) {
+            let sIndex = startSIndex
+            if (sIndex >= startP.length) sIndex = startP.length - 1
+            startStyles = startP[sIndex].marks?.[0]?.attrs ?? {}
+          } else {
+            let spanStyle: string
+            if (editor.getAttributes('paragraph').spanStyle) {
+              spanStyle = editor.getAttributes('paragraph').spanStyle
+            } else {
+              spanStyle = editor.storage.nuTextStyle.spanStyle
+            }
+            const el = document.createElement('div')
+            el.style.cssText = spanStyle
+            startStyles = tiptapUtils.generateSpanStyle(el.style)
           }
+
+          origin = startStyles[prop]
         }
+
+        if (startPIndex === endPIndex && startSIndex === endSIndex) {
+          res = origin
+          return
+        }
+
+        let tempStartSIndex = startSIndex
+        let tempEndSIndex
+        for (let i = startPIndex; i <= endPIndex; i++) {
+          if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) { // paragraph props
+            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+              isMulti = true
+              break
+            }
+            continue
+          }
+
+          const spans = paragraphs[i].content ?? []
+          if (i === endPIndex) {
+            tempEndSIndex = endSIndex
+          } else {
+            tempEndSIndex = spans.length - 1
+          }
+          for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
+            const spanStyle = spans[j].marks?.[0]?.attrs ?? {}
+            if (origin !== spanStyle[prop]) {
+              isMulti = true
+              break
+            }
+          }
+          if (isMulti) break
+          tempStartSIndex = 0
+        }
+        res = isMulti ? undefined : origin
       }
-      if (isMulti) break
-    }
-    return isMulti ? undefined : origin
+    })
+    return res
   }
 
   propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {

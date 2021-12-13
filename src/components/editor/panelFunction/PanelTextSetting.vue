@@ -125,7 +125,7 @@ export default Vue.extend({
   },
   mounted() {
     this.setCurrFunctionPanel(FunctionPanelType.textSetting)
-    TextPropUtils.updateTextPropsState()
+    // TextPropUtils.updateTextPropsState()
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
     })
@@ -299,6 +299,9 @@ export default Vue.extend({
           break
         case 'text-align-right':
           if (this.props.textAlign === 'right') return hitStyle
+          break
+        case 'text-align-justify':
+          if (this.props.textAlign === 'justify') return hitStyle
       }
       return origin
     },
@@ -336,13 +339,13 @@ export default Vue.extend({
         tiptapUtils.agent(editor => {
           switch (iconName) {
             case 'bold':
-              editor.chain().focus().updateAttributes('textStyle', { weight: 'bold' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { weight: (this.props.weight === 'bold') ? 'normal' : 'bold' }).run()
               break
             case 'underline':
-              editor.chain().focus().updateAttributes('textStyle', { decoration: 'underline' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' }).run()
               break
             case 'italic':
-              editor.chain().focus().updateAttributes('textStyle', { style: 'italic' }).run()
+              editor.chain().focus().updateAttributes('textStyle', { style: (this.props.style === 'italic') ? 'normal' : 'italic' }).run()
               break
           }
         })

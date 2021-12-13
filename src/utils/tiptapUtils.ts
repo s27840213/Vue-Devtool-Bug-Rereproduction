@@ -23,9 +23,6 @@ class TiptapUtils {
         NuTextStyle
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
-      parseOptions: {
-        preserveWhitespace: 'full'
-      },
       onCreate: ({ editor }) => {
         editor.commands.selectAll()
         this.prevText = editor.getText()
@@ -105,7 +102,6 @@ class TiptapUtils {
 
   toIParagraph(tiptapJSON: any): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
-    console.log(tiptapJSON)
     let isSetContentRequired = false
     const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as string
     const result: IParagraph[] = []
