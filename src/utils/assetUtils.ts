@@ -125,8 +125,8 @@ class AssetUtils {
   async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex || this.lastSelectedPageIndex
-    const targetPage: IPage = this.getPage(targetPageIndex)
-    json = await this.updateBackground(json)
+    // const targetPage: IPage = this.getPage(targetPageIndex)
+    json = await this.updateBackground(GeneralUtils.deepCopy(json))
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     PageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (width && height) {
