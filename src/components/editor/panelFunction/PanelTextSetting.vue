@@ -219,7 +219,7 @@ export default Vue.extend({
 
       if (currLayer.type === 'text') {
         StepsUtils.record()
-        tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ color }).run())
+        tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('textStyle', { color: tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color) }).run())
       }
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
@@ -517,7 +517,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.agent(editor => editor.chain().focus().setParagraphProps({ 'letter-spacing': `${value / 1000}em` }).run())
+          tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('paragraph', { fontSpacing: value / 1000 }).run())
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -526,7 +526,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.agent(editor => editor.chain().focus().setParagraphProps({ 'line-height': `${toNumber((value).toFixed(2))}em` }).run())
+          tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('paragraph', { lineHeight: toNumber((value).toFixed(2)) }).run())
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }
