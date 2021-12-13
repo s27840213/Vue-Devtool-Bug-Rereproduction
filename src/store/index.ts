@@ -131,7 +131,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
-      return state.pages[pageIndex].layers[layerIndex >= 0 ? layerIndex : state.pages[pageIndex].layers.length + layerIndex]
+      const page = state.pages[pageIndex]
+      return page?.layers[layerIndex >= 0 ? layerIndex : page.layers.length + layerIndex] ?? {}
     }
   },
   getLayers(state: IEditorState) {
