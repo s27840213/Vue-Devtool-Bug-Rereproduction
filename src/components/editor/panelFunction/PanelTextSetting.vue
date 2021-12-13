@@ -253,15 +253,12 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      if (Number.isNaN(this.sel.start.offset)) {
-        TextUtils.updateLayerTextSize({ size: value })
-        setTimeout(() => {
-          // reset layer width for getting the right position of image element
-          LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
-        }, 0)
-      } else {
-        TextPropUtils._spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
-      }
+      const newFontSize = `${value * 1.3333}px`
+      tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-size': newFontSize }).setParagraphProps({ 'font-size': newFontSize }).run())
+      tiptapUtils.agent(editor => {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+        StepsUtils.record()
+      })
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
     },
     handleSliderModal(modalName = '') {
@@ -506,15 +503,12 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          if (Number.isNaN(this.sel.start.offset)) {
-            TextUtils.updateLayerTextSize({ size: parseFloat(value) })
-            setTimeout(() => {
-              // reset layer width for getting the right position of image element
-              LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
-            }, 0)
-          } else {
-            TextPropUtils._spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
-          }
+          const newFontSize = `${parseFloat(value) * 1.3333}px`
+          tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-size': newFontSize }).setParagraphProps({ 'font-size': newFontSize }).run())
+          tiptapUtils.agent(editor => {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            StepsUtils.record()
+          })
           TextPropUtils.updateTextPropsState({ fontSize: value })
         })
       }
