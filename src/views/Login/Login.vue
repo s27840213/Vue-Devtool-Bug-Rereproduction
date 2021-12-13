@@ -7,42 +7,43 @@ div(style="position: relative;")
         img(:src="require('@/assets/img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 登 入
+        span(class="text-blue-1 heading-5") {{$tc('NN0168',2)}}
       div
         btn(@click.native="onFacebookClicked()"
           :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") 使用 Facebook 帳號登入
+        span(class="body-2") {{$t('NN0178', {media:'Facebook'})}}
       div
         btn(@click.native="onGoogleClicked()"
           :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") 使用 Google 帳號登入
+        span(class="body-2") {{$t('NN0178', {media:'Google'})}}
       div
-        span 或
+        span {{$t('NN0179')}}
       div
         div
-          span(class="label-mid") 電子郵件
+          span(class="label-mid") Email
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
               v-model="email"
               type="email" name="email"
-              placeholder="請輸入 Email")
+              :placeholder="$t('NN0163', {term: $t('NN0173')})")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}
         div
           div(class="flex flex-between")
-            span(class="label-mid") 密碼
+            span(class="label-mid") {{$t('NN0180')}}
             btn(:type="'icon'"
               class="text-gray-3 body-2 forgot-pwd"
-              @click.native="onForgotClicked()") 忘記密碼
+              @click.native="onForgotClicked()") {{$t('NN0181')}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
               v-model="password" type="number"
-              placeholder="請輸入密碼" :type="togglePeerPasswordInput")
+              :placeholder="$t('NN0163', {term: $t('NN0180')})"
+              :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
                 :iconName="togglePeerPasswordIcon"
@@ -53,12 +54,12 @@ div(style="position: relative;")
       div
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
-          @click.native="onLogInClicked()") 送 出
+          @click.native="onLogInClicked()") {{$tc('NN0168',2)}}
       div
-        span 初次使用？
+        span {{$t('NN0182')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onSignupClicked()") 立即註冊
+          @click.native="onSignupClicked()") {{$t('NN0183')}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
@@ -66,7 +67,7 @@ div(style="position: relative;")
     div(v-if="currentPageIndex === 1"
       class="login")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 忘 記 密 碼？
+        span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
         span(class="body-2") 別擔心，請輸入Email<br>我們會傳送訊息給你，以協助你重設密碼。
       div
@@ -75,7 +76,7 @@ div(style="position: relative;")
           input(class="body-2 text-gray-2"
             v-model="email"
             type="email" name="email"
-            placeholder="請輸入 Email")
+            :placeholder="$t('NN0163', {term: $t('NN0173')})")
         div(v-if="!mailValid || emailResponseError"
           class="invalid-message")
           span {{ mailErrorMessage }}
@@ -85,7 +86,7 @@ div(style="position: relative;")
         btn(:type="'primary-mid'"
           class="btn-shadow body-1"
           style="width: 50%;"
-          @click.native="onSendEmailClicked()") 確 定 發 送
+          @click.native="onSendEmailClicked()") {{$tc('NN0164',2)}}
       div(v-if="!hideBackButton"
         class="flex"
         style="justify-content: center;")
@@ -114,11 +115,11 @@ div(style="position: relative;")
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'"
           class="btn-shadow full-width"
-          @click.native="onEnterCodeDoneClicked()") 完 成
+          @click.native="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(v-if="resendAvailable"
         class="flex flex-between align-center"
         style="height:30px; margin-bottom: 0;")
-        span 沒有收到驗證碼嗎？
+        span 沒有收到驗證碼嗎
         btn(:type="'icon'"
           class="text-blue-1 body-1"
           @click.native="onResendClicked()") 重新傳送驗證碼
@@ -194,9 +195,11 @@ div(style="position: relative;")
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
+import localeUtils from '@/utils/localeUtils'
 
 export default Vue.extend({
   name: 'Login',
@@ -214,7 +217,7 @@ export default Vue.extend({
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
-      passwordErrorMessage: '請輸入您的密碼' as string,
+      passwordErrorMessage: i18n.t('NN0163', { term: i18n.t('NN0180') }) as string,
       emailResponseError: false as boolean,
       mailErrorMessage: 'Email 格式錯誤' as string,
       vcodeErrorMessage: '驗證碼錯誤' as string,
@@ -339,6 +342,9 @@ export default Vue.extend({
       } else {
         return false
       }
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   methods: {
@@ -381,7 +387,7 @@ export default Vue.extend({
       this.isLoginClicked = true
       this.isLoading = true
       if (this.password.length === 0) {
-        this.passwordErrorMessage = '請輸入您的密碼'
+        this.passwordErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0180') }) as string
         this.isLoading = false
         return
       }
@@ -394,7 +400,7 @@ export default Vue.extend({
         this.$router.push({ path: this.redirect || '/' })
       } else {
         this.password = ''
-        this.passwordErrorMessage = data.msg || '發生錯誤，請重試'
+        this.passwordErrorMessage = data.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },
@@ -421,7 +427,7 @@ export default Vue.extend({
       this.isLoading = true
       if (this.email.length === 0) {
         this.isLoading = false
-        this.mailErrorMessage = '請輸入您的 Email'
+        this.mailErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
         return
       }
       if (!this.mailValid) {
@@ -432,7 +438,8 @@ export default Vue.extend({
       const parameter = {
         account: this.email,
         register: '0',
-        vcode_only: '1'
+        vcode_only: '1',
+        locale: this.currLocale
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -440,7 +447,7 @@ export default Vue.extend({
         this.currentPageIndex = 2
       } else {
         this.emailResponseError = true
-        this.mailErrorMessage = data.msg || '發生錯誤，請重試'
+        this.mailErrorMessage = data.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },
@@ -456,7 +463,8 @@ export default Vue.extend({
       const parameter = {
         account: this.email,
         register: '0',
-        vcode_only: '1'
+        vcode_only: '1',
+        locale: this.currLocale
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -501,7 +509,7 @@ export default Vue.extend({
         this.isResetClicked = false
         this.token = data.token
       } else {
-        this.vcodeErrorMessage = data.msg || '發生錯誤，請重試'
+        this.vcodeErrorMessage = data.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },
@@ -518,7 +526,7 @@ export default Vue.extend({
         this.isLoading = false
         return
       } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
-        this.confirmErrorMessage = '您的兩組密碼不相同'
+        this.confirmErrorMessage = '請確認輸入的密碼是否與第一組密碼相符。'
         this.isLoading = false
         return
       }
@@ -531,7 +539,7 @@ export default Vue.extend({
         this.currentPageIndex = 0
         this.isLoginClicked = false
       } else {
-        this.confirmErrorMessage = data.msg || '發生錯誤，請重試'
+        this.confirmErrorMessage = data.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },

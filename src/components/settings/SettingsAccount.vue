@@ -4,28 +4,28 @@ div(class="settings-account")
   div(class="settings-account__buttons")
     div(v-if="hasAvatar"
       class="settings-account__button mr-30 pointer"
-      @click="onRemoveAvatarClicked()") 移 除 照 片
+      @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
     div(class="settings-account__button pointer"
       @click="chooseAvatar()")
-      span(v-if="hasAvatar") 變 更 照 片
-      span(v-else) 新 增 個 人 照 片
+      span(v-if="hasAvatar") {{$t('NN0171')}}
+      span(v-else) 變更個人相片
   div(class="settings-account__info")
-    div(class="settings-account__label my-10") 名稱
+    div(class="settings-account__label my-10") {{$t('NN0172')}}
     property-bar
       input(class="body-2 text-gray-2"
         v-model="inputName" type="text"
-        placeholder="請輸入暱稱")
-    div(class="settings-account__label my-10") 信箱
+        :placeholder="$t('NN0163', {term: $t('NN0172')})")
+    div(class="settings-account__label my-10") {{$t('NN0173')}}
     property-bar(:class="{'input-invalid': !mailValid}")
       input(class="body-2 text-gray-2"
         v-model="inputAccount"
         @input="onUpdate"
         type="email" name="email"
-        placeholder="請輸入信箱")
+        :placeholder="$t('NN0163', {term: $t('NN0173')})")
     div(v-if="!mailValid"
       class="invalid-message")
       span {{ accountErrorMessage }}
-    div(class="settings-account__label my-10") 語系
+    div(class="settings-account__label my-10") {{$t('NN0174')}}
     select(class="locale-select" v-model="inputLocale")
       option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
     div(class="settings-account__subscribe mt-40 mb-10")
@@ -40,7 +40,7 @@ div(class="settings-account")
     div(class="settings-account__buttons mt-10")
       btn(class="pointer"
         :disabled="!isChanged"
-        @click.native="onConfirmClicked()") 修 改 並 儲 存
+        @click.native="onConfirmClicked()") {{$t('NN0176')}}
   div(v-if="showVerifyPopup"
     class="settings-account__popup")
     popup-verify(type="vcode"
@@ -55,6 +55,7 @@ div(class="settings-account")
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -73,7 +74,7 @@ export default Vue.extend({
       inputAccount: '',
       inputLocale: '',
       inputSubscribe: true,
-      subscribeText: '我願意收到來自 Vivipic 的設計技巧、熱門模板、電商趨勢、促銷訊息等電子信。',
+      subscribeText: i18n.t('NN0175'),
       localeOptions: [] as Array<ILocale>,
       accountErrorMessage: 'Email 格式錯誤',
       isLoading: false,
@@ -87,7 +88,7 @@ export default Vue.extend({
   watch: {
     inputAccount() {
       if (this.inputAccount.length === 0) {
-        this.accountErrorMessage = '請輸入 Email'
+        this.accountErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
       } else if (!this.mailValid) {
         this.accountErrorMessage = 'Email 格式錯誤'
       }

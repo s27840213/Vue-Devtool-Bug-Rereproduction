@@ -45,11 +45,11 @@
         div(v-if="!isLogin")
           btn(@click.native="goToPage('Login')"
           :type="'icon-mid text-blue-1'"
-          class="rounded" style="padding: 5px 30px;") 登 入
+          class="rounded" style="padding: 5px 30px;") {{$tc('NN0168',2)}}
         div(v-if="!isLogin")
           btn(@click.native="goToPage('SignUp')"
           :type="'primary-mid'"
-          class="rounded" style="padding: 5px 30px;") 註 冊
+          class="rounded" style="padding: 5px 30px;") {{$tc('NN0169',2)}}
         //- svg-icon(v-if="isLogin"
         //-   :iconName="`notify`"
         //-   :iconWidth="'20px'")
@@ -97,7 +97,7 @@
       search-bar(class="search"
         :placeholder="$t('NN0037')"
         @search="handleSearch")
-      div(class="pt-20 nu-header__search-mobile__title") 熱門搜尋：
+      div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}：
       div(class="pt-10 nu-header__search-mobile__options")
         span(v-for="key in keys"
           @click="handleSearch(key)") {{key}}

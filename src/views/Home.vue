@@ -8,8 +8,8 @@
             style="height: 150px;")
           div(class="home-content__top-title") {{$t('NN0148')}}
           div(class="home-content__top-mobile-subtitle")
-            div Vivipic 提供無數免費的專業模板，快立刻開始編輯吧！
-            div(class="pt-30") *僅供電腦版編輯
+            div {{$t('NN0235')}}
+            div(class="pt-30") *{{$t('NN0236')}}
       template(v-else)
         div(class="home-content__top")
           img(class="home-content__top-img"
@@ -17,9 +17,9 @@
           div(class="home-content__top-title") {{$t('NN0148')}}
           div(v-if="!isLogin"
             class="home-content__top-subtitle")
-            span Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+            span {{$t('NN0237')}}
             br
-            span 瀏覽我們提供的無數個免費的專業模板，並立刻開始編輯吧！
+            span {{$t('NN0238')}}
           div(v-if="isLogin"
             class="home-content__top-btns")
             div(class="rounded home-btn"
@@ -40,7 +40,7 @@
         div(class="home-content__plaque-title") 立即享受海量的精美電商模板
         div(class="home-content__plaque-subtitle"
           class="px-20")
-          span(v-if="isMobile") Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。
+          span(v-if="isMobile") {{$t('NN0237')}}
           span(v-else) Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
       div(v-if="!isLogin"
         class="home-content__feature"

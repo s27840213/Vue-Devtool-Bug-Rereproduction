@@ -15,14 +15,14 @@
           svg-icon(:iconName="'settings'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
-          span 帳 號 設 定
+          span {{$tc('NN0165',1)}}
         div(class="nav-container__option"
           :class="{'selected': optionSelected === 'security'}"
           @click="switchNav('security')")
           svg-icon(:iconName="'lock'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
-          span 登 入 與 安 全 性
+          span {{$tc('NN0166',1)}}
 </template>
 <script lang="ts">
 import Vue from 'vue'

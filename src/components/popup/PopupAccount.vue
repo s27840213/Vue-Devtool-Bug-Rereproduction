@@ -15,14 +15,14 @@
         :iconName="'settings'"
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
-      span 帳 號 設 定
+      span {{$tc('NN0165',2)}}
     div(class="popup-account__option"
       @click="goToPage('/settings/security')")
       svg-icon(class="pr-10"
         :iconName="'lock'"
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
-      span 登 入 與 安 全 性
+      span {{$tc('NN0166',2)}}
     div(class="popup-account__hr")
     div(class="popup-account__option"
       @click="onLogoutClicked()")
@@ -30,7 +30,7 @@
         :iconName="'logout'"
         :iconWidth="'15px'"
         :iconColor="'gray-2'")
-      span 登 出
+      span {{$tc('NN0167',2)}}
 </template>
 
 <script lang="ts">

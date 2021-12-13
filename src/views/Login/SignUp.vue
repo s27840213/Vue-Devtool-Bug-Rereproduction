@@ -10,7 +10,7 @@ div(style="position:relative;")
         span(class="text-blue-1 heading-5") 開始使用 Vivipic
       div
         div 在電商這條路上，讓 Vivipic 成為你的設計好助手！
-        div 馬上註冊，即可免費享用無數電商模板
+        div 馬上註冊，即可免費享用海量電商模板
       div
         btn(@click.native="onFacebookClicked()"
           :type="'icon-mid-body'")
@@ -23,7 +23,7 @@ div(style="position:relative;")
       div
         btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") 使用電子郵件註冊
       div
-        span 已是會員?
+        span 已是會員
         btn(:type="'icon'"
           class="h-link"
           @click.native="onLoginClicked()") 立即登入
@@ -42,31 +42,31 @@ div(style="position:relative;")
                 iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
       div
         div
-          span(class="label-mid") 暱稱
+          span(class="label-mid") {{$t('NN0172')}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !nameValid}")
             input(class="body-2 text-gray-2"
               v-model="name" type="text" name="name"
-              placeholder="您的暱稱")
+              :placeholder="$t('NN0163', {term: $t('NN0172')})")
           div(v-if="!nameValid" class="invalid-message")
-            span 請輸入您的暱稱
+            span {{$t('NN0163', {term: $t('NN0172')})}}
         div
-          span(class="label-mid") 電子郵件
+          span(class="label-mid") {{$t('NN0173')}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
               v-model="email" type="email" name="email"
-              placeholder="請輸入常用 Email")
+              :placeholder="$t('NN0163', {term: $t('NN0173')})")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          span(class="label-mid") 密碼
+          span(class="label-mid") {{$t('NN0180')}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
               v-model="password" type="number"
-              placeholder="請輸入密碼"
+              :placeholder="$t('NN0163', {term: $t('NN0180')})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
@@ -98,7 +98,7 @@ div(style="position:relative;")
       div
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
-          @click.native="onSignUpClicked()") 送出
+          @click.native="onSignUpClicked()") {{$tc('NN0169',2)}}
       div
         span 註冊即代表你同意 Vivipic 的
         a(class="h-link") 使用條款
@@ -106,7 +106,7 @@ div(style="position:relative;")
         a(class="h-link") 隱私政策
         span 。
       div
-        span 已是會員?
+        span 已是會員
         btn(:type="'icon'"
           class="h-link"
           @click.native="onLoginClicked()") 立即登入
@@ -127,7 +127,7 @@ div(style="position:relative;")
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'"
           class="btn-shadow full-width"
-          @click.native="onEnterCodeDoneClicked()") {{$t('NN0133')}}
+          @click.native="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
@@ -135,7 +135,7 @@ div(style="position:relative;")
       div(v-if="resendAvailable"
         class="flex flex-between align-center"
         style="height:30px; margin-bottom: 0;")
-        span 沒有收到驗證碼嗎？
+        span 沒有收到驗證碼嗎
         btn(:type="'icon'"
           class="text-blue-1 body-1"
           @click.native="onResendClicked()") 重新傳送驗證碼
@@ -148,9 +148,11 @@ div(style="position:relative;")
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
+import localeUtils from '@/utils/localeUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -282,6 +284,9 @@ export default Vue.extend({
       } else {
         return false
       }
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   methods: {
@@ -346,13 +351,19 @@ export default Vue.extend({
         this.passwordHint = '密碼需包含大小寫英文字母、數字８碼以上。'
         return
       }
-      const response = await store.dispatch('user/register', { uname: this.name, account: this.email, upass: this.password })
+      const parameter = {
+        uname: this.name,
+        account: this.email,
+        upass: this.password,
+        locale: this.currLocale
+      }
+      const response = await store.dispatch('user/register', parameter)
       if (response.flag === 0) {
         this.currentPageIndex = 2
         this.isVcodeClicked = false
       } else {
         this.emailResponseError = true
-        this.passwordHint = response.msg || '發生錯誤，請重試'
+        this.passwordHint = response.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },
@@ -368,7 +379,8 @@ export default Vue.extend({
       const parameter = {
         account: this.email,
         register: '1',
-        vcode_only: '1'
+        vcode_only: '1',
+        locale: this.currLocale
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -413,7 +425,7 @@ export default Vue.extend({
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
-        this.vcodeErrorMessage = data.msg || '發生錯誤，請重試'
+        this.vcodeErrorMessage = data.msg || i18n.t('NN0242')
       }
       this.isLoading = false
     },

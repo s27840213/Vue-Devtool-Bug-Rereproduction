@@ -5,7 +5,7 @@
       svg-icon(class="pointer" iconName="page-close"
         :iconWidth="'10px'" iconColor="gray-0"
         @click.native="closePopup()")
-    div(class="label-mid pb-20") 自 訂 尺 寸
+    div(class="label-mid pb-20") {{$tc('NN0023',2)}}
     div(class="popup-size__body-row")
       div(class="popup-size__body__custom")
         property-bar(class="popup-size__body__custom__box"
@@ -30,7 +30,7 @@
       class="popup-size__body-row text-red body-2") {{errorMsg}}
     div(v-if="isLogin && recentlyUsed.length > 0")
       div(class="popup-size__body__hr")
-      div(class="label-mid text-left") 最 近 使 用
+      div(class="label-mid text-left") {{$tc('NN0024',2)}}
       div(v-if="!isLayoutReady"
         class="popup-size__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-0")
@@ -47,7 +47,7 @@
           @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
     div(class="popup-size__body__button")
       btn(:type="'primary-sm'" class="rounded my-5 full-width pointer"
-        @click.native="onConfirmClicked()") 確 認
+        @click.native="onConfirmClicked()") {{$tc('NN0164',2)}}
 </template>
 
 <script lang="ts">
