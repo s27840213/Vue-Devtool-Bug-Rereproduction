@@ -27,7 +27,7 @@ export default Extension.create({
     }
   },
   onSelectionUpdate() {
-    const spanStyle = this.editor.getAttributes('textStyle').style
+    const spanStyle = tiptapUtils.textStyles(this.editor.getAttributes('textStyle'))
     if (spanStyle) {
       this.storage.spanStyle = spanStyle
     }
@@ -52,17 +52,65 @@ export default Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ['textStyle', 'paragraph'],
+        types: ['textStyle'],
         attributes: {
+          font: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return spanStyle.fontFamily.split(',')[0]
+            },
+            renderHTML: () => ({})
+          },
+          weight: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return spanStyle.fontWeight
+            },
+            renderHTML: () => ({})
+          },
+          size: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+            },
+            renderHTML: () => ({})
+          },
+          decoration: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return spanStyle.textDecorationLine
+            },
+            renderHTML: () => ({})
+          },
           style: {
             default: null,
             parseHTML: element => {
-              return element.style
+              const spanStyle = element.style
+              return spanStyle.fontStyle
+            },
+            renderHTML: () => ({})
+          },
+          color: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
+            },
+            renderHTML: () => ({})
+          },
+          opacity: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = element.style
+              return parseInt(spanStyle.opacity)
             },
             renderHTML: attributes => {
-              if (!attributes.style) return {}
               return {
-                style: attributes.style.cssText + ' margin: 0;'
+                style: tiptapUtils.textStyles(attributes)
               }
             }
           }
@@ -74,18 +122,58 @@ export default Extension.create({
             default: null,
             parseHTML: element => {
               const cssText = element.getAttribute('data-span-style')
-              if (cssText) {
-                const el = document.createElement('div')
-                el.style.cssText = cssText
-                return el.style
-              } else {
-                return null
-              }
+              return cssText
             },
             renderHTML: attributes => {
               if (!attributes.spanStyle) return {}
               return {
-                'data-span-style': attributes.spanStyle.cssText
+                'data-span-style': attributes.spanStyle
+              }
+            }
+          },
+          font: {
+            default: null,
+            parseHTML: element => {
+              const paragraphStyle = element.style
+              return paragraphStyle.fontFamily.split(',')[0]
+            },
+            renderHTML: () => ({})
+          },
+          lineHeight: {
+            default: null,
+            parseHTML: element => {
+              const paragraphStyle = element.style
+              const floatNum = /[+-]?\d+(\.\d+)?/
+              return paragraphStyle.lineHeight.match(floatNum) !== null ? parseFloat(paragraphStyle.lineHeight.match(floatNum)![0]) : -1
+            },
+            renderHTML: () => ({})
+          },
+          fontSpacing: {
+            default: null,
+            parseHTML: element => {
+              const paragraphStyle = element.style
+              const floatNum = /[+-]?\d+(\.\d+)?/
+              return paragraphStyle.letterSpacing.match(floatNum) !== null ? parseFloat(paragraphStyle.letterSpacing.match(floatNum)![0]) : 0
+            },
+            renderHTML: () => ({})
+          },
+          size: {
+            default: null,
+            parseHTML: element => {
+              const paragraphStyle = element.style
+              return Math.round(parseFloat(paragraphStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+            },
+            renderHTML: () => ({})
+          },
+          align: {
+            default: null,
+            parseHTML: element => {
+              const paragraphStyle = element.style
+              return paragraphStyle.textAlign.replace('text-align-', '')
+            },
+            renderHTML: attributes => {
+              return {
+                style: tiptapUtils.textStyles(attributes) + '; margin: 0;'
               }
             }
           }

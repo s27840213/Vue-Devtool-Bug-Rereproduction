@@ -49,9 +49,9 @@ class TiptapUtils {
     })
   }
 
-  private isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
-  private componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
-  private rgbToHex = (rgb: string) => {
+  isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
+  componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
+  rgbToHex = (rgb: string) => {
     const rgbArr = rgb.match(/\d+/g)
     if (rgbArr && rgbArr.length === 3) {
       return '#' + this.componentToHex(parseInt(rgbArr[0])) + this.componentToHex(parseInt(rgbArr[1])) + this.componentToHex(parseInt(rgbArr[2]))
@@ -84,19 +84,9 @@ class TiptapUtils {
     }).join('\n')
   }
 
-  generateParagraphStyle(paragraphStyle: CSSStyleDeclaration): IParagraphStyle {
-    const floatNum = /[+-]?\d+(\.\d+)?/
-    const lineHeight = paragraphStyle.lineHeight.match(floatNum) !== null ? parseFloat(paragraphStyle.lineHeight.match(floatNum)![0]) : -1
-    const fontSpacing = paragraphStyle.letterSpacing.match(floatNum) !== null ? parseFloat(paragraphStyle.letterSpacing.match(floatNum)![0]) : 0
-    const fontSize = Math.round(parseFloat(paragraphStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
-    const font = paragraphStyle.fontFamily.split(',')[0]
-    return {
-      font,
-      lineHeight,
-      fontSpacing,
-      size: fontSize,
-      align: paragraphStyle.textAlign.replace('text-align-', '')
-    } as IParagraphStyle
+  makeParagraphStyle(attributes: any): IParagraphStyle {
+    const { font, lineHeight, fontSpacing, size, align } = attributes
+    return { font, lineHeight, fontSpacing, size, align }
   }
 
   generateSpanStyle(spanStyle: CSSStyleDeclaration): ISpanStyle {
@@ -111,39 +101,46 @@ class TiptapUtils {
     } as ISpanStyle
   }
 
+  makeSpanStyle(attributes: any): ISpanStyle {
+    const { font, weight, size, decoration, style, color, opacity } = attributes
+    return { font, weight, size, decoration, style, color, opacity } as ISpanStyle
+  }
+
   toIParagraph(tiptapJSON: any): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
     let isSetContentRequired = false
-    const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as CSSStyleDeclaration
+    const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as string
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {
-      const paragraphStyle: CSSStyleDeclaration = paragraph.attrs.style
-      const pStyles = this.generateParagraphStyle(paragraphStyle)
+      const pStyles = this.makeParagraphStyle(paragraph.attrs)
       const spans: ISpan[] = []
       for (const span of paragraph.content ?? []) {
         if (span.marks && span.marks.length > 0) {
-          const spanStyle: CSSStyleDeclaration = span.marks[0].attrs.style
-          const sStyles = this.generateSpanStyle(spanStyle)
+          const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
-          let spanStyle: CSSStyleDeclaration
+          let spanStyle: string
           if (paragraph.attrs.spanStyle) {
             spanStyle = paragraph.attrs.spanStyle
           } else {
             spanStyle = defaultStyle
           }
-          const sStyles = this.generateSpanStyle(spanStyle)
+          const el = document.createElement('div')
+          el.style.cssText = spanStyle
+          const sStyles = this.generateSpanStyle(el.style)
           spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
         isSetContentRequired = true
-        const sStyles = this.generateSpanStyle(defaultStyle)
+        const el = document.createElement('div')
+        el.style.cssText = defaultStyle
+        const sStyles = this.generateSpanStyle(el.style)
         spans.push({ text: '', styles: sStyles })
-        result.push({ spans, styles: pStyles, spanStyle: defaultStyle.cssText })
+        result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
       } else {
-        result.push(Object.assign({ spans, styles: pStyles }, paragraph.spanStyle ? { spanStyle: paragraph.spanStyle } : null))
+        result.push({ spans, styles: pStyles })
       }
     }
     return { paragraphs: result, isSetContentRequired }
