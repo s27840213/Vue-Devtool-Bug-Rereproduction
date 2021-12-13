@@ -27,9 +27,9 @@ export default Extension.create({
     }
   },
   onSelectionUpdate() {
-    const spanStyle = tiptapUtils.textStyles(this.editor.getAttributes('textStyle'))
-    if (spanStyle) {
-      this.storage.spanStyle = spanStyle
+    const spanAttrs = this.editor.getAttributes('textStyle')
+    if (Object.keys(spanAttrs).length) {
+      this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     }
     const selectionRanges = this.editor.view.state.selection.ranges
     if (selectionRanges.length > 0) {
