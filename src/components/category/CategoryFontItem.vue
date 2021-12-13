@@ -32,7 +32,6 @@ import { IGroup, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import text from '@/store/text'
 import tiptapUtils from '@/utils/tiptapUtils'
-import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {
@@ -153,7 +152,7 @@ export default Vue.extend({
         }
 
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
-          stepsUtils.record()
+          StepsUtils.record()
           tiptapUtils.agent(editor => editor.chain().focus().setSpanProps({ 'font-family': tiptapUtils.getFontFamily(this.item.id) }).run())
         }
 
