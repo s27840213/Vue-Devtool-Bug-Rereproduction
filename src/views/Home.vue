@@ -111,6 +111,7 @@ import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
+import localeUtils from '@/utils/localeUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -152,7 +153,7 @@ export default Vue.extend({
       ],
       showSizePopup: false,
       featureSelected: 0,
-      tagString: '聖誕節,母嬰,雙十一,特價',
+      tagString: '',
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
@@ -173,6 +174,9 @@ export default Vue.extend({
     },
     featureContent(): string {
       return this.featureList[this.featureSelected].content
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   async mounted() {
@@ -203,6 +207,13 @@ export default Vue.extend({
     })
     const theme = squareTheme.join(',')
 
+    if (this.currLocale === 'tw') {
+      this.tagString = '免運,新品,內容行銷,聖誕節'
+    } else if (this.currLocale === 'us') {
+      this.tagString = 'Free Shipping,New Arrivals,Content Marketing,Christmas Day'
+    } else {
+      this.tagString = '送料無料,新商品,コンテンツマーケティング,クリスマス'
+    }
     let keyword = this.tagString.replace(/,/gi, ' ')
     this.tags = this.tagString.split(',')
     const tagTemplate = await this.getTagContent({ keyword, theme })

@@ -105,14 +105,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
+import { mapGetters, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapGetters, mapState } from 'vuex'
-import store from '@/store'
+import localeUtils from '@/utils/localeUtils'
 export default Vue.extend({
   components: {
     SearchBar,
@@ -130,10 +131,19 @@ export default Vue.extend({
   data() {
     return {
       StepsUtils,
-      keys: ['聖誕節', '雙十ㄧ', '電商商品圖', '公告'],
+      keys: [] as string[],
       isAccountPopup: false,
       isShowSearchBar: false,
       isShowMenu: false
+    }
+  },
+  mounted() {
+    if (this.currLocale === 'tw') {
+      this.keys = ['免運', '新品', '內容行銷', '聖誕節']
+    } else if (this.currLocale === 'us') {
+      this.keys = ['Free Shipping', 'New Arrivals', 'Content Marketing', 'Christmas Day']
+    } else {
+      this.keys = ['送料無料', '新商品', 'コンテンツマーケティング', 'クリスマス']
     }
   },
   computed: {
@@ -153,6 +163,9 @@ export default Vue.extend({
     },
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   methods: {
