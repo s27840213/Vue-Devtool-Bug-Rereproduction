@@ -219,7 +219,7 @@ export default Vue.extend({
 
       if (currLayer.type === 'text') {
         StepsUtils.record()
-        tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('textStyle', { color: tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color) }).run())
+        tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
       }
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
@@ -253,11 +253,7 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      tiptapUtils.agent(
-        editor => editor.chain().focus()
-          .updateAttributes('textStyle', { size: value })
-          .run()
-      )
+      tiptapUtils.applySpanStyle('size', value)
       tiptapUtils.agent(editor => {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
         StepsUtils.record()
@@ -335,47 +331,42 @@ export default Vue.extend({
       if (iconName === 'font-vertical') {
         TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
       } else {
-        tiptapUtils.agent(editor => {
-          switch (iconName) {
-            case 'bold':
-              editor.chain().focus().updateAttributes('textStyle', { weight: (this.props.weight === 'bold') ? 'normal' : 'bold' }).run()
-              break
-            case 'underline':
-              editor.chain().focus().updateAttributes('textStyle', { decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' }).run()
-              break
-            case 'italic':
-              editor.chain().focus().updateAttributes('textStyle', { style: (this.props.style === 'italic') ? 'normal' : 'italic' }).run()
-              break
-          }
-        })
-      }
-
-      // Only select with range or none selection exist, the prop-panel update.
-      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
-        TextPropUtils.updateTextPropsState()
+        switch (iconName) {
+          case 'bold':
+            tiptapUtils.applySpanStyle('weight', (this.props.weight === 'bold') ? 'normal' : 'bold')
+            TextPropUtils.updateTextPropsState({ weight: (this.props.weight === 'bold') ? 'normal' : 'bold' })
+            break
+          case 'underline':
+            tiptapUtils.applySpanStyle('decoration', (this.props.decoration === 'underline') ? 'none' : 'underline')
+            TextPropUtils.updateTextPropsState({ decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' })
+            break
+          case 'italic':
+            tiptapUtils.applySpanStyle('style', (this.props.style === 'italic') ? 'normal' : 'italic')
+            TextPropUtils.updateTextPropsState({ style: (this.props.style === 'italic') ? 'normal' : 'italic' })
+            break
+        }
       }
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
       // TextPropUtils.paragraphPropsHandler(iconName)
-      tiptapUtils.agent(editor => {
-        switch (iconName) {
-          case 'text-align-left':
-            editor.chain().focus().updateAttributes('paragraph', { align: 'left' }).run()
-            break
-          case 'text-align-center':
-            editor.chain().focus().updateAttributes('paragraph', { align: 'center' }).run()
-            break
-          case 'text-align-right':
-            editor.chain().focus().updateAttributes('paragraph', { align: 'right' }).run()
-            break
-          case 'text-align-justify':
-            editor.chain().focus().updateAttributes('paragraph', { align: 'justify' }).run()
-            break
-        }
-      })
-      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
-        TextPropUtils.updateTextPropsState()
+      switch (iconName) {
+        case 'text-align-left':
+          tiptapUtils.applyParagraphStyle('align', 'left')
+          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          break
+        case 'text-align-center':
+          tiptapUtils.applyParagraphStyle('align', 'center')
+          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          break
+        case 'text-align-right':
+          tiptapUtils.applyParagraphStyle('align', 'right')
+          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          break
+        case 'text-align-justify':
+          tiptapUtils.applyParagraphStyle('align', 'justify')
+          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          break
       }
       StepsUtils.record()
     },
@@ -509,11 +500,7 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.agent(
-            editor => editor.chain().focus()
-              .updateAttributes('textStyle', { size: value })
-              .run()
-          )
+          tiptapUtils.applySpanStyle('size', value)
           tiptapUtils.agent(editor => {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
@@ -526,7 +513,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('paragraph', { fontSpacing: value / 1000 }).run())
+          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000)
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -535,7 +522,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('paragraph', { lineHeight: toNumber((value).toFixed(2)) }).run())
+          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)))
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }

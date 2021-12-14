@@ -153,7 +153,7 @@ export default Vue.extend({
 
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           StepsUtils.record()
-          tiptapUtils.agent(editor => editor.chain().focus().updateAttributes('textStyle', { font: this.item.id }).run())
+          tiptapUtils.applySpanStyle('font', this.item.id)
         }
 
         if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {

@@ -29,6 +29,11 @@ export default Extension.create({
     const spanAttrs = this.editor.getAttributes('textStyle')
     if (Object.keys(spanAttrs).length) {
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
+    } else {
+      const spanStyle = this.editor.getAttributes('paragraph').spanStyle
+      if (spanStyle) {
+        this.storage.spanStyle = spanStyle
+      }
     }
     textPropUtils.updateTextPropsState()
     const selectionRanges = this.editor.view.state.selection.ranges
@@ -48,14 +53,15 @@ export default Extension.create({
       //   } else {
       //     spanStyle = this.storage.spanStyle
       //   }
-      //   const el = document.createElement('div')
-      //   el.style.cssText = spanStyle
-      //   const sStyles = tiptapUtils.generateSpanStyle(el.style)
       //   if (this.editor.isActive('textStyle')) {
       //     this.editor.chain().focus().unsetAllMarks().setMark('textStyle', sStyles).run()
       //   } else {
       //     this.editor.chain().focus().setMark('textStyle', sStyles).run()
       //   }
+      //   this.editor.chain().focus().insertContent(
+      //     `<span style="${spanStyle}">&#8288</span>`,
+      //     { updateSelection: false }
+      //   ).run()
       // }
       const currChangeCount = (this.editor.view as any).domChangeCount
       if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {

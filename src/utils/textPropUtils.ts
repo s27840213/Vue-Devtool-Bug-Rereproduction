@@ -749,9 +749,7 @@ class TextPropUtils {
             } else {
               spanStyle = editor.storage.nuTextStyle.spanStyle
             }
-            const el = document.createElement('div')
-            el.style.cssText = spanStyle
-            startStyles = tiptapUtils.generateSpanStyle(el.style)
+            startStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
           }
 
           origin = startStyles[prop]

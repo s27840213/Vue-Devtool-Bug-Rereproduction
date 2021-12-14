@@ -620,18 +620,12 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
           })
-          if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-            if (this.getLayerType === 'text' && this.isActive && (tiptapUtils.editor?.view?.dom as HTMLElement).contains(e.target as Node)) {
-              // if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-              //   const sel = TextUtils.getSelection()
-              //   if (sel) {
-              //     const { start } = sel
-              //     TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
-              //   }
-              // }
-              // TextPropUtils.updateTextPropsState()
+          if (this.isActive && !inSelectionMode && this.contentEditable) {
+            if ((e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+              tiptapUtils.hasFocus = false
+            } else {
+              return
             }
-            return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
             // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {

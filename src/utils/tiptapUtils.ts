@@ -11,6 +11,7 @@ import { IParagraph, IParagraphStyle, ISpan, ISpanStyle } from '@/interfaces/lay
 class TiptapUtils {
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
+  hasFocus = false
 
   init(content: string) {
     this.editor = new Editor({
@@ -26,6 +27,9 @@ class TiptapUtils {
       onCreate: ({ editor }) => {
         editor.commands.selectAll()
         this.prevText = editor.getText()
+      },
+      onFocus: () => {
+        this.hasFocus = true
       }
     })
   }
@@ -100,6 +104,12 @@ class TiptapUtils {
     return { font, weight, size, decoration, style, color, opacity } as ISpanStyle
   }
 
+  str2css(str: string): CSSStyleDeclaration {
+    const el = document.createElement('div')
+    el.style.cssText = str
+    return el.style
+  }
+
   toIParagraph(tiptapJSON: any): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
     let isSetContentRequired = false
@@ -123,18 +133,14 @@ class TiptapUtils {
           } else {
             spanStyle = defaultStyle
           }
-          const el = document.createElement('div')
-          el.style.cssText = spanStyle
-          const sStyles = this.generateSpanStyle(el.style)
+          const sStyles = this.generateSpanStyle(this.str2css(spanStyle))
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
         isSetContentRequired = true
-        const el = document.createElement('div')
-        el.style.cssText = defaultStyle
-        const sStyles = this.generateSpanStyle(el.style)
+        const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
         spans.push({ text: '', styles: sStyles })
         pStyles.size = sStyles.size
         result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
@@ -147,6 +153,39 @@ class TiptapUtils {
       }
     }
     return { paragraphs: result, isSetContentRequired }
+  }
+
+  applySpanStyle(key: string, value: any) {
+    const item: {[string: string]: any} = {}
+    item[key] = value
+    this.agent(editor => {
+      if (this.hasFocus) {
+        const ranges = editor.state.selection.ranges
+        if (ranges.length > 0) {
+          if (ranges[0].$from.pos === ranges[0].$to.pos) {
+            const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
+            attr[key] = value
+            editor.chain().focus().setMark('textStyle', attr).run()
+          } else {
+            editor.chain().focus().updateAttributes('textStyle', item).run()
+          }
+        }
+      } else {
+        editor.chain().focus().selectAll().updateAttributes('textStyle', item).run()
+      }
+    })
+  }
+
+  applyParagraphStyle(key: string, value: any) {
+    const item: {[string: string]: any} = {}
+    item[key] = value
+    this.agent(editor => {
+      if (this.hasFocus) {
+        editor.chain().focus().updateAttributes('paragraph', item).run()
+      } else {
+        editor.chain().focus().selectAll().updateAttributes('paragraph', item).run()
+      }
+    })
   }
 }
 
