@@ -1,10 +1,10 @@
 <template lang="pug">
-  editor-content(:editor="tiptapUtils.editor")
+  editor-content(:editor="editor")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { EditorContent } from '@tiptap/vue-2'
+import { Editor, EditorContent } from '@tiptap/vue-2'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
@@ -17,11 +17,12 @@ export default Vue.extend({
   },
   data() {
     return {
-      tiptapUtils
+      editor: undefined as Editor | undefined
     }
   },
   mounted() {
     tiptapUtils.init(this.initText)
+    this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
       if (!editor.view.composing && (tiptapUtils.prevText !== editor.getText())) {
@@ -46,7 +47,9 @@ export default Vue.extend({
     })
   },
   destroyed() {
-    tiptapUtils.destroy()
+    if (this.editor) {
+      this.editor.destroy()
+    }
   }
 })
 </script>
