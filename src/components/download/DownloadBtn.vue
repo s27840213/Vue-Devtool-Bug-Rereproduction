@@ -47,7 +47,7 @@ export default Vue.extend({
         !show && (this.inprogress = false)
       } else {
         modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo('請註冊/登入後才能下載', [])
+        modalUtils.setModalInfo(this.$t('NN0323') as string, [])
       }
     }
   }

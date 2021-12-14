@@ -12,7 +12,7 @@
             type="checkbox"
             :key="`page_${idx}`"
             :default-checked="status"
-            :label="`第 ${idx + 1} 頁`"
+            :label="$t('NN0134', { num:`${idx + 1}` })"
             @change="({ checked }) => handleSelect(idx, checked)")
           div
             btn(class="full-width body-3 rounded"

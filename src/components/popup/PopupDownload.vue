@@ -54,7 +54,7 @@
           download-check-button(type="radio"
             class="mb-10"
             group-name="range"
-            :label="`${$t('NN0125')}（第${currentPageIndex + 1}頁）`"
+            :label="`${$t('NN0125')}（${$t('NN0134', { num:`${currentPageIndex + 1}` })}）`"
             value="current"
             :default-checked="rangeType === 'current'"
             @change="handleRangeType")
