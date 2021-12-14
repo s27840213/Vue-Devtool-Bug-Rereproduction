@@ -199,6 +199,38 @@ export default Extension.create({
                 style: tiptapUtils.textStyles(attributes) + '; margin: 0;'
               }
             }
+          },
+          weight: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
+              return spanStyle.fontWeight
+            },
+            renderHTML: () => ({})
+          },
+          decoration: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
+              return spanStyle.textDecorationLine
+            },
+            renderHTML: () => ({})
+          },
+          style: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
+              return spanStyle.fontStyle
+            },
+            renderHTML: () => ({})
+          },
+          color: {
+            default: null,
+            parseHTML: element => {
+              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
+              return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
+            },
+            renderHTML: () => ({})
           }
         }
       }

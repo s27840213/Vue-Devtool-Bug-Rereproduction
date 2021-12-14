@@ -143,6 +143,7 @@ class TiptapUtils {
         const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
         spans.push({ text: '', styles: sStyles })
         pStyles.size = sStyles.size
+        pStyles.font = sStyles.font
         result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
       } else {
         if (pStyles.size !== largestSize) {
@@ -166,6 +167,15 @@ class TiptapUtils {
             const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
             attr[key] = value
             editor.chain().focus().setMark('textStyle', attr).run()
+            // const chainedCommands = editor.chain().focus().setMark('textStyle', attr)
+            // const spanStyle = editor.getAttributes('paragraph').spanStyle
+            // if (spanStyle) {
+            //   const sStyles = this.generateSpanStyle(this.str2css(spanStyle))
+            //   sStyles[key] = value
+            //   chainedCommands.updateAttributes('paragraph', { spanStyle: this.textStyles(sStyles) }).run()
+            // } else {
+            //   chainedCommands.run()
+            // }
           } else {
             editor.chain().focus().updateAttributes('textStyle', item).run()
           }

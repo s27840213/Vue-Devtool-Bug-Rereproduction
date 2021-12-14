@@ -623,6 +623,7 @@ export default Vue.extend({
           if (this.isActive && !inSelectionMode && this.contentEditable) {
             if ((e.target as HTMLElement).classList.contains('control-point__move-bar')) {
               tiptapUtils.hasFocus = false
+              tiptapUtils.agent(editor => editor.commands.selectAll())
             } else {
               return
             }
