@@ -256,7 +256,6 @@ export default Vue.extend({
       tiptapUtils.agent(
         editor => editor.chain().focus()
           .updateAttributes('textStyle', { size: value })
-          .updateAttributes('paragraph', { size: value })
           .run()
       )
       tiptapUtils.agent(editor => {
@@ -513,7 +512,6 @@ export default Vue.extend({
           tiptapUtils.agent(
             editor => editor.chain().focus()
               .updateAttributes('textStyle', { size: value })
-              .updateAttributes('paragraph', { size: value })
               .run()
           )
           tiptapUtils.agent(editor => {

@@ -107,10 +107,13 @@ class TiptapUtils {
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
+      const pSize = pStyles.size
+      let largestSize = 0
       const spans: ISpan[] = []
       for (const span of paragraph.content ?? []) {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
+          if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
@@ -123,6 +126,7 @@ class TiptapUtils {
           const el = document.createElement('div')
           el.style.cssText = spanStyle
           const sStyles = this.generateSpanStyle(el.style)
+          if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
       }
@@ -132,8 +136,13 @@ class TiptapUtils {
         el.style.cssText = defaultStyle
         const sStyles = this.generateSpanStyle(el.style)
         spans.push({ text: '', styles: sStyles })
+        pStyles.size = sStyles.size
         result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
       } else {
+        if (pStyles.size !== largestSize) {
+          pStyles.size = largestSize
+          isSetContentRequired = true
+        }
         result.push({ spans, styles: pStyles })
       }
     }
