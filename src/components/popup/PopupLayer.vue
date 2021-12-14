@@ -302,6 +302,7 @@ export default Vue.extend({
       return {
         icon: 'copy',
         text: this.$t('NN0096'),
+        condition: this.inAdminMode && this.isLogin,
         shortcutText: '',
         action: () => {
           const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage

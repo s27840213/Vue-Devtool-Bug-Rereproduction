@@ -326,6 +326,12 @@ class PageUtils {
     }
     this.findCentralPageIndexInfo()
   }
+
+  isAllPageSizeEqual() {
+    return new Set(this.getPages.map((page: IPage) => {
+      return page.width
+    })).size === 1
+  }
 }
 
 const pageUtils = new PageUtils()

@@ -17,7 +17,7 @@
       :iconColor="isShowPagePreview ? 'gray-4' :'gray-2'"
       :iconWidth="'24px'"
       :disabled="isShowPagePreview"
-      @click.native="setDetailPageMode(!detailPageMode)")
+      @click.native="setShowPagePanel(!showPagePanel)")
 </template>
 
 <script lang="ts">
@@ -35,7 +35,7 @@ export default Vue.extend({
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
-      detailPageMode: 'page/getDeatilPageMode'
+      showPagePanel: 'page/getShowPagePanel'
     }),
     ratioInPercent: {
       get(): number {
@@ -50,7 +50,7 @@ export default Vue.extend({
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      _setDetailPageMode: 'page/SET_detailPageMode'
+      _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
@@ -61,9 +61,9 @@ export default Vue.extend({
         pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
       }
     },
-    setDetailPageMode(show: boolean) {
-      this.toggleSidebarPanel(show)
-      this._setDetailPageMode(show)
+    setShowPagePanel(show: boolean) {
+      // this.toggleSidebarPanel(show)
+      this._setShowPagePanel(show)
     },
     toggleSidebarPanel(open: boolean) {
       this.$emit('toggleSidebarPanel', open)
