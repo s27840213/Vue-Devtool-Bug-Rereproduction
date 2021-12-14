@@ -49,7 +49,7 @@ import GroupUtils from '@/utils/groupUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
-import { ILayer } from '@/interfaces/layer'
+import { IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 
@@ -84,11 +84,27 @@ export default Vue.extend({
     subLayerType(): string {
       return this.currSubSelectedInfo.type
     },
+    subLayerIndex(): number {
+      const primaryLayerIndex = LayerUtils.layerIndex
+      return (LayerUtils.getCurrLayer as IGroup)
+        .layers.findIndex(l => l.active)
+    },
+    primaryLayerIndex(): number {
+      if (LayerUtils.getCurrLayer.type === 'group') {
+        return LayerUtils.layerIndex
+      }
+      return -1
+    },
     opacity(): number {
-      if (this.layerNum === 1) {
+      const currLayer = LayerUtils.getCurrLayer
+      if (!['tmp', 'group'].includes(currLayer.type)) {
         return this.currSelectedInfo.layers[0].styles.opacity
       }
-      return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
+      if (currLayer.type === 'group') {
+        const { subLayerIndex } = this
+        return subLayerIndex !== -1 ? (currLayer as IGroup).layers[subLayerIndex].styles.opacity : currLayer.styles.opacity
+      }
+      return Math.max(...(LayerUtils.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
     },
     isTextEditing(): boolean {
       return this.layerNum === 1 && this.currSelectedInfo.layers[0].type === 'text' && this.currSelectedInfo.layers[0].editing
@@ -149,17 +165,20 @@ export default Vue.extend({
           })
         }
       } else {
-        if (this.hasSubSelectedLayer) {
-          this.$store.commit('SET_subLayerStyles', {
-            pageIndex: this.currSelectedInfo.pageIndex,
-            primaryLayerIndex: this.currSelectedInfo.index,
-            subLayerIndex: this.currSubSelectedInfo.index,
-            styles: {
-              opacity: value
-            }
+        const { subLayerIndex, primaryLayerIndex } = this
+        if (subLayerIndex !== -1) {
+          LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, primaryLayerIndex, subLayerIndex, {
+            opacity: value
           })
         } else {
-          this.$store.commit('UPDATE_groupLayerStyles', {
+          // this.$store.commit('UPDATE_groupLayerStyles', {
+          //   styles: {
+          //     opacity: value
+          //   }
+          // })
+          this.$store.commit('UPDATE_layerStyles', {
+            pageIndex: this.currSelectedInfo.pageIndex,
+            layerIndex: this.currSelectedInfo.index,
             styles: {
               opacity: value
             }

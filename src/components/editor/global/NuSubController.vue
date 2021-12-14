@@ -65,7 +65,6 @@ import { IFrame, IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
-import TemplateUtils from '@/utils/templateUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -75,7 +74,8 @@ import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { ISelection } from '@/interfaces/text'
-import { FunctionPanelType } from '@/store/types'
+import { FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   props: {
@@ -186,6 +186,7 @@ export default Vue.extend({
             })
           }
         }
+        popupUtils.closePopup()
       } else {
         TextUtils.setCurrTextInfo({
           config: this.config as IText,

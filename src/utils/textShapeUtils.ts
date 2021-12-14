@@ -2,6 +2,7 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
 import { IText } from '@/interfaces/layer'
 import store from '@/store'
+import generalUtils from './generalUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }

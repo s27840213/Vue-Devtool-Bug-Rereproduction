@@ -195,10 +195,6 @@ export default Vue.extend({
     pageIndex: Number,
     snapUtils: Object
   },
-  created() {
-    console.log(this.layerIndex)
-    console.log(this.config)
-  },
   data() {
     return {
       MappingUtils,
@@ -241,6 +237,10 @@ export default Vue.extend({
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
+  },
+  updated() {
+    // console.log(this.config)
+    // console.log(this.layerIndex)
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -370,6 +370,7 @@ export default Vue.extend({
             }
           }
         }
+        popupUtils.closePopup()
       } else {
         if (this.getLayerType === 'text') {
           TextUtils.setCurrTextInfo({
