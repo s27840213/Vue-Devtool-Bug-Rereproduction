@@ -7,17 +7,11 @@ import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import store from '@/store'
 import { IParagraph, IParagraphStyle, ISpan, ISpanStyle } from '@/interfaces/layer'
-import { EventEmitter } from 'events'
 
 class TiptapUtils {
-  event: any
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
   hasFocus = false
-
-  constructor() {
-    this.event = new EventEmitter()
-  }
 
   init(content: string) {
     this.editor = new Editor({
@@ -55,16 +49,6 @@ class TiptapUtils {
 
   on(event: keyof EditorEvents, handler: (props: any) => void): void {
     this.agent(editor => editor.on(event, handler))
-  }
-
-  onForceUpdate(handler: (editor: Editor) => void): void {
-    this.event.on('update', () => {
-      this.agent(editor => handler(editor))
-    })
-  }
-
-  forceUpdate() {
-    this.event.emit('update')
   }
 
   isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
