@@ -735,13 +735,14 @@ class TextPropUtils {
         if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) {
           origin = (paragraphs[startPIndex].attrs ?? {})[prop]
         } else {
-          let startStyles
+          let startStyles: any = {}
           const startP = paragraphs[startPIndex].content
           if (startP) {
             let sIndex = startSIndex
             if (sIndex >= startP.length) sIndex = startP.length - 1
             startStyles = startP[sIndex].marks?.[0]?.attrs ?? {}
-          } else {
+          }
+          if (Object.keys(startStyles).length === 0) {
             let spanStyle: string
             if (editor.getAttributes('paragraph').spanStyle) {
               spanStyle = editor.getAttributes('paragraph').spanStyle
