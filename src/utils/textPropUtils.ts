@@ -793,6 +793,49 @@ class TextPropUtils {
     return res
   }
 
+  fontSizeStepping(step: number) {
+    tiptapUtils.agent(editor => {
+      const selectionRanges = editor.view.state.selection.ranges
+      if (selectionRanges.length > 0) {
+        const range = selectionRanges[0]
+        const startPIndex = range.$from.index(0)
+        const startSIndex = range.$from.index(1)
+        const endPIndex = range.$to.index(0)
+        let endSIndex = range.$to.index(1)
+        const tiptapJSON = editor.getJSON()
+        const paragraphs = tiptapJSON.content ?? []
+
+        if (!(startPIndex === endPIndex && startSIndex === endSIndex)) {
+          endSIndex--
+        }
+
+        let tempStartSIndex = startSIndex
+        let tempEndSIndex
+        for (let i = startPIndex; i <= endPIndex; i++) {
+          const pAttrs = paragraphs[i].attrs
+          if (pAttrs) {
+            pAttrs.size += step
+          }
+          const spans = paragraphs[i].content ?? []
+          if (i === endPIndex) {
+            tempEndSIndex = endSIndex
+          } else {
+            tempEndSIndex = spans.length - 1
+          }
+          for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
+            const spanAttrs = spans[j].marks?.[0]?.attrs
+            if (spanAttrs) {
+              spanAttrs.size += step
+            }
+          }
+          tempStartSIndex = 0
+        }
+        editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+        tiptapUtils.forceUpdate()
+      }
+    })
+  }
+
   propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {
     const prop: { [key: string]: string | number } = {}
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText

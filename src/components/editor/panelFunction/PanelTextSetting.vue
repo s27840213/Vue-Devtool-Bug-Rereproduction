@@ -373,17 +373,19 @@ export default Vue.extend({
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
       const { config, subLayerIndex } = this.currTextInfo
-      let { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
-        start: ISelection,
-        end: ISelection
-      }
+      // let { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
+      //   start: ISelection,
+      //   end: ISelection
+      // }
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            const { start: _start, end: _end } = this.fontSizeSteppingHandler(start, end, step)
-            start = _start
-            end = _end
-            TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
+            // const { start: _start, end: _end } = this.fontSizeSteppingHandler(start, end, step)
+            // start = _start
+            // end = _end
+            TextPropUtils.fontSizeStepping(step)
+            TextPropUtils.updateTextPropsState()
+            // TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -399,7 +401,8 @@ export default Vue.extend({
           end: ISelection
         }
         if (new Date().getTime() - startTime < 500) {
-          this.fontSizeSteppingHandler(start, end, step)
+          TextPropUtils.fontSizeStepping(step)
+          TextPropUtils.updateTextPropsState()
         }
         clearInterval(interval)
         StepsUtils.record()

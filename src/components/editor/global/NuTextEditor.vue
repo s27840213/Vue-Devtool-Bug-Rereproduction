@@ -32,6 +32,9 @@ export default Vue.extend({
       }
       tiptapUtils.prevText = editor.getText()
     })
+    tiptapUtils.onForceUpdate((editor) => {
+      this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
+    })
     tiptapUtils.on('create', ({ editor }) => {
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
