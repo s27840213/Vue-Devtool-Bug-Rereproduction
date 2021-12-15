@@ -31,6 +31,9 @@ class TiptapUtils {
         TextStyle,
         NuTextStyle
       ],
+      parseOptions: {
+        preserveWhitespace: true
+      },
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
       onCreate: ({ editor }) => {
         editor.commands.selectAll()
@@ -137,7 +140,6 @@ class TiptapUtils {
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
-      const pSize = pStyles.size
       let largestSize = 0
       const spans: ISpan[] = []
       for (const span of paragraph.content ?? []) {
@@ -170,6 +172,9 @@ class TiptapUtils {
           pStyles.size = largestSize
           isSetContentRequired = true
         }
+        if (paragraph.attrs.spanStyle) {
+          isSetContentRequired = true
+        }
         result.push({ spans, styles: pStyles })
       }
     }
@@ -186,6 +191,7 @@ class TiptapUtils {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
             const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
             attr[key] = value
+            editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().focus().setMark('textStyle', attr).run()
             // const chainedCommands = editor.chain().focus().setMark('textStyle', attr)
             // const spanStyle = editor.getAttributes('paragraph').spanStyle
