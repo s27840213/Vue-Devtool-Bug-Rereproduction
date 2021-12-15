@@ -32,7 +32,7 @@ export default Vue.extend({
       }
       tiptapUtils.prevText = editor.getText()
     })
-    tiptapUtils.on('focus', ({ editor }) => {
+    tiptapUtils.onForceUpdate((editor) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
     })
     tiptapUtils.on('create', ({ editor }) => {
