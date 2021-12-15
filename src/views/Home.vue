@@ -29,7 +29,7 @@
           div(v-else
             class="home-content__top-btn rounded home-btn"
             :type="'primary-lg'"
-            @click="newDesign()") 開 始 製 作
+            @click="newDesign()") {{$t('NN0274')}}
       div(class="home-content-title label-lg") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
@@ -348,7 +348,7 @@ export default Vue.extend({
         font-size: 32px;
       }
       @include layout-mobile {
-        top: 40px;
+        top: 30px;
         font-size: 16px;
       }
     }

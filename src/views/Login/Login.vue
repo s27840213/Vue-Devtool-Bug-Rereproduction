@@ -22,7 +22,7 @@ div(style="position: relative;")
         span {{$t('NN0179')}}
       div
         div
-          span(class="label-mid") Email
+          span(class="label-mid") {{$t('NN0173')}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
@@ -69,7 +69,9 @@ div(style="position: relative;")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
-        span(class="body-2") 別擔心，請輸入Email<br>我們會傳送訊息給你，以協助你重設密碼。
+        i18n(path="NN0282" tag="span")
+          template(#newline)
+            br
       div
         property-bar(class="mt-5"
           :class="{'input-invalid': !mailValid || emailResponseError}")
@@ -84,16 +86,16 @@ div(style="position: relative;")
         :class="hideBackButton ? 'pt-20' : ''"
         style="justify-content: center;")
         btn(:type="'primary-mid'"
-          class="btn-shadow body-1"
+          class="btn-shadow"
           style="width: 50%;"
-          @click.native="onSendEmailClicked()") {{$tc('NN0164',2)}}
+          @click.native="onSendEmailClicked()") {{$tc('NN0164', 2)}}
       div(v-if="!hideBackButton"
         class="flex"
         style="justify-content: center;")
         btn(:type="'icon-mid'"
           class="bg-gray-3 text-white btn-shadow"
           style="width: 50%;"
-          @click.native="onBackClicked()") 返 回 登 入 頁
+          @click.native="onBackClicked()") {{$t('NN0283')}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
@@ -101,14 +103,14 @@ div(style="position: relative;")
     div(v-if="currentPageIndex === 2"
       class="login")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 驗 證 碼 已 傳 送
+        span(class="text-blue-1 heading-5") {{$t('NN0284')}}
       div
-        span(class="body-2") 請在 10 分鐘內輸入我們傳送到 {{ email }} 的驗證碼。
+        span(class="body-2") {{$t('NN0285', {email: email, time: 10})}}
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
           input(class="body-2 text-gray-2"
             v-model="vcode" type="text" name="vcode"
-            placeholder="請輸入驗證碼")
+            :placeholder="$t('NN0163', {term: $t('NN0286')})")
         div(v-if="!vcodeValid"
           class="invalid-message")
           span {{ vcodeErrorMessage }}
@@ -119,10 +121,10 @@ div(style="position: relative;")
       div(v-if="resendAvailable"
         class="flex flex-between align-center"
         style="height:30px; margin-bottom: 0;")
-        span 沒有收到驗證碼嗎
+        span {{$t('NN0288')}}
         btn(:type="'icon'"
           class="text-blue-1 body-1"
-          @click.native="onResendClicked()") 重新傳送驗證碼
+          @click.native="onResendClicked()") {{$t('NN0290')}}
       div(v-else
         class="flex align-center text-gray-3"
         style="height:30px; margin-bottom: 0;")
@@ -134,15 +136,15 @@ div(style="position: relative;")
     div(v-if="currentPageIndex === 3"
       class="login")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 重 設 新 密 碼
+        span(class="text-blue-1 heading-5") {{$t('NN0291')}}
       div
         div
-          span(class="label-mid") 新密碼
+          span(class="label-mid") {{$t('NN0292')}}
         property-bar(class="mt-5"
           :class="{'input-invalid': !resetPasswordValid}")
           input(class="body-2 text-gray-2"
             v-model="password" type="number"
-            placeholder="新密碼"
+            :placeholder="$t('NN0292')"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
             svg-icon(class="pointer"
@@ -153,26 +155,26 @@ div(style="position: relative;")
               :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
             span(class="ml-5"
-              :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
+              :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
           div
             svg-icon(class="pointer"
               :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
             span(class="ml-5"
-              :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
+              :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
           div
             svg-icon(class="pointer"
               :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
               :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
             span(class="ml-5"
-              :class="{'text-green-1': passwordContainNum}") 密碼包含數字
+              :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
         div(class="mt-20")
-          span(class="label-mid") 確認新密碼
+          span(class="label-mid") {{$t('NN0296')}}
         property-bar(class="mt-5"
           :class="{'input-invalid': !confirmPasswordValid}")
           input(class="body-2 text-gray-2"
             v-model="confirmPassword" type="number"
-            placeholder="確認新密碼"
+            :placeholder="$t('NN0296')"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
             svg-icon(class="pointer"
@@ -185,7 +187,7 @@ div(style="position: relative;")
           btn(:type="'primary-mid'"
             class="btn-shadow"
             style="width: 50%;"
-            @click.native="onResetDoneClicked()") 完 成
+            @click.native="onResetDoneClicked()") {{$t('NN0287')}}
         div(class="page-close")
           button(@click="onCloseClicked")
             svg-icon(class="pointer"
@@ -219,8 +221,8 @@ export default Vue.extend({
       isLoginClicked: false as boolean,
       passwordErrorMessage: i18n.t('NN0163', { term: i18n.t('NN0180') }) as string,
       emailResponseError: false as boolean,
-      mailErrorMessage: 'Email 格式錯誤' as string,
-      vcodeErrorMessage: '驗證碼錯誤' as string,
+      mailErrorMessage: i18n.t('NN0297') as string,
+      vcodeErrorMessage: i18n.t('NN0298') as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -432,7 +434,7 @@ export default Vue.extend({
       }
       if (!this.mailValid) {
         this.isLoading = false
-        this.mailErrorMessage = 'Email 格式錯誤'
+        this.mailErrorMessage = i18n.t('NN0297') as string
         return
       }
       const parameter = {
@@ -459,7 +461,7 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         account: this.email,
         register: '0',
@@ -471,7 +473,7 @@ export default Vue.extend({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -494,7 +496,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = '請輸入驗證碼'
+        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -522,11 +524,11 @@ export default Vue.extend({
         return
       }
       if (this.password.length === 0) {
-        this.confirmErrorMessage = '請輸入新密碼'
+        this.confirmErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0292') }) as string
         this.isLoading = false
         return
       } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
-        this.confirmErrorMessage = '請確認輸入的密碼是否與第一組密碼相符。'
+        this.confirmErrorMessage = i18n.t('NN0298') as string
         this.isLoading = false
         return
       }
@@ -720,9 +722,9 @@ export default Vue.extend({
 .h-link {
   color: setColor(blue-1);
   text-decoration: underline;
-  font-size: 16px;
-  padding-left: 4px;
-  padding-right: 4px;
+  font-size: 14px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 .invalid-message {
   display: flex;
