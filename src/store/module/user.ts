@@ -346,9 +346,11 @@ const actions: ActionTree<IUserModule, unknown> = {
         commit('SET_groupId', groupId, { root: true })
         if (!isDelete) {
           modalUtils.setModalInfo('上傳成功', [`Group ID: ${groupId}`])
+          commit('SET_groupType', params.ecomm, { root: true })
         } else {
           modalUtils.setModalInfo('刪除成功', [])
           commit('SET_groupId', '', { root: true })
+          commit('SET_groupType', 0, { root: true })
         }
         themeUtils.fetchTemplateContent()
         console.log(`Success: ${groupId}}`)
@@ -359,7 +361,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else if (flag === 2) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
         commit('SET_groupId', '', { root: true })
-        console.log(`Invalid token: ${msg}`)
       }
     } catch (error) {
       console.log(error)

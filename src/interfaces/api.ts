@@ -123,6 +123,7 @@ export interface IGroupDesignInputParams {
   group_id: string,
   list?: string,
   cover?: string,
+  ecomm?: number
 }
 
 export interface IListServiceContentDataItem {

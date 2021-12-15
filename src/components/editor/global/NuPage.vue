@@ -2,7 +2,7 @@
   div(class="nu-page"
       :style="pageMarginStyles"
       ref="page")
-    div(v-if="!inPagePanel"
+    div(v-if="!isDetailPage"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -39,7 +39,7 @@
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()"
           v-hint="`${$t('NN0141')}`")
-    div(v-if="inPagePanel" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="isDetailPage" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
@@ -146,7 +146,7 @@
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
-      div(v-if="(currActivePageIndex === pageIndex && inPagePanel)"
+      div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
           @mousedown.left.stop="pageResizeStart($event)"
@@ -164,7 +164,7 @@
         div(v-for="line in closestSnaplines.h"
           class="snap-area__line snap-area__line--hr"
           :style="snapLineStyles('h', line)")
-        template(v-if="isShowGuideline && !inPagePanel")
+        template(v-if="isShowGuideline && !isDetailPage")
           div(v-for="(line,index) in guidelines.v"
             class="snap-area__line snap-area__line--vr"
             :style="snapLineStyles('v', line,true)"
@@ -264,7 +264,7 @@ export default Vue.extend({
       getPage: 'getPage',
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
-      detailPageMode: 'page/getDeatilPageMode'
+      groupType: 'getGroupType'
     }),
     ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
@@ -324,12 +324,12 @@ export default Vue.extend({
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
     },
-    inPagePanel(): boolean {
-      return this.detailPageMode
+    isDetailPage(): boolean {
+      return this.groupType === 1
     },
     pageMarginStyles(): { [index: string]: string } {
       return {
-        margin: this.inPagePanel ? '0px auto' : '25px auto'
+        margin: this.isDetailPage ? '0px auto' : '25px auto'
       }
     },
     isOutOfBound(): boolean {

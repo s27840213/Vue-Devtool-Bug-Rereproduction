@@ -660,7 +660,7 @@ class TextUtils {
 
     if (targePageIndex === this.lastSelectedPageIndex) {
       const currLayer = LayerUtils.getLayer(targePageIndex, LayerUtils.layerIndex)
-      if (currLayer) {
+      if (currLayer.styles) {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
         const specy = currLayer.styles.y + currLayer.styles.height
         if ((specy + height) < page.height) {

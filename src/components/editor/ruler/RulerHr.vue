@@ -36,7 +36,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio',
-      detailPageMode: 'page/getDeatilPageMode'
+      showPagePanel: 'page/getShowPagePanel'
     }),
     currFocusPage(): IPage {
       const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
@@ -71,7 +71,7 @@ export default Vue.extend({
     currFocusPage() {
       this.calcRulerBodyOffset()
     },
-    detailPageMode() {
+    showPagePanel() {
       this.calcRulerBodyOffset()
     }
   },

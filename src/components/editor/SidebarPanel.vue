@@ -5,7 +5,7 @@
         class="p-10 border-box"
         :style="panelStyles()"
         v-on="$listeners"
-        :is="detailPageMode? 'panel-page' :panelComponents[currPanel]")
+        :is="showPagePanel? 'panel-page' :panelComponents[currPanel]")
 </template>
 
 <script lang="ts">
@@ -64,7 +64,7 @@ export default Vue.extend({
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      detailPageMode: 'page/getDeatilPageMode'
+      showPagePanel: 'page/getShowPagePanel'
     })
   },
   methods: {
@@ -73,7 +73,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: this.detailPageMode ? '200px' : '320px'
+        width: this.showPagePanel ? '200px' : '320px'
       }
     }
   }

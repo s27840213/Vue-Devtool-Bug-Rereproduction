@@ -57,7 +57,7 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      detailPageMode: 'page/getDeatilPageMode',
+      showPagePanel: 'page/getDeatilPageMode',
       hasAvatar: 'user/hasAvatar',
       isLogin: 'user/isLogin'
     }),
@@ -82,13 +82,13 @@ export default Vue.extend({
     ...mapMutations({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      _setDetailPageMode: 'page/SET_detailPageMode'
+      _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
       this.setCurrSidebarPanel(index)
       this.$emit('toggleSidebarPanel', true)
-      if (this.detailPageMode) {
-        this._setDetailPageMode(false)
+      if (this.showPagePanel) {
+        this._setShowPagePanel(false)
       }
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
@@ -99,8 +99,8 @@ export default Vue.extend({
       this.$router.push({ name: pageName })
     },
     toggleSidebarPanel() {
-      if (this.detailPageMode) {
-        this._setDetailPageMode(false)
+      if (this.showPagePanel) {
+        this._setShowPagePanel(false)
       }
       this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }

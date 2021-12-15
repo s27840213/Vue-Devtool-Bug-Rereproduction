@@ -248,7 +248,6 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = groupId
   },
   SET_groupType(state: IEditorState, groupType: number) {
-    console.log('set group type' + groupType)
     state.groupType = groupType
   },
   SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {

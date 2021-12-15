@@ -23,7 +23,6 @@ import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -64,7 +63,7 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
-      detailPageMode: 'page/getDeatilPageMode'
+      groupType: 'getGroupType'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
@@ -99,7 +98,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳群組模板',
           shortcutText: '',
-          condition: !this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1 && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 0)
           }
@@ -108,7 +107,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin,
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
           }
@@ -117,38 +116,56 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除群組模板',
           shortcutText: '',
-          condition: !this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0, true)
           }
+        },
+        {
+          icon: 'copy',
+          text: '上傳詳情頁模板',
+          shortcutText: '',
+          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(0, 1)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新詳情頁模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 1)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '刪除詳情頁模板',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 1, true)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新群組成詳情頁',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 1)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '更新詳情頁成群組',
+          shortcutText: '',
+          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          action: () => {
+            uploadUtils.uploadGroupDesign(1, 0)
+          }
         }
-        // {
-        //   icon: 'copy',
-        //   text: '上傳詳情頁模板',
-        //   shortcutText: '',
-        //   condition: this.detailPageMode && this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
-        //   action: () => {
-        //     uploadUtils.uploadGroupDesign(0, 1)
-        //   }
-        // },
-        // {
-        //   icon: 'copy',
-        //   text: '更新詳情頁模板',
-        //   shortcutText: '',
-        //   condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
-        //   action: () => {
-        //     uploadUtils.uploadGroupDesign(1, 1)
-        //   }
-        // },
-        // {
-        //   icon: 'copy',
-        //   text: '刪除詳情頁模板',
-        //   shortcutText: '',
-        //   condition: this.detailPageMode && this.groupId && this.inAdminMode && this.isLogin,
-        //   action: () => {
-        //     uploadUtils.uploadGroupDesign(1, 1, true)
-        //   }
-        // },
         // {
         //   icon: 'copy',
         //   text: '測試用',

@@ -59,6 +59,7 @@ import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import Vue from 'vue'
+import { mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
@@ -85,6 +86,9 @@ export default Vue.extend({
     this.initIcon(1)
   },
   methods: {
+    ...mapMutations({
+      setGroupType: 'SET_groupType'
+    }),
     initIcon(times = 0) {
       const { scrollWidth, offsetWidth } = this.items
       if (scrollWidth === offsetWidth && times < 10) {
@@ -116,7 +120,12 @@ export default Vue.extend({
     },
     newDesign(item: Itheme) {
       this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(item.width, item.height)
+        if (item.height !== 0) {
+          designUtils.newDesign(item.width, item.height)
+        } else {
+          designUtils.newDesign(item.width, item.width)
+          this.setGroupType(1)
+        }
       })
     },
     newDesignSquare() {

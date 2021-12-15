@@ -682,6 +682,13 @@ class UploadUtils {
     if (update === GroupDesignUpdateFlag.UPLOAD || update === GroupDesignUpdateFlag.UPDATE_GROUP) {
       // Could only delete group when updating group
       const list = deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP ? '' : pages.map((page: IPage) => page.designId).join(',')
+      if (ecomm) {
+        if (!pageUtils.isAllPageSizeEqual()) {
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'])
+          return
+        }
+      }
       store.dispatch('user/groupDesign', {
         token: this.token,
         update,

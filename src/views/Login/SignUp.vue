@@ -7,26 +7,26 @@ div(style="position:relative;")
         img(:src="require('@/assets/img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 開始使用 Vivipic
+        span(class="text-blue-1 heading-5") {{$t('NN0300')}}
       div
-        div 在電商這條路上，讓 Vivipic 成為你的設計好助手！
-        div 馬上註冊，即可免費享用海量電商模板
+        div {{$t('NN0301')}}
+        div {{$t('NN0302')}}
       div
         btn(@click.native="onFacebookClicked()"
           :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") 使用 Facebook 帳號註冊
+        span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
       div
         btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") 使用 Google 帳號註冊
+        span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") 使用電子郵件註冊
+        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $t('NN0173')})}}
       div
-        span 已是會員
+        span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") 立即登入
+          @click.native="onLoginClicked()") {{$t('NN0305')}}
       div
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
@@ -36,7 +36,7 @@ div(style="position:relative;")
         button(@click="onBackClicked")
               svg-icon(class="pointer"
               iconName="page-back" :iconWidth="'15px'" :iconColor="'gray-3'")
-        span(class="text-blue-1") 建立您的帳號
+        span(class="text-blue-1") {{$t('NN0306')}}
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
                 iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
@@ -82,40 +82,40 @@ div(style="position:relative;")
                 :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
               span(class="ml-5 mt-2"
-                :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
+                :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
             div
               svg-icon(class="pointer"
                 :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
               span(class="ml-5 mt-2"
-                :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
+                :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
             div
               svg-icon(class="pointer"
                 :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'25px'"
                 :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
               span(class="ml-5 mt-2"
-                :class="{'text-green-1': passwordContainNum}") 密碼包含數字
+                :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
       div
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
           @click.native="onSignUpClicked()") {{$tc('NN0169',2)}}
       div
-        span 註冊即代表你同意 Vivipic 的
-        a(class="h-link") 使用條款
-        span 與
-        a(class="h-link") 隱私政策
-        span 。
+        i18n(path="NN0307" tag="span")
+          template(#use)
+            a(class="h-link" :href="termsPage") {{$t('NN0162')}}
+          template(#privacy)
+            a(class="h-link" :href="privacyPage") {{$t('NN0161')}}
       div
-        span 已是會員
+        span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") 立即登入
+          @click.native="onLoginClicked()") {{$t('NN0281')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")
-        span(class="text-blue-1 heading-5") 驗 證 碼 已 傳 送
+        span(class="text-blue-1 heading-5") {{$t('NN0284')}}
       div
-        span(class="body-2") 請在 10 分鐘內輸入我們傳送到 {{ email }} 的驗證碼。
+        span(class="body-2") {{$t('NN0285', {email: email, time: 10})}}
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
           input(class="body-2 text-gray-2"
@@ -135,10 +135,10 @@ div(style="position:relative;")
       div(v-if="resendAvailable"
         class="flex flex-between align-center"
         style="height:30px; margin-bottom: 0;")
-        span 沒有收到驗證碼嗎
+        span {{$t('NN0288')}}
         btn(:type="'icon'"
           class="text-blue-1 body-1"
-          @click.native="onResendClicked()") 重新傳送驗證碼
+          @click.native="onResendClicked()") {{$t('NN0290')}}
       div(v-else
         class="flex align-center text-gray-3"
         style="height:30px; margin-bottom: 0;")
@@ -174,12 +174,14 @@ export default Vue.extend({
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
       emailResponseError: false as boolean,
-      passwordHint: '密碼需包含大小寫英文字母、數字８碼以上。' as string,
-      vcodeErrorMessage: '驗證碼錯誤' as string,
+      passwordHint: i18n.t('NN0308') as string,
+      vcodeErrorMessage: i18n.t('NN0298') as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
-      isLoading: false
+      isLoading: false,
+      privacyPage: '',
+      termsPage: ''
     }
   },
   created() {
@@ -210,6 +212,21 @@ export default Vue.extend({
         }
       }
     }
+
+    switch (this.currLocale) {
+      case 'us':
+        this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+        this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+        break
+      case 'tw':
+        this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+        this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+        break
+      case 'jp':
+        this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+        this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+        break
+    }
   },
   computed: {
     nameValid(): boolean {
@@ -232,9 +249,9 @@ export default Vue.extend({
     },
     mailErrorMessage(): string {
       if (this.email.length === 0) {
-        return '請輸入您的 Email'
+        return i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
       } else {
-        return 'Email 格式錯誤'
+        return i18n.t('NN0297') as string
       }
     },
     passwordLengthValid(): boolean {
@@ -348,7 +365,7 @@ export default Vue.extend({
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         this.isLoading = false
-        this.passwordHint = '密碼需包含大小寫英文字母、數字８碼以上。'
+        this.passwordHint = i18n.t('NN0308') as string
         return
       }
       const parameter = {
@@ -375,7 +392,7 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         account: this.email,
         register: '1',
@@ -387,7 +404,7 @@ export default Vue.extend({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -410,7 +427,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = '請輸入驗證碼'
+        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -642,9 +659,9 @@ export default Vue.extend({
 .h-link {
   color: setColor(blue-1);
   text-decoration: underline;
-  font-size: 16px;
-  padding-left: 4px;
-  padding-right: 4px;
+  font-size: 14px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 .password-hint {
   padding-top: 10px;

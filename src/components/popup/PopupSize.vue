@@ -5,7 +5,7 @@
       svg-icon(class="pointer" iconName="page-close"
         :iconWidth="'10px'" iconColor="gray-0"
         @click.native="closePopup()")
-    div(class="label-mid pb-20") {{$tc('NN0023',2)}}
+    div(class="label-mid pb-20") {{$t('NN0023')}}
     div(class="popup-size__body-row")
       div(class="popup-size__body__custom")
         property-bar(class="popup-size__body__custom__box"
@@ -30,7 +30,7 @@
       class="popup-size__body-row text-red body-2") {{errorMsg}}
     div(v-if="isLogin && recentlyUsed.length > 0")
       div(class="popup-size__body__hr")
-      div(class="label-mid text-left") {{$tc('NN0024',2)}}
+      div(class="label-mid text-left") {{$t('NN0024')}}
       div(v-if="!isLayoutReady"
         class="popup-size__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-0")
