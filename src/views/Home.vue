@@ -6,22 +6,33 @@
         div(class="home-content__top")
           img(class="home-content__top-img"
             style="height: 150px;")
-          div(class="home-content__top-title") {{$t('NN0148')}}
+          div(class="home-content__top-title")
+            i18n(path="NN0148" tag="span")
+              template(#newline)
+                br
           div(class="home-content__top-mobile-subtitle")
-            div {{$t('NN0235')}}
+            div
+              i18n(path="NN0235" tag="span")
+                template(#newline)
+                  br
             div(class="pt-30") *{{$t('NN0236')}}
       template(v-else)
         div(class="home-content__top")
           img(class="home-content__top-img"
             :style="`height: ${isLogin ? '250px;' : '350px;'}`")
-          div(class="home-content__top-title") {{$t('NN0148')}}
+          div(class="home-content__top-title"
+            :class="isLogin ? 'login' : ''")
+            i18n(path="NN0148" tag="span")
+              template(#newline)
+                br
           div(v-if="!isLogin"
             class="home-content__top-subtitle")
             span {{$t('NN0237')}}
             br
             span {{$t('NN0238')}}
           div(v-if="isLogin"
-            class="home-content__top-btns")
+            class="home-content__top-btns"
+            :class="currLocale === 'us' ? 'us' : ''")
             div(class="rounded home-btn"
               @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
             div(class="rounded home-btn"
@@ -338,23 +349,30 @@ export default Vue.extend({
       }
     }
     &-title {
+      display: flex;
+      align-items: center;
+      height: 100px;
       position: absolute;
-      top: 60px;
+      top: 55px;
       color: setColor(dark-blue);
       font-size: 40px;
       font-weight: 700;
       line-height: 1.3;
+      &.login {
+        top: 40px;
+      }
       @media screen and (max-width: 990px) {
         font-size: 32px;
       }
       @include layout-mobile {
+        align-items: flex-start;
         top: 30px;
         font-size: 16px;
       }
     }
     &-subtitle {
       position: absolute;
-      top: 125px;
+      top: 160px;
       font-size: 20px;
       line-height: 2;
       @media screen and (max-width: 990px) {
@@ -374,10 +392,13 @@ export default Vue.extend({
       display: flex;
       justify-content: space-evenly;
       width: 500px;
+      &.us {
+        top: 160px;
+      }
     }
     &-btn {
       position: absolute;
-      top: 240px;
+      top: 260px;
     }
   }
   &__theme,
