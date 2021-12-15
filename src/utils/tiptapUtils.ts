@@ -102,16 +102,18 @@ class TiptapUtils {
   toHTML(paragraphs: IParagraph[]): string {
     return (paragraphs as IParagraph[]).map((p) => {
       return `<p style="${this.textStyles(p.styles)}"${p.spanStyle ? ` data-span-style="${p.spanStyle}"` : ''}>${
-        (p.spans.map((span) => { return `<span style="${this.textStyles(span.styles)}">${
-          (!span.text && p.spans.length === 1)
-            ? '<br/>'
-            : span.text.replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;')
-                        .replace(/ /g, '&nbsp;')
-        }</span>` })).join('')
+        (p.spans.map((span) => {
+          return `<span style="${this.textStyles(span.styles)}">${
+            (!span.text && p.spans.length === 1)
+              ? '<br/>'
+              : span.text.replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#039;')
+                          .replace(/ /g, '&nbsp;')
+          }</span>`
+        })).join('')
       }</p>`
     }).join('')
   }
