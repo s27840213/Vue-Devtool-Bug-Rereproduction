@@ -6,7 +6,8 @@
       :src="src"
       :styles="config.styles")
     img(v-show="!isAdjustImage"
-      class="nu-image__picture"
+      :style="flipStyles()"
+      class="nu-image__picture layer-flip"
       draggable="false"
       :src="src"
       @error="onError()")
@@ -103,6 +104,15 @@ export default Vue.extend({
         ...inheritStyle
       }
     },
+    flipStyles() {
+      const { styles } = this.config
+      const { horizontalFlip, verticalFlip } = styles
+      styles.scaleX = horizontalFlip ? -1 : 1
+      styles.scaleY = verticalFlip ? -1 : 1
+      return {
+        transform: `scaleX(${styles.scaleX}) scaleY(${styles.scaleY})`
+      }
+    },
     sizeMap(width: number) {
       if (width < 540) {
         return 540
@@ -116,12 +126,10 @@ export default Vue.extend({
     },
     onError() {
       console.log('image on error')
-      console.log(this.config)
       if (this.config.srcObj.type === 'private') {
         try {
           this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
         } catch (error) {
-          console.log(error)
         }
       }
     }
@@ -140,5 +148,9 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
   }
+}
+
+.layer-flip {
+  transition: transform 0.2s linear;
 }
 </style>

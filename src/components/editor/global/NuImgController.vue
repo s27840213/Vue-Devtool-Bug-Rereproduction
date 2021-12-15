@@ -83,6 +83,14 @@ export default Vue.extend({
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
+    },
+    getFlipXFactor(): number {
+      const currLayer = LayerUtils.getCurrLayer
+      return currLayer.type === 'frame' ? (currLayer.styles.horizontalFlip ? -1 : 1) : 1
+    },
+    getFlipYFactor(): number {
+      const currLayer = LayerUtils.getCurrLayer
+      return currLayer.type === 'frame' ? (currLayer.styles.verticalFlip ? -1 : 1) : 1
     }
   },
   methods: {
@@ -112,7 +120,7 @@ export default Vue.extend({
         y: this.config.styles.y - rectCenter.y
       }
       /**
-       * Anchor denotes the top-left fix point of the elements
+       * Anchor denotes the top-left fix point of the element
        */
       const scale = this.config.styles.scale
       const layerAnchor = ControlUtils.getNoRotationPos(layerVect, rectCenter, -angleInRad)
@@ -130,6 +138,21 @@ export default Vue.extend({
         y: imgAnchor.y - center.y
       }
       const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
+
+      /**
+       * For sub-img-controller under frame layer
+       * if the frame layer is set the flip prop, do following mapping modification
+       */
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer.type === 'frame' && !this.config.forRender) {
+        const baseLine = {
+          x: -w / 2 + currLayer.styles.width / 2,
+          y: -h / 2 + currLayer.styles.height / 2
+        }
+        imgControllerPos.x += currLayer.styles.horizontalFlip ? -2 * (imgControllerPos.x - baseLine.x) : 0
+        imgControllerPos.y += currLayer.styles.verticalFlip ? -2 * (imgControllerPos.y - baseLine.y) : 0
+      }
+
       return imgControllerPos
     },
     controllerStyles() {
@@ -186,20 +209,16 @@ export default Vue.extend({
         x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
         y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
-      // x: -this.getImgWidth / 2 + (this.config.styles.width) / 2,
-      // y: -this.getImgHeight / 2 + (this.config.styles.height) / 2
       const translateLimit = {
         width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
         height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
       }
-      //   width: (this.getImgWidth - this.config.styles.width) / 2,
-      //   height: (this.getImgHeight - this.config.styles.height) / 2
-      // }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
-      offsetPos.x = (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.x = this.getFlipXFactor * (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.y = this.getFlipYFactor * (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
@@ -278,7 +297,6 @@ export default Vue.extend({
         height = offsetHeight + initHeight
         width = height * initWidth / initHeight
       }
-      if (width <= 40 || height <= 40) return
 
       const offsetSize = {
         width: width - initWidth,
@@ -304,6 +322,7 @@ export default Vue.extend({
           offsetSize.width = this.initImgPos.imgX
         } else {
           /**
+           *  Derivation:
            *   -this.initImgPos.imgX - width / 2 + (this.config.styles.width / this.getLayerScale) / 2 = (width - this.config.styles.width / this.getLayerScale) / 2
            *  => -this.initImgPos.imgX = width - this.config.styles.width
            *  => width = this.config.styles.width  - this.initImgPos.imgX
@@ -332,6 +351,12 @@ export default Vue.extend({
         imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
+      }
+
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer.type === 'frame') {
+        imgPos.x += currLayer.styles.horizontalFlip ? -this.control.xSign * offsetSize.width : 0
+        imgPos.y += currLayer.styles.verticalFlip ? -this.control.ySign * offsetSize.height : 0
       }
 
       this.updateLayerStyles({

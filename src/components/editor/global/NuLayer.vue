@@ -9,7 +9,7 @@
       div(v-if="config.type === 'image' && config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      nu-clipper(class="layer-flip" :config="config" :style="flipStyles()")
+      nu-clipper(:config="config")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //-   span {{layerIndex}}
@@ -28,16 +28,18 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import { IGroup } from '@/interfaces/layer'
+import { IGroup, IImage } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    flip: Object
   },
   data() {
     return {

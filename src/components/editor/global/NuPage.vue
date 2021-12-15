@@ -119,12 +119,12 @@
             template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :config="getCurrSubSelectedLayerShown")
+                :config="backImgConfig(getCurrSubSelectedLayerShown)")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :config="Object.assign(getCurrSubSelectedLayer, { pointerEvents: 'none' })")
+                                    :config="Object.assign(backImgConfig(getCurrSubSelectedLayerShown), { pointerEvents: 'none' }, { forRender: true })")
             template(v-else)
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
@@ -182,7 +182,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
-import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
@@ -314,6 +314,7 @@ export default Vue.extend({
     isAnyLayerActive(): boolean {
       return (this.config as IPage).layers.some(l => l.active)
     },
+
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
     },
@@ -388,6 +389,22 @@ export default Vue.extend({
           transform: `translate3d(0,${pos}px,50px)`,
           'pointer-events': isGuideline ? 'auto' : 'none'
         }
+    },
+    backImgConfig(_config: any, isController = false) {
+      const config = GeneralUtils.deepCopy(_config) as IImage
+      const currLayer = layerUtils.getCurrLayer
+      const { styles } = config
+      const { horizontalFlip, verticalFlip } = layerUtils.getCurrLayer.styles
+      const { imgX, imgY, imgWidth, imgHeight } = this.getCurrSubSelectedLayerShown?.styles as IImageStyle
+      styles.horizontalFlip = horizontalFlip
+      styles.verticalFlip = verticalFlip
+      const baseLine = {
+        x: -imgWidth / 2 + currLayer.styles.width / 2,
+        y: -imgHeight / 2 + currLayer.styles.height / 2
+      }
+      styles.imgX += horizontalFlip ? -2 * (imgX - baseLine.x) : 0
+      styles.imgY += verticalFlip ? -2 * (imgY - baseLine.y) : 0
+      return config
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
       this.ADD_newLayers({

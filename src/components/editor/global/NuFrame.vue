@@ -6,6 +6,7 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
+      :flip="flip"
       :config="layer")
 </template>
 
@@ -102,6 +103,12 @@ export default Vue.extend({
       getLayer: 'getLayer'
     }),
     ...mapGetters('user', ['getVerUni']),
+    flip() {
+      return {
+        horizontalFlip: this.config.styles.horizontalFlip,
+        verticalFlip: this.config.styles.verticalFlip
+      }
+    },
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
