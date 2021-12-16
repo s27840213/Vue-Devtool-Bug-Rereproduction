@@ -743,10 +743,12 @@ export default Vue.extend({
       const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
 
-      if (themeAspectRatio === templateAspectRatio) {
+      if (parseInt(themeHeight) === 0) { // 詳情頁模板
         return false
-      } else if ((themeWidth === this.templateInfo.width || themeWidth === '0') &&
-        (themeHeight === this.templateInfo.height || themeHeight === '0')) {
+      } else if (themeAspectRatio === templateAspectRatio) {
+        return false
+      } else if ((themeWidth === this.templateInfo.width || parseInt(themeWidth) === 0) &&
+        (themeHeight === this.templateInfo.height || parseInt(themeHeight) === 0)) {
         return false
       } else {
         return true
