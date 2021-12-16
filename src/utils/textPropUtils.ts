@@ -717,78 +717,89 @@ class TextPropUtils {
     prop = fontPropsMap[prop]
     tiptapUtils.agent(editor => {
       let isMulti = false
-      const selectionRanges = editor.view.state.selection.ranges
-      if (selectionRanges.length > 0) {
-        const range = selectionRanges[0]
-        const startPIndex = range.$from.index(0)
-        const startSIndex = range.$from.index(1)
-        const endPIndex = range.$to.index(0)
-        let endSIndex = range.$to.index(1)
-        const tiptapJSON = editor.getJSON()
-        const paragraphs = tiptapJSON.content ?? []
-        let origin
+      const selection = editor.view.state.selection
+      const from = selection.$from
+      const to = selection.$to
+      const startPIndex = from.index(0)
+      let startSIndex = from.index(1)
+      const endPIndex = to.index(0)
+      let endSIndex = to.index(1)
+      const tiptapJSON = editor.getJSON()
+      const paragraphs = tiptapJSON.content ?? []
+      let origin
 
-        if (!(startPIndex === endPIndex && startSIndex === endSIndex)) {
+      if (selection.empty) {
+        if (from.textOffset === 0 && startSIndex !== 0) {
+          startSIndex--
+        }
+      } else {
+        if (to.textOffset === 0 && endSIndex !== 0) {
           endSIndex--
         }
-
-        if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) {
-          origin = (paragraphs[startPIndex].attrs ?? {})[prop]
-        } else {
-          let startStyles: any = {}
-          const startP = paragraphs[startPIndex].content
-          if (startP) {
-            let sIndex = startSIndex
-            if (sIndex >= startP.length) sIndex = startP.length - 1
-            startStyles = startP[sIndex].marks?.[0]?.attrs ?? {}
-          }
-          if (Object.keys(startStyles).length === 0) {
-            let spanStyle: string
-            if (editor.getAttributes('paragraph').spanStyle) {
-              spanStyle = editor.getAttributes('paragraph').spanStyle
-            } else {
-              spanStyle = editor.storage.nuTextStyle.spanStyle
-            }
-            startStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
-          }
-
-          origin = startStyles[prop]
-        }
-
-        if (startPIndex === endPIndex && startSIndex === endSIndex) {
-          res = origin
-          return
-        }
-
-        let tempStartSIndex = startSIndex
-        let tempEndSIndex
-        for (let i = startPIndex; i <= endPIndex; i++) {
-          if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) { // paragraph props
-            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
-              isMulti = true
-              break
-            }
-            continue
-          }
-
-          const spans = paragraphs[i].content ?? []
-          if (i === endPIndex) {
-            tempEndSIndex = endSIndex
-          } else {
-            tempEndSIndex = spans.length - 1
-          }
-          for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
-            const spanStyle = spans[j].marks?.[0]?.attrs ?? {}
-            if (origin !== spanStyle[prop]) {
-              isMulti = true
-              break
-            }
-          }
-          if (isMulti) break
-          tempStartSIndex = 0
-        }
-        res = isMulti ? undefined : origin
       }
+
+      if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) {
+        origin = (paragraphs[startPIndex].attrs ?? {})[prop]
+      } else {
+        let startStyles: any = {}
+        const startP = paragraphs[startPIndex].content
+        if (startP) {
+          let sIndex = startSIndex
+          if (sIndex >= startP.length) sIndex = startP.length - 1
+          startStyles = startP[sIndex].marks?.[0]?.attrs ?? {}
+        }
+        if (Object.keys(startStyles).length === 0) {
+          let spanStyle: string
+          if (editor.getAttributes('paragraph').spanStyle) {
+            spanStyle = editor.getAttributes('paragraph').spanStyle
+          } else {
+            spanStyle = editor.storage.nuTextStyle.spanStyle
+          }
+          startStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+        }
+
+        origin = startStyles[prop]
+      }
+
+      if (selection.empty) {
+        res = origin
+        return
+      }
+
+      let tempStartSIndex = startSIndex
+      let tempEndSIndex
+      for (let i = startPIndex; i <= endPIndex; i++) {
+        if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) { // paragraph props
+          if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            isMulti = true
+            break
+          }
+          continue
+        }
+
+        const spans = paragraphs[i].content ?? []
+        if (i === endPIndex) {
+          tempEndSIndex = endSIndex
+        } else {
+          tempEndSIndex = spans.length - 1
+        }
+        if (spans.length > 0) {
+          for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
+            if (origin !== (spans[j].marks?.[0]?.attrs ?? {})[prop]) {
+              isMulti = true
+              break
+            }
+          }
+        } else {
+          if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            isMulti = true
+            break
+          }
+        }
+        if (isMulti) break
+        tempStartSIndex = 0
+      }
+      res = isMulti ? undefined : origin
     })
     return res
   }
