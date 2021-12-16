@@ -6,10 +6,11 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import store from '@/store'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import layerUtils from './layerUtils'
 import Vue from 'vue'
+import { range } from 'lodash'
 
 class TiptapUtils {
   event: any
@@ -18,29 +19,16 @@ class TiptapUtils {
   prevText: string | undefined = undefined
   hasFocus = false
 
-  get config(): IText | undefined {
-    const currLayer = layerUtils.getCurrLayer
-    switch (currLayer.type) {
-      case 'text':
-        return currLayer as IText
-      case 'group':
-        return (currLayer as IGroup).layers.find(l => l.active) as IText ?? undefined
-      default:
-        console.error('cannt access acitve text config')
-        return undefined
+  get isRanged(): boolean {
+    const ranges = this.editor?.state.selection.ranges
+    if (ranges) {
+      return ranges[0]?.$from !== ranges[0]?.$to
     }
+    return false
   }
-
-  updateLayerProps(props: { [key: string]: string | number | boolean }) {
-    const { getCurrLayer: currLayer, pageIndex, layerIndex, getCurrSubIdx } = layerUtils
-    switch (currLayer.type) {
-      case 'text':
-        layerUtils.updateLayerProps(pageIndex, layerIndex, props)
-        break
-      case 'group':
-        layerUtils.updateSubLayerProps(pageIndex, layerIndex, getCurrSubIdx, props)
-    }
-  }
+  // get isFocus(): boolean {
+  //   return this.editor?.isFocused || false
+  // }
 
   constructor() {
     this.event = new EventEmitter()
@@ -67,20 +55,7 @@ class TiptapUtils {
         this.prevText = editor.getText()
       },
       onFocus: () => {
-        if (this.config && !this.config.isEdited) {
-          Vue.nextTick(() => {
-            if (this.editor) {
-              this.editor.commands.selectAll()
-            }
-          })
-        }
         this.hasFocus = true
-      },
-      onUpdate: () => {
-        console.log('on updated!')
-        if (!this.config?.isEdited) {
-          this.updateLayerProps({ isEdited: true })
-        }
       }
       // parseOptions: {
       //   preserveWhitespace: true
@@ -279,6 +254,12 @@ class TiptapUtils {
         editor.chain().focus().selectAll().updateAttributes('paragraph', item).run()
       }
     })
+  }
+
+  focus() {
+    if (this.editor) {
+      this.editor.commands.focus()
+    }
   }
 }
 

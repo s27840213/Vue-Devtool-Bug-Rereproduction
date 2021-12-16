@@ -217,10 +217,8 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer
       const nan = TextUtils.getNullSel()
 
-      if (currLayer.type === 'text') {
-        StepsUtils.record()
-        tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-      }
+      StepsUtils.record()
+      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
 
       if (currLayer.type === 'group' || currLayer.type === 'tmp') {
         const { subLayerIndex } = this.currTextInfo
@@ -240,6 +238,7 @@ export default Vue.extend({
         }
       }
       TextPropUtils.updateTextPropsState({ color })
+      console.log('cc')
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector

@@ -20,12 +20,13 @@ class LayerUtils {
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
-  get getPage() { return store.getters.getPage }
+  get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
+  get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
   get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
     return store.getters.getLayer
   }
 
-  get getCurrSubIdx(): number {
+  get subLayerIdx(): number {
     const { type } = this.getCurrLayer
     if (type === 'group') {
       return (this.getCurrLayer as IGroup).layers
