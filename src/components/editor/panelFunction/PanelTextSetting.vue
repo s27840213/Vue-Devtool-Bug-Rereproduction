@@ -348,7 +348,7 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          (editor.view.dom as HTMLElement).focus()
+          editor.chain().focus().selectPrevious()
         })
       })
       StepsUtils.record()
@@ -375,7 +375,7 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          (editor.view.dom as HTMLElement).focus()
+          editor.chain().focus().selectPrevious()
         })
       })
       StepsUtils.record()
