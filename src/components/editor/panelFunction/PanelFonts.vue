@@ -52,6 +52,7 @@ import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -71,6 +72,9 @@ export default Vue.extend({
     uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
       this.fontUploadStatus = status
     })
+    if (!tiptapUtils.isRanged) {
+      tiptapUtils.focus()
+    }
   },
   destroyed() {
     TextUtils.setCurrTextInfo({ layerIndex: -1 })

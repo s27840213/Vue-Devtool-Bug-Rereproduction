@@ -1049,6 +1049,44 @@ class TextPropUtils {
       styles
     })
   }
+
+  applyPropsToAll(propType = 'span', prop: { [key: string]: string | boolean | number }, layerIndex = LayerUtils.layerIndex, subLayerIdx = -1) {
+    // const handler = (paragraphs: IParagraph[]) => {
+    //   paragraphs
+    //     .forEach(p => {
+    //       if (propType === 'paragraph') {
+    //         Object.assign(p.styles, prop)
+    //       } else {
+    //         p.spans.forEach(s => {
+    //           Object.assign(s.styles, prop)
+    //         })
+    //       }
+    //     })
+    // }
+
+    // const layer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex)
+
+    // if (subLayerIdx !== -1 && layer.type === 'group') {
+    //   const paragraphs = GeneralUtils.deepCopy((layer as IGroup).layers[subLayerIdx].paragraphs) as IParagraph[]
+    //   handler(paragraphs)
+    //   LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIdx, { paragraphs })
+    // }
+    // if (['tmp', 'group'].includes(layer.type)) {
+    //   (layer as IGroup | ITmp).layers
+    //     .forEach((l, idx) => {
+    //       if (l.type === 'text') {
+    //         const paragraphs = GeneralUtils.deepCopy((layer as IGroup).layers[subLayerIdx].paragraphs) as IParagraph[]
+    //         handler(paragraphs)
+    //         LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, idx, { paragraphs })
+    //       }
+    //     })
+    // }
+    // if (layer.type === 'text') {
+    //   const paragraphs = GeneralUtils.deepCopy((layer as IText).paragraphs) as IParagraph[]
+    //   handler(paragraphs)
+    //   LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs })
+    // }
+  }
 }
 
 export default new TextPropUtils()

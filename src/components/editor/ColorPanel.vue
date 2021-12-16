@@ -51,6 +51,7 @@ import textUtils from '@/utils/textUtils'
 import layerUtils from '@/utils/layerUtils'
 import { FunctionPanelType } from '@/store/types'
 import color from '@/store/module/color'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -88,6 +89,10 @@ export default Vue.extend({
   },
   created() {
     this.vcoConfig.middleware = this.middleware
+    console.log(tiptapUtils.isRanged)
+    if (!tiptapUtils.isRanged) {
+      tiptapUtils.focus()
+    }
   },
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })

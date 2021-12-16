@@ -7,6 +7,8 @@ import Vue from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-2'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import { IGroup, IText, ITmp } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -17,10 +19,35 @@ export default Vue.extend({
   },
   data() {
     return {
-      editor: undefined as Editor | undefined
+      editor: undefined as Editor | undefined,
+      layerInfo: {} as {
+        currLayer: IText | IGroup | ITmp,
+        layerIndex: number,
+        subLayerIdx: number
+      } | undefined
+    }
+  },
+  computed: {
+    config(): IText | undefined {
+      const currLayer = layerUtils.getCurrLayer
+      switch (currLayer.type) {
+        case 'text':
+          return currLayer as IText
+        case 'group':
+          return (currLayer as IGroup).layers.find(l => l.active) as IText ?? undefined
+        default:
+          console.error('cannt access acitve text config')
+          return undefined
+      }
     }
   },
   mounted() {
+    this.layerInfo = {
+      currLayer: layerUtils.getCurrLayer as IText | IGroup | ITmp,
+      layerIndex: layerUtils.layerIndex,
+      subLayerIdx: layerUtils.subLayerIdx
+    }
+
     tiptapUtils.init(this.initText)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
@@ -31,6 +58,7 @@ export default Vue.extend({
         })
       }
       tiptapUtils.prevText = editor.getText()
+      this.updateLayerProps({ isEdited: true })
     })
     tiptapUtils.onForceUpdate((editor) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
@@ -48,10 +76,34 @@ export default Vue.extend({
         })
       }
     })
+    tiptapUtils.on('focus', ({ editor }) => {
+      if (!this.config?.isEdited) {
+        editor.commands.selectAll()
+      }
+      this.updateLayerProps({ isTyping: true })
+    })
+    tiptapUtils.on('blur', () => {
+      this.updateLayerProps({ isTyping: false })
+    })
   },
   destroyed() {
     if (this.editor) {
       this.editor.destroy()
+    }
+    this.layerInfo = undefined
+  },
+  methods: {
+    updateLayerProps(props: { [key: string]: string | number | boolean }) {
+      if (this.layerInfo) {
+        const { currLayer, layerIndex, subLayerIdx } = this.layerInfo
+        switch (currLayer.type) {
+          case 'text':
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, props)
+            break
+          case 'group':
+            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, props)
+        }
+      }
     }
   }
 })
