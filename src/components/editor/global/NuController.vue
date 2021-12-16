@@ -52,7 +52,7 @@
               @onFrameDragleave="onFrameDragLeave(index)",
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-      template(v-if="config.type === 'text'")
+      template(v-if="config.type === 'text' && config.active")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"

@@ -32,13 +32,13 @@ class TiptapUtils {
   }
 
   updateLayerProps(props: { [key: string]: string | number | boolean }) {
-    const { getCurrLayer: currLayer, pageIndex, layerIndex, currSubSelectedInfo } = layerUtils
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, getCurrSubIdx } = layerUtils
     switch (currLayer.type) {
       case 'text':
         layerUtils.updateLayerProps(pageIndex, layerIndex, props)
         break
       case 'group':
-        layerUtils.updateSubLayerProps(pageIndex, layerIndex, currSubSelectedInfo.index, props)
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, getCurrSubIdx, props)
     }
   }
 
