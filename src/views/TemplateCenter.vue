@@ -189,11 +189,11 @@ export default Vue.extend({
     const sortingCriteria = [
       {
         key: 'popular',
-        text: '最受歡迎'
+        text: this.$t('NN0256')
       },
       {
         key: 'recent',
-        text: '最新'
+        text: this.$t('NN0257')
       }
     ]
     return {
