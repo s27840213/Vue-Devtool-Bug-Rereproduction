@@ -52,7 +52,7 @@
               @onFrameDragleave="onFrameDragLeave(index)",
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-      template(v-if="config.type === 'text'")
+      template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
@@ -157,6 +157,7 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
+import zindexUtils from '@/utils/zindexUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -324,9 +325,10 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const text = tiptapUtils.editor?.view?.dom as HTMLElement
-          if (text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
+          const text = document.getElementById(`text-${this.layerIndex}`)
+          if (text && text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
             LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
+            zindexUtils.reassignZindex(this.pageIndex)
             return
           }
           if (!this.isLocked) {
@@ -598,7 +600,6 @@ export default Vue.extend({
           if (this.isActive && !inSelectionMode && this.contentEditable) {
             if ((e.target as HTMLElement).classList.contains('control-point__move-bar')) {
               tiptapUtils.hasFocus = false
-              tiptapUtils.agent(editor => editor.commands.selectAll())
             } else {
               return
             }
@@ -613,6 +614,7 @@ export default Vue.extend({
             }
             if (this.pageIndex === this.lastSelectedPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
+              TextPropUtils.updateTextPropsState()
             }
             if (!this.config.locked) {
               this.isControlling = true

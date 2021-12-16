@@ -75,11 +75,11 @@ export default Vue.extend({
           })
         })
       }
+      if (!this.config?.isEdited) {
+        editor.chain().focus().selectAll().run()
+      }
     })
     tiptapUtils.on('focus', ({ editor }) => {
-      if (!this.config?.isEdited) {
-        editor.commands.selectAll()
-      }
       this.updateLayerProps({ isTyping: true })
     })
     tiptapUtils.on('blur', () => {

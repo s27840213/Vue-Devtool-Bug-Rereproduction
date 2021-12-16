@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { Editor, EditorEvents } from '@tiptap/vue-2'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -43,7 +44,6 @@ class TiptapUtils {
         TextStyle,
         NuTextStyle
       ],
-      autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
       editorProps: {
         attributes: {
           class: 'non-selectable'
@@ -51,11 +51,16 @@ class TiptapUtils {
       },
       onCreate: ({ editor }) => {
         this.prevText = editor.getText()
-        textPropUtils.updateTextPropsState()
       },
       onFocus: () => {
+        Vue.nextTick(() => {
+          if (textPropUtils.pageIndex > 0 && textPropUtils.layerIndex > 0) {
+            textPropUtils.updateTextPropsState()
+          }
+        })
         this.hasFocus = true
       }
+      // autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
       // parseOptions: {
       //   preserveWhitespace: true
       // },
@@ -80,13 +85,14 @@ class TiptapUtils {
   }
 
   onForceUpdate(handler: (editor: Editor) => void): void {
+    const fullHandler = () => {
+      this.agent(editor => handler(editor))
+    }
     if (this.eventHandler) {
       this.event.off('update', this.eventHandler)
     }
-    this.eventHandler = handler
-    this.event.on('update', () => {
-      this.agent(editor => handler(editor))
-    })
+    this.eventHandler = fullHandler
+    this.event.on('update', fullHandler)
   }
 
   forceUpdate() {

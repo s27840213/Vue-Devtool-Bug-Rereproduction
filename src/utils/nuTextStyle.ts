@@ -35,7 +35,9 @@ export default Extension.create({
         this.storage.spanStyle = spanStyle
       }
     }
-    textPropUtils.updateTextPropsState()
+    if (textPropUtils.pageIndex > 0 && textPropUtils.layerIndex > 0) {
+      textPropUtils.updateTextPropsState()
+    }
     const selectionRanges = this.editor.view.state.selection.ranges
     if (selectionRanges.length > 0) {
       const from = selectionRanges[0].$from.pos
