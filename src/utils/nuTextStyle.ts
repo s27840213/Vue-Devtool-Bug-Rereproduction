@@ -5,6 +5,8 @@ import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
+import assetUtils from './assetUtils'
+import i18n from '@/i18n'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -62,58 +64,71 @@ export default Extension.create({
         types: ['textStyle'],
         attributes: {
           font: {
-            default: null,
+            default: assetUtils.getFontMap()[i18n.locale],
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.fontFamily.split(',')[0]
+              const font = spanStyle.fontFamily
+              if (!font.includes(',')) return null
+              const fontFamily = font.split(',')[0]
+              if (fontFamily.length !== 20 || !fontFamily.match(/^[A-Za-z0-9]+$/)) return null
+              return fontFamily
             },
             renderHTML: () => ({})
           },
           weight: {
-            default: null,
+            default: 'normal',
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.getPropertyValue('-webkit-text-stroke-width') === '0px' ? 'normal' : 'bold'
+              const stroke = spanStyle.getPropertyValue('-webkit-text-stroke-width')
+              if (spanStyle.fontWeight) {
+                return spanStyle.fontWeight === 'bold' ? 'bold' : 'normal'
+              }
+              if (stroke === '') return null
+              return stroke === '0px' ? 'normal' : 'bold'
             },
             renderHTML: () => ({})
           },
           size: {
-            default: null,
+            default: 20,
             parseHTML: element => {
               const spanStyle = element.style
+              if (!spanStyle.fontSize.includes('px')) return null
               return Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
             },
             renderHTML: () => ({})
           },
           decoration: {
-            default: null,
+            default: 'none',
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line')
+              const decoration = spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line')
+              return decoration === 'underline' ? 'underline' : 'none'
             },
             renderHTML: () => ({})
           },
           style: {
-            default: null,
+            default: 'normal',
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.fontStyle
+              return spanStyle.fontStyle === 'italic' ? 'italic' : 'normal'
             },
             renderHTML: () => ({})
           },
           color: {
-            default: null,
+            default: '#000000',
             parseHTML: element => {
               const spanStyle = element.style
+              if (spanStyle.color === '') return null
               return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
             },
             renderHTML: () => ({})
           },
           opacity: {
-            default: null,
+            default: 1,
             parseHTML: element => {
               const spanStyle = element.style
-              return parseInt(spanStyle.opacity)
+              const opacity = parseInt(spanStyle.opacity)
+              return Number.isNaN(opacity) ? null : opacity
             },
             renderHTML: attributes => {
               return {
@@ -139,44 +154,51 @@ export default Extension.create({
             }
           },
           font: {
-            default: null,
+            default: assetUtils.getFontMap()[i18n.locale],
             parseHTML: element => {
               const paragraphStyle = element.style
-              return paragraphStyle.fontFamily.split(',')[0]
+              const font = paragraphStyle.fontFamily
+              if (!font.includes(',')) return null
+              const fontFamily = font.split(',')[0]
+              if (fontFamily.length !== 20 || !fontFamily.match(/^[A-Za-z0-9]+$/)) return null
+              return fontFamily
             },
             renderHTML: () => ({})
           },
           lineHeight: {
-            default: null,
+            default: 1.4,
             parseHTML: element => {
               const paragraphStyle = element.style
               const floatNum = /[+-]?\d+(\.\d+)?/
-              return paragraphStyle.lineHeight.match(floatNum) !== null ? parseFloat(paragraphStyle.lineHeight.match(floatNum)![0]) : -1
+              return paragraphStyle.lineHeight.match(floatNum) !== null ? parseFloat(paragraphStyle.lineHeight.match(floatNum)![0]) : null
             },
             renderHTML: () => ({})
           },
           fontSpacing: {
-            default: null,
+            default: 0,
             parseHTML: element => {
               const paragraphStyle = element.style
               const floatNum = /[+-]?\d+(\.\d+)?/
-              return paragraphStyle.letterSpacing.match(floatNum) !== null ? parseFloat(paragraphStyle.letterSpacing.match(floatNum)![0]) : 0
+              return paragraphStyle.letterSpacing.match(floatNum) !== null ? parseFloat(paragraphStyle.letterSpacing.match(floatNum)![0]) : null
             },
             renderHTML: () => ({})
           },
           size: {
-            default: null,
+            default: 20,
             parseHTML: element => {
               const paragraphStyle = element.style
+              if (!paragraphStyle.fontSize.includes('px')) return null
               return Math.round(parseFloat(paragraphStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
             },
             renderHTML: () => ({})
           },
           align: {
-            default: null,
+            default: 'center',
             parseHTML: element => {
               const paragraphStyle = element.style
-              return paragraphStyle.textAlign.replace('text-align-', '')
+              const textAlign = paragraphStyle.textAlign
+              if (!textAlign.match(/^text-align-(left|center|right|justify)$/)) return null
+              return textAlign.replace('text-align-', '')
             },
             renderHTML: attributes => {
               return {
@@ -185,33 +207,40 @@ export default Extension.create({
             }
           },
           weight: {
-            default: null,
+            default: 'normal',
             parseHTML: element => {
               const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              return spanStyle.fontWeight
+              if (spanStyle.fontWeight) {
+                return spanStyle.fontWeight === 'bold' ? 'bold' : 'normal'
+              }
+              const stroke = spanStyle.getPropertyValue('-webkit-text-stroke-width')
+              if (stroke === '') return null
+              return stroke === '0px' ? 'normal' : 'bold'
             },
             renderHTML: () => ({})
           },
           decoration: {
-            default: null,
+            default: 'none',
             parseHTML: element => {
               const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              return spanStyle.textDecorationLine
+              const decoration = spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line')
+              return decoration === 'underline' ? 'underline' : 'none'
             },
             renderHTML: () => ({})
           },
           style: {
-            default: null,
+            default: 'normal',
             parseHTML: element => {
               const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              return spanStyle.fontStyle
+              return spanStyle.fontStyle === 'italic' ? 'italic' : 'normal'
             },
             renderHTML: () => ({})
           },
           color: {
-            default: null,
+            default: '#000000',
             parseHTML: element => {
               const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
+              if (spanStyle.color === '') return null
               return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
             },
             renderHTML: () => ({})
