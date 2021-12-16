@@ -304,8 +304,8 @@ export default Vue.extend({
       console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
-      let start
-      let end
+      // let start
+      // let end
       let subLayerIndex
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
@@ -316,15 +316,15 @@ export default Vue.extend({
         }
       }
 
-      const sel = TextUtils.getSelection()
-      start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-      end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
+      // const sel = TextUtils.getSelection()
+      // start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
+      // end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
 
-      if (!TextUtils.isSel(start) && config.type === 'text') {
-        start = TextUtils.selectAll(config as IText).start
-        end = TextUtils.selectAll(config as IText).end
-      }
-      TextUtils.updateSelection(start, end)
+      // if (!TextUtils.isSel(start) && config.type === 'text') {
+      //   start = TextUtils.selectAll(config as IText).start
+      //   end = TextUtils.selectAll(config as IText).end
+      // }
+      // TextUtils.updateSelection(start, end)
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
@@ -346,6 +346,11 @@ export default Vue.extend({
             break
         }
       }
+      tiptapUtils.agent(editor => {
+        setTimeout(() => {
+          (editor.view.dom as HTMLElement).focus()
+        })
+      })
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
@@ -368,6 +373,11 @@ export default Vue.extend({
           TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
           break
       }
+      tiptapUtils.agent(editor => {
+        setTimeout(() => {
+          (editor.view.dom as HTMLElement).focus()
+        })
+      })
       StepsUtils.record()
     },
     fontSizeStepping(step: number, tickInterval = 100) {
