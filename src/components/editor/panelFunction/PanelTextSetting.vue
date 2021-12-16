@@ -348,8 +348,8 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          editor.chain().focus().selectPrevious()
-        })
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       })
       StepsUtils.record()
     },
@@ -375,8 +375,8 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          editor.chain().focus().selectPrevious()
-        })
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       })
       StepsUtils.record()
     },

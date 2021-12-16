@@ -45,24 +45,6 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
-      // const startNode = selectionRanges[0].$from.node()
-      // if (from === to && startNode.content.size === 0) {
-      //   let spanStyle: string
-      //   if (this.editor.getAttributes('paragraph').spanStyle) {
-      //     spanStyle = this.editor.getAttributes('paragraph').spanStyle
-      //   } else {
-      //     spanStyle = this.storage.spanStyle
-      //   }
-      //   if (this.editor.isActive('textStyle')) {
-      //     this.editor.chain().focus().unsetAllMarks().setMark('textStyle', sStyles).run()
-      //   } else {
-      //     this.editor.chain().focus().setMark('textStyle', sStyles).run()
-      //   }
-      //   this.editor.chain().focus().insertContent(
-      //     `<span style="${spanStyle}">&#8288</span>`,
-      //     { updateSelection: false }
-      //   ).run()
-      // }
       const currChangeCount = (this.editor.view as any).domChangeCount
       if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
