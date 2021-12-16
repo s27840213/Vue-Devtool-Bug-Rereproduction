@@ -58,6 +58,11 @@ class TiptapUtils {
         NuTextStyle
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
+      editorProps: {
+        attributes: {
+          class: 'non-selectable'
+        }
+      },
       onCreate: ({ editor }) => {
         this.prevText = editor.getText()
       },
