@@ -22,11 +22,11 @@
         div(class="nav__option")
           btn(@click.native="goToPage('Login')"
             :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'Login'}") {{$t('NN0168')}}
+            :class="{'text-blue-1': currentPage === 'Login'}") {{$tc('NN0168', 1)}}
         div(class="nav__option")
           btn(@click.native="goToPage('SignUp')"
             :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'SignUp'}") {{$t('NN0169')}}
+            :class="{'text-blue-1': currentPage === 'SignUp'}") {{$tc('NN0169', 1)}}
       template(v-else)
         div(class="mobile-menu__bottom__profile")
           avatar(class="mr-10"
@@ -34,17 +34,18 @@
             :avatarSize="35")
         div(class="nav__option"
           @click="goToPageByPath('/settings/account')")
-          span {{$t('NN0165')}}
+          span {{$tc('NN0165', 1)}}
         div(class="nav__option"
           @click="goToPageByPath('/settings/security')")
-          span {{$t('NN0166')}}
+          span {{$tc('NN0166', 1)}}
         div(class="nav__option"
           @click="onLogoutClicked()")
-          span {{$t('NN0167')}}
+          span {{$tc('NN0167', 1)}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapState, mapGetters } from 'vuex'
+import localeUtils from '@/utils/localeUtils'
+import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
@@ -62,6 +63,9 @@ export default Vue.extend({
     }),
     currentPage(): string {
       return this.$route.name || ''
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   methods: {
@@ -72,7 +76,9 @@ export default Vue.extend({
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
         // Temporary setting ----
       } else if (pageName === 'Toturial' || pageName === 'Faq') {
-        window.location.href = 'https://www.facebook.com/vivipictw'
+        if (this.currLocale === 'tw' || this.currLocale === 'us' || this.currLocale === 'jp') {
+          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
+        }
       } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
         this.$router.push({ name: pageName })
       } else if (pageName === 'TemplateCenter') {

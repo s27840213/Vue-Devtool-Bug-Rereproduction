@@ -176,7 +176,9 @@ export default Vue.extend({
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
         // Temporary setting ----
       } else if (pageName === 'Toturial' || pageName === 'Faq') {
-        window.location.href = 'https://www.facebook.com/vivipictw'
+        if (this.currLocale === 'tw' || this.currLocale === 'us' || this.currLocale === 'jp') {
+          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
+        }
       } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
         this.$router.push({ name: pageName })
       } else if (pageName === 'TemplateCenter') {
