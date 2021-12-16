@@ -58,7 +58,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-.non-selectable[contenteditable] {
+.non-selectable[contenteditable=false] {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
