@@ -105,7 +105,7 @@ export default Extension.create({
             default: null,
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.textDecorationLine
+              return spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line')
             },
             renderHTML: () => ({})
           },
