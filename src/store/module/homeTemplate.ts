@@ -25,17 +25,6 @@ const getters: GetterTree<IHomeTemplateState, unknown> = {
 }
 
 const actions: ActionTree<IHomeTemplateState, unknown> = {
-  async getThemeList({ commit }) {
-    const { locale } = state
-    try {
-      const { data } = await list.getTheme({
-        locale
-      })
-      return Promise.resolve(data)
-    } catch (error) {
-      captureException(error)
-    }
-  },
   async getTagContent({ commit }, { keyword, theme }) {
     const { locale } = state
     try {
