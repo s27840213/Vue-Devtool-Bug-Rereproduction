@@ -89,7 +89,7 @@ export default Extension.create({
             default: null,
             parseHTML: element => {
               const spanStyle = element.style
-              return spanStyle.fontWeight
+              return spanStyle.getPropertyValue('-webkit-text-stroke-width') === '0px' ? 'normal' : 'bold'
             },
             renderHTML: () => ({})
           },
