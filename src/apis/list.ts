@@ -1,5 +1,6 @@
 import axios from '@/apis'
 import authToken from './auth-token'
+import localeUtils from '@/utils/localeUtils'
 import {
   IListServiceParams,
   IListServiceResponse
@@ -78,6 +79,7 @@ class ListService {
 
   getTheme (params: IListServiceParams) {
     params.type = 'theme'
+    params.locale = localeUtils.currLocale()
     return this.getList(params)
   }
 

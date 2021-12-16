@@ -39,7 +39,7 @@
             @click="openPopup()")
           div(class="pt-10 scroll-list__item-title") {{$t('NN0023')}}
         div(v-for="item, idx in list" class="scroll-list__item py-10"
-          :class="{'pb-70 item-theme': type === 'theme'}")
+          :class="{'pb-90 item-theme': type === 'theme'}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
