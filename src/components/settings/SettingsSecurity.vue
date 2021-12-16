@@ -2,23 +2,23 @@
 div(class="settings-security")
   div(class="settings-security__content")
     div
-      div(class="settings-security__title") 更改密碼
+      div(class="settings-security__title") {{$t('NN0310')}}
       div(class="settings-security__item")
-        span(v-if="showUpdatePassword") 您上一次密碼更新日期： {{lastUpdateText}}
-        span(v-else) 因採用Google/Facebook帳號登入，所以無法在此更改密碼，若要更改密碼，請至原平台修改。
+        span(v-if="showUpdatePassword") {{$t('NN0311')}} {{lastUpdateText}}
+        span(v-else) {{$t('NN0177')}}
         div(v-if="showUpdatePassword"
           class="settings-security__button"
-          @click="onChangeClicked()") 更 改
+          @click="onChangeClicked()") {{$t('NN0313')}}
       div(class="settings-security__divider")
-    //- div(class="settings-security__title") 安全防護
+    //- div(class="settings-security__title") {{$t('NN0314')}}
     //- div(class="settings-security__item")
-    //-   span 從所有裝置上登出以結束所有作業階段。
-    //-   div(class="settings-security__button") 從 裝 置 上 登 出
+    //-   span {{$t('NN0315')}}
+    //-   div(class="settings-security__button") {{$t('NN0316')}}
     //- div(class="settings-security__divider")
-    //- div(class="settings-security__title") 刪除帳號
+    //- div(class="settings-security__title") {{$tc('NN0317',1)}}
     //- div(class="settings-security__item")
-    //-   span 刪除帳號後，你將無法再存取任何設計或登入 Vivipic。
-    //-   div(class="settings-security__button") 刪 除 帳 號
+    //-   span {{$t('NN0318')}}
+    //-   div(class="settings-security__button") {{$tc('NN0317',2)}}
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
     class="settings-security__popup-verify")
@@ -28,8 +28,10 @@ div(class="settings-security")
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
+import localeUtils from '@/utils/localeUtils'
 
 export default Vue.extend({
   components: {
@@ -49,10 +51,14 @@ export default Vue.extend({
     }),
     lastUpdateText(): string {
       if (this.upassUpdate === '0000-00-00 00:00:00') {
-        return '未曾更新'
+        return i18n.t('NN0325') as string
       }
+
       const s = new Date(this.upassUpdate)
-      return s.getFullYear() + ' 年 ' + (s.getMonth() + 1) + ' 月 ' + s.getDate() + ' 日'
+      return i18n.t('NN0312', { year: s.getFullYear(), month: s.getMonth() + 1, date: s.getDate() }) as string
+    },
+    currLocale(): string {
+      return localeUtils.currLocale()
     }
   },
   mounted() {

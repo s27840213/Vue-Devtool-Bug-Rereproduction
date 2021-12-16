@@ -2,8 +2,10 @@
   div(class="popup-size"
     v-click-outside="closePopup")
     div(class="popup-size__close")
-      svg-icon(class="pointer" iconName="page-close"
-        :iconWidth="'10px'" iconColor="gray-0"
+      svg-icon(class="pointer"
+        iconName="page-close"
+        iconWidth="10px"
+        iconColor="gray-0"
         @click.native="closePopup()")
     div(class="label-mid pb-20") {{$t('NN0023')}}
     div(class="popup-size__body-row")
@@ -11,9 +13,11 @@
         property-bar(class="popup-size__body__custom__box"
           :class="widthValid ? '' : 'input-invalid'")
           input(class="body-3" type="number" min="0"
-            placeholder="請輸入寬度"
+            :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
-            :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
+            :value="pageWidth"
+            @input="setPageWidth"
+            @click="selectFormat('custom')")
           span(class="body-4 text-gray-3") W
         svg-icon(class="pointer px-10"
           :iconName="isLocked ? 'lock' : 'unlock'"
@@ -22,9 +26,11 @@
         property-bar(class="popup-size__body__custom__box"
           :class="heightValid ? '' : 'input-invalid'")
           input(class="body-3" type="number" min="0"
-            placeholder="請輸入高度"
+            :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
-            :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
+            :value="pageHeight"
+            @input="setPageHeight"
+            @click="selectFormat('custom')")
           span(class="body-4 text-gray-3") H
     div(v-if="!widthValid || !heightValid"
       class="popup-size__body-row text-red body-2") {{errorMsg}}
@@ -33,7 +39,10 @@
       div(class="label-mid text-left") {{$t('NN0024')}}
       div(v-if="!isLayoutReady"
         class="popup-size__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-0")
+        svg-icon(iconName="loading"
+          iconWidth="25px"
+          iconHeight="10px"
+          iconColor="gray-0")
       div(v-for="(format, index) in recentlyUsed"
         class="popup-size__body-row pointer"
         @click="selectFormat(`recent-${index}`)")
@@ -46,13 +55,14 @@
           :class="selectedFormat === `recent-${index}` ? 'text-black' : 'text-gray-3'"
           @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
     div(class="popup-size__body__button")
-      btn(:type="'primary-sm'" class="rounded my-5 full-width pointer"
-        @click.native="onConfirmClicked()") {{$tc('NN0164',2)}}
+      btn(:type="'primary-sm'"
+        class="rounded my-5 full-width pointer"
+        @click.native="onConfirmClicked()") {{$tc('NN0164', 2)}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
@@ -87,6 +97,9 @@ export default Vue.extend({
         'categories'
       ]
     ),
+    isMobile(): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
+    },
     widthValid(): boolean {
       if (!this.isConfirmClicked || this.selectedFormat !== 'custom') {
         return true

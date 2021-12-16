@@ -8,7 +8,7 @@ div(class="settings-account")
     div(class="settings-account__button pointer"
       @click="chooseAvatar()")
       span(v-if="hasAvatar") {{$t('NN0171')}}
-      span(v-else) 變更個人相片
+      span(v-else) {{$t('NN0309')}}
   div(class="settings-account__info")
     div(class="settings-account__label my-10") {{$t('NN0172')}}
     property-bar
@@ -36,7 +36,7 @@ div(class="settings-account")
           class="settings-account__subscribe__checkbox")
         div(class="settings-account__subscribe__switch")
         div(class="settings-account__subscribe__circle")
-      div(class="settings-account__subscribe__text") {{subscribeText}}
+      div(class="settings-account__subscribe__text") {{$t('NN0175')}}
     div(class="settings-account__buttons mt-10")
       btn(class="pointer"
         :disabled="!isChanged"
@@ -74,24 +74,14 @@ export default Vue.extend({
       inputAccount: '',
       inputLocale: '',
       inputSubscribe: true,
-      subscribeText: i18n.t('NN0175'),
       localeOptions: [] as Array<ILocale>,
-      accountErrorMessage: 'Email 格式錯誤',
+      accountErrorMessage: i18n.t('NN0297') as string,
       isLoading: false,
       isConfirmClicked: false as boolean,
       isEmailVerified: false,
       showVerifyPopup: false,
       showRemovePopup: false,
       responseError: false
-    }
-  },
-  watch: {
-    inputAccount() {
-      if (this.inputAccount.length === 0) {
-        this.accountErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
-      } else if (!this.mailValid) {
-        this.accountErrorMessage = 'Email 格式錯誤'
-      }
     }
   },
   computed: {
@@ -151,6 +141,11 @@ export default Vue.extend({
       this.responseError = false
       this.isConfirmClicked = true
       if (!this.mailValid) {
+        if (this.inputAccount.length === 0) {
+          this.accountErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
+        } else {
+          this.accountErrorMessage = i18n.t('NN0297') as string
+        }
         this.isLoading = false
         return
       }
@@ -166,7 +161,8 @@ export default Vue.extend({
             account: this.inputAccount,
             register: '0',
             vcode_only: '1',
-            type: 1
+            type: 1,
+            locale: this.currLocale
           }
           const data = await store.dispatch('user/sendVcode', parameter)
           if (data.flag === 0) {

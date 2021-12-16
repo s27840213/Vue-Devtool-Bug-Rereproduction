@@ -354,7 +354,7 @@ class UploadUtils {
           xhr.send(formData)
           modalUtils.setIsModalOpen(true)
           modalUtils.setIsPending(true)
-          modalUtils.setModalInfo('上傳中')
+          modalUtils.setModalInfo(`${i18n.t('NN0136')}`)
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -375,10 +375,10 @@ class UploadUtils {
                         avatar: targetUrls
                       })
                       modalUtils.setIsPending(false)
-                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`)
+                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`)
                     } else {
                       console.log('Failed to upload the file')
-                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`)
+                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`)
                     }
                   })
                 }

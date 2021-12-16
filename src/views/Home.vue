@@ -48,11 +48,11 @@
       div(v-if="!isLogin && !isMobile"
         class="home-content__plaque")
         img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
-        div(class="home-content__plaque-title") 立即享受海量的精美電商模板
+        div(class="home-content__plaque-title") {{$t('NN0276')}}
         div(class="home-content__plaque-subtitle"
           class="px-20")
           span(v-if="isMobile") {{$t('NN0237')}}
-          span(v-else) Vivipic 幫助您快速創建精美而令人印象深刻的電商圖片。經營電商太忙碌，讓設計成為最不必煩惱的小事。
+          span(v-else) {{$t('NN0277')}}
       div(v-if="!isLogin"
         class="home-content__feature"
         :class="isMobile ? 'mt-10' : ''")
@@ -73,7 +73,7 @@
               class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
-              @click.native="newDesign()") 開 始 製 作
+              @click.native="newDesign()") {{$t('NN0274')}}
       div(v-if="isLogin")
         div(class="home-content-title label-lg")
           span {{$t('NN0080')}}
@@ -93,14 +93,14 @@
         scroll-list(:list="tagTemplateList" type='template'
           :isLoading="tagTemplateList.length === 0")
       div(class="home-content-title label-lg")
-        span 熱門模板
+        span {{$t('NN0278')}}
         span(class="pointer body-1"
           @click="goToTemplateCenterSortBy('popular')") {{$t('NN0082')}}
       div(class="home-content__template")
         scroll-list(:list="popularTemplateList" type='template'
           :isLoading="popularTemplateList.length === 0")
       div(class="home-content-title label-lg")
-        span 最新模板
+        span {{$t('NN0279')}}
         span(class="pointer body-1"
           @click="goToTemplateCenterSortBy('recent')") {{$t('NN0082')}}
       div(class="home-content__template")
@@ -114,6 +114,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
@@ -138,28 +139,28 @@ export default Vue.extend({
       featureList: [
         {
           name: '1',
-          title: '限時免費試用！',
+          title: i18n.t('NN0326'),
           content: ''
         },
         {
           name: '2',
-          title: '上千個專業的精美模板',
-          content: 'Vivipic 提供上千個由專業設計師製作的電商模板，風格多樣且適合各種行業'
+          title: i18n.t('NN0327'),
+          content: i18n.t('NN0328')
         },
         {
           name: '3',
-          title: '專為瞬息萬變的電商而生',
-          content: '使用符合臺灣人口味的模板，快速製作出你心目中的電商圖片'
+          title: i18n.t('NN0329'),
+          content: i18n.t('NN0330')
         },
         {
           name: '4',
-          title: 'LINE 行銷嘛欸通',
-          content: '不只是 Facebook 和 Instagram，包含電商商品、官網用圖，甚至是 LINE 推播圖片也一應俱全'
+          title: i18n.t('NN0331'),
+          content: i18n.t('NN0332')
         },
         {
           name: '5',
-          title: '提供精美素材媒體庫',
-          content: 'Vivipic 擁有你在設計路上需要的必要素材。超過 200 萬張的可商用圖庫、定期新增的插圖素材、背景、圖示等等。'
+          title: i18n.t('NN0333'),
+          content: i18n.t('NN0334')
         }
       ],
       showSizePopup: false,
@@ -184,7 +185,7 @@ export default Vue.extend({
       return document.body.clientWidth / document.body.clientHeight < 1
     },
     featureContent(): string {
-      return this.featureList[this.featureSelected].content
+      return this.featureList[this.featureSelected].content as string
     },
     currLocale(): string {
       return localeUtils.currLocale()
@@ -535,10 +536,10 @@ export default Vue.extend({
         padding: 20px 10px;
       }
       > button {
-        width: 150px;
+        width: 200px;
         height: 45px;
-        font-size: 18px;
-        padding: 5px 30px;
+        font-size: 20px;
+        padding: 5px 10px;
         @include layout-mobile {
           width: 50%;
           padding: 0;

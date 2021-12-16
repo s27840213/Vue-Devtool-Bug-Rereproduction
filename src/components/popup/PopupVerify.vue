@@ -6,26 +6,26 @@
         svg-icon(class="pointer" iconName="page-close"
           :iconWidth="'10px'" iconColor="gray-0"
           @click.native="closePopup()")
-      div(class="text-blue-1 heading-5 pb-20 text-center") 驗 證 碼 已 傳 送
-      div(class="pb-20 px-20")
-        span(class="body-2") 請在 10 分鐘內輸入我們傳送到 {{ account }} 的驗證碼。
+      div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
+      div(class="pb-20")
+        span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
       div
         property-bar(:class="{'input-invalid': !vcodeValid}")
           input(class="body-2 text-gray-2"
             v-model="vcode" type="text" name="vcode"
-            placeholder="請輸入驗證碼")
+            :placeholder="$t('NN0163', {term: $t('NN0286')})")
         div(v-if="!vcodeValid"
           class="invalid-message")
           span {{ vcodeErrorMessage }}
         div(class="my-10")
           div(class="popup-verify__btn btn-blue full-width"
-            @click="onEnterCodeDoneClicked()") 完 成
+            @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
         div(v-if="resendAvailable"
           class="popup-verify__vcode-bottom")
-          span 沒有收到驗證碼嗎？
+          span {{$t('NN0288')}}
           btn(:type="'icon'"
             class="text-blue-1"
-            @click.native="onResendClicked()") 重新傳送驗證碼
+            @click.native="onResendClicked()") {{$t('NN0290')}}
         div(v-else
           class="popup-verify__vcode-bottom text-gray-3")
           span {{ leftTimeText }}
@@ -34,36 +34,36 @@
         svg-icon(class="pointer" iconName="page-close"
           :iconWidth="'10px'" iconColor="gray-0"
           @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") 確 認 原 始 密 碼
-      div(class="pb-10 body-2 text-gray-3 text-center") 更新帳號前，請確認原始密碼。
+      div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
+      div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
       div
         property-bar(:class="{'input-invalid': !oldPassValid}")
           input(class="body-2 text-gray-2"
             v-model="oldPass" type="password" name="oldPass"
             @input="onUpdate"
-            placeholder="請輸入原始密碼")
+            :placeholder="$t('NN0163', {term: $t('NN0336')})")
         div(class="popup-verify__forgot-pwd")
           div(class="invalid-message")
             span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
           btn(:type="'icon'"
             class="pt-5 body-2"
-            @click.native="onForgotClicked()") 忘記密碼
+            @click.native="onForgotClicked()") {{$t('NN0181')}}
         div(class="popup-verify__btns my-15")
           div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") 取 消
+            @click="closePopup()") {{$t('NN0203')}}
           div(class="popup-verify__btn btn-blue"
-            @click="onCheckPasswordClicked()") 確 認 密 碼
+            @click="onCheckPasswordClicked()") {{$t('NN0338')}}
     div(v-if="currentPage === 'newPass'")
       div(class="popup-verify__close")
         svg-icon(class="pointer" iconName="page-close"
           :iconWidth="'10px'" iconColor="gray-0"
           @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") 設 定 新 密 碼
+      div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
       div
         property-bar(:class="{'input-invalid': !resetPasswordValid}")
           input(class="body-2 text-gray-2"
             v-model="newPass" type="password" name="newPass"
-            placeholder="請輸入新密碼"
+            :placeholder="$t('NN0163', { term: $t('NN0292') })"
             @input="onUpdate"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
@@ -80,40 +80,42 @@
               :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'20px'"
               :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
             span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordLengthValid}") 密碼長度至少8個字元
+              :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
           div(class="flex align-center")
             svg-icon(class="pointer"
               :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'20px'"
               :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
             span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainEng}") 密碼包含英文字母
+              :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
           div(class="flex align-center")
             svg-icon(class="pointer"
               :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'20px'"
               :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
             span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainNum}") 密碼包含數字
+              :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
         div(class="popup-verify__btns my-15")
           div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") 取 消
+            @click="closePopup()") {{$t('NN0203')}}
           div(class="popup-verify__btn btn-blue"
-            @click="onConfirmPasswordClicked()") 確 認
+            @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
     div(v-if="currentPage === 'removeAvatar'")
-      div(class="label-lg pb-20 text-center") 確 定 移 除 ？
+      div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
       div(class="popup-verify__btns my-15")
         div(class="popup-verify__btn btn-gray"
-          @click="closePopup()") 取 消
+          @click="closePopup()") {{$t('NN0203')}}
         div(class="popup-verify__btn btn-red"
-          @click="onRemoveAvatarClicked()") 移除照片
+          @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
     spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import userApis from '@/apis/user'
 import store from '@/store'
+import i18n from '@/i18n'
+import localeUtils from '@/utils/localeUtils'
 
 export default Vue.extend({
   props: {
@@ -129,9 +131,9 @@ export default Vue.extend({
       vcode: '' as string,
       oldPass: '',
       newPass: '',
-      vcodeErrorMessage: '驗證碼錯誤' as string,
+      vcodeErrorMessage: i18n.t('NN0298') as string,
       oldPassErrorMessage: '' as string,
-      passwordHint: '密碼需包含大小寫英文字母、數字８碼以上。' as string,
+      passwordHint: i18n.t('NN0308') as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -231,20 +233,21 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         token: this.token,
         account: this.account,
         register: '0',
         vcode_only: '1',
-        type: 1
+        type: 1,
+        locale: localeUtils.currLocale()
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = this.leftTime + '秒後可以重寄驗證碼'
+          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -265,7 +268,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = '請輸入驗證碼'
+        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -287,7 +290,7 @@ export default Vue.extend({
       this.isCheckPasswordClicked = true
       this.isLoading = true
       if (!this.oldPassValid) {
-        this.oldPassErrorMessage = '請輸入密碼'
+        this.oldPassErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0180') }) as string
         this.isLoading = false
         return
       }
@@ -302,7 +305,7 @@ export default Vue.extend({
         this.currentPage = 'newPass'
       } else {
         this.oldPass = ''
-        this.oldPassErrorMessage = data.msg || '發生錯誤，請重試'
+        this.oldPassErrorMessage = data.msg || i18n.t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false
@@ -315,7 +318,7 @@ export default Vue.extend({
       this.isConfirmClicked = true
       this.isResponseError = false
       if (!this.resetPasswordValid) {
-        this.passwordHint = '密碼需包含大小寫英文字母、數字８碼以上。'
+        this.passwordHint = i18n.t('NN0308') as string
         return
       }
       this.isLoading = true
@@ -331,7 +334,7 @@ export default Vue.extend({
         this.closePopup()
       } else {
         this.isResponseError = true
-        this.passwordHint = data.msg || '發生錯誤，請重試'
+        this.passwordHint = data.msg || i18n.t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false
@@ -349,7 +352,6 @@ export default Vue.extend({
       this.$emit('close')
     },
     onRemoveAvatarClicked() {
-      console.log('remmmove')
       store.commit('user/SET_STATE', {
         avatar: {}
       })
