@@ -52,9 +52,10 @@
               @onFrameDragleave="onFrameDragLeave(index)",
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-      template(v-if="config.type === 'text' && config.active")
+      template(v-if="config.type === 'text'")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml"
+          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
+            :style="textBodyStyle()"
             @keydown.native.37.stop
             @keydown.native.38.stop
             @keydown.native.39.stop
@@ -332,33 +333,7 @@ export default Vue.extend({
             this.contentEditable = false
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
-
-          // for (const p of this.paragraphs) {
-          //   for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
-          //     if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
-          //       p.spans.splice(sIndex, 1)
-          //       if (TextPropUtils.isSameSpanStyles(p.spans[sIndex - 1].styles, p.spans[sIndex].styles)) {
-          //         p.spans[sIndex - 1].text += p.spans[sIndex].text
-          //         p.spans.splice(sIndex, 1)
-          //         sIndex--
-          //       }
-          //     }
-          //   }
-          // }
         }
-      } else {
-        if (this.getLayerType === 'text') {
-          // this.updateTextState({ paragraphs: this.config.paragraphs })
-          // TextUtils.setCurrTextInfo({
-          //   config: this.config as IText,
-          //   layerIndex: this.layerIndex
-          // })
-        }
-      }
-
-      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && val) {
-        // this.$store.commit('text/SET_default')
-        // TextPropUtils.updateTextPropsState()
       }
     },
     isTextEditing(editing) {
@@ -1828,9 +1803,8 @@ export default Vue.extend({
     align-items: center;
   }
   &__body {
-    outline: none;
-    padding: 0;
-    position: relative;
+    width: 100%;
+    height: auto;
   }
   &__content {
     text-align: left;

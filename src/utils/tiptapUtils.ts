@@ -6,8 +6,10 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import store from '@/store'
-import { IParagraph, IParagraphStyle, ISpan, ISpanStyle } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
+import layerUtils from './layerUtils'
+import Vue from 'vue'
 
 class TiptapUtils {
   event: any
@@ -15,6 +17,30 @@ class TiptapUtils {
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
   hasFocus = false
+
+  get config(): IText | undefined {
+    const currLayer = layerUtils.getCurrLayer
+    switch (currLayer.type) {
+      case 'text':
+        return currLayer as IText
+      case 'group':
+        return (currLayer as IGroup).layers.find(l => l.active) as IText ?? undefined
+      default:
+        console.error('cannt access acitve text config')
+        return undefined
+    }
+  }
+
+  updateLayerProps(props: { [key: string]: string | number | boolean }) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, currSubSelectedInfo } = layerUtils
+    switch (currLayer.type) {
+      case 'text':
+        layerUtils.updateLayerProps(pageIndex, layerIndex, props)
+        break
+      case 'group':
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, currSubSelectedInfo.index, props)
+    }
+  }
 
   constructor() {
     this.event = new EventEmitter()
@@ -33,11 +59,23 @@ class TiptapUtils {
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
       onCreate: ({ editor }) => {
-        editor.commands.selectAll()
         this.prevText = editor.getText()
       },
       onFocus: () => {
+        if (this.config && !this.config.isEdited) {
+          Vue.nextTick(() => {
+            if (this.editor) {
+              this.editor.commands.selectAll()
+            }
+          })
+        }
         this.hasFocus = true
+      },
+      onUpdate: () => {
+        console.log('on updated!')
+        if (!this.config?.isEdited) {
+          this.updateLayerProps({ isEdited: true })
+        }
       }
       // parseOptions: {
       //   preserveWhitespace: true
