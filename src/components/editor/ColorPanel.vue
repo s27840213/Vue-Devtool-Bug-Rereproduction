@@ -89,6 +89,7 @@ export default Vue.extend({
   },
   created() {
     this.vcoConfig.middleware = this.middleware
+    console.log(tiptapUtils.isRanged)
     if (!tiptapUtils.isRanged) {
       tiptapUtils.focus()
     }

@@ -123,9 +123,9 @@ export default Vue.extend({
           tiptapUtils.applySpanStyle('font', this.item.id)
           AssetUtils.addAssetToRecentlyUsed(this.item)
           StepsUtils.record()
-        } else {
-          tiptapUtils.focus()
         }
+
+        tiptapUtils.focus()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code

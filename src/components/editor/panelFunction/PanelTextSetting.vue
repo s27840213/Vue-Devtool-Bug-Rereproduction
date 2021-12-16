@@ -214,31 +214,14 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const currLayer = LayerUtils.getCurrLayer
-      const nan = TextUtils.getNullSel()
+      const isRanged = tiptapUtils.isRanged
 
-      StepsUtils.record()
-      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const { subLayerIndex } = this.currTextInfo
-        const primaryLayer = currLayer as IGroup
-        if (typeof subLayerIndex === 'undefined') {
-          for (let i = 0; i < primaryLayer.layers.length; i++) {
-            const layer = primaryLayer.layers[i] as IText
-            if (layer.type === 'text') {
-              TextPropUtils._spanPropertyHandler('color', color, nan, nan, i)
-            }
-          }
-        } else {
-          TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
-          if (!TextUtils.isSel(this.sel.end)) {
-            TextUtils.focus(this.sel.start, this.sel.end, subLayerIndex)
-          }
-        }
+      if (isRanged) {
+        StepsUtils.record()
+        tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
       }
+      tiptapUtils.focus()
       TextPropUtils.updateTextPropsState({ color })
-      console.log('cc')
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -347,8 +330,8 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          editor.chain().focus().selectPrevious()
-        })
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       })
       StepsUtils.record()
     },
@@ -374,8 +357,8 @@ export default Vue.extend({
       }
       tiptapUtils.agent(editor => {
         setTimeout(() => {
-          editor.chain().focus().selectPrevious()
-        })
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       })
       StepsUtils.record()
     },

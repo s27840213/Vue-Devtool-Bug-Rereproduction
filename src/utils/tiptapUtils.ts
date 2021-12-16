@@ -8,9 +8,7 @@ import cssConveter from '@/utils/cssConverter'
 import store from '@/store'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
-import layerUtils from './layerUtils'
-import Vue from 'vue'
-import { range } from 'lodash'
+import textPropUtils from './textPropUtils'
 
 class TiptapUtils {
   event: any
@@ -53,6 +51,7 @@ class TiptapUtils {
       },
       onCreate: ({ editor }) => {
         this.prevText = editor.getText()
+        textPropUtils.updateTextPropsState()
       },
       onFocus: () => {
         this.hasFocus = true
@@ -224,7 +223,7 @@ class TiptapUtils {
             const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
             attr[key] = value
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
-            editor.chain().focus().setMark('textStyle', attr).run()
+            editor.chain().setMark('textStyle', attr).run()
             // const chainedCommands = editor.chain().focus().setMark('textStyle', attr)
             // const spanStyle = editor.getAttributes('paragraph').spanStyle
             // if (spanStyle) {
@@ -235,11 +234,11 @@ class TiptapUtils {
             //   chainedCommands.run()
             // }
           } else {
-            editor.chain().focus().updateAttributes('textStyle', item).run()
+            editor.chain().updateAttributes('textStyle', item).run()
           }
         }
       } else {
-        editor.chain().focus().selectAll().updateAttributes('textStyle', item).run()
+        editor.chain().selectAll().updateAttributes('textStyle', item).run()
       }
     })
   }
@@ -249,9 +248,9 @@ class TiptapUtils {
     item[key] = value
     this.agent(editor => {
       if (this.hasFocus) {
-        editor.chain().focus().updateAttributes('paragraph', item).run()
+        editor.chain().updateAttributes('paragraph', item).run()
       } else {
-        editor.chain().focus().selectAll().updateAttributes('paragraph', item).run()
+        editor.chain().selectAll().updateAttributes('paragraph', item).run()
       }
     })
   }
