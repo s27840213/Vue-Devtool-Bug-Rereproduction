@@ -15,7 +15,7 @@ const styleMap = {
   scaleX: 'scaleX',
   scaleY: 'scaleY',
   font: 'font-family',
-  weight: 'font-weight',
+  weight: '-webkit-text-stroke-width',
   align: 'text-align',
   lineHeight: 'line-height',
   fontSpacing: 'letter-spacing',
@@ -28,22 +28,22 @@ const styleMap = {
   caretColor: 'caret-color'
 } as IStyleMap
 
-const fontStyleMap = {
-  'font-family': 'fontFamily',
-  'font-weight': 'fontWeight',
-  'font-align': 'fontAlign',
-  'line-height': 'lineHeight',
-  'font-spacing': 'fontSpacing',
-  'font-size': 'fontSize',
-  'writing-mode': 'writingMode',
-  'font-style': 'fontStyle',
-  'text-decoration-line': 'decoration',
-  'text-decoration-thickness': 'decoration',
-  'text-decoration-style': 'decoration',
-  'text-decoration-color': 'decoration',
-  'letter-spacing': 'letterSpacing',
-  color: 'color'
-} as IStyleMap
+// const fontStyleMap = {
+//   'font-family': 'fontFamily',
+//   'font-weight': 'fontWeight',
+//   'font-align': 'fontAlign',
+//   'line-height': 'lineHeight',
+//   'font-spacing': 'fontSpacing',
+//   'font-size': 'fontSize',
+//   'writing-mode': 'writingMode',
+//   'font-style': 'fontStyle',
+//   'text-decoration-line': 'decoration',
+//   'text-decoration-thickness': 'decoration',
+//   'text-decoration-style': 'decoration',
+//   'text-decoration-color': 'decoration',
+//   'letter-spacing': 'letterSpacing',
+//   color: 'color'
+// } as IStyleMap
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
@@ -71,15 +71,17 @@ class CssConveter {
     return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
   }
 
-  fontStyleMap(prop: string): string {
-    return fontStyleMap[prop as any]
-  }
+  // fontStyleMap(prop: string): string {
+  //   return fontStyleMap[prop as any]
+  // }
 
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'size') {
         result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
+      } else if (prop === 'weight') {
+        result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `${(sourceStyles.size as number) / 32}px` : '0px'
       } else if (prop === 'opacity') {
         result[styleMap[prop]] = `${sourceStyles[prop] ?? 1}`
       } else if (prop === 'fontSpacing' || prop === 'lineHeight') {
@@ -123,10 +125,10 @@ class CssConveter {
     return Object.keys(object).find(key => object[key] === value)!
   }
 
-  fontStyleKeyMap(prop: string): string {
-    const propInCss = this.getKeyByValue(fontStyleMap, prop)
-    return this.getKeyByValue(styleMap, propInCss)
-  }
+  // fontStyleKeyMap(prop: string): string {
+  //   const propInCss = this.getKeyByValue(fontStyleMap, prop)
+  //   return this.getKeyByValue(styleMap, propInCss)
+  // }
 
   convertTextShadow (x:number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
     return {

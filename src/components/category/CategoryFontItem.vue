@@ -89,42 +89,43 @@ export default Vue.extend({
     },
     async setFont() {
       if (this.pending) return
+      tiptapUtils.agent(editor => editor.setEditable(false))
       try {
         const fontStore = this.fontStore as Array<IFont>
         const { config, layerIndex, subLayerIndex } = TextPropUtils.getTextInfo
         const pageIndex = layerUtils.pageIndex
         const { type, id } = layerUtils.getCurrLayer
-        let { start, end } = generalUtils.deepCopy(this.sel)
+        // let { start, end } = generalUtils.deepCopy(this.sel)
         // Non selection applied
-        if (!TextUtils.isSel(start)) {
-          switch (type) {
-            case 'text': {
-              const currLayer = layerUtils.getLayer(pageIndex, layerIndex) as IText
-              const endPidx = currLayer.paragraphs.length - 1
-              const endSidx = currLayer.paragraphs[endPidx].spans.length - 1
-              const endOff = currLayer.paragraphs[endPidx].spans[endSidx].text.length
+        // if (!TextUtils.isSel(start)) {
+        //   switch (type) {
+        //     case 'text': {
+        //       const currLayer = layerUtils.getLayer(pageIndex, layerIndex) as IText
+        //       const endPidx = currLayer.paragraphs.length - 1
+        //       const endSidx = currLayer.paragraphs[endPidx].spans.length - 1
+        //       const endOff = currLayer.paragraphs[endPidx].spans[endSidx].text.length
 
-              start = { pIndex: 0, sIndex: 0, offset: 0 }
-              end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
-              break
-            }
-            default: {
-              if (typeof subLayerIndex === 'undefined' || type === 'tmp') {
-                break
-              }
-              if (typeof subLayerIndex === 'number' || type === 'group') {
-                const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-                const target = primaryLayer.layers[subLayerIndex] as IText
-                const endPidx = target.paragraphs.length - 1
-                const endSidx = target.paragraphs[endPidx].spans.length - 1
-                const endOff = target.paragraphs[endPidx].spans[endSidx].text.length
+        //       start = { pIndex: 0, sIndex: 0, offset: 0 }
+        //       end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
+        //       break
+        //     }
+        //     default: {
+        //       if (typeof subLayerIndex === 'undefined' || type === 'tmp') {
+        //         break
+        //       }
+        //       if (typeof subLayerIndex === 'number' || type === 'group') {
+        //         const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+        //         const target = primaryLayer.layers[subLayerIndex] as IText
+        //         const endPidx = target.paragraphs.length - 1
+        //         const endSidx = target.paragraphs[endPidx].spans.length - 1
+        //         const endOff = target.paragraphs[endPidx].spans[endSidx].text.length
 
-                start = { pIndex: 0, sIndex: 0, offset: 0 }
-                end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
-              }
-            }
-          }
-        }
+        //         start = { pIndex: 0, sIndex: 0, offset: 0 }
+        //         end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
+        //       }
+        //     }
+        //   }
+        // }
 
         if (!fontStore.some(font => font.face === this.item.id)) {
           this.updateTextState({ pending: this.item.id })
@@ -140,42 +141,42 @@ export default Vue.extend({
           })
         }
 
-        const handler = (config: IText, start: ISelection, end: ISelection): {
-          config: IText,
-          start: ISelection,
-          end: ISelection
-        } => {
-          return {
-            config: TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText),
-            ...(generalUtils.deepCopy(this.sel) as { start: ISelection, end: ISelection })
-          }
-        }
+        // const handler = (config: IText, start: ISelection, end: ISelection): {
+        //   config: IText,
+        //   start: ISelection,
+        //   end: ISelection
+        // } => {
+        //   return {
+        //     config: TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText),
+        //     ...(generalUtils.deepCopy(this.sel) as { start: ISelection, end: ISelection })
+        //   }
+        // }
 
         if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
           StepsUtils.record()
           tiptapUtils.applySpanStyle('font', this.item.id)
         }
 
-        if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
-          if (typeof subLayerIndex === 'undefined') {
-            const layers = (config as IGroup).layers
-            layers.forEach((l, idx) => {
-              if (l.type === 'text') {
-                start = TextUtils.selectAll(l as IText).start
-                end = TextUtils.selectAll(l as IText).end
-                const { config: newConfig } = handler(l as IText, start, end)
-                layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs: newConfig.paragraphs })
-              }
-            })
-          }
-          if (typeof subLayerIndex === 'number') {
-            // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-            // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-            const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
-            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-            // TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
-          }
-        }
+        // if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
+        //   if (typeof subLayerIndex === 'undefined') {
+        //     const layers = (config as IGroup).layers
+        //     layers.forEach((l, idx) => {
+        //       if (l.type === 'text') {
+        //         start = TextUtils.selectAll(l as IText).start
+        //         end = TextUtils.selectAll(l as IText).end
+        //         const { config: newConfig } = handler(l as IText, start, end)
+        //         layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs: newConfig.paragraphs })
+        //       }
+        //     })
+        //   }
+        //   if (typeof subLayerIndex === 'number') {
+        //     console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
+        //     console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
+        //     const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
+        //     layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
+        //     TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
+        //   }
+        // }
 
         TextPropUtils.updateTextPropsState({ font: this.item.id })
         AssetUtils.addAssetToRecentlyUsed(this.item)
@@ -187,6 +188,7 @@ export default Vue.extend({
           text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`
         })
       } finally {
+        tiptapUtils.agent(editor => editor.setEditable(true))
         this.updateTextState({ pending: '' })
         const sel = window.getSelection()
         if (sel) sel.removeAllRanges()

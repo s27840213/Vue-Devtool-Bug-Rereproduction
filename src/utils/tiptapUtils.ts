@@ -58,6 +58,11 @@ class TiptapUtils {
         NuTextStyle
       ],
       autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
+      editorProps: {
+        attributes: {
+          class: 'non-selectable'
+        }
+      },
       onCreate: ({ editor }) => {
         this.prevText = editor.getText()
       },
@@ -128,7 +133,8 @@ class TiptapUtils {
   textStyles(styles: any): string {
     const textStyles = cssConveter.convertFontStyle(styles)
     const finalStyles = Object.assign(textStyles, {
-      'font-family': this.getFontFamily(textStyles['font-family'])
+      'font-family': this.getFontFamily(textStyles['font-family']),
+      '-webkit-text-decoration-line': textStyles['text-decoration']
     })
     return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
   }
@@ -164,9 +170,9 @@ class TiptapUtils {
   generateSpanStyle(spanStyle: CSSStyleDeclaration): ISpanStyle {
     return {
       font: spanStyle.fontFamily.split(',')[0],
-      weight: spanStyle.fontWeight,
+      weight: spanStyle.getPropertyValue('-webkit-text-stroke-width') === '0px' ? 'normal' : 'bold',
       size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
-      decoration: spanStyle.textDecorationLine,
+      decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
       opacity: parseInt(spanStyle.opacity)
