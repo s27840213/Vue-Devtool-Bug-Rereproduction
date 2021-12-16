@@ -253,6 +253,10 @@ export default Extension.create({
           editor.commands.sync()
         })
         return true
+      },
+      'Shift-Enter': ({ editor }) => {
+        editor.commands.keyboardShortcut('Enter')
+        return true
       }
     }
   },
