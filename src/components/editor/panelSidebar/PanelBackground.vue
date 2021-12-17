@@ -129,7 +129,7 @@ export default Vue.extend({
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx * 2, idx * 2 + 2)
-          const title: string = !keyword && !idx ? '所有結果' : ''
+          const title: string = !keyword && !idx ? `${this.$t('NN0340')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',

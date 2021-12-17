@@ -25,7 +25,7 @@ export default Vue.extend({
   methods: {
     popupDatas() {
       const icons = ['flip-h', 'flip-v']
-      const texts = ['水平翻轉', '垂直翻轉']
+      const texts = [`${this.$t('NN0053')}`, `${this.$t('NN0054')}`]
       return icons.map((icon: string, index: number) => {
         return {
           icon: icons[index],

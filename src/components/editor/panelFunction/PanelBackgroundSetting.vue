@@ -14,7 +14,7 @@
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
         @click.native="handleLockBackground"
-        v-hint="`${$t('NN0142')}`")
+        v-hint="`${$t('NN0143')}`")
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"

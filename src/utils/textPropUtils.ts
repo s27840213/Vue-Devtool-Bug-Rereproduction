@@ -8,6 +8,7 @@ import LayerUtils from './layerUtils'
 import TextUtils from './textUtils'
 import TextShapeUtils from './textShapeUtils'
 import TextEffectUtils from './textEffectUtils'
+import i18n from '@/i18n'
 
 const fontPropsMap = {
   fontSize: 'size',
@@ -377,7 +378,7 @@ class TextPropUtils {
     }
   }
 
-  rangedSelHandler (start: ISelection, end: ISelection, config: IText, prop: { [key: string]: string | number }): boolean {
+  rangedSelHandler(start: ISelection, end: ISelection, config: IText, prop: { [key: string]: string | number }): boolean {
     let isStartContainerDivided = true
     for (let pIndex = start.pIndex; pIndex < config.paragraphs.length; pIndex++) {
       const p = config.paragraphs[pIndex]
@@ -577,7 +578,7 @@ class TextPropUtils {
     const { layerIndex, subLayerIndex } = this.getTextInfo
     const { start, end } = this.getCurrSel
 
-    const prop:{ [key: string]: string | number } = {}
+    const prop: { [key: string]: string | number } = {}
     switch (propName) {
       case 'fontSpacing':
         prop.fontSpacing = value as number
@@ -921,7 +922,7 @@ class TextPropUtils {
         }
         case 'font': {
           const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : '_多種字型'
+          value = typeof font === 'string' ? font : `_${i18n.t('NN0341')}`
           break
         }
         case 'color': {

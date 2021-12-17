@@ -210,7 +210,7 @@
   "NN0210": "{content} copied",
   "NN0211": "Resize and duplicate",
   "NN0212": "Ungroup",
-  "NN0213": "Unlock",
+  "NN0213": "Lock",
   "NN0214": "Share",
   "NN0215": "Transparent background",
   "NN0216": "Downloading",
@@ -335,5 +335,11 @@
   "NN0336": "Current password",
   "NN0337": "Please confirm your current password.",
   "NN0338": "Confirm",
-  "NN0339": "Are you sure?"
+  "NN0339": "Are you sure?",
+  "NN0340": "All results",
+  "NN0341": "未翻譯",
+  "OG0001": "未翻譯",
+  "OG0002": "未翻譯",
+  "OG0003": "未翻譯",
+  "OG0004": "未翻譯"
 }

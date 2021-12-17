@@ -42,10 +42,10 @@ export default Vue.extend({
       switch (type) {
         case 'order': {
           return [
-            '置前',
-            '移至最前',
-            '置後',
-            '移至最後'
+            `${this.$t('NN0232')}`,
+            `${this.$t('NN0231')}`,
+            `${this.$t('NN0233')}`,
+            `${this.$t('NN0234')}`
           ]
         }
         case 'layer': {
