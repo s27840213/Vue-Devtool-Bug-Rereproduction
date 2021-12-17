@@ -231,8 +231,6 @@ export default Vue.extend({
         const input = this.$refs['input-fontSize'] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     handleValueUpdate(value: number) {
@@ -250,8 +248,6 @@ export default Vue.extend({
         const input = this.$refs[`input-${modalName}`] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     propsBtnStyles(iconName: string) {
