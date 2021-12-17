@@ -2,7 +2,7 @@
   div(class="panel-template")
     div(v-if="showPrompt"
       class="panel-template__prompt body-2")
-      span ${{$t('NN0247')}}
+      span {{$t('NN0247')}}
       svg-icon(class="pointer"
         iconColor="gray-2"
         iconName="close"

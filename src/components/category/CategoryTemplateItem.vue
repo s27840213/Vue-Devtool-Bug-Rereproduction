@@ -38,6 +38,9 @@ export default Vue.extend({
     previewImage(): string {
       const { match_cover: cover, ver, id } = this.item
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
+    },
+    isEcommerceType(): boolean {
+      return this.groupItem?.group_type === 1
     }
   },
   methods: {
@@ -61,6 +64,12 @@ export default Vue.extend({
       const cb = this.groupItem
         ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
+
+      if (this.isEcommerceType) {
+        const resize = { width: 1080, height: matchCover.height || height }
+        return cb(resize)
+      }
+
       if (!isSameTheme) {
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(

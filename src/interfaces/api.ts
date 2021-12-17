@@ -136,7 +136,7 @@ export interface IListServiceContentDataItem {
   description?: string
   content_ids?: IListServiceContentDataItem[],
   group_id?: string,
-  group_type?: string
+  group_type?: number | string
 }
 
 export interface IListServiceContentData {

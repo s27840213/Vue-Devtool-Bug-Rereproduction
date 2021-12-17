@@ -478,6 +478,18 @@ class AssetUtils {
               props: resize
             })
           }
+          if (groupType === 1 && !resize) {
+            // 電商詳情頁模板 + 全部加入 = 所有寬度設為1080
+            for (const idx in jsonDataList) {
+              const { height } = jsonDataList[idx]
+              const pageIndex = +idx + targetIndex
+              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), { height, width: 1080 })
+              store.commit('UPDATE_pageProps', {
+                pageIndex,
+                props: { height, width: 1080 }
+              })
+            }
+          }
           stepsUtils.record()
         })
       })
