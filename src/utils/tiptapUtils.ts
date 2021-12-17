@@ -193,12 +193,20 @@ class TiptapUtils {
         }
       }
       if (spans.length === 0) {
-        isSetContentRequired = true
-        const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
-        spans.push({ text: '', styles: sStyles })
-        pStyles.size = sStyles.size
-        pStyles.font = sStyles.font
-        result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
+        if (paragraph.attrs.spanStyle) {
+          const sStyles = this.generateSpanStyle(this.str2css(paragraph.attrs.spanStyle))
+          spans.push({ text: '', styles: sStyles })
+          pStyles.size = sStyles.size
+          pStyles.font = sStyles.font
+          result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
+        } else {
+          isSetContentRequired = true
+          const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
+          spans.push({ text: '', styles: sStyles })
+          pStyles.size = sStyles.size
+          pStyles.font = sStyles.font
+          result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
+        }
       } else {
         if (pStyles.size !== largestSize) {
           pStyles.size = largestSize
