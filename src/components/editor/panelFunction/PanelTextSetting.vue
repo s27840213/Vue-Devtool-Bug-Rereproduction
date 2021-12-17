@@ -216,10 +216,12 @@ export default Vue.extend({
       if (color === this.props.color) return
       const isRanged = tiptapUtils.isRanged
 
-      if (isRanged) {
-        StepsUtils.record()
-        tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-      }
+      // if (isRanged) {
+      //   StepsUtils.record()
+      //   tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+      // }
+      StepsUtils.record()
+      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
       tiptapUtils.focus()
       TextPropUtils.updateTextPropsState({ color })
     },
@@ -328,11 +330,6 @@ export default Vue.extend({
             break
         }
       }
-      tiptapUtils.agent(editor => {
-        setTimeout(() => {
-          editor.chain().focus().selectPrevious().run()
-        }, 10)
-      })
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {

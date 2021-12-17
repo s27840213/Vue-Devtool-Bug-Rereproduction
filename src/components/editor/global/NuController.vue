@@ -614,7 +614,6 @@ export default Vue.extend({
             }
             if (this.pageIndex === this.lastSelectedPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
-              TextPropUtils.updateTextPropsState()
             }
             if (!this.config.locked) {
               this.isControlling = true

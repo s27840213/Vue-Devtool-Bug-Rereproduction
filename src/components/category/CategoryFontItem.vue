@@ -118,12 +118,15 @@ export default Vue.extend({
           return
         }
 
-        if (isRanged) {
-          StepsUtils.record()
-          tiptapUtils.applySpanStyle('font', this.item.id)
-          AssetUtils.addAssetToRecentlyUsed(this.item)
-          StepsUtils.record()
-        }
+        // if (isRanged) {
+        //   StepsUtils.record()
+        //   tiptapUtils.applySpanStyle('font', this.item.id)
+        //   AssetUtils.addAssetToRecentlyUsed(this.item)
+        //   StepsUtils.record()
+        // }
+        tiptapUtils.applySpanStyle('font', this.item.id)
+        AssetUtils.addAssetToRecentlyUsed(this.item)
+        StepsUtils.record()
 
         tiptapUtils.focus()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
