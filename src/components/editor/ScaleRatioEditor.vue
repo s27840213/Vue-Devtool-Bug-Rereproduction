@@ -59,6 +59,7 @@ export default Vue.extend({
       this._setIsShowPagePreview(show)
       if (!show) {
         pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
+        this._setShowPagePanel(false)
       }
     },
     setShowPagePanel(show: boolean) {
