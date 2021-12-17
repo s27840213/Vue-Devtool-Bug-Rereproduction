@@ -7,6 +7,7 @@ import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
 import assetUtils from './assetUtils'
 import i18n from '@/i18n'
+import shortcutUtils from './shortcutUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -287,6 +288,14 @@ export default Extension.create({
       },
       'Shift-Enter': ({ editor }) => {
         editor.commands.keyboardShortcut('Enter')
+        return true
+      },
+      'Mod-c': () => {
+        shortcutUtils.textCopy()
+        return true
+      },
+      'Mod-v': () => {
+        shortcutUtils.textPaste()
         return true
       }
     }
