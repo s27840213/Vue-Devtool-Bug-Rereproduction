@@ -806,23 +806,31 @@ class TextPropUtils {
 
   fontSizeStepping(step: number) {
     tiptapUtils.agent(editor => {
-      const selectionRanges = editor.view.state.selection.ranges
-      if (selectionRanges.length > 0) {
-        const range = selectionRanges[0]
-        const startPIndex = range.$from.index(0)
-        const startSIndex = range.$from.index(1)
-        const endPIndex = range.$to.index(0)
-        let endSIndex = range.$to.index(1)
-        const tiptapJSON = editor.getJSON()
-        const paragraphs = tiptapJSON.content ?? []
+      const selection = editor.view.state.selection
+      const from = selection.$from
+      const to = selection.$to
+      const startPIndex = from.index(0)
+      const startSIndex = from.index(1)
+      const endPIndex = to.index(0)
+      let endSIndex = to.index(1)
+      const tiptapJSON = editor.getJSON()
+      const paragraphs = tiptapJSON.content ?? []
 
-        if (!(startPIndex === endPIndex && startSIndex === endSIndex)) {
+      if (selection.empty) {
+        const sAttrs = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(editor.storage.nuTextStyle.spanStyle))
+        sAttrs.size += step
+        editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
+        editor.chain().focus().setMark('textStyle', sAttrs).run()
+        this.updateTextPropsState({ fontSize: sAttrs.size })
+      } else {
+        if (to.textOffset === 0 && endSIndex !== 0) {
           endSIndex--
         }
 
         let tempStartSIndex = startSIndex
         let tempEndSIndex
         for (let i = startPIndex; i <= endPIndex; i++) {
+          let startSplit = false
           const pAttrs = paragraphs[i].attrs
           if (pAttrs) {
             pAttrs.size += step
@@ -833,13 +841,60 @@ class TextPropUtils {
           } else {
             tempEndSIndex = spans.length - 1
           }
-          for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
-            const spanAttrs = spans[j].marks?.[0]?.attrs
-            if (spanAttrs) {
-              spanAttrs.size += step
+          if (spans.length > 0) {
+            const newSpans = GeneralUtils.deepCopy(spans) as any[]
+            for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
+              let splitHandled = false
+              if (i === startPIndex && j === startSIndex && from.textOffset !== 0) {
+                startSplit = true
+                const itemBefore = GeneralUtils.deepCopy(spans[j])
+                const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                const text = itemBefore.text
+                const textBefore = text.substring(0, from.textOffset)
+                itemBefore.text = textBefore
+                const textAfter = text.substring(from.textOffset)
+                itemAfter.text = textAfter
+                const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
+                if (spanAttrsAfter) {
+                  spanAttrsAfter.size += step
+                }
+                newSpans.splice(j, 1, itemBefore, itemAfter)
+                splitHandled = true
+              }
+              if (i === endPIndex && j === endSIndex && to.textOffset !== 0) {
+                const realSIndex = startSplit ? j + 1 : j
+                const itemBefore = GeneralUtils.deepCopy(newSpans[realSIndex])
+                const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                const text = itemBefore.text
+                const textBefore = text.substring(0, to.textOffset)
+                itemBefore.text = textBefore
+                const spanAttrsBefore = itemBefore.marks?.[0]?.attrs
+                if (spanAttrsBefore) {
+                  spanAttrsBefore.size += step
+                }
+                const textAfter = text.substring(to.textOffset)
+                itemAfter.text = textAfter
+                newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
+                splitHandled = true
+              }
+              if (!splitHandled) {
+                const realSIndex = startSplit ? j + 1 : j
+                const spanAttrs = newSpans[realSIndex].marks?.[0]?.attrs
+                if (spanAttrs) {
+                  spanAttrs.size += step
+                }
+              }
             }
+            tempStartSIndex = 0
+            paragraphs[i].content = newSpans
+          } else {
+            const pAttrs = paragraphs[i].attrs ?? {}
+            pAttrs.size += step
+            const spanStyle = pAttrs.spanStyle ?? ''
+            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+            sStyles.size += step
+            pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
           }
-          tempStartSIndex = 0
         }
         editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
         Vue.nextTick(() => {
