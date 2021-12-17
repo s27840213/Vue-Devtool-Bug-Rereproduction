@@ -51,14 +51,11 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role', 'shortName']),
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getDeatilPageMode',
-      hasAvatar: 'user/hasAvatar',
+      showPagePanel: 'page/getShowPagePanel',
       isLogin: 'user/isLogin'
     }),
     navItem(): Array<{ icon: string, text: string }> {
