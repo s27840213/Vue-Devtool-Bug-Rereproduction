@@ -67,6 +67,9 @@ export default Vue.extend({
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
     })
     tiptapUtils.on('create', ({ editor }) => {
+      if (!this.config?.isEdited) {
+        editor.commands.focus()
+      }
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
@@ -82,7 +85,7 @@ export default Vue.extend({
     tiptapUtils.on('focus', ({ editor }) => {
       this.updateLayerProps({ isTyping: true })
       if (!this.config?.isEdited) {
-        editor.chain().focus().selectAll().run()
+        editor.commands.selectAll()
       }
     })
     tiptapUtils.on('blur', () => {
