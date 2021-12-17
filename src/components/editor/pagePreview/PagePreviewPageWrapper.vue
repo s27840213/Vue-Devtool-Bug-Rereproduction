@@ -45,6 +45,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
@@ -71,11 +72,11 @@ export default Vue.extend({
       menuItems: [
         {
           icon: 'copy',
-          text: '建立副本'
+          text: i18n.t('NN0251')
         },
         {
           icon: 'trash',
-          text: '刪除'
+          text: i18n.t('NN0034')
         }
       ],
       isMouseOver: false,
@@ -245,7 +246,7 @@ export default Vue.extend({
     }
     .menu {
       position: absolute;
-      width: 100px;
+      width: 120px;
       box-sizing: border-box;
       border-radius: 2px;
       display: flex;

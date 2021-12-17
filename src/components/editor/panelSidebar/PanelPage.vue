@@ -6,7 +6,7 @@
         :type="'gray-sm'"
         class="rounded my-20 mx-25"
         style="padding: 5px 0;"
-        @click.native="addPage(lastSelectedPageIndex+1)") 新 增 頁 面
+        @click.native="addPage(lastSelectedPageIndex+1)") {{$t('NN0139')}}
     div(class="panel-page-items")
       template(v-for="(page, idx) in getPages")
         div(class="panel-page__plus")
