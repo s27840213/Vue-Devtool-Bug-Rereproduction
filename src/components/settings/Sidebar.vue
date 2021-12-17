@@ -15,19 +15,19 @@
           svg-icon(:iconName="'settings'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
-          span {{$tc('NN0165',1)}}
+          span {{$tc('NN0165', 1)}}
         div(class="nav-container__option"
           :class="{'selected': optionSelected === 'security'}"
           @click="switchNav('security')")
           svg-icon(:iconName="'lock'"
             :iconWidth="'15px'"
             :iconColor="'gray-2'")
-          span {{$tc('NN0166',1)}}
+          span {{$tc('NN0166', 1)}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import router from '@/router'
-import { mapState, mapGetters, mapMutations } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
@@ -49,8 +49,7 @@ export default Vue.extend({
     ...mapState('user', [
       'shortName', 'uname']),
     ...mapGetters('user', {
-      account: 'getAccount',
-      hasAvatar: 'hasAvatar'
+      account: 'getAccount'
     }),
     showUname(): string {
       if (this.uname.length > 10) {

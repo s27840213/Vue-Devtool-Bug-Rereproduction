@@ -52,10 +52,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'shortName', 'uname']),
+      'uname']),
     ...mapGetters('user', {
-      account: 'getAccount',
-      hasAvatar: 'hasAvatar'
+      account: 'getAccount'
     }),
     showUname(): string {
       if (this.uname.length > 10) {

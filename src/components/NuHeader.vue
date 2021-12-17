@@ -149,9 +149,6 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'role', 'shortName']),
-    ...mapGetters('user', [
-      'hasAvatar'
-    ]),
     currentPage(): string {
       return this.$route.name || ''
     },

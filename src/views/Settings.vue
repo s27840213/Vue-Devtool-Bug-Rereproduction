@@ -31,10 +31,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      currentView: 'account',
-      inputName: '',
-      email: '',
-      isSubscribed: true
+      currentView: 'account'
     }
   },
   watch: {
