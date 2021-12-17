@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="settings-account")
-  avatar(class="mt-30" :textSize="30" :avatarSize="75")
+  avatar(class="mt-30 settings-account__avatar"
+    :textSize="30" :avatarSize="75")
   div(class="settings-account__buttons")
     div(v-if="hasAvatar"
       class="settings-account__button mr-30 pointer"
@@ -11,10 +12,13 @@ div(class="settings-account")
       span(v-else) {{$t('NN0309')}}
   div(class="settings-account__info")
     div(class="settings-account__label my-10") {{$t('NN0172')}}
-    property-bar
+    property-bar(:class="{'input-invalid': !nameValid}")
       input(class="body-2 text-gray-2"
         v-model="inputName" type="text"
         :placeholder="$t('NN0163', {term: $t('NN0172')})")
+    div(v-if="!nameValid"
+      class="invalid-message")
+      span {{ $t('NN0163', {term: $t('NN0172')}) }}
     div(class="settings-account__label my-10") {{$t('NN0173')}}
     property-bar(:class="{'input-invalid': !mailValid}")
       input(class="body-2 text-gray-2"
@@ -86,16 +90,24 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'shortName', 'uname']),
+      'uname']),
     ...mapGetters('user', {
       token: 'getToken',
-      isLogin: 'isLogin',
       hasAvatar: 'hasAvatar',
       account: 'getAccount',
       subscribe: 'getSubscribe'
     }),
     currLocale(): string {
       return this.$i18n.locale
+    },
+    nameValid(): boolean {
+      if (!this.isConfirmClicked) {
+        return true
+      } else if (this.inputName.length === 0) {
+        return false
+      } else {
+        return true
+      }
     },
     mailValid(): boolean {
       if (!this.isConfirmClicked) {
@@ -146,6 +158,10 @@ export default Vue.extend({
         } else {
           this.accountErrorMessage = i18n.t('NN0297') as string
         }
+        this.isLoading = false
+        return
+      }
+      if (!this.nameValid) {
         this.isLoading = false
         return
       }
@@ -239,20 +255,8 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
-  &__profile {
-    display: flex;
-    padding-top: 50px;
-    .profile-img {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 75px;
-      height: 75px;
-      font-size: 30px;
-      font-weight: 700;
-      background: #61aac2;
-      border-radius: 50%;
-    }
+  &__avatar {
+    min-height: 75px;
   }
   &__buttons {
     display: flex;
