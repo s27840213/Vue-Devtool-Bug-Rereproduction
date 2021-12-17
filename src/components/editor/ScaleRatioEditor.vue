@@ -62,7 +62,7 @@ export default Vue.extend({
       }
     },
     setShowPagePanel(show: boolean) {
-      // this.toggleSidebarPanel(show)
+      this.toggleSidebarPanel(show)
       this._setShowPagePanel(show)
     },
     toggleSidebarPanel(open: boolean) {
