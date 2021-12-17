@@ -59,6 +59,9 @@ export default Vue.extend({
       }
       tiptapUtils.prevText = editor.getText()
       this.updateLayerProps({ isEdited: true })
+      if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
+        this.updateLayerProps({ loadFontEdited: true })
+      }
     })
     tiptapUtils.onForceUpdate((editor) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
@@ -75,12 +78,12 @@ export default Vue.extend({
           })
         })
       }
-      if (!this.config?.isEdited) {
-        editor.chain().focus().selectAll().run()
-      }
     })
     tiptapUtils.on('focus', ({ editor }) => {
       this.updateLayerProps({ isTyping: true })
+      if (!this.config?.isEdited) {
+        editor.chain().focus().selectAll().run()
+      }
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
