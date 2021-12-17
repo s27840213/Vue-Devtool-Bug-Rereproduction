@@ -42,11 +42,6 @@ class TiptapUtils {
         this.prevText = editor.getText()
       },
       onFocus: () => {
-        Vue.nextTick(() => {
-          if (textPropUtils.pageIndex > 0 && textPropUtils.layerIndex > 0) {
-            textPropUtils.updateTextPropsState()
-          }
-        })
         this.hasFocus = true
       }
       // autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
@@ -187,12 +182,20 @@ class TiptapUtils {
         }
       }
       if (spans.length === 0) {
-        isSetContentRequired = true
-        const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
-        spans.push({ text: '', styles: sStyles })
-        pStyles.size = sStyles.size
-        pStyles.font = sStyles.font
-        result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
+        if (paragraph.attrs.spanStyle) {
+          const sStyles = this.generateSpanStyle(this.str2css(paragraph.attrs.spanStyle))
+          spans.push({ text: '', styles: sStyles })
+          pStyles.size = sStyles.size
+          pStyles.font = sStyles.font
+          result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
+        } else {
+          isSetContentRequired = true
+          const sStyles = this.generateSpanStyle(this.str2css(defaultStyle))
+          spans.push({ text: '', styles: sStyles })
+          pStyles.size = sStyles.size
+          pStyles.font = sStyles.font
+          result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
+        }
       } else {
         if (pStyles.size !== largestSize) {
           pStyles.size = largestSize
@@ -219,21 +222,21 @@ class TiptapUtils {
             attr[key] = value
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().setMark('textStyle', attr).run()
-            // const chainedCommands = editor.chain().focus().setMark('textStyle', attr)
-            // const spanStyle = editor.getAttributes('paragraph').spanStyle
-            // if (spanStyle) {
-            //   const sStyles = this.generateSpanStyle(this.str2css(spanStyle))
-            //   sStyles[key] = value
-            //   chainedCommands.updateAttributes('paragraph', { spanStyle: this.textStyles(sStyles) }).run()
-            // } else {
-            //   chainedCommands.run()
-            // }
+            setTimeout(() => {
+              editor.chain().focus().run()
+            }, 10)
           } else {
             editor.chain().updateAttributes('textStyle', item).run()
+            setTimeout(() => {
+              editor.chain().focus().selectPrevious().run()
+            }, 10)
           }
         }
       } else {
         editor.chain().selectAll().updateAttributes('textStyle', item).run()
+        setTimeout(() => {
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       }
     })
   }

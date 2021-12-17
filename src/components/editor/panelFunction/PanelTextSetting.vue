@@ -236,8 +236,6 @@ export default Vue.extend({
         const input = this.$refs['input-fontSize'] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     handleValueUpdate(value: number) {
@@ -255,8 +253,6 @@ export default Vue.extend({
         const input = this.$refs[`input-${modalName}`] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     propsBtnStyles(iconName: string) {
@@ -330,11 +326,6 @@ export default Vue.extend({
             break
         }
       }
-      tiptapUtils.agent(editor => {
-        setTimeout(() => {
-          editor.chain().focus().selectPrevious().run()
-        }, 10)
-      })
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
@@ -366,20 +357,10 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const { config, subLayerIndex } = this.currTextInfo
-      // let { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
-      //   start: ISelection,
-      //   end: ISelection
-      // }
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            // const { start: _start, end: _end } = this.fontSizeSteppingHandler(start, end, step)
-            // start = _start
-            // end = _end
             TextPropUtils.fontSizeStepping(step)
-            TextPropUtils.updateTextPropsState()
-            // TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -390,92 +371,19 @@ export default Vue.extend({
 
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
-        const { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
-          start: ISelection,
-          end: ISelection
-        }
         if (new Date().getTime() - startTime < 500) {
           TextPropUtils.fontSizeStepping(step)
-          TextPropUtils.updateTextPropsState()
         }
         clearInterval(interval)
-        StepsUtils.record()
+        tiptapUtils.agent(editor => {
+          if (!editor.state.selection.empty) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            StepsUtils.record()
+          }
+        })
       }
 
       window.addEventListener('mouseup', onmouseup)
-    },
-    fontSizeSteppingHandler(start: ISelection, end: ISelection, step: number) {
-      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      const { config: _config, subLayerIndex } = this.currTextInfo
-      const { paragraphs } = _config
-      if (this.sel) {
-        // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-        // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-
-        const finalStart = {} as ISelection
-        const finalEnd = {} as ISelection
-        const currStart = {} as ISelection
-        const currEnd = {} as ISelection
-        for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-          const p = paragraphs[pidx]
-          for (let sidx = 0; sidx < p.spans.length; sidx++) {
-            const span = p.spans[sidx]
-            if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
-              continue
-            }
-            // PIndex, sIndex both are at the start-selection
-            if (pidx === start.pIndex && sidx === start.sIndex) {
-              // Start-selection and the end-selection are exactly at the same span
-              if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
-                Object.assign(currStart, start)
-                Object.assign(currEnd, end)
-                sidx++
-              } else {
-                Object.assign(currStart, start)
-                Object.assign(currEnd, { ...start, offset: span.text.length })
-              }
-            } else if (pidx === end.pIndex && sidx === end.sIndex) {
-              const endSidx = (start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
-              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
-            } else {
-              const endSidx = (start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
-              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
-            }
-            // TextPropUtils.fontSizeStepper(span.styles.size + step, this.sel.start, this.sel.end)
-            TextPropUtils.fontSizeStepper(_config, span.styles.size + step, currStart, currEnd)
-            console.log(GeneralUtils.deepCopy(_config.paragraphs))
-
-            if (Object.keys(finalStart).length === 0) {
-              Object.assign(finalStart, this.sel.start)
-            }
-            Object.assign(finalEnd, currEnd)
-          }
-        }
-        // Object.assign(finalEnd, this.sel.end)
-        // const finalSel = TextPropUtils.spanMerger(_config.paragraphs, finalStart, finalEnd)
-        this.$nextTick(() => {
-          // TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex)
-          // TextUtils.updateSelection(finalSel[0], finalSel[1])
-          TextUtils.focus(finalStart, finalEnd)
-          TextPropUtils.updateTextPropsState()
-        })
-        return { start: { ...finalStart }, end: { ...finalEnd } }
-      } else {
-        TextUtils.updateLayerTextSize({ diff: step })
-        TextPropUtils.updateTextPropsState()
-        const endP = _config.paragraphs.length - 1
-        const endS = _config.paragraphs[endP].spans.length - 1
-        return {
-          start: { pIndex: 0, sIndex: 0, offset: 0 },
-          end: {
-            pIndex: endP,
-            sIndex: endS,
-            offset: _config.paragraphs[endP].spans[endS].offset
-          }
-        }
-      }
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
