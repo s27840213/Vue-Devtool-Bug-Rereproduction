@@ -120,7 +120,8 @@ export default Vue.extend({
         'text-align-center': '文字置中',
         'text-align-right': '右對齊',
         'text-align-justify': '兩端對齊'
-      }
+      },
+      hasFocused: false
     }
   },
   mounted() {
@@ -128,6 +129,11 @@ export default Vue.extend({
     // TextPropUtils.updateTextPropsState()
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
+    })
+    colorUtils.on(ColorEventType.textInit, () => {
+      if (this.hasFocus) {
+        tiptapUtils.focus()
+      }
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
@@ -179,6 +185,9 @@ export default Vue.extend({
         return '--'
       }
       return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+    },
+    hasFocus(): boolean {
+      return this.hasFocused
     }
   },
   methods: {
@@ -194,7 +203,7 @@ export default Vue.extend({
     openFontsPanel() {
       this.isOpenFontPanel = true
       this.textInfoRecorder()
-      this.$emit('openFontsPanel')
+      this.$emit('openFontsPanel', this.hasFocused)
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
@@ -214,12 +223,10 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const isRanged = tiptapUtils.isRanged
 
-      if (isRanged) {
-        StepsUtils.record()
-        tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-      }
+      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color), this.hasFocus)
+      StepsUtils.record()
+
       tiptapUtils.focus()
       TextPropUtils.updateTextPropsState({ color })
     },
@@ -297,17 +304,12 @@ export default Vue.extend({
           subLayerIndex = undefined
         }
       }
-
-      // const sel = TextUtils.getSelection()
-      // start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-      // end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
-
-      // if (!TextUtils.isSel(start) && config.type === 'text') {
-      //   start = TextUtils.selectAll(config as IText).start
-      //   end = TextUtils.selectAll(config as IText).end
-      // }
-      // TextUtils.updateSelection(start, end)
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
+
+      const sel = window.getSelection()
+      if (sel?.rangeCount) {
+        this.hasFocused = true
+      }
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {

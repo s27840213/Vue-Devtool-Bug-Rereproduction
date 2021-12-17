@@ -28,7 +28,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import { IFont, ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import text from '@/store/text'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -90,11 +90,16 @@ export default Vue.extend({
     async setFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
+      const isRanged = this.isRanged()
+      const sel = isRanged ? tiptapUtils.getSelection() as { start: ISelection, end: ISelection } : undefined
+      const start = sel?.start || {} as ISelection
+      const end = sel?.end || {} as ISelection
       try {
         const fontStore = this.fontStore as Array<IFont>
-        const { type, id } = layerUtils.getCurrLayer
+        const { id, type } = layerUtils.getCurrLayer
+        const preLayerIndex = layerUtils.layerIndex
         const subLayerIdx = layerUtils.subLayerIdx
-        const isRanged = tiptapUtils.isRanged
+        this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         if (!fontStore.some(font => font.face === this.item.id)) {
           this.updateTextState({ pending: this.item.id })
@@ -110,22 +115,35 @@ export default Vue.extend({
           })
         }
 
-        const layerIndex = layerUtils.getCurrPage.layers
+        const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)
+        const config = subLayerIdx === -1 ? layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IText
+          : (layerUtils.getCurrLayer as IGroup).layers[subLayerIdx] as IText
 
-        if (layerIndex === -1) {
-          console.warn('The selected text layer is unavilable')
+        if (currLayerIndex === -1 || config.loadFontEdited) {
+          console.warn('The selected text layer is unaviliable')
           return
         }
 
-        if (isRanged) {
-          StepsUtils.record()
-          tiptapUtils.applySpanStyle('font', this.item.id)
-          AssetUtils.addAssetToRecentlyUsed(this.item)
-          StepsUtils.record()
+        const currLayer = layerUtils.getCurrLayer
+        if (currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active)) {
+          if (!sel) {
+            Object.assign(start, TextUtils.selectAll(config).start)
+            Object.assign(end, TextUtils.selectAll(config).end)
+          }
+          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
+          this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
+          tiptapUtils.updateHtml(newConfig.paragraphs)
+          if (subLayerIdx === -1) {
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
+          } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
+        } else {
+          tiptapUtils.applySpanStyle('font', this.item.id, isRanged)
+          isRanged && tiptapUtils.focus()
         }
 
-        tiptapUtils.focus()
+        AssetUtils.addAssetToRecentlyUsed(this.item)
+        StepsUtils.record()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
@@ -142,6 +160,20 @@ export default Vue.extend({
     },
     getFontUrl(fontID: string): string {
       return `url("https://template.vivipic.com/font/${fontID}/font")`
+    },
+    updateLayerProps(layerIndex: number, subLayerIdx: number, prop: { [key: string]: IParagraph[] | boolean }) {
+      if (subLayerIdx === -1) {
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, prop)
+      } else {
+        layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, prop)
+      }
+    },
+    isRanged(): any {
+      const sel = window.getSelection()
+      if (sel?.rangeCount) {
+        return sel.getRangeAt(0).toString()
+      }
+      return false
     }
   }
 })

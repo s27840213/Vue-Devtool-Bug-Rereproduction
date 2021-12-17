@@ -31,7 +31,7 @@
       div(v-if="!isGroup" class="p-20")
         panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
         panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
-          @openFontsPanel="openFontsPanel()"
+          @openFontsPanel="openFontsPanel"
           v-on="$listeners")
         panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
         panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
@@ -44,12 +44,12 @@
         template(v-if="!hasSubSelectedLayer")
           panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
           panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
-            @openFontsPanel="openFontsPanel()"
+            @openFontsPanel="openFontsPanel"
             v-on="$listeners")
           panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
           panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
           panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel" :hasFocus="hasFocus")
           panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
         template(v-else)
           panel-general
@@ -60,7 +60,7 @@
             panel-text-effect-setting(v-on="$listeners")
           panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
           panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel" :hasFocus="hasFocus")
 </template>
 
 <script lang="ts">
@@ -97,7 +97,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      isFontsPanelOpened: false
+      isFontsPanelOpened: false,
+      hasFocused: false
     }
   },
   computed: {
@@ -151,6 +152,9 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
+    },
+    hasFocus(): boolean {
+      return this.hasFocused
     }
   },
   watch: {
@@ -161,7 +165,9 @@ export default Vue.extend({
     }
   },
   methods: {
-    openFontsPanel() {
+    openFontsPanel(hasFocus: boolean) {
+      this.hasFocused = hasFocus
+      console.log(this.hasFocus)
       this.isFontsPanelOpened = true
     },
     closeFontsPanel() {

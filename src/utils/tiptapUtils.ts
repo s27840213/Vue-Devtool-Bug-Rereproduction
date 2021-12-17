@@ -18,17 +18,6 @@ class TiptapUtils {
   prevText: string | undefined = undefined
   hasFocus = false
 
-  get isRanged(): boolean {
-    const ranges = this.editor?.state.selection.ranges
-    if (ranges) {
-      return ranges[0]?.$from !== ranges[0]?.$to
-    }
-    return false
-  }
-  // get isFocus(): boolean {
-  //   return this.editor?.isFocused || false
-  // }
-
   constructor() {
     this.event = new EventEmitter()
     this.eventHandler = undefined
@@ -218,11 +207,11 @@ class TiptapUtils {
     return { paragraphs: result, isSetContentRequired }
   }
 
-  applySpanStyle(key: string, value: any) {
+  applySpanStyle(key: string, value: any, hasFocus = this.hasFocus) {
     const item: {[string: string]: any} = {}
     item[key] = value
     this.agent(editor => {
-      if (this.hasFocus) {
+      if (hasFocus) {
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
@@ -264,6 +253,33 @@ class TiptapUtils {
   focus() {
     if (this.editor) {
       this.editor.commands.focus()
+    }
+  }
+
+  updateHtml(paragraphs: IParagraph[]) {
+    if (this.editor) {
+      this.editor.chain().setContent(this.toHTML(paragraphs)).selectPrevious().run()
+    }
+  }
+
+  getSelection() {
+    if (this.editor) {
+      const selection = this.editor.view.state.selection
+      const from = selection.$from
+      const to = selection.$to
+
+      return {
+        start: {
+          pIndex: from.index(0),
+          sIndex: from.index(1),
+          offset: from.textOffset
+        },
+        end: {
+          pIndex: to.index(0),
+          sIndex: to.index(1),
+          offset: to.textOffset
+        }
+      }
     }
   }
 }
