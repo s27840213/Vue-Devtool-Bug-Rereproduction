@@ -41,36 +41,36 @@ export default Vue.extend({
         {
           target: '.panel-template',
           placement: 'right-start',
-          title: '選一個心儀的模板',
+          title: this.$t('NN0263'),
           offset: { x: 10, y: 100 },
-          content: '用滑動頁面、關鍵字搜尋的方式尋找更多模板。按下篩選鍵後可切換搜尋不同尺寸的模板，且不同尺寸模板可以收於同一設計檔案內。',
-          skip: { text: '略過', action: () => guideUtils.skipGuide() },
-          next: { text: '下一步' }
+          content: this.$t('NN0264'),
+          skip: { text: this.$t('NN0271'), action: () => guideUtils.skipGuide() },
+          next: { text: this.$t('NN0272') }
         },
         {
           target: '.nav-container .nav-item:nth-child(4)',
           placement: 'right-end',
-          title: '自訂物件',
-          content: '左側欄功能列包含圖片、元素、背景、文字皆可按一下選擇，工具列將出現在畫面右側讓您做更多更改。',
-          skip: { text: '略過', action: () => guideUtils.skipGuide() },
-          next: { text: '下一步' }
+          title: this.$t('NN0265'),
+          content: this.$t('NN0266'),
+          skip: { text: this.$t('NN0271'), action: () => guideUtils.skipGuide() },
+          next: { text: this.$t('NN0272') }
         },
         {
           target: '.nav-container .nav-item:last-child',
           placement: 'right-end',
-          title: '隨心上傳',
-          content: '想要加入自己的照片也沒問題，直接將圖片拖曳到「我的檔案」區塊，或是點擊「上傳圖片」。',
-          skip: { text: '略過', action: () => guideUtils.skipGuide() },
-          next: { text: '下一步' }
+          title: this.$t('NN0267'),
+          content: this.$t('NN0268'),
+          skip: { text: this.$t('NN0271'), action: () => guideUtils.skipGuide() },
+          next: { text: this.$t('NN0272') }
         },
         {
           target: '.btn-download',
           placement: 'bottom-end',
-          title: '自由下載',
+          title: this.$t('NN0269'),
           offset: { y: 15 },
-          content: '選擇您想要的圖片格式、尺寸與範圍，即可順利下載完成！',
+          content: this.$t('NN0270'),
           finish: {
-            text: '我瞭解了', action: () => guideUtils.finishGuide()
+            text: this.$t('NN0273'), action: () => guideUtils.finishGuide()
           }
         }
       ]

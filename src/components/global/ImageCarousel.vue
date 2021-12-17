@@ -32,7 +32,7 @@ export default Vue.extend({
       this.handleNext()
     }, this.speed)
   },
-  destroyed () {
+  beforeDestroy () {
     clearInterval(this.handler)
     this.$emit('change', 0)
   },
