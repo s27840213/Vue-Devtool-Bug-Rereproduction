@@ -899,6 +899,7 @@ class TextPropUtils {
         editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
         Vue.nextTick(() => {
           tiptapUtils.forceUpdate()
+          this.updateTextPropsState()
         })
       }
     })
