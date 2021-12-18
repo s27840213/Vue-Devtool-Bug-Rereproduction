@@ -257,6 +257,7 @@ export default Extension.create({
         Vue.nextTick(() => {
           if (!tiptapUtils.editor) return
           editor.commands.sync()
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
@@ -265,6 +266,7 @@ export default Extension.create({
         Vue.nextTick(() => {
           if (!tiptapUtils.editor) return
           editor.commands.sync()
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
@@ -275,6 +277,7 @@ export default Extension.create({
         Vue.nextTick(() => {
           if (!tiptapUtils.editor) return
           editor.commands.sync()
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
@@ -283,6 +286,7 @@ export default Extension.create({
         Vue.nextTick(() => {
           if (!tiptapUtils.editor) return
           editor.commands.sync()
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
