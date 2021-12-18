@@ -253,9 +253,9 @@ class TiptapUtils {
     })
   }
 
-  focus() {
+  focus(options = {} as { scrollIntoView?: boolean }) {
     if (this.editor) {
-      this.editor.commands.focus()
+      this.editor.commands.focus(null, options)
     }
   }
 
