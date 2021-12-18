@@ -51,13 +51,14 @@ export default Vue.extend({
     tiptapUtils.init(this.initText)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
+      // console.log(JSON.stringify(tiptapUtils.getText(editor)))
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
-      if (!editor.view.composing && (tiptapUtils.prevText !== editor.getText())) {
+      if (!editor.view.composing && (tiptapUtils.prevText !== tiptapUtils.getText(editor))) {
         this.$nextTick(() => {
           stepsUtils.record()
         })
       }
-      tiptapUtils.prevText = editor.getText()
+      tiptapUtils.prevText = tiptapUtils.getText(editor)
       this.updateLayerProps({ isEdited: true })
       if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
         this.updateLayerProps({ loadFontEdited: true })

@@ -39,7 +39,7 @@ class TiptapUtils {
         }
       },
       onCreate: ({ editor }) => {
-        this.prevText = editor.getText()
+        this.prevText = this.getText(editor as Editor)
       },
       onFocus: () => {
         this.hasFocus = true
@@ -208,6 +208,25 @@ class TiptapUtils {
       }
     }
     return { paragraphs: result, isSetContentRequired }
+  }
+
+  getText(editor: Editor): string {
+    const lines: string[] = []
+    const json = editor.getJSON()
+    const paragraphs = json.content ?? []
+    for (const paragraph of paragraphs) {
+      const spans = paragraph.content ?? []
+      if (spans.length > 0) {
+        const fragments: string[] = []
+        for (const span of spans) {
+          fragments.push(span.text ?? '')
+        }
+        lines.push(fragments.join(''))
+      } else {
+        lines.push('')
+      }
+    }
+    return lines.join('\n')
   }
 
   applySpanStyle(key: string, value: any, hasFocus = this.hasFocus) {
