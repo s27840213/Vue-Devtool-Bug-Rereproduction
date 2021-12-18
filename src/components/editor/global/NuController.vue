@@ -14,8 +14,7 @@
         :layer-index="`${layerIndex}`"
         :style="styles(getLayerType)"
         @drop.prevent="onDrop($event)"
-        @dragover.prevent,
-        @click.left="onClick"
+        @dragover.prevent
         @click.right.stop="onRightClick"
         @contextmenu.prevent
         @mousedown.left="moveStart"
@@ -174,6 +173,7 @@ export default Vue.extend({
   },
   created() {
     this.updateTextState({ paragraphs: this.config.paragraphs })
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
   },
   data() {
     return {
@@ -201,7 +201,7 @@ export default Vue.extend({
       isComposing: false,
       isComposeEndEnter: false,
       isSnapping: false,
-      contentEditable: true,
+      // contentEditable: true,
       clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
@@ -278,6 +278,9 @@ export default Vue.extend({
       // @Test
       return !this.isControlling
     },
+    contentEditable(): boolean {
+      return this.config.contentEditable
+    },
     isDragging(): boolean {
       return this.config.dragging
     },
@@ -332,7 +335,7 @@ export default Vue.extend({
             return
           }
           if (!this.isLocked) {
-            this.contentEditable = false
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
         }
@@ -343,9 +346,11 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
-        // if (editing && !this.config.isEdited) {
-        //   ShortcutUtils.textSelectAll(this.layerIndex)
-        // }
+      }
+    },
+    contentEditable(newVal) {
+      if (!newVal) {
+        tiptapUtils.agent(editor => editor.commands.selectAll())
       }
     }
   },
@@ -490,14 +495,6 @@ export default Vue.extend({
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    textStyles(styles: any): string {
-      const textStyles = CssConveter.convertFontStyle(styles)
-      // 'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
-      const finalStyles = Object.assign(textStyles, {
-        'font-family': (textStyles['font-family'] + ',').concat(this.getDefaultFonts)
-      })
-      return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
-    },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       if (this.isLine) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -597,12 +594,8 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
           })
-          if (this.isActive && !inSelectionMode && this.contentEditable) {
-            if ((e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-              tiptapUtils.hasFocus = false
-            } else {
-              return
-            }
+          if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+            return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
             // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
@@ -624,7 +617,7 @@ export default Vue.extend({
             return
           }
 
-          this.contentEditable = true
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
           break
         }
         case 'group':
@@ -731,7 +724,7 @@ export default Vue.extend({
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           StepsUtils.record()
           if (this.getLayerType === 'text') {
-            this.contentEditable = false
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
         } else if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
@@ -1324,107 +1317,107 @@ export default Vue.extend({
           MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
-    onClick(e: MouseEvent) {
-      // if (!['text', 'group', 'tmp'].includes(this.config.type)) return
-      // this.textClickHandler(e)
-    },
-    textClickHandler(e: MouseEvent) {
-      if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
-        this.hasChangeTextContent = false
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
-        this.$nextTick(() => {
-          TextUtils.focus(this.sel.start, this.sel.end)
-        })
-      }
-      const { start, end } = TextUtils.getSelection()
-      TextUtils.updateSelection(start, end)
-      TextPropUtils.updateTextPropsState()
-    },
-    onTyping(mutations: MutationRecord[], observer: MutationObserver) {
-      observer.disconnect()
-      const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
-      const config = GeneralUtils.deepCopy(this.config) as IText
-      config.paragraphs = paragraphs
-      this.updateTextState({ paragraphs })
-      this.textSizeRefresh(config)
-      this.hasChangeTextContent = true
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-    },
-    onKeyDown(e: KeyboardEvent) {
-      const observer = new MutationObserver(this.onTyping)
-      observer.observe(tiptapUtils.editor?.view?.dom as HTMLElement, {
-        characterData: true,
-        childList: true,
-        subtree: true,
-        attributes: false,
-        attributeOldValue: false,
-        characterDataOldValue: false
-      })
+    // onClick(e: MouseEvent) {
+    //   // if (!['text', 'group', 'tmp'].includes(this.config.type)) return
+    //   // this.textClickHandler(e)
+    // },
+    // textClickHandler(e: MouseEvent) {
+    //   if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
+    //     this.hasChangeTextContent = false
+    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
+    //     this.$nextTick(() => {
+    //       TextUtils.focus(this.sel.start, this.sel.end)
+    //     })
+    //   }
+    //   const { start, end } = TextUtils.getSelection()
+    //   TextUtils.updateSelection(start, end)
+    //   TextPropUtils.updateTextPropsState()
+    // },
+    // onTyping(mutations: MutationRecord[], observer: MutationObserver) {
+    //   observer.disconnect()
+    //   const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
+    //   const config = GeneralUtils.deepCopy(this.config) as IText
+    //   config.paragraphs = paragraphs
+    //   this.updateTextState({ paragraphs })
+    //   this.textSizeRefresh(config)
+    //   this.hasChangeTextContent = true
+    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
+    // },
+    // onKeyDown(e: KeyboardEvent) {
+    //   const observer = new MutationObserver(this.onTyping)
+    //   observer.observe(tiptapUtils.editor?.view?.dom as HTMLElement, {
+    //     characterData: true,
+    //     childList: true,
+    //     subtree: true,
+    //     attributes: false,
+    //     attributeOldValue: false,
+    //     characterDataOldValue: false
+    //   })
 
-      if (this.isComposeEndEnter) {
-        this.isComposeEndEnter = false
-        return
-      }
+    //   if (this.isComposeEndEnter) {
+    //     this.isComposeEndEnter = false
+    //     return
+    //   }
 
-      if (['Enter', 'Backspace', 'Delete'].includes(e.key) && !e.isComposing) {
-        console.warn(e.isComposing)
-        e.preventDefault()
+    //   if (['Enter', 'Backspace', 'Delete'].includes(e.key) && !e.isComposing) {
+    //     console.warn(e.isComposing)
+    //     e.preventDefault()
 
-        const sel = window.getSelection()
-        if (!sel?.rangeCount) {
-          throw new Error('cant access selection')
-        }
+    //     const sel = window.getSelection()
+    //     if (!sel?.rangeCount) {
+    //       throw new Error('cant access selection')
+    //     }
 
-        const { start, end } = TextUtils.getSelection()
-        TextUtils.updateSelection(start, end)
-        const config = GeneralUtils.deepCopy(this.config) as IText
-        config.paragraphs = this.paragraphs
+    //     const { start, end } = TextUtils.getSelection()
+    //     TextUtils.updateSelection(start, end)
+    //     const config = GeneralUtils.deepCopy(this.config) as IText
+    //     config.paragraphs = this.paragraphs
 
-        const paragraphs = TextUtils.textHandler(config, e.key)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-        this.hasChangeTextContent = false
-        this.updateTextState({ paragraphs })
-        this.textSizeRefresh(this.config)
-        this.$nextTick(() => {
-          TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
-        })
-      }
-    },
-    rangedHandler(config: IText, e: KeyboardEvent) {
-      if (e.key !== 'CapsLock') e.preventDefault()
-      const paragraphs = TextUtils.textHandler(config, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.textSizeRefresh(this.config)
-      setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
-    },
-    onKeyUp(e: KeyboardEvent) {
-      const { start, end } = TextUtils.getSelection()
-      TextUtils.updateSelection(start, end)
-      TextPropUtils.updateTextPropsState()
-      this.isComposeEndEnter = false
-    },
-    composingStart() {
-      this.isComposing = true
-    },
-    composingEnd() {
-      this.isComposing = false
-      this.isComposeEndEnter = true
-      const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
-      const config = GeneralUtils.deepCopy(this.config) as IText
-      config.paragraphs = paragraphs
-      this.textSizeRefresh(config)
-      this.updateTextState({ paragraphs })
-    },
-    onTextFocus() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-    },
-    onTextBlur() {
-      if (this.hasChangeTextContent) {
-        this.contentEditable = false
-        this.hasChangeTextContent = false
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
-      }
-    },
+    //     const paragraphs = TextUtils.textHandler(config, e.key)
+    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+    //     this.hasChangeTextContent = false
+    //     this.updateTextState({ paragraphs })
+    //     this.textSizeRefresh(this.config)
+    //     this.$nextTick(() => {
+    //       TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
+    //     })
+    //   }
+    // },
+    // rangedHandler(config: IText, e: KeyboardEvent) {
+    //   if (e.key !== 'CapsLock') e.preventDefault()
+    //   const paragraphs = TextUtils.textHandler(config, e.key)
+    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
+    //   this.textSizeRefresh(this.config)
+    //   setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
+    // },
+    // onKeyUp(e: KeyboardEvent) {
+    //   const { start, end } = TextUtils.getSelection()
+    //   TextUtils.updateSelection(start, end)
+    //   TextPropUtils.updateTextPropsState()
+    //   this.isComposeEndEnter = false
+    // },
+    // composingStart() {
+    //   this.isComposing = true
+    // },
+    // composingEnd() {
+    //   this.isComposing = false
+    //   this.isComposeEndEnter = true
+    //   const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
+    //   const config = GeneralUtils.deepCopy(this.config) as IText
+    //   config.paragraphs = paragraphs
+    //   this.textSizeRefresh(config)
+    //   this.updateTextState({ paragraphs })
+    // },
+    // onTextFocus() {
+    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+    // },
+    // onTextBlur() {
+    //   if (this.hasChangeTextContent) {
+    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+    //     this.hasChangeTextContent = false
+    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
+    //   }
+    // },
     handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config)

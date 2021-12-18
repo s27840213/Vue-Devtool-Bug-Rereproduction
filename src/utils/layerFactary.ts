@@ -167,6 +167,7 @@ class LayerFactary {
       dragging: false,
       designId: '',
       isEdited: false,
+      contentEditable: false,
       styles: {
         x: 0,
         y: 0,

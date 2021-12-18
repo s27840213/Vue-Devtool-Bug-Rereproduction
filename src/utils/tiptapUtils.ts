@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import { Editor, EditorEvents } from '@tiptap/vue-2'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -6,17 +5,17 @@ import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
+import layerUtils from '@/utils/layerUtils'
 import store from '@/store'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
-import textPropUtils from './textPropUtils'
 
 class TiptapUtils {
   event: any
   eventHandler: undefined | ((editor: Editor) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
-  hasFocus = false
+  // hasFocus = false
 
   constructor() {
     this.event = new EventEmitter()
@@ -40,9 +39,10 @@ class TiptapUtils {
       },
       onCreate: ({ editor }) => {
         this.prevText = this.getText(editor as Editor)
+        editor.commands.selectAll()
       },
       onFocus: () => {
-        this.hasFocus = true
+        // this.hasFocus = true
       }
       // autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
       // parseOptions: {
@@ -229,11 +229,12 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, hasFocus = this.hasFocus) {
+  applySpanStyle(key: string, value: any, applyToBlock = false) {
     const item: {[string: string]: any} = {}
     item[key] = value
+    const contentEditable = layerUtils.getCurrLayer.contentEditable
     this.agent(editor => {
-      if (hasFocus) {
+      if (!applyToBlock && contentEditable) {
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
@@ -242,7 +243,7 @@ class TiptapUtils {
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().setMark('textStyle', attr).run()
             setTimeout(() => {
-              editor.chain().focus().run()
+              editor.commands.focus()
             }, 10)
           } else {
             editor.chain().updateAttributes('textStyle', item).run()
@@ -253,9 +254,11 @@ class TiptapUtils {
         }
       } else {
         editor.chain().selectAll().updateAttributes('textStyle', item).run()
-        setTimeout(() => {
-          editor.chain().focus().selectPrevious().run()
-        }, 10)
+        if (applyToBlock) {
+          setTimeout(() => {
+            editor.commands.focus()
+          }, 10)
+        }
       }
     })
   }
@@ -264,10 +267,13 @@ class TiptapUtils {
     const item: {[string: string]: any} = {}
     item[key] = value
     this.agent(editor => {
-      if (this.hasFocus) {
+      if (layerUtils.getCurrLayer.contentEditable) {
         editor.chain().updateAttributes('paragraph', item).run()
+        setTimeout(() => {
+          editor.chain().focus().selectPrevious().run()
+        }, 10)
       } else {
-        editor.chain().selectAll().updateAttributes('paragraph', item).run()
+        editor.chain().updateAttributes('paragraph', item).run()
       }
     })
   }
