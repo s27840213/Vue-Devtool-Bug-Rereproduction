@@ -198,8 +198,8 @@ export default Extension.create({
             parseHTML: element => {
               const paragraphStyle = element.style
               const textAlign = paragraphStyle.textAlign
-              if (!textAlign.match(/^text-align-(left|center|right|justify)$/)) return null
-              return textAlign.replace('text-align-', '')
+              if (!textAlign.match(/^left|center|right|justify$/)) return null
+              return textAlign
             },
             renderHTML: attributes => {
               return {
