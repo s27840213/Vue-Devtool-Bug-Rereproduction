@@ -124,6 +124,6 @@ export default Vue.extend({
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
-  user-select: none;;
+  user-select: none;
 }
 </style>

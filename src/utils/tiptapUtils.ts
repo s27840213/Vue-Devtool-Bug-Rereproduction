@@ -229,12 +229,12 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToBlock = false) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined) {
     const item: {[string: string]: any} = {}
     item[key] = value
     const contentEditable = layerUtils.getCurrLayer.contentEditable
     this.agent(editor => {
-      if (!applyToBlock && contentEditable) {
+      if (contentEditable && (applyToRange !== false)) { // contentEditable or not contentEditable and isRanged (set font for range)
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
@@ -254,11 +254,6 @@ class TiptapUtils {
         }
       } else {
         editor.chain().selectAll().updateAttributes('textStyle', item).run()
-        if (applyToBlock) {
-          setTimeout(() => {
-            editor.commands.focus()
-          }, 10)
-        }
       }
     })
   }

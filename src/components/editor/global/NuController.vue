@@ -208,7 +208,8 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string }
       },
       subControlerIndexs: [],
-      hasChangeTextContent: false
+      hasChangeTextContent: false,
+      movingByControlPoint: false
     }
   },
   mounted() {
@@ -352,6 +353,7 @@ export default Vue.extend({
       if (!newVal) {
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }
+      tiptapUtils.agent(editor => editor.setEditable(newVal))
     }
   },
   destroyed() {
@@ -585,6 +587,7 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      this.movingByControlPoint = false
       const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
@@ -594,7 +597,10 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
           })
-          if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
+          const targetClassList = (e.target as HTMLElement).classList
+          const isMoveBar = targetClassList.contains('control-point__move-bar')
+          const isMover = targetClassList.contains('control-point__mover')
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
@@ -617,7 +623,11 @@ export default Vue.extend({
             return
           }
 
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+          if (isMover || isMoveBar) {
+            this.movingByControlPoint = true
+          } else {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+          }
           break
         }
         case 'group':
@@ -722,12 +732,15 @@ export default Vue.extend({
           // }
         }
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-          StepsUtils.record()
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
+          StepsUtils.record()
         } else if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+          if (this.movingByControlPoint) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          }
         }
         this.isControlling = false
         this.setCursorStyle('initial')
