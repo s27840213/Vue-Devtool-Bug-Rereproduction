@@ -209,7 +209,8 @@ export default Vue.extend({
       },
       subControlerIndexs: [],
       hasChangeTextContent: false,
-      movingByControlPoint: false
+      movingByControlPoint: false,
+      enterActive: false
     }
   },
   mounted() {
@@ -354,6 +355,7 @@ export default Vue.extend({
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }
       tiptapUtils.agent(editor => editor.setEditable(newVal))
+      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -588,10 +590,12 @@ export default Vue.extend({
     },
     moveStart(e: MouseEvent) {
       this.movingByControlPoint = false
+      this.enterActive = false
       const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
       }
+      this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -603,6 +607,7 @@ export default Vue.extend({
           if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
+            this.enterActive = true
             let targetIndex = this.layerIndex
             // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
             if (!inSelectionMode) {
@@ -636,7 +641,6 @@ export default Vue.extend({
             return
           }
       }
-      this.initTranslate = this.getLayerPos
       if (!this.config.locked && !inSelectionMode) {
         this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
@@ -740,6 +744,9 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
           if (this.movingByControlPoint) {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          }
+          if (this.enterActive) {
+            StepsUtils.record()
           }
         }
         this.isControlling = false

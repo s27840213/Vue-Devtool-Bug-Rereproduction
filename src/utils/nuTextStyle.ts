@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
+import { Editor } from '@tiptap/vue-2'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
@@ -8,6 +9,7 @@ import textPropUtils from './textPropUtils'
 import assetUtils from './assetUtils'
 import i18n from '@/i18n'
 import shortcutUtils from './shortcutUtils'
+import generalUtils from './generalUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -24,8 +26,7 @@ export default Extension.create({
     return {
       spanStyle: undefined,
       from: undefined,
-      to: undefined,
-      prevChangeCount: 0
+      to: undefined
     }
   },
   onSelectionUpdate() {
@@ -50,13 +51,11 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
-      const currChangeCount = (this.editor.view as any).domChangeCount
-      if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {
+      if (tiptapUtils.getText(this.editor as Editor) === tiptapUtils.prevText && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
           selection: { from, to }
         })
       }
-      this.storage.prevChangeCount = currChangeCount
     }
   },
   addGlobalAttributes() {
@@ -255,8 +254,10 @@ export default Extension.create({
       'Mod-z': ({ editor }) => {
         stepsUtils.undo()
         Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
+          const currLayer = layerUtils.getCurrLayer as IText
+          if (!currLayer.active) return
           editor.commands.sync()
+          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
           textPropUtils.updateTextPropsState()
         })
         return true
@@ -264,8 +265,10 @@ export default Extension.create({
       'Shift-Mod-z': ({ editor }) => {
         stepsUtils.redo()
         Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
+          const currLayer = layerUtils.getCurrLayer as IText
+          if (!currLayer.active) return
           editor.commands.sync()
+          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
           textPropUtils.updateTextPropsState()
         })
         return true
@@ -273,26 +276,13 @@ export default Extension.create({
 
       // Russian keyboard layouts
       'Mod-я': ({ editor }) => {
-        stepsUtils.undo()
-        Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
-          editor.commands.sync()
-          textPropUtils.updateTextPropsState()
-        })
-        return true
+        return editor.commands.keyboardShortcut('Mod-z')
       },
       'Shift-Mod-я': ({ editor }) => {
-        stepsUtils.redo()
-        Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
-          editor.commands.sync()
-          textPropUtils.updateTextPropsState()
-        })
-        return true
+        return editor.commands.keyboardShortcut('Shift-Mod-z')
       },
       'Shift-Enter': ({ editor }) => {
-        editor.commands.keyboardShortcut('Enter')
-        return true
+        return editor.commands.keyboardShortcut('Enter')
       },
       'Mod-c': () => {
         shortcutUtils.textCopy()
