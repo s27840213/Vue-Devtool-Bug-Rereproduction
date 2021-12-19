@@ -15,7 +15,6 @@ class TiptapUtils {
   eventHandler: undefined | ((editor: Editor) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
-  // hasFocus = false
 
   constructor() {
     this.event = new EventEmitter()
@@ -134,7 +133,7 @@ class TiptapUtils {
   generateSpanStyle(spanStyle: CSSStyleDeclaration): ISpanStyle {
     return {
       font: spanStyle.fontFamily.split(',')[0],
-      weight: spanStyle.getPropertyValue('-webkit-text-stroke-width') === '0px' ? 'normal' : 'bold',
+      weight: spanStyle.getPropertyValue('-webkit-text-stroke-width').includes('+') ? 'bold' : 'normal',
       size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,

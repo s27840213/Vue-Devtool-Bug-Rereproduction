@@ -84,7 +84,7 @@ export default Extension.create({
                 return spanStyle.fontWeight === 'bold' ? 'bold' : 'normal'
               }
               if (stroke === '') return null
-              return stroke === '0px' ? 'normal' : 'bold'
+              return stroke.includes('+') ? 'bold' : 'normal'
             },
             renderHTML: () => ({})
           },

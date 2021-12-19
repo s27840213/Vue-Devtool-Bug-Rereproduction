@@ -525,6 +525,7 @@ export default Vue.extend({
         return this.config.styles.zindex + 1
       })()
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
@@ -532,7 +533,8 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     lineControlPointStyles() {
