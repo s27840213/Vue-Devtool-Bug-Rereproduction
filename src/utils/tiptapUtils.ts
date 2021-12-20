@@ -39,14 +39,7 @@ class TiptapUtils {
       onCreate: ({ editor }) => {
         this.prevText = this.getText(editor as Editor)
         editor.commands.selectAll()
-      },
-      onFocus: () => {
-        // this.hasFocus = true
       }
-      // autofocus: 'start', // this is required, otherwise the cursor in Chrome will be shown weirdly
-      // parseOptions: {
-      //   preserveWhitespace: true
-      // },
     })
   }
 
@@ -106,23 +99,35 @@ class TiptapUtils {
     return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
-  toHTML(paragraphs: IParagraph[]): string {
-    return (paragraphs as IParagraph[]).map((p) => {
-      return `<p style="${this.textStyles(p.styles)}"${p.spanStyle ? ` data-span-style="${p.spanStyle}"` : ''}>${
-        (p.spans.map((span) => {
-          return `<span style="${this.textStyles(span.styles)}">${
-            (!span.text && p.spans.length === 1)
-              ? '<br/>'
-              : span.text.replace(/&/g, '&amp;')
-                          .replace(/</g, '&lt;')
-                          .replace(/>/g, '&gt;')
-                          .replace(/"/g, '&quot;')
-                          .replace(/'/g, '&#039;')
-                          .replace(/ /g, '&nbsp;')
-          }</span>`
-        })).join('')
-      }</p>`
-    }).join('')
+  toJSON(paragraphs: IParagraph[]): any {
+    return {
+      type: 'doc',
+      content: paragraphs.map(p => {
+        const pObj = {
+          type: 'paragraph'
+        } as {[key: string]: any}
+        const attrs = this.makeParagraphStyle(p.styles)
+        if (p.spanStyle) {
+          attrs.spanStyle = p.spanStyle as string
+          const sStyles = this.generateSpanStyle(this.str2css(p.spanStyle as string))
+          Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
+        }
+        pObj.attrs = attrs
+        if (p.spans.length > 1 || p.spans[0].text !== '') {
+          pObj.content = p.spans.map(s => {
+            return {
+              type: 'text',
+              text: s.text,
+              marks: [{
+                type: 'textStyle',
+                attrs: this.makeSpanStyle(s.styles)
+              }]
+            }
+          })
+        }
+        return pObj
+      })
+    }
   }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
@@ -145,6 +150,11 @@ class TiptapUtils {
   makeSpanStyle(attributes: any): ISpanStyle {
     const { font, weight, size, decoration, style, color, opacity } = attributes
     return { font, weight, size, decoration, style, color, opacity } as ISpanStyle
+  }
+
+  extractSpanStyleForParagraph(attributes: any): Partial<ISpanStyle> {
+    const { weight, decoration, style, color } = attributes
+    return { weight, decoration, style, color }
   }
 
   str2css(str: string): CSSStyleDeclaration {
@@ -280,7 +290,7 @@ class TiptapUtils {
 
   updateHtml(paragraphs: IParagraph[]) {
     if (this.editor) {
-      this.editor.chain().setContent(this.toHTML(paragraphs)).selectPrevious().run()
+      this.editor.chain().setContent(this.toJSON(paragraphs)).selectPrevious().run()
     }
   }
 

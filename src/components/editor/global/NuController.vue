@@ -316,8 +316,8 @@ export default Vue.extend({
         transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio})`
       }
     },
-    textHtml(): string {
-      return tiptapUtils.toHTML(this.config.paragraphs)
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
     }
   },
   watch: {
@@ -1448,7 +1448,7 @@ export default Vue.extend({
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
-            editor.chain().setContent(tiptapUtils.toHTML(payload.paragraphs)).selectPrevious().run()
+            editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
           })
         })
       }
