@@ -183,6 +183,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   width: 225px;
+  height: fit-content;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: white;
   &:focus {

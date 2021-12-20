@@ -290,6 +290,19 @@ export default Vue.extend({
         GroupUtils.select(this.getLastSelectedPageIndex, layerIndexs)
       }
     },
+    mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {
+      const targetPageIndex = pageUtils.currFocusPageIndex
+      const targetPage: IPage = this.currFocusPage
+
+      const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
+      const mapResult = (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100)
+      return {
+        x: (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100),
+        y: (selectionData.top - pageRect.top) / (pageUtils.scaleRatio / 100),
+        width: 0,
+        height: 0
+      }
+    },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
       const minX = Math.min(initPoint.x, endPoint.x)
       const maxX = Math.max(initPoint.x, endPoint.x)

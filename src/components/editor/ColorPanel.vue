@@ -14,7 +14,7 @@
         span(class="body-1") {{$t('NN0091')}}
       div
         div(class="color-panel__add-color pointer"
-          @click="handleColorModal")
+          @click="openColorPanel($event)")
         div(v-for="color in documentColors"
           class="pointer color-panel__color"
           :style="colorStyles(color)"
@@ -33,7 +33,7 @@
         span(class="body-1") {{$t('NN0089')}}
       div
         div(class="color-panel__add-color pointer"
-          @click="handleColorModal")
+          @click="openColorPanel($event)")
         div(v-for="color in defaultColors"
           class="pointer color-panel__color"
           :style="colorStyles(color)"
@@ -41,7 +41,6 @@
     color-picker(v-if="isColorPickerOpen"
       class="color-panel__color-picker"
       ref="colorPicker"
-      :style="pickerPos()"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate")
@@ -140,17 +139,6 @@ export default Vue.extend({
         backgroundColor: color
       }
     },
-    pickerPos() {
-      return this.alignLeft ? {
-        left: '0px',
-        bottom: '0px',
-        transform: 'translate3d(-100%, 0, 0)'
-      } : {
-        right: '0px',
-        bottom: '0px',
-        transform: 'translate3d(100%, 0, 0)'
-      }
-    },
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
@@ -168,45 +156,43 @@ export default Vue.extend({
     },
     closePanel(): void {
       this.$emit('toggleColorPanel', false)
+    },
+    openColorPanel(event: MouseEvent) {
+      colorUtils.setIsColorPickerOpen(true)
+      Vue.nextTick(() => {
+        const colorPanel = this.$refs.colorPanel as HTMLElement
+        const colorPicker = document.getElementsByClassName('color-panel__color-picker')[0] as HTMLElement
+        const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
+        const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+        const mousePos = mouseUtils.getMouseAbsPoint(event)
+        const { top, left, right } = (event.target as HTMLElement).getBoundingClientRect()
+
+        const margin = 10
+        const panelTop = colorPanel.getBoundingClientRect().top
+        let topPos = top - panelTop
+        console.log(top, height, vh, topPos)
+        if (top + height > vh) {
+          topPos -= ((top + height) - vh)
+        }
+
+        console.log(`${left - colorPanel.getBoundingClientRect().left - margin}px`)
+        console.log(`${colorPanel.getBoundingClientRect().left - width - margin}px`)
+        const pickerPos = this.alignLeft ? {
+          left: `${left - colorPanel.getBoundingClientRect().left - width - margin}px`,
+          top: `${topPos}px`
+        } : {
+          right: `${colorPanel.getBoundingClientRect().right - right - width - margin}px`,
+          top: `${topPos}px`
+        }
+        if (this.alignLeft) {
+          colorPicker.style.left = pickerPos.left ?? '0px'
+          colorPicker.style.top = pickerPos.top
+        } else {
+          colorPicker.style.right = pickerPos.right ?? '0px'
+          colorPicker.style.top = pickerPos.top
+        }
+      })
     }
-    // openColorPanel(event: MouseEvent) {
-    //   colorUtils.setIsColorPickerOpen(true)
-    //   Vue.nextTick(() => {
-    //     const colorPanel = this.$refs.colorPanel as HTMLElement
-    //     const colorPicker = document.getElementsByClassName('color-panel__color-picker')[0] as HTMLElement
-    //     console.log(colorPanel)
-    //     console.log(colorPicker)
-    //     const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
-    //     const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
-    //     console.log(colorPanel.getBoundingClientRect().top)
-    //     console.log((event.target as HTMLElement).getBoundingClientRect().top)
-    //     const mousePos = mouseUtils.getMouseAbsPoint(event)
-    //     // let xDiff = 0
-    //     // let yDiff = 0
-    //     // if ((mousePos.x + width) > vw) {
-    //     //   xDiff = (mousePos.x + width - 5) - vw
-    //     // }
-    //     // if ((mousePos.y + height) > vh) {
-    //     //   yDiff = (mousePos.y + height - 5) - vh
-    //     // }
-    //     const margin = 10
-    //     const panelTop = colorPanel.getBoundingClientRect().top
-    //     const pickerPos = this.alignLeft ? {
-    //       left: '0px',
-    //       top: `${(event.target as HTMLElement).getBoundingClientRect().top - panelTop}px`
-    //     } : {
-    //       right: `${colorPanel.getBoundingClientRect().right - (event.target as HTMLElement).getBoundingClientRect().right - width - margin}px`,
-    //       top: `${(event.target as HTMLElement).getBoundingClientRect().top - panelTop}px`
-    //     }
-    //     if (this.alignLeft) {
-    //       colorPicker.style.left = pickerPos.left ?? '0px'
-    //       colorPicker.style.top = pickerPos.top
-    //     } else {
-    //       colorPicker.style.right = pickerPos.right ?? '0px'
-    //       colorPicker.style.top = pickerPos.top
-    //     }
-    //   })
-    // }
   }
 })
 </script>
