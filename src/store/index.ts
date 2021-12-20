@@ -214,13 +214,15 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean }) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
       state.pages = newPages
     } else {
       state.pages = newPages.loadDesign ? pageUtils.newPages(newPages.pages) : newPages.pages
       state.name = newPages.name
+      state.groupId = newPages.groupId || state.groupId
+      state.groupType = newPages.groupType || state.groupType
     }
     // reset page index
     state.lastSelectedPageIndex = 0

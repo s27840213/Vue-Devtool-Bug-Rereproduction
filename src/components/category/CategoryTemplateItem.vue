@@ -66,7 +66,8 @@ export default Vue.extend({
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
 
       if (this.isEcommerceType) {
-        const resize = { width: 1080, height: matchCover.height || height }
+        const ratio = (matchCover.width || width) / 1000
+        const resize = { width: 1000, height: (matchCover.height || height) * ratio }
         return cb(resize)
       }
 

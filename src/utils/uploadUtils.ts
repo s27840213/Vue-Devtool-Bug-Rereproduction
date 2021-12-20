@@ -453,7 +453,9 @@ class UploadUtils {
 
     const resultJSON = {
       name: pageUtils.pagesName,
-      pages: pagesJSON
+      pages: pagesJSON,
+      groupId: store.state.groupId,
+      groupType: store.state.groupType
     }
 
     const formData = new FormData()

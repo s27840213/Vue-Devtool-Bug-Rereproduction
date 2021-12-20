@@ -21,6 +21,8 @@ export interface IDownloadServiceParams {
   quality?: number
   scale?: number
   pdfQuality?: 0 | 1
+  merge?: 1 | undefined
+  splitSize?: number
 }
 
 export interface IDownloadServiceResponse {

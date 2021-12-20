@@ -479,14 +479,15 @@ class AssetUtils {
             })
           }
           if (groupType === 1 && !resize) {
-            // 電商詳情頁模板 + 全部加入 = 所有寬度設為1080
+            // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             for (const idx in jsonDataList) {
-              const { height } = jsonDataList[idx]
+              const { height, width } = jsonDataList[idx]
               const pageIndex = +idx + targetIndex
-              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), { height, width: 1080 })
+              const newSize = { height: height * width / 1000, width: 1000 }
+              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
               store.commit('UPDATE_pageProps', {
                 pageIndex,
-                props: { height, width: 1080 }
+                props: newSize
               })
             }
           }
