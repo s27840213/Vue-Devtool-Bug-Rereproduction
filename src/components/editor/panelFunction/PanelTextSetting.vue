@@ -336,7 +336,6 @@ export default Vue.extend({
       StepsUtils.record()
     },
     onParaPropsClick(iconName: string) {
-      // TextPropUtils.paragraphPropsHandler(iconName)
       switch (iconName) {
         case 'text-align-left':
           tiptapUtils.applyParagraphStyle('align', 'left')
@@ -355,11 +354,6 @@ export default Vue.extend({
           TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
           break
       }
-      tiptapUtils.agent(editor => {
-        setTimeout(() => {
-          editor.chain().focus().selectPrevious().run()
-        }, 10)
-      })
       StepsUtils.record()
     },
     fontSizeStepping(step: number, tickInterval = 100) {

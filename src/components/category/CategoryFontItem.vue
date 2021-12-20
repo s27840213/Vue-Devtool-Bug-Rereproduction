@@ -90,7 +90,7 @@ export default Vue.extend({
     async setFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
-      const isRanged = this.isRanged()
+      const isRanged = !!this.isRanged()
       const sel = isRanged ? tiptapUtils.getSelection() as { start: ISelection, end: ISelection } : undefined
       const start = sel?.start || {} as ISelection
       const end = sel?.end || {} as ISelection

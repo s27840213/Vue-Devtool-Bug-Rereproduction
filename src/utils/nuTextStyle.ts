@@ -1,12 +1,15 @@
 import Vue from 'vue'
 import { IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
+import { Editor } from '@tiptap/vue-2'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
 import assetUtils from './assetUtils'
 import i18n from '@/i18n'
+import shortcutUtils from './shortcutUtils'
+import generalUtils from './generalUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -23,8 +26,7 @@ export default Extension.create({
     return {
       spanStyle: undefined,
       from: undefined,
-      to: undefined,
-      prevChangeCount: 0
+      to: undefined
     }
   },
   onSelectionUpdate() {
@@ -49,13 +51,11 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
-      const currChangeCount = (this.editor.view as any).domChangeCount
-      if (currChangeCount === this.storage.prevChangeCount && !this.editor.view.composing) {
+      if (tiptapUtils.getText(this.editor as Editor) === tiptapUtils.prevText && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
           selection: { from, to }
         })
       }
-      this.storage.prevChangeCount = currChangeCount
     }
   },
   addGlobalAttributes() {
@@ -84,7 +84,7 @@ export default Extension.create({
                 return spanStyle.fontWeight === 'bold' ? 'bold' : 'normal'
               }
               if (stroke === '') return null
-              return stroke === '0px' ? 'normal' : 'bold'
+              return stroke.includes('+') ? 'bold' : 'normal'
             },
             renderHTML: () => ({})
           },
@@ -197,8 +197,8 @@ export default Extension.create({
             parseHTML: element => {
               const paragraphStyle = element.style
               const textAlign = paragraphStyle.textAlign
-              if (!textAlign.match(/^text-align-(left|center|right|justify)$/)) return null
-              return textAlign.replace('text-align-', '')
+              if (!textAlign.match(/^left|center|right|justify$/)) return null
+              return textAlign
             },
             renderHTML: attributes => {
               return {
@@ -215,7 +215,7 @@ export default Extension.create({
               }
               const stroke = spanStyle.getPropertyValue('-webkit-text-stroke-width')
               if (stroke === '') return null
-              return stroke === '0px' ? 'normal' : 'bold'
+              return stroke.includes('+') ? 'bold' : 'normal'
             },
             renderHTML: () => ({})
           },
@@ -254,39 +254,42 @@ export default Extension.create({
       'Mod-z': ({ editor }) => {
         stepsUtils.undo()
         Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
+          const currLayer = layerUtils.getCurrLayer as IText
+          if (!currLayer.active) return
           editor.commands.sync()
+          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
       'Shift-Mod-z': ({ editor }) => {
         stepsUtils.redo()
         Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
+          const currLayer = layerUtils.getCurrLayer as IText
+          if (!currLayer.active) return
           editor.commands.sync()
+          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+          textPropUtils.updateTextPropsState()
         })
         return true
       },
 
       // Russian keyboard layouts
       'Mod-я': ({ editor }) => {
-        stepsUtils.undo()
-        Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
-          editor.commands.sync()
-        })
-        return true
+        return editor.commands.keyboardShortcut('Mod-z')
       },
       'Shift-Mod-я': ({ editor }) => {
-        stepsUtils.redo()
-        Vue.nextTick(() => {
-          if (!tiptapUtils.editor) return
-          editor.commands.sync()
-        })
-        return true
+        return editor.commands.keyboardShortcut('Shift-Mod-z')
       },
       'Shift-Enter': ({ editor }) => {
-        editor.commands.keyboardShortcut('Enter')
+        return editor.commands.keyboardShortcut('Enter')
+      },
+      'Mod-c': () => {
+        shortcutUtils.textCopy()
+        return true
+      },
+      'Mod-v': () => {
+        shortcutUtils.textPaste()
         return true
       }
     }

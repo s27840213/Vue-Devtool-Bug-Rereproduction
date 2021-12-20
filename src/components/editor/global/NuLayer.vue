@@ -87,13 +87,15 @@ export default Vue.extend({
         CssConveter.convertDefaultStyle(this.config.styles),
         { 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial' }
       )
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
       if (this.config.type === 'text') {
         Object.assign(
           styles,
-          TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {}),
+          textEffectStyles,
           {
             background: 'rgba(0, 0, 255, 0)',
-            willChange: 'text-shadow'
+            willChange: 'text-shadow',
+            '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
           }
         )
       }

@@ -51,13 +51,14 @@ export default Vue.extend({
     tiptapUtils.init(this.initText)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
+      // console.log(JSON.stringify(tiptapUtils.getText(editor)))
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
-      if (!editor.view.composing && (tiptapUtils.prevText !== editor.getText())) {
+      if (!editor.view.composing && (tiptapUtils.prevText !== tiptapUtils.getText(editor))) {
         this.$nextTick(() => {
           stepsUtils.record()
         })
       }
-      tiptapUtils.prevText = editor.getText()
+      tiptapUtils.prevText = tiptapUtils.getText(editor)
       this.updateLayerProps({ isEdited: true })
       if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
         this.updateLayerProps({ loadFontEdited: true })
@@ -67,6 +68,9 @@ export default Vue.extend({
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
     })
     tiptapUtils.on('create', ({ editor }) => {
+      if (!this.config?.isEdited) {
+        editor.commands.focus()
+      }
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
@@ -82,7 +86,7 @@ export default Vue.extend({
     tiptapUtils.on('focus', ({ editor }) => {
       this.updateLayerProps({ isTyping: true })
       if (!this.config?.isEdited) {
-        editor.chain().focus().selectAll().run()
+        editor.commands.selectAll()
       }
     })
     tiptapUtils.on('blur', () => {
@@ -120,6 +124,6 @@ export default Vue.extend({
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
-  user-select: none;;
+  user-select: none;
 }
 </style>
