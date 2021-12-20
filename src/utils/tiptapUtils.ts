@@ -241,7 +241,8 @@ class TiptapUtils {
   applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined) {
     const item: {[string: string]: any} = {}
     item[key] = value
-    const contentEditable = layerUtils.getCurrLayer.contentEditable
+    const { subLayerIdx, getCurrLayer } = layerUtils
+    const contentEditable = subLayerIdx === -1 ? getCurrLayer.contentEditable : (getCurrLayer as IGroup).layers[subLayerIdx].contentEditable
     this.agent(editor => {
       if (contentEditable && (applyToRange !== false)) { // contentEditable and (applyToRange not set or isRanged (set font for range))
         const ranges = editor.state.selection.ranges

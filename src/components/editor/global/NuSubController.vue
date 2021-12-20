@@ -80,7 +80,6 @@ export default Vue.extend({
       isControlling: false,
       isComposing: false,
       layerSizeBuff: 0,
-      contentEditable: true,
       posDiff: { x: 0, y: 0 },
       parentId: ''
     }
@@ -144,6 +143,9 @@ export default Vue.extend({
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
+    },
+    contentEditable(): boolean {
+      return this.config.contentEditable
     }
   },
   watch: {
@@ -164,7 +166,6 @@ export default Vue.extend({
             editing: false,
             isTyping: false
           })
-          this.contentEditable = false
           this.isControlling = false
 
           if (this.currTextInfo.subLayerIndex === this.layerIndex) {
@@ -197,6 +198,13 @@ export default Vue.extend({
       } else {
         this.layerSizeBuff = NaN
       }
+    },
+    contentEditable(newVal) {
+      // if (!newVal) {
+      //   tiptapUtils.agent(editor => editor.commands.selectAll())
+      // }
+      tiptapUtils.agent(editor => editor.setEditable(newVal))
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -267,11 +275,13 @@ export default Vue.extend({
         if (this.isActive && this.contentEditable) return
         else if (!this.isActive) {
           this.isControlling = true
-          this.contentEditable = false
+          // this.contentEditable = false
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
           document.addEventListener('mouseup', this.onMouseup)
           return
         }
-        this.contentEditable = true
+        // this.contentEditable = true
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
       }
       document.addEventListener('mouseup', this.onMouseup)
       this.isControlling = true
@@ -281,7 +291,8 @@ export default Vue.extend({
         this.posDiff.x = this.getPrimaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.getPrimaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
-          this.contentEditable = false
+          // this.contentEditable = false
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
       }
       document.removeEventListener('mouseup', this.onMouseup)
