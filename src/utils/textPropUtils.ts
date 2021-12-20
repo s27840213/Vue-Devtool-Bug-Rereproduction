@@ -831,10 +831,6 @@ class TextPropUtils {
         let tempEndSIndex
         for (let i = startPIndex; i <= endPIndex; i++) {
           let startSplit = false
-          const pAttrs = paragraphs[i].attrs
-          if (pAttrs) {
-            pAttrs.size += step
-          }
           const spans = paragraphs[i].content ?? []
           if (i === endPIndex) {
             tempEndSIndex = endSIndex
@@ -896,7 +892,7 @@ class TextPropUtils {
             pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
           }
         }
-        editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+        editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs), true).focus().selectPrevious().run()
         Vue.nextTick(() => {
           tiptapUtils.forceUpdate()
           this.updateTextPropsState()
