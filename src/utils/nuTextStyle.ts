@@ -215,7 +215,7 @@ export default Extension.create({
               }
               const stroke = spanStyle.getPropertyValue('-webkit-text-stroke-width')
               if (stroke === '') return null
-              return stroke === '0px' ? 'normal' : 'bold'
+              return stroke.includes('+') ? 'bold' : 'normal'
             },
             renderHTML: () => ({})
           },
