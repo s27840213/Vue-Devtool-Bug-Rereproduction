@@ -136,10 +136,10 @@
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
+            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
             nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
             div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
           div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
               class="dim-background"
               :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")

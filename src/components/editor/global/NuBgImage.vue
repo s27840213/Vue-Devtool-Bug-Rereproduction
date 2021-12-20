@@ -4,7 +4,7 @@
     draggable="false")
     div(v-if="!isColorBackground && isAdjustImage" :style="frameStyles")
       nu-adjust-image(:src="src"
-        :styles="image.config.styles")
+        :styles="adjustImgStyles")
     div(v-else :style="bgStyles")
 </template>
 
@@ -14,6 +14,8 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
+import layerUtils from '@/utils/layerUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -44,7 +46,8 @@ export default Vue.extend({
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      getPageSize: 'getPageSize'
     }),
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
@@ -81,6 +84,14 @@ export default Vue.extend({
         height: `${image.config.styles.imgHeight}px`,
         transform: `translate(${image.posX}px, ${image.posY}px) ${flipStyles.transform}`
       }
+    },
+    adjustImgStyles(): { [key: string]: string | number } {
+      return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
+        width: this.getPageSize(layerUtils.pageIndex).width,
+        height: this.getPageSize(layerUtils.pageIndex).height,
+        imgX: this.image.posX,
+        imgY: this.image.posY
+      })
     },
     bgStyles(): { [key: string]: string | number } {
       const { image, color } = this

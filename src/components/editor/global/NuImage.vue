@@ -4,7 +4,7 @@
     draggable="false")
     nu-adjust-image(v-show="isAdjustImage"
       :src="src"
-      :styles="config.styles")
+      :styles="adjustImgStyles")
     img(v-show="!isAdjustImage"
       :style="flipStyles()"
       class="nu-image__picture layer-flip"
@@ -21,6 +21,7 @@ import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters } from 'vuex'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -28,7 +29,8 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number,
     subLayerIndex: Number,
-    inheritStyle: Object
+    inheritStyle: Object,
+    isBgImgControl: Boolean
   },
   created() {
     const { type } = this.config.srcObj
@@ -90,6 +92,15 @@ export default Vue.extend({
       return Object
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
+    },
+    adjustImgStyles(): any {
+      const styles = generalUtils.deepCopy(this.config.styles)
+      if (this.isBgImgControl) {
+        Object.assign(styles.adjust, {
+          halation: 0
+        })
+      }
+      return styles
     }
   },
   methods: {
