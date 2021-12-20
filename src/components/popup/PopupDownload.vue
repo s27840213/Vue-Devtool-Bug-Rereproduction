@@ -73,9 +73,9 @@
               div(class="flex items-center")
                 property-bar(class="popup-download__size-scale ml-20 mr-5")
                   input(type="text"
-                    :value="selectedDetailPage.height"
+                    v-model.number="selectedDetailPage.height"
                     :disabled="selectedDetailPage.noLimit"
-                    @input="handleDetailPageHeight")
+                    @blur="handleMaxHeight")
                 span px
         div(class="mb-10 pt-5") {{$t('NN0124')}}
         div
@@ -167,8 +167,8 @@ export default Vue.extend({
         { value: 'splice', label: this.$t('NN0348') as string }
       ],
       selectedDetailPage: {
-        option: 'whole',
-        noLimit: true,
+        option: 'splice',
+        noLimit: false,
         height: 1500
       },
       typeOptions: [
@@ -258,7 +258,7 @@ export default Vue.extend({
     handleDetailPageIsLimited(data: { [key: string]: any }) {
       this.selectedDetailPage.noLimit = data.value === 'no-limit'
     },
-    handleDetailPageHeight(e: Event) {
+    handleMaxHeight(e: Event) {
       const value = +(e.target as HTMLInputElement).value
       if (Number.isNaN(value)) {
         this.selectedDetailPage.height = 400
