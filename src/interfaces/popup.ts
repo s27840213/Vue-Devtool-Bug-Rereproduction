@@ -1,7 +1,7 @@
 export interface IPopupProps {
   event: MouseEvent,
-  posX: string,
-  posY: string,
+  posX: 'left' | 'right',
+  posY: 'top' | 'bottom',
   target: string,
   style: string,
   layerIndex: number

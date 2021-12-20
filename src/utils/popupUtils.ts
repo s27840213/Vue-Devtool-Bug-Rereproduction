@@ -15,6 +15,8 @@ interface ISliderConfig {
 class PopupUtils {
   get isPopupOpen(): boolean { return store.getters['popup/getIsPopupOpen'] }
   get popupComponent(): IPopupComponent { return store.getters['popup/getPopupComponent'] }
+
+  currPopupType: string
   event: any
   eventHash: { [index: string]: (value: number) => void }
   currEvent: string
@@ -27,6 +29,7 @@ class PopupUtils {
   }
 
   constructor() {
+    this.currPopupType = ''
     this.event = new EventEmitter()
     this.eventHash = {}
     this.currEvent = ''
@@ -57,7 +60,7 @@ class PopupUtils {
     Object.assign(this.sliderConfig, config)
   }
 
-  private openPopupUnderTarget(target: string, pos: { x: string, y: string }) {
+  private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
     Vue.nextTick(() => {
       const el = document.querySelector('.popup') as HTMLElement
       const [width, height] = [el.offsetWidth, el.offsetHeight]
@@ -103,14 +106,15 @@ class PopupUtils {
   }
 
   openPopup(type: string, properties?: Partial<IPopupProps>) {
-    const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template', 'download']
+    const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template', 'download', 'page-scale']
     const targetMap: { [index: string]: string } = {
       order: '.layers-alt',
       align: '.btn-align',
       flip: '.btn-flip',
       slider: '.btn-opacity',
       file: '.btn-file',
-      download: '.btn-download'
+      download: '.btn-download',
+      'page-scale': '.btn-page-resize'
     }
     const onMousePos = ['layer', 'page', 'guideline']
     store.dispatch('popup/openPopup', {
@@ -120,11 +124,13 @@ class PopupUtils {
         return false
       }
     })
+
+    this.currPopupType = type
     if (underTarget.includes(type)) {
       const target = properties?.target ? properties.target : targetMap[type]
       const posX = properties?.posX ? properties.posX : 'left'
       const posY = properties?.posY ? properties.posY : 'bottom'
-      this.openPopupUnderTarget(target, {
+      this.openPopupNearTarget(target, {
         x: posX,
         y: posY
       })
@@ -138,6 +144,7 @@ class PopupUtils {
   async closePopup() {
     // await this.popupComponent.closeHandler()
     store.dispatch('popup/closePopup')
+    this.currPopupType = ''
   }
 }
 

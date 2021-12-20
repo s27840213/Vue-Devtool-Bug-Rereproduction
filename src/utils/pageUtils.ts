@@ -327,6 +327,20 @@ class PageUtils {
     this.findCentralPageIndexInfo()
   }
 
+  fillPage() {
+    const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const targetPage = this.getPage(this.lastSelectedPageIndex) as IPage
+    const resizeRatio = editorViewBox.clientWidth / (targetPage.width * (this.scaleRatio / 100)) * 0.9
+
+    editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+    if ((store.state as any).user.userId === 'backendRendering') {
+      store.commit('SET_pageScaleRatio', 100)
+    } else {
+      store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+    }
+    this.findCentralPageIndexInfo()
+  }
+
   isAllPageSizeEqual() {
     return new Set(this.getPages.map((page: IPage) => {
       return page.width

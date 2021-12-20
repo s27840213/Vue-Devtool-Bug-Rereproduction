@@ -1,14 +1,18 @@
 <template lang="pug">
   div(class="scale-ratio-editor")
-    input(ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
+    input(class="scale-ratio-editor__input"
+      ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
       v-model="ratioInPercent"
       :disabled="isShowPagePreview"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
       v-ratio-change)
-    div(class="scale-ratio-editor__percentage lead-2")
-      span(class="text-gray-2") {{pageScaleRatio}}%
-    svg-icon(class="pointer" @click.native="plus()"
-      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+    div(class="px-5 flex items-center  btn-page-resize hover-effect"
+        @click="openResizePopup()")
+      div(class="scale-ratio-editor__percentage lead-2")
+        span(class="text-gray-2") {{pageScaleRatio}}%
+      svg-icon(class="pointer"
+        :class="[{'rotate-hr': isPageScalePopupOpen}]"
+        :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
     svg-icon(class="hover-effect pointer"
       @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
@@ -24,6 +28,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   data() {
@@ -37,6 +42,9 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       showPagePanel: 'page/getShowPagePanel'
     }),
+    isPageScalePopupOpen(): boolean {
+      return popupUtils.isPopupOpen && popupUtils.currPopupType === 'page-scale'
+    },
     ratioInPercent: {
       get(): number {
         return this.pageScaleRatio / 100
@@ -68,6 +76,12 @@ export default Vue.extend({
     },
     toggleSidebarPanel(open: boolean) {
       this.$emit('toggleSidebarPanel', open)
+    },
+    openResizePopup() {
+      popupUtils.openPopup('page-scale', {
+        posX: 'right',
+        posY: 'top'
+      })
     }
   }
 })
@@ -84,8 +98,9 @@ export default Vue.extend({
   padding: 7px 14px;
   border-radius: 7px 7px 0 0;
   column-gap: 5px;
-  input[type="range"] {
+  &__input {
     background: setColor(gray-6);
+    width: 180px;
     &:focus {
       outline: none;
     }
@@ -97,8 +112,9 @@ export default Vue.extend({
 }
 
 .hover-effect {
+  border-radius: 4px;
   &:hover {
-    background-color: #d9dbe1;
+    background-color: setColor(gray-5);
   }
 }
 </style>

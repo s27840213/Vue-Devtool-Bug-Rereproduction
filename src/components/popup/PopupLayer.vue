@@ -265,25 +265,29 @@ export default Vue.extend({
         {
           icon: icons[0],
           text: this.$t('NN0231'),
-          shortcutText: 'Cmd+Alt+]',
+          shortcutText: '',
+          // shortcutText: 'Cmd+Alt+]',
           action: this.mappingIconAction(icons[0])
         },
         {
           icon: icons[1],
           text: this.$t('NN0232'),
-          shortcutText: 'Cmd+]',
+          shortcutText: '',
+          // shortcutText: 'Cmd+]',
           action: this.mappingIconAction(icons[1])
         },
         {
           icon: icons[2],
           text: this.$t('NN0233'),
-          shortcutText: 'Cmd+[',
+          shortcutText: '',
+          // shortcutText: 'Cmd+[',
           action: this.mappingIconAction(icons[2])
         },
         {
           icon: icons[3],
           text: this.$t('NN0234'),
-          shortcutText: 'Cmd+Alt+]',
+          // shortcutText: 'Cmd+Alt+]',
+          shortcutText: '',
           action: this.mappingIconAction(icons[3])
         }
       ]

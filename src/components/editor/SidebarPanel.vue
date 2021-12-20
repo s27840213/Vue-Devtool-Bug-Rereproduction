@@ -1,10 +1,15 @@
 <template lang="pug">
   div(class="panel")
+    div(class="panel__color-panel")
+      transition(name="panel-up")
+        color-panel(v-if="isColorPanelOpen"
+          @toggleColorPanel="toggleColorPanel"
+          :alignLeft="false")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
       component(v-show="isSidebarPanelOpen && !isShowPagePreview"
         class="p-10 border-box"
         :style="panelStyles()"
-        v-on="$listeners"
+        @toggleColorPanel="toggleColorPanel"
         :is="showPagePanel? 'panel-page' :panelComponents[currPanel]")
 </template>
 
@@ -13,6 +18,7 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import ColorPanel from '@/components/editor/ColorPanel.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -33,7 +39,8 @@ export default Vue.extend({
     PanelFile,
     PanelBrand,
     PanelPexels, // for testing purposes
-    PanelPage
+    PanelPage,
+    ColorPanel
   },
   props: {
     isSidebarPanelOpen: Boolean
@@ -57,7 +64,8 @@ export default Vue.extend({
         'panel-page-setting',
         'panel-photo-setting'
       ],
-      isActive: true
+      isActive: true,
+      isColorPanelOpen: false
     }
   },
   computed: {
@@ -71,9 +79,12 @@ export default Vue.extend({
     togglePanel() {
       this.isActive = !this.isActive
     },
+    toggleColorPanel(bool: boolean) {
+      this.isColorPanelOpen = bool
+    },
     panelStyles() {
       return {
-        width: this.showPagePanel ? '200px' : '320px'
+        width: this.showPagePanel ? '320px' : '320px'
       }
     }
   }
@@ -82,9 +93,17 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel {
+  height: 100%;
   position: relative;
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   background-color: setColor(sidebar-panel);
+  &__color-panel {
+    height: 50%;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
 }
 </style>

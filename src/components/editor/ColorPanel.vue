@@ -1,11 +1,15 @@
 <template lang="pug">
-  div(class="color-panel p-20" v-click-outside="vcoConfig")
+  div(class="color-panel p-20"
+      :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
+      v-click-outside="vcoConfig"
+      ref="colorPanel")
     img(class="color-panel__btn"
-      :src="require('@/assets/img/svg/btn-pack-hr.svg')"
+      :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
       @click="closePanel()")
     search-bar(:placeholder="'Search color'"
     class="mb-10")
-    div(class="color-panel__colors mb-10")
+    div(class="color-panel__colors mb-10"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
       div(class="text-left mb-5")
         span(class="body-1") {{$t('NN0091')}}
       div
@@ -23,7 +27,8 @@
     //-       class="pointer color-panel__color"
     //-       :style="colorStyles(color)"
     //-       @click="handleColorEvent(color)")
-    div(class="color-panel__colors")
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
       div(class="text-left mb-5")
         span(class="body-1") {{$t('NN0089')}}
       div
@@ -35,6 +40,8 @@
           @click="handleColorEvent(color)")
     color-picker(v-if="isColorPickerOpen"
       class="color-panel__color-picker"
+      ref="colorPicker"
+      :style="pickerPos()"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate")
@@ -47,12 +54,21 @@ import SearchBar from '@/components/SearchBar.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
-import textUtils from '@/utils/textUtils'
 import layerUtils from '@/utils/layerUtils'
 import { FunctionPanelType } from '@/store/types'
-import color from '@/store/module/color'
+import mouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
+  props: {
+    whiteTheme: {
+      type: Boolean,
+      default: false
+    },
+    alignLeft: {
+      type: Boolean,
+      default: true
+    }
+  },
   components: {
     SearchBar,
     ColorPicker
@@ -71,6 +87,7 @@ export default Vue.extend({
               return
             }
           }
+          colorUtils.setIsColorPickerOpen(false)
           this.$emit('toggleColorPanel', false)
         },
         middleware: null as unknown,
@@ -123,6 +140,17 @@ export default Vue.extend({
         backgroundColor: color
       }
     },
+    pickerPos() {
+      return this.alignLeft ? {
+        left: '0px',
+        bottom: '0px',
+        transform: 'translate3d(-100%, 0, 0)'
+      } : {
+        right: '0px',
+        bottom: '0px',
+        transform: 'translate3d(100%, 0, 0)'
+      }
+    },
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
       colorUtils.setCurrColor(color)
@@ -141,6 +169,44 @@ export default Vue.extend({
     closePanel(): void {
       this.$emit('toggleColorPanel', false)
     }
+    // openColorPanel(event: MouseEvent) {
+    //   colorUtils.setIsColorPickerOpen(true)
+    //   Vue.nextTick(() => {
+    //     const colorPanel = this.$refs.colorPanel as HTMLElement
+    //     const colorPicker = document.getElementsByClassName('color-panel__color-picker')[0] as HTMLElement
+    //     console.log(colorPanel)
+    //     console.log(colorPicker)
+    //     const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
+    //     const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+    //     console.log(colorPanel.getBoundingClientRect().top)
+    //     console.log((event.target as HTMLElement).getBoundingClientRect().top)
+    //     const mousePos = mouseUtils.getMouseAbsPoint(event)
+    //     // let xDiff = 0
+    //     // let yDiff = 0
+    //     // if ((mousePos.x + width) > vw) {
+    //     //   xDiff = (mousePos.x + width - 5) - vw
+    //     // }
+    //     // if ((mousePos.y + height) > vh) {
+    //     //   yDiff = (mousePos.y + height - 5) - vh
+    //     // }
+    //     const margin = 10
+    //     const panelTop = colorPanel.getBoundingClientRect().top
+    //     const pickerPos = this.alignLeft ? {
+    //       left: '0px',
+    //       top: `${(event.target as HTMLElement).getBoundingClientRect().top - panelTop}px`
+    //     } : {
+    //       right: `${colorPanel.getBoundingClientRect().right - (event.target as HTMLElement).getBoundingClientRect().right - width - margin}px`,
+    //       top: `${(event.target as HTMLElement).getBoundingClientRect().top - panelTop}px`
+    //     }
+    //     if (this.alignLeft) {
+    //       colorPicker.style.left = pickerPos.left ?? '0px'
+    //       colorPicker.style.top = pickerPos.top
+    //     } else {
+    //       colorPicker.style.right = pickerPos.right ?? '0px'
+    //       colorPicker.style.top = pickerPos.top
+    //     }
+    //   })
+    // }
   }
 })
 </script>
@@ -148,18 +214,17 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .color-panel {
   position: relative;
-  background-color: setColor(sidebar-panel);
   width: 100%;
   height: 100%;
   z-index: setZindex(color-panel);
   box-sizing: border-box;
+  filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__btn {
     position: absolute;
     top: 0;
-    transform: translate3d(-50%, -99%, 0);
+    transform: translate3d(-50%, -70%, 0);
   }
   &__colors {
-    color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -194,13 +259,11 @@ export default Vue.extend({
     width: 100%;
     padding-top: 100%;
     border-radius: 2px;
+    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
   }
 
   &__color-picker {
     position: absolute;
-    left: 0px;
-    bottom: 0px;
-    transform: translate3d(-100%, 0, 0);
     z-index: setZindex(color-panel);
   }
 }
