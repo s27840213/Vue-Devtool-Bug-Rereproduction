@@ -219,6 +219,7 @@ export default Vue.extend({
       input.focus()
       input.select()
       this.$emit('toggleColorPanel', true)
+      this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
@@ -333,7 +334,18 @@ export default Vue.extend({
             break
         }
       }
+      this.updateLayerProps({ isEdited: true })
       StepsUtils.record()
+    },
+    updateLayerProps(props: { [key: string]: string | number | boolean }) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      switch (currLayer.type) {
+        case 'text':
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, props)
+          break
+        case 'group':
+          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+      }
     },
     onParaPropsClick(iconName: string) {
       switch (iconName) {
