@@ -351,7 +351,7 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      if (!newVal) {
+      if (!newVal || !this.config.isEdited) {
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }
       tiptapUtils.agent(editor => editor.setEditable(newVal))

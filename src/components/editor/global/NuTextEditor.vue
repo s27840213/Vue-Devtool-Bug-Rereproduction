@@ -68,6 +68,7 @@ export default Vue.extend({
     })
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited) {
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: true })
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
@@ -82,11 +83,8 @@ export default Vue.extend({
         })
       }
     })
-    tiptapUtils.on('focus', ({ editor }) => {
+    tiptapUtils.on('focus', () => {
       this.updateLayerProps({ isTyping: true })
-      if (!this.config?.isEdited) {
-        editor.commands.selectAll()
-      }
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })

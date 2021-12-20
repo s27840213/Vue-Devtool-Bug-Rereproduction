@@ -243,7 +243,7 @@ class TiptapUtils {
     item[key] = value
     const contentEditable = layerUtils.getCurrLayer.contentEditable
     this.agent(editor => {
-      if (contentEditable && (applyToRange !== false)) { // contentEditable or not contentEditable and isRanged (set font for range)
+      if (contentEditable && (applyToRange !== false)) { // contentEditable and (applyToRange not set or isRanged (set font for range))
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
