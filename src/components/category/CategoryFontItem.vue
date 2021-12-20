@@ -138,7 +138,9 @@ export default Vue.extend({
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
         } else {
-          tiptapUtils.applySpanStyle('font', this.item.id, isRanged)
+          tiptapUtils.agent(editor => {
+            editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
+          })
           isRanged && tiptapUtils.focus()
         }
 

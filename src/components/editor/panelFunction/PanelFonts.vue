@@ -67,18 +67,11 @@ export default Vue.extend({
       fontUploadStatus: 'none'
     }
   },
-  props: {
-    hasFocus: Boolean
-  },
   mounted() {
     this.getCategories()
     uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
       this.fontUploadStatus = status
     })
-    console.log(this.hasFocus)
-    if (this.hasFocus) {
-      tiptapUtils.focus()
-    }
   },
   destroyed() {
     TextUtils.setCurrTextInfo({ layerIndex: -1 })

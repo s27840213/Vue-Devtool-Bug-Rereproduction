@@ -202,8 +202,7 @@ export default Vue.extend({
     },
     openFontsPanel() {
       this.isOpenFontPanel = true
-      this.textInfoRecorder()
-      this.$emit('openFontsPanel', this.hasFocused)
+      this.$emit('openFontsPanel')
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
@@ -224,7 +223,15 @@ export default Vue.extend({
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
 
-      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color), this.hasFocus)
+      const isFocused = (() => {
+        return window.getSelection()?.rangeCount !== 0 && (
+          () => {
+            const startContainer = window.getSelection()?.getRangeAt(0).startContainer
+            return startContainer?.nodeName === '#text'
+          })()
+      })()
+
+      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color), isFocused)
       StepsUtils.record()
 
       tiptapUtils.focus()
