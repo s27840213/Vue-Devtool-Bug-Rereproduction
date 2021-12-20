@@ -49,7 +49,7 @@
           panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
           panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
           panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel" :hasFocus="hasFocus")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
           panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
         template(v-else)
           panel-general
@@ -60,7 +60,7 @@
             panel-text-effect-setting(v-on="$listeners")
           panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
           panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel" :hasFocus="hasFocus")
+          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
 
 <script lang="ts">
@@ -97,8 +97,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      isFontsPanelOpened: false,
-      hasFocused: false
+      isFontsPanelOpened: false
     }
   },
   computed: {
@@ -152,9 +151,6 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
-    },
-    hasFocus(): boolean {
-      return this.hasFocused
     }
   },
   watch: {
@@ -165,9 +161,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    openFontsPanel(hasFocus: boolean) {
-      this.hasFocused = hasFocus
-      console.log(this.hasFocus)
+    openFontsPanel() {
       this.isFontsPanelOpened = true
     },
     closeFontsPanel() {
