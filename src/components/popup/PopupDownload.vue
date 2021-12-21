@@ -49,6 +49,34 @@
             min="1"
             v-ratio-change
             type="range")
+        div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
+          dropdown(class="mt-5"
+            :options="detailPageDownloadOptions"
+            @select="handleDetailPageOption") {{ detailPageOptionLabel }}
+          div(v-if="selectedDetailPage.option === 'splice'"
+            class="mt-10")
+            download-check-button(type="radio"
+              class="mb-10"
+              group-name="product_page"
+              :label="$t('NN0345')"
+              :default-checked="selectedDetailPage.noLimit"
+              @change="handleDetailPageIsLimited"
+              value="no-limit")
+            div
+              download-check-button(type="radio"
+                class="mb-5"
+                group-name="product_page"
+                :label="$t('NN0346')"
+                :default-checked="!selectedDetailPage.noLimit"
+                @change="handleDetailPageIsLimited"
+                value="height-limit")
+              div(class="flex items-center")
+                property-bar(class="popup-download__size-scale ml-20 mr-5")
+                  input(type="text"
+                    v-model.number="selectedDetailPage.height"
+                    :disabled="selectedDetailPage.noLimit"
+                    @blur="handleMaxHeight")
+                span px
         div(class="mb-10 pt-5") {{$t('NN0124')}}
         div
           download-check-button(type="radio"
@@ -133,7 +161,16 @@ export default Vue.extend({
       rangeType: 'current',
       pageRange: [] as number[],
       selectedTypeVal: selectedTypeVal || 'png',
-      scaleOptions: [0.5, 1, 1.5, 2, 2.5, 3],
+      scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      detailPageDownloadOptions: [
+        { value: 'whole', label: this.$t('NN0347') as string },
+        { value: 'splice', label: this.$t('NN0348') as string }
+      ],
+      selectedDetailPage: {
+        option: 'splice',
+        noLimit: false,
+        height: 1500
+      },
       typeOptions: [
         { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
         { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
@@ -146,7 +183,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['name']),
+    ...mapState(['name', 'groupType']),
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
@@ -165,6 +202,13 @@ export default Vue.extend({
       const { rangeType, pageRange } = this
       const noPagesSelected = rangeType === 'spec' && pageRange.length === 0
       return this.polling || noPagesSelected
+    },
+    isDetailPage(): boolean {
+      return this.groupType === 1
+    },
+    detailPageOptionLabel(): string {
+      const { selectedDetailPage, detailPageDownloadOptions = [] } = this
+      return detailPageDownloadOptions.find(option => option.value === selectedDetailPage.option)?.label ?? ''
     }
   },
   mounted() {
@@ -208,6 +252,21 @@ export default Vue.extend({
       const { value } = data
       this.rangeType = value
     },
+    handleDetailPageOption(data: { [key: string]: any }) {
+      this.selectedDetailPage.option = data.value
+    },
+    handleDetailPageIsLimited(data: { [key: string]: any }) {
+      this.selectedDetailPage.noLimit = data.value === 'no-limit'
+    },
+    handleMaxHeight(e: Event) {
+      const value = +(e.target as HTMLInputElement).value
+      if (Number.isNaN(value)) {
+        this.selectedDetailPage.height = 400
+      } else {
+        this.selectedDetailPage.height = value < 400 ? 400 : value
+      }
+      (e.target as HTMLInputElement).value = `${this.selectedDetailPage.height}`
+    },
     handleUpdate(field: string, option: string | number) {
       Object.assign(this.selected, { [field]: option })
     },
@@ -243,6 +302,13 @@ export default Vue.extend({
         teamId: '',
         format: selectedTypeVal,
         ...selected
+      }
+
+      if (this.isDetailPage) {
+        this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
+        this.selectedDetailPage.option === 'splice' &&
+          !this.selectedDetailPage.noLimit &&
+          (fileInfo.splitSize = this.selectedDetailPage.height)
       }
 
       if (['spec', 'current'].includes(rangeType)) {

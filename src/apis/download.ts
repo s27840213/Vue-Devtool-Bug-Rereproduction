@@ -15,7 +15,9 @@ class DownloadService {
       omit_background: params.omitBackground,
       quality: params.quality,
       scale: params.scale,
-      pdf_quality: params.pdfQuality
+      pdf_quality: params.pdfQuality,
+      merge: params.merge,
+      split_size: params.splitSize
     }
 
     return axios.request<IDownloadServiceResponse>({

@@ -28,7 +28,9 @@
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -53,7 +55,7 @@ export default Vue.extend({
     },
     cssFilterElms(): any[] {
       const { styles: { adjust, width, imgX, imgY, height } } = this
-      // @TODO: only for halation now
+      // @s.TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
       }
