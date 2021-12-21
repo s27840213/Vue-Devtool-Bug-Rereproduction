@@ -50,6 +50,9 @@ export default Vue.extend({
           ...content,
           type: 6
         }))
+    },
+    isDetailPage(): boolean {
+      return this.groupItem.group_type === 1
     }
   },
   methods: {
@@ -60,7 +63,7 @@ export default Vue.extend({
       if (!this.isAdmin) return
       modalUtils.setIsModalOpen(true)
       modalUtils.setModalInfo(
-        '確認刪除群組模板？',
+        this.isDetailPage ? '確認刪除詳情頁模板？' : '確認刪除群組模板？',
         [],
         {
           msg: '',
@@ -71,7 +74,7 @@ export default Vue.extend({
               update: 1,
               list: '',
               group_id: this.groupItem.group_id,
-              ecomm: 0
+              ecomm: this.isDetailPage ? 1 : 0
             })
           }
         }
