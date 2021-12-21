@@ -329,12 +329,6 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const text = document.getElementById(`text-${this.layerIndex}`)
-          if (text && text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
-            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-            zindexUtils.reassignZindex(this.pageIndex)
-            return
-          }
           if (!this.isLocked) {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -1345,107 +1339,6 @@ export default Vue.extend({
           MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
-    // onClick(e: MouseEvent) {
-    //   // if (!['text', 'group', 'tmp'].includes(this.config.type)) return
-    //   // this.textClickHandler(e)
-    // },
-    // textClickHandler(e: MouseEvent) {
-    //   if (this.config.isEdited && this.hasChangeTextContent && TextUtils.isSel(this.sel.end)) {
-    //     this.hasChangeTextContent = false
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs })
-    //     this.$nextTick(() => {
-    //       TextUtils.focus(this.sel.start, this.sel.end)
-    //     })
-    //   }
-    //   const { start, end } = TextUtils.getSelection()
-    //   TextUtils.updateSelection(start, end)
-    //   TextPropUtils.updateTextPropsState()
-    // },
-    // onTyping(mutations: MutationRecord[], observer: MutationObserver) {
-    //   observer.disconnect()
-    //   const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
-    //   const config = GeneralUtils.deepCopy(this.config) as IText
-    //   config.paragraphs = paragraphs
-    //   this.updateTextState({ paragraphs })
-    //   this.textSizeRefresh(config)
-    //   this.hasChangeTextContent = true
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-    // },
-    // onKeyDown(e: KeyboardEvent) {
-    //   const observer = new MutationObserver(this.onTyping)
-    //   observer.observe(tiptapUtils.editor?.view?.dom as HTMLElement, {
-    //     characterData: true,
-    //     childList: true,
-    //     subtree: true,
-    //     attributes: false,
-    //     attributeOldValue: false,
-    //     characterDataOldValue: false
-    //   })
-
-    //   if (this.isComposeEndEnter) {
-    //     this.isComposeEndEnter = false
-    //     return
-    //   }
-
-    //   if (['Enter', 'Backspace', 'Delete'].includes(e.key) && !e.isComposing) {
-    //     console.warn(e.isComposing)
-    //     e.preventDefault()
-
-    //     const sel = window.getSelection()
-    //     if (!sel?.rangeCount) {
-    //       throw new Error('cant access selection')
-    //     }
-
-    //     const { start, end } = TextUtils.getSelection()
-    //     TextUtils.updateSelection(start, end)
-    //     const config = GeneralUtils.deepCopy(this.config) as IText
-    //     config.paragraphs = this.paragraphs
-
-    //     const paragraphs = TextUtils.textHandler(config, e.key)
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-    //     this.hasChangeTextContent = false
-    //     this.updateTextState({ paragraphs })
-    //     this.textSizeRefresh(this.config)
-    //     this.$nextTick(() => {
-    //       TextUtils.focus(TextUtils.getCurrSel.start, TextUtils.getCurrSel.end)
-    //     })
-    //   }
-    // },
-    // rangedHandler(config: IText, e: KeyboardEvent) {
-    //   if (e.key !== 'CapsLock') e.preventDefault()
-    //   const paragraphs = TextUtils.textHandler(config, e.key)
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-    //   this.textSizeRefresh(this.config)
-    //   setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
-    // },
-    // onKeyUp(e: KeyboardEvent) {
-    //   const { start, end } = TextUtils.getSelection()
-    //   TextUtils.updateSelection(start, end)
-    //   TextPropUtils.updateTextPropsState()
-    //   this.isComposeEndEnter = false
-    // },
-    // composingStart() {
-    //   this.isComposing = true
-    // },
-    // composingEnd() {
-    //   this.isComposing = false
-    //   this.isComposeEndEnter = true
-    //   const paragraphs = TextUtils.textParser(tiptapUtils.editor?.view?.dom as HTMLElement)
-    //   const config = GeneralUtils.deepCopy(this.config) as IText
-    //   config.paragraphs = paragraphs
-    //   this.textSizeRefresh(config)
-    //   this.updateTextState({ paragraphs })
-    // },
-    // onTextFocus() {
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-    // },
-    // onTextBlur() {
-    //   if (this.hasChangeTextContent) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //     this.hasChangeTextContent = false
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: this.paragraphs, isTyping: false })
-    //   }
-    // },
     handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config)
