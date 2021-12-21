@@ -39,8 +39,11 @@ export default Vue.extend({
       const { match_cover: cover, ver, id } = this.item
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
     },
-    isEcommerceType(): boolean {
-      return this.groupItem?.group_type === 1
+    designGroupType(): number {
+      return this.$store.state.groupType
+    },
+    isDetailPage(): boolean {
+      return this.designGroupType === 1 || this.groupItem?.group_type === 1
     }
   },
   methods: {
@@ -65,7 +68,7 @@ export default Vue.extend({
         ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
 
-      if (this.isEcommerceType) {
+      if (this.isDetailPage) {
         const ratio = (matchCover.width || width) / 1000
         const resize = { width: 1000, height: (matchCover.height || height) * ratio }
         return cb(resize)
