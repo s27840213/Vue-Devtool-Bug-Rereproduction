@@ -101,6 +101,7 @@
               :default-checked="rangeType === 'spec'"
               @change="handleRangeType")
             download-page-selection(class="ml-5 w-75"
+              :defaultSelected="pageRange"
               @confirm="handleRangeConfirm")
         hr(class="popup-download__hr my-15")
         download-check-button(type="checkbox"
@@ -148,25 +149,34 @@ export default Vue.extend({
     pageIndex: Number
   },
   data() {
-    const { selectedTypeVal, ...prevSubmission } = JSON.parse(localStorage.getItem(submission) || '{}')
+    const {
+      selectedTypeVal,
+      rangeType = 'current',
+      pageRange = [],
+      selectedDetailPage,
+      ...prevSubmission
+    } = JSON.parse(localStorage.getItem(submission) || '{}')
+    const prevInfo = {
+      saveSubmission: !!selectedTypeVal,
+      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
+      selectedTypeVal: selectedTypeVal || 'png',
+      rangeType,
+      pageRange: rangeType === 'spec' ? pageRange : []
+    }
     const currentPageIndex = this.pageIndex || 0
     return {
+      ...prevInfo,
       currentPageIndex,
-      saveSubmission: !!selectedTypeVal,
       polling: false,
       progress: -1,
-      functionQueue: [] as Array<() => void>,
       exportId: '',
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
-      rangeType: 'current',
-      pageRange: [] as number[],
-      selectedTypeVal: selectedTypeVal || 'png',
+      functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
       ],
-      selectedDetailPage: {
+      selectedDetailPage: selectedDetailPage || {
         option: 'splice',
         noLimit: false,
         height: 1500
@@ -283,6 +293,19 @@ export default Vue.extend({
       this.polling = true
       this.exportId ? this.handleDownload() : (this.functionQueue = [this.handleDownload])
     },
+    handleSubmissionInfo() {
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange } = this
+      const info = {
+        ...selected,
+        selectedTypeVal,
+        rangeType,
+        pageRange,
+        selectedDetailPage
+      }
+      saveSubmission
+        ? localStorage.setItem(submission, JSON.stringify(info))
+        : localStorage.removeItem(submission)
+    },
     async handleDownload() {
       this.polling = true
       const {
@@ -290,12 +313,10 @@ export default Vue.extend({
         selected,
         pageRange,
         rangeType,
-        selectedTypeVal,
-        saveSubmission
+        selectedTypeVal
       } = this
-      saveSubmission
-        ? localStorage.setItem(submission, JSON.stringify({ ...selected, selectedTypeVal }))
-        : localStorage.removeItem(submission)
+
+      this.handleSubmissionInfo()
 
       const fileInfo = {
         exportId,
