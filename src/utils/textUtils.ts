@@ -549,7 +549,7 @@ class TextUtils {
   }
 
   textResizeHandler(pageIndex: number, layerIndex: number, width: number, height: number): [number, number] {
-    const text = document.getElementById(`text-${layerIndex}`)
+    const text = document.getElementById(`text-${layerIndex}`)?.firstElementChild as HTMLElement
     if (text) {
       const config = LayerUtils.getLayer(pageIndex, layerIndex) as IText
       const scaleRatio = store.getters.getPageScaleRatio
