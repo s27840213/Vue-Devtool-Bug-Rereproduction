@@ -25,6 +25,10 @@ class LayerUtils {
     return store.getters.getLayer
   }
 
+  get getLayers(): (pageIndex: number) => Array<IImage | IText | IShape | IGroup | IFrame> {
+    return store.getters.getLayers
+  }
+
   addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,

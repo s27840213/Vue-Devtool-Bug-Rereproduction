@@ -62,6 +62,8 @@ import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
+import layerUtils from '@/utils/layerUtils'
+import mathUtils from '@/utils/mathUtils'
 
 export default Vue.extend({
   components: {
@@ -284,6 +286,18 @@ export default Vue.extend({
           layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
         }
       })
+      // const selectionAreaInfo = this.mapSelectionRectToPage(selectionData)
+      // const layers = layerUtils.getLayers(this.getLastSelectedPageIndex)
+      // // const layers = [...document.querySelectorAll(`.nu-layer--p${this.getLastSelectedPageIndex}`)]
+      // const layerIndexs: number[] = []
+      // layers.forEach((layer) => {
+      //   mathUtils.getCornerPoints(0, selectionAreaInfo)
+      //   const layerData = layer.getBoundingClientRect()
+      //   if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
+      //     (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
+      //     layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+      //   }
+      // })
       if (layerIndexs.length > 0) {
         console.log(`Overlap num: ${layerIndexs.length}`)
         // this.addSelectedLayer(layerIndexs as number[])
@@ -295,12 +309,12 @@ export default Vue.extend({
       const targetPage: IPage = this.currFocusPage
 
       const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-      const mapResult = (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100)
+
       return {
         x: (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100),
         y: (selectionData.top - pageRect.top) / (pageUtils.scaleRatio / 100),
-        width: 0,
-        height: 0
+        width: (selectionData.right - selectionData.left) / (pageUtils.scaleRatio / 100),
+        height: (selectionData.bottom - selectionData.top) / (pageUtils.scaleRatio / 100)
       }
     },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {

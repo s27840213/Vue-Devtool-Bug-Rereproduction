@@ -100,7 +100,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳群組模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1 && this.groupType === 0,
+          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 0)
           }

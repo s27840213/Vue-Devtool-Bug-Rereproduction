@@ -1,5 +1,6 @@
 import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 
 class MathUtils {
@@ -66,6 +67,97 @@ class MathUtils {
       offsetX: x * (100 / scaleRatio),
       offsetY: y * (100 / scaleRatio)
     }
+  }
+
+  // getCornerPoints(angle: number, posInfo: Partial<IStyle>) {
+  //   const { x, y, width, height } = posInfo
+  //   const center = this.getCenter(posInfo)
+  //   const posArr = [{
+  //     x,
+  //     y
+  //   },
+  //   {
+  //     x: x + width,
+  //     y
+  //   },
+  //   {
+  //     x: x + width,
+  //     y: y + height
+  //   },
+  //   {
+  //     x,
+  //     y: y + height
+  //   }]
+
+  //   return posArr.map((pos) => {
+  //     return this.getRotatedPoint(angle, center, pos)
+  //   })
+  // }
+
+  /**
+ * Helper function to determine whether there is an intersection between the two polygons described
+ * by the lists of vertices. Uses the Separating Axis Theorem
+ *
+ * @param a an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @param b an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @return true if there is any intersection between the 2 polygons, false otherwise
+ */
+  doPolygonsIntersect(a: Array<{ x: number, y: number }>, b: Array<{ x: number, y: number }>) {
+    const polygons = [a, b]
+    let minA = Number.MAX_SAFE_INTEGER
+    let minB = Number.MAX_SAFE_INTEGER
+    let maxA = Number.MIN_SAFE_INTEGER
+    let maxB = Number.MIN_SAFE_INTEGER
+    let projected = 0
+
+    // const minA, maxA, projected, i, i1, j, minB, maxB
+
+    for (let i = 0; i < polygons.length; i++) {
+      // for each polygon, look at each edge of the polygon, and determine if it separates
+      // the two shapes
+      const polygon = polygons[i]
+      for (let i1 = 0; i1 < polygon.length; i1++) {
+        // grab 2 vertices to create an edge
+        const i2 = (i1 + 1) % polygon.length
+        const p1 = polygon[i1]
+        const p2 = polygon[i2]
+
+        // find the line perpendicular to this edge
+        const normal = { x: p2.y - p1.y, y: p1.x - p2.x }
+
+        // for each vertex in the first shape, project it onto the line perpendicular to the edge
+        // and keep track of the min and max of these values
+        for (let j = 0; j < a.length; j++) {
+          projected = normal.x * a[j].x + normal.y * a[j].y
+          if (!minA || projected < minA) {
+            minA = projected
+          }
+          if (!maxA || projected > maxA) {
+            maxA = projected
+          }
+        }
+
+        // for each vertex in the second shape, project it onto the line perpendicular to the edge
+        // and keep track of the min and max of these values
+        for (let j = 0; j < b.length; j++) {
+          projected = normal.x * b[j].x + normal.y * b[j].y
+          if (!minB || projected < minB) {
+            minB = projected
+          }
+          if (!minB || projected > maxB) {
+            maxB = projected
+          }
+        }
+
+        // if there is no overlap between the projects, the edge we are looking at separates the two
+        // polygons, and we know there is no overlap
+        if (maxA < minB || maxB < minA) {
+          console.log("polygons don't intersect!")
+          return false
+        }
+      }
+    }
+    return true
   }
 
   multipy(multiplier: number, _params: { [key: string]: number } | Array<number>): { [key: string]: number } | Array<number> {
