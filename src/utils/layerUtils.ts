@@ -39,6 +39,15 @@ class LayerUtils {
     return -1
   }
 
+  get getCurrConfig(): ILayer {
+    return this.subLayerIdx === -1 ? this.getCurrLayer as IText | IImage | IShape : (() => {
+      if (this.getCurrLayer.type === 'group') {
+        return (this.getCurrLayer as IGroup).layers[this.subLayerIdx]
+      }
+      return (this.getCurrLayer as IFrame).clips[this.subLayerIdx]
+    })()
+  }
+
   addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,

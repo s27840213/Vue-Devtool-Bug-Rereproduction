@@ -120,14 +120,13 @@ class TextPropUtils {
     let isStartContainerDivided = true
     if (TextUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
-      // @TODO should set to font of paragraph to the biggest size
       if (propName === 'fontFamily') {
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
         }
       }
       if (propName !== 'fontSize') {
-        [start, end] = this.spanMerger(config.paragraphs, start, end)
+        // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
     }
     if (!TextUtils.isSel(end)) {
@@ -173,7 +172,7 @@ class TextPropUtils {
     TextUtils.updateSelection(start, end)
 
     // Sync updating text effect if the color changed
-    TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
+    // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     return config
   }
 
