@@ -81,6 +81,9 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import tiptapUtils from '@/utils/tiptapUtils'
+import textPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: {
@@ -174,9 +177,33 @@ export default Vue.extend({
     },
     undo() {
       shotcutUtils.undo()
+      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            const currLayer = LayerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.commands.sync()
+            tiptapUtils.prevText = tiptapUtils.getText(editor)
+            textPropUtils.updateTextPropsState()
+          })
+        })
+      }
     },
     redo() {
       shotcutUtils.redo()
+      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            const currLayer = LayerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.commands.sync()
+            tiptapUtils.prevText = tiptapUtils.getText(editor)
+            textPropUtils.updateTextPropsState()
+          })
+        })
+      }
     }
   }
 })
