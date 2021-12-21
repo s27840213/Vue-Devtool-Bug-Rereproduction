@@ -274,9 +274,20 @@ class TiptapUtils {
     this.agent(editor => {
       if (layerUtils.getCurrLayer.contentEditable) {
         editor.chain().updateAttributes('paragraph', item).run()
-        setTimeout(() => {
-          editor.chain().focus().selectPrevious().run()
-        }, 10)
+        const ranges = editor.state.selection.ranges
+        if (ranges.length > 0) {
+          if (ranges[0].$from.pos === ranges[0].$to.pos) {
+            const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
+            editor.chain().setMark('textStyle', attr).run()
+            setTimeout(() => {
+              editor.commands.focus()
+            }, 10)
+          } else {
+            setTimeout(() => {
+              editor.chain().focus().selectPrevious().run()
+            }, 10)
+          }
+        }
       } else {
         editor.chain().updateAttributes('paragraph', item).run()
       }
