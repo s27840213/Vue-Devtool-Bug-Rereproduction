@@ -173,7 +173,7 @@ export default Vue.extend({
   },
   created() {
     this.updateTextState({ paragraphs: this.config.paragraphs })
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
   },
   data() {
     return {
@@ -344,14 +344,17 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      if (!newVal || !this.config.isEdited) {
-        tiptapUtils.agent(editor => editor.commands.selectAll())
-      }
-      tiptapUtils.agent(editor => editor.setEditable(newVal))
-      if (newVal) {
-        this.$nextTick(() => {
-          tiptapUtils.focus({ scrollIntoView: false })
-        })
+      if (this.config.type !== 'text') return
+      if (this.config.active) {
+        if (!newVal || !this.config.isEdited) {
+          tiptapUtils.agent(editor => editor.commands.selectAll())
+        }
+        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        if (newVal) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
+        }
       }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
