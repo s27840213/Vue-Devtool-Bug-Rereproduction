@@ -9,6 +9,7 @@ import { IPage } from '@/interfaces/page'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
+import tiptapUtils from './tiptapUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -586,25 +587,44 @@ class TextUtils {
     }
   }
 
-  getTextHW(content: IText, widthLimit = -1): { width: number, height: number } {
+  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number } {
     const body = document.createElement('div')
+    const content = GeneralUtils.deepCopy(_content) as IText
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
       pData.spans.forEach(spanData => {
         const span = document.createElement('span')
         span.textContent = spanData.text
-        Object.assign(span.style, CssConveter.convertFontStyle(spanData.styles))
-        span.style.whiteSpace = 'pre-wrap'
-        p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
 
+        const spanStyleObject = {}
+        tiptapUtils.textStyles(spanData.styles)
+          .split(';')
+          .forEach(s => {
+            Object.assign(spanStyleObject, {
+              [s.split(':')[0].trim()]: s.split(': ')[1].trim()
+            })
+          })
+        Object.assign(span.style, spanStyleObject)
+
+        p.classList.add('nu-text__span')
+        p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
         if (spanData.styles.size > fontSize) {
           fontSize = spanData.styles.size
         }
       })
-      Object.assign(p.style, CssConveter.convertFontStyle(pData.styles), { size: fontSize })
-      p.style.margin = '0'
-      p.style.overflowWrap = 'break-word'
+
+      const pStyleObject = {}
+      tiptapUtils.textStyles(pData.styles)
+        .split(';')
+        .forEach(s => {
+          Object.assign(pStyleObject, {
+            [s.split(':')[0].trim()]: s.split(':')[1].trim()
+          })
+        })
+      Object.assign(p.style, pStyleObject)
+
+      p.classList.add('nu-text__p')
       body.appendChild(p)
     })
     if (content.styles.writingMode.includes('vertical')) {
@@ -614,9 +634,7 @@ class TextUtils {
       body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / content.styles.scale}px`
       body.style.height = 'max-content'
     }
-    body.style.border = '1px solid blue'
-    body.style.whiteSpace = 'pre-wrap'
-    body.style.textAlign = 'center'
+    body.classList.add('nu-text')
     body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
 

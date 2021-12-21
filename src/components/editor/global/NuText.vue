@@ -159,7 +159,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .nu-text {
     width: 100%;
     height: 100%;
