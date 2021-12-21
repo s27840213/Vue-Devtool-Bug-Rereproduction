@@ -106,7 +106,7 @@ export interface ISearchPhotoParams {
 export interface IListServiceParams {
   token?: string
   locale?: string
-  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout' | 'theme' | 'hashtag'
+  type?: 'template' | 'text' | 'svg' | 'background' | 'font' | 'marker' | 'layout' | 'theme' | 'hashtag' | 'group'
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
@@ -115,6 +115,7 @@ export interface IListServiceParams {
   width?: number
   height?: number
   theme?: string
+  groupId?: string
 }
 
 export interface IGroupDesignInputParams {

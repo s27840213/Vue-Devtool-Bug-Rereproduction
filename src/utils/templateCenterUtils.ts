@@ -25,7 +25,9 @@ class TemplateCenterUtils {
         height: cover.height,
         type: 6,
         ver: cover.ver,
-        content_ids: template.content_ids
+        content_ids: template.content_ids,
+        group_type: template.group_type,
+        group_id: template.group_id
       })
     }
     return res

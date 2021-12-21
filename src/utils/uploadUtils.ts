@@ -19,6 +19,7 @@ import designUtils from './designUtils'
 import { SidebarPanelType } from '@/store/types'
 import i18n from '@/i18n'
 import logUtils from './logUtils'
+import listService from '@/apis/list'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -39,6 +40,7 @@ enum GetDesignType {
   TEXT = 'text',
   ASSET_DESIGN = 'design',
   NEW_DESIGN_TEMPLATE = 'new-design-template',
+  PRODUCT_PAGE_TEMPLATE = 'product-page-template'
 }
 /**
  * @todo do the house keeping for upload and update logic
@@ -958,6 +960,24 @@ class UploadUtils {
       //   fetchTarget = signedUrl
       //   break
       // }
+      case GetDesignType.PRODUCT_PAGE_TEMPLATE: {
+        return listService.getList({ type: 'group', groupId: designId })
+          .then(result => {
+            const { content } = result.data.data
+            return assetUtils.addGroupTemplate({
+              id: '',
+              type: 6,
+              ver: 0,
+              content_ids: content[0].list,
+              group_id: designId,
+              group_type: 1
+            })
+          })
+          .then(() => {
+            themeUtils.refreshTemplateState()
+            stepsUtils.reset()
+          })
+      }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
         fetchTarget = `https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`
         break
