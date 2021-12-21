@@ -201,7 +201,6 @@ export default Vue.extend({
       isComposing: false,
       isComposeEndEnter: false,
       isSnapping: false,
-      // contentEditable: true,
       clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
@@ -355,6 +354,11 @@ export default Vue.extend({
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }
       tiptapUtils.agent(editor => editor.setEditable(newVal))
+      if (newVal) {
+        this.$nextTick(() => {
+          tiptapUtils.focus({ scrollIntoView: false })
+        })
+      }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
