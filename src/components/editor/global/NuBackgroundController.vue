@@ -157,15 +157,10 @@ export default Vue.extend({
         x: -this.getImgWidth / 2 + (this.page.width / this.getPageScale) / 2,
         y: -this.getImgHeight / 2 + (this.page.height / this.getPageScale) / 2
       }
-      // x: -this.getImgWidth / 2 + (this.page.width) / 2,
-      // y: -this.getImgHeight / 2 + (this.page.height) / 2
       const translateLimit = {
         width: (this.getImgWidth - this.page.width / this.getPageScale) / 2,
         height: (this.getImgHeight - this.page.height / this.getPageScale) / 2
       }
-      //   width: (this.getImgWidth - this.page.width) / 2,
-      //   height: (this.getImgHeight - this.page.height) / 2
-      // }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
