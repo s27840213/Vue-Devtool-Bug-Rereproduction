@@ -305,7 +305,7 @@ export default Extension.create({
         const currLayer = layerUtils.getCurrLayer as IText
         const paragraphs = currLayer.paragraphs
         const selection = currLayer.selection
-        return chain().setContent(tiptapUtils.toHTML(paragraphs)).setTextSelection(selection).run()
+        return chain().setContent(tiptapUtils.toJSON(paragraphs)).setTextSelection(selection).run()
       }
     }
   }

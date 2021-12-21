@@ -15,7 +15,7 @@ export default Vue.extend({
     EditorContent
   },
   props: {
-    initText: String
+    initText: Object
   },
   data() {
     return {
@@ -51,7 +51,6 @@ export default Vue.extend({
     tiptapUtils.init(this.initText)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
-      // console.log(JSON.stringify(tiptapUtils.getText(editor)))
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
       if (!editor.view.composing && (tiptapUtils.prevText !== tiptapUtils.getText(editor))) {
         this.$nextTick(() => {
@@ -69,6 +68,7 @@ export default Vue.extend({
     })
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited) {
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: true })
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
@@ -77,17 +77,14 @@ export default Vue.extend({
           this.$nextTick(() => {
             stepsUtils.record()
             tiptapUtils.agent(editor => {
-              editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
+              editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
             })
           })
         })
       }
     })
-    tiptapUtils.on('focus', ({ editor }) => {
+    tiptapUtils.on('focus', () => {
       this.updateLayerProps({ isTyping: true })
-      if (!this.config?.isEdited) {
-        editor.commands.selectAll()
-      }
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })

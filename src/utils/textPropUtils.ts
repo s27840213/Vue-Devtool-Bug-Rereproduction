@@ -892,7 +892,7 @@ class TextPropUtils {
             pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
           }
         }
-        editor.chain().setContent(tiptapUtils.toHTML(tiptapUtils.toIParagraph(tiptapJSON).paragraphs), true).focus().selectPrevious().run()
+        editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
         Vue.nextTick(() => {
           tiptapUtils.forceUpdate()
           this.updateTextPropsState()
