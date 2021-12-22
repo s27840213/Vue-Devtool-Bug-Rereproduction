@@ -52,6 +52,7 @@ import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
+import networkUtils from '@/utils/networkUtils'
 
 export default Vue.extend({
   name: 'Editor',

@@ -32,6 +32,8 @@ import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
+import networkUtils from '@/utils/networkUtils'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -45,6 +47,18 @@ export default Vue.extend({
   },
   components: {
     CircleCheckbox
+  },
+  data() {
+    return {
+      online: true
+    }
+  },
+  created() {
+    networkUtils.onNetworkChange((online) => {
+      this.online = online
+    })
+
+    this.online = navigator.onLine
   },
   computed: {
     ...mapGetters({
@@ -89,40 +103,47 @@ export default Vue.extend({
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     dragStart(e: DragEvent, photo: any) {
-      const dataTransfer = e.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-      const width = photo.width / 20
-      const height = photo.height / 20
-      const rect = (e.target as Element).getBoundingClientRect()
-      const src = this.fullSrc
-      const type = ImageUtils.getSrcType(this.fullSrc)
-      const data = {
-        type: 'image',
-        // @/assets/img/svg/img-tmp.svg
-        srcObj: {
-          type,
-          userId: ImageUtils.getUserId(src, type),
-          assetId: photo.assetIndex ?? ImageUtils.getAssetId(src, type)
-        },
-        styles: {
-          x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
-          y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
-          width: width,
-          height: height
-        }
+      if (!this.online) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        return
       }
-      dataTransfer.setData('data', JSON.stringify(data))
-      fetch(ImageUtils.getSrc(data as IImage))
-      fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type,
-        ImageUtils.getSignificantDimension(data.styles.width, data.styles.height),
-        'next')))
-      this.setCurrDraggedPhoto({
-        srcObj: {
-          ...data.srcObj
-        },
-        styles: { width, height }
-      })
+      if (!this.isUploading) {
+        const dataTransfer = e.dataTransfer as DataTransfer
+        dataTransfer.dropEffect = 'move'
+        dataTransfer.effectAllowed = 'move'
+        const width = photo.width / 20
+        const height = photo.height / 20
+        const rect = (e.target as Element).getBoundingClientRect()
+        const src = this.fullSrc
+        const type = ImageUtils.getSrcType(this.fullSrc)
+        const data = {
+          type: 'image',
+          // @/assets/img/svg/img-tmp.svg
+          srcObj: {
+            type,
+            userId: ImageUtils.getUserId(src, type),
+            assetId: photo.assetIndex ?? ImageUtils.getAssetId(src, type)
+          },
+          styles: {
+            x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
+            y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
+            width: width,
+            height: height
+          }
+        }
+        dataTransfer.setData('data', JSON.stringify(data))
+        fetch(ImageUtils.getSrc(data as IImage))
+        fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type,
+          ImageUtils.getSignificantDimension(data.styles.width, data.styles.height),
+          'next')))
+        this.setCurrDraggedPhoto({
+          srcObj: {
+            ...data.srcObj
+          },
+          styles: { width, height }
+        })
+      }
     },
     dragEnd() {
       this.setCurrDraggedPhoto({
@@ -131,6 +152,11 @@ export default Vue.extend({
       })
     },
     addImage(photo: IAssetPhoto) {
+      if (!this.online) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        return
+      }
       const src = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
       const photoAspectRatio = photo.width / photo.height
 

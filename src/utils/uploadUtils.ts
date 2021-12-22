@@ -67,8 +67,9 @@ class UploadUtils {
   }
 
   event: any
-  eventHash: { [index: string]: (color: string) => void }
+  eventHash: { [index: string]: (param: any) => void }
   hasGottenDesign: boolean
+  designStatusTimer: number
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
@@ -89,6 +90,7 @@ class UploadUtils {
     this.hasGottenDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
+    this.designStatusTimer = -1
   }
 
   setLoginOutput(loginOutput: any) {
@@ -104,6 +106,23 @@ class UploadUtils {
 
   emitFontUploadEvent(status: 'none' | 'uploading' | 'success' | 'fail') {
     this.event.emit('fontUploadStatus', status)
+  }
+
+  onDesignUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+    if (this.eventHash.designUploadStatus) {
+      delete this.eventHash.designUploadStatus
+    }
+    this.event.on('designUploadStatus', callback)
+    this.eventHash.designUploadStatus = callback
+    this.event.on('designUploadStatus', callback)
+  }
+
+  emitDesignUploadEvent(status: 'none' | 'uploading' | 'success' | 'fail') {
+    this.event.emit('designUploadStatus', status)
+  }
+
+  offDesignUploadStatus() {
+    this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
   chooseAssets(type: 'image' | 'font' | 'avatar') {
@@ -474,9 +493,15 @@ class UploadUtils {
     } else {
       formData.append('file', blob)
     }
-
+    this.emitDesignUploadEvent('uploading')
     await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
       .then(() => {
+        if (this.designStatusTimer !== -1) {
+          clearTimeout(this.designStatusTimer)
+        }
+        this.designStatusTimer = setTimeout(() => {
+          this.emitDesignUploadEvent('success')
+        }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
           store.dispatch('user/putAssetDesign', {

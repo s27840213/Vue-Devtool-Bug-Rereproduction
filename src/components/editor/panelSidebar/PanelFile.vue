@@ -33,6 +33,7 @@ import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
+import networkUtils from '@/utils/networkUtils'
 
 export default Vue.extend({
   components: {
@@ -41,8 +42,19 @@ export default Vue.extend({
   },
   data() {
     return {
-      galleryUtils: new GalleryUtils(300, 75, 5)
+      galleryUtils: new GalleryUtils(300, 75, 5),
+      online: true
     }
+  },
+  created() {
+    networkUtils.onNetworkChange((online) => {
+      this.online = online
+    })
+
+    this.online = navigator.onLine
+  },
+  beforeDestroy() {
+    networkUtils.offNetworkCahnge()
   },
   computed: {
     ...mapGetters({
@@ -63,22 +75,28 @@ export default Vue.extend({
       clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
     }),
     uploadImage() {
-      if (uploadUtils.isLogin) {
+      if (!this.online) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+      } else if (uploadUtils.isLogin) {
         uploadUtils.chooseAssets('image')
       } else {
         modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo('請登入後，才可上傳檔案', [])
+        modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
       }
     },
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
       if (dt) {
         const files = dt.files
-        if (uploadUtils.isLogin) {
+        if (!this.online) {
+          modalUtils.setIsModalOpen(true)
+          modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        } else if (uploadUtils.isLogin) {
           uploadUtils.uploadAsset('image', files)
         } else {
           modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo('請登入後，才可上傳檔案', [])
+          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }
     }

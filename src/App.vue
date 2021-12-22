@@ -44,6 +44,7 @@ import PhotoInfo from '@/components/modal/PhotoInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
+import networkUtils from './utils/networkUtils'
 
 export default Vue.extend({
   components: {
@@ -89,8 +90,14 @@ export default Vue.extend({
       })
       .catch(e => console.error(e))
   },
+  beforeMount() {
+    networkUtils.registerNetworkListener()
+  },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+  },
+  beforeDestroy() {
+    networkUtils.unregisterNetworkListener()
   },
   computed: {
     ...mapGetters({

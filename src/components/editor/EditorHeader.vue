@@ -19,9 +19,9 @@
         ref="pagesName")
       svg-icon(:iconName="'upload-cloud'"
         :iconWidth="'20px'"
-        :iconColor="'green-1'"
+        :iconColor="statusColor"
         class="ml-10"
-        v-hint="`${$t('NN0135')}`")
+        v-hint="statusHint")
 </template>
 
 <script lang="ts">
@@ -33,13 +33,34 @@ import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import rulerUtils from '@/utils/rulerUtils'
+import networkUtils from '@/utils/networkUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
     return {
       ShortcutUtils,
-      StepsUtils
+      StepsUtils,
+      online: false,
+      designUploadStatus: 'success'
     }
+  },
+  created() {
+    networkUtils.onNetworkChange((online) => {
+      this.online = online
+      if (!this.online) {
+        this.$notify({ group: 'copy', text: `${this.$t('NN0349')}` })
+      }
+    })
+    uploadUtils.onDesignUploadStatus((status) => {
+      this.designUploadStatus = status
+    })
+
+    this.online = navigator.onLine
+  },
+  beforeDestroy() {
+    networkUtils.offNetworkCahnge()
+    uploadUtils.offDesignUploadStatus()
   },
   computed: {
     ...mapState('user', [
@@ -49,12 +70,6 @@ export default Vue.extend({
       groupId: 'getGroupId',
       folderInfo: 'getFolderInfo'
     }),
-    isInFirstStep(): boolean {
-      return (StepsUtils.currStep === 0) && (StepsUtils.steps.length > 1)
-    },
-    isInLastStep(): boolean {
-      return (StepsUtils.currStep === (StepsUtils.steps.length - 1)) && (StepsUtils.steps.length > 1)
-    },
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
@@ -78,6 +93,18 @@ export default Vue.extend({
       return {
         top
       }
+    },
+    statusColor(): string {
+      if (!this.online) {
+        return 'red'
+      }
+      return this.designUploadStatus === 'uploading' ? 'yellow' : 'green-1'
+    },
+    statusHint(): string {
+      if (!this.online) {
+        return `${this.$t('NN0349')}`
+      }
+      return this.designUploadStatus === 'uploading' ? `${this.$t('NN0136')}` : `${this.$t('NN0135')}`
     }
   },
   methods: {
