@@ -102,14 +102,20 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     newDesignWithTemplate(template: any) {
+      const query = {
+        type: 'new-design-template',
+        design_id: template.match_cover.id,
+        width: template.match_cover.width,
+        height: template.match_cover.height
+      }
+      if (template.group_type === 1) {
+        // 判斷電商詳情頁模板
+        query.type = 'product-page-template'
+        query.design_id = template.group_id
+      }
       const route = this.$router.resolve({
         name: 'Editor',
-        query: {
-          type: 'new-design-template',
-          design_id: template.match_cover.id,
-          width: template.match_cover.width,
-          height: template.match_cover.height
-        }
+        query
       })
       window.open(route.href, '_blank')
 
