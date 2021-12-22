@@ -183,7 +183,7 @@ export default Vue.extend({
           tiptapUtils.agent(editor => {
             const currLayer = LayerUtils.getCurrLayer as IText
             if (!currLayer.active) return
-            editor.commands.sync()
+            editor.chain().sync().focus().run()
             tiptapUtils.prevText = tiptapUtils.getText(editor)
             textPropUtils.updateTextPropsState()
           })
@@ -198,7 +198,7 @@ export default Vue.extend({
           tiptapUtils.agent(editor => {
             const currLayer = LayerUtils.getCurrLayer as IText
             if (!currLayer.active) return
-            editor.commands.sync()
+            editor.chain().sync().focus().run()
             tiptapUtils.prevText = tiptapUtils.getText(editor)
             textPropUtils.updateTextPropsState()
           })
