@@ -126,22 +126,43 @@ export default Vue.extend({
         }
 
         const currLayer = layerUtils.getCurrLayer
-        if (currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active)) {
+        if (!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active)) {
           if (!sel) {
             Object.assign(start, TextUtils.selectAll(config).start)
             Object.assign(end, TextUtils.selectAll(config).end)
           }
           const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
-          tiptapUtils.updateHtml(newConfig.paragraphs)
+          if (currLayer.active) {
+            tiptapUtils.updateHtml(newConfig.paragraphs)
+          }
           if (subLayerIdx === -1) {
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
         } else {
-          tiptapUtils.agent(editor => {
-            editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
-          })
-          isRanged && tiptapUtils.focus()
+          // case for changing the font of <br>
+          const { start } = tiptapUtils.getSelection() as { start: ISelection }
+          if (!config.paragraphs[start.pIndex].spans[start.sIndex].text) {
+            const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
+            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
+            sStyles.font = this.item.id
+            paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
+            paragraphs[start.pIndex].styles.font = this.item.id
+            paragraphs[start.pIndex].spanStyle = tiptapUtils.textStyles(sStyles)
+            this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs })
+            tiptapUtils.updateHtml(paragraphs)
+            tiptapUtils.focus()
+          } else {
+            tiptapUtils.agent(editor => {
+              const ranges = editor.state.selection.ranges
+              if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
+                tiptapUtils.applySpanStyle('font', this.item.id)
+              } else {
+                editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
+              }
+            })
+            isRanged && tiptapUtils.focus()
+          }
         }
 
         AssetUtils.addAssetToRecentlyUsed(this.item)
@@ -149,6 +170,7 @@ export default Vue.extend({
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
+        console.error(error)
         this.$notify({
           group: 'error',
           text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`

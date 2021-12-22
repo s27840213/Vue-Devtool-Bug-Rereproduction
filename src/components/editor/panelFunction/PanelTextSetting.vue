@@ -10,12 +10,12 @@
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="size-bar relative")
         div(class="pointer"
-          @mousedown="fontSizeStepping(-1)") -
+          @mousedown="fontSizeStepping(-step)") -
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" :value="fontSize")
         div(class="pointer"
-          @mousedown="fontSizeStepping(1)") +
+          @mousedown="fontSizeStepping(step)") +
         value-selector(v-if="openValueSelector"
                     :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
@@ -151,7 +151,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    // ...mapState('text', ['currTextInfo']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -185,6 +184,16 @@ export default Vue.extend({
         return '--'
       }
       return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+    },
+    step(): number {
+      // const config = LayerUtils.getCurrConfig
+      // return 1 / config.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      let scale = currLayer.styles.scale
+      if (subLayerIdx !== -1) {
+        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
+      }
+      return 1 / scale
     },
     hasFocus(): boolean {
       return this.hasFocused
