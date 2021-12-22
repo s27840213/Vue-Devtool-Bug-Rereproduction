@@ -28,6 +28,9 @@ export default Vue.extend({
   watch: {
     list() {
       this.selected = this.defaultSelection as string[]
+    },
+    defaultSelection() {
+      this.selected = this.defaultSelection as string[]
     }
   },
   data() {
