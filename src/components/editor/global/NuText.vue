@@ -102,6 +102,9 @@ export default Vue.extend({
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     }
   },
   watch: {
@@ -137,8 +140,8 @@ export default Vue.extend({
     },
     wrapperStyles() {
       const { editing } = this.config
-      const { isCurveText } = this
-      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
+      const { isCurveText, isFlipped } = this
+      const opacity = editing ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity
