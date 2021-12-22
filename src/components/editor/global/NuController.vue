@@ -217,6 +217,9 @@ export default Vue.extend({
   },
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
+    if (this.config.active) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
+    }
   },
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
@@ -339,7 +342,7 @@ export default Vue.extend({
         }
       } else {
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true, isTyping: true })
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
           StepsUtils.record()
         }
       }

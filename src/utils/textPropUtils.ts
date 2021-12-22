@@ -929,6 +929,7 @@ class TextPropUtils {
             const newSpans = GeneralUtils.deepCopy(spans) as any[]
             for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
               let splitHandled = false
+              let splitLength = 0
               if (i === startPIndex && j === startSIndex && from.textOffset !== 0) {
                 startSplit = true
                 const itemBefore = GeneralUtils.deepCopy(spans[j])
@@ -936,6 +937,7 @@ class TextPropUtils {
                 const text = itemBefore.text
                 const textBefore = text.substring(0, from.textOffset)
                 itemBefore.text = textBefore
+                splitLength = textBefore.length
                 const textAfter = text.substring(from.textOffset)
                 itemAfter.text = textAfter
                 const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
@@ -950,13 +952,13 @@ class TextPropUtils {
                 const itemBefore = GeneralUtils.deepCopy(newSpans[realSIndex])
                 const itemAfter = GeneralUtils.deepCopy(itemBefore)
                 const text = itemBefore.text
-                const textBefore = text.substring(0, to.textOffset)
+                const textBefore = text.substring(0, to.textOffset - splitLength)
                 itemBefore.text = textBefore
                 const spanAttrsBefore = itemBefore.marks?.[0]?.attrs
                 if (spanAttrsBefore) {
                   spanAttrsBefore.size += step
                 }
-                const textAfter = text.substring(to.textOffset)
+                const textAfter = text.substring(to.textOffset - splitLength)
                 itemAfter.text = textAfter
                 newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
                 splitHandled = true
