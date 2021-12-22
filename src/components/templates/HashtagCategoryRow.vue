@@ -7,7 +7,7 @@
         :class="{'mobile': isMobile}")
       div(class="hashtag-row__tags__tag"
           :class="{'selected': selected.length === 0, 'mobile': isMobile}"
-          @click="handleSelectAll") 全部
+          @click="handleSelectAll") {{ $t('NN0324') }}
       div(v-for="tag in list.list" class="hashtag-row__tags__tag"
           :class="{'mobile': isMobile, 'selected': checkSelection(tag)}"
           @click="handleSelect(tag)") {{ tag.name }}
@@ -27,6 +27,9 @@ export default Vue.extend({
   },
   watch: {
     list() {
+      this.selected = this.defaultSelection as string[]
+    },
+    defaultSelection() {
       this.selected = this.defaultSelection as string[]
     }
   },

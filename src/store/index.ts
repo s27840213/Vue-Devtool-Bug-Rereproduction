@@ -53,7 +53,8 @@ const getDefaultState = (): IEditorState => ({
     pageIndex: -1,
     index: -1,
     layers: [],
-    types: new Set<string>()
+    types: new Set<string>(),
+    id: ''
   },
   currDraggedPhoto: {
     srcObj: {
@@ -171,7 +172,8 @@ const getters: GetterTree<IEditorState, unknown> = {
     pageIndex: number,
     index: number,
     layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-    types: Set<string>
+    types: Set<string>,
+    id: string
   } {
     return state.currSelectedInfo
   },

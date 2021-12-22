@@ -686,7 +686,6 @@ export default Vue.extend({
       }
       this.initTranslate = this.getLayerPos
       if (!this.config.locked && !inSelectionMode) {
-        this.isControlling = true
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
@@ -723,6 +722,7 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
+      this.isControlling = true
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)

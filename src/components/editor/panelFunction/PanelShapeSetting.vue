@@ -132,7 +132,7 @@
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
-            div {{$t('NN0086')}}
+            div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     div(class="shape-setting__colors")
       div(v-if="inGrouped"
         class="shape-setting__color"
@@ -258,6 +258,7 @@ export default Vue.extend({
     ...mapGetters({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       currSelectedIndex: 'getCurrSelectedIndex',
+      currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
     }),
     ...mapState(
@@ -337,7 +338,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    currSelectedIndex: function () {
+    'currSelectedInfo.id': function() {
       this.initilizeRecord()
     },
     getColors: function () {
@@ -423,7 +424,6 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     handleColorUpdate(color: string) {
-      console.log('update color')
       this.setColor(color, this.currSelectedColorIndex)
       const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
       if (record) {
@@ -432,7 +432,6 @@ export default Vue.extend({
     },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
-      console.log(this.getColors)
       colorUtils.setCurrColor(this.getColors[index])
       this.$emit('toggleColorPanel', true)
     },
@@ -606,6 +605,9 @@ export default Vue.extend({
         const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
         this.paletteRecord.push(record)
       }
+      if (this.currSelectedColorIndex < 0) {
+        this.currSelectedColorIndex = 0
+      }
       while (this.currSelectedColorIndex > this.paletteRecord.length - 1) {
         this.currSelectedColorIndex--
       }
@@ -773,6 +775,9 @@ export default Vue.extend({
   &__basic-shape-corner-radius {
     display: flex;
     align-items: center;
+    > div {
+      width: 42px;
+    }
   }
 }
 .rainbow {

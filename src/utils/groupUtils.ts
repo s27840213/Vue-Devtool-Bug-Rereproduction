@@ -169,7 +169,7 @@ class GroupUtils {
         const topIndex = Math.max(...layerIndexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
+        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
@@ -179,6 +179,7 @@ class GroupUtils {
           newLayers
         })
         LayerUtils.addLayersToPos(pageIndex, [tmp], currSelectedIndex)
+        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
       }
     } else { // when we already have selected layers
       if (store.getters.getCurrSelectedLayers.length === 1) {
@@ -190,7 +191,7 @@ class GroupUtils {
         const topIndex = Math.max(...indexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
+        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -200,6 +201,7 @@ class GroupUtils {
           newLayers
         })
         LayerUtils.addLayersToPos(pageIndex, [tmp], currSelectedIndex)
+        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
       } else {
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
         const tmpLayer = this.tmpLayer
@@ -209,7 +211,7 @@ class GroupUtils {
         const newLayersNum = 1 + layerIndexs.length
         const indexs = [this.currSelectedInfo.index, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
-        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
+        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -219,6 +221,7 @@ class GroupUtils {
           newLayers
         })
         LayerUtils.addLayersToPos(pageIndex, [tmp], currSelectedIndex)
+        this.set(pageIndex, currSelectedIndex, currSelectedLayers)
       }
     }
 
@@ -316,7 +319,8 @@ class GroupUtils {
       pageIndex: currSelectedPageIndex,
       index: currSelectedIndex,
       layers: currSelectedLayers,
-      types: this.calcType(currSelectedLayers)
+      types: this.calcType(currSelectedLayers),
+      id: LayerUtils.getLayer(currSelectedPageIndex, currSelectedIndex).id || ''
     })
   }
 
