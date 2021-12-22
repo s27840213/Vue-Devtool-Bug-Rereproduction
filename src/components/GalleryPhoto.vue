@@ -104,8 +104,7 @@ export default Vue.extend({
     }),
     dragStart(e: DragEvent, photo: any) {
       if (!this.online) {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        networkUtils.notifyNetworkError()
         return
       }
       if (!this.isUploading) {
@@ -153,8 +152,7 @@ export default Vue.extend({
     },
     addImage(photo: IAssetPhoto) {
       if (!this.online) {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        networkUtils.notifyNetworkError()
         return
       }
       const src = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc

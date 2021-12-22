@@ -76,8 +76,7 @@ export default Vue.extend({
     }),
     uploadImage() {
       if (!this.online) {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        networkUtils.notifyNetworkError()
       } else if (uploadUtils.isLogin) {
         uploadUtils.chooseAssets('image')
       } else {
@@ -90,8 +89,7 @@ export default Vue.extend({
       if (dt) {
         const files = dt.files
         if (!this.online) {
-          modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+          networkUtils.notifyNetworkError()
         } else if (uploadUtils.isLogin) {
           uploadUtils.uploadAsset('image', files)
         } else {

@@ -49,7 +49,7 @@ export default Vue.extend({
     networkUtils.onNetworkChange((online) => {
       this.online = online
       if (!this.online) {
-        this.$notify({ group: 'copy', text: `${this.$t('NN0349')}` })
+        networkUtils.notifyNetworkError()
       }
     })
     uploadUtils.onDesignUploadStatus((status) => {

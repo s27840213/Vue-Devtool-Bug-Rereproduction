@@ -1,4 +1,8 @@
+import i18n from '@/i18n'
+import { vueRouterInstrumentation } from '@sentry/vue'
 import { EventEmitter } from 'events'
+import Vue from 'vue'
+import VueNotification from 'vue-notification'
 
 class NetworkUtils {
   event: any
@@ -46,6 +50,10 @@ class NetworkUtils {
       console.log('offline')
       this.onLine = false
     })
+  }
+
+  notifyNetworkError() {
+    Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
   }
 }
 

@@ -39,6 +39,7 @@ import { SidebarPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
+import networkUtils from '@/utils/networkUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -81,8 +82,7 @@ export default Vue.extend({
     }),
     onDrop(e: DragEvent) {
       if (!navigator.onLine) {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        networkUtils.notifyNetworkError()
         return
       }
       const dt = e.dataTransfer
