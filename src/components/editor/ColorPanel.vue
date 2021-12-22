@@ -32,8 +32,6 @@
       div(class="text-left mb-5")
         span(class="body-1") {{$t('NN0089')}}
       div
-        div(class="color-panel__add-color pointer"
-          @click="openColorPanel($event)")
         div(v-for="color in defaultColors"
           class="pointer color-panel__color"
           :style="colorStyles(color)"
