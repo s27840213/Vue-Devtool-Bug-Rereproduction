@@ -16,7 +16,8 @@
                 @search="handleSearch")
     div(v-if="!isMobile" class="template-center__search-container")
       div(class="template-center__search")
-        div(class="template-center__search__title")
+        div(class="template-center__search__title"
+            :style="searchTitleStyles()")
           span {{$t('NN0185')}}
         div(class="template-center__search__text")
           i18n(path="NN0186" tag="span")
@@ -51,7 +52,7 @@
                   iconColor="white")
       div(class="template-center__filter"
           :class="{'mobile': isMobile}"
-          :style="{'max-height': isShowOptions || !isMobile ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions || !isMobile ? '1' : '0'}")
+          :style="{'max-height': isMobile ? (isShowOptions ? `${82 * hashtags.length}px` : '0px') : '100%', 'opacity': isShowOptions || !isMobile ? '1' : '0'}")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
@@ -292,6 +293,16 @@ export default Vue.extend({
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
+    searchTitleStyles() {
+      if (this.$i18n.locale === 'us') {
+        return {}
+      } else {
+        return {
+          letterSpacing: '0.255em',
+          textIndent: '0.255em'
+        }
+      }
+    },
     templateStyles(heightPercent: number) {
       return { paddingTop: `${heightPercent}%` }
     },
@@ -493,8 +504,6 @@ export default Vue.extend({
         font-weight: 700;
         font-size: 40px;
         line-height: 40px;
-        letter-spacing: 0.255em;
-        text-indent: 0.255em;
         display: block;
         color: #373f41;
       }
