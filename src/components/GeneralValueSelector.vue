@@ -72,7 +72,6 @@ export default Vue.extend({
           height: 20px;
           display: flex;
           align-items: center;
-          @extend .flex-evenly;
         }
         &:hover {
           background-color: map-get($colors, blue-4);

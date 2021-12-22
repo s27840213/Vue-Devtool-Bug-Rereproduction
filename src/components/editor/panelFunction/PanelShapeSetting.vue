@@ -132,7 +132,7 @@
         template
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
-            div {{$t('NN0086')}}
+            div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     div(class="shape-setting__colors")
       div(v-if="inGrouped"
         class="shape-setting__color"
@@ -773,6 +773,9 @@ export default Vue.extend({
   &__basic-shape-corner-radius {
     display: flex;
     align-items: center;
+    > div {
+      width: 42px;
+    }
   }
 }
 .rainbow {
