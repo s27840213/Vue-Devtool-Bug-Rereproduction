@@ -81,10 +81,13 @@ export default Vue.extend({
           [],
           {
             msg: `${this.$t('NN0208')}`,
+            style: { width: '120px', height: '32px' },
             action: cb
           },
           {
             msg: `${this.$t('NN0021')}`,
+            class: 'border-blue-1 btn-light-mid',
+            style: { width: '120px', height: '32px' },
             action: () => {
               const resize = { width: currLayer.width, height: currLayer.height }
               cb(resize)

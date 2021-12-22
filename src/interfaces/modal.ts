@@ -1,6 +1,8 @@
 export interface IModalButton {
   msg: string,
-  action: () => void
+  action: () => void,
+  style?: { [key: string]: number | string },
+  class?: string | string[]
 }
 export interface IModalInfo {
   [key: string]: string | Array<string> | IModalButton
