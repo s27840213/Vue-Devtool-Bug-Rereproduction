@@ -156,7 +156,6 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
-import zindexUtils from '@/utils/zindexUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -173,7 +172,7 @@ export default Vue.extend({
   },
   created() {
     this.updateTextState({ paragraphs: this.config.paragraphs })
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
   },
   data() {
     return {
@@ -208,8 +207,7 @@ export default Vue.extend({
       },
       subControlerIndexs: [],
       hasChangeTextContent: false,
-      movingByControlPoint: false,
-      enterActive: false
+      movingByControlPoint: false
     }
   },
   mounted() {
@@ -329,16 +327,15 @@ export default Vue.extend({
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const text = document.getElementById(`text-${this.layerIndex}`)
-          if (text && text.childNodes.length === 1 && text.firstChild?.childNodes.length === 1 && !text.firstChild.firstChild?.textContent) {
-            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-            zindexUtils.reassignZindex(this.pageIndex)
-            return
-          }
           if (!this.isLocked) {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
           }
+        }
+      } else {
+        if (this.getLayerType === 'text') {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true, isTyping: true })
+          StepsUtils.record()
         }
       }
     },
@@ -350,14 +347,17 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      if (!newVal || !this.config.isEdited) {
-        tiptapUtils.agent(editor => editor.commands.selectAll())
-      }
-      tiptapUtils.agent(editor => editor.setEditable(newVal))
-      if (newVal) {
-        this.$nextTick(() => {
-          tiptapUtils.focus({ scrollIntoView: false })
-        })
+      if (this.config.type !== 'text') return
+      if (this.config.active) {
+        if (!newVal || !this.config.isEdited) {
+          tiptapUtils.agent(editor => editor.commands.selectAll())
+        }
+        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        if (newVal) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
+        }
       }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
@@ -598,7 +598,6 @@ export default Vue.extend({
     },
     moveStart(e: MouseEvent) {
       this.movingByControlPoint = false
-      this.enterActive = false
       const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
@@ -615,7 +614,6 @@ export default Vue.extend({
           if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
-            this.enterActive = true
             let targetIndex = this.layerIndex
             // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
             if (!inSelectionMode) {
@@ -752,9 +750,6 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
           if (this.movingByControlPoint) {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-          }
-          if (this.enterActive) {
-            StepsUtils.record()
           }
         }
         this.isControlling = false
