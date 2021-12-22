@@ -135,12 +135,13 @@ const mutations: MutationTree<ITextState> = {
 }
 
 const actions: ActionTree<ITextState, unknown> = {
-  async addFont ({ state, commit }, data: { type: string, face: string, url: string }): Promise<void> {
-    const { face, type, url } = data
+  async addFont ({ state, commit }, data: { type: string, face: string, url: string, ver: number }): Promise<void> {
+    const { face, type, url, ver } = data
     if (face && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
-        const newFont = new FontFace(face, getFontUrl(type, url || face))
+        state.pending = face
+        const newFont = new FontFace(face, getFontUrl(type, url || face, ver))
         commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: false })
         return new Promise<void>(resolve => {
           newFont.load()
@@ -148,6 +149,7 @@ const actions: ActionTree<ITextState, unknown> = {
               document.fonts.add(newFont)
               commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: true })
               resolve()
+              state.pending = ''
             })
         })
       } else {
@@ -165,16 +167,16 @@ const actions: ActionTree<ITextState, unknown> = {
   }
 }
 
-const getFontUrl = (type: string, id: string): string => {
+const getFontUrl = (type: string, id: string, ver = 0): string => {
   switch (type) {
     case 'public':
-      return `url("https://template.vivipic.com/font/${id}/font")`
+      return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
     case 'private':
       return ''
     case 'URL':
       return 'url("' + id + '")'
   }
-  return `url("https://template.vivipic.com/font/${id}/font")`
+  return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
 }
 
 export default {

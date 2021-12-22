@@ -51,7 +51,8 @@ export default Vue.extend({
         const promise = this.addFont({
           type: span.styles.type,
           face: span.styles.font,
-          url: span.styles.fontUrl
+          url: span.styles.fontUrl,
+          ver: this.verUni
         }).catch(e => console.error(e))
 
         promises.push(promise)
@@ -82,6 +83,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['fontStore']),
+    ...mapState('user', ['verUni']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',

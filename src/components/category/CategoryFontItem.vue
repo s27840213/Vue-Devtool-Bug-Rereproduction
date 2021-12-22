@@ -101,19 +101,26 @@ export default Vue.extend({
         const subLayerIdx = layerUtils.subLayerIdx
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
-        if (!fontStore.some(font => font.face === this.item.id)) {
-          this.updateTextState({ pending: this.item.id })
-          const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-          await Promise.race([
-            newFont.load(),
-            new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
-          ]).then(() => {
-            document.fonts.add(newFont)
-            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-          }).catch((error) => {
-            throw error
-          })
-        }
+        // if (!fontStore.some(font => font.face === this.item.id)) {
+        //   this.updateTextState({ pending: this.item.id })
+        //   const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
+        //   await Promise.race([
+        //     newFont.load(),
+        //     new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+        //   ]).then(() => {
+        //     document.fonts.add(newFont)
+        //     TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
+        //   }).catch((error) => {
+        //     throw error
+        //   })
+        // }
+
+        await this.$store.dispatch('text/addFont', {
+          type: 'public',
+          url: '',
+          face: this.item.id,
+          ver: this.item.ver
+        })
 
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)
@@ -177,13 +184,9 @@ export default Vue.extend({
         })
       } finally {
         tiptapUtils.agent(editor => editor.setEditable(true))
-        this.updateTextState({ pending: '' })
         const sel = window.getSelection()
         if (sel) sel.removeAllRanges()
       }
-    },
-    getFontUrl(fontID: string): string {
-      return `url("https://template.vivipic.com/font/${fontID}/font")`
     },
     updateLayerProps(layerIndex: number, subLayerIdx: number, prop: { [key: string]: IParagraph[] | boolean }) {
       if (subLayerIdx === -1) {
