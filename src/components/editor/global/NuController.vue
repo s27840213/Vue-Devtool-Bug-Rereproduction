@@ -55,6 +55,9 @@
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
+            :pageIndex="pageIndex"
+            :layerIndex="layerIndex"
+            :subLayerIndex="-1"
             @keydown.native.37.stop
             @keydown.native.38.stop
             @keydown.native.39.stop
@@ -1353,33 +1356,29 @@ export default Vue.extend({
     },
     textSizeRefresh(text: IText) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      const getSize = () => isVertical ? this.getLayerHeight : this.getLayerWidth
 
-      let widthLimit = this.getLayerRotate ? getSize() : this.config.widthLimit
-      let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos.x
       let layerY = this.getLayerPos.y
+      let textHW = TextUtils.getTextHW(text, this.config.widthLimit)
+      let widthLimit = this.config.widthLimit
 
-      if (widthLimit === -1) {
-        const pageSize = (this.$parent.$el as HTMLElement)
-          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio / 100)
-        const currTextSize = textHW[isVertical ? 'height' : 'width']
+      if (this.config.widthLimit === -1) {
+        const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
+        const currTextWidth = textHW.width
 
-        let layerPos = this.getLayerPos[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
-        const reachLeftLimit = layerPos <= 0
-        const reachRightLimit = layerPos + currTextSize >= pageSize
+        layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
+        const reachLeftLimit = layerX <= 0
+        const reachRightLimit = layerX + currTextWidth >= pageWidth
 
         if (reachLeftLimit && reachRightLimit) {
-          textHW = TextUtils.getTextHW(text, pageSize)
-          layerPos = 0
-          widthLimit = pageSize
+          textHW = TextUtils.getTextHW(text, pageWidth)
+          layerX = 0
+          widthLimit = pageWidth
         } else if (reachLeftLimit || reachRightLimit) {
-          widthLimit = getSize()
+          widthLimit = this.getLayerWidth
           textHW = TextUtils.getTextHW(text, widthLimit)
-          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          layerX = reachLeftLimit ? 0 : pageWidth - widthLimit
         }
-        layerX = isVertical ? layerX : layerPos
-        layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
           xSign: 1,

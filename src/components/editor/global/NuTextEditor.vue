@@ -15,7 +15,10 @@ export default Vue.extend({
     EditorContent
   },
   props: {
-    initText: Object
+    initText: Object,
+    pageIndex: Number,
+    layerIndex: Number,
+    subLayerIndex: Number
   },
   data() {
     return {
@@ -29,7 +32,7 @@ export default Vue.extend({
   },
   computed: {
     config(): IText | undefined {
-      const currLayer = layerUtils.getCurrLayer
+      const currLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       switch (currLayer.type) {
         case 'text':
           return currLayer as IText
@@ -43,9 +46,9 @@ export default Vue.extend({
   },
   mounted() {
     this.layerInfo = {
-      currLayer: layerUtils.getCurrLayer as IText | IGroup | ITmp,
-      layerIndex: layerUtils.layerIndex,
-      subLayerIdx: layerUtils.subLayerIdx
+      currLayer: layerUtils.getLayer(this.pageIndex, this.layerIndex) as IText | IGroup | ITmp,
+      layerIndex: this.layerIndex,
+      subLayerIdx: this.subLayerIndex
     }
 
     tiptapUtils.init(this.initText)
@@ -68,7 +71,7 @@ export default Vue.extend({
     })
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited) {
-        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: true })
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
@@ -102,10 +105,10 @@ export default Vue.extend({
         const { currLayer, layerIndex, subLayerIdx } = this.layerInfo
         switch (currLayer.type) {
           case 'text':
-            layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, props)
+            layerUtils.updateLayerProps(this.pageIndex, layerIndex, props)
             break
           case 'group':
-            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, props)
+            layerUtils.updateSubLayerProps(this.pageIndex, layerIndex, subLayerIdx, props)
         }
       }
     }

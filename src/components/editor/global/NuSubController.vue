@@ -18,6 +18,9 @@
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
             :style="textBodyStyle()"
+            :pageIndex="pageIndex"
+            :layerIndex="primaryLayerIndex"
+            :subLayerIndex="layerIndex"
             @keydown.native.37.stop
             @keydown.native.38.stop
             @keydown.native.39.stop

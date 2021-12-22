@@ -37,7 +37,7 @@
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") 位置對齊
-      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditing}"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditable}"
         @click.native="openFlipPopup") 翻轉
 </template>
 
@@ -90,11 +90,11 @@ export default Vue.extend({
       }
       return Math.max(...this.currSelectedInfo.layers.map((layer: ILayer) => layer.styles.opacity))
     },
-    isTextEditing(): boolean {
-      return this.layerNum === 1 && this.currSelectedInfo.layers[0].type === 'text' && this.currSelectedInfo.layers[0].editing
+    isTextEditable(): boolean {
+      return this.layerNum === 1 && this.currSelectedInfo.layers[0].type === 'text' && this.currSelectedInfo.layers[0].contentEditable
     },
     isFlipDisabled(): boolean {
-      return this.isGroup || this.layerNum !== 1 || this.isTextEditing
+      return this.isGroup || this.layerNum !== 1 || this.isTextEditable
     }
   },
   mounted() {
@@ -199,7 +199,7 @@ export default Vue.extend({
   }
 }
 
-.disabled {
+.btn-flip.disabled {
   color: map-get($colors, gray-3);
   pointer-events: none;
   cursor: not-allowed;
