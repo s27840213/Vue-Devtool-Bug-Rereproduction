@@ -127,4 +127,9 @@ export default Vue.extend({
   -o-user-select: none;
   user-select: none;
 }
+
+::selection {
+  color: currentColor;
+  background-color: #fbcb9294;
+}
 </style>
