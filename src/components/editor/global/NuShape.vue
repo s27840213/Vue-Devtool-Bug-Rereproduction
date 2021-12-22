@@ -15,6 +15,7 @@
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -345,9 +346,13 @@ export default Vue.extend({
             this.config.styles.initWidth = shape.vSize[0]
             this.config.styles.initHeight = shape.vSize[1]
           }
+          // Fix some bug that the color is empty array.
+          if (!(this.config as IShape).color.length) {
+            const shape = await shapeUtils.fetchSvg(this.config) as IShape
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
+          }
         }
       }
-      // console.log(this.config.styleArray)
       const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       if (this.styleNode) {
         this.styleNode.textContent = styleText

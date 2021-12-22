@@ -4,7 +4,8 @@ export interface ICurrSelectedInfo {
   pageIndex: number,
   index: number,
   layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-  types: Set<string>
+  types: Set<string>,
+  id: string
 }
 
 export interface ICurrSubSelectedInfo {
