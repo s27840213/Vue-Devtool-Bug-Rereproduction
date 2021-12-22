@@ -130,6 +130,6 @@ export default Vue.extend({
 
 ::selection {
   color: currentColor;
-  background-color: #fbcb9294;
+  background-color: #acd2fe94;
 }
 </style>
