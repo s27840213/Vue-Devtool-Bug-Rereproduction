@@ -2,9 +2,11 @@ import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
 import listService from '@/apis/list'
+import i18n from '@/i18n'
 
 class ThemeUtils {
   get themes () { return store.state.themes }
+  get groupType () { return store.state.groupType }
   get getPageSize () { return store.getters.getPageSize }
 
   getFocusPageSize (pageIndex?: number): { width: number, height: number } {
@@ -20,7 +22,6 @@ class ThemeUtils {
   async fetchTemplateContent () {
     const queryString = new URLSearchParams(window.location.search)
     const keyword = queryString.get('search')
-    console.log(keyword)
     store.dispatch('templates/resetContent')
     if (keyword) {
       queryString.delete('search')
@@ -46,7 +47,7 @@ class ThemeUtils {
   async checkThemeState () {
     const { themes } = this
     if (!themes.length) {
-      await listService.getTheme({})
+      await listService.getTheme({ locale: i18n.locale })
         .then(response => {
           const { data } = response.data
           store.commit('SET_themes', data.content)
@@ -62,7 +63,9 @@ class ThemeUtils {
   }
 
   getThemesBySize (width: number, height: number) {
-    const { themes } = this
+    const { themes, groupType } = this
+    console.log(groupType)
+    if (groupType === 1) return themes.filter(theme => theme.id === 7)
     const ratio = width / height
     const recommendation = themes.filter(theme => {
       const themeRatio = theme.width / theme.height
