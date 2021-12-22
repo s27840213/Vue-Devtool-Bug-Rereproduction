@@ -77,6 +77,7 @@ export default Vue.extend({
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
+          this.$emit('compositionend')
           this.$nextTick(() => {
             stepsUtils.record()
             tiptapUtils.agent(editor => {

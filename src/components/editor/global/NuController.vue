@@ -1347,8 +1347,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      // this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
-      this.textSizeRefresh(this.config, false)
+      this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -1358,16 +1357,14 @@ export default Vue.extend({
       }
     },
     handleTextCompositionEnd() {
-      // if (this.widthLimitSetDuringComposition) {
-      //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-      //   console.log(this.config.paragraph)
-      //   this.textSizeRefresh(this.config, false)
-      // }
+      if (this.widthLimitSetDuringComposition) {
+        this.widthLimitSetDuringComposition = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
+        this.textSizeRefresh(this.config, false)
+      }
     },
     textSizeRefresh(text: IText, composing: boolean) {
-      // console.log(composing)
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      if (!composing) this.widthLimitSetDuringComposition = false
 
       const getSize = () => isVertical ? this.getLayerHeight : this.getLayerWidth
 
