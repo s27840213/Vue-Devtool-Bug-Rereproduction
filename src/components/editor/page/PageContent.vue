@@ -80,6 +80,11 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     onDrop(e: DragEvent) {
+      if (!navigator.onLine) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo(`${this.$t('NN0351')}`, [])
+        return
+      }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
         mouseUtils.onDrop(e, this.pageIndex)
