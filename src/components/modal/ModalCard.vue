@@ -14,8 +14,13 @@
     template(v-if='!pending')
       div(class="modal-card__button")
         button(class="btn-primary-mid full-width"
+          :class="modalInfo.confirmButton.class"
+          :style="modalInfo.confirmButton.style"
           @click="confirmAction()") {{ modalInfo.confirmButton.msg || $tc('NN0164',1) }}
-        button(v-if="modalInfo.cancelButton.msg" class="ml-10 btn-primary-mid full-width"
+        button(v-if="modalInfo.cancelButton.msg"
+          class="ml-10 btn-primary-mid full-width"
+          :class="modalInfo.cancelButton.class"
+          :style="modalInfo.cancelButton.style"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || '關閉' }}
       div(class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")

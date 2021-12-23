@@ -328,6 +328,17 @@ export default Vue.extend({
       this.composeKeyword()
     },
     handleClickWaterfall(template: ITemplate) {
+      if (template.group_type === 1) {
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'product-page-template',
+            design_id: template.group_id
+          }
+        })
+        window.open(route.href, '_blank')
+        return
+      }
       if (template.content_ids.length === 1) {
         const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
         const format = matchedTheme ? {

@@ -16,7 +16,8 @@ class ListService {
       list_all: params.listAll,
       keyword: params.keyword,
       font_list: params.fontList,
-      theme: params.theme
+      theme: params.theme,
+      group_id: params.groupId
     }
 
     return axios.request<IListServiceResponse>({

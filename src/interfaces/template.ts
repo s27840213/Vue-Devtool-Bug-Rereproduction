@@ -7,7 +7,9 @@ export interface ITemplate {
   prev_height: number,
   type: number,
   ver: number,
-  content_ids: IContentTemplate[]
+  content_ids: IContentTemplate[],
+  group_type?: number
+  group_id?: string
 }
 
 export interface IContentTemplate {

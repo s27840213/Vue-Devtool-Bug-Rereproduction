@@ -16,7 +16,7 @@
             @change="({ checked }) => handleSelect(idx, checked)")
           div
             btn(class="full-width body-3 rounded"
-              @click.native="handleSubmit") {{$t('NN0133')}}
+              @click.native="handleSubmit") {{$tc('NN0133', 2)}}
 </template>
 
 <script lang="ts">
@@ -25,6 +25,9 @@ import { mapGetters } from 'vuex'
 import DownloadCheckButton from './DownloadCheckButton.vue'
 
 export default Vue.extend({
+  props: {
+    defaultSelected: Array
+  },
   data() {
     return {
       selected: [] as boolean[],
@@ -33,8 +36,8 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const { pages } = this
-    const initialStatus = new Array(pages.length).fill(false)
+    const { pages, defaultSelected = [] } = this
+    const initialStatus = new Array(pages.length).fill(false).map((_, idx) => defaultSelected.includes(idx))
     this.preSelected = [...initialStatus]
     this.handleLabel()
   },
