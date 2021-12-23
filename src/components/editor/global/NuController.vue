@@ -348,7 +348,7 @@ export default Vue.extend({
       } else {
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-          StepsUtils.record()
+          // StepsUtils.record()
         }
       }
     },
@@ -363,7 +363,7 @@ export default Vue.extend({
       if (this.config.type !== 'text') return
       if (this.config.active) {
         if (!newVal || !this.config.isEdited) {
-          tiptapUtils.agent(editor => editor.commands.selectAll())
+          tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => editor.setEditable(newVal))
         if (newVal) {

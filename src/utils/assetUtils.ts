@@ -365,7 +365,6 @@ class AssetUtils {
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
     LayerUtils.addLayers(targePageIndex, [newLayer])
-    stepsUtils.record()
   }
 
   addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number) {
@@ -386,7 +385,6 @@ class AssetUtils {
         textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
-        stepsUtils.record()
       })
       .catch(() => {
         console.log('Cannot find the file')
