@@ -447,9 +447,6 @@ export default Vue.extend({
     },
     applySelectedFormat(record = true) {
       if (!this.isFormatApplicable) return
-      if (record) {
-        StepsUtils.record()
-      }
       const format = this.getSelectedFormat()
       if (!format) return
       this.resizePage(format)
@@ -464,10 +461,12 @@ export default Vue.extend({
       this.recentlyUsed.splice(index, 1)
       this.recentlyUsed.unshift(format)
       this.setSuggestionPanel(false)
+      if (record) {
+        StepsUtils.record()
+      }
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.designId = ''
       this.addPageToPos({
@@ -478,6 +477,7 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.lastSelectedPageIndex + 1)
       this.setCurrActivePageIndex(this.lastSelectedPageIndex + 1)
       this.applySelectedFormat(false)
+      StepsUtils.record()
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.lastSelectedPageIndex) })
     },
     resizePage(format: { width: number, height: number }) {
