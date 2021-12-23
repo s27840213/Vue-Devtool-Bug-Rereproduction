@@ -338,7 +338,7 @@ export default Vue.extend({
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false })
           if (!this.isLocked) {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
@@ -348,7 +348,6 @@ export default Vue.extend({
       } else {
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-          // StepsUtils.record()
         }
       }
     },
