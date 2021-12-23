@@ -15,6 +15,7 @@ const getDefaultState = (): IColorState => ({
     '#C9D0D8',
     '#646C77',
     '#505760',
+    '#31363c',
     '#000000',
     '#EB5757',
     '#F76C83',
