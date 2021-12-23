@@ -98,6 +98,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPagesName(state: IEditorState): string {
     return state.name
   },
+  getPagesLength(state: IEditorState): number {
+    return state.pages.length
+  },
   getDesignId(state: IEditorState): string {
     return state.designId
   },
