@@ -177,7 +177,6 @@ export default Vue.extend({
     NuTextEditor
   },
   created() {
-    this.updateTextState({ paragraphs: this.config.paragraphs })
     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
   },
   data() {
