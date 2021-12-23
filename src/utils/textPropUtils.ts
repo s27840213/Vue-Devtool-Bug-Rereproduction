@@ -108,6 +108,45 @@ class TextPropUtils {
     }
   }
 
+  //   blockPropertyHandler(propName: string, subLayerIdx = LayerUtils.subLayerIdx, layerIndex = LayerUtils.layerIndex) {
+  //   const handler = (() => {
+  //     const layer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex)
+  //     switch (layer.type) {
+  //       case 'tmp':
+  //       case 'group':
+  //         if (layer.type === 'tmp' || subLayerIdx === -1) {
+  //           return (styles: { [key: string]: string | number | boolean }) => {
+  //             for (let i = 0; i < (layer as ITmp).layers.length; i++) {
+  //               this.updateSelectedLayersProps(styles, i)
+  //               TextUtils.updateLayerSize((layer as IGroup).layers[i] as IText, layerIndex, i)
+  //             }
+  //           }
+  //         } else {
+  //           return (styles: { [key: string]: string | number | boolean }) => {
+  //             this.updateSelectedLayersProps(styles, subLayerIdx)
+  //             TextUtils.updateLayerSize((layer as IGroup).layers[subLayerIdx] as IText, layerIndex, subLayerIdx)
+  //           }
+  //         }
+  //       default:
+  //         return (styles: { [key: string]: string | number | boolean }) => {
+  //           LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, styles)
+  //           TextUtils.updateLayerSize(layer as IText, layerIndex)
+  //           console.warn(layerIndex)
+  //           console.log(GeneralUtils.deepCopy(layer).styles.writingMode)
+  //         }
+  //     }
+  //   })()
+
+  //   switch (propName) {
+  //     case 'font-vertical': {
+  //       const writingMode = this.getTextState.props.isVertical ? 'initial' : 'vertical-lr'
+  //       handler({ writingMode })
+  //       writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
+  //       this.updateTextPropsState({ isVertical: !this.getTextState.props.isVertical })
+  //     }
+  //   }
+  // }
+
   blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
@@ -128,6 +167,7 @@ class TextPropUtils {
           // @TODO: need to reallocate position of each layer
         }
         handler({ writingMode })
+        this.updateTextPropsState({ isVertical: !this.getTextState.props.isVertical })
       }
     }
   }

@@ -2,6 +2,7 @@
  * This file is used to convert properties of layers into CSS-readable properties
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
+import store from '@/store'
 
 interface IStyleMap {
   [key: string]: string
@@ -71,10 +72,6 @@ class CssConveter {
     return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
   }
 
-  // fontStyleMap(prop: string): string {
-  //   return fontStyleMap[prop as any]
-  // }
-
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
@@ -88,11 +85,17 @@ class CssConveter {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
         result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else if (prop === 'font') {
+        result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }
     })
     return result
+  }
+
+  getFontFamily(font: string): string {
+    return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {

@@ -131,10 +131,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('text', ['addFont']),
     styles(styles: any) {
-      const converted = CssConveter.convertFontStyle(styles)
-      return Object.assign(converted, {
-        'font-family': (converted['font-family'] + ',').concat(this.getDefaultFonts)
-      })
+      return CssConveter.convertFontStyle(styles)
     },
     bodyStyles() {
       const isVertical = this.config.styles.writingMode.includes('vertical')

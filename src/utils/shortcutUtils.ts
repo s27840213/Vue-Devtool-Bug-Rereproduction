@@ -176,6 +176,7 @@ class ShortcutUtils {
           }
         })
         chainedCommands.run()
+        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
     })
   }

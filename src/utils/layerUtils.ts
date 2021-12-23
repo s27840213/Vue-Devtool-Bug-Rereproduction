@@ -52,6 +52,23 @@ class LayerUtils {
     })()
   }
 
+  updatecCurrTypeLayerProp(prop: { [key: string]: string | boolean | number }) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = this
+    switch (currLayer.type) {
+      case 'group':
+        try {
+          this.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, prop)
+        } catch (e) {
+          console.log(e)
+        }
+        break
+      default:
+        if (!['tmp', 'frame'].includes(currLayer.type)) {
+          this.updateLayerProps(pageIndex, layerIndex, prop)
+        }
+    }
+  }
+
   addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,
