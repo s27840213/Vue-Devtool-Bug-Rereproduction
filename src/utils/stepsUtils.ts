@@ -220,6 +220,10 @@ class StepsUtils {
     }
   }
 
+  getPrevPages() {
+    return this.steps[this.currStep].pages
+  }
+
   reset() {
     this.clearSteps()
     this.record()

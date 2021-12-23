@@ -55,12 +55,13 @@ export default Vue.extend({
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
-      if (!editor.view.composing && (tiptapUtils.prevText !== tiptapUtils.getText(editor))) {
+      const newText = tiptapUtils.getText(editor)
+      if (!editor.view.composing && (tiptapUtils.prevText !== newText)) {
         this.$nextTick(() => {
           stepsUtils.record()
         })
       }
-      tiptapUtils.prevText = tiptapUtils.getText(editor)
+      tiptapUtils.prevText = newText
       this.updateLayerProps({ isEdited: true })
       if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
         this.updateLayerProps({ loadFontEdited: true })
@@ -79,7 +80,16 @@ export default Vue.extend({
         editorDiv.addEventListener('compositionend', () => {
           this.$emit('compositionend')
           this.$nextTick(() => {
-            stepsUtils.record()
+            const pages = stepsUtils.getPrevPages()
+            let currLayerInPrevStep = pages[this.pageIndex].layers[this.layerIndex]
+            if (currLayerInPrevStep.type === 'group') {
+              currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[this.subLayerIndex] as IText
+            } else {
+              currLayerInPrevStep = currLayerInPrevStep as IText
+            }
+            if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
+              stepsUtils.record()
+            }
             tiptapUtils.agent(editor => {
               editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
             })

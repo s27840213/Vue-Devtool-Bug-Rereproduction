@@ -238,6 +238,24 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
+  toText(textLayer: IText): string {
+    const lines: string[] = []
+    const paragraphs = textLayer.paragraphs
+    for (const paragraph of paragraphs) {
+      const spans = paragraph.spans
+      if (spans.length > 0) {
+        const fragments: string[] = []
+        for (const span of spans) {
+          fragments.push(span.text ?? '')
+        }
+        lines.push(fragments.join(''))
+      } else {
+        lines.push('')
+      }
+    }
+    return lines.join('\n')
+  }
+
   applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined) {
     const item: {[string: string]: any} = {}
     item[key] = value
