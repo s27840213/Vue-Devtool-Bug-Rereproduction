@@ -426,7 +426,6 @@ export default Vue.extend({
       position: absolute;
       top: 95px;
       font-size: 20px;
-      letter-spacing: 5px;
       font-weight: 700;
       line-height: 1.3;
       color: setColor(white);

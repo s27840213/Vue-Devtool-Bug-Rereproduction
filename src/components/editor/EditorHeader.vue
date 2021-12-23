@@ -2,10 +2,11 @@
   div(class="editor-header" ref="header"
       :style="headerPosStyle")
     template(v-if="!isLogin")
-      span 若要儲存設計，請
-      a(:href="`/signup?redirect=${path}`") 註冊
-      span 或
-      a(:href="`/login?redirect=${path}`") 登入
+      i18n(path="NN0352" tag="span")
+        template(#signUp)
+          a(:href="`/signup?redirect=${path}`") {{$tc('NN0169',1)}}
+        template(#logIn)
+          a(:href="`/signup?redirect=${path}`") {{$tc('NN0168',1)}}
     template(v-else)
       span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{$t('NN0080')}}
       span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}

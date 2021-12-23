@@ -14,7 +14,7 @@
     template(v-if='!pending')
       div(class="modal-card__button")
         button(class="btn-primary-mid full-width"
-          @click="confirmAction()") {{ modalInfo.confirmButton.msg || '確認' }}
+          @click="confirmAction()") {{ modalInfo.confirmButton.msg || $tc('NN0164',1) }}
         button(v-if="modalInfo.cancelButton.msg" class="ml-10 btn-primary-mid full-width"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || '關閉' }}
       div(class="modal-card__close")

@@ -51,7 +51,8 @@ export default Vue.extend({
       layerIndex: number,
       primaryLayerIndex?: number
       pageIndex: number
-      } {
+      // eslint-disable-next-line indent
+    } {
       const { getCurrLayer: currLayer, layerIndex } = layerUtils
       switch (currLayer.type) {
         case 'group': {
@@ -183,7 +184,7 @@ export default Vue.extend({
         const code = error.message === 'timeout' ? 'timeout' : error.code
         this.$notify({
           group: 'error',
-          text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${code})`
+          text: `${this.$t('NN0248')} (ErrorCode: ${code})`
         })
       } finally {
         this.updateTextState({ pending: '' })
@@ -200,22 +201,22 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .category-fonts {
-    display: grid;
-    grid-template-columns: 7fr 4fr 1fr;
-    grid-gap: 10px;
-    &__item-wrapper {
-      overflow: hidden;
-      position: relative;
-      text-align: left;
-    }
-    &__item {
+.category-fonts {
+  display: grid;
+  grid-template-columns: 7fr 4fr 1fr;
+  grid-gap: 10px;
+  &__item-wrapper {
+    overflow: hidden;
+    position: relative;
+    text-align: left;
+  }
+  &__item {
     height: 25px;
     object-fit: contain;
-    }
-    &__icon {
-      position: absolute;
-      right: 0;
-    }
   }
+  &__icon {
+    position: absolute;
+    right: 0;
+  }
+}
 </style>
