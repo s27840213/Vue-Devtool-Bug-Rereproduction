@@ -955,6 +955,10 @@ class TextPropUtils {
                 }
                 const textAfter = text.substring(to.textOffset - splitLength)
                 itemAfter.text = textAfter
+                const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
+                if (spanAttrsAfter && startSplit && endSIndex === startSIndex) { // if this span has been startSplit
+                  spanAttrsAfter.size -= step
+                }
                 newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
                 splitHandled = true
               }
