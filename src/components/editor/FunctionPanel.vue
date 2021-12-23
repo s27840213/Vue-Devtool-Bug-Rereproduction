@@ -27,7 +27,7 @@
       div(v-if="!isGroup" class="p-20")
         panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
         panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
-          @openFontsPanel="openFontsPanel()"
+          @openFontsPanel="openFontsPanel"
           v-on="$listeners")
         panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
         panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
@@ -40,7 +40,7 @@
         template(v-if="!hasSubSelectedLayer")
           panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
           panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
-            @openFontsPanel="openFontsPanel()"
+            @openFontsPanel="openFontsPanel"
             v-on="$listeners")
           panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
           panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
@@ -77,6 +77,9 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import tiptapUtils from '@/utils/tiptapUtils'
+import textPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: {
@@ -170,9 +173,33 @@ export default Vue.extend({
     },
     undo() {
       shotcutUtils.undo()
+      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            const currLayer = LayerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.chain().sync().focus().run()
+            tiptapUtils.prevText = tiptapUtils.getText(editor)
+            textPropUtils.updateTextPropsState()
+          })
+        })
+      }
     },
     redo() {
       shotcutUtils.redo()
+      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            const currLayer = LayerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.chain().sync().focus().run()
+            tiptapUtils.prevText = tiptapUtils.getText(editor)
+            textPropUtils.updateTextPropsState()
+          })
+        })
+      }
     }
   }
 })

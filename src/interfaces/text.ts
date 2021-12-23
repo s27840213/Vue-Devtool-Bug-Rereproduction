@@ -9,3 +9,8 @@ export interface IFont {
   face: string,
   loaded: boolean
 }
+
+export interface ITiptapSelection {
+  from: number,
+  to: number
+}

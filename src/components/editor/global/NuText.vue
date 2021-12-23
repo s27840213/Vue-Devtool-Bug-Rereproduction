@@ -55,7 +55,8 @@ export default Vue.extend({
         const promise = this.addFont({
           type: span.styles.type,
           face: span.styles.font,
-          url: span.styles.fontUrl
+          url: span.styles.fontUrl,
+          ver: this.verUni
         }).catch(e => console.error(e))
 
         promises.push(promise)
@@ -86,6 +87,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['fontStore']),
+    ...mapState('user', ['verUni']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -106,6 +108,9 @@ export default Vue.extend({
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     }
   },
   watch: {
@@ -141,8 +146,8 @@ export default Vue.extend({
     },
     wrapperStyles() {
       const { editing } = this.config
-      const { isCurveText } = this
-      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
+      const { isCurveText, isFlipped } = this
+      const opacity = editing ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity
@@ -163,7 +168,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .nu-text {
     width: 100%;
     height: 100%;

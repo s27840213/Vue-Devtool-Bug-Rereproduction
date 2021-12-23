@@ -28,9 +28,10 @@ import StepsUtils from '@/utils/stepsUtils'
 import { IFont, ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import text from '@/store/text'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -89,112 +90,118 @@ export default Vue.extend({
     },
     async setFont() {
       if (this.pending) return
+      tiptapUtils.agent(editor => editor.setEditable(false))
+      const isRanged = !!this.isRanged()
+      const sel = isRanged ? tiptapUtils.getSelection() as { start: ISelection, end: ISelection } : undefined
+      const start = sel?.start || {} as ISelection
+      const end = sel?.end || {} as ISelection
       try {
         const fontStore = this.fontStore as Array<IFont>
-        const { config, layerIndex, subLayerIndex } = TextPropUtils.getTextInfo
-        const pageIndex = layerUtils.pageIndex
-        const { type, id } = layerUtils.getCurrLayer
-        let { start, end } = generalUtils.deepCopy(this.sel)
-        if (!TextUtils.isSel(start)) {
-          switch (type) {
-            case 'text': {
-              const currLayer = layerUtils.getLayer(pageIndex, layerIndex) as IText
-              const endPidx = currLayer.paragraphs.length - 1
-              const endSidx = currLayer.paragraphs[endPidx].spans.length - 1
-              const endOff = currLayer.paragraphs[endPidx].spans[endSidx].text.length
+        const { id, type } = layerUtils.getCurrLayer
+        const preLayerIndex = layerUtils.layerIndex
+        const subLayerIdx = layerUtils.subLayerIdx
+        this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
-              start = { pIndex: 0, sIndex: 0, offset: 0 }
-              end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
-              break
-            }
-            default: {
-              if (typeof subLayerIndex === 'undefined' || type === 'tmp') {
-                break
-              }
-              if (typeof subLayerIndex === 'number' || type === 'group') {
-                const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-                const target = primaryLayer.layers[subLayerIndex] as IText
-                const endPidx = target.paragraphs.length - 1
-                const endSidx = target.paragraphs[endPidx].spans.length - 1
-                const endOff = target.paragraphs[endPidx].spans[endSidx].text.length
+        // if (!fontStore.some(font => font.face === this.item.id)) {
+        //   this.updateTextState({ pending: this.item.id })
+        //   const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
+        //   await Promise.race([
+        //     newFont.load(),
+        //     new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+        //   ]).then(() => {
+        //     document.fonts.add(newFont)
+        //     TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
+        //   }).catch((error) => {
+        //     throw error
+        //   })
+        // }
 
-                start = { pIndex: 0, sIndex: 0, offset: 0 }
-                end = { pIndex: endPidx, sIndex: endSidx, offset: endOff }
-              }
-            }
+        await this.$store.dispatch('text/addFont', {
+          type: 'public',
+          url: '',
+          face: this.item.id,
+          ver: this.item.ver
+        })
+
+        const currLayerIndex = layerUtils.getCurrPage.layers
+          .findIndex(l => l.id === id)
+        const config = subLayerIdx === -1 ? layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IText
+          : (layerUtils.getCurrLayer as IGroup).layers[subLayerIdx] as IText
+
+        if (currLayerIndex === -1 || config.loadFontEdited) {
+          console.warn('The selected text layer is unaviliable')
+          return
+        }
+
+        const currLayer = layerUtils.getCurrLayer
+        if (!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active)) {
+          if (!sel) {
+            Object.assign(start, TextUtils.selectAll(config).start)
+            Object.assign(end, TextUtils.selectAll(config).end)
           }
-        }
-
-        if (!fontStore.some(font => font.face === this.item.id)) {
-          this.updateTextState({ pending: this.item.id })
-          const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-          await Promise.race([
-            newFont.load(),
-            new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
-          ]).then(() => {
-            document.fonts.add(newFont)
-            TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-          }).catch((error) => {
-            throw error
-          })
-        }
-
-        const handler = (config: IText, start: ISelection, end: ISelection): {
-          config: IText,
-          start: ISelection,
-          end: ISelection
-        } => {
-          return {
-            config: TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText),
-            ...(generalUtils.deepCopy(this.sel) as { start: ISelection, end: ISelection })
+          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
+          this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
+          if (currLayer.active) {
+            tiptapUtils.updateHtml(newConfig.paragraphs)
           }
-        }
-
-        if (type === 'text' && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
-          const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
-          layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          this.$nextTick(() => TextUtils.focus(newStart, newEnd))
-        }
-
-        if ((type === 'group' || type === 'tmp') && id === layerUtils.getLayer(pageIndex, layerIndex).id) {
-          if (typeof subLayerIndex === 'undefined') {
-            const layers = (config as IGroup).layers
-            layers.forEach((l, idx) => {
-              if (l.type === 'text') {
-                start = TextUtils.selectAll(l as IText).start
-                end = TextUtils.selectAll(l as IText).end
-                const { config: newConfig } = handler(l as IText, start, end)
-                layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs: newConfig.paragraphs })
+          if (subLayerIdx === -1) {
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
+          } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
+        } else {
+          // case for changing the font of <br>
+          const { start } = tiptapUtils.getSelection() as { start: ISelection }
+          if (!config.paragraphs[start.pIndex].spans[start.sIndex].text) {
+            const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
+            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
+            sStyles.font = this.item.id
+            paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
+            paragraphs[start.pIndex].styles.font = this.item.id
+            paragraphs[start.pIndex].spanStyle = tiptapUtils.textStyles(sStyles)
+            this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs })
+            tiptapUtils.updateHtml(paragraphs)
+            tiptapUtils.focus()
+          } else {
+            tiptapUtils.agent(editor => {
+              const ranges = editor.state.selection.ranges
+              if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
+                tiptapUtils.applySpanStyle('font', this.item.id)
+              } else {
+                editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
               }
             })
-          }
-          if (typeof subLayerIndex === 'number') {
-            // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-            // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-            const { config: newConfig, start: newStart, end: newEnd } = handler(config as IText, start, end)
-            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-            // TextUtils.focus(newStart, newEnd, subLayerIndex, layerIndex)
+            isRanged && tiptapUtils.focus()
           }
         }
 
-        TextPropUtils.updateTextPropsState({ font: this.item.id })
         AssetUtils.addAssetToRecentlyUsed(this.item)
         StepsUtils.record()
+        TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
+        console.error(error)
         this.$notify({
           group: 'error',
           text: `${this.$t('NN0248')} (ErrorCode: ${code})`
         })
       } finally {
-        this.updateTextState({ pending: '' })
+        tiptapUtils.agent(editor => editor.setEditable(true))
         const sel = window.getSelection()
         if (sel) sel.removeAllRanges()
       }
     },
-    getFontUrl(fontID: string): string {
-      console.log(fontID)
-      return `url("https://template.vivipic.com/font/${fontID}/font")`
+    updateLayerProps(layerIndex: number, subLayerIdx: number, prop: { [key: string]: IParagraph[] | boolean }) {
+      if (subLayerIdx === -1) {
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, prop)
+      } else {
+        layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, prop)
+      }
+    },
+    isRanged(): any {
+      const sel = window.getSelection()
+      if (sel?.rangeCount) {
+        return sel.getRangeAt(0).toString()
+      }
+      return false
     }
   }
 })

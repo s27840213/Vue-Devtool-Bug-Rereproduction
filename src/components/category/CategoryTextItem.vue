@@ -12,6 +12,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
+import textPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   props: {
@@ -49,6 +50,9 @@ export default Vue.extend({
     },
     addText() {
       AssetUtils.addAsset(this.item)
+        .then(() => {
+          textPropUtils.updateTextPropsState()
+        })
     }
   }
 })

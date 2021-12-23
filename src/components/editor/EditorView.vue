@@ -64,6 +64,7 @@ import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -92,7 +93,8 @@ export default Vue.extend({
       scrollListener: null as unknown,
       from: -1,
       screenWidth: document.documentElement.clientWidth,
-      screenHeight: document.documentElement.clientHeight
+      screenHeight: document.documentElement.clientHeight,
+      scrollHeight: 0
     }
   },
   mounted() {
@@ -104,6 +106,7 @@ export default Vue.extend({
     this.$nextTick(() => {
       pageUtils.findCentralPageIndexInfo()
     })
+    this.scrollHeight = this.editorView.scrollHeight
     document.addEventListener('blur', this.detectBlur, true)
     window.onresize = () => {
       this.screenWidth = document.documentElement.clientWidth
@@ -241,6 +244,10 @@ export default Vue.extend({
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
+      let focusTextEditor = false
+      if (tiptapUtils.editor?.view?.hasFocus?.()) {
+        focusTextEditor = true
+      }
       if (this.isSelecting || RulerUtils.isDragging) {
         const event = new MouseEvent('mousemove', {
           clientX: this.currentAbsPos.x,
@@ -257,6 +264,9 @@ export default Vue.extend({
         this.closeGuidelineH()
       }
       pageUtils.findCentralPageIndexInfo()
+      if (focusTextEditor) {
+        tiptapUtils.focus({ scrollIntoView: false })
+      }
     },
     selectEnd() {
       if (this.isSelecting) {
