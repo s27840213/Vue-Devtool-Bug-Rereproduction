@@ -84,8 +84,10 @@ class CssConveter {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'opacity') {
         result[styleMap[prop]] = `${sourceStyles[prop] ?? 1}`
-      } else if (prop === 'fontSpacing' || prop === 'lineHeight') {
+      } else if (prop === 'fontSpacing') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
+      } else if (prop === 'lineHeight') {
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }
