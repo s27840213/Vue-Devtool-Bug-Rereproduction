@@ -249,9 +249,12 @@ export default Vue.extend({
     },
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
+      console.log(this.getLayerHeight)
       return {
-        width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
-        height: isVertical ? '' : 'auto',
+        width: `${this.getLayerWidth / this.getLayerScale}px`,
+        height: `${this.getLayerHeight / this.getLayerScale}px`,
+        // width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
+        // height: isVertical ? '' : 'auto',
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: this.isTextEditing ? 1 : 0
       }
