@@ -396,7 +396,7 @@ export default Vue.extend({
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
       const HW = {
-        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
         height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
       }
@@ -413,7 +413,7 @@ export default Vue.extend({
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
       const HW = {
-        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 10}px`
           : (tooSmall ? `${(this.getLayerHeight - 10) * 0.16}px` : resizerStyle.width),
         height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 10}px`
@@ -430,6 +430,8 @@ export default Vue.extend({
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
               : resizers.slice(2, 4)
+          } else if (this.config.styles.textShape && this.config.styles.textShape.name) {
+            resizers = []
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
               tooNarrow ? resizers.slice(3, 4) : resizers.slice(2, 4)

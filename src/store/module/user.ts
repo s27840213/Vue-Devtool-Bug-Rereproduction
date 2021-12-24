@@ -496,9 +496,10 @@ const actions: ActionTree<IUserModule, unknown> = {
     //   asset_list: assetSet
     //   // team_id: state.teamId || state.userId
     // })
-    const { data } = await apiUtils.requestWithRetry(() =>
-      userApis.getAllAssets(token, { asset_list: assetSet })
-    )
+    const { data } = await apiUtils.requestWithRetry(() => {
+      console.warn('fetch')
+      return userApis.getAllAssets(token, { asset_list: assetSet })
+    })
     const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     if (urlSet) {
       for (const [assetId, urls] of Object.entries(urlSet)) {

@@ -10,7 +10,8 @@
       class="nu-image__picture layer-flip"
       draggable="false"
       :src="src"
-      @error="onError()")
+      @error="onError()"
+      @load="onLoad()")
 </template>
 
 <script lang="ts">
@@ -60,16 +61,19 @@ export default Vue.extend({
   },
   data() {
     return {
+      isOnError: false
     }
   },
   watch: {
     getImgDimension(newVal) {
-      const { type } = this.config.srcObj
-      if (type === 'background') return
-      const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'pre'))
-      const nextImg = new Image()
-      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'next'))
+      if (!this.isOnError) {
+        const { type } = this.config.srcObj
+        if (type === 'background') return
+        const preImg = new Image()
+        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'pre'))
+        const nextImg = new Image()
+        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'next'))
+      }
     }
   },
   components: { NuAdjustImage },
@@ -137,12 +141,16 @@ export default Vue.extend({
     },
     onError() {
       console.log('image on error')
+      this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
           this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
         } catch (error) {
         }
       }
+    },
+    onLoad() {
+      this.isOnError = false
     }
   }
 })

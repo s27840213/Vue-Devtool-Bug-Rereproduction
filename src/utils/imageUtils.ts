@@ -29,7 +29,7 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage, size?: string | number): string {
+  getSrc(config: IImage, size?: string | number, retry = false): string {
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined') {
       size = this.getSrcSize(
@@ -47,10 +47,10 @@ class ImageUtils {
           for (const [k, v] of Object.entries(img.urls)) {
             if (k === size) return v
           }
-        } else {
+        } else if (!retry) {
           store.dispatch('user/updateImages', { assetSet: `${assetId}` })
             .then(() => {
-              return this.getSrc(config, size)
+              return this.getSrc(config, size, true)
             })
             .catch((error) => {
               console.log(error + ', assetId: ' + assetId)
