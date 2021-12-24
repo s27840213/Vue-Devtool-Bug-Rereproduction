@@ -102,20 +102,6 @@ export default Vue.extend({
         const subLayerIdx = layerUtils.subLayerIdx
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
-        // if (!fontStore.some(font => font.face === this.item.id)) {
-        //   this.updateTextState({ pending: this.item.id })
-        //   const newFont = new FontFace(this.item.id, this.getFontUrl(this.item.id))
-        //   await Promise.race([
-        //     newFont.load(),
-        //     new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
-        //   ]).then(() => {
-        //     document.fonts.add(newFont)
-        //     TextUtils.updateFontFace({ name: newFont.family, face: newFont.family, loaded: true })
-        //   }).catch((error) => {
-        //     throw error
-        //   })
-        // }
-
         await this.$store.dispatch('text/addFont', {
           type: 'public',
           url: '',
@@ -148,10 +134,13 @@ export default Vue.extend({
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
         } else {
-          // case for changing the font of <br>
           const { start } = tiptapUtils.getSelection() as { start: ISelection }
-          if (!config.paragraphs[start.pIndex].spans[start.sIndex].text) {
-            const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
+          /**
+           * Check if the caret is focus at <br>.
+           * if so, apply the font data to the spanStyle of the corresponding p.
+           */
+          const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
+          if (start.sIndex === 0 && !config.paragraphs[start.pIndex].spans[start.sIndex].text) {
             const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
             sStyles.font = this.item.id
             paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
@@ -166,7 +155,17 @@ export default Vue.extend({
               if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
                 tiptapUtils.applySpanStyle('font', this.item.id)
               } else {
-                editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
+                /**
+                 * Fix problem: caret at the end of a paragraph, the returned sIndex is not as expected.
+                 */
+                if (start.sIndex >= config.paragraphs[start.pIndex].spans.length) {
+                  paragraphs[start.pIndex].spans[paragraphs[start.pIndex].spans.length - 1]
+                    .styles.font = this.item.id
+                  layerUtils.updatecCurrTypeLayerProp({ paragraphs })
+                  tiptapUtils.updateHtml(paragraphs)
+                } else {
+                  editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
+                }
               }
             })
             isRanged && tiptapUtils.focus()

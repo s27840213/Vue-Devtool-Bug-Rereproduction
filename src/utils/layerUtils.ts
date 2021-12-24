@@ -52,7 +52,7 @@ class LayerUtils {
     })()
   }
 
-  updatecCurrTypeLayerProp(prop: { [key: string]: string | boolean | number }) {
+  updatecCurrTypeLayerProp(prop: { [key: string]: string | boolean | number | Array<IParagraph> }) {
     const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = this
     switch (currLayer.type) {
       case 'group':
