@@ -294,13 +294,13 @@ export default Vue.extend({
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
     searchTitleStyles() {
-      if (this.$i18n.locale === 'us') {
-        return {}
-      } else {
+      if (this.$i18n.locale === 'tw') {
         return {
           letterSpacing: '0.255em',
           textIndent: '0.255em'
         }
+      } else {
+        return {}
       }
     },
     templateStyles(heightPercent: number) {
@@ -459,7 +459,7 @@ export default Vue.extend({
     },
     getThemeTitle(themeId: string): string {
       const theme = this.themes.find((theme) => theme.id.toString() === themeId)
-      return theme ? theme.title : '未指定主題'
+      return theme ? theme.title : `${this.$t('NN0258')}`
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id

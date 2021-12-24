@@ -52,8 +52,10 @@ import { mapGetters, mapMutations } from 'vuex'
 import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
-import { FunctionPanelType } from '@/store/types'
 import mouseUtils from '@/utils/mouseUtils'
+import { ColorEventType, FunctionPanelType } from '@/store/types'
+import color from '@/store/module/color'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {

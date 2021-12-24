@@ -2,6 +2,7 @@ import { GetterTree, ActionTree } from 'vuex'
 import { floor } from 'lodash'
 import list from '@/apis/list'
 import { captureException } from '@sentry/browser'
+import localeUtils from '@/utils/localeUtils'
 
 interface IHomeTemplateState {
   locale: string,
@@ -26,7 +27,7 @@ const getters: GetterTree<IHomeTemplateState, unknown> = {
 
 const actions: ActionTree<IHomeTemplateState, unknown> = {
   async getTagContent({ commit }, { keyword, theme }) {
-    const { locale } = state
+    const locale = localeUtils.currLocale()
     try {
       const { data } = await list.getTemplate({
         locale,

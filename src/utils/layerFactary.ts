@@ -167,6 +167,7 @@ class LayerFactary {
       dragging: false,
       designId: '',
       isEdited: false,
+      contentEditable: false,
       styles: {
         x: 0,
         y: 0,
@@ -207,7 +208,11 @@ class LayerFactary {
             }
           ]
         }
-      ]
+      ],
+      selection: {
+        from: 0,
+        to: 0
+      }
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
@@ -233,7 +238,6 @@ class LayerFactary {
           }
         }
       })
-
       config.paragraphs.forEach(p => {
         if (p.spans.length) {
           p.id = GeneralUtils.generateRandomString(8)
@@ -248,14 +252,6 @@ class LayerFactary {
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    layers
-      .forEach(l => {
-        if (l.type === 'text') {
-          const text = l as IText
-          text.widthLimit = text.styles.writingMode.includes('vertical')
-            ? text.styles.height : text.styles.width
-        }
-      })
     return {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -282,6 +278,7 @@ class LayerFactary {
         verticalFlip: false
       },
       layers: layers
+        .map(l => this.newByLayerType(l) as IShape | IText | IImage)
     }
   }
 

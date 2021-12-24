@@ -8,6 +8,7 @@ import modalUtils from '@/utils/modalUtils'
 import Vue from 'vue'
 import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
+import apiUtils from '@/utils/apiUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -495,7 +496,10 @@ const actions: ActionTree<IUserModule, unknown> = {
     //   asset_list: assetSet
     //   // team_id: state.teamId || state.userId
     // })
-    const { data } = await userApis.getAllAssets(token, { asset_list: assetSet })
+    const { data } = await apiUtils.requestWithRetry(() => {
+      console.warn('fetch')
+      return userApis.getAllAssets(token, { asset_list: assetSet })
+    })
     const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
     if (urlSet) {
       for (const [assetId, urls] of Object.entries(urlSet)) {

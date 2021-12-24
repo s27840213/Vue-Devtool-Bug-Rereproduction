@@ -8,17 +8,17 @@
       img(class="mobile-warning__image"
           :src="require('@/assets/img/jpg/mobilewarning/mobile.jpg')")
       div(class="mobile-warning__title")
-        span 目前暫時不支援您使用的裝置。
+        span {{$t('NN0259')}}
       div(class="mobile-warning__description")
         div(class="mobile-warning__description-line")
-          span 請使用電腦版瀏覽器開啟 Vivipic 編輯器
+          span {{$t('NN0260')}}
         div(class="mobile-warning__description-line")
-          span 以獲得最佳的設計體驗。
+          span {{$t('NN0261')}}
       div(class="mobile-warning__button-outter")
         div(class="mobile-warning__button-wrapper")
           div(class="mobile-warning__button"
               @click="goToHome")
-            span 回到首頁
+            span {{$t('NN0262')}}
 </template>
 
 <script lang="ts">

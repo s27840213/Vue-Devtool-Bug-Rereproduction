@@ -11,6 +11,7 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import ShapeUtils from './shapeUtils'
 import ImageUtils from './imageUtils'
 import stepsUtils from './stepsUtils'
+import textUtils from './textUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -236,12 +237,18 @@ class GroupUtils {
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
-      if (store.getters.getCurrSelectedLayers.length === 1) {
+      const currSelectedLayers = store.getters.getCurrSelectedLayers
+      if (currSelectedLayers.length === 1) {
         const { pageIndex, index: layerIndex } = this.currSelectedInfo
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-          active: false
-        })
-        ImageUtils.setImgControlDefault()
+        if (currSelectedLayers[0].type === 'text' && textUtils.isEmptyText(currSelectedLayers[0])) {
+          store.commit('DELETE_selectedLayer')
+          store.commit('SET_lastSelectedLayerIndex', -1)
+        } else {
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+            active: false
+          })
+          ImageUtils.setImgControlDefault()
+        }
       } else {
         const tmpLayer = this.tmpLayer
         store.commit('DELETE_selectedLayer')

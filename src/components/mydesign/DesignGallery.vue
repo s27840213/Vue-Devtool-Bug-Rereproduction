@@ -9,7 +9,7 @@
                 iconHeight="5px"
                 iconColor="gray-2")
       div(class="design-gallery__title")
-        span 設計
+        span {{$tc('NN0252', 2)}}
     div(v-if="isExpanded" class="design-gallery__designs")
       design-item(v-for="design in allDesigns"
                   :key="design.asset_index"
@@ -17,6 +17,7 @@
                   :favorable="!limitFunctions"
                   :undraggable="limitFunctions"
                   :nameIneditable="limitFunctions"
+                  :unenterable="limitFunctions"
                   :isSelected="checkSelected(design.asset_index.toString())"
                   :isAnySelected="isAnySelected"
                   :isMultiSelected="isMultiSelected"

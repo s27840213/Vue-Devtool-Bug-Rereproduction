@@ -23,7 +23,7 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { ISpanStyle, IText } from '@/interfaces/layer'
+import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
@@ -48,14 +48,14 @@ export default Vue.extend({
     if (this.config.styles.textShape.name) {
       return
     }
-
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
         const promise = this.addFont({
           type: span.styles.type,
           face: span.styles.font,
-          url: span.styles.fontUrl
+          url: span.styles.fontUrl,
+          ver: this.verUni
         }).catch(e => console.error(e))
 
         promises.push(promise)
@@ -86,6 +86,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['fontStore']),
+    ...mapState('user', ['verUni']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -106,6 +107,9 @@ export default Vue.extend({
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     }
   },
   watch: {
@@ -126,10 +130,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('text', ['addFont']),
     styles(styles: any) {
-      const converted = CssConveter.convertFontStyle(styles)
-      return Object.assign(converted, {
-        'font-family': (converted['font-family'] + ',').concat(this.getDefaultFonts)
-      })
+      return CssConveter.convertFontStyle(styles)
     },
     bodyStyles() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
@@ -141,8 +142,8 @@ export default Vue.extend({
     },
     wrapperStyles() {
       const { editing } = this.config
-      const { isCurveText } = this
-      const opacity = editing ? (isCurveText ? 0.2 : 0) : 1
+      const { isCurveText, isFlipped } = this
+      const opacity = editing ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity
@@ -163,7 +164,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .nu-text {
     width: 100%;
     height: 100%;

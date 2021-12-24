@@ -187,7 +187,6 @@ export default Vue.extend({
     },
     async handleAddText(config: { type: string, text: string }) {
       await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
-      ShortcutUtils.textSelectAll(this.getLayersNum() - 1)
     },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]

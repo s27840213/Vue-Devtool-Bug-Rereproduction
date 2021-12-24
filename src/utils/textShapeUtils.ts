@@ -73,6 +73,7 @@ class Controller {
           shape,
           attrs
         )
+        console.log(styles.writingMode)
         store.commit('UPDATE_specLayerData', {
           pageIndex,
           layerIndex,

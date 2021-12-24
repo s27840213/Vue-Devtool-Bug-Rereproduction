@@ -10,12 +10,12 @@
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="size-bar relative")
         div(class="pointer"
-          @mousedown="fontSizeStepping(-1)") -
+          @mousedown="fontSizeStepping(-step)") -
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" :value="fontSize")
         div(class="pointer"
-          @mousedown="fontSizeStepping(1)") +
+          @mousedown="fontSizeStepping(step)") +
         value-selector(v-if="openValueSelector"
                     :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
@@ -85,6 +85,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -124,7 +125,7 @@ export default Vue.extend({
   },
   mounted() {
     this.setCurrFunctionPanel(FunctionPanelType.textSetting)
-    TextPropUtils.updateTextPropsState()
+    // TextPropUtils.updateTextPropsState()
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
     })
@@ -144,7 +145,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    // ...mapState('text', ['currTextInfo']),
     ...mapGetters({
       pageIndex: 'getLastSelectedPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -178,6 +178,16 @@ export default Vue.extend({
         return '--'
       }
       return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+    },
+    step(): number {
+      // const config = LayerUtils.getCurrConfig
+      // return 1 / config.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      let scale = currLayer.styles.scale
+      if (subLayerIdx !== -1) {
+        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
+      }
+      return 1 / scale
     }
   },
   methods: {
@@ -192,7 +202,6 @@ export default Vue.extend({
     },
     openFontsPanel() {
       this.isOpenFontPanel = true
-      this.textInfoRecorder()
       this.$emit('openFontsPanel')
     },
     inputColor(input: Event) {
@@ -210,37 +219,31 @@ export default Vue.extend({
       input.focus()
       input.select()
       this.$emit('toggleColorPanel', true)
+      this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      let currLayer = LayerUtils.getCurrLayer
-      const nan = TextUtils.getNullSel()
+      const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = LayerUtils
 
-      if (currLayer.type === 'text') {
-        currLayer = currLayer as IText
-        TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end)
-        if (!TextUtils.isSel(this.sel.end)) {
-          setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end))
-        }
-      }
-
-      if (currLayer.type === 'group' || currLayer.type === 'tmp') {
-        const { subLayerIndex } = this.currTextInfo
-        const primaryLayer = currLayer as IGroup
-        if (typeof subLayerIndex === 'undefined') {
-          for (let i = 0; i < primaryLayer.layers.length; i++) {
-            const layer = primaryLayer.layers[i] as IText
-            if (layer.type === 'text') {
-              TextPropUtils._spanPropertyHandler('color', color, nan, nan, i)
-            }
+      switch (currLayer.type) {
+        case 'text':
+          if ((currLayer as IText).contentEditable) {
+            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+          } else {
+            TextPropUtils.applyPropsToAll('span', { color }, layerIndex)
+            tiptapUtils.updateHtml()
           }
-        } else {
-          TextPropUtils._spanPropertyHandler('color', color, this.sel.start, this.sel.end, subLayerIndex)
-          if (!TextUtils.isSel(this.sel.end)) {
-            TextUtils.focus(this.sel.start, this.sel.end, subLayerIndex)
+          break
+        case 'tmp':
+        case 'group':
+          if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+            TextPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
+            tiptapUtils.updateHtml()
+          } else {
+            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
           }
-        }
       }
+      StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
@@ -249,21 +252,15 @@ export default Vue.extend({
         const input = this.$refs['input-fontSize'] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      if (Number.isNaN(this.sel.start.offset)) {
-        TextUtils.updateLayerTextSize({ size: value })
-        setTimeout(() => {
-          // reset layer width for getting the right position of image element
-          LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
-        }, 0)
-      } else {
-        TextPropUtils._spanPropertyHandler('fontSize', value, this.sel.start, this.sel.end)
-      }
+      tiptapUtils.applySpanStyle('size', value)
+      tiptapUtils.agent(editor => {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+        StepsUtils.record()
+      })
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
     },
     handleSliderModal(modalName = '') {
@@ -272,8 +269,6 @@ export default Vue.extend({
         const input = this.$refs[`input-${modalName}`] as HTMLInputElement
         input.focus()
         input.select()
-      } else {
-        this.onBlur()
       }
     },
     propsBtnStyles(iconName: string) {
@@ -300,6 +295,9 @@ export default Vue.extend({
           break
         case 'text-align-right':
           if (this.props.textAlign === 'right') return hitStyle
+          break
+        case 'text-align-justify':
+          if (this.props.textAlign === 'justify') return hitStyle
       }
       return origin
     },
@@ -307,8 +305,8 @@ export default Vue.extend({
       console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
-      let start
-      let end
+      // let start
+      // let end
       let subLayerIndex
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
@@ -318,43 +316,67 @@ export default Vue.extend({
           subLayerIndex = undefined
         }
       }
-
-      const sel = TextUtils.getSelection()
-      console.log(sel.start.pIndex)
-      start = TextUtils.isSel(sel?.start) ? sel?.start as ISelection : TextUtils.getNullSel()
-      end = TextUtils.isSel(sel?.end) ? sel?.end as ISelection : TextUtils.getNullSel()
-
-      if (!TextUtils.isSel(start) && config.type === 'text') {
-        start = TextUtils.selectAll(config as IText).start
-        end = TextUtils.selectAll(config as IText).end
-      }
-      TextUtils.updateSelection(start, end)
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
-      TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
-
-      // Only select with range or none selection exist, the prop-panel update.
-      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end)) || iconName === 'font-vertical') {
-        TextPropUtils.updateTextPropsState()
+      if (iconName === 'font-vertical') {
+        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+      } else {
+        switch (iconName) {
+          case 'bold':
+            tiptapUtils.applySpanStyle('weight', (this.props.weight === 'bold') ? 'normal' : 'bold')
+            TextPropUtils.updateTextPropsState({ weight: (this.props.weight === 'bold') ? 'normal' : 'bold' })
+            break
+          case 'underline':
+            tiptapUtils.applySpanStyle('decoration', (this.props.decoration === 'underline') ? 'none' : 'underline')
+            TextPropUtils.updateTextPropsState({ decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' })
+            break
+          case 'italic':
+            tiptapUtils.applySpanStyle('style', (this.props.style === 'italic') ? 'normal' : 'italic')
+            TextPropUtils.updateTextPropsState({ style: (this.props.style === 'italic') ? 'normal' : 'italic' })
+            break
+        }
       }
+      this.updateLayerProps({ isEdited: true })
       StepsUtils.record()
     },
+    updateLayerProps(props: { [key: string]: string | number | boolean }) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      switch (currLayer.type) {
+        case 'text':
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, props)
+          break
+        case 'group':
+          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+      }
+    },
     onParaPropsClick(iconName: string) {
-      TextPropUtils.paragraphPropsHandler(iconName)
-      if (!this.sel || (TextUtils.isSel(this.sel.start) && TextUtils.isSel(this.sel.end))) {
-        TextPropUtils.updateTextPropsState()
+      switch (iconName) {
+        case 'text-align-left':
+          tiptapUtils.applyParagraphStyle('align', 'left')
+          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          break
+        case 'text-align-center':
+          tiptapUtils.applyParagraphStyle('align', 'center')
+          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          break
+        case 'text-align-right':
+          tiptapUtils.applyParagraphStyle('align', 'right')
+          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          break
+        case 'text-align-justify':
+          tiptapUtils.applyParagraphStyle('align', 'justify')
+          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          break
       }
       StepsUtils.record()
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const { config, subLayerIndex } = this.currTextInfo
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            this.fontSizeSteppingHandler(step)
-            TextUtils.updateLayerSize(config, LayerUtils.pageIndex, LayerUtils.layerIndex, subLayerIndex)
+            TextPropUtils.fontSizeStepping(step)
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -365,76 +387,19 @@ export default Vue.extend({
 
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
-        const { start, end } = GeneralUtils.deepCopy(TextUtils.getCurrSel) as {
-          start: ISelection,
-          end: ISelection
-        }
         if (new Date().getTime() - startTime < 500) {
-          this.fontSizeSteppingHandler(step)
+          TextPropUtils.fontSizeStepping(step)
         }
         clearInterval(interval)
-        StepsUtils.record()
+        tiptapUtils.agent(editor => {
+          if (!editor.state.selection.empty) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            StepsUtils.record()
+          }
+        })
       }
 
       window.addEventListener('mouseup', onmouseup)
-    },
-    fontSizeSteppingHandler(step: number) {
-      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
-      const { config, subLayerIndex } = this.currTextInfo
-      if (this.sel) {
-        const { start, end } = this.sel
-        // console.log('start: p: ', start.pIndex, ' s: ', start.sIndex, 'off: ', start.offset)
-        // console.log('end: p: ', end.pIndex, ' s: ', end.sIndex, 'off: ', end.offset)
-
-        const finalStart = {} as ISelection
-        const finalEnd = {} as ISelection
-        const currStart = {} as ISelection
-        const currEnd = {} as ISelection
-        for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
-          const p = config.paragraphs[pidx]
-          for (let sidx = 0; sidx < p.spans.length; sidx++) {
-            const span = p.spans[sidx]
-            if ((pidx === start.pIndex && sidx < start.sIndex) || (pidx === end.pIndex && sidx > end.sIndex)) {
-              continue
-            }
-
-            // PIndex, sIndex both are at the start-selection
-            if (pidx === start.pIndex && sidx === start.sIndex) {
-              // Start-selection and the end-selection are exactly at the same span
-              if ((start.pIndex === end.pIndex) && (start.sIndex === end.sIndex)) {
-                Object.assign(currStart, start)
-                Object.assign(currEnd, end)
-              } else {
-                Object.assign(currStart, start)
-                Object.assign(currEnd, { ...start, offset: span.text.length })
-              }
-            } else if (pidx === end.pIndex && sidx === end.sIndex) {
-              const endSidx = (start.pIndex === end.pIndex && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
-              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: end.offset })
-            } else {
-              const endSidx = (start.pIndex === pidx && start.sIndex + 1 === finalStart.sIndex) ? sidx + 1 : sidx
-              Object.assign(currStart, { pIndex: pidx, sIndex: endSidx, offset: 0 })
-              Object.assign(currEnd, { pIndex: pidx, sIndex: endSidx, offset: span.text.length })
-            }
-            TextPropUtils.fontSizeStepper(span.styles.size + step)
-
-            if (Object.keys(finalStart).length === 0) {
-              Object.assign(finalStart, this.sel.start)
-            }
-          }
-        }
-        Object.assign(finalEnd, this.sel.end)
-        const finalSel = TextPropUtils.spanMerger(config.paragraphs, finalStart, finalEnd)
-        this.$nextTick(() => {
-          TextUtils.focus(finalSel[0], finalSel[1], subLayerIndex)
-          TextUtils.updateSelection(finalSel[0], finalSel[1])
-          TextPropUtils.updateTextPropsState()
-        })
-      } else {
-        TextUtils.updateLayerTextSize({ diff: step })
-        TextPropUtils.updateTextPropsState()
-      }
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
@@ -456,15 +421,11 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          if (Number.isNaN(this.sel.start.offset)) {
-            TextUtils.updateLayerTextSize({ size: parseFloat(value) })
-            setTimeout(() => {
-              // reset layer width for getting the right position of image element
-              LayerUtils.resetLayerWidth(this.pageIndex, this.layerIndex)
-            }, 0)
-          } else {
-            TextPropUtils._spanPropertyHandler('fontSize', parseFloat(value), this.sel.start, this.sel.end)
-          }
+          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.agent(editor => {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            StepsUtils.record()
+          })
           TextPropUtils.updateTextPropsState({ fontSize: value })
         })
       }
@@ -473,7 +434,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('fontSpacing', value / 1000)
+          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000)
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -482,7 +443,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          TextPropUtils.paragraphPropsHandler('lineHeight', toNumber((value).toFixed(2)))
+          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)))
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }

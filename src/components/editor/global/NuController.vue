@@ -14,8 +14,7 @@
         :layer-index="`${layerIndex}`"
         :style="styles(getLayerType)"
         @drop.prevent="onDrop($event)"
-        @dragover.prevent,
-        @click.left="onClick"
+        @dragover.prevent
         @click.right.stop="onRightClick"
         @contextmenu.prevent
         @mousedown.left="moveStart"
@@ -52,52 +51,29 @@
               @onFrameDragleave="onFrameDragLeave(index)",
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-      template(v-if="config.type === 'text' && config.active")
+      template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          div(ref="text" :id="`text-${layerIndex}`" spellcheck="false"
-            @dragstart="preventDefault($event)"
+          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
-            class="text__body"
-            :contenteditable="config.type === 'tmp' || config.locked ? false : contentEditable"
-            @focus="onTextFocus()"
-            @blur="onTextBlur()"
-            @compositionstart="composingStart"
-            @compositionend="composingEnd"
-            @keypress="onKeyPress"
-            @keydown="onKeyDown"
-            @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-            @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.textCopy()"
-            @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-            @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.textPaste()"
-            @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-            @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.textSelectAll()"
-            @keydown.ctrl.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-            @keydown.meta.90.exact.stop.prevent.self="ShortcutUtils.undo()"
-            @keydown.ctrl.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-            @keydown.meta.shift.90.exact.stop.prevent.self="ShortcutUtils.redo()"
-            @keydown.37.stop
-            @keydown.38.stop
-            @keydown.39.stop
-            @keydown.40.stop
-            @keyup="onKeyUp")
-            p(v-for="(p, pIndex) in config.paragraphs" class="text__p"
-              :data-pindex="pIndex"
-              :key="p.id",
-              :style="textStyles(p.styles)")
-              template(v-for="(span, sIndex) in p.spans")
-                span(v-if="!span.text && p.spans.length > 1 && sIndex !== 0" class="text__span"
-                  :data-sindex="sIndex"
-                  :key="span.id",
-                  :style="textStyles(span.styles)")
-                  span(class="text__span"
-                  :data-sindex="sIndex"
-                  :key="span.id",
-                  :style="textStyles(span.styles)") {{ '&#8288' }}
-                span(v-else class="text__span"
-                  :data-sindex="sIndex"
-                  :key="span.id",
-                  :style="textStyles(span.styles)") {{ span.text }}
-                  br(v-if="!span.text && p.spans.length === 1")
+            :pageIndex="pageIndex"
+            :layerIndex="layerIndex"
+            :subLayerIndex="-1"
+            @keydown.native.37.stop
+            @keydown.native.38.stop
+            @keydown.native.39.stop
+            @keydown.native.40.stop
+            @keydown.native.ctrl.67.exact.stop.self
+            @keydown.native.meta.67.exact.stop.self
+            @keydown.native.ctrl.86.exact.stop.self
+            @keydown.native.meta.86.exact.stop.self
+            @keydown.native.ctrl.65.exact.stop.self
+            @keydown.native.meta.65.exact.stop.self
+            @keydown.native.ctrl.90.exact.stop.self
+            @keydown.native.meta.90.exact.stop.self
+            @keydown.native.ctrl.shift.90.exact.stop.self
+            @keydown.native.meta.shift.90.exact.stop.self
+            @update="handleTextChange"
+            @compositionend="handleTextCompositionEnd")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles"
@@ -184,6 +160,8 @@ import popupUtils from '@/utils/popupUtils'
 import color from '@/store/module/color'
 import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
+import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -194,6 +172,12 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     snapUtils: Object
+  },
+  components: {
+    NuTextEditor
+  },
+  created() {
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
   },
   data() {
     return {
@@ -220,19 +204,22 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      contentEditable: true,
       clipedImgBuff: {} as {
         index: number,
         styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-
-      paragraphs: [] as Array<IParagraph>,
-      subControlerIndexs: []
+      subControlerIndexs: [],
+      hasChangeTextContent: false,
+      movingByControlPoint: false,
+      widthLimitSetDuringComposition: false
     }
   },
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
+    if (this.config.active) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
+    }
   },
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
@@ -302,6 +289,9 @@ export default Vue.extend({
       // @Test
       return !this.isControlling
     },
+    contentEditable(): boolean {
+      return this.config.contentEditable
+    },
     isDragging(): boolean {
       return this.config.dragging
     },
@@ -334,6 +324,9 @@ export default Vue.extend({
       return {
         transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio})`
       }
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
     }
   },
   watch: {
@@ -345,44 +338,17 @@ export default Vue.extend({
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
-          const { paragraphs } = GeneralUtils.deepCopy(this.config) as IText
-          if (paragraphs.length === 1 && !paragraphs[0].spans[0].text) {
-            LayerUtils.deleteLayer(this.lastSelectedLayerIndex)
-            return
-          }
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false })
           if (!this.isLocked) {
-            this.contentEditable = false
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-          }
-
-          for (const p of paragraphs) {
-            for (let sIndex = 0; sIndex < p.spans.length; sIndex++) {
-              if (!p.spans[sIndex].text && sIndex >= 1 && sIndex < p.spans.length - 1) {
-                p.spans.splice(sIndex, 1)
-                if (TextPropUtils.isSameSpanStyles(p.spans[sIndex - 1].styles, p.spans[sIndex].styles)) {
-                  p.spans[sIndex - 1].text += p.spans[sIndex].text
-                  p.spans.splice(sIndex, 1)
-                  sIndex--
-                }
-                LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
-              }
-            }
           }
         }
         popupUtils.closePopup()
       } else {
         if (this.getLayerType === 'text') {
-          TextUtils.setCurrTextInfo({
-            config: this.config as IText,
-            layerIndex: this.layerIndex
-          })
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
         }
-      }
-
-      if ((this.getLayerType === 'text' || this.getLayerType === 'tmp') && val) {
-        this.$store.commit('text/SET_default')
-        TextPropUtils.updateTextPropsState()
       }
     },
     isTextEditing(editing) {
@@ -390,10 +356,22 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           editing
         })
-        if (editing && !this.config.isEdited) {
-          ShortcutUtils.textSelectAll(this.layerIndex)
+      }
+    },
+    contentEditable(newVal) {
+      if (this.config.type !== 'text') return
+      if (this.config.active) {
+        if (!newVal || !this.config.isEdited) {
+          tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+        }
+        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        if (newVal) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
         }
       }
+      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -418,7 +396,7 @@ export default Vue.extend({
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
       const HW = {
-        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
         height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
       }
@@ -435,7 +413,7 @@ export default Vue.extend({
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
       const HW = {
-        //  get the widht/height of the controller for resizer-bar and minus the scaler size
+        // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 10}px`
           : (tooSmall ? `${(this.getLayerHeight - 10) * 0.16}px` : resizerStyle.width),
         height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 10}px`
@@ -452,6 +430,8 @@ export default Vue.extend({
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
               : resizers.slice(2, 4)
+          } else if (this.config.styles.textShape && this.config.styles.textShape.name) {
+            resizers = []
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
               tooNarrow ? resizers.slice(3, 4) : resizers.slice(2, 4)
@@ -519,9 +499,11 @@ export default Vue.extend({
     },
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
+      // width: isVertical ? '100%' : `${this.getLayerWidth / this.getLayerScale}px`,
+      // height: isVertical ? '' : 'auto',
       return {
-        width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
-        height: isVertical ? '' : 'auto',
+        width: '100%',
+        height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: this.isTextEditing ? 1 : 0
       }
@@ -533,14 +515,6 @@ export default Vue.extend({
         position: 'absolute',
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
-    },
-    textStyles(styles: any) {
-      const textStyles = CssConveter.convertFontStyle(styles)
-      Object.assign(textStyles, {
-        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000',
-        'font-family': (textStyles['font-family'] + ',').concat(this.getDefaultFonts)
-      })
-      return textStyles
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
       if (this.isLine) return
@@ -568,6 +542,7 @@ export default Vue.extend({
         return this.config.styles.zindex + 1
       })()
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
@@ -575,7 +550,8 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     lineControlPointStyles() {
@@ -632,27 +608,21 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      this.movingByControlPoint = false
       const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
       }
+      this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
           })
-          if (this.isActive && !inSelectionMode && this.contentEditable && !(e.target as HTMLElement).classList.contains('control-point__move-bar')) {
-            if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-              if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-                const sel = TextUtils.getSelection()
-                if (sel) {
-                  const { start } = sel
-                  console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-                  TextUtils.updateSelection(sel.start, TextUtils.getNullSel())
-                }
-              }
-              TextPropUtils.updateTextPropsState()
-            }
+          const targetClassList = (e.target as HTMLElement).classList
+          const isMoveBar = targetClassList.contains('control-point__move-bar')
+          const isMover = targetClassList.contains('control-point__mover')
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
@@ -675,7 +645,11 @@ export default Vue.extend({
             return
           }
 
-          this.contentEditable = true
+          if (isMover || isMoveBar) {
+            this.movingByControlPoint = true
+          } else {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+          }
           break
         }
         case 'group':
@@ -684,7 +658,6 @@ export default Vue.extend({
             return
           }
       }
-      this.initTranslate = this.getLayerPos
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
@@ -780,12 +753,15 @@ export default Vue.extend({
           // }
         }
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-          StepsUtils.record()
           if (this.getLayerType === 'text') {
-            this.contentEditable = false
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
+          StepsUtils.record()
         } else if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+          if (this.movingByControlPoint) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          }
         }
         this.isControlling = false
         this.setCursorStyle('initial')
@@ -1397,234 +1373,56 @@ export default Vue.extend({
           MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       }
     },
-    onClick(e: MouseEvent) {
-      this.textClickHandler(e)
-    },
-    textClickHandler(e: MouseEvent) {
-      if (!this.contentEditable) {
-        TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-      } else if (this.getLayerType === 'text' && this.isActive && (this.$refs.text as HTMLElement).contains(e.target as Node)) {
-        if (window.getSelection() && window.getSelection()!.rangeCount !== 0) {
-          const sel = TextUtils.getSelection()
-          if (sel) {
-            const { start, end } = sel
-            console.log('start: pindex: ', start.pIndex, ' sIndex: ', start.sIndex, ' offset: ', start.offset)
-            console.log('end: pindex: ', end.pIndex, ' sIndex: ', end.sIndex, ' offset: ', end.offset)
-            TextUtils.updateSelection(sel.start, sel.end)
-          }
-        }
-        TextPropUtils.updateTextPropsState()
-      }
-    },
-    onKeyDown(e: KeyboardEvent) {
-      let updated = false
-      const onTyping = (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-        const config = GeneralUtils.deepCopy(this.config) as IText
-        config.paragraphs = paragraphs
-        this.paragraphs = paragraphs
-        this.textSizeRefresh(config)
-        if (!this.isComposing && e.key === 'Backspace' && !updated) {
-          /**
-           * this block is used for recall the composingEnd callback
-           * because the composingEnd callback will be triggered before this mutation callback
-           * this situation will happen if the composing is ended up by 'Backspace'
-           */
-          this.composingEnd()
-        }
-      }
-
-      const observer = new MutationObserver(onTyping)
-      observer.observe(this.$refs.text as HTMLElement, {
-        characterData: true,
-        childList: true,
-        subtree: true,
-        attributes: false,
-        attributeOldValue: false,
-        characterDataOldValue: false
-      })
-      setTimeout(() => { observer.disconnect() }, 0)
-      if (this.isComposing) {
-        return
-      }
-
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        console.log(e.key)
-        if (e.key === 'Backspace') {
-          observer.disconnect()
-          this.rangedHandler(e)
-        }
-        // Tab would lead to some default action -> lose the focus of the text
-        if (['Tab'].includes(e.key)) e.preventDefault()
-        return
-      }
-
-      if (['Enter', 'Backspace'].includes(e.key)) {
-        e.preventDefault()
-        this.contentEditable = false
-        const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-        updated = true
+    handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
+      this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
+      if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
-          console.warn(e.isComposing)
-          this.contentEditable = true
-          setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
+          tiptapUtils.agent(editor => {
+            editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
+          })
         })
       }
     },
-    rangedHandler(e: KeyboardEvent) {
-      if (e.key !== 'CapsLock') e.preventDefault()
-      const paragraphs = TextUtils.textHandler(this.config, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.textSizeRefresh(this.config)
-      setTimeout(() => TextUtils.focus(this.sel.start, TextUtils.getNullSel()), 0)
-    },
-    onKeyPress(e: KeyboardEvent) {
-      const sel = window.getSelection()
-      if (sel?.getRangeAt(0).toString()) {
-        this.rangedHandler(e)
-        return
-      }
-      e.preventDefault()
-      this.contentEditable = false
-      const paragraphs = TextUtils.textHandler(this.config as IText, e.key)
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs, isEdited: true })
-      this.$nextTick(() => {
-        this.contentEditable = true
-        // TextUtils.focus(this.sel.start, this.sel.end)
-        setTimeout(() => TextUtils.focus(this.sel.start, this.sel.end), 0)
-      })
-    },
-    onKeyUp(e: KeyboardEvent) {
-      if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        const sel = TextUtils.getSelection()
-        TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
-        TextPropUtils.updateTextPropsState()
+    handleTextCompositionEnd() {
+      if (this.widthLimitSetDuringComposition) {
+        this.widthLimitSetDuringComposition = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
+        this.textSizeRefresh(this.config, false)
       }
     },
-    composingStart() {
-      this.isComposing = true
-    },
-    composingEnd() {
-      this.isComposing = false
-      const { start } = TextUtils.getSelection()
-      TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, this.paragraphs)
-      this.contentEditable = false
-      this.$nextTick(() => {
-        this.contentEditable = true
-        if (this.isActive) {
-          // TextUtils.focus(start, TextUtils.getNullSel())
-          setTimeout(() => TextUtils.focus(start, TextUtils.getNullSel()), 0)
-        }
-      })
-    },
-    onTextFocus() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-    },
-    onTextBlur() {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-    },
-    onTyping(e: KeyboardEvent, isComposing: boolean) {
-      return (mutations: MutationRecord[], observer: MutationObserver) => {
-        observer.disconnect()
-        const text = this.$refs.text as HTMLElement
-        let paragraphs: IParagraph[] = []
-        try {
-          paragraphs = TextUtils.textParser(this.$refs.text as HTMLElement)
-          // paragraphs = TextUtils._textParser(this.$refs.text as HTMLElement, this.config as IText, e.key)
-          console.log(GeneralUtils.deepCopy(paragraphs))
-        } catch (error) {
-          console.log(error)
-        }
-        if (e.key !== 'Enter' && e.key !== 'Backspace') {
-          paragraphs = TextUtils.newPropsHandler(paragraphs)
-        }
-
-        const sel = TextUtils.getSelection()
-        let { pIndex, sIndex, offset } = this.sel.start
-        // if below condition is false, means some paragraph (p-node) is removed
-        if (sel && TextUtils.isSel(sel.start)) {
-          pIndex = sel.start.pIndex
-          sIndex = sel.start.sIndex
-          offset = sel.start.offset
-          if (pIndex === 0 && sIndex === 1 && parseInt((text.childNodes[0].childNodes[0] as HTMLElement).dataset.sindex ?? '1') !== 0) {
-            sIndex = 0
-            offset = 0
-          }
-          // Deleting the first span of the text, and moving the caret to the previous p
-          const isSpanDeleted = paragraphs[pIndex].spans.length < (this.config as IText).paragraphs[pIndex].spans.length
-          if (e.key !== 'Enter' && isSpanDeleted && sIndex === 1 && offset === 0) {
-            pIndex -= 1
-            sIndex = paragraphs[pIndex].spans.length - 1
-            offset = paragraphs[pIndex].spans[sIndex].text.length
-            // if below condition is satisfied, means there is deletion at the begining of the text (p=0, s=0, offset=0)
-            if (pIndex < 0) {
-              [pIndex, sIndex, offset] = [0, 0, 0]
-            }
-          }
-        }
-        if (e.key === 'Enter') {
-          [sIndex, offset] = [0, 0]
-          pIndex += 1
-        }
-        if (this.isComposing) {
-          const config = GeneralUtils.deepCopy(this.config) as IText
-          Object.assign(config.paragraphs, paragraphs)
-          this.textSizeRefresh(config)
-        } else {
-          TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, paragraphs)
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true })
-          // TemplateUtils.updateTextInfo(this.config)
-          // this.textSizeRefresh(Object.assign(GeneralUtils.deepCopy(this.config), { paragraphs }))
-          this.textSizeRefresh(this.config)
-          this.$nextTick(() => {
-            // ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-            StepsUtils.record()
-            const sel = window.getSelection()
-            if (sel) {
-              const currPropsState = this.props
-              const isSameSpanStyles = (() => {
-                if (e.key !== 'Enter' && e.key !== 'Backspace' && !Number.isNaN(pIndex) && !Number.isNaN(sIndex)) {
-                  const props = ['weight', 'style', 'decoration', 'color']
-                  for (const k of props) {
-                    if (paragraphs[pIndex].spans[sIndex].styles[k] !== currPropsState[k]) {
-                      return false
-                    }
-                  }
-                }
-                return true
-              })()
-              if (!isSameSpanStyles) {
-                sIndex += 1
-                offset = 1
-              }
-            }
-          })
-        }
-      }
-    },
-    textSizeRefresh(text: IText) {
+    textSizeRefresh(text: IText, composing: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
 
+      const getSize = () => isVertical ? this.getLayerHeight : this.getLayerWidth
+
+      let widthLimit = this.getLayerRotate ? getSize() : this.config.widthLimit
+      let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos.x
       let layerY = this.getLayerPos.y
-      const textHW = TextUtils.getTextHW(text, this.config.widthLimit)
 
-      if (this.config.widthLimit === -1) {
-        const pageWidth = (this.$parent.$el as HTMLElement).getBoundingClientRect().width / (this.scaleRatio / 100)
-        const currTextWidth = textHW.width
-        layerX = this.getLayerPos.x - (currTextWidth - this.getLayerWidth) / 2
-        if (layerX <= 0) {
-          layerX = 0
-          textHW.width = this.getLayerWidth
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
-        } else if (layerX + currTextWidth >= pageWidth) {
-          layerX = pageWidth - this.getLayerWidth
-          textHW.width = this.getLayerWidth
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: this.getLayerWidth })
+      if (widthLimit === -1) {
+        const pageSize = (this.$parent.$el as HTMLElement)
+          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio / 100)
+        const currTextSize = textHW[isVertical ? 'height' : 'width']
+
+        let layerPos = this.getLayerPos[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
+        const reachLeftLimit = layerPos <= 0
+        const reachRightLimit = layerPos + currTextSize >= pageSize
+
+        if (reachLeftLimit && reachRightLimit) {
+          if (composing) this.widthLimitSetDuringComposition = true
+          textHW = TextUtils.getTextHW(text, pageSize)
+          layerPos = 0
+          widthLimit = pageSize
+        } else if (reachLeftLimit || reachRightLimit) {
+          if (composing) this.widthLimitSetDuringComposition = true
+          widthLimit = getSize()
+          textHW = TextUtils.getTextHW(text, widthLimit)
+          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
+        layerX = isVertical ? layerX : layerPos
+        layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
           xSign: 1,
@@ -1965,11 +1763,14 @@ export default Vue.extend({
   }
   &__wrapper {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
   }
   &__body {
-    outline: none;
-    padding: 0;
-    position: relative;
+    width: 100%;
+    height: auto;
   }
   &__content {
     text-align: left;

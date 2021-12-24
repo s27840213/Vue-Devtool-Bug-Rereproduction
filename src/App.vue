@@ -77,12 +77,14 @@ export default Vue.extend({
         Object.entries(json)
           .forEach(([k, v]) => {
             if (['tw_default', 'jp_default', 'us_default', 'emoji'].includes(k)) {
+              const { priority, id, ver } = v as { id: string, ver: number, priority: number }
               const font = {
                 type: 'public',
-                face: (v as { id: string }).id,
-                url: ''
+                face: id,
+                url: '',
+                ver
               }
-              this.updateDefaultFonts({ priority: 0, font })
+              this.updateDefaultFonts({ priority, font })
               defaultFonts.push(this.addFont(font))
             }
           })

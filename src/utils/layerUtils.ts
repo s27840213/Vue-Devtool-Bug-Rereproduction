@@ -12,21 +12,61 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
 import Vue from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
+import { ITiptapSelection } from '@/interfaces/text'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
-  get currSubSelectedInfo(): ICurrSubSelectedInfo { return store.getters.getSubSelectedInfo }
   get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
-  get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
+  get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
+  get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
   get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
     return store.getters.getLayer
   }
 
   get getLayers(): (pageIndex: number) => Array<IImage | IText | IShape | IGroup | IFrame> {
     return store.getters.getLayers
+  }
+
+  get subLayerIdx(): number {
+    const { type } = this.getCurrLayer
+    if (type === 'group') {
+      return (this.getCurrLayer as IGroup).layers
+        .findIndex(l => l.active)
+    }
+    if (type === 'frame') {
+      return (this.getCurrLayer as IFrame).clips
+        .findIndex(img => img.active)
+    }
+    return -1
+  }
+
+  get getCurrConfig(): ILayer {
+    return this.subLayerIdx === -1 ? this.getCurrLayer as IText | IImage | IShape : (() => {
+      if (this.getCurrLayer.type === 'group') {
+        return (this.getCurrLayer as IGroup).layers[this.subLayerIdx]
+      }
+      return (this.getCurrLayer as IFrame).clips[this.subLayerIdx]
+    })()
+  }
+
+  updatecCurrTypeLayerProp(prop: { [key: string]: string | boolean | number | Array<IParagraph> }) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = this
+    switch (currLayer.type) {
+      case 'group':
+        try {
+          this.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, prop)
+        } catch (e) {
+          console.log(e)
+        }
+        break
+      default:
+        if (!['tmp', 'frame'].includes(currLayer.type)) {
+          this.updateLayerProps(pageIndex, layerIndex, prop)
+        }
+    }
   }
 
   addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
@@ -111,7 +151,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> | ITiptapSelection }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,

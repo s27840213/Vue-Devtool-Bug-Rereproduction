@@ -25,7 +25,7 @@
             svg-icon(class="page-setting__suggestion-panel__body__close"
                     iconName="close" iconWidth="19px" iconColor="white")
           div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 自訂尺寸
+            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0023')}}
           div(class="page-setting__suggestion-panel__body-row")
             radio-btn(class="page-setting__suggestion-panel__body__radio"
                       :isSelected="selectedFormat === 'custom'",
@@ -51,34 +51,35 @@
                 span(class="body-4"
                     :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'") H
           div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
-          div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0024')}}
-          div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
-            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-          div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row pointer"
-              @click="selectFormat(`recent-${index}`)")
-            radio-btn(class="page-setting__suggestion-panel__body__radio"
-                      :isSelected="selectedFormat === `recent-${index}`",
-                      :formatKey="`recent-${index}`",
-                      @select="selectFormat")
-            span(class="page-setting__suggestion-panel__body__recently body-3 pointer"
-                  :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'"
-                  @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
-          div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
-          div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0025')}}
-          div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
-            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-          div(v-for="(format, index) in formatList" class="page-setting__suggestion-panel__body-row pointer"
-              @click="selectFormat(`preset-${index}`)")
-            radio-btn(class="page-setting__suggestion-panel__body__radio"
-                      :isSelected="selectedFormat === `preset-${index}`",
-                      :formatKey="`preset-${index}`",
-                      @select="selectFormat")
-            span(class="page-setting__suggestion-panel__body__typical-name body-4"
-                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
-            span(class="page-setting__suggestion-panel__body__typical-size body-4"
-                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
+          div(class="page-setting__container")
+            div(class="page-setting__suggestion-panel__body-row first-row")
+              span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0024')}}
+            div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+            div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row pointer"
+                @click="selectFormat(`recent-${index}`)")
+              radio-btn(class="page-setting__suggestion-panel__body__radio"
+                        :isSelected="selectedFormat === `recent-${index}`",
+                        :formatKey="`recent-${index}`",
+                        @select="selectFormat")
+              span(class="page-setting__suggestion-panel__body__recently body-3 pointer"
+                    :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'"
+                    @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
+            div(class="mt-10")
+            div(class="page-setting__suggestion-panel__body-row first-row")
+              span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0025')}}
+            div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
+              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+            div(v-for="(format, index) in formatList" class="page-setting__suggestion-panel__body-row pointer"
+                @click="selectFormat(`preset-${index}`)")
+              radio-btn(class="page-setting__suggestion-panel__body__radio"
+                        :isSelected="selectedFormat === `preset-${index}`",
+                        :formatKey="`preset-${index}`",
+                        @select="selectFormat")
+              span(class="page-setting__suggestion-panel__body__typical-name body-4"
+                    :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
+              span(class="page-setting__suggestion-panel__body__typical-size body-4"
+                    :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
           div(class="page-setting__suggestion-panel__body__buttons")
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
@@ -87,7 +88,7 @@
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
                 @click="copyAndApplySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") 複製並調整尺寸
+              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
     div(class="page-setting__footer")
     div(v-if="inAdminMode"
       class="template-information")
@@ -381,7 +382,10 @@ export default Vue.extend({
       lastSelectedPageIndex: 'getLastSelectedPageIndex',
       token: 'user/getToken',
       getAsset: 'getAsset',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      groupType: 'getGroupType',
+      pagesLength: 'getPagesLength',
+      getPageSize: 'getPageSize'
     }),
     currentPageWidth(): number {
       return Math.round(this.getPage(this.lastSelectedPageIndex)?.width ?? 0)
@@ -443,22 +447,26 @@ export default Vue.extend({
     },
     applySelectedFormat(record = true) {
       if (!this.isFormatApplicable) return
-      if (record) {
-        StepsUtils.record()
-      }
       const format = this.getSelectedFormat()
       if (!format) return
       this.resizePage(format)
+      if (this.groupType === 1) {
+        // resize電商詳情頁時 其他頁面要依width做resize
+        this.resizeOtherPages([this.lastSelectedPageIndex], { width: format.width })
+      }
       listApi.addDesign(format.id, 'layout', format)
       const index = this.recentlyUsed.findIndex((recent) => {
         return format.id === recent.id && format.width === recent.width && format.height === recent.height
       })
       this.recentlyUsed.splice(index, 1)
       this.recentlyUsed.unshift(format)
+      this.setSuggestionPanel(false)
+      if (record) {
+        StepsUtils.record()
+      }
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      StepsUtils.record()
       const page = GeneralUtils.deepCopy(this.getPage(this.lastSelectedPageIndex))
       page.designId = ''
       this.addPageToPos({
@@ -469,6 +477,7 @@ export default Vue.extend({
       this.setLastSelectedPageIndex(this.lastSelectedPageIndex + 1)
       this.setCurrActivePageIndex(this.lastSelectedPageIndex + 1)
       this.applySelectedFormat(false)
+      StepsUtils.record()
       this.$nextTick(() => { PageUtils.scrollIntoPage(this.lastSelectedPageIndex) })
     },
     resizePage(format: { width: number, height: number }) {
@@ -480,6 +489,22 @@ export default Vue.extend({
           height: format.height
         }
       })
+    },
+    resizeOtherPages(excludes:number[] = [], format: { [key: string]: number }) {
+      const { pagesLength, getPageSize } = this
+      for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
+        if (excludes.includes(pageIndex)) continue
+        const { width, height } = getPageSize(pageIndex)
+        const newSize = {
+          width: format.width || width * (format.height / height),
+          height: format.height || height * (format.width / width)
+        }
+        ResizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
+        this.updatePageProps({
+          pageIndex,
+          props: newSize
+        })
+      }
     },
     toggleLock() {
       this.isLocked = !this.isLocked
@@ -956,20 +981,21 @@ export default Vue.extend({
       }
       &__buttons {
         display: flex;
-        justify-content: space-between;
         width: 95%;
         margin-left: auto;
         margin-right: auto;
         margin-top: 29px;
         margin-bottom: 17.43px;
+        gap: 11px;
       }
       &__button {
+        flex-grow: 1;
         border-radius: 3px;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 27px;
-        padding: 0 18px;
+        padding: 4px;
+        text-align: center;
         &__text {
           font-weight: 700;
           font-size: 12px;
@@ -979,6 +1005,22 @@ export default Vue.extend({
   }
   &__footer {
     height: 20px;
+  }
+  &__container {
+    max-height: 500px;
+    margin-right: -5px;
+    padding-right: 5px;
+    overflow-y: overlay;
+    scrollbar-width: thin;
+    &::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+      background-color: rgba(24, 25, 31, 0.5);
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      background-color: setColor(gray-2);
+    }
   }
 }
 .horizontal-rule {

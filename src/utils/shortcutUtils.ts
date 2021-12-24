@@ -14,6 +14,7 @@ import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
 import router from '@/router'
 import logUtils from './logUtils'
+import tiptapUtils from './tiptapUtils'
 
 class ShortcutUtils {
   get currSelectedPageIndex() {
@@ -149,116 +150,36 @@ class ShortcutUtils {
   textCopy() {
     const sel = window.getSelection()
     if (sel) {
-      navigator.clipboard.writeText(sel.toString())
+      navigator.clipboard.writeText(sel.toString().replace(/\n\n/g, '\n'))
     }
   }
 
   textPaste() {
-    const sel = window.getSelection()
-    if (sel && sel.rangeCount !== 0) {
-      const selPos = TextUtils.getSelection()?.start as ISelection
-      const selEnd = TextUtils.getSelection()?.end as ISelection
-      const paragraphs = GeneralUtils.deepCopy((LayerUtils.getCurrLayer as IText).paragraphs) as IParagraph[]
-
-      if (TextUtils.isSel(selEnd)) {
-        /**
-         *  Used to delete the selected-text-range
-         *  */
-        const textTrimming = () => {
-          paragraphs[selPos.pIndex].spans[selPos.sIndex].text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text.substring(0, selPos.offset)
-          paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text = paragraphs[selEnd.pIndex].spans[selEnd.sIndex].text.substr(selEnd.offset)
-        }
-        if (selPos.pIndex === selEnd.pIndex) {
-          /**
-           *  The startSel and endSel is at the same paragraph and span
-           *  */
-          if (selPos.sIndex === selEnd.sIndex) {
-            const text = paragraphs[selPos.pIndex].spans[selPos.sIndex].text
-            const removedText = text.substring(selPos.offset, selEnd.offset)
-            paragraphs[selPos.pIndex].spans[selPos.sIndex].text = text.replace(removedText, '')
-          } else {
-            textTrimming()
-            paragraphs[selEnd.pIndex].spans.splice(selPos.sIndex + 1, selEnd.sIndex - selPos.sIndex - 1)
+    navigator.clipboard.readText().then((text) => {
+      tiptapUtils.agent(editor => {
+        text = text.replace(/\r/g, '')
+        const spans = text.split('\n')
+        let chainedCommands = editor.chain().deleteSelection()
+        spans.forEach((line, index) => {
+          const spanText = `<span>${
+            line === ''
+              ? '<br/>'
+              : line.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/ /g, '&nbsp;')
+          }</span>`
+          chainedCommands = chainedCommands.insertContent(spanText)
+          if (index !== spans.length - 1) {
+            chainedCommands = chainedCommands.enter()
           }
-        } else {
-          textTrimming()
-          paragraphs[selPos.pIndex].spans.splice(selPos.sIndex + 1)
-          paragraphs[selEnd.pIndex].spans.splice(0, selEnd.sIndex)
-          if (selEnd.pIndex - selPos.pIndex > 1) {
-            paragraphs.splice(selPos.pIndex + 1, selEnd.pIndex - selPos.pIndex - 1)
-          }
-        }
-      }
-
-      const spanBuff: ISpan[] = []
-      const paraStyles: IParagraphStyle = GeneralUtils.deepCopy(paragraphs[selPos.pIndex].styles)
-      const spanStyles: ISpanStyle = GeneralUtils.deepCopy(paragraphs[selPos.pIndex].spans[selPos.sIndex].styles)
-      const selFinalPos: ISelection = Object.assign({}, selPos)
-      navigator.clipboard.readText().then((text) => {
-        const textArr = text.split('\n\n')
-        for (let i = 0; i < textArr.length; i++, selPos.pIndex++) {
-          let pastedText = textArr[i]
-          const p = paragraphs[selPos.pIndex]
-          if (i === 0) {
-            /**
-             * Store the rest spans of to the textBuffer
-             */
-            for (let sidx = selPos.sIndex; sidx < p.spans.length; sidx++) {
-              if (sidx === selPos.sIndex) {
-                if (textArr.length === 1) {
-                  pastedText += p.spans[selPos.sIndex].text.substr(selPos.offset)
-                  selFinalPos.offset += textArr[i].length
-                  p.spans[selPos.sIndex].text = p.spans[selPos.sIndex].text.substr(0, selPos.offset)
-                  p.spans[selPos.sIndex].text += pastedText
-                  break
-                }
-                const span = GeneralUtils.deepCopy(p.spans[sidx])
-                if ((span.text = span.text.substr(selPos.offset))) {
-                  spanBuff.push(span)
-                }
-                p.spans[selPos.sIndex].text = p.spans[selPos.sIndex].text.substr(0, selPos.offset)
-                p.spans[selPos.sIndex].text += pastedText
-                continue
-              }
-              const span = GeneralUtils.deepCopy(p.spans[sidx])
-              spanBuff.push(span)
-            }
-            if (textArr.length !== 1) {
-              p.spans.splice(selPos.sIndex + 1, p.spans.length)
-            }
-            continue
-          }
-          const newPara: IParagraph = {
-            id: GeneralUtils.generateRandomString(8),
-            styles: GeneralUtils.deepCopy(paraStyles) as IParagraphStyle,
-            spans: [
-              {
-                id: GeneralUtils.generateRandomString(8),
-                text: pastedText,
-                styles: GeneralUtils.deepCopy(spanStyles) as ISpanStyle
-              }
-            ]
-          }
-          paragraphs.splice(selPos.pIndex, 0, newPara)
-          selFinalPos.pIndex++
-        }
-        if (spanBuff.length) {
-          paragraphs.splice(selPos.pIndex, 0, {
-            styles: paraStyles,
-            spans: spanBuff
-          })
-        }
-        TextUtils.updateTextParagraphs(LayerUtils.pageIndex, LayerUtils.layerIndex, paragraphs)
-        Vue.nextTick(() => {
-          if (textArr.length !== 1) {
-            selFinalPos.sIndex = paragraphs[selFinalPos.pIndex].spans.length - 1
-            selFinalPos.offset = paragraphs[selFinalPos.pIndex].spans[selFinalPos.sIndex].text.length
-          }
-          TextUtils.updateSelection(selFinalPos, selFinalPos)
-          TextUtils.focus()
         })
+        chainedCommands.run()
+        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
-    }
+    })
   }
 
   textSelectAll(layerIndex?: number) {

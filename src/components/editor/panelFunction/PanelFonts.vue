@@ -36,8 +36,8 @@
             :iconWidth="'30px'"
             :iconColor="'green-2'")
           span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
-      btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
-        :disabled="fontUploadStatus === 'uploading'") Upload Font
+      //- btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
+      //-   :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>
 
 <script lang="ts">
@@ -52,6 +52,7 @@ import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
