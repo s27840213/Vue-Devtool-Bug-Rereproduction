@@ -15,6 +15,9 @@ import FrameUtils from './frameUtils'
 import { drop } from 'lodash'
 import { Layer } from 'konva/types/Layer'
 import page from '@/store/module/page'
+import imageUtils from './imageUtils'
+import pageUtils from './pageUtils'
+import uploadUtils from './uploadUtils'
 
 class MouseUtils {
   getMouseAbsPoint(e: MouseEvent) {
@@ -116,6 +119,7 @@ class MouseUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
+    console.log(data)
     let layer
     switch (data.type) {
       case 'image': {
@@ -157,7 +161,21 @@ class MouseUtils {
           this.backgroundHandler(pageIndex, layerConfig)
           return
         } else {
-          layer = LayerFactary.newImage(layerConfig as IImage)
+          const src = imageUtils.getSrc({ srcObj: data.srcObj } as IImage)
+          const photoAspectRatio = photoWidth / photoHeight
+          const inFilePanel = store.getters.getCurrSidebarPanelType === SidebarPanelType.file
+          const attr = {
+            pageIndex: pageUtils.currFocusPageIndex,
+            ...(inFilePanel && !uploadUtils.isAdmin && { assetIndex: data.srcObj.assetId }),
+            ...(inFilePanel && uploadUtils.isAdmin && { assetId: data.srcObj.assetId })
+          }
+          AssetUtils.addImage(
+            src,
+            photoAspectRatio,
+            attr
+          )
+
+          return
         }
         break
       }

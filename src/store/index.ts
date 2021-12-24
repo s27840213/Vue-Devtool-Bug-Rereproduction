@@ -613,6 +613,7 @@ const mutations: MutationTree<IEditorState> = {
           userId,
           assetId
         })
+        console.log(type, userId, assetId)
       })
     })
   },

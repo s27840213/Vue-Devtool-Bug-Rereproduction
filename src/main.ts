@@ -92,7 +92,10 @@ new Vue({
   router,
   store,
   i18n,
-  render: (h) => h(App)
+  render: (h) => h(App),
+  mounted() {
+    document.dispatchEvent(new Event('render-event'))
+  }
 }).$mount('#app')
 
 // Here is a testing code to export whole porject as a Library

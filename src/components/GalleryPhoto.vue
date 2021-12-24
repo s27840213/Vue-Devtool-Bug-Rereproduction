@@ -66,7 +66,8 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
-      checkedAssets: 'user/getCheckedAssets'
+      checkedAssets: 'user/getCheckedAssets',
+      isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
       return this.photo.progress && this.photo.progress !== 100
@@ -122,7 +123,7 @@ export default Vue.extend({
           srcObj: {
             type,
             userId: ImageUtils.getUserId(src, type),
-            assetId: photo.assetIndex ?? ImageUtils.getAssetId(src, type)
+            assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
           },
           styles: {
             x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
