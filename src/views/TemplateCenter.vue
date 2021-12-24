@@ -294,13 +294,13 @@ export default Vue.extend({
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
     searchTitleStyles() {
-      if (this.$i18n.locale === 'us') {
-        return {}
-      } else {
+      if (this.$i18n.locale === 'tw') {
         return {
           letterSpacing: '0.255em',
           textIndent: '0.255em'
         }
+      } else {
+        return {}
       }
     },
     templateStyles(heightPercent: number) {
