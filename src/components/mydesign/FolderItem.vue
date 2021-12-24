@@ -53,7 +53,7 @@
           @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
     transition(name="fade")
       div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
-        span 不可超過64個字元，請縮減名稱。
+        span {{$t('NN0226')}}
     div(class="dragged-folder" :style="draggedFolderStyles()")
       div
         div(class="dragged-folder__icon")
@@ -469,7 +469,6 @@ export default Vue.extend({
     position: fixed;
     display: flex;
     transform: translate(-50%);
-    width: 208.8px;
     height: 20px;
     align-items: center;
     justify-content: center;

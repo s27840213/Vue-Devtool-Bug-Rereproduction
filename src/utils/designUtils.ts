@@ -164,7 +164,7 @@ class DesignUtils {
     return [
       {
         icon: 'copy',
-        text: '建立副本'
+        text: `${i18n.t('NN0251')}`
       },
       {
         icon: 'folder',
@@ -372,7 +372,7 @@ class DesignUtils {
   }
 
   addNewFolder(path: string[], fromFolderView = false): string {
-    const folder = this.newFolder('未命名資料夾', 'SYSTEM')
+    const folder = this.newFolder(`${i18n.t('NN0249')}`, 'SYSTEM')
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
