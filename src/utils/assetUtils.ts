@@ -345,6 +345,7 @@ class AssetUtils {
   }
 
   addText(json: any, attrs: IAssetProps = {}) {
+    json = GeneralUtils.deepCopy(json)
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
