@@ -104,7 +104,6 @@ export default Vue.extend({
   },
   created() {
     this.vcoConfig.middleware = this.middleware
-    colorUtils.event.emit(ColorEventType.textInit, '')
   },
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
