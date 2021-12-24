@@ -120,8 +120,7 @@ export default Vue.extend({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      },
-      hasFocused: false
+      }
     }
   },
   mounted() {
@@ -129,11 +128,6 @@ export default Vue.extend({
     // TextPropUtils.updateTextPropsState()
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
-    })
-    colorUtils.on(ColorEventType.textInit, () => {
-      if (this.hasFocus) {
-        tiptapUtils.focus()
-      }
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
@@ -194,9 +188,6 @@ export default Vue.extend({
         scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
       }
       return 1 / scale
-    },
-    hasFocus(): boolean {
-      return this.hasFocused
     }
   },
   methods: {
@@ -232,19 +223,27 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
+      const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = LayerUtils
 
-      const isFocused = (() => {
-        return window.getSelection()?.rangeCount !== 0 && (
-          () => {
-            const startContainer = window.getSelection()?.getRangeAt(0).startContainer
-            return startContainer?.nodeName === '#text'
-          })()
-      })()
-
-      tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color), isFocused)
+      switch (currLayer.type) {
+        case 'text':
+          if ((currLayer as IText).contentEditable) {
+            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+          } else {
+            TextPropUtils.applyPropsToAll('span', { color }, layerIndex)
+            tiptapUtils.updateHtml()
+          }
+          break
+        case 'tmp':
+        case 'group':
+          if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+            TextPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
+            tiptapUtils.updateHtml()
+          } else {
+            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+          }
+      }
       StepsUtils.record()
-
-      tiptapUtils.focus()
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
@@ -318,11 +317,6 @@ export default Vue.extend({
         }
       }
       this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
-
-      const sel = window.getSelection()
-      if (sel?.rangeCount) {
-        this.hasFocused = true
-      }
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {

@@ -89,14 +89,9 @@ class TiptapUtils {
   textStyles(styles: any): string {
     const textStyles = cssConveter.convertFontStyle(styles)
     const finalStyles = Object.assign(textStyles, {
-      // 'font-family': this.getFontFamily(textStyles['font-family']),
       '-webkit-text-decoration-line': textStyles['text-decoration']
     })
     return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
-  }
-
-  getFontFamily(font: string): string {
-    return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
   toJSON(paragraphs: IParagraph[]): any {
@@ -318,8 +313,13 @@ class TiptapUtils {
     }
   }
 
-  updateHtml(paragraphs: IParagraph[]) {
+  updateHtml(paragraphs?: IParagraph[]) {
     if (this.editor) {
+      if (!paragraphs) {
+        const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+        paragraphs = currLayer.type === 'text' ? (currLayer as IText).paragraphs
+          : (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
+      }
       this.editor.chain().setContent(this.toJSON(paragraphs)).selectPrevious().run()
     }
   }

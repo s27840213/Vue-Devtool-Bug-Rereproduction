@@ -94,7 +94,6 @@ export enum FunctionPanelType {
 
 export enum ColorEventType {
   text = 'setTextColor',
-  textInit = 'setTextColorInit',
   textEffect = 'setTextEffectColor',
   shape = 'setShapeColor',
   background = 'setBackgroundColor'

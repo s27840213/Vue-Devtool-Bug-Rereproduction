@@ -96,10 +96,16 @@ export default Vue.extend({
       const start = sel?.start || {} as ISelection
       const end = sel?.end || {} as ISelection
       try {
-        const fontStore = this.fontStore as Array<IFont>
         const { id, type } = layerUtils.getCurrLayer
         const preLayerIndex = layerUtils.layerIndex
         const subLayerIdx = layerUtils.subLayerIdx
+        let contentEditable = false
+        if (type === 'text') {
+          contentEditable = layerUtils.getCurrLayer.contentEditable as boolean
+        } else {
+          contentEditable = subLayerIdx === -1 ? false
+            : (layerUtils.getCurrLayer as IGroup).layers[subLayerIdx].contentEditable as boolean
+        }
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         await this.$store.dispatch('text/addFont', {
@@ -112,19 +118,32 @@ export default Vue.extend({
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)
         const config = subLayerIdx === -1 ? layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IText
-          : (layerUtils.getCurrLayer as IGroup).layers[subLayerIdx] as IText
+          : (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers[subLayerIdx] as IText
 
         if (currLayerIndex === -1 || config.loadFontEdited) {
           console.warn('The selected text layer is unaviliable')
           return
         }
 
+        if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
+          TextPropUtils.applyPropsToAll('span', { font: this.item.id }, currLayerIndex, subLayerIdx)
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
+          this.$nextTick(() => {
+            layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: true })
+          })
+
+          AssetUtils.addAssetToRecentlyUsed(this.item)
+          StepsUtils.record()
+          TextPropUtils.updateTextPropsState({ font: this.item.id })
+          return
+        }
+
         const currLayer = layerUtils.getCurrLayer
-        if (!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active)) {
-          if (!sel) {
-            Object.assign(start, TextUtils.selectAll(config).start)
-            Object.assign(end, TextUtils.selectAll(config).end)
-          }
+        if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
+          // if (!sel) {
+          //   Object.assign(start, TextUtils.selectAll(config).start)
+          //   Object.assign(end, TextUtils.selectAll(config).end)
+          // }
           const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
@@ -132,7 +151,9 @@ export default Vue.extend({
           }
           if (subLayerIdx === -1) {
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
-          } else layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
+          } else if (layerUtils.subLayerIdx !== -1) {
+            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
+          }
         } else {
           const { start } = tiptapUtils.getSelection() as { start: ISelection }
           /**
@@ -159,13 +180,12 @@ export default Vue.extend({
                  * Fix problem: caret at the end of a paragraph, the returned sIndex is not as expected.
                  */
                 if (start.sIndex >= config.paragraphs[start.pIndex].spans.length) {
-                  paragraphs[start.pIndex].spans[paragraphs[start.pIndex].spans.length - 1]
-                    .styles.font = this.item.id
-                  layerUtils.updatecCurrTypeLayerProp({ paragraphs })
-                  tiptapUtils.updateHtml(paragraphs)
-                } else {
-                  editor.chain().extendMarkRange('textStyle').updateAttributes('textStyle', { font: this.item.id }).run()
+                  start.sIndex = paragraphs[start.pIndex].spans.length - 1
                 }
+                paragraphs[start.pIndex].spans[start.sIndex]
+                  .styles.font = this.item.id
+                layerUtils.updatecCurrTypeLayerProp({ paragraphs })
+                tiptapUtils.updateHtml(paragraphs)
               }
             })
             isRanged && tiptapUtils.focus()
