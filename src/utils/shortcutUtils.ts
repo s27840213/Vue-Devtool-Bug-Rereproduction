@@ -161,16 +161,15 @@ class ShortcutUtils {
         const spans = text.split('\n')
         let chainedCommands = editor.chain().deleteSelection()
         spans.forEach((line, index) => {
-          const spanText = `<span>${
-            line === ''
-              ? '<br/>'
-              : line.replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;')
-                .replace(/ /g, '&nbsp;')
-          }</span>`
+          const spanText = `<span>${line === ''
+            ? '<br/>'
+            : line.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;')
+              .replace(/ /g, '&nbsp;')
+            }</span>`
           chainedCommands = chainedCommands.insertContent(spanText)
           if (index !== spans.length - 1) {
             chainedCommands = chainedCommands.enter()
@@ -240,7 +239,6 @@ class ShortcutUtils {
   }
 
   async save() {
-    console.log('save')
     await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
     logUtils.uploadLog()
   }
@@ -281,12 +279,10 @@ class ShortcutUtils {
           }
       }
     }
-    console.log('undo')
     StepsUtils.undo()
   }
 
   redo() {
-    console.log('redo')
     StepsUtils.redo()
   }
 

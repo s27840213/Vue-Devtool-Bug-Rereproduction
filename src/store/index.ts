@@ -27,6 +27,7 @@ import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
+import uploadUtils from '@/utils/uploadUtils'
 
 Vue.use(Vuex)
 
@@ -605,7 +606,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  DELETE_previewSrc(state: IEditorState, { type, userId, assetId }) {
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
     state.pages.forEach((page: IPage, index: number) => {
       page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
         return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
@@ -614,9 +615,9 @@ const mutations: MutationTree<IEditorState> = {
         Object.assign(layer.srcObj, {
           type,
           userId,
-          assetId
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
         })
-        console.log(type, userId, assetId)
+        uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
       })
     })
   },

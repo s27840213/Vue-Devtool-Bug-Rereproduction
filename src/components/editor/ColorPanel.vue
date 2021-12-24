@@ -170,13 +170,10 @@ export default Vue.extend({
         const margin = 10
         const panelTop = colorPanel.getBoundingClientRect().top
         let topPos = top - panelTop
-        console.log(top, height, vh, topPos)
         if (top + height > vh) {
           topPos -= ((top + height) - vh)
         }
 
-        console.log(`${left - colorPanel.getBoundingClientRect().left - margin}px`)
-        console.log(`${colorPanel.getBoundingClientRect().left - width - margin}px`)
         const pickerPos = this.alignLeft ? {
           left: `${left - colorPanel.getBoundingClientRect().left - width - margin}px`,
           top: `${topPos}px`

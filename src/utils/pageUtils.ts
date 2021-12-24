@@ -1,8 +1,10 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import FocusUtils from './focusUtils'
-import GeneralUtils from './generalUtils'
+import generalUtils from './generalUtils'
+import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import uploadUtils from './uploadUtils'
 
@@ -172,7 +174,7 @@ class PageUtils {
 
   updateSpecPage(index: number, json: Partial<IPage>): void {
     const pages = store.getters.getPages
-    const pagesTmp = GeneralUtils.deepCopy(pages)
+    const pagesTmp = generalUtils.deepCopy(pages)
     if (pagesTmp[index]) {
       // keep original page name
       const oriPageName = pagesTmp[index].name
@@ -232,7 +234,7 @@ class PageUtils {
   appendPagesTo(pages: IPage[], index?: number, replace?: boolean) {
     const currentPages = store.getters.getPages as IPage[]
     const newPages = this.newPages(pages)
-    let currentPagesTmp = GeneralUtils.deepCopy(currentPages)
+    let currentPagesTmp = generalUtils.deepCopy(currentPages)
     if (typeof index === 'number') {
       currentPagesTmp = currentPagesTmp.slice(0, index)
         .concat(newPages)
@@ -345,6 +347,21 @@ class PageUtils {
     return new Set(this.getPages.map((page: IPage) => {
       return page.width
     })).size === 1
+  }
+
+  filterBrokenImageLayer(pages: Array<IPage>) {
+    const tmpPages = generalUtils.deepCopy(pages)
+    return tmpPages.map((page: IPage) => {
+      page.layers = page.layers.filter((layer) => {
+        if (layer.type !== 'image') {
+          return true
+        } else {
+          layer = layer as IImage
+          return !(layer.srcObj.userId === '' && typeof layer.srcObj.assetId !== 'number')
+        }
+      })
+      return page
+    })
   }
 }
 
