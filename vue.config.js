@@ -1,8 +1,8 @@
 const path = require('path')
 const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
-const PrerenderSPAPlugin = require('prerender-spa-plugin')
-const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+// const PrerenderSPAPlugin = require('prerender-spa-plugin')
+// const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 
 function resolve (dir) {
   return path.join(__dirname, dir)
@@ -53,18 +53,18 @@ module.exports = {
     }
   },
 
-  configureWebpack: {
-    plugins: [
-      new PrerenderSPAPlugin({
-        staticDir: path.join(__dirname, 'dist'),
-        routes: ['/', '/templates'],
-        renderer: new Renderer({
-          renderAfterDocumentEvent: 'render-event',
-          headless: true
-        })
-      })
-    ]
-  },
+  // configureWebpack: {
+  //   plugins: [
+  //     new PrerenderSPAPlugin({
+  //       staticDir: path.join(__dirname, 'dist'),
+  //       routes: ['/', '/templates'],
+  //       renderer: new Renderer({
+  //         renderAfterDocumentEvent: 'render-event',
+  //         headless: true
+  //       })
+  //     })
+  //   ]
+  // },
 
   css: {
     loaderOptions: {
