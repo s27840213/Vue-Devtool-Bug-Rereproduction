@@ -108,7 +108,9 @@ export default Vue.extend({
         networkUtils.notifyNetworkError()
         return
       }
-      if (!this.isUploading) {
+      if (this.isUploading) {
+        e.preventDefault()
+      } else {
         const dataTransfer = e.dataTransfer as DataTransfer
         dataTransfer.dropEffect = 'move'
         dataTransfer.effectAllowed = 'move'
@@ -141,7 +143,8 @@ export default Vue.extend({
           srcObj: {
             ...data.srcObj
           },
-          styles: { width, height }
+          styles: { width, height },
+          isPreview: this.isUploading
         })
       }
     },

@@ -86,7 +86,8 @@ export default Vue.extend({
     },
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
-      if (dt) {
+      if (evt.dataTransfer?.getData('data') || !dt) {
+      } else {
         const files = dt.files
         if (!this.online) {
           networkUtils.notifyNetworkError()

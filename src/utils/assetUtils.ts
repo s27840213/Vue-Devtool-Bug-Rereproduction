@@ -434,7 +434,6 @@ class AssetUtils {
         imgHeight: photoHeight
       }
     }
-    console.log(config)
     const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)

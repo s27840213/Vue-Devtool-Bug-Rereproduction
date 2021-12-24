@@ -30,7 +30,7 @@
           @mouseup="onFrameMouseUp(index)"
           @dragenter="onFrameDragEnter(index)",
           @dragleave="onFrameDragLeave(index)",
-          @drop="onFrameDrop(index)",
+          @drop.stop="onFrameDrop(index)",
           @click="clickSubController(index)"
           @dblclick="dblSubController(index)")
       template(v-if="(['group','frame', 'tmp'].includes(getLayerType)) && isActive")
@@ -390,7 +390,6 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
@@ -1337,43 +1336,43 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
-      // const dt = e.dataTransfer
-      // if (e.dataTransfer?.getData('data')) {
-      //   switch (this.getLayerType) {
-      //     case 'image': {
-      //       const config = this.config as IImage
-      //       MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-      //       break
-      //     }
-      //     case 'frame':
-      //       return
-      //     default:
-      //       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      //   }
-      // } else if (dt && dt.files.length !== 0) {
-      //   const files = dt.files
-      //   this.setCurrSidebarPanel(SidebarPanelType.file)
-      //   uploadUtils.uploadAsset('image', files, true)
-      // }
       const dt = e.dataTransfer
-      if (dt && dt.files.length !== 0) {
+      if (e.dataTransfer?.getData('data')) {
+        switch (this.getLayerType) {
+          case 'image': {
+            const config = this.config as IImage
+            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+            break
+          }
+          case 'frame':
+            return
+          default:
+            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        }
+      } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
       }
-      switch (this.getLayerType) {
-        case 'image': {
-          const config = this.config as IImage
-          MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-          break
-        }
-        case 'frame':
-          return
-        default:
-          MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      }
+      // const dt = e.dataTransfer
+      // if (dt && dt.files.length !== 0) {
+      //   const files = dt.files
+      //   this.setCurrSidebarPanel(SidebarPanelType.file)
+      //   uploadUtils.uploadAsset('image', files, true)
+      // }
+      // switch (this.getLayerType) {
+      //   case 'image': {
+      //     const config = this.config as IImage
+      //     MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+      //     break
+      //   }
+      //   case 'frame':
+      //     return
+      //   default:
+      //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+      // }
     },
-    handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
@@ -1525,7 +1524,7 @@ export default Vue.extend({
       }
       const currLayer = LayerUtils.getCurrLayer as IImage
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
           index: clipIndex,
@@ -1580,7 +1579,7 @@ export default Vue.extend({
     },
     onFrameDragEnter(clipIndex: number) {
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (this.currDraggedPhoto.srcObj.type) {
+      if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
           index: clipIndex,

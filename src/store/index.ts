@@ -66,7 +66,8 @@ const getDefaultState = (): IEditorState => ({
     styles: {
       width: 0,
       height: 0
-    }
+    },
+    isPreview: false
   },
   currSubSelectedInfo: {
     index: -1,
@@ -346,13 +347,14 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number } }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
       ...photo.styles
     }
+    state.currDraggedPhoto.isPreview = photo.isPreview
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
