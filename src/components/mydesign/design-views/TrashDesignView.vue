@@ -13,7 +13,7 @@
           img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
         transition(name="slide-fade-text")
           div(v-if="isInfoOpen" class="trash-design-view__info__text")
-            span 30天後自動永久刪除。
+            span {{$t('NN0241')}}
     div(class="horizontal-rule")
     folder-gallery(:menuItems="menuItems"
                   :allFolders="allFolders"

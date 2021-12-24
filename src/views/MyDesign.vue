@@ -11,7 +11,8 @@
           div(v-if="isMultiSelected" class="my-design__multi")
             div(class="my-design__multi__container")
               div(class="my-design__multi__number")
-                span {{ `選取 ${selectedNum}` }}
+                i18n(path="NN0254" tag="span")
+                  template(#selectedNum) {{selectedNum}}
               div(class="my-design__multi__actions relative")
                 div(ref="tgFav"
                     v-if="mydesignView !== 'trash-design-view'"
@@ -78,18 +79,24 @@
             div(v-if="isShowDeleteMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(deletedQueue[0])")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(deletedQueue[0])}已移至垃圾桶` }}
+                i18n(path="NN0250" tag="span")
+                  template(#item) {{messageItemName(deletedQueue[0])}}
+                  template(#folder) {{$t('NN0189')}}
               div(class="my-design__message__button" @click="recover")
                 span {{$t('NN0119')}}
           transition(name="slide-fade")
             div(v-if="isShowRecoverMessage" class="my-design__message")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(recoveredQueue[0])}已移至 ${messageDestName(recoveredQueue[0])}` }}
+                i18n(path="NN0250" tag="span")
+                  template(#item) {{messageItemName(recoveredQueue[0])}}
+                  template(#folder) {{messageDestName(recoveredQueue[0])}}
           transition(name="slide-fade")
             div(v-if="isShowMoveMessage" class="my-design__message")
               div(class="my-design__message__img" :style="messageImageStyles(movedQueue[0])")
               div(class="my-design__message__text")
-                span {{ `${messageItemName(movedQueue[0])}已移至 ${messageDestName(movedQueue[0])}` }}
+                i18n(path="NN0250" tag="span")
+                  template(#item) {{messageItemName(movedQueue[0])}}
+                  template(#folder) {{messageDestName(movedQueue[0])}}
           transition(name="slide-fade")
             div(v-if="isErrorShowing" class="my-design__message")
               div(class="my-design__message__text")
@@ -310,7 +317,7 @@ export default Vue.extend({
         }
         this.errorMessageTimer = setTimeout(() => {
           this.setIsErrorShowing(false)
-        }, 1000)
+        }, 2000)
       }
     }
   },
@@ -338,9 +345,9 @@ export default Vue.extend({
     },
     messageItemName(item: IQueueItem): string {
       if (item.type === 'multi') {
-        return '多項設計/資料夾'
+        return `${this.$t('NN0255')}`
       } else if (item.type === 'design') {
-        return '設計'
+        return `${this.$tc('NN0252', 1)}`
       } else {
         return (item.data as IFolder).name + ' '
       }
@@ -667,6 +674,7 @@ export default Vue.extend({
         line-height: 25px;
         color: white;
         letter-spacing: 0.205em;
+        white-space: nowrap;
       }
     }
     &__button {
@@ -761,7 +769,6 @@ export default Vue.extend({
       align-items: center;
     }
     &__buttons {
-      width: 170px;
       height: 25px;
       margin-top: 18px;
       display: flex;
@@ -770,8 +777,8 @@ export default Vue.extend({
       gap: 7px;
     }
     &__cancel {
-      width: 68px;
       height: 25px;
+      padding: 0 12px;
       background-color: setColor(gray-4);
       border-radius: 4px;
       display: flex;
@@ -782,15 +789,13 @@ export default Vue.extend({
         font-family: NotoSansTC;
         font-size: 12px;
         line-height: 25px;
-        letter-spacing: 0.875em;
-        text-indent: 0.875em;
         display: block;
         color: setColor(gray-2);
       }
     }
     &__confirm {
-      width: 95px;
       height: 25px;
+      padding: 0 12px;
       background-color: setColor(blue-1);
       border-radius: 4px;
       display: flex;
@@ -908,7 +913,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       height: 25px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 11px;
       > div {
         height: 25px;
         border-radius: 6px;
@@ -916,6 +921,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        padding: 0 18px;
         > span {
           font-family: NotoSansTC;
           font-weight: 400;
@@ -940,8 +946,8 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       }
       > span {
         display: block;
-        letter-spacing: 0.32em;
-        text-indent: 0.32em;
+        // letter-spacing: 0.32em;
+        // text-indent: 0.32em;
         color: black;
       }
     }
@@ -952,8 +958,8 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       }
       > span {
         display: block;
-        letter-spacing: 0.32em;
-        text-indent: 0.32em;
+        // letter-spacing: 0.32em;
+        // text-indent: 0.32em;
         color: white;
       }
     }
@@ -969,9 +975,9 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   gap: 4px;
   &__buttons {
     margin-top: 8px;
-    width: 137px;
+    // width: 137px;
     > div {
-      width: 63.39px;
+      // width: 63.39px;
     }
   }
 }

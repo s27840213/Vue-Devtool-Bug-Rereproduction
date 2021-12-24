@@ -459,7 +459,7 @@ export default Vue.extend({
     },
     getThemeTitle(themeId: string): string {
       const theme = this.themes.find((theme) => theme.id.toString() === themeId)
-      return theme ? theme.title : '未指定主題'
+      return theme ? theme.title : `${this.$t('NN0258')}`
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id

@@ -30,7 +30,7 @@
                   iconColor="red-1")
         transition(name="fade")
           div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
-            span 不可超過64個字元，請縮減名稱。
+            span {{$t('NN0226')}}
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in shownParents")
@@ -463,13 +463,14 @@ export default Vue.extend({
     display: flex;
     left: 0px;
     top: 51px;
-    width: 208.8px;
     height: 20px;
     align-items: center;
     justify-content: center;
     background-color: setColor(red-1);
     border-radius: 2px;
     padding: 2px 8px;
+    width: max-content;
+    z-index: 1;
     > span {
       font-family: "NotoSansTC";
       font-weight: 400;

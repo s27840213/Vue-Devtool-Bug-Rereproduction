@@ -57,7 +57,7 @@
           div(v-if="isShowHint"
               class="nav-item__name-hint-text"
               :style="hintTextStyles()")
-            span 不可超過64個字元，請縮減名稱。
+            span {{$t('NN0226')}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -283,7 +283,6 @@ export default Vue.extend({
     position: fixed;
     display: flex;
     left: 8px;
-    width: 208.8px;
     height: 20px;
     align-items: center;
     justify-content: center;

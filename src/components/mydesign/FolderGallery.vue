@@ -9,7 +9,7 @@
                 iconHeight="5px"
                 iconColor="gray-2")
       div(class="folder-gallery__title")
-        span 資料夾
+        span {{$tc('NN0253', 2)}}
     div(v-if="isExpanded" class="folder-gallery__folders")
       folder-item(v-for="folder in allFolders"
                   :path="path"

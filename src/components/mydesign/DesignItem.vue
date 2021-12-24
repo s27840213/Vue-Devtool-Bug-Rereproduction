@@ -98,6 +98,7 @@ export default Vue.extend({
     favorable: Boolean,
     undraggable: Boolean,
     nameIneditable: Boolean,
+    unenterable: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,
     isMultiSelected: Boolean
@@ -268,6 +269,7 @@ export default Vue.extend({
       designUtils.setDesignName(this.config, this.editableName)
     },
     handleClick() {
+      if (this.unenterable) return
       if (this.isAnySelected) {
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
