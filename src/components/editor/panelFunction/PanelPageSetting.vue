@@ -25,7 +25,7 @@
             svg-icon(class="page-setting__suggestion-panel__body__close"
                     iconName="close" iconWidth="19px" iconColor="white")
           div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") 自訂尺寸
+            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0023')}}
           div(class="page-setting__suggestion-panel__body-row")
             radio-btn(class="page-setting__suggestion-panel__body__radio"
                       :isSelected="selectedFormat === 'custom'",
@@ -88,7 +88,7 @@
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
                 @click="copyAndApplySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") 複製並調整尺寸
+              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
     div(class="page-setting__footer")
     div(v-if="inAdminMode"
       class="template-information")
@@ -981,20 +981,21 @@ export default Vue.extend({
       }
       &__buttons {
         display: flex;
-        justify-content: space-between;
         width: 95%;
         margin-left: auto;
         margin-right: auto;
         margin-top: 29px;
         margin-bottom: 17.43px;
+        gap: 11px;
       }
       &__button {
+        flex-grow: 1;
         border-radius: 3px;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 27px;
-        padding: 0 18px;
+        padding: 4px;
+        text-align: center;
         &__text {
           font-weight: 700;
           font-size: 12px;
