@@ -1764,6 +1764,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
   }
   &__body {
     width: 100%;

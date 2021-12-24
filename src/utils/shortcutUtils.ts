@@ -157,6 +157,7 @@ class ShortcutUtils {
   textPaste() {
     navigator.clipboard.readText().then((text) => {
       tiptapUtils.agent(editor => {
+        text = text.replace(/\r/g, '')
         const spans = text.split('\n')
         let chainedCommands = editor.chain().deleteSelection()
         spans.forEach((line, index) => {

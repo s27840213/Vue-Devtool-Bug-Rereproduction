@@ -138,6 +138,10 @@ export default Vue.extend({
   user-select: none;
 }
 
+.ProseMirror.non-selectable {
+  white-space: pre-wrap;
+}
+
 ::selection {
   color: currentColor;
   background-color: #acd2fe94;
