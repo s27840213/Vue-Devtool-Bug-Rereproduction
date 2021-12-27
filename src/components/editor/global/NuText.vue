@@ -23,7 +23,7 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
@@ -45,7 +45,7 @@ export default Vue.extend({
     }
   },
   async created() {
-    if (this.config.styles.textShape.name) {
+    if (this.config.styles.textShape.name || LayerUtils.getCurrLayer.type === 'tmp') {
       return
     }
     const promises: Array<Promise<void>> = []
@@ -68,10 +68,12 @@ export default Vue.extend({
     if (!this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
+        console.warn('sdfsdf')
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
     }
@@ -119,10 +121,10 @@ export default Vue.extend({
          * If below conditions is pass, means the text-properties changes,
          * the layer width/height needs to refresh
          */
-        if (this.config.isTyping) return
-        this.$nextTick(() => {
-          TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
-        })
+        // if (this.config.isTyping) return
+        // this.$nextTick(() => {
+        //   TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
+        // })
       },
       deep: true
     }

@@ -15,6 +15,7 @@ import FontFaceObserver from 'fontfaceobserver'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -83,8 +84,10 @@ export default Vue.extend({
       const { area, config } = this
       return {
         margin: 0,
-        minHeight: `${area.height / config.styles.scale}px`,
-        minWidth: `${area.width / config.styles.scale}px`
+        height: `${config.styles.height / config.styles.scale}px`,
+        width: `${config.styles.width / config.styles.scale}px`
+        // minHeight: `${area.height / config.styles.scale}px`,
+        // minWidth: `${area.width / config.styles.scale}px`
       }
     },
     circleStyle(): any {

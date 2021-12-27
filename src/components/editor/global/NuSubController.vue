@@ -319,10 +319,10 @@ export default Vue.extend({
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const currLayer = LayerUtils.getCurrLayer as IGroup
+      const currLayer = LayerUtils.getCurrLayer
       const primaryScale = currLayer.styles.scale
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
-        if (this.config.type === 'tmp' || this.isControlling) {
+        if (this.isControlling) {
           return `${2 * (100 / this.scaleRatio) / primaryScale}px dashed ${outlineColor}`
         } else {
           return `${2 * (100 / this.scaleRatio) / primaryScale}px solid ${outlineColor}`

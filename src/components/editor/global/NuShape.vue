@@ -60,6 +60,7 @@ export default Vue.extend({
   },
   async created() {
     await this.checkAndFetchSvg()
+    console.log(this.config.designId)
   },
   destroyed () {
     if (this.styleNode && this.styleNode.parentElement) {
@@ -72,8 +73,10 @@ export default Vue.extend({
   watch: {
     'config.color': {
       handler: function (newVal) {
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-        this.styleNode.textContent = styleText
+        if (this.config.color && this.config.color.length) {
+          const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
+          this.styleNode.textContent = styleText
+        }
       },
       deep: true
     },
@@ -348,7 +351,9 @@ export default Vue.extend({
           }
           // Fix some bug that the color is empty array.
           if (!(this.config as IShape).color.length) {
+            console.log(this.config.designId)
             const shape = await shapeUtils.fetchSvg(this.config) as IShape
+            console.warn(shape)
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
           }
         }

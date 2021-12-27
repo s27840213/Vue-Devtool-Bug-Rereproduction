@@ -108,8 +108,12 @@ const mutations: MutationTree<ITextState> = {
       state.fontStore.push(payload)
     }
   },
-  [UPDATE_DEFAULT_FONT] (state: ITextState, payload: { font: IFont, priority: number }) {
-    state.defaultFonts.splice(payload.priority, 0, payload.font)
+  [UPDATE_DEFAULT_FONT] (state: ITextState, payload: { font: IFont, priority?: number }) {
+    if (payload.priority) {
+      state.defaultFonts.splice(payload.priority, 0, payload.font)
+    } else {
+      state.defaultFonts.push(payload.font)
+    }
   },
   SET_default (state: ITextState) {
     const defaultState = getDefaultState()
