@@ -4,7 +4,7 @@ export interface ITemplate {
   theme_id: string,
   width: number,
   height: number,
-  prev_height: number,
+  aspect_ratio: number,
   type: number,
   ver: number,
   content_ids: IContentTemplate[],
