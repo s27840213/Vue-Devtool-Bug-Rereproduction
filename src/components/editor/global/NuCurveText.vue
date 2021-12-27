@@ -28,18 +28,14 @@ export default Vue.extend({
     const { width, height, y, x } = this.config.styles
     return {
       transforms: [] as string[],
-      textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      curveArea: {
-        width: 0,
-        height: 0,
-        left: x + (width / 2)
-      },
-      originalArea: {
+      area: {
+        width,
         height,
         top: y,
-        bottom: y
+        bottom: y,
+        left: x + (width / 2)
       }
     }
   },
@@ -125,21 +121,17 @@ export default Vue.extend({
   },
   watch: {
     dragging(curr, prev) {
+      const { x, width } = this.config.styles
       if (prev && !curr) {
-        const { x, width } = this.config.styles
-        this.curveArea.left = x + width / 2
-        this.resetOriginalArea()
+        this.resetLimitY()
+        this.area.left = x + width / 2
       }
     },
     bend() {
       this.handleCurveSpan(this.spans)
     },
     spans(newSpans) {
-      this.textWidth = []
-      this.textHeight = []
-      this.$nextTick(() => {
-        this.handleCurveSpan(newSpans)
-      })
+      this.handleCurveSpan(newSpans)
     }
   },
   methods: {
@@ -164,20 +156,19 @@ export default Vue.extend({
             .slice(midLeng)
             .map((position: string[]) => position[0])
         )
-      const curveWidth = Math.abs(maxX + minX) * 1.3 * scale
-      const curveHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
-      this.curveArea.width = curveWidth
-      this.curveArea.height = curveHeight
+      const areaWidth = Math.abs(maxX + minX) * 1.3 * scale
+      const areaHeight = (Math.abs(maxY - minY) + this.minHeight) * scale
+      this.area.width = areaWidth
+      this.area.height = areaHeight
       this.handleCurveTextUpdate({
-        styles: { width: curveWidth, height: curveHeight },
-        props: curveWidth > width ? { widthLimit: curveWidth } : {}
+        styles: { width: areaWidth, height: areaHeight },
+        props: areaWidth > width ? { widthLimit: areaWidth } : {}
       })
     },
     rePosition() {
-      const { top, bottom } = this.originalArea
-      const { width, height, left } = this.curveArea
-      const y = this.bend >= 0 ? top : bottom - height
-      const x = left - (width / 2)
+      const { top, bottom, left, width: areaWidth, height: areaHeight } = this.area
+      const y = this.bend >= 0 ? top : bottom - areaHeight
+      const x = left - (areaWidth / 2)
       this.handleCurveTextUpdate({
         styles: { y, x }
       })
@@ -194,28 +185,26 @@ export default Vue.extend({
       )
     },
     handleCurveSpan (spans: any[], firstInit = false) {
-      const { bend, textWidth, textHeight } = this
+      const { bend } = this
       if (spans.length) {
-        const { curveText } = this.$refs
-        if (!curveText) return
-        if (!textWidth.length || !textHeight.length) {
-          const textSpans = (curveText as Element).querySelectorAll('span.nu-text__span')
-          const newTextWidth = []
-          const newTextHeight = []
+        this.$nextTick(() => {
+          if (!this.$refs.curveText) return
+          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
+          const textWidth = []
+          const textHeight = []
           let minHeight = 0
-          for (let idx = 0; idx < textSpans.length; idx++) {
-            const { offsetWidth, offsetHeight } = textSpans[idx] as HTMLElement
-            newTextWidth.push(offsetWidth)
-            newTextHeight.push(offsetHeight)
+          for (let idx = 0; idx < eleSpans.length; idx++) {
+            const { offsetWidth, offsetHeight } = eleSpans[idx] as HTMLElement
+            textWidth.push(offsetWidth)
+            textHeight.push(offsetHeight)
             minHeight = Math.max(minHeight, offsetHeight)
           }
-          this.textWidth = newTextWidth
-          this.textHeight = newTextHeight
+          this.textHeight = textHeight
           this.minHeight = minHeight
-        }
-        this.transforms = TextShapeUtils.convertTextShape(this.textWidth, bend)
-        this.calcArea()
-        firstInit ? this.resetOriginalArea() : this.rePosition()
+          this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
+          this.calcArea()
+          firstInit ? this.resetLimitY() : this.rePosition()
+        })
       } else {
         this.transforms = []
       }
@@ -231,11 +220,11 @@ export default Vue.extend({
         props
       })
     },
-    resetOriginalArea () {
+    resetLimitY () {
       const { config, bend } = this
       const { y } = config.styles
-      this.originalArea.bottom = bend >= 0 ? y + this.minHeight : y + this.originalArea.height
-      this.originalArea.top = bend >= 0 ? y : this.originalArea.bottom - this.minHeight
+      this.area.bottom = bend >= 0 ? y + this.minHeight : y + this.area.height
+      this.area.top = bend >= 0 ? y : this.area.bottom - this.minHeight
     }
   }
 })
