@@ -45,7 +45,7 @@ export default Vue.extend({
     }
   },
   async created() {
-    if (this.config.styles.textShape.name || LayerUtils.getCurrLayer.type === 'tmp') {
+    if (LayerUtils.getCurrLayer.type === 'tmp') {
       return
     }
     const promises: Array<Promise<void>> = []
