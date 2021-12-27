@@ -112,8 +112,7 @@ class GroupUtils {
         if (l.type === 'text') {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
-            widthLimit: l.widthLimit === -1 ? (writingMode as string).includes('vertical') ? height : width
-              : (l as IText).widthLimit * group.styles.scale
+            widthLimit: (writingMode as string).includes('vertical') ? height : width
           })
         }
       })
@@ -127,12 +126,6 @@ class GroupUtils {
       targetLayer.layers.forEach((layer: ILayer | IText, index: number) => {
         layer.styles.zindex = targetLayer.styles.zindex + index
         layer.active = false
-        // if (layer.type === 'text') {
-        //   console.warn((layer as IText).widthLimit * targetLayer.styles.scale)
-        //   // LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, index, {
-        //   //   widthLimit: (layer as IText).widthLimit * targetLayer.styles.scale
-        //   // })
-        // }
       })
       const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -164,7 +157,6 @@ class GroupUtils {
   select(pageIndex: number, layerIndexs: Array<number>) {
     // currSelectedIndex is smaller than 0 means there isn't any selected layer
     if (this.currSelectedInfo.index < 0) {
-      console.log('this.currSelectedInfo.index < 0')
       // When we only select one layer
       if (layerIndexs.length === 1) {
         LayerUtils.updateLayerProps(pageIndex, layerIndexs[0], {
