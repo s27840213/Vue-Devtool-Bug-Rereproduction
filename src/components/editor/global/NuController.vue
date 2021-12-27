@@ -1125,7 +1125,19 @@ export default Vue.extend({
           break
         }
         case 'text':
-          [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
+          // [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
+          /**  
+           * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
+           * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus, 
+           * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
+           */
+          if (this.config.styles.writingMode.includes('vertical')) {
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
+            width = TextUtils.getTextHW(this.config, height).width
+          } else {
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
+            height = TextUtils.getTextHW(this.config, width).height
+          }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
            */
