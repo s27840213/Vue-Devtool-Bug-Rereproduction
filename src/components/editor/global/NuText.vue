@@ -65,6 +65,10 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
+    if (this.config.styles.textShape.name) {
+      return
+    }
+
     if (!this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {

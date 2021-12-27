@@ -7,6 +7,7 @@ import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IAssetPhoto } from '@/interfaces/api'
+import uploadUtils from './uploadUtils'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {

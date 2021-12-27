@@ -16,7 +16,7 @@
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items body-1"
             :class="isMobile & featureExpand[0] ? 'expand' : ''")
-            a(:href="blogPage") {{$t('NN0146')}}
+            a(:href="toturialPage") {{$t('NN0146')}}
             a(:href="blogPage") {{$t('NN0157')}}
         div(class="nu-footer__feature-region")
           div(class="label-lg nu-footer__feature-title"
@@ -114,6 +114,7 @@ export default Vue.extend({
       inputLocale: '',
       localeOptions: [] as Array<ILocale>,
       blogPage: '',
+      toturialPage: '',
       servicePage: '',
       privacyPage: '',
       agreementPage: '',
@@ -179,18 +180,29 @@ export default Vue.extend({
     },
     switchUrl(locale: string) {
       switch (locale) {
-        case 'us':
-          this.blogPage = 'https://blog.vivipic.com/'
+        case 'tw':
+          this.blogPage = 'https://blog.vivipic.com/' + locale
+          this.toturialPage = 'https://blog.vivipic.com/tw/tutorial/'
           this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
           this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
-          this.facebookPage = 'https://www.facebook.com/vivipicus'
-          this.igPage = 'https://www.instagram.com/vivipicus'
-          this.mailtoService = 'mailto:tw@vivipic.com'
+          this.facebookPage = 'https://www.facebook.com/vivipic' + locale
+          this.igPage = 'https://www.instagram.com/vivipic' + locale
+          this.mailtoService = 'mailto:' + locale + '@vivipic.com'
           break
-        case 'tw':
+        case 'us':
+          this.blogPage = 'https://blog.vivipic.com/'
+          this.toturialPage = 'https://www.facebook.com/vivipic' + locale
+          this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
+          this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
+          this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+          this.facebookPage = 'https://www.facebook.com/vivipic' + locale
+          this.igPage = 'https://www.instagram.com/vivipicus'
+          this.mailtoService = 'mailto:service@vivipic.com'
+          break
         case 'jp':
           this.blogPage = 'https://blog.vivipic.com/' + locale
+          this.toturialPage = 'https://www.facebook.com/vivipic' + locale
           this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
           this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'

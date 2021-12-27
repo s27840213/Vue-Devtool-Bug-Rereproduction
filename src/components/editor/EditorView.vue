@@ -309,7 +309,6 @@ export default Vue.extend({
       //   }
       // })
       if (layerIndexs.length > 0) {
-        console.log(`Overlap num: ${layerIndexs.length}`)
         // this.addSelectedLayer(layerIndexs as number[])
         GroupUtils.select(this.getLastSelectedPageIndex, layerIndexs)
       }

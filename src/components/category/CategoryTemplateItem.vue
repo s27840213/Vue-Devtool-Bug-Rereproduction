@@ -69,8 +69,9 @@ export default Vue.extend({
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
 
       if (this.isDetailPage) {
-        const ratio = (matchCover.width || width) / 1000
-        const resize = { width: 1000, height: (matchCover.height || height) * ratio }
+        const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
+        const ratio = (matchCover.width || width) / pageWidth
+        const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
         return cb(resize)
       }
 

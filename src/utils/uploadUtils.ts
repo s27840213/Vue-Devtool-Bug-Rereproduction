@@ -227,10 +227,10 @@ class UploadUtils {
                       progress: 100
                     })
                     store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
-                    store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
-                    // the reason why we record here is that if user refresh the window immediately after they succefully upload the screenshot
+                    store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
+                    // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
-                    stepsUtils.record()
+                    this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
                     modalUtils.setIsModalOpen(true)
                     modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`])
@@ -271,7 +271,6 @@ class UploadUtils {
       } else {
         formData.append('file', files[i])
       }
-      console.log(type)
       reader.onload = (evt) => {
         /**
          * @TODO -> simplify the codes below
@@ -329,7 +328,7 @@ class UploadUtils {
                             progress: 100
                           })
                           store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
-                          store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId })
+                          store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                         }
                       } else {
                         console.log('Failed to upload the file')
@@ -386,7 +385,6 @@ class UploadUtils {
                   response.json().then((json: IUploadAssetResponse) => {
                     if (json.flag === 0) {
                       console.log('Successfully upload the file')
-                      console.log(json)
                       const targetUrls = this.isAdmin ? {
                         prev: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev`,
                         prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_2x`,
@@ -443,7 +441,6 @@ class UploadUtils {
     const teamId = router.currentRoute.query.team_id
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
-    console.log(designId && teamId && type && !this.hasGottenDesign)
     if (designId && teamId && type && !this.hasGottenDesign) {
       return
     }
@@ -630,7 +627,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        console.log(designId)
+        // console.log(designId)
       }
     }
   }
@@ -1012,6 +1009,7 @@ class UploadUtils {
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_assetId', designId)
+                json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()

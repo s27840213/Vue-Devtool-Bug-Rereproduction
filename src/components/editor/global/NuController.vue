@@ -30,7 +30,7 @@
           @mouseup="onFrameMouseUp(index)"
           @dragenter="onFrameDragEnter(index)",
           @dragleave="onFrameDragLeave(index)",
-          @drop="onFrameDrop(index)",
+          @drop.stop="onFrameDrop(index)",
           @click="clickSubController(index)"
           @dblclick="dblSubController(index)")
       template(v-if="(['group','frame', 'tmp'].includes(getLayerType)) && isActive")
@@ -390,7 +390,6 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
@@ -1126,7 +1125,19 @@ export default Vue.extend({
           break
         }
         case 'text':
-          [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
+          // [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
+          /**
+           * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
+           * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus,
+           * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
+           */
+          if (this.config.styles.writingMode.includes('vertical')) {
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
+            width = TextUtils.getTextHW(this.config, height).width
+          } else {
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
+            height = TextUtils.getTextHW(this.config, width).height
+          }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
            */
@@ -1373,7 +1384,7 @@ export default Vue.extend({
       //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       // }
     },
-    handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
@@ -1525,7 +1536,7 @@ export default Vue.extend({
       }
       const currLayer = LayerUtils.getCurrLayer as IImage
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
           index: clipIndex,
@@ -1580,7 +1591,7 @@ export default Vue.extend({
     },
     onFrameDragEnter(clipIndex: number) {
       LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (this.currDraggedPhoto.srcObj.type) {
+      if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
           index: clipIndex,

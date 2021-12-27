@@ -27,6 +27,7 @@ import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
+import uploadUtils from '@/utils/uploadUtils'
 
 Vue.use(Vuex)
 
@@ -65,7 +66,8 @@ const getDefaultState = (): IEditorState => ({
     styles: {
       width: 0,
       height: 0
-    }
+    },
+    isPreview: false
   },
   currSubSelectedInfo: {
     index: -1,
@@ -345,13 +347,14 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number } }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
       ...photo.styles
     }
+    state.currDraggedPhoto.isPreview = photo.isPreview
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -605,7 +608,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  DELETE_previewSrc(state: IEditorState, { type, userId, assetId }) {
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
     state.pages.forEach((page: IPage, index: number) => {
       page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
         return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
@@ -614,8 +617,9 @@ const mutations: MutationTree<IEditorState> = {
         Object.assign(layer.srcObj, {
           type,
           userId,
-          assetId
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
         })
+        uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
       })
     })
   },

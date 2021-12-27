@@ -136,6 +136,8 @@ class AssetUtils {
         props: { width, height }
       })
     }
+    store.commit('SET_lastSelectedPageIndex', targetPageIndex)
+    store.commit('SET_currActivePageIndex', targetPageIndex)
     stepsUtils.record()
   }
 
@@ -434,7 +436,6 @@ class AssetUtils {
         imgHeight: photoHeight
       }
     }
-    console.log(config)
     const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
@@ -479,10 +480,11 @@ class AssetUtils {
           }
           if (groupType === 1 && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
+            const { width: pageWidth = 1000 } = PageUtils.getPageWidth()
             for (const idx in jsonDataList) {
               const { height, width } = jsonDataList[idx]
               const pageIndex = +idx + targetIndex
-              const newSize = { height: height * width / 1000, width: 1000 }
+              const newSize = { height: height * width / pageWidth, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
               store.commit('UPDATE_pageProps', {
                 pageIndex,

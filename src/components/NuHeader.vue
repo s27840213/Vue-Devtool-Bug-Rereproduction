@@ -172,8 +172,16 @@ export default Vue.extend({
       } else if (pageName === 'Login' || pageName === 'SignUp') {
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
         // Temporary setting ----
-      } else if (pageName === 'Toturial' || pageName === 'Faq') {
-        if (this.currLocale === 'tw' || this.currLocale === 'us' || this.currLocale === 'jp') {
+      } else if (pageName === 'Toturial') {
+        if (this.currLocale === 'tw') {
+          window.location.href = 'https://blog.vivipic.com/tw/tutorial/'
+        } else if (this.currLocale === 'us' || this.currLocale === 'jp') {
+          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
+        }
+      } else if (pageName === 'Faq') {
+        if (this.currLocale === 'tw') {
+          window.location.href = 'https://blog.vivipic.com/tw/faq/'
+        } else if (this.currLocale === 'us' || this.currLocale === 'jp') {
           window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
         }
       } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {

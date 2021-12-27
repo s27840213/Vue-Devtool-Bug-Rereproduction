@@ -54,7 +54,8 @@ export interface IEditorState {
     styles: {
       width: number,
       height: number
-    }
+    },
+    isPreview: boolean
   },
   asset: {
     [key: string]: IAsset

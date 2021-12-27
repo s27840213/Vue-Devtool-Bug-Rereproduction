@@ -109,11 +109,6 @@ export default Vue.extend({
       return localeUtils.currLocale()
     }
   },
-  watch: {
-    currLocale() {
-      console.log(this.$route.path)
-    }
-  },
   methods: {
     ...mapActions('text', ['addFont']),
     ...mapMutations('text', {
