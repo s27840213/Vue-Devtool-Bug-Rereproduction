@@ -45,9 +45,6 @@ export default Vue.extend({
     }
   },
   async created() {
-    if (this.config.styles.textShape.name) {
-      return
-    }
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
@@ -64,6 +61,10 @@ export default Vue.extend({
 
     await Promise
       .all(promises)
+
+    if (this.config.styles.textShape.name) {
+      return
+    }
 
     if (!this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
