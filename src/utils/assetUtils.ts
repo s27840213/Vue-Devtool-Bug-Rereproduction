@@ -136,6 +136,8 @@ class AssetUtils {
         props: { width, height }
       })
     }
+    store.commit('SET_lastSelectedPageIndex', targetPageIndex)
+    store.commit('SET_currActivePageIndex', targetPageIndex)
     stepsUtils.record()
   }
 
