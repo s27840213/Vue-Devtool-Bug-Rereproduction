@@ -1126,9 +1126,9 @@ export default Vue.extend({
         }
         case 'text':
           // [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
-          /**  
+          /**
            * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
-           * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus, 
+           * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus,
            * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
            */
           if (this.config.styles.writingMode.includes('vertical')) {
