@@ -1225,7 +1225,7 @@ class UploadUtils {
               color: decorationTop.color
             }
           }),
-          styles: this.styleFilter(styles)
+          styles: this.styleFilter(styles, 'frame')
         }
       }
       case 'text': {
