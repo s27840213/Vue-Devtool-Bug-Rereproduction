@@ -220,33 +220,35 @@ export default Vue.extend({
     }
   },
   mounted() {
-    colorUtils.on(ColorEventType.shape, (color: string) => {
-      this.handleColorUpdate(color)
-    })
-    colorUtils.setCurrEvent(ColorEventType.shape)
-    colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
-    this.initilizeRecord()
     const currLayer = this.currLayer as IShape
-    this.getCategories().then(async () => {
-      const markerList = (this.categories[0] as IListServiceContentData).list
-      this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
-      for (const marker of markerList) {
-        const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
-        this.markerContentMap[marker.id] = {
-          styleArray: markerContent.styleArray,
-          svg: markerContent.svg,
-          trimWidth: markerContent.trimWidth,
-          vSize: markerContent.vSize,
-          trimOffset: markerContent.trimOffset ?? -1
+    if (currLayer.color && currLayer.color.length) {
+      colorUtils.on(ColorEventType.shape, (color: string) => {
+        this.handleColorUpdate(color)
+      })
+      colorUtils.setCurrEvent(ColorEventType.shape)
+      colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
+      this.initilizeRecord()
+      this.getCategories().then(async () => {
+        const markerList = (this.categories[0] as IListServiceContentData).list
+        this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
+        for (const marker of markerList) {
+          const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
+          this.markerContentMap[marker.id] = {
+            styleArray: markerContent.styleArray,
+            svg: markerContent.svg,
+            trimWidth: markerContent.trimWidth,
+            vSize: markerContent.vSize,
+            trimOffset: markerContent.trimOffset ?? -1
+          }
         }
-      }
-      this.markerListReady = true
-    })
-    this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
-    this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
-    popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
-      this.setLineWidth(value)
-    })
+        this.markerListReady = true
+      })
+      this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
+      this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
+      popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
+        this.setLineWidth(value)
+      })
+    }
   },
   beforeCreate() {
     this.$store.registerModule('markers', markers)

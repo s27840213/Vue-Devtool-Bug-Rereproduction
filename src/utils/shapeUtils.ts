@@ -31,9 +31,11 @@ class ShapeUtils {
       const tmpStyle = `.${className}S${i}{${styleArray[i]}}`
       style += `${tmpStyle} `
     }
-    for (let j = 0; j < colorArray.length; j++) {
-      const reg = new RegExp('\\$color\\[' + j + '\\]', 'g')
-      style = style.replace(reg, colorArray[j])
+    if (colorArray) {
+      for (let j = 0; j < colorArray.length; j++) {
+        const reg = new RegExp('\\$color\\[' + j + '\\]', 'g')
+        style = style.replace(reg, colorArray[j])
+      }
     }
     if (sizeArray) {
       for (let j = 0; j < sizeArray.length; j++) {

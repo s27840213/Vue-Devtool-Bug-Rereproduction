@@ -69,24 +69,22 @@ export default Vue.extend({
     await fetch('https://template.vivipic.com/static/app.json')
       .then(response => response.json())
       .then(json => {
+        console.log('static json loaded: ', json)
         this.$store.commit('user/SET_STATE', {
           verUni: json.ver_uni,
           imgSizeMap: json.image_size_map
         })
-
-        Object.entries(json)
-          .forEach(([k, v]) => {
-            if (['tw_default', 'jp_default', 'us_default', 'emoji'].includes(k)) {
-              const { priority, id, ver } = v as { id: string, ver: number, priority: number }
-              const font = {
-                type: 'public',
-                face: id,
-                url: '',
-                ver
-              }
-              this.updateDefaultFonts({ priority, font })
-              defaultFonts.push(this.addFont(font))
+        const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+        defaultFontsJson
+          .forEach(_font => {
+            const font = {
+              type: 'public',
+              face: _font.id,
+              ver: _font.ver,
+              url: ''
             }
+            defaultFonts.push(this.addFont(font))
+            this.updateDefaultFonts({ font })
           })
         Promise.all(defaultFonts)
       })

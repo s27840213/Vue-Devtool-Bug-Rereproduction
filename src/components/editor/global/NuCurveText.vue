@@ -15,6 +15,7 @@ import FontFaceObserver from 'fontfaceobserver'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -80,11 +81,13 @@ export default Vue.extend({
       return new Set(spans.map((span: any) => span.styles.font))
     },
     pStyle(): any {
-      const { area, config } = this
+      const { config } = this
       return {
         margin: 0,
-        minHeight: `${area.height / config.styles.scale}px`,
-        minWidth: `${area.width / config.styles.scale}px`
+        height: `${config.styles.height / config.styles.scale}px`,
+        width: `${config.styles.width / config.styles.scale}px`
+        // minHeight: `${area.height / config.styles.scale}px`,
+        // minWidth: `${area.width / config.styles.scale}px`
       }
     },
     circleStyle(): any {
@@ -207,6 +210,7 @@ export default Vue.extend({
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
+      if (LayerUtils.getCurrLayer.type === 'tmp') return
       const { styles, props } = updateInfo
       const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({

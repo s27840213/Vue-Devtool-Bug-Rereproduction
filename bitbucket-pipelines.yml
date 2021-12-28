@@ -29,8 +29,8 @@ pipelines:
         #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
     - parallel:
       - step:
-          name: 'dev0 Bruce'
-          deployment: dev0
+          name: 'dev5 Alan'
+          deployment: dev5
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:0.5.0
@@ -38,12 +38,54 @@ pipelines:
                 AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                 AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                S3_BUCKET: $AWS_BUCKET_DEV0
+                S3_BUCKET: $AWS_BUCKET_DEV5
                 LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
               #no cache for test environment (since free cloudflare can not remove cache by host)
       - step:
-          name: 'dev1 Mingchi'
+          name: 'dev4 Gary'
+          deployment: dev4
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_DEV4
+                LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
+              #no cache for test environment (since free cloudflare can not remove cache by host)
+      - step:
+          name: 'dev3 HsingChi'
+          deployment: dev3
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_DEV3
+                LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
+              #no cache for test environment (since free cloudflare can not remove cache by host)
+      - step:
+          name: 'dev2 TingAn'
+          deployment: dev2
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_DEV2
+                LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
+              #no cache for test environment (since free cloudflare can not remove cache by host)
+      - step:
+          name: 'dev1 Giambi'
           deployment: dev1
           trigger: manual
           script:
@@ -53,6 +95,20 @@ pipelines:
                 AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                 S3_BUCKET: $AWS_BUCKET_DEV1
+                LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
+              #no cache for test environment (since free cloudflare can not remove cache by host)
+      - step:
+          name: 'dev0'
+          deployment: dev0
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_DEV0
                 LOCAL_PATH: 'dist' #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: '--delete' #remove files or objects from the target that are not present in the source
               #no cache for test environment (since free cloudflare can not remove cache by host)
@@ -73,16 +129,16 @@ pipelines:
                 - yarn build
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          - step:
-              name: 'Run E2E Tests'
-              caches:
-                - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
-              script:
-                - npx cypress install
-                - yarn install
-                - yarn serve & npx wait-on http://localhost:8080
-                - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+          # - step:
+          #     name: 'Run E2E Tests'
+          #     caches:
+          #       - node
+          #     image: cypress/browsers:node14.17.0-chrome88-ff89
+          #     script:
+          #       - npx cypress install
+          #       - yarn install
+          #       - yarn serve & npx wait-on http://localhost:8080
+          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
       - step:
           name: 'deploy test'
           deployment: test

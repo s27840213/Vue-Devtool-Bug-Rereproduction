@@ -313,16 +313,16 @@ export default Vue.extend({
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.outlineStyles(),
-        'pointer-events': (this.isActive) ? 'initial' : 'initial',
+        'pointer-events': 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const currLayer = LayerUtils.getCurrLayer as IGroup
+      const currLayer = LayerUtils.getCurrLayer
       const primaryScale = currLayer.styles.scale
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
-        if (this.config.type === 'tmp' || this.isControlling) {
+        if (this.isControlling) {
           return `${2 * (100 / this.scaleRatio) / primaryScale}px dashed ${outlineColor}`
         } else {
           return `${2 * (100 / this.scaleRatio) / primaryScale}px solid ${outlineColor}`

@@ -13,7 +13,7 @@ import ImageUtils from './imageUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
 
-export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): ICalculatedGroupStyle {
+export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
   let minY = Number.MAX_SAFE_INTEGER
   let maxWidth = Number.MIN_SAFE_INTEGER
@@ -45,10 +45,10 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>): I
   return {
     x: minX,
     y: minY,
-    width: maxWidth,
-    height: maxHeight,
-    initWidth: maxWidth,
-    initHeight: maxHeight
+    width: maxWidth * scale,
+    height: maxHeight * scale,
+    initWidth: maxWidth * scale,
+    initHeight: maxHeight * scale
   } as ICalculatedGroupStyle
 }
 
@@ -108,7 +108,7 @@ class GroupUtils {
     const group = LayerUtils.getLayer(tmpPageIndex, tmpIndex) as IGroup
     group.layers
       .forEach((l, idx) => {
-        if (l.type === 'text' && l.widthLimit === -1) {
+        if (l.type === 'text') {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
             widthLimit: (writingMode as string).includes('vertical') ? height : width
@@ -119,18 +119,19 @@ class GroupUtils {
   }
 
   ungroup() {
-    const targetLayer = store.getters.getLayer(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index)
+    const { pageIndex, index: layerIndex } = this.currSelectedInfo
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     if (targetLayer.type === 'group') {
-      targetLayer.layers.forEach((layer: IGroup, index: number) => {
+      targetLayer.layers.forEach((layer: ILayer | IText, index: number) => {
         layer.styles.zindex = targetLayer.styles.zindex + index
         layer.active = false
       })
       const tmpLayer = GeneralUtils.deepCopy(targetLayer)
-      LayerUtils.updateLayerProps(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         type: 'tmp',
         active: true
       })
-      LayerUtils.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
+      LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
         zindex: -1
       })
       const tmpPageIndex = this.currSelectedInfo.pageIndex
@@ -170,11 +171,14 @@ class GroupUtils {
         const topIndex = Math.max(...layerIndexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
         const tmp = LayerFactary.newTmp(tmpStyles, currSelectedLayers)
+        /**
+         * Set the non-selected layers as the frontest layes,
+         * then, insert the tmp layer
+         */
         store.commit('SET_layers', {
           pageIndex: pageIndex,
           newLayers
@@ -212,7 +216,6 @@ class GroupUtils {
         const newLayersNum = 1 + layerIndexs.length
         const indexs = [this.currSelectedInfo.index, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
-        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -426,6 +429,14 @@ class GroupUtils {
         layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
         layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
         layer.styles.scale *= tmpLayer.styles.scale
+        if (layer.type === 'text') {
+          const { widthLimit, styles } = layer as IText
+          if (widthLimit === -1) {
+            layer.widthLimit = (styles.writingMode as string).includes('vertical') ? styles.height : styles.width
+          } else {
+            layer.widthLimit = (layer as IText).widthLimit * tmpLayer.styles.scale
+          }
+        }
       }
 
       // calculate the center shift of scaled image

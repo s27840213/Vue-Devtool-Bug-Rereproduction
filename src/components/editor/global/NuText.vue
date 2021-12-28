@@ -23,7 +23,7 @@
 import Vue from 'vue'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
@@ -45,6 +45,9 @@ export default Vue.extend({
     }
   },
   async created() {
+    if (LayerUtils.getCurrLayer.type === 'tmp') {
+      return
+    }
     const promises: Array<Promise<void>> = []
     for (const p of (this.config as IText).paragraphs) {
       for (const span of p.spans) {
@@ -62,20 +65,22 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    if (this.config.styles.textShape.name) {
-      return
-    }
+    // if (this.config.styles.textShape.name) {
+    //   return
+    // }
 
-    if (!this.isDestroyed) {
-      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-      } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        const { width, height } = calcTmpProps(this.getLayer(this.pageIndex, this.layerIndex).layers)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
-      }
-    }
+    // if (!this.isDestroyed) {
+    //   const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+    //   console.warn('updateLayerSize')
+    //   if (typeof this.subLayerIndex === 'undefined') {
+    //     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+    //   } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+    //     const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+    //     const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+    //   }
+    // }
   },
   destroyed() {
     this.isDestroyed = true
@@ -120,10 +125,10 @@ export default Vue.extend({
          * If below conditions is pass, means the text-properties changes,
          * the layer width/height needs to refresh
          */
-        if (this.config.isTyping) return
-        this.$nextTick(() => {
-          TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
-        })
+        // if (this.config.isTyping) return
+        // this.$nextTick(() => {
+        //   TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
+        // })
       },
       deep: true
     }

@@ -21,6 +21,7 @@ import { IPage } from '@/interfaces/page'
 
 const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
+  us: 'cRgaSK5ZVXnLDpWTL8MN',
   en: 'cRgaSK5ZVXnLDpWTL8MN',
   jp: 'OyDbjZxjk9r14eZnPELb'
 }
