@@ -221,6 +221,7 @@ export default Vue.extend({
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
+      if (LayerUtils.getCurrLayer.type === 'tmp') return
       const { styles, props } = updateInfo
       const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({

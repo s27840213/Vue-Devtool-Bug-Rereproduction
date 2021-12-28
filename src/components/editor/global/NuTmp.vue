@@ -42,7 +42,8 @@ export default Vue.extend({
       }
     },
     subLayerStyles(layer: ILayer) {
-      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: '2px solid #7190CC' }
+      const primaryScale = this.config.styles.scale
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: `${2 / primaryScale}px solid #7190CC` }
     }
   }
 })

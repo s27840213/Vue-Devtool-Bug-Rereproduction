@@ -14,7 +14,6 @@ import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
-  // console.trace()
   let minX = Number.MAX_SAFE_INTEGER
   let minY = Number.MAX_SAFE_INTEGER
   let maxWidth = Number.MIN_SAFE_INTEGER
@@ -172,7 +171,6 @@ class GroupUtils {
         const topIndex = Math.max(...layerIndexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !layerIndexs.includes(index)
         })
@@ -218,7 +216,6 @@ class GroupUtils {
         const newLayersNum = 1 + layerIndexs.length
         const indexs = [this.currSelectedInfo.index, ...layerIndexs]
         const currSelectedIndex = topIndex - newLayersNum + 1
-        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })

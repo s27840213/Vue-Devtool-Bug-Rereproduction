@@ -313,7 +313,7 @@ export default Vue.extend({
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         outline: this.outlineStyles(),
-        'pointer-events': (this.isActive) ? 'initial' : 'initial',
+        'pointer-events': 'initial',
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
