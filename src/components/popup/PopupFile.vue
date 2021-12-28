@@ -17,6 +17,11 @@ div(class="popup-file")
     span {{showGuideline ?$t('NN0074'):$t('NN0075')}}
   div(class="popup-file__item" @click="clearGuideline()")
     span {{$t('NN0075')}}
+  template(v-if="isAdmin")
+    div(class="popup-file__item" @click="importJSON()")
+      span 匯入設計
+    div(class="popup-file__item" @click="exportJSON()")
+      span 匯出設計
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -31,6 +36,7 @@ import rulerUtils from '@/utils/rulerUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
+import fileUtils from '@/utils/fileUtils'
 
 export default Vue.extend({
   data() {
@@ -40,7 +46,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      isAdmin: 'user/isAdmin'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -80,12 +87,12 @@ export default Vue.extend({
     save() {
       shortcutHandler.save()
     },
-    uploadTmpJson() {
-      uploadUtils.uploadTmpJSON()
+    importJSON() {
+      fileUtils.import()
     },
-    getTmpJson() {
+    exportJSON() {
+      fileUtils.export()
       // designUtils.newDesign()
-      uploadUtils.getTmpJSON()
     }
   }
 })

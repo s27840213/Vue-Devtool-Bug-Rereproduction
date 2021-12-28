@@ -1,6 +1,7 @@
 import store from '@/store'
 import download from '@/apis/download'
 import { IDownloadTypeAttrs, IDownloadServiceParams } from '@/interfaces/download'
+import GeneralUtils from './generalUtils'
 
 class DownloadUtil {
   private fileAttrs = {
@@ -44,7 +45,7 @@ class DownloadUtil {
 
   async getFileStatus (url: string) {
     try {
-      const { data: fileResult } = await download.getFileUrl(url)
+      const { data: fileResult } = await download.getFileUrl(url + `?ver=${GeneralUtils.generateRandomString(6)}`)
       if (fileResult.flag === 2 && !fileResult.url) {
         fileResult.url = url
       }

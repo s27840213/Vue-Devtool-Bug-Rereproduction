@@ -84,7 +84,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: this.showPagePanel ? '320px' : '320px'
+        width: this.showPagePanel ? '200px' : '320px'
       }
     }
   }

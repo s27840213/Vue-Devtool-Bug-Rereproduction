@@ -157,7 +157,7 @@ export default Vue.extend({
         spread: 'NN0068',
         stroke: 'NN0069',
         shape: 'NN0070',
-        bend: 'NN00671'
+        bend: 'NN0071'
       },
       shapes: {
         none: [],

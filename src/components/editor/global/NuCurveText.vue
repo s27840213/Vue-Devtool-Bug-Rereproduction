@@ -39,17 +39,17 @@ export default Vue.extend({
       }
     }
   },
-  mounted () {
+  async created () {
     this.handleCurveSpan(this.spans, true)
     const promises = [...this.fonts]
-      .map(font => (new FontFaceObserver(font)).load(null, 10000))
-    Promise
+      .map(font => (new FontFaceObserver(font)).load(null, 20000))
+    await Promise
       .all(promises)
       .then(() => {
         [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
-        this.handleCurveSpan(this.spans)
       })
       .catch(() => { console.log('font loading timeout') })
+    this.handleCurveSpan(this.spans, true)
   },
   computed: {
     ...mapGetters({
@@ -203,7 +203,8 @@ export default Vue.extend({
           this.minHeight = minHeight
           this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
           this.calcArea()
-          firstInit ? this.resetLimitY() : this.rePosition()
+          firstInit && this.resetLimitY()
+          this.rePosition()
         })
       } else {
         this.transforms = []

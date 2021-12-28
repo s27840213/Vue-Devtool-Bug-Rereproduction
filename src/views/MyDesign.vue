@@ -913,6 +913,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       height: 25px;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 11px;
       > div {
         height: 25px;
@@ -921,7 +922,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        padding: 0 18px;
+        padding: 0 12px;
         > span {
           font-family: NotoSansTC;
           font-weight: 400;
@@ -967,12 +968,13 @@ $messageTypes: delete-all, delete-folder, delete-forever;
 }
 
 .delete-all-message {
-  width: 243px;
+  min-width: 243px;
   height: 158px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  padding: 0 12px;
   &__buttons {
     margin-top: 8px;
     // width: 137px;
@@ -1009,39 +1011,40 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   &__buttons {
     margin-top: 17px;
     margin-bottom: 37px;
-    width: 183px;
+    // width: 183px;
     > div {
-      width: 84.67px;
+      // width: 84.67px;
     }
   }
 }
 
 .delete-forever-message {
-  width: 259px;
+  min-width: 259px;
   height: 174px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  padding: 0 12px;
   &__buttons {
     margin-top: 14px;
-    width: 201px;
+    // width: 201px;
     height: 30px;
     > div {
-      width: 93px;
+      // width: 93px;
       height: 30px;
     }
   }
   &__cancel {
     > span {
-      letter-spacing: 1.21em;
-      text-indent: 1.21em;
+      // letter-spacing: 1.21em;
+      // text-indent: 1.21em;
     }
   }
   &__confirm {
     > span {
-      letter-spacing: 0.305em;
-      text-indent: 0.305em;
+      // letter-spacing: 0.305em;
+      // text-indent: 0.305em;
     }
   }
 }

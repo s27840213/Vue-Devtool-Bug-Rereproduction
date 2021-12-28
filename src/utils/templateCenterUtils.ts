@@ -20,7 +20,7 @@ class TemplateCenterUtils {
         url: this.getPrevUrl(cover),
         id: cover.id,
         theme_id: cover.theme_id,
-        prev_height: height / width * 100,
+        aspect_ratio: width / height,
         width: cover.width,
         height: cover.height,
         type: 6,
