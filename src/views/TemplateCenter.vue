@@ -89,7 +89,7 @@
                                           :isMobile="isMobile"
                                           :contentIds="template.content_ids")
               img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
-              div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
                         iconWidth="24px"
@@ -664,19 +664,10 @@ export default Vue.extend({
         border: 1px solid setColor(gray-5);
         overflow: hidden;
         cursor: pointer;
-        box-sizing: border-box;
-        // &__container {
-        //   position: absolute;
-        //   top: 0;
-        //   left: 0;
-        //   width: 100%;
-        //   height: 100%;
-        //   background-color: setColor(gray-5);
         &__img {
           width: 100%;
-          display: block;
+          height: 100%;
         }
-        // }
         &__theme {
           position: absolute;
           bottom: -20px;
