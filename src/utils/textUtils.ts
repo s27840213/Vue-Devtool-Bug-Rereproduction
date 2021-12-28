@@ -614,7 +614,7 @@ class TextUtils {
           })
         Object.assign(span.style, spanStyleObject)
 
-        p.classList.add('nu-text__span')
+        span.classList.add('nu-text__span')
         p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
         if (spanData.styles.size > fontSize) {
           fontSize = spanData.styles.size
