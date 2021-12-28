@@ -241,7 +241,6 @@ class LayerFactary {
       config.paragraphs.forEach(p => {
         if (p.spans.length) {
           p.id = GeneralUtils.generateRandomString(8)
-          p.styles.font = p.spans[0].styles.font
           p.spans.forEach(s => {
             s.id = GeneralUtils.generateRandomString(8)
           })

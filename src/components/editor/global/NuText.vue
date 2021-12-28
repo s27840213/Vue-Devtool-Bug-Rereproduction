@@ -65,22 +65,22 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    // if (this.config.styles.textShape.name) {
-    //   return
-    // }
+    if (this.config.styles.textShape.name) {
+      return
+    }
 
-    // if (!this.isDestroyed) {
-    //   const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-    //   console.warn('updateLayerSize')
-    //   if (typeof this.subLayerIndex === 'undefined') {
-    //     ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-    //   } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
-    //     const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-    //     const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
-    //   }
-    // }
+    if (!this.isDestroyed) {
+      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      console.warn('updateLayerSize')
+      if (typeof this.subLayerIndex === 'undefined') {
+        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+      } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
+    }
   },
   destroyed() {
     this.isDestroyed = true
