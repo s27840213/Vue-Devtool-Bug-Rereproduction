@@ -1460,6 +1460,7 @@ export default Vue.extend({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
+      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
     },
