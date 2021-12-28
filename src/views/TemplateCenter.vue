@@ -81,11 +81,15 @@
               :class="{'mobile': isMobile}")
             div(v-for="template in waterfallTemplate"
                 class="template-center__waterfall__column__template"
-                :style="templateStyles(template.prev_height)"
-                @click="handleClickWaterfall(template)")
-              div(class="template-center__waterfall__column__template__container")
-                img(:src="template.url")
-              div(class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+                :style="templateStyles(template.aspect_ratio)"
+                @click="handleClickWaterfall(template)"
+                @mouseenter="handleMouseEnter(template.group_id)"
+                @mouseleave="handleMouseLeave(template.group_id)")
+              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
+                                          :isMobile="isMobile"
+                                          :contentIds="template.content_ids")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
                         iconWidth="24px"
@@ -168,6 +172,7 @@ import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
+import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
@@ -181,6 +186,7 @@ export default Vue.extend({
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
+    ScrollableTemplatePreview,
     ObserverSentinel
   },
   directives: {
@@ -212,7 +218,8 @@ export default Vue.extend({
       content_ids: [] as IContentTemplate[],
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
-      isShowOptions: false
+      isShowOptions: false,
+      mouseInTemplate: ''
     }
   },
   mounted() {
@@ -303,8 +310,9 @@ export default Vue.extend({
         return {}
       }
     },
-    templateStyles(heightPercent: number) {
-      return { paddingTop: `${heightPercent}%` }
+    templateStyles(aspectRatio: number) {
+      // return { paddingTop: `${heightPercent}%` }
+      return { aspectRatio: `${aspectRatio}` }
     },
     handleScroll() {
       if (this.isMobile) return
@@ -365,6 +373,14 @@ export default Vue.extend({
         } else {
           this.modal = 'pages'
         }
+      }
+    },
+    handleMouseEnter(id: string) {
+      this.mouseInTemplate = id
+    },
+    handleMouseLeave(id: string) {
+      if (this.mouseInTemplate === id) {
+        this.mouseInTemplate = ''
       }
     },
     scrollToTop() {
@@ -463,6 +479,9 @@ export default Vue.extend({
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id
+    },
+    checkMouseEntered(id: string, groupType: number): boolean {
+      return this.mouseInTemplate === id && groupType === 1
     }
   }
 })
@@ -645,18 +664,9 @@ export default Vue.extend({
         border: 1px solid setColor(gray-5);
         overflow: hidden;
         cursor: pointer;
-        box-sizing: border-box;
-        &__container {
-          position: absolute;
-          top: 0;
-          left: 0;
+        &__img {
           width: 100%;
           height: 100%;
-          background-color: setColor(gray-5);
-          > img {
-            width: 100%;
-            display: block;
-          }
         }
         &__theme {
           position: absolute;
