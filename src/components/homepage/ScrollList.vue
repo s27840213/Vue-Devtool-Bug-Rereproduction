@@ -30,8 +30,8 @@
           div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
-            div(class="pt-10 scroll-list__item-title") 點我製作
-          div(class="scroll-list__hint") 來設計自己第一款模板吧！肯定很有趣！
+            div(class="pt-10 scroll-list__item-title") {{$t('NN0354')}}
+          div(class="scroll-list__hint") {{$t('NN0355')}}
       template(v-else)
         div(v-if="type === 'theme'"
           class="pointer scroll-list__plus")
@@ -94,7 +94,7 @@ export default Vue.extend({
       if (scrollWidth === offsetWidth && times < 10) {
         setTimeout(() => {
           this.initIcon(times + 1)
-        }, 250)
+        }, 500)
       }
       this.nextIcon = scrollWidth > offsetWidth
     },
