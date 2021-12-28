@@ -2,7 +2,7 @@
   div(class="popup-slider"
       :style="styles")
     input(class="popup-slider__range-input"
-      v-model="value"
+      v-model.number="value"
       :max="max"
       :min="min"
       :step="step"
@@ -12,7 +12,7 @@
     input(class="popup-slider__text body-2 text-gray-2"
       v-if="!noText"
       type="text"
-      v-model="value"
+      v-model.number="value"
       @change="handleChangeStop")
 </template>
 
