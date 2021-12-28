@@ -269,11 +269,11 @@ export default Vue.extend({
       designUtils.setDesignName(this.config, this.editableName)
     },
     handleClick() {
-      if (this.unenterable) return
       if (this.isAnySelected) {
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
+      if (this.unenterable) return
       this.$router.push({ name: 'Editor' }).then(() => {
         designUtils.setDesign(this.config)
       })
