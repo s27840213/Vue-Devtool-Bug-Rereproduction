@@ -156,7 +156,7 @@ export default Vue.extend({
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = value
+      this.pageWidth = parseInt(value)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
@@ -168,7 +168,7 @@ export default Vue.extend({
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = value
+      this.pageHeight = parseInt(value)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
@@ -218,8 +218,8 @@ export default Vue.extend({
 
       if (this.selectedFormat === 'custom') {
         const item = {
-          width: this.pageWidth,
-          height: this.pageHeight
+          width: (typeof this.pageWidth === 'string') ? parseInt(this.pageWidth) : this.pageWidth,
+          height: (typeof this.pageHeight === 'string') ? parseInt(this.pageHeight) : this.pageHeight
         } as Itheme
         this.newDesign(item)
       } else {
