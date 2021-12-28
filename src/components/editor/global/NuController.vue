@@ -269,6 +269,10 @@ export default Vue.extend({
     isLine(): boolean {
       return this.config.type === 'shape' && this.config.category === 'D'
     },
+    isCurveText(): boolean {
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
+    },
     getLayerWidth(): number {
       return this.config.styles.width
     },
@@ -504,7 +508,7 @@ export default Vue.extend({
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? 1 : 0
+        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
     },
     groupControllerStyle() {
