@@ -99,13 +99,6 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getTextInfo: 'getTextInfo'
     }),
-    updateTextSize(): any {
-      const config = this.config as IText
-      return {
-        paragraphs: config.paragraphs,
-        writingMode: config.styles.writingMode
-      }
-    },
     getLayerScale(): number {
       return this.config.styles.scale
     },
@@ -115,21 +108,6 @@ export default Vue.extend({
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    }
-  },
-  watch: {
-    updateTextSize: {
-      handler: function() {
-        /**
-         * If below conditions is pass, means the text-properties changes,
-         * the layer width/height needs to refresh
-         */
-        // if (this.config.isTyping) return
-        // this.$nextTick(() => {
-        //   TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
-        // })
-      },
-      deep: true
     }
   },
   methods: {

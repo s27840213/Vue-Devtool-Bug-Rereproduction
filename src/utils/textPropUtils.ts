@@ -80,7 +80,7 @@ class TextPropUtils {
             }
           } else {
             this.blockPropertyHandler(propName, subLayerIndex)
-            TextUtils.updateLayerSize(config as IText, LayerUtils.pageIndex, layerIndex, subLayerIndex)
+            TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIndex)
           }
           break
         }

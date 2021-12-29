@@ -69,6 +69,23 @@ class LayerUtils {
     }
   }
 
+  updatecCurrTypeLayerStyles(styles: { [key: string]: string | boolean | number }, layerIndex = this.layerIndex) {
+    const { getCurrLayer: currLayer, pageIndex, subLayerIdx } = this
+    switch (currLayer.type) {
+      case 'group':
+        try {
+          this.updateSubLayerStyles(pageIndex, layerIndex, subLayerIdx, styles)
+        } catch (e) {
+          console.log(e)
+        }
+        break
+      default:
+        if (!['tmp', 'frame'].includes(currLayer.type)) {
+          this.updateLayerStyles(pageIndex, layerIndex, styles)
+        }
+    }
+  }
+
   addLayers(pageIndex: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>) {
     store.commit('ADD_newLayers', {
       pageIndex: pageIndex,
@@ -171,7 +188,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean }) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean | string}) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,

@@ -82,7 +82,7 @@ export default Vue.extend({
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
-      layerSizeBuff: 0,
+      layerSizeBuff: -1,
       posDiff: { x: 0, y: 0 },
       parentId: ''
     }
@@ -125,8 +125,6 @@ export default Vue.extend({
       return this.config.locked
     },
     isTextEditing(): boolean {
-      // return !this.isControlling && this.contentEditable
-      // @Test
       return !this.isControlling
     },
     getLayerWidth(): number {
@@ -149,6 +147,10 @@ export default Vue.extend({
     },
     contentEditable(): boolean {
       return this.config.contentEditable
+    },
+    isCurveText(): any {
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
     }
   },
   watch: {
@@ -200,7 +202,7 @@ export default Vue.extend({
         this.layerSizeBuff = this.config.styles.writingMode.includes('vertical')
           ? this.getLayerWidth : this.getLayerHeight
       } else {
-        this.layerSizeBuff = NaN
+        this.layerSizeBuff = -1
       }
     },
     contentEditable(newVal) {
@@ -249,7 +251,6 @@ export default Vue.extend({
     },
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      console.log(this.getLayerHeight)
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
@@ -282,12 +283,10 @@ export default Vue.extend({
         if (this.isActive && this.contentEditable) return
         else if (!this.isActive) {
           this.isControlling = true
-          // this.contentEditable = false
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
           document.addEventListener('mouseup', this.onMouseup)
           return
         }
-        // this.contentEditable = true
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
       }
       document.addEventListener('mouseup', this.onMouseup)
@@ -298,7 +297,6 @@ export default Vue.extend({
         this.posDiff.x = this.getPrimaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.getPrimaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
-          // this.contentEditable = false
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
       }
@@ -354,7 +352,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.textSizeRefresh(this.config)
+      !this.isCurveText && this.textSizeRefresh(this.config)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -371,7 +369,7 @@ export default Vue.extend({
         ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
       const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
-      if (Number.isNaN(this.layerSizeBuff)) {
+      if (this.layerSizeBuff === -1) {
         this.layerSizeBuff = newSize.height
       } else if (newSize.height === this.layerSizeBuff) {
         return
@@ -396,7 +394,7 @@ export default Vue.extend({
       }
       // @TODO: the vertical kind pending
 
-      TextUtils.updateLayerSize(text, this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onKeyUp(e: KeyboardEvent) {
       if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
