@@ -32,7 +32,9 @@ class ColorUtils {
   }
 
   setCurrColor(color: string) {
-    this.currColor = color
+    if (/^#[0-9A-F]{6}$/i.test(color)) {
+      this.currColor = color
+    }
   }
 
   setIsColorPickerOpen(bool: boolean) {

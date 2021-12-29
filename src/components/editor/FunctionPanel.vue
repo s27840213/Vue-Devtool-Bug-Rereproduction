@@ -227,6 +227,8 @@ export default Vue.extend({
     background-color: setColor(blue-5);
     border-bottom: 2px solid setColor(gray-6);
     pointer-events: auto;
+    position: relative;
+    z-index: 20;
   }
 }
 </style>

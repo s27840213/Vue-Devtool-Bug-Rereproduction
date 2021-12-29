@@ -168,7 +168,6 @@ class ShortcutUtils {
               .replace(/>/g, '&gt;')
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&#039;')
-              .replace(/ /g, '&nbsp;')
             }</span>`
           chainedCommands = chainedCommands.insertContent(spanText)
           if (index !== spans.length - 1) {

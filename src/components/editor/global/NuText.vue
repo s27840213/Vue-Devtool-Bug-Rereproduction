@@ -71,7 +71,6 @@ export default Vue.extend({
 
     if (!this.isDestroyed) {
       const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      console.warn('updateLayerSize')
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
@@ -147,9 +146,9 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
-      const { editing } = this.config
+      const { editing, contentEditable } = this.config
       const { isCurveText, isFlipped } = this
-      const opacity = editing ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1
+      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : (isCurveText ? 1 : (isFlipped ? 0.2 : 0))) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity

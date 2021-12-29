@@ -145,6 +145,7 @@ export default Vue.extend({
       })
     },
     setOpacity(value: number): void {
+      console.log(typeof value)
       if (value > 100) {
         value = 100
       }
@@ -171,11 +172,6 @@ export default Vue.extend({
             opacity: value
           })
         } else {
-          // this.$store.commit('UPDATE_groupLayerStyles', {
-          //   styles: {
-          //     opacity: value
-          //   }
-          // })
           this.$store.commit('UPDATE_layerStyles', {
             pageIndex: this.currSelectedInfo.pageIndex,
             layerIndex: this.currSelectedInfo.index,

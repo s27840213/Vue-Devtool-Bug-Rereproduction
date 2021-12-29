@@ -112,7 +112,7 @@ export default Vue.extend({
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
-      if (config.decoration && config.decoration.svg) {
+      if (config.decoration && config.decoration.svg && !config.clips[0].isFrameImg) {
         layers = layers.concat(config.decoration)
       }
 

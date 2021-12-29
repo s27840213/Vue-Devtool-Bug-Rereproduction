@@ -660,7 +660,9 @@ export default Vue.extend({
     margin: 0;
 
     &__button-text {
+      width: 70%;
       font-size: 12px;
+      text-align: left;
     }
 
     &-dash-and-edge {
