@@ -203,16 +203,11 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  // if (!MOBILE_ROUTES.includes(to.name ?? '')) {
-  //   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-  //     next({ name: 'MobileWarning', query: { isMobile: 'support_touch' } })
-  //     return
-  //   }
-  //   if (window.screen.height > window.screen.width) {
-  //     next({ name: 'MobileWarning', query: { isMobile: 'aspect_ratio' } })
-  //     return
-  //   }
-  // }
+  if (!MOBILE_ROUTES.includes(to.name ?? '')) {
+    if (window.screen.width <= 1366) {
+      next({ name: 'MobileWarning', query: { isMobile: 'width' } })
+    }
+  }
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
