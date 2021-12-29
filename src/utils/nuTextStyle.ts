@@ -65,7 +65,7 @@ export default Extension.create({
         types: ['textStyle'],
         attributes: {
           font: {
-            default: assetUtils.getFontMap()[i18n.locale],
+            default: 'undefined',
             parseHTML: element => {
               const spanStyle = element.style
               const font = spanStyle.fontFamily
@@ -155,7 +155,7 @@ export default Extension.create({
             }
           },
           font: {
-            default: assetUtils.getFontMap()[i18n.locale],
+            default: 'undefined',
             parseHTML: element => {
               const paragraphStyle = element.style
               const font = paragraphStyle.fontFamily
