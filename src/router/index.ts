@@ -9,6 +9,7 @@ import Pricing from '../views/Pricing.vue'
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
+import Preview from '../views/Preview.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -16,6 +17,7 @@ import i18n from '@/i18n'
 import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import assetUtils from '@/utils/assetUtils'
 Vue.use(VueRouter)
 
 const SUPPORTED_LOCALES = [{
@@ -68,6 +70,40 @@ const routes: Array<RouteConfig> = [
     component: Editor,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
+  },
+  {
+    path: 'preview',
+    name: 'Preview',
+    component: Preview,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: async (to, from, next) => {
+      try {
+        next()
+        const urlParams = new URLSearchParams(window.location.search)
+        const url = urlParams.get('url')
+
+        if (url) {
+          // e.g.: https://test.vivipic.com/editor?url=template.vivipic.com%2Fexport%2F9XBAb9yoKlJbzLiWNUVM%2F211123164456873giej3iKR%2Fpage_0.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
+          const hasToken = url.indexOf('token=') !== -1
+          let tokenKey = ''
+          let src = url
+          if (hasToken) {
+            tokenKey = url.match('&token') ? '&token=' : '?token='
+            src = url.substring(0, hasToken ? url.indexOf(tokenKey) : undefined)
+            const token = url.substring((src + tokenKey).length, url.indexOf('&team_id='))
+            const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
+            store.commit('user/SET_STATE', { token, teamId })
+          }
+          fetch(`https://${src}`)
+            .then(response => response.json())
+            .then(json => { assetUtils.addTemplate(json, { pageIndex: 0 }) })
+
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
   {
     path: 'signup',
