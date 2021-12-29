@@ -65,7 +65,7 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    if (this.config.styles.textShape.name) {
+    if (this.config.styles.textShape?.name) {
       return
     }
 
