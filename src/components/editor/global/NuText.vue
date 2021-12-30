@@ -70,7 +70,8 @@ export default Vue.extend({
     }
 
     if (!this.isDestroyed) {
-      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      const textHW = this.autoResize()
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
@@ -164,6 +165,34 @@ export default Vue.extend({
           return 'url("' + spanStyles.fontUrl + '")'
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+    },
+    autoResize(): {width: number, height: number} {
+      if (this.$route.name !== 'Preview' || this.config.widthLimit === -1) return TextUtils.getTextHW(this.config, this.config.widthLimit)
+      const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+      let direction = 0
+      let shouldContinue = true
+      let widthLimit = this.config.widthLimit
+      let autoSize = TextUtils.getTextHW(this.config, widthLimit)
+      const originDimension = this.config.styles[dimension]
+      while (shouldContinue) {
+        const autoDimension = autoSize[dimension]
+        if (autoDimension - originDimension > 5) {
+          if (direction < 0) break
+          widthLimit += 1
+          direction = 1
+          autoSize = TextUtils.getTextHW(this.config, widthLimit)
+          continue
+        }
+        if (originDimension - autoDimension > 5) {
+          if (direction > 0) break
+          widthLimit -= 1
+          direction = -1
+          autoSize = TextUtils.getTextHW(this.config, widthLimit)
+          continue
+        }
+        shouldContinue = false
+      }
+      return autoSize
     }
   }
 })
