@@ -136,7 +136,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -206,7 +206,7 @@ export default Vue.extend({
       isSnapping: false,
       clipedImgBuff: {} as {
         index: number,
-        styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
+        styles: Partial<IImageStyle>,
         srcObj: { type: string, assetId: string | number, userId: string }
       },
       subControlerIndexs: [],
@@ -292,10 +292,6 @@ export default Vue.extend({
       // return !this.isControlling && this.contentEditable
       // @Test
       return !this.isControlling
-    },
-    isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
     },
     contentEditable(): boolean {
       return this.config.contentEditable
@@ -1547,7 +1543,9 @@ export default Vue.extend({
             imgX: clips[clipIndex].styles.imgX,
             imgY: clips[clipIndex].styles.imgY,
             imgWidth: clips[clipIndex].styles.imgWidth,
-            imgHeight: clips[clipIndex].styles.imgHeight
+            imgHeight: clips[clipIndex].styles.imgHeight,
+            horizontalFlip: clips[clipIndex].styles.horizontalFlip,
+            verticalFlip: clips[clipIndex].styles.verticalFlip
           }
         }
         Object.assign(clips[clipIndex].srcObj, currLayer.srcObj)
@@ -1566,6 +1564,11 @@ export default Vue.extend({
           imgX,
           imgY
         })
+        console.log(this.clipedImgBuff.styles.horizontalFlip)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          horizontalFlip: currLayer.styles.horizontalFlip,
+          verticalFlip: currLayer.styles.verticalFlip
+        })
       }
     },
     onFrameMouseLeave(clipIndex: number) {
@@ -1577,6 +1580,10 @@ export default Vue.extend({
         Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
 
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          horizontalFlip: false,
+          verticalFlip: false
+        })
       }
     },
     onFrameMouseUp(clipIndex: number) {
