@@ -57,7 +57,10 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .download-btn {
   position: relative;
-  width: 90px;
+  // width: 90px;
+  > button {
+    padding: 6px 20px;
+  }
   &__modal {
     position: absolute;
     top: 100%;
