@@ -28,7 +28,8 @@ class PageUtils {
   get currFocusPageIndex() {
     const { pageIndex } = this.currSelectedInfo
     return pageIndex >= 0 ? pageIndex
-      : this.currActivePageIndex >= 0 ? this.currActivePageIndex : this.middlemostPageIndex
+      : this.currActivePageIndex >= 0
+        ? this.currActivePageIndex : this.middlemostPageIndex
   }
 
   get currFocusPage(): IPage {
@@ -358,7 +359,7 @@ class PageUtils {
           return true
         } else {
           layer = layer as IImage
-          return !(layer.srcObj.userId === '' && typeof layer.srcObj.assetId !== 'number')
+          return layer.previewSrc
         }
       })
       return page

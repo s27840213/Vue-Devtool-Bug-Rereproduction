@@ -5,6 +5,7 @@
       :class="{show: hasCheckedAssets}"
       :value="photo.assetIndex"
       :checkedValues="checkedAssets"
+      :disabled="isUploading"
       @update="handleCheck")
     svg-icon(v-if="!inFilePanel" class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
@@ -195,7 +196,9 @@ export default Vue.extend({
       this.updateCheckedAssets(value)
     },
     modifyCheckedAssets(assetIndex: number) {
-      this.checkedAssets.includes(assetIndex) ? this.deleteCheckedAssets(assetIndex) : this.addCheckedAssets(assetIndex)
+      if (!this.isUploading) {
+        this.checkedAssets.includes(assetIndex) ? this.deleteCheckedAssets(assetIndex) : this.addCheckedAssets(assetIndex)
+      }
     }
   }
 })

@@ -46,7 +46,7 @@ export default Extension.create({
     if (selectionRanges.length > 0) {
       const from = selectionRanges[0].$from.pos
       const to = selectionRanges[0].$to.pos
-      console.log(from, to)
+      // console.log(from, to)
       this.storage.from = from
       this.storage.to = to
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {

@@ -211,7 +211,7 @@ class UploadUtils {
         xhr.onload = () => {
           // polling the JSON file of uploaded image
           const interval = setInterval(() => {
-            const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+            const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
             fetch(pollingTargetSrc).then((response) => {
               if (response.status === 200) {
                 clearInterval(interval)
@@ -314,7 +314,7 @@ class UploadUtils {
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = setInterval(() => {
-                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
                     clearInterval(interval)
@@ -327,7 +327,8 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
+
+                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                         }
                       } else {
@@ -946,7 +947,7 @@ class UploadUtils {
          * @Note isAdmin -> fetch the public design, else fetch the private design
          */
         jsonName = 'config.json'
-        fetchTarget = designParams.fetchTarget ?? `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        fetchTarget = designParams.fetchTarget ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
         break
       }
       // case GetDesignType.PRIVATE_DESIGN: {
@@ -1011,7 +1012,10 @@ class UploadUtils {
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
                 store.commit('SET_assetId', designId)
-                json.pages = pageUtils.filterBrokenImageLayer(json.pages)
+                /**
+                 * @todo fix the filter function below
+                 */
+                // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
@@ -1283,7 +1287,12 @@ class UploadUtils {
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
       // console.log(this.loginOutput)
+      logUtils.setLog(`Export Design:
+        ExportId: ${exportId},
+        UserId: ${this.userId}
+        Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
       const pagesJSON = json || store.getters.getPages
+      this.resetControlStates(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
@@ -1312,6 +1321,26 @@ class UploadUtils {
       }
       xhr.send(data)
     })
+  }
+
+  resetControlStates(json: IPage[]) {
+    for (const page of json) {
+      for (const layer of page.layers) {
+        switch (layer.type) {
+          case 'text':
+            layer.editing = false
+            break
+          case 'tmp':
+          case 'group':
+            for (const subLayer of (layer as IGroup).layers) {
+              if (subLayer.type === 'text') {
+                subLayer.editing = false
+              }
+            }
+            break
+        }
+      }
+    }
   }
 }
 
