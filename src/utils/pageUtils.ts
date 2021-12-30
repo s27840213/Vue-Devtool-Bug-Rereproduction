@@ -17,8 +17,8 @@ class PageUtils {
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
-  get lastSelectedPageIndex(): number {
-    return store.getters.getLastSelectedPageIndex
+  get middlemostPageIndex(): number {
+    return store.getters.getMiddlemostPageIndex
   }
 
   get currActivePageIndex(): number {
@@ -27,11 +27,12 @@ class PageUtils {
 
   get currFocusPageIndex() {
     const { pageIndex } = this.currSelectedInfo
-    return pageIndex > 0 ? pageIndex : this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+    return pageIndex >= 0 ? pageIndex
+      : this.currActivePageIndex >= 0 ? this.currActivePageIndex : this.middlemostPageIndex
   }
 
   get currFocusPage(): IPage {
-    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.middlemostPageIndex
     return this.getPage(targetIndex)
   }
 
@@ -128,7 +129,7 @@ class PageUtils {
     uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
   }
 
-  activeMostCentralPage(): number {
+  activeMiddlemostPage(): number {
     // pages.some((page: { top: number, bottom: number }, index: number) => {
     //   if (page.top < centerLinePos && page.bottom > centerLinePos) {
     //     targetIndex = index
@@ -141,8 +142,8 @@ class PageUtils {
     //     }
     //   }
     // })
-    FocusUtils.focusElement(`.nu-page-${this.lastSelectedPageIndex}`, true)
-    return this.lastSelectedPageIndex
+    FocusUtils.focusElement(`.nu-page-${this.middlemostPageIndex}`, true)
+    return this.middlemostPageIndex
   }
 
   activeCurrActivePage(): void {
@@ -261,9 +262,9 @@ class PageUtils {
     const centerLinePos = (containerRect.bottom - containerRect.top) / 2
 
     const minDistance = Number.MAX_SAFE_INTEGER
-    const targetIndex = this.searchMostCentralPageIndex(pages, centerLinePos, minDistance, -1)
-    store.commit('SET_lastSelectedPageIndex', targetIndex)
-    this.activeMostCentralPage()
+    const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
+    store.commit('SET_middlemostPageIndex', targetIndex)
+    this.activeMiddlemostPage()
     this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
     this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }
@@ -292,7 +293,7 @@ class PageUtils {
   }
 
   // Algorithm: Binary Search
-  searchMostCentralPageIndex(posArr: Array<{ top: number, bottom: number }>, centerLinePos: number, minDist: number, minIndex: number): number {
+  searchMiddlemostPageIndex(posArr: Array<{ top: number, bottom: number }>, centerLinePos: number, minDist: number, minIndex: number): number {
     // get the middle inext of the posArr
     const middleIndex = Math.floor(posArr.length / 2)
     // if centerLinePos is exactly in the posArr, return the index
@@ -310,9 +311,9 @@ class PageUtils {
       minDist = dist
     }
     if (searchTopDir) {
-      return this.searchMostCentralPageIndex(posArr.slice(0, middleIndex), centerLinePos, minDist, middleIndex)
+      return this.searchMiddlemostPageIndex(posArr.slice(0, middleIndex), centerLinePos, minDist, middleIndex)
     } else {
-      return middleIndex + this.searchMostCentralPageIndex(posArr.slice(middleIndex, posArr.length), centerLinePos, minDist, middleIndex)
+      return middleIndex + this.searchMiddlemostPageIndex(posArr.slice(middleIndex, posArr.length), centerLinePos, minDist, middleIndex)
     }
   }
 
@@ -331,7 +332,7 @@ class PageUtils {
 
   fillPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const targetPage = this.getPage(this.lastSelectedPageIndex) as IPage
+    const targetPage = this.getPage(this.middlemostPageIndex) as IPage
     const resizeRatio = editorViewBox.clientWidth / (targetPage.width * (this.scaleRatio / 100)) * 0.9
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)

@@ -91,11 +91,11 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       getPage: 'getPage'
     }),
     currPage(): IPage {
-      return this.getPage(this.lastSelectedPageIndex)
+      return this.getPage(this.middlemostPageIndex)
     },
     backgroundColor(): string {
       return this.currPage.backgroundColor
@@ -158,45 +158,45 @@ export default Vue.extend({
     }),
     handleDeleteBackground() {
       if (this.backgroundLocked) return this.handleLockedNotify()
-      this.removeBg({ pageIndex: this.lastSelectedPageIndex })
+      this.removeBg({ pageIndex: this.middlemostPageIndex })
       stepsUtils.record()
     },
     handleLockBackground() {
       this.setBgConfig({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         config: {
           locked: !this.backgroundLocked
         }
       })
       this.setBgImageControl({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         imgControl: false
       })
       stepsUtils.record()
     },
     handleChangeBgColor(color: string) {
       this.setBgColor({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         color
       })
       stepsUtils.record()
     },
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         opacity: `${opacity}`
       })
     },
     handleControlBgImage() {
       if (this.backgroundLocked) return this.handleLockedNotify()
       this.setBgImageControl({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         imgControl: !this.backgroundImgControl
       })
     },
     handleChangeBgAdjust(adjust: any) {
       this.setBgImageStyles({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         styles: {
           adjust: { ...adjust }
         }
@@ -228,7 +228,7 @@ export default Vue.extend({
     handleImageFlip(flipIcon: string) {
       const [h, v] = this.backgroundImgFlip
       this.setBgImageStyles({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         styles: {
           horizontalFlip: flipIcon === 'flip-h' ? !h : h,
           verticalFlip: flipIcon === 'flip-v' ? !v : v

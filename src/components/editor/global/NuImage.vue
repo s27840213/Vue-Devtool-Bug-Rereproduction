@@ -3,8 +3,10 @@
     :style="styles()"
     draggable="false")
     nu-adjust-image(v-show="isAdjustImage"
+      class="layer-flip"
       :src="src"
-      :styles="adjustImgStyles")
+      :styles="adjustImgStyles"
+      :style="flipStyles()")
     img(v-show="!isAdjustImage"
       :style="flipStyles()"
       class="nu-image__picture layer-flip"

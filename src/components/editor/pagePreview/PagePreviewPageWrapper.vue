@@ -14,7 +14,7 @@
       ref="content")
       page-content(:style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
       div(class="page-preview-page__highlighter"
-        :class="{'focused': lastSelectedPageIndex === index}"
+        :class="{'focused': middlemostPageIndex === index}"
         :style="hightlighterStyles()")
       div(v-if="isMouseOver"
         class="page-preview-page-content-more"
@@ -22,7 +22,7 @@
         svg-icon(class="pb-5"
           :iconName="'more_vertical'"
           :iconWidth="'25px'")
-      div(v-if="isMenuOpen && lastSelectedPageIndex === index"
+      div(v-if="isMenuOpen && middlemostPageIndex === index"
         class="menu"
         v-click-outside="closeMenu")
         template(v-for="menuItem in menuItems")
@@ -41,7 +41,7 @@
       :style="styles()")
     div(v-if="type === 'full'"
       class="page-preview-page-title")
-      span(:style="{'color': lastSelectedPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+      span(:style="{'color': middlemostPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -92,7 +92,7 @@ export default Vue.extend({
       'focusPageIndex'
     ]),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       getPage: 'getPage',
       isDragged: 'page/getIsDragged'
     }),
@@ -116,7 +116,7 @@ export default Vue.extend({
     },
     styles2() {
       if (this.type === 'panel' &&
-        this.isDragged && this.index !== this.lastSelectedPageIndex) {
+        this.isDragged && this.index !== this.middlemostPageIndex) {
         return {
           'z-index': '-1'
         }
@@ -134,7 +134,7 @@ export default Vue.extend({
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
-      _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview'
@@ -152,28 +152,28 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
-      this._setLastSelectedPageIndex(this.index)
+      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
         pageUtils.jumpIntoPage(this.index)
       }
     },
     dbclickPage() {
-      this._setLastSelectedPageIndex(this.index)
+      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
+        pageUtils.jumpIntoPage(this.middlemostPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
       this._setIsDragged(true)
       this.isMouseOver = false
-      this._setLastSelectedPageIndex(this.index)
+      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
 
       const target = e.target as HTMLElement
-      setTimeout(function() {
+      setTimeout(function () {
         target.style.visibility = 'hidden'
       }, 0)
 
@@ -187,7 +187,7 @@ export default Vue.extend({
       this._setIsDragged(false)
 
       const target = e.target as HTMLElement
-      setTimeout(function() {
+      setTimeout(function () {
         target.style.visibility = 'visible'
       }, 0)
 
@@ -208,14 +208,14 @@ export default Vue.extend({
             pos: this.index + 1
           })
           GroupUtils.deselect()
-          this._setLastSelectedPageIndex(this.index + 1)
+          this._setmiddlemostPageIndex(this.index + 1)
           this._setCurrActivePageIndex(this.index + 1)
           StepsUtils.record()
           break
         case 'trash':
           GroupUtils.deselect()
           this._deletePage(this.index)
-          this._setLastSelectedPageIndex(this.index - 1)
+          this._setmiddlemostPageIndex(this.index - 1)
           this._setCurrActivePageIndex(this.index - 1)
           StepsUtils.record()
           break

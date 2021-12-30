@@ -15,7 +15,7 @@ class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
-  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
 
   isArrowKey(e: KeyboardEvent): boolean {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
@@ -148,7 +148,7 @@ class TextUtils {
     }
   }
 
-  startEqualEnd (start: ISelection, end: ISelection) {
+  startEqualEnd(start: ISelection, end: ISelection) {
     return (Object.keys(start) as Array<keyof ISelection>)
       .every(k => (start[k] as any) === end[k])
   }
@@ -681,12 +681,12 @@ class TextUtils {
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const page = LayerUtils.getPage(targePageIndex)
     const x = (page.width - width) / 2
     const y = (page.height - height) / 2
 
-    if (targePageIndex === this.lastSelectedPageIndex) {
+    if (targePageIndex === this.middlemostPageIndex) {
       const currLayer = LayerUtils.getLayer(targePageIndex, LayerUtils.layerIndex)
       if (currLayer.styles) {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
@@ -699,7 +699,7 @@ class TextUtils {
     return { x, y }
   }
 
-  resetTextField (textLayer: IText, pageIndex: number, field?: string) {
+  resetTextField(textLayer: IText, pageIndex: number, field?: string) {
     const page = LayerUtils.getPage(pageIndex) as IPage
     /**
      * Add the response font-size for each paragraph

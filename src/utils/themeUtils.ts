@@ -5,21 +5,21 @@ import listService from '@/apis/list'
 import i18n from '@/i18n'
 
 class ThemeUtils {
-  get themes () { return store.state.themes }
-  get groupType () { return store.state.groupType }
-  get getPageSize () { return store.getters.getPageSize }
+  get themes() { return store.state.themes }
+  get groupType() { return store.state.groupType }
+  get getPageSize() { return store.getters.getPageSize }
 
-  getFocusPageSize (pageIndex?: number): { width: number, height: number } {
+  getFocusPageSize(pageIndex?: number): { width: number, height: number } {
     return this.getPageSize(pageIndex || PageUtils.currFocusPageIndex)
   }
 
-  setTemplateThemes (themes: Itheme[]) {
+  setTemplateThemes(themes: Itheme[]) {
     store.commit('templates/SET_STATE', {
       theme: themes.map(theme => theme.id).join(',')
     })
   }
 
-  async fetchTemplateContent () {
+  async fetchTemplateContent() {
     const queryString = new URLSearchParams(window.location.search)
     const keyword = queryString.get('search')
     store.dispatch('templates/resetContent')
@@ -36,7 +36,7 @@ class ThemeUtils {
     // this.getContent()
   }
 
-  refreshTemplateState (pageIndex?: number) {
+  refreshTemplateState(pageIndex?: number) {
     this.setTemplateThemes([])
     return this.checkThemeState().then(() => {
       this.setPageThemes(pageIndex)
@@ -44,7 +44,7 @@ class ThemeUtils {
     })
   }
 
-  async checkThemeState () {
+  async checkThemeState() {
     const { themes } = this
     if (!themes.length) {
       await listService.getTheme({ locale: i18n.locale })
@@ -56,15 +56,15 @@ class ThemeUtils {
     return Promise.resolve()
   }
 
-  setPageThemes (pageIndex?: number, themes?: Itheme[]) {
+  setPageThemes(pageIndex?: number, themes?: Itheme[]) {
     const pageSize = this.getFocusPageSize(pageIndex)
     const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height))
     this.setTemplateThemes(pageThemes)
   }
 
-  getThemesBySize (width: number, height: number) {
+  getThemesBySize(width: number, height: number) {
     const { themes, groupType } = this
-    console.log(groupType)
+
     if (groupType === 1) return themes.filter(theme => theme.id === 7)
     const ratio = width / height
     const recommendation = themes.filter(theme => {
@@ -74,18 +74,18 @@ class ThemeUtils {
     return recommendation.length ? recommendation : [...themes]
   }
 
-  compareThemesWithPage (themes: string, pageIndex?: number) {
+  compareThemesWithPage(themes: string, pageIndex?: number) {
     const pageSize = this.getFocusPageSize(pageIndex)
     const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
     return pageThemes.some(theme => themes.includes(`${theme.id}`))
   }
 
-  private isSameDirection (targetRatio: number, ratio: number) {
+  private isSameDirection(targetRatio: number, ratio: number) {
     // @TODO 正方形
     return targetRatio === 1 || (Math.floor(targetRatio) === Math.floor(ratio))
   }
 
-  private isSimilarSize (targetRatio: number, ratio: number, range: number) {
+  private isSimilarSize(targetRatio: number, ratio: number, range: number) {
     return targetRatio * (1 + range) >= ratio && targetRatio * (1 - range) <= ratio
   }
 }

@@ -16,7 +16,7 @@ import { ITiptapSelection } from '@/interfaces/text'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
-  get pageIndex(): number { return store.getters.getLastSelectedPageIndex }
+  get pageIndex(): number { return store.getters.getMiddlemostPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
@@ -93,7 +93,7 @@ class LayerUtils {
     })
     ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
-    store.commit('SET_lastSelectedPageIndex', pageIndex)
+    store.commit('SET_middlemostPageIndex', pageIndex)
     FocusUtils.focusElement(`.nu-page-${pageIndex}`, false)
     GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
 

@@ -162,7 +162,7 @@ export default Vue.extend({
     ...mapGetters({
       groupId: 'getGroupId',
       pages: 'getPages',
-      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -216,13 +216,13 @@ export default Vue.extend({
       pageUtils.setBackgroundImageControlDefault()
       pageUtils.findCentralPageIndexInfo()
       if (imageUtils.isImgControl()) {
-        ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
     },
     selectStart(e: MouseEvent) {
       if (this.isTyping) return
       if (imageUtils.isImgControl()) {
-        ControlUtils.updateLayerProps(this.getLastSelectedPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
@@ -287,7 +287,7 @@ export default Vue.extend({
       })
     },
     handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${this.getLastSelectedPageIndex}`)]
+      const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
@@ -297,8 +297,8 @@ export default Vue.extend({
         }
       })
       // const selectionAreaInfo = this.mapSelectionRectToPage(selectionData)
-      // const layers = layerUtils.getLayers(this.getLastSelectedPageIndex)
-      // // const layers = [...document.querySelectorAll(`.nu-layer--p${this.getLastSelectedPageIndex}`)]
+      // const layers = layerUtils.getLayers(this.getMiddlemostPageIndex)
+      // // const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
       // const layerIndexs: number[] = []
       // layers.forEach((layer) => {
       //   mathUtils.getCornerPoints(0, selectionAreaInfo)
@@ -310,7 +310,7 @@ export default Vue.extend({
       // })
       if (layerIndexs.length > 0) {
         // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(this.getLastSelectedPageIndex, layerIndexs)
+        GroupUtils.select(this.getMiddlemostPageIndex, layerIndexs)
       }
     },
     mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {

@@ -31,14 +31,14 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getPage: 'getPage',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio'
     }),
     currFocusPage(): IPage {
-      const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.lastSelectedPageIndex
+      const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.middlemostPageIndex
       return this.getPage(targetIndex)
     },
     rulerBodyStyles(): { [index: string]: number | string } {

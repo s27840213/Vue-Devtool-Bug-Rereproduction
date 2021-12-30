@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:prerender": "vue-cli-service build:prerender",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""
@@ -79,5 +80,10 @@
     "typescript": "~4.1.5",
     "vue-cli-plugin-i18n": "~2.3.1",
     "vue-template-compiler": "^2.6.11"
+  },
+  "vuePlugins": {
+    "service": [
+      "build.prerender.js"
+    ]
   }
 }

@@ -101,7 +101,7 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType'
@@ -161,7 +161,7 @@ export default Vue.extend({
       if (val) {
         // @todo
         if (this.getCurrFunctionPanelType === FunctionPanelType.colorPicker && this.getLayerType === 'shape') {
-        // colorUtils.setCurrColor(this.getColors[index])
+          // colorUtils.setCurrColor(this.getColors[index])
         }
       }
       if (!val) {
@@ -222,7 +222,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
@@ -350,7 +349,7 @@ export default Vue.extend({
         })
       }
     },
-    handleTextChange(payload: {paragraphs: IParagraph[], isSetContentRequired: boolean}) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       !this.isCurveText && this.textSizeRefresh(this.config)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
@@ -366,7 +365,7 @@ export default Vue.extend({
       const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
       const isAllHorizon = !group.layers
         .some(l => l.type === 'text' &&
-        ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
       const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
       if (this.layerSizeBuff === -1) {

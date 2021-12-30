@@ -6,7 +6,7 @@
         :type="'gray-sm'"
         class="rounded my-20 mx-25"
         style="padding: 5px 0;"
-        @click.native="addPage(lastSelectedPageIndex+1)") {{$t('NN0139')}}
+        @click.native="addPage(middlemostPageIndex+1)") {{$t('NN0139')}}
     div(class="panel-page-items")
       template(v-for="(page, idx) in getPages")
         div(class="panel-page__plus")
@@ -33,7 +33,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getPages: 'getPages',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex'
+      middlemostPageIndex: 'getMiddlemostPageIndex'
     }),
     getPageCount(): number {
       return this.getPages.length
@@ -42,14 +42,14 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
-      _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      _setmiddlemostPageIndex: 'SET_middlemostPageIndex'
     }),
     addPage(position: number) {
       this._addPageToPos({
         newPage: pageUtils.newPage({}),
         pos: position
       })
-      this._setLastSelectedPageIndex(position)
+      this._setmiddlemostPageIndex(position)
     }
   }
 })

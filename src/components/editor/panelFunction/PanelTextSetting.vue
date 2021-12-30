@@ -146,7 +146,7 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
-      pageIndex: 'getLastSelectedPageIndex',
+      pageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',

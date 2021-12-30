@@ -258,7 +258,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
@@ -287,7 +287,7 @@ export default Vue.extend({
       return (currLayer as IShape).shapeType === 'e'
     },
     currLayer(): ILayer {
-      return this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex) as ILayer
+      return this.getLayer(this.middlemostPageIndex, this.currSelectedIndex) as ILayer
     },
     inGrouped(): boolean {
       const currLayer = LayerUtils.getCurrLayer
@@ -340,7 +340,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    'currSelectedInfo.id': function() {
+    'currSelectedInfo.id': function () {
       this.initilizeRecord()
     },
     getColors: function () {
@@ -374,7 +374,7 @@ export default Vue.extend({
       return value.toString()
     },
     groupColorStyles() {
-      const currLayer = this.getLayer(this.lastSelectedPageIndex, this.currSelectedIndex)
+      const currLayer = this.getLayer(this.middlemostPageIndex, this.currSelectedIndex)
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const origin = currLayer.layers
           .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
@@ -465,13 +465,13 @@ export default Vue.extend({
           for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
             if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
               const color = [newColor]
-              LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, i, { color })
+              LayerUtils.updateSelectedLayerProps(this.middlemostPageIndex, i, { color })
             }
           }
         } else {
           const color = [...(currLayer as IGroup).layers[subSelectedIdx].color as string]
           color[this.currSelectedColorIndex] = newColor
-          LayerUtils.updateSelectedLayerProps(this.lastSelectedPageIndex, subSelectedIdx, { color })
+          LayerUtils.updateSelectedLayerProps(this.middlemostPageIndex, subSelectedIdx, { color })
         }
       }
       if (currLayer.type === 'shape') {
@@ -481,7 +481,7 @@ export default Vue.extend({
         if (record) {
           record.value = index
         }
-        LayerUtils.updateLayerProps(this.lastSelectedPageIndex, this.currSelectedIndex, { color })
+        LayerUtils.updateLayerProps(this.middlemostPageIndex, this.currSelectedIndex, { color })
       }
     },
     setLineWidth(value: number) {
@@ -489,14 +489,14 @@ export default Vue.extend({
       const { currLayer } = this
       const { point, styles, size } = (currLayer as IShape)
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         { size: [lineWidth, ...(size ?? []).slice(1)] }
       )
       if (this.isLine) {
         const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, size?.[0] ?? 1, lineWidth)
         LayerUtils.updateLayerStyles(
-          this.lastSelectedPageIndex,
+          this.middlemostPageIndex,
           this.currSelectedIndex,
           {
             x: trans.x,
@@ -516,14 +516,14 @@ export default Vue.extend({
     },
     handleLineDash(dash: number) {
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         { dasharray: (dash === 1) ? [] : [1] }
       )
     },
     handleLineEdge(edge: number) {
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         { linecap: (edge === 3) ? 'butt' : 'round' }
       )
@@ -531,7 +531,7 @@ export default Vue.extend({
     handleBasicShapeFilledUpdate(index: number, filled: number) {
       stepsUtils.record()
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         { filled: filled === 1 }
       )
@@ -544,7 +544,7 @@ export default Vue.extend({
         newSize[1] = controlUtils.getCorRadValue(vSize, corRadPercentage, shapeType ?? '')
       }
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         { size: newSize }
       )
@@ -554,7 +554,7 @@ export default Vue.extend({
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         {
           styleArray: [currLayer.styleArray[0], styleArray[0], currLayer.styleArray[2]],
@@ -565,7 +565,7 @@ export default Vue.extend({
         }
       )
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         {
           markerId: [value, currLayer.markerId?.[1] ?? 'none']
@@ -577,7 +577,7 @@ export default Vue.extend({
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         {
           styleArray: [currLayer.styleArray[0], currLayer.styleArray[1], styleArray[0]],
@@ -588,7 +588,7 @@ export default Vue.extend({
         }
       )
       LayerUtils.updateLayerProps(
-        this.lastSelectedPageIndex,
+        this.middlemostPageIndex,
         this.currSelectedIndex,
         {
           markerId: [currLayer.markerId?.[0] ?? 'none', value]
@@ -660,7 +660,9 @@ export default Vue.extend({
     margin: 0;
 
     &__button-text {
+      width: 70%;
       font-size: 12px;
+      text-align: left;
     }
 
     &-dash-and-edge {

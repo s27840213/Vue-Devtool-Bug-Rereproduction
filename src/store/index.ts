@@ -46,7 +46,7 @@ const getDefaultState = (): IEditorState => ({
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
-  lastSelectedPageIndex: 0,
+  middlemostPageIndex: 0,
   currActivePageIndex: -1,
   lastSelectedLayerIndex: -1,
   clipboard: [],
@@ -147,7 +147,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     }
   },
   getLayersNum(state: IEditorState) {
-    return (pageIndex = state.lastSelectedPageIndex): number => {
+    return (pageIndex = state.middlemostPageIndex): number => {
       return state.pages[pageIndex].layers.length
     }
   },
@@ -161,8 +161,8 @@ const getters: GetterTree<IEditorState, unknown> = {
       return state.pages[pageIndex].backgroundColor
     }
   },
-  getLastSelectedPageIndex(state: IEditorState): number {
-    return state.lastSelectedPageIndex
+  getMiddlemostPageIndex(state: IEditorState): number {
+    return state.middlemostPageIndex
   },
   getCurrActivePageIndex(state: IEditorState): number {
     return state.currActivePageIndex
@@ -232,7 +232,7 @@ const mutations: MutationTree<IEditorState> = {
       state.groupType = newPages.groupType || state.groupType
     }
     // reset page index
-    state.lastSelectedPageIndex = 0
+    state.middlemostPageIndex = 0
     state.currActivePageIndex = -1
   },
   ADD_page(state: IEditorState, newPage: IPage) {
@@ -285,10 +285,11 @@ const mutations: MutationTree<IEditorState> = {
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
   },
-  SET_lastSelectedPageIndex(state: IEditorState, index: number) {
-    state.lastSelectedPageIndex = index
+  SET_middlemostPageIndex(state: IEditorState, index: number) {
+    state.middlemostPageIndex = index
   },
   SET_currActivePageIndex(state: IEditorState, index: number) {
+    console.log(index)
     state.currActivePageIndex = index
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
@@ -410,7 +411,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
-      (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      (state.pages[state.middlemostPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
         layer[k] = v
       })
     })
@@ -497,11 +498,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_groupLayerStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      (state.pages[state.middlemostPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
         layer.styles[k] = v
       })
     })
-    // state.currSelectedInfo.layers[0].layers = (state.pages[state.lastSelectedPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
+    // state.currSelectedInfo.layers[0].layers = (state.pages[state.middlemostPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
   },
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number }, layerIndex?: number }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {

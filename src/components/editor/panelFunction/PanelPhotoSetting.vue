@@ -55,7 +55,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
@@ -124,14 +124,14 @@ export default Vue.extend({
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
           return frameUtils.updateFrameLayerStyles(
-            this.lastSelectedPageIndex,
+            this.middlemostPageIndex,
             this.currSelectedIndex,
             0,
             { adjust: { ...adjust } }
           )
         }
         return frameUtils.updateSubFrameLayerStyles(
-          this.lastSelectedPageIndex,
+          this.middlemostPageIndex,
           this.currSelectedIndex,
           index,
           { adjust: { ...adjust } }
@@ -140,7 +140,7 @@ export default Vue.extend({
       if (types.has('image') || (types.has('group') && type === 'image')) {
         return imageAdjustUtil.setAdjust({
           adjust: { ...adjust },
-          pageIndex: this.lastSelectedPageIndex,
+          pageIndex: this.middlemostPageIndex,
           layerIndex: this.currSelectedIndex,
           subLayerIndex: types.has('group') && index
         })

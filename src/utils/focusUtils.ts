@@ -3,8 +3,8 @@ import store from '@/store'
 
 class FocusUtils {
   focusLastSelectedPage() {
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
-    const targetPage = document.querySelector(`.nu-page-${lastSelectedPageIndex}`) as HTMLElement
+    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
+    const targetPage = document.querySelector(`.nu-page-${middlemostPageIndex}`) as HTMLElement
     targetPage.focus()
   }
 

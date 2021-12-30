@@ -52,7 +52,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize'
     }),
@@ -126,7 +126,7 @@ export default Vue.extend({
         }
       }
       Object.assign(config, svgData)
-      layerUtils.addLayers(this.lastSelectedPageIndex, [layerFactary.newShape(config)])
+      layerUtils.addLayers(this.middlemostPageIndex, [layerFactary.newShape(config)])
     }
   }
 })

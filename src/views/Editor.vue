@@ -151,14 +151,13 @@ export default Vue.extend({
       return this.viewGuide === 0
     }
   },
-  created() {
-    window.addEventListener('beforeunload', this.beforeWindowUnload)
-  },
-
-  beforeDestroy() {
-    window.removeEventListener('beforeunload', this.beforeWindowUnload)
-  },
   beforeRouteLeave(to, from, next) {
+    // const answer = this.confirmLeave()
+    // if (!answer) {
+    //   next(false)
+    //   return
+    // }
+
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
@@ -170,13 +169,6 @@ export default Vue.extend({
       logUtils.setLog('Leave editor')
       next()
     }
-    // const answer = this.confirmLeave()
-    // if (answer) {
-    //   uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-    //   next()
-    // } else {
-    //   next(false)
-    // }
   },
   methods: {
     ...mapMutations({
@@ -197,15 +189,6 @@ export default Vue.extend({
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
-    },
-    async beforeWindowUnload(e: any) {
-      // Cancel the event
-      if (uploadUtils.isLogin) {
-        e.preventDefault()
-        await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-        // // Chrome requires returnValue to be set
-        e.returnValue = 'Do you really want to leave? You have unsaved changes'
-      }
     }
   }
 })

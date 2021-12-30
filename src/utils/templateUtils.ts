@@ -14,7 +14,7 @@ class TemplateUtils {
   } as { [key: string]: string }
 
   get getTextInfo() { return store.getters.getTextInfo }
-  get pageIndex() { return store.getters.getLastSelectedPageIndex }
+  get pageIndex() { return store.getters.getMiddlemostPageIndex }
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
   updateTemplate(json: any): any {
