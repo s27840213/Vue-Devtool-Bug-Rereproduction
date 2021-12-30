@@ -76,19 +76,27 @@ export default Vue.extend({
       }
 
       if (!isSameTheme) {
+        let btnWidth = '120px'
+        if (this.$i18n.locale === 'tw') {
+          btnWidth = '120px'
+        } else if (this.$i18n.locale === 'us') {
+          btnWidth = '150px'
+        } else if (this.$i18n.locale === 'jp') {
+          btnWidth = '180px'
+        }
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
           `${this.$t('NN0209')}`,
           [],
           {
             msg: `${this.$t('NN0208')}`,
-            style: { width: '120px', height: '32px' },
+            style: { width: btnWidth, height: '32px' },
             action: cb
           },
           {
             msg: `${this.$t('NN0021')}`,
             class: 'border-blue-1 btn-light-mid',
-            style: { width: '120px', height: '32px' },
+            style: { width: btnWidth, height: '32px' },
             action: () => {
               const resize = { width: currLayer.width, height: currLayer.height }
               cb(resize)

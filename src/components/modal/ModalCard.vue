@@ -68,12 +68,15 @@ export default Vue.extend({
   align-items: center;
   background-color: white;
   min-width: 350px;
-  padding: 30px;
+  padding-top: 45px;
+  padding-bottom: 35px;
+  padding-left: 30px;
+  padding-right: 30px;
   border-radius: 10px;
   &__close {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: 15px;
+    right: 15px;
     width: 30px;
     height: 30px;
   }
