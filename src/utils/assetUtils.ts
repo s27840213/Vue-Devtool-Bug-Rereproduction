@@ -4,7 +4,7 @@ import store from '@/store'
 import { IListServiceContentDataItem, IListServiceContentData, IAssetPhoto } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
-import PageUtils from './pageUtils'
+import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
@@ -33,7 +33,7 @@ class AssetUtils {
 
   get getAsset() { return store.getters.getAsset }
   get getPage() { return store.getters.getPage }
-  get pageSize() { return store.getters.getPageSize(PageUtils.currFocusPageIndex) }
+  get pageSize() { return store.getters.getPageSize(pageUtils.currFocusPageIndex) }
   get getLayer() { return store.getters.getLayer }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
   get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
@@ -125,11 +125,11 @@ class AssetUtils {
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex || PageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex || pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(GeneralUtils.deepCopy(json))
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    PageUtils.updateSpecPage(targetPageIndex, newLayer)
+    pageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (width && height) {
       resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
       store.commit('UPDATE_pageProps', {
@@ -137,7 +137,6 @@ class AssetUtils {
         props: { width, height }
       })
     }
-    store.commit('SET_middlemostPageIndex', targetPageIndex)
     store.commit('SET_currActivePageIndex', targetPageIndex)
     stepsUtils.record()
   }
@@ -402,7 +401,7 @@ class AssetUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
-    const targePageIndex = pageIndex || PageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
 
     const allLayers = this.getLayers(targePageIndex)
     const type = ImageUtils.getSrcType(url)
@@ -460,17 +459,17 @@ class AssetUtils {
       })
       .then(jsonDataList => {
         // 單頁: 取代, 多頁: 空白取代/加入後面
-        const lastSelectedPage: IPage = this.getPage(this.middlemostPageIndex)
-        let targetIndex = this.middlemostPageIndex
+        const currFocusPage: IPage = this.getPage(pageUtils.currFocusPageIndex)
+        let targetIndex = pageUtils.currFocusPageIndex
         let replace = true
-        if (!childId && lastSelectedPage && lastSelectedPage.layers.length) {
+        if (!childId && currFocusPage && currFocusPage.layers.length) {
           // 多頁且當前頁面非空白 => 加入在最後頁面
           targetIndex = this.getPages.length
           replace = false
         }
-        PageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
+        pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         Vue.nextTick(() => {
-          PageUtils.scrollIntoPage(targetIndex)
+          pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
@@ -481,7 +480,7 @@ class AssetUtils {
           }
           if (groupType === 1 && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
-            const { width: pageWidth = 1000 } = PageUtils.getPageWidth()
+            const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
             for (const idx in jsonDataList) {
               const { height, width } = jsonDataList[idx]
               const pageIndex = +idx + targetIndex
@@ -493,6 +492,7 @@ class AssetUtils {
               })
             }
           }
+          store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
         })
       })
