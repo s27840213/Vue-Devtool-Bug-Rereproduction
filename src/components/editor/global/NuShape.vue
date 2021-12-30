@@ -350,7 +350,7 @@ export default Vue.extend({
             this.config.styles.initHeight = shape.vSize[1]
           }
           // Fix some bug that the color is empty array.
-          if (!(this.config as IShape).color.length) {
+          if (!(this.config as IShape).color?.length) {
             console.log(this.config.designId)
             const shape = await shapeUtils.fetchSvg(this.config) as IShape
             console.warn(shape)
