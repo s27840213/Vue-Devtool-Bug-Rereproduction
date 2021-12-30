@@ -1292,6 +1292,7 @@ class UploadUtils {
         UserId: ${this.userId}
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
       const pagesJSON = json || store.getters.getPages
+      this.resetControlStates(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
@@ -1320,6 +1321,26 @@ class UploadUtils {
       }
       xhr.send(data)
     })
+  }
+
+  resetControlStates(json: IPage[]) {
+    for (const page of json) {
+      for (const layer of page.layers) {
+        switch (layer.type) {
+          case 'text':
+            layer.editing = false
+            break
+          case 'tmp':
+          case 'group':
+            for (const subLayer of (layer as IGroup).layers) {
+              if (subLayer.type === 'text') {
+                subLayer.editing = false
+              }
+            }
+            break
+        }
+      }
+    }
   }
 }
 
