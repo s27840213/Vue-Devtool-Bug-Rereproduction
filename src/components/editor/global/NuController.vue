@@ -234,7 +234,7 @@ export default Vue.extend({
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -390,7 +390,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
@@ -633,10 +633,10 @@ export default Vue.extend({
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
-              this.setLastSelectedPageIndex(this.pageIndex)
+              this.setMiddlemostPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
             }
-            if (this.pageIndex === this.lastSelectedPageIndex) {
+            if (this.pageIndex === this.middlemostPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
             }
             if (!this.config.locked) {
@@ -681,16 +681,16 @@ export default Vue.extend({
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
-              this.setLastSelectedPageIndex(this.pageIndex)
+              this.setMiddlemostPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
             }
             // this if statement is used to prevent select the layer in another page
-            if (this.pageIndex === this.lastSelectedPageIndex) {
+            if (this.pageIndex === this.middlemostPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
             }
           } else {
             targetIndex = this.config.styles.zindex - 1
-            this.setLastSelectedPageIndex(this.pageIndex)
+            this.setMiddlemostPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
             GroupUtils.select(this.pageIndex, [targetIndex])
           }

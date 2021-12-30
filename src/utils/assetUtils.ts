@@ -36,7 +36,7 @@ class AssetUtils {
   get pageSize() { return store.getters.getPageSize(PageUtils.currFocusPageIndex) }
   get getLayer() { return store.getters.getLayer }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
-  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
@@ -125,7 +125,7 @@ class AssetUtils {
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex || this.lastSelectedPageIndex
+    const targetPageIndex = pageIndex || PageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(GeneralUtils.deepCopy(json))
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
@@ -137,7 +137,7 @@ class AssetUtils {
         props: { width, height }
       })
     }
-    store.commit('SET_lastSelectedPageIndex', targetPageIndex)
+    store.commit('SET_middlemostPageIndex', targetPageIndex)
     store.commit('SET_currActivePageIndex', targetPageIndex)
     stepsUtils.record()
   }
@@ -146,7 +146,7 @@ class AssetUtils {
     console.log(json)
     console.log(attrs)
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = 0.55
@@ -180,7 +180,7 @@ class AssetUtils {
 
   async addLine(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targePageIndex)
@@ -218,7 +218,7 @@ class AssetUtils {
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = 0.55
@@ -259,7 +259,7 @@ class AssetUtils {
 
   addFrame(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = 0.6
     const width = json.width * resizeRatio
@@ -286,7 +286,7 @@ class AssetUtils {
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
     const { pageIndex, styles = {} } = attrs
-    const targetPageIndex = pageIndex || this.lastSelectedPageIndex
+    const targetPageIndex = pageIndex || this.middlemostPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
     const page = store.getters.getPage(targetPageIndex)
@@ -352,7 +352,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     const config = {
       ...json,
       styles: {
@@ -372,7 +372,7 @@ class AssetUtils {
   }
 
   addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number) {
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
+    const targePageIndex = pageIndex || this.middlemostPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
         const fieldMap = {
@@ -402,7 +402,9 @@ class AssetUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
-    const allLayers = this.getLayers(this.lastSelectedPageIndex)
+    const targePageIndex = pageIndex || PageUtils.currFocusPageIndex
+
+    const allLayers = this.getLayers(targePageIndex)
     const type = ImageUtils.getSrcType(url)
     const assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
 
@@ -416,8 +418,6 @@ class AssetUtils {
     // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
     const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
     const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
-
-    const targePageIndex = pageIndex || this.lastSelectedPageIndex
 
     const config = {
       ...(isPreview && { previewSrc: url }),
@@ -460,8 +460,8 @@ class AssetUtils {
       })
       .then(jsonDataList => {
         // 單頁: 取代, 多頁: 空白取代/加入後面
-        const lastSelectedPage: IPage = this.getPage(this.lastSelectedPageIndex)
-        let targetIndex = this.lastSelectedPageIndex
+        const lastSelectedPage: IPage = this.getPage(this.middlemostPageIndex)
+        let targetIndex = this.middlemostPageIndex
         let replace = true
         if (!childId && lastSelectedPage && lastSelectedPage.layers.length) {
           // 多頁且當前頁面非空白 => 加入在最後頁面

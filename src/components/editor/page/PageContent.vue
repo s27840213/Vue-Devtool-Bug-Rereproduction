@@ -73,7 +73,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
@@ -110,7 +110,6 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       groupUtils.deselect()
-      this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
@@ -119,7 +118,6 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
-      this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       popupUtils.openPopup('page', { event })
     },

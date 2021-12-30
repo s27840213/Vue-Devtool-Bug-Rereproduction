@@ -255,7 +255,7 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
@@ -347,7 +347,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
@@ -420,7 +420,6 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       GroupUtils.deselect()
-      this.setLastSelectedPageIndex(this.pageIndex)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
@@ -496,10 +495,8 @@ export default Vue.extend({
     deletePage() {
       GroupUtils.deselect()
       if (this.pages.length - 1 === this.pageIndex) {
-        this.setLastSelectedPageIndex(this.pageIndex - 1)
         this.setCurrActivePageIndex(this.pageIndex - 1)
       } else {
-        this.setLastSelectedPageIndex(this.pageIndex)
         this.setCurrActivePageIndex(this.pageIndex)
       }
       this._deletePage(this.pageIndex)
@@ -600,7 +597,7 @@ export default Vue.extend({
     },
     pageNameFocused() {
       ShortcutUtils.deselect()
-      this.setLastSelectedPageIndex(this.pageIndex)
+      this.setMiddlemostPageIndex(this.pageIndex)
     },
     stepRecord() {
       StepsUtils.record()
@@ -692,21 +689,6 @@ export default Vue.extend({
   transform-origin: 0 0;
 }
 
-/*
-    because overflow: hidden will disable the translateZ props in page-content(layers' order will be incorrect)
-    That's why we need this additional container
- */
-.overflow-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.page-content {
-  position: absolute;
-  box-sizing: border-box;
-  background-repeat: no-repeat;
-  transform-style: preserve-3d;
-}
 .page-highlighter {
   position: absolute;
   top: 0px;
@@ -723,6 +705,9 @@ export default Vue.extend({
   // this css property will prevent the page-control div from blocking all the event of page-content
   transform-style: preserve-3d;
   pointer-events: none;
+  :focus {
+    outline: none;
+  }
 }
 
 .page-resizer {
