@@ -1283,6 +1283,10 @@ class UploadUtils {
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
       // console.log(this.loginOutput)
+      logUtils.setLog(`Export Design:
+        ExportId: ${exportId},
+        UserId: ${this.userId}
+        Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
       const pagesJSON = json || store.getters.getPages
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
