@@ -245,7 +245,6 @@ class Controller {
       if (type === 'text') {
         const mainColor = this.getLayerMainColor(paragraphs)
         Object.assign(textEffect, {
-          color: mainColor,
           strokeColor: mainColor
         })
         store.commit('UPDATE_specLayerData', {
