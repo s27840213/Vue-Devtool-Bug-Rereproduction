@@ -492,7 +492,7 @@ export default Vue.extend({
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing / 1000, noText: false, step: 1 }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, noText: false, step: 1 }, MappingUtils.mappingMinMax('letterSpacing')))
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.btn-ls'
