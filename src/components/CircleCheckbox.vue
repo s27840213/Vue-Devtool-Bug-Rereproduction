@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="circle-checkbox")
-    input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm")
+    input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm" :disabled="disabled")
     label(:for="value")
       svg(fill="none", viewBox="0 0 12 12")
         circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
@@ -13,7 +13,11 @@ import Vue from 'vue'
 export default Vue.extend({
   props: {
     value: [Number, String],
-    checkedValues: Array
+    checkedValues: Array,
+    disabled: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -28,7 +32,9 @@ export default Vue.extend({
       set(value: Array<any> | boolean): void {
         if (!this.checkedValues) {
         } else {
-          this.$emit('update', value)
+          if (!this.disabled) {
+            this.$emit('update', value)
+          }
         }
       }
     }

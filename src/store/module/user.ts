@@ -249,7 +249,7 @@ const mutations: MutationTree<IUserModule> = {
     })
     state.images[targetIndex].progress = progress
   },
-  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls }) {
+  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex }) {
     const { images, teamId, userId } = state
     const isAdmin = state.role === 0
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
@@ -279,6 +279,8 @@ const mutations: MutationTree<IUserModule> = {
       })
     } else {
       images[targetIndex].urls = targetUrls
+      images[targetIndex].id = isAdmin ? assetId : undefined
+      images[targetIndex].assetIndex = assetIndex
     }
   },
   [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
