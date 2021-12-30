@@ -86,6 +86,7 @@ import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store
 import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   components: {
@@ -227,22 +228,20 @@ export default Vue.extend({
 
       switch (currLayer.type) {
         case 'text':
-          if ((currLayer as IText).contentEditable) {
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-          } else {
-            TextPropUtils.applyPropsToAll('span', { color }, layerIndex)
-            tiptapUtils.updateHtml()
-          }
+          tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
           break
         case 'tmp':
         case 'group':
           if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
             TextPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
-            tiptapUtils.updateHtml()
+            if (subLayerIdx !== -1) {
+              tiptapUtils.updateHtml()
+            }
           } else {
             tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
           }
       }
+      textEffectUtils.refreshColor()
       StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
@@ -262,6 +261,7 @@ export default Vue.extend({
         StepsUtils.record()
       })
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
+      textEffectUtils.refreshSize()
     },
     handleSliderModal(modalName = '') {
       this.openSliderBar = modalName
@@ -347,7 +347,16 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(pageIndex, layerIndex, props)
           break
         case 'group':
-          LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+          if (subLayerIdx !== -1) {
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+          } else {
+            const layers = currLayer.layers as ILayer[]
+            layers.forEach((layer, index) => {
+              if (layer.type === 'text') {
+                LayerUtils.updateSubLayerProps(pageIndex, layerIndex, index, props)
+              }
+            })
+          }
       }
     },
     onParaPropsClick(iconName: string) {
@@ -377,6 +386,7 @@ export default Vue.extend({
         if (new Date().getTime() - startTime > 500) {
           try {
             TextPropUtils.fontSizeStepping(step)
+            textEffectUtils.refreshSize()
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -389,6 +399,7 @@ export default Vue.extend({
         window.removeEventListener('mouseup', onmouseup)
         if (new Date().getTime() - startTime < 500) {
           TextPropUtils.fontSizeStepping(step)
+          textEffectUtils.refreshSize()
         }
         clearInterval(interval)
         tiptapUtils.agent(editor => {
@@ -427,6 +438,7 @@ export default Vue.extend({
             StepsUtils.record()
           })
           TextPropUtils.updateTextPropsState({ fontSize: value })
+          textEffectUtils.refreshSize()
         })
       }
     },
