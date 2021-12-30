@@ -60,6 +60,8 @@ export default Vue.extend({
     }
 
     nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+
+    console.log(this.src)
   },
   data() {
     return {

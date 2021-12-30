@@ -620,6 +620,7 @@ const mutations: MutationTree<IEditorState> = {
           userId,
           assetId: uploadUtils.isAdmin ? assetId : assetIndex
         })
+
         uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
       })
     })
