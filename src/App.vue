@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(id="app")
+  div(id="app" :style="appStyles()")
     //- div(class="coordinate" ref="coordinate")
     //-   div(class="coordinate__val coordinate__width")
     //-     span {{coordinateWidth}}px
@@ -118,6 +118,18 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
     }),
+    appStyles() {
+      if (this.$route.name === 'Preview') {
+        return {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          '-webkit-font-smoothing': 'antialiased',
+          transformStyle: 'preserve-3d'
+        }
+      }
+    },
     coordinateHandler(e: MouseEvent) {
       this.coordinateWidth = e.clientX
       this.coordinateHeight = e.clientY
