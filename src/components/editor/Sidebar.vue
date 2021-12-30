@@ -53,7 +53,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
       isLogin: 'user/isLogin'
@@ -89,7 +89,7 @@ export default Vue.extend({
       }
       if (this.isShowPagePreview) {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(this.lastSelectedPageIndex)
+        pageUtils.jumpIntoPage(this.middlemostPageIndex)
       }
     },
     goToPage(pageName: string) {

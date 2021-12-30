@@ -62,7 +62,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
+      currActivePageIndex: 'getCurrActivePageIndex',
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
@@ -166,7 +167,7 @@ export default Vue.extend({
         src,
         photoAspectRatio,
         {
-          pageIndex: this.lastSelectedPageIndex,
+          pageIndex: pageUtils.currFocusPageIndex,
           ...(this.inFilePanel && !photo.id && { assetIndex: photo.assetIndex }),
           ...(this.inFilePanel && photo.id && { assetId: photo.id }),
           // The following props is used for preview image during polling process

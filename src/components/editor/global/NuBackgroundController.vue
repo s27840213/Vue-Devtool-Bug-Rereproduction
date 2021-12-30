@@ -83,7 +83,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex'
+      setMiddlemostPageIndex: 'SET_middlemostPageIndex'
     }),
     styles() {
       // preserve in case the background image is needed to be rotatable in the future
@@ -148,7 +148,7 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.moving)
 
       this.setCursorStyle('move')
-      this.setLastSelectedPageIndex(this.pageIndex)
+      this.setMiddlemostPageIndex(this.pageIndex)
     },
     moving(event: MouseEvent) {
       this.setCursorStyle('move')

@@ -58,7 +58,7 @@ class GroupUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
-  get lastSelectedPageIndex() { return store.getters.getLastSelectedPageIndex }
+  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
@@ -234,7 +234,7 @@ class GroupUtils {
 
   selectAll() {
     this.deselect()
-    this.select(store.getters.getLastSelectedPageIndex, [...Array(store.getters.getLayersNum(store.getters.getLastSelectedPageIndex)).keys()])
+    this.select(store.getters.getMiddlemostPageIndex, [...Array(store.getters.getLayersNum(store.getters.getMiddlemostPageIndex)).keys()])
   }
 
   deselect() {

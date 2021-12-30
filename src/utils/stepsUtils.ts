@@ -81,12 +81,12 @@ class StepsUtils {
   }
 
   record() {
-    const lastSelectedPageIndex = store.getters.getLastSelectedPageIndex
+    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-    const modifiedPage = pageUtils.getPage(lastSelectedPageIndex) as IPage
+    const modifiedPage = pageUtils.getPage(middlemostPageIndex) as IPage
     if (modifiedPage.designId.length !== 0) {
       store.commit('SET_pageIsModified', {
-        pageIndex: lastSelectedPageIndex,
+        pageIndex: middlemostPageIndex,
         modified: modifiedPage.modified !== undefined
       })
     }
@@ -96,15 +96,15 @@ class StepsUtils {
 
     // There's not any steps before, create the initial step first
     if (this.currStep < 0) {
-      this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
-      this.pageSteps.push(lastSelectedPageIndex)
+      this.steps.push({ pages, middlemostPageIndex, lastSelectedLayerIndex, currSelectedInfo })
+      this.pageSteps.push(middlemostPageIndex)
       this.currStep++
     } else {
       this.steps.length = this.currStep + 1
       if (this.steps.length === this.MAX_STORAGE_COUNT) {
         this.steps.shift()
       }
-      this.steps.push({ pages, lastSelectedPageIndex, lastSelectedLayerIndex, currSelectedInfo })
+      this.steps.push({ pages, middlemostPageIndex, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {
@@ -123,7 +123,7 @@ class StepsUtils {
     this.currStep--
     const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
     store.commit('SET_pages', pages)
-    store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
+    store.commit('SET_middlemostPageIndex', this.steps[this.currStep].middlemostPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
     let layers
@@ -178,7 +178,7 @@ class StepsUtils {
     this.currStep++
     const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
     store.commit('SET_pages', pages)
-    store.commit('SET_lastSelectedPageIndex', this.steps[this.currStep].lastSelectedPageIndex)
+    store.commit('SET_middlemostPageIndex', this.steps[this.currStep].middlemostPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
     let layers

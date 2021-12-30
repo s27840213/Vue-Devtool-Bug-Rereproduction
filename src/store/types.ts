@@ -8,7 +8,7 @@ import { IUserModule } from './module/user'
 import { Itheme } from '@/interfaces/theme'
 
 /**
- * @param {number} lastSelectedPageIndex -> 進行各項操作時，主要使用到的pageIndex
+ * @param {number} middlemostPageIndex -> 進行各項操作時，主要使用到的pageIndex
  * @param {number} currActivePageIndex
  *    -> 若使用者點擊 Page 會使該 Page 變為 active 狀態，此刻當 Page 的 focus 因為點 Sidebar 或 Function Panel 的 button 而跑掉時，以此判斷說要重新 focus 的 Page 為何
  *    -> 若為 -1 ， focus 最接近中線的 Page
@@ -35,7 +35,7 @@ export interface IEditorState {
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,
-  lastSelectedPageIndex: number,
+  middlemostPageIndex: number,
   currActivePageIndex: number,
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,

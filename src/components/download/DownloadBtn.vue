@@ -10,7 +10,7 @@
       span(v-if="!inprogress") {{$t('NN0010')}}
     popup-download(v-if="show"
       class="download-btn__modal"
-      :page-index="lastSelectedPageIndex"
+      :page-index="middlemostPageIndex"
       @close="handleShowPopup"
       @inprogress="handleInprogress")
 </template>
@@ -33,7 +33,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       isLogin: 'user/isLogin'
     })
   },

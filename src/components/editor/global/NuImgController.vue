@@ -95,7 +95,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     styles() {
@@ -199,7 +199,7 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.moving)
 
       this.setCursorStyle('move')
-      this.setLastSelectedPageIndex(this.pageIndex)
+      this.setMiddlemostPageIndex(this.pageIndex)
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent) {

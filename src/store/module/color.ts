@@ -76,11 +76,11 @@ const getters: GetterTree<IColorState, IEditorState> = {
     return state.brandColors
   },
   getDocumentColors(state, getters, rootState): Array<string> {
-    const pageColors = rootState.pages[rootState.lastSelectedPageIndex].documentColors
+    const pageColors = rootState.pages[rootState.middlemostPageIndex].documentColors
     if (!pageColors.length) {
       return state.documentColors
     }
-    return rootState.pages[rootState.lastSelectedPageIndex].documentColors
+    return rootState.pages[rootState.middlemostPageIndex].documentColors
   }
 }
 

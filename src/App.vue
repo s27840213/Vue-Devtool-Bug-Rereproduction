@@ -101,7 +101,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      getLastSelectedPageIndex: 'getLastSelectedPageIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
       isModalOpen: 'modal/getModalOpen'
     }),

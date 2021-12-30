@@ -746,7 +746,7 @@ class UploadUtils {
     /**
      * @Todo check the index valid or not
      */
-    // const pageIndex = store.getters.getLastSelectedPageIndex
+    // const pageIndex = store.getters.getMiddlemostPageIndex
     const pageIndex = pageUtils.currFocusPageIndex
     const page = store.getters.getPage(pageIndex)
     const parentId = page.designId ?? ''
@@ -800,7 +800,7 @@ class UploadUtils {
   }
 
   updateTemplate() {
-    const pageIndex = store.getters.getLastSelectedPageIndex
+    const pageIndex = store.getters.getMiddlemostPageIndex
     const designId = store.getters.getPage(pageIndex).designId
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage

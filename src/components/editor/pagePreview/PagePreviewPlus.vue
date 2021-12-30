@@ -38,7 +38,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndexgetMiddlemostPageIndex',
       getPage: 'getPage',
       getPagesPerRow: 'page/getPagesPerRow',
       isDragged: 'page/getIsDragged'
@@ -48,7 +48,7 @@ export default Vue.extend({
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
-      _setLastSelectedPageIndex: 'SET_lastSelectedPageIndex',
+      _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     styles() {
@@ -112,7 +112,7 @@ export default Vue.extend({
       this.pageMoveBack($event)
 
       // move selected to index: copy and delete origin one
-      const indexFrom = this.lastSelectedPageIndex
+      const indexFrom = this.middlemostPageIndex
       const indexTo = this.index
       if (indexFrom === indexTo || indexFrom + 1 === indexTo) {
         return
@@ -126,7 +126,7 @@ export default Vue.extend({
         pos: newPos
       })
       GroupUtils.deselect()
-      this._setLastSelectedPageIndex(indexTo)
+      this._setmiddlemostPageIndex(indexTo)
       this._setCurrActivePageIndex(indexTo)
       StepsUtils.record()
     },
@@ -135,7 +135,7 @@ export default Vue.extend({
         newPage: pageUtils.newPage({}),
         pos: position
       })
-      this._setLastSelectedPageIndex(position)
+      this._setmiddlemostPageIndex(position)
       StepsUtils.record()
     }
   }

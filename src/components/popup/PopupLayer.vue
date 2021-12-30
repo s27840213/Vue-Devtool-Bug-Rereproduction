@@ -125,7 +125,7 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       isLogin: 'user/isLogin',
       token: 'user/getToken',
       _layerNum: 'getLayersNum',
@@ -159,7 +159,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
     },
     hasPageDesignId(): boolean {
-      return this.getPage(this.lastSelectedPageIndex).designId !== ''
+      return this.getPage(this.middlemostPageIndex).designId !== ''
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false

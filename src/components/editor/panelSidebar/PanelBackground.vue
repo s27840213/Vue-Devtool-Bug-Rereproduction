@@ -93,7 +93,7 @@ export default Vue.extend({
     ),
     ...mapGetters({
       getPage: 'getPage',
-      lastSelectedPageIndex: 'getLastSelectedPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       defaultBgColor: 'color/getDefaultBgColors',
       getBackgroundColor: 'getBackgroundColor'
     }),
@@ -149,11 +149,11 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     currentPageColor(): string {
-      const { backgroundColor } = this.getPage(this.lastSelectedPageIndex) || {}
+      const { backgroundColor } = this.getPage(this.middlemostPageIndex) || {}
       return backgroundColor || ''
     },
     currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.getPage(this.lastSelectedPageIndex) || {}
+      const { backgroundImage } = this.getPage(this.middlemostPageIndex) || {}
       return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
@@ -213,7 +213,7 @@ export default Vue.extend({
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
       this._setBgColor({
-        pageIndex: this.lastSelectedPageIndex,
+        pageIndex: this.middlemostPageIndex,
         color: color
       })
       stepsUtils.record()
