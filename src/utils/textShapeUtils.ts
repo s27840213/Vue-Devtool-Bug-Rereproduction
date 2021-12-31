@@ -3,6 +3,7 @@ import TextUtils from '@/utils/textUtils'
 import { IText } from '@/interfaces/layer'
 import store from '@/store'
 import generalUtils from './generalUtils'
+import layerUtils from './layerUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -65,23 +66,42 @@ class Controller {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-    for (const idx in layers) {
-      const { type } = layers[idx] as IText
-      if (type === 'text') {
-        const { styles, props } = this.getTextShapeStyles(
-          layers[idx],
-          shape,
-          attrs
-        )
-        console.log(styles.writingMode)
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles,
-          props
-        })
+    const subLayerIndex = layerUtils.subLayerIdx
+
+    if (subLayerIndex === -1 || targetLayer.type === 'text') {
+      for (const idx in layers) {
+        const { type } = layers[idx] as IText
+        if (type === 'text') {
+          const { styles, props } = this.getTextShapeStyles(
+            layers[idx],
+            shape,
+            attrs
+          )
+          store.commit('UPDATE_specLayerData', {
+            pageIndex,
+            layerIndex,
+            subLayerIndex: +idx,
+            styles,
+            props
+          })
+        }
       }
+      // if (targetLayer.type !== 'text') {
+      //   TextUtils.updateGroupLayerSize(pageIndex, layerIndex)
+      // }
+    } else {
+      const { styles, props } = this.getTextShapeStyles(
+        layers[subLayerIndex],
+        shape,
+        attrs
+      )
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex,
+        styles,
+        props
+      })
     }
   }
 

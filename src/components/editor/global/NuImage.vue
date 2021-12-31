@@ -25,6 +25,8 @@ import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
+import store from '@/store'
+import { IAssetPhoto } from '@/interfaces/api'
 
 export default Vue.extend({
   props: {
@@ -35,8 +37,16 @@ export default Vue.extend({
     inheritStyle: Object,
     isBgImgControl: Boolean
   },
-  created() {
-    const { type } = this.config.srcObj
+  async created() {
+    const { type } = this.config
+    const { assetId } = this.config.srcObj
+    if (type === 'private') {
+      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+      const img = images.find(img => img.assetIndex === assetId)
+      if (!img) {
+        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      }
+    }
     const nextImg = new Image()
     nextImg.onerror = () => {
       if ((this.config as IImage).srcObj.type === 'pexels') {

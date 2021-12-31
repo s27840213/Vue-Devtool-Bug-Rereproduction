@@ -136,7 +136,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
 import { ISelection } from '@/interfaces/text'
 import MathUtils from '@/utils/mathUtils'
@@ -206,7 +206,7 @@ export default Vue.extend({
       isSnapping: false,
       clipedImgBuff: {} as {
         index: number,
-        styles: { imgX: number, imgY: number, imgWidth: number, imgHeight: number },
+        styles: Partial<IImageStyle>,
         srcObj: { type: string, assetId: string | number, userId: string }
       },
       subControlerIndexs: [],
@@ -501,15 +501,20 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      // width: isVertical ? '100%' : `${this.getLayerWidth / this.getLayerScale}px`,
-      // height: isVertical ? '' : 'auto',
-      return {
+      const textstyles = {
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
+      return !this.isCurveText ? textstyles
+        : Object.assign(this.textScaleStyle, {
+          width: 'auto',
+          height: 'auto',
+          position: 'absolute',
+          top: 0,
+          left: 0
+        })
     },
     groupControllerStyle() {
       return {
@@ -1370,27 +1375,10 @@ export default Vue.extend({
         this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', files, true)
       }
-      // const dt = e.dataTransfer
-      // if (dt && dt.files.length !== 0) {
-      //   const files = dt.files
-      //   this.setCurrSidebarPanel(SidebarPanelType.file)
-      //   uploadUtils.uploadAsset('image', files, true)
-      // }
-      // switch (this.getLayerType) {
-      //   case 'image': {
-      //     const config = this.config as IImage
-      //     MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-      //     break
-      //   }
-      //   case 'frame':
-      //     return
-      //   default:
-      //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      // }
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
+      !this.isCurveText && this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -1408,7 +1396,6 @@ export default Vue.extend({
     },
     textSizeRefresh(text: IText, composing: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
-
       const getSize = () => isVertical ? this.getLayerHeight : this.getLayerWidth
 
       let widthLimit = this.getLayerRotate ? getSize() : this.config.widthLimit
@@ -1464,9 +1451,13 @@ export default Vue.extend({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
-      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
-      ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-      ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, layerX, layerY)
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        width: textHW.width,
+        height: textHW.height,
+        x: layerX,
+        y: layerY
+      })
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return
@@ -1552,7 +1543,9 @@ export default Vue.extend({
             imgX: clips[clipIndex].styles.imgX,
             imgY: clips[clipIndex].styles.imgY,
             imgWidth: clips[clipIndex].styles.imgWidth,
-            imgHeight: clips[clipIndex].styles.imgHeight
+            imgHeight: clips[clipIndex].styles.imgHeight,
+            horizontalFlip: clips[clipIndex].styles.horizontalFlip,
+            verticalFlip: clips[clipIndex].styles.verticalFlip
           }
         }
         Object.assign(clips[clipIndex].srcObj, currLayer.srcObj)
@@ -1571,6 +1564,11 @@ export default Vue.extend({
           imgX,
           imgY
         })
+        console.log(this.clipedImgBuff.styles.horizontalFlip)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          horizontalFlip: currLayer.styles.horizontalFlip,
+          verticalFlip: currLayer.styles.verticalFlip
+        })
       }
     },
     onFrameMouseLeave(clipIndex: number) {
@@ -1582,6 +1580,10 @@ export default Vue.extend({
         Object.assign(clips[clipIndex].styles, this.clipedImgBuff.styles)
 
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          horizontalFlip: false,
+          verticalFlip: false
+        })
       }
     },
     onFrameMouseUp(clipIndex: number) {

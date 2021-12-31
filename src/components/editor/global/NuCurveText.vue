@@ -15,7 +15,10 @@ import FontFaceObserver from 'fontfaceobserver'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import { IGroup } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
+import { calcTmpProps } from '@/utils/groupUtils'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   props: {
@@ -36,7 +39,8 @@ export default Vue.extend({
         top: y,
         bottom: y,
         left: x + (width / 2)
-      }
+      },
+      asSubLayerSizeBuff: -1
     }
   },
   async created () {
@@ -50,6 +54,13 @@ export default Vue.extend({
       })
       .catch(() => { console.log('font loading timeout') })
     this.handleCurveSpan(this.spans, true)
+
+    const { pageIndex, layerIndex } = this
+    typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+  },
+  destroyed() {
+    const { pageIndex, layerIndex } = this
+    typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
   },
   computed: {
     ...mapGetters({
@@ -61,6 +72,9 @@ export default Vue.extend({
     },
     dragging(): boolean {
       return this.config.dragging
+    },
+    editing(): boolean {
+      return this.config.editing
     },
     bend(): number {
       const { textShape } = this.config.styles
@@ -81,7 +95,7 @@ export default Vue.extend({
       return new Set(spans.map((span: any) => span.styles.font))
     },
     pStyle(): any {
-      const { config } = this
+      const { config, area } = this
       return {
         margin: 0,
         height: `${config.styles.height / config.styles.scale}px`,
@@ -131,8 +145,30 @@ export default Vue.extend({
       this.handleCurveSpan(this.spans)
     },
     spans(newSpans) {
+      console.log('123')
+      const heightOri = this.config.styles.height
       this.handleCurveSpan(newSpans)
+        .then(() => {
+          // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
+          // if (this.editing && height > this.area.height) {
+          //   LayerUtils.updatecCurrTypeLayerStyles({ height })
+          // }
+          // if (newSpans.length === 1) {
+          //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
+          // }
+          typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
+        })
     }
+    // editing(val) {
+    //   const { height } = textUtils.getTextHW(this.config, this.config.widthLimit)
+    //   if (val && height > this.config.styles.height) {
+    //     LayerUtils.updatecCurrTypeLayerStyles({ height })
+    //     return
+    //   }
+    //   if (!val && this.config.styles.height > this.area.height) {
+    //     LayerUtils.updatecCurrTypeLayerStyles({ height: this.area.height }, this.layerIndex)
+    //   }
+    // }
   },
   methods: {
     calcArea() {
@@ -168,7 +204,7 @@ export default Vue.extend({
     rePosition() {
       const { top, bottom, left, width: areaWidth, height: areaHeight } = this.area
       const y = this.bend >= 0 ? top : bottom - areaHeight
-      const x = left - (areaWidth / 2)
+      const x = Math.max(left - (areaWidth / 2), 0)
       this.handleCurveTextUpdate({
         styles: { y, x }
       })
@@ -184,9 +220,9 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    handleCurveSpan (spans: any[], firstInit = false) {
+    async handleCurveSpan (spans: any[], firstInit = false) {
       const { bend } = this
-      if (spans.length) {
+      if (spans.length > 1) {
         this.$nextTick(() => {
           if (!this.$refs.curveText) return
           const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
@@ -227,6 +263,29 @@ export default Vue.extend({
       const { y } = config.styles
       this.area.bottom = bend >= 0 ? y + this.minHeight : y + this.area.height
       this.area.top = bend >= 0 ? y : this.area.bottom - this.minHeight
+    },
+    asSubLayerSizeRefresh(height: number, heightOri: number) {
+      if (this.asSubLayerSizeBuff === -1) {
+        this.asSubLayerSizeBuff = height
+      } else if (this.asSubLayerSizeBuff === height) {
+        return
+      }
+      const group = LayerUtils.getCurrLayer as IGroup
+      const lowLine = this.config.styles.y + heightOri
+      const targetSubLayers = [] as Array<[number, number]>
+      group.layers
+        .forEach((l, idx) => {
+          if (l.styles.y >= lowLine && idx !== this.subLayerIndex) {
+            targetSubLayers.push([idx, l.styles.y])
+          }
+        })
+      targetSubLayers
+        .forEach(data => {
+          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
+            y: (height - heightOri) + data[1]
+          })
+        })
+      textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
     }
   }
 })

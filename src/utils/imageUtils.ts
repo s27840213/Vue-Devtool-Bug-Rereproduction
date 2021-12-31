@@ -48,15 +48,6 @@ class ImageUtils {
           for (const [k, v] of Object.entries(img.urls)) {
             if (k === size) return v
           }
-        } else if (!retry) {
-          store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-            .then(() => {
-              return this.getSrc(config, size, true)
-            })
-            .catch((error) => {
-              console.log(error + ', assetId: ' + assetId)
-              return ''
-            })
         }
         return ''
       }

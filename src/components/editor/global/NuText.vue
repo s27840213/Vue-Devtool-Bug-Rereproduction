@@ -70,7 +70,8 @@ export default Vue.extend({
     }
 
     if (!this.isDestroyed) {
-      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      const textHW = this.autoResize()
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
@@ -99,13 +100,6 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getTextInfo: 'getTextInfo'
     }),
-    updateTextSize(): any {
-      const config = this.config as IText
-      return {
-        paragraphs: config.paragraphs,
-        writingMode: config.styles.writingMode
-      }
-    },
     getLayerScale(): number {
       return this.config.styles.scale
     },
@@ -115,21 +109,6 @@ export default Vue.extend({
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    }
-  },
-  watch: {
-    updateTextSize: {
-      handler: function() {
-        /**
-         * If below conditions is pass, means the text-properties changes,
-         * the layer width/height needs to refresh
-         */
-        // if (this.config.isTyping) return
-        // this.$nextTick(() => {
-        //   TextUtils.updateLayerSize(this.config, this.pageIndex, this.layerIndex, this.subLayerIndex)
-        // })
-      },
-      deep: true
     }
   },
   methods: {
@@ -164,6 +143,34 @@ export default Vue.extend({
           return 'url("' + spanStyles.fontUrl + '")'
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+    },
+    autoResize(): {width: number, height: number} {
+      if (this.$route.name !== 'Preview' || this.config.widthLimit === -1) return TextUtils.getTextHW(this.config, this.config.widthLimit)
+      const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+      let direction = 0
+      let shouldContinue = true
+      let widthLimit = this.config.widthLimit
+      let autoSize = TextUtils.getTextHW(this.config, widthLimit)
+      const originDimension = this.config.styles[dimension]
+      while (shouldContinue) {
+        const autoDimension = autoSize[dimension]
+        if (autoDimension - originDimension > 5) {
+          if (direction < 0) break
+          widthLimit += 1
+          direction = 1
+          autoSize = TextUtils.getTextHW(this.config, widthLimit)
+          continue
+        }
+        if (originDimension - autoDimension > 5) {
+          if (direction > 0) break
+          widthLimit -= 1
+          direction = -1
+          autoSize = TextUtils.getTextHW(this.config, widthLimit)
+          continue
+        }
+        shouldContinue = false
+      }
+      return autoSize
     }
   }
 })

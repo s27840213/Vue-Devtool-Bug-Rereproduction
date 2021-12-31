@@ -655,19 +655,29 @@ class TextUtils {
     return textHW
   }
 
-  updateLayerSize(config: IText, pageIndex: number, layerIndex = LayerUtils.layerIndex,
-    subLayerIndex: number | undefined = undefined) {
-    const textHW = this.getTextHW(config, config.widthLimit)
-    if (typeof subLayerIndex === 'undefined') {
-      ControlUtils.updateLayerSize(pageIndex, layerIndex, textHW.width, textHW.height, config.styles.scale)
-    } else {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+    const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (subLayerIndex !== -1) {
+      const config = currLayer.layers[subLayerIndex] as IText
+      const textHW = this.getTextHW(config, config.widthLimit)
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-      const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
-      let { width, height } = calcTmpProps(currLayer.layers)
-      width *= currLayer.styles.scale
-      height *= currLayer.styles.scale
-      LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
     }
+    let { width, height } = calcTmpProps(currLayer.layers)
+    width *= currLayer.styles.scale
+    height *= currLayer.styles.scale
+    let minX = Number.MAX_SAFE_INTEGER
+    currLayer.layers
+      .forEach(l => {
+        minX = Math.min(minX, l.styles.x)
+      })
+    if (minX > 0) {
+      for (const [idx, layer] of Object.entries(currLayer.layers)) {
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+          x: layer.styles.x - minX
+        })
+      }
+    }
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {

@@ -128,6 +128,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -230,7 +231,6 @@ export default Vue.extend({
       this.openModal = !this.openModal
     },
     handleColorModal() {
-      // this.openColorPicker = !this.openColorPicker
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.textEffect.color)
