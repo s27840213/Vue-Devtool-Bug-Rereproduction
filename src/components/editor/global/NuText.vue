@@ -155,14 +155,16 @@ export default Vue.extend({
       while (shouldContinue) {
         const autoDimension = autoSize[dimension]
         if (autoDimension - originDimension > 5) {
-          if (direction < 0 || direction >= 20) break
+          if (direction < 0) break
+          if (direction >= 20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
           widthLimit += 1
           direction += 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
         }
         if (originDimension - autoDimension > 5) {
-          if (direction > 0 || direction <= -20) break
+          if (direction > 0) break
+          if (direction <= -20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
           widthLimit -= 1
           direction -= 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
