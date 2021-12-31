@@ -70,8 +70,8 @@ export default Vue.extend({
     }
 
     if (!this.isDestroyed) {
-      const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      // const textHW = this.autoResize()
+      // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
+      const textHW = this.autoResize()
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
@@ -155,16 +155,16 @@ export default Vue.extend({
       while (shouldContinue) {
         const autoDimension = autoSize[dimension]
         if (autoDimension - originDimension > 5) {
-          if (direction < 0) break
+          if (direction < 0 || direction >= 20) break
           widthLimit += 1
-          direction = 1
+          direction += 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
         }
         if (originDimension - autoDimension > 5) {
-          if (direction > 0) break
+          if (direction > 0 || direction <= -20) break
           widthLimit -= 1
-          direction = -1
+          direction -= 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
         }
