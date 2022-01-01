@@ -16,6 +16,8 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
+import store from '@/store'
+import { IAssetPhoto } from '@/interfaces/api'
 
 export default Vue.extend({
   props: {
@@ -23,9 +25,17 @@ export default Vue.extend({
     color: String,
     pageIndex: Number
   },
-  created() {
+  async created() {
     const { srcObj } = this.image.config
     if (!srcObj || !srcObj.type) return
+    const { assetId } = this.image.config.srcObj
+    if (srcObj.type === 'private') {
+      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+      const img = images.find(img => img.assetIndex === assetId)
+      if (!img) {
+        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      }
+    }
     const nextImg = new Image()
     nextImg.onerror = () => {
       if (srcObj.type === 'pexels') {

@@ -446,6 +446,7 @@ class UploadUtils {
       return
     }
     if (!type || !designId || !teamId) {
+      putAssetDesignType = PutAssetDesignType.UPDATE_DB
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
     }
     store.commit('SET_assetId', assetId)
@@ -992,6 +993,7 @@ class UploadUtils {
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
+          this.hasGottenDesign = true
         } else {
           response.json().then(async (json) => {
             switch (type) {
