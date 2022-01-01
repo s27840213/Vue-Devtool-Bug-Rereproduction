@@ -1564,7 +1564,8 @@ export default Vue.extend({
           imgX,
           imgY
         })
-        console.log(this.clipedImgBuff.styles.horizontalFlip)
+        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
+        clipper && clipper.classList.remove('layer-flip')
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
           horizontalFlip: currLayer.styles.horizontalFlip,
           verticalFlip: currLayer.styles.verticalFlip
@@ -1585,6 +1586,10 @@ export default Vue.extend({
           verticalFlip: false
         })
       }
+      setTimeout(() => {
+        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
+        clipper && clipper.classList.add('layer-flip')
+      }, 0)
     },
     onFrameMouseUp(clipIndex: number) {
       const currLayer = LayerUtils.getCurrLayer as IImage

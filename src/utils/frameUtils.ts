@@ -66,7 +66,9 @@ class FrameUtils {
           y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
           width: imgWidth * currLayer.styles.scale,
           height: imgHeight * currLayer.styles.scale,
-          adjust // inherit adjust to the new layer
+          horizontalFlip: currLayer.styles.horizontalFlip,
+          verticalFlip: currLayer.styles.verticalFlip,
+          adjust // inherit adjust to the new layer,
         }
       })])
       Object.assign(clips[idx].styles, {
@@ -77,6 +79,21 @@ class FrameUtils {
         adjust: {}
       })
       LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
+
+      const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
+      clipper && clipper.classList.remove('layer-flip')
+      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
+        horizontalFlip: currLayer.styles.horizontalFlip,
+        verticalFlip: currLayer.styles.verticalFlip
+      })
+      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
+        horizontalFlip: false,
+        verticalFlip: false
+      })
+      setTimeout(() => {
+        const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
+        clipper && clipper.classList.add('layer-flip')
+      }, 0)
     }
     store.commit('SET_popupComponent', { layerIndex: -1 })
   }

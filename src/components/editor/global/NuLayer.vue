@@ -9,7 +9,7 @@
       div(v-if="config.type === 'image' && config.imgControl" :style="backImageStyle()")
         nu-image(style="opacity: 0.45"
                 :config="config" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      nu-clipper(:config="config")
+      nu-clipper(:config="config" :layerIndex="layerIndex")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     //-   span {{layerIndex}}
@@ -53,6 +53,7 @@ export default Vue.extend({
         scaleLayer.classList.add('shape')
       }
     }
+    console.log(this.layerIndex)
   },
   computed: {
     getLayerPos(): { x: number, y: number } {

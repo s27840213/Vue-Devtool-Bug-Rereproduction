@@ -68,10 +68,7 @@ export default Vue.extend({
       const preImg = new Image()
       preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
     }
-
     nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
-
-    console.log(this.src)
   },
   data() {
     return {
