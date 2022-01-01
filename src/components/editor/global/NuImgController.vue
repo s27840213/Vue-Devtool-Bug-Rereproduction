@@ -23,7 +23,6 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   props: {
@@ -215,9 +214,13 @@ export default Vue.extend({
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-
       offsetPos.x = this.getFlipXFactor * (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
       offsetPos.y = this.getFlipYFactor * (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        const primaryScale = LayerUtils.getCurrLayer.styles.scale
+        offsetPos.x /= primaryScale
+        offsetPos.y /= primaryScale
+      }
 
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
@@ -281,6 +284,11 @@ export default Vue.extend({
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        const primaryScale = LayerUtils.getCurrLayer.styles.scale
+        diff.offsetX /= primaryScale
+        diff.offsetY /= primaryScale
+      }
       const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
