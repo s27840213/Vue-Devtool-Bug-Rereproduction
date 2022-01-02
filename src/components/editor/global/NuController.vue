@@ -33,7 +33,7 @@
           @drop.stop="onFrameDrop(index)",
           @click="clickSubController(index)"
           @dblclick="dblSubController(index)")
-      template(v-if="(['group','frame', 'tmp'].includes(getLayerType)) && isActive")
+      template(v-if="(['group', 'frame', 'tmp'].includes(getLayerType)) && isActive")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
