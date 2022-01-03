@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-fonts")
     div(class="panel-fonts__title")
-      span(class="text-blue-1 label-lg") Fonts
+      span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
         :iconWidth="'30px'"
@@ -202,6 +202,12 @@ export default Vue.extend({
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')
+    },
+    capitalize(str: string): string {
+      if (str.length > 0) {
+        return str[0].toUpperCase() + str.substring(1)
+      }
+      return str
     }
   }
 })
