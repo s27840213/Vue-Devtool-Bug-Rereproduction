@@ -204,7 +204,7 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
   if (!MOBILE_ROUTES.includes(to.name ?? '')) {
-    if (window.screen.width <= 1366) {
+    if (window.screen.width <= 1300) {
       next({ name: 'MobileWarning', query: { isMobile: 'width' } })
     }
   }
