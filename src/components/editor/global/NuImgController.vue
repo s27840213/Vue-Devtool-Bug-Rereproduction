@@ -23,7 +23,6 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { Layer } from 'konva/types/Layer'
 
 export default Vue.extend({
   props: {
@@ -215,9 +214,14 @@ export default Vue.extend({
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-
       offsetPos.x = this.getFlipXFactor * (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
       offsetPos.y = this.getFlipYFactor * (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+      const currLayer = LayerUtils.getCurrLayer
+      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+        const primaryScale = LayerUtils.getCurrLayer.styles.scale
+        offsetPos.x /= primaryScale
+        offsetPos.y /= primaryScale
+      }
 
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
@@ -232,7 +236,7 @@ export default Vue.extend({
       })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
-      const angleInRad = this.getLayerRotate * Math.PI / 180
+      const angleInRad = this.angleInRad()
       return {
         x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX,
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
@@ -263,7 +267,7 @@ export default Vue.extend({
       this.center = ControlUtils.getRectCenter(rect)
 
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
-      const angleInRad = this.getLayerRotate * Math.PI / 180
+      const angleInRad = this.angleInRad()
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
@@ -273,20 +277,33 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.scaling, false)
       window.addEventListener('mouseup', this.scaleEnd, false)
     },
+    angleInRad(): number {
+      const currLayer = LayerUtils.getCurrLayer
+      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'frame') {
+        return currLayer.styles.rotate * Math.PI / 180
+      } else {
+        return this.getLayerRotate * Math.PI / 180
+      }
+    },
     scaling(event: MouseEvent) {
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
+      const currLayer = LayerUtils.getCurrLayer
 
-      const angleInRad = this.getLayerRotate * Math.PI / 180
+      const angleInRad = this.angleInRad()
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+        const primaryScale = currLayer.styles.scale
+        diff.offsetX /= primaryScale
+        diff.offsetY /= primaryScale
+      }
       const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
-
       const initWidth = this.initialWH.width
       const initHeight = this.initialWH.height
 
@@ -322,13 +339,17 @@ export default Vue.extend({
           offsetSize.width = this.initImgPos.imgX
         } else {
           /**
-           *  Derivation:
+           *  Derivation (for image layer as example):
            *   -this.initImgPos.imgX - width / 2 + (this.config.styles.width / this.getLayerScale) / 2 = (width - this.config.styles.width / this.getLayerScale) / 2
            *  => -this.initImgPos.imgX = width - this.config.styles.width
            *  => width = this.config.styles.width  - this.initImgPos.imgX
            *  => offsetSize.width + initWidth = this.config.styles.styles.width - this.initImgPos.imgX
            */
-          offsetSize.width = this.config.styles.width - this.initImgPos.imgX - initWidth
+          if (currLayer.type === 'frame') {
+            offsetSize.width = currLayer.styles.width / currLayer.styles.scale - this.initImgPos.imgX - initWidth
+          } else {
+            offsetSize.width = this.config.styles.width - this.initImgPos.imgX - initWidth
+          }
         }
         offsetSize.height = offsetSize.width / ratio
         imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
@@ -345,7 +366,11 @@ export default Vue.extend({
           imgPos.y = 0
           offsetSize.height = this.initImgPos.imgY
         } else {
-          offsetSize.height = this.config.styles.height - this.initImgPos.imgY - initHeight
+          if (currLayer.type === 'frame') {
+            offsetSize.height = currLayer.styles.height / currLayer.styles.scale - this.initImgPos.imgY - initHeight
+          } else {
+            offsetSize.height = this.config.styles.height - this.initImgPos.imgY - initHeight
+          }
         }
         offsetSize.width = offsetSize.height * ratio
         imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
@@ -353,7 +378,6 @@ export default Vue.extend({
         width = offsetSize.width + initWidth
       }
 
-      const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'frame') {
         imgPos.x += currLayer.styles.horizontalFlip ? -this.control.xSign * offsetSize.width : 0
         imgPos.y += currLayer.styles.verticalFlip ? -this.control.ySign * offsetSize.height : 0
