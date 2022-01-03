@@ -383,14 +383,14 @@ const actions: ActionTree<IUserModule, unknown> = {
       if (flag === 0) {
         console.log('Put asset success')
         dispatch('getAllAssets', { token: state.token })
-        Vue.notify({ group: 'copy', text: '檔案資料已儲存' })
+        Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
         console.log('Put asset failed')
-        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       } else if (flag === 2) {
         console.log('Token invalid!')
-        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
     } catch (error) {
       console.log(error)

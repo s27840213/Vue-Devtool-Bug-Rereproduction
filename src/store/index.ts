@@ -37,6 +37,7 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
+  exportId: '',
   folderInfo: {
     isRoot: true,
     parentFolder: '',
@@ -221,7 +222,7 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number }) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportId: string }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
       state.pages = newPages
@@ -230,6 +231,7 @@ const mutations: MutationTree<IEditorState> = {
       state.name = newPages.name
       state.groupId = newPages.groupId || state.groupId
       state.groupType = newPages.groupType || state.groupType
+      state.exportId = newPages.exportId || state.exportId
     }
     // reset page index
     state.middlemostPageIndex = 0
@@ -255,6 +257,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_groupId(state: IEditorState, groupId: string) {
     state.groupId = groupId
+  },
+  SET_exportId(state: IEditorState, exportId: string) {
+    state.exportId = exportId
   },
   SET_groupType(state: IEditorState, groupType: number) {
     state.groupType = groupType
@@ -289,7 +294,6 @@ const mutations: MutationTree<IEditorState> = {
     state.middlemostPageIndex = index
   },
   SET_currActivePageIndex(state: IEditorState, index: number) {
-    console.log(index)
     state.currActivePageIndex = index
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {

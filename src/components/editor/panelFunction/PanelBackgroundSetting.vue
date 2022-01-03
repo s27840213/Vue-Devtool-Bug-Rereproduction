@@ -84,8 +84,8 @@ export default Vue.extend({
     return {
       show: '',
       popupDatas: [
-        { icon: 'flip-h', text: '水平翻轉' },
-        { icon: 'flip-v', text: '垂直翻轉' }
+        { icon: 'flip-h', text: `${this.$t('NN0053')}` },
+        { icon: 'flip-v', text: `${this.$t('NN0054')}` }
       ]
     }
   },

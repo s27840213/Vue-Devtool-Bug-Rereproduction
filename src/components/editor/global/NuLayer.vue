@@ -53,7 +53,6 @@ export default Vue.extend({
         scaleLayer.classList.add('shape')
       }
     }
-    console.log(this.layerIndex)
   },
   computed: {
     getLayerPos(): { x: number, y: number } {

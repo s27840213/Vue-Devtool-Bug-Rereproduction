@@ -9,7 +9,7 @@ class LogUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadLog(this.getLog() ?? '')
     }
-    // this.consoleLog()
+    this.consoleLog()
     this.clearLog()
   }
 
