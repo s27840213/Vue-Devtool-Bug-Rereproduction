@@ -154,18 +154,18 @@ export default Vue.extend({
       const originDimension = this.config.styles[dimension]
       while (shouldContinue) {
         const autoDimension = autoSize[dimension]
-        if (autoDimension - originDimension > 5) {
+        if (autoDimension - originDimension > 5 * this.config.scale) {
           if (direction < 0) break
           if (direction >= 20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
-          widthLimit += 1
+          widthLimit += this.config.scale
           direction += 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
         }
-        if (originDimension - autoDimension > 5) {
+        if (originDimension - autoDimension > 5 * this.config.scale) {
           if (direction > 0) break
           if (direction <= -20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
-          widthLimit -= 1
+          widthLimit -= this.config.scale
           direction -= 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
