@@ -38,7 +38,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndexgetMiddlemostPageIndex',
+      middlemostPageIndex: 'getMiddlemostPageIndex',
       getPage: 'getPage',
       getPagesPerRow: 'page/getPagesPerRow',
       isDragged: 'page/getIsDragged'
