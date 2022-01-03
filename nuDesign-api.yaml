@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20211208"
+  version: "20220103"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -236,6 +236,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /remove-bg:
+    post:
+      description: 圖片去背
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: removeBgInput
+          required: true
+          schema:
+            $ref: "#/definitions/removeBgInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/removeBgOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
   /reprocess-design:
     post:
       description: 重新處理Cyberduck上傳之檔案
@@ -358,6 +379,20 @@ paths:
             Access-Control-Allow-Origin:
               type: string
 definitions:
+  removeBgInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - asset_index
+          - locale
+        properties:
+          asset_index:
+            type: number
+            description: asset index (for image only)
+          locale:
+            type: string
+            description: locale
   uploadMap:
     type: object
     properties:
@@ -410,6 +445,18 @@ definitions:
           data:
             type: string
             description: json string for design info
+  removeBgOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          url:
+            type: string
+            description: "url for polling json. The polling json has the following keys:
+              flag indicates export result (0 for success, 1 for fail), progress
+              indicates the removing background progress, url for the presigned
+              url map of the processed image, data for the full data of the
+              processed image."
   sendVcodeInput:
     type: object
     required:
@@ -668,6 +715,12 @@ definitions:
           pdf_quality:
             type: number
             description: 0 (default) for normal pdf quality, 1 for higher pdf quality
+          merge:
+            type: number
+            description: ecomm only. 0 (default) for not merge, 1 for merge.
+          split_size:
+            type: number
+            description: ecomm only. max. height for output image.
   apiCommonResponse:
     type: object
     required:
@@ -934,6 +987,9 @@ definitions:
       vcode:
         type: string
         description: verification code
+      locale:
+        type: string
+        description: user locale
   putAssetDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -963,6 +1019,9 @@ definitions:
           password:
             type: string
             description: User password
+          locale:
+            type: string
+            description: User locale
   fbLoginInput:
     type: object
     required:
