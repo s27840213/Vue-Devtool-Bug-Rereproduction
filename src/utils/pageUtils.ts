@@ -247,7 +247,7 @@ class PageUtils {
     store.commit('SET_pages', currentPagesTmp)
   }
 
-  findCentralPageIndexInfo() {
+  findCentralPageIndexInfo(preventFocus = false) {
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       const rect = (page as HTMLElement).getBoundingClientRect()
       return {
@@ -265,7 +265,7 @@ class PageUtils {
     const minDistance = Number.MAX_SAFE_INTEGER
     const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
     store.commit('SET_middlemostPageIndex', targetIndex)
-    this.activeMiddlemostPage()
+    if (!preventFocus) this.activeMiddlemostPage()
     this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
     this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }

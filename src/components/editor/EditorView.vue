@@ -244,10 +244,6 @@ export default Vue.extend({
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
-      // let focusTextEditor = false
-      // if (tiptapUtils.editor?.view?.hasFocus?.()) {
-      //   focusTextEditor = true
-      // }
       if (this.isSelecting || RulerUtils.isDragging) {
         const event = new MouseEvent('mousemove', {
           clientX: this.currentAbsPos.x,
@@ -263,17 +259,11 @@ export default Vue.extend({
       if (this.isShowGuidelineH && !RulerUtils.isDragging) {
         this.closeGuidelineH()
       }
-      if (!tiptapUtils.editor?.view?.composing && !tiptapUtils.editor?.view?.hasFocus?.()) {
-        /**
-         * The following function sets focus on the page, which will break the functionality of a text editor.
-         * Especially changing focus when composing brings unexpected composeend to the editor.
-         * So do not execute it when composing.
-         */
-        pageUtils.findCentralPageIndexInfo()
-      }
-      // if (focusTextEditor) {
-      //   tiptapUtils.focus({ scrollIntoView: false })
-      // }
+      /**
+       * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
+       * So prevent changing focus when a text editor is focused.
+       */
+      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
     },
     selectEnd() {
       if (this.isSelecting) {
