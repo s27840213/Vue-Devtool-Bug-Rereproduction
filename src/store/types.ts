@@ -102,6 +102,7 @@ export enum ColorEventType {
 }
 
 export enum PopupSliderEventType {
+  stop = 'changeStop',
   opacity = 'setLayerOpacity',
   lineHeight = 'setTextLineHeight',
   letterSpacing = 'setTextSpacing',

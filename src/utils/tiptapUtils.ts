@@ -281,7 +281,7 @@ class TiptapUtils {
     })
   }
 
-  applyParagraphStyle(key: string, value: any) {
+  applyParagraphStyle(key: string, value: any, setFocus = true) {
     const item: {[string: string]: any} = {}
     item[key] = value
     this.agent(editor => {
@@ -292,13 +292,17 @@ class TiptapUtils {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
             const attr = this.generateSpanStyle(this.str2css(editor.storage.nuTextStyle.spanStyle))
             editor.chain().setMark('textStyle', attr).run()
-            setTimeout(() => {
-              editor.commands.focus()
-            }, 10)
+            if (setFocus) {
+              setTimeout(() => {
+                editor.commands.focus()
+              }, 10)
+            }
           } else {
-            setTimeout(() => {
-              editor.chain().focus().selectPrevious().run()
-            }, 10)
+            if (setFocus) {
+              setTimeout(() => {
+                editor.chain().focus().selectPrevious().run()
+              }, 10)
+            }
           }
         }
       } else {

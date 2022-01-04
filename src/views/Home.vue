@@ -260,11 +260,11 @@ export default Vue.extend({
     const tagTemplate = await this.getTagContent({ keyword, theme })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
-    keyword = 'locale::' + localeUtils.currLocale() + ';;order_by::popular'
+    keyword = 'group::0;;order_by::popular'
     const popularTemplate = await this.getTagContent({ keyword, theme })
     this.popularTemplateList = popularTemplate.data.content[0].list
 
-    keyword = 'locale::' + localeUtils.currLocale() + ';;order_by::time'
+    keyword = 'group::0;;order_by::time'
     const latestTemplate = await this.getTagContent({ keyword, theme })
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
