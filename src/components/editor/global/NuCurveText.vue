@@ -10,8 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import FontFaceObserver from 'fontfaceobserver'
+import { mapGetters, mapState } from 'vuex'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -45,16 +44,6 @@ export default Vue.extend({
   },
   async created () {
     this.handleCurveSpan(this.spans, true)
-    const promises = [...this.fonts]
-      .map(font => (new FontFaceObserver(font)).load(null, 20000))
-    await Promise
-      .all(promises)
-      .then(() => {
-        [...this.fonts].forEach(font => console.log(font, document.fonts.check(`16px ${font}`)))
-      })
-      .catch(() => { console.log('font loading timeout') })
-    this.handleCurveSpan(this.spans, true)
-
     const { pageIndex, layerIndex } = this
     typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
   },
@@ -63,6 +52,7 @@ export default Vue.extend({
     typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
   },
   computed: {
+    ...mapState('text', ['fontStore']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
@@ -131,6 +121,15 @@ export default Vue.extend({
         width: `${size / styles.scale}px`,
         height: `${size / styles.scale}px`
       }
+    },
+    isFontLoaded(): boolean {
+      const { fonts, fontStore } = this
+      for (const font of fontStore) {
+        const { face, name, loaded } = font
+        const hasFont = fonts.has(face) || fonts.has(name)
+        if (hasFont && !loaded) { return false }
+      }
+      return true
     }
   },
   watch: {
@@ -158,6 +157,9 @@ export default Vue.extend({
           // }
           typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
         })
+    },
+    isFontLoaded (curr) {
+      curr && this.handleCurveSpan(this.spans, true)
     }
     // editing(val) {
     //   const { height } = textUtils.getTextHW(this.config, this.config.widthLimit)
