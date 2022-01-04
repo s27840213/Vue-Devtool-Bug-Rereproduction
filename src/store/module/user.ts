@@ -281,7 +281,7 @@ const mutations: MutationTree<IUserModule> = {
     } else {
       images[targetIndex].urls = targetUrls
       images[targetIndex].id = isAdmin ? assetId : undefined
-      images[targetIndex].assetIndex = assetIndex
+      images[targetIndex].assetIndex = assetIndex ?? assetId
     }
   },
   [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
