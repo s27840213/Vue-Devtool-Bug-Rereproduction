@@ -20,23 +20,6 @@ import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
 Vue.use(VueRouter)
 
-const SUPPORTED_LOCALES = [{
-  code: 'us',
-  base: '/us',
-  flag: 'us',
-  name: 'English'
-}, {
-  code: 'tw',
-  base: '',
-  flag: 'tw',
-  name: '繁體中文'
-}, {
-  code: 'jp',
-  base: '/jp',
-  flag: 'jp',
-  name: 'Japan'
-}]
-
 const MOBILE_ROUTES = [
   'Home',
   'TemplateCenter',
@@ -193,7 +176,7 @@ const router = new VueRouter({
           localStorage.setItem('locale', locale)
         }
         next()
-        if (!(window as any).__PRERENDER_INJECTED.isPrerender) {
+        if ((window as any).__PRERENDER_INJECTED && !(window as any).__PRERENDER_INJECTED.isPrerender) {
           console.log('not in prerender mode')
           router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
         }
