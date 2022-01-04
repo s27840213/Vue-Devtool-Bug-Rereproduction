@@ -358,6 +358,7 @@ export default Vue.extend({
           }, 1000)
           break
         case 1:
+          console.log(response)
           this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
           this.$emit('close')
           break

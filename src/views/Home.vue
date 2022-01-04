@@ -175,6 +175,35 @@ export default Vue.extend({
       CoolDownTimer: 0 as number
     }
   },
+  metaInfo() {
+    const meta = [
+      {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      },
+      {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      },
+      {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      },
+      {
+        property: 'og:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'og:description'
+      }
+    ]
+    const title = `${this.$t('SE0001')}`
+    return {
+      title,
+      meta
+    }
+  },
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',

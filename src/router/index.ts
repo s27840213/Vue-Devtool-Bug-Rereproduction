@@ -193,7 +193,10 @@ const router = new VueRouter({
           localStorage.setItem('locale', locale)
         }
         next()
-        router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
+        if (!(window as any).__PRERENDER_INJECTED.isPrerender) {
+          console.log('not in prerender mode')
+          router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
+        }
       },
       children: routes
     }
