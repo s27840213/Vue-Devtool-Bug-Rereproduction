@@ -1290,8 +1290,24 @@ class UploadUtils {
         ExportIds: ${this.exportIds},
         UserId: ${this.userId}
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
-      const pagesJSON = json || store.getters.getPages
-      this.resetControlStates(pagesJSON)
+
+      // ref: uploadUtils.ts:L466
+      const pagesJSON = (json || store.getters.getPages).map((page: IPage) => {
+        const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+        for (const [i, layer] of newPage.layers.entries()) {
+          if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          } else if (layer.type !== 'shape') {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          }
+        }
+        newPage.backgroundImage.config.imgControl = false
+        newPage.width = parseInt(newPage.width.toString(), 10)
+        newPage.height = parseInt(newPage.height.toString(), 10)
+        return newPage
+      })
+
+      // this.resetControlStates(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
