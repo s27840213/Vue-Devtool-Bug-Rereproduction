@@ -58,7 +58,7 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    template(v-if="!isOutOfBound")
+    template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
@@ -334,6 +334,22 @@ export default Vue.extend({
     },
     isOutOfBound(): boolean {
       return pageUtils.isOutOfBound(this.pageIndex)
+    },
+    hasEditingText(): boolean {
+      const page = this.config as IPage
+      for (const layer of page.layers) {
+        switch (layer.type) {
+          case 'text':
+            if ((layer as IText).contentEditable) return true
+            break
+          case 'group':
+            for (const subLayer of (layer as IGroup).layers) {
+              if (subLayer.type === 'text' && (subLayer as IText).contentEditable) return true
+            }
+            break
+        }
+      }
+      return false
     }
   },
   watch: {
