@@ -259,8 +259,7 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = groupId
   },
   ADD_exportIds(state: IEditorState, exportId: string) {
-    const exportIds = state.exportIds.split(',')
-    console.log(exportIds)
+    const exportIds = state.exportIds.split(',').filter((id) => id.length !== 0)
     exportIds.push(exportId)
     if (exportIds.length > 10) {
       exportIds.shift()
@@ -672,6 +671,7 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.groupType = 0
     state.name = ''
+    state.exportIds = ''
     Object.assign(state.folderInfo, {
       isRoot: true,
       parentFolder: '',
