@@ -125,6 +125,7 @@ pipelines:
               name: "Start build with node module cache"
               caches: #set caches for node modules to speed up building
                 - node
+              image: cypress/browsers:chrome67-ff57
               script:
                 - yarn install
                 - yarn build
