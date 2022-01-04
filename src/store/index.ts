@@ -37,7 +37,7 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
-  exportId: '',
+  exportIds: '',
   folderInfo: {
     isRoot: true,
     parentFolder: '',
@@ -222,7 +222,7 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportId: string }) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
       state.pages = newPages
@@ -231,7 +231,7 @@ const mutations: MutationTree<IEditorState> = {
       state.name = newPages.name
       state.groupId = newPages.groupId || state.groupId
       state.groupType = newPages.groupType || state.groupType
-      state.exportId = newPages.exportId || state.exportId
+      state.exportIds = newPages.exportIds || state.exportIds
     }
     // reset page index
     state.middlemostPageIndex = 0
@@ -258,8 +258,14 @@ const mutations: MutationTree<IEditorState> = {
   SET_groupId(state: IEditorState, groupId: string) {
     state.groupId = groupId
   },
-  SET_exportId(state: IEditorState, exportId: string) {
-    state.exportId = exportId
+  ADD_exportIds(state: IEditorState, exportId: string) {
+    const exportIds = state.exportIds.split(',')
+    console.log(exportIds)
+    exportIds.push(exportId)
+    if (exportIds.length > 10) {
+      exportIds.shift()
+    }
+    state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
     state.groupType = groupType
@@ -563,7 +569,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
-    console.log(state.isColorPickerOpened)
   },
   SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data

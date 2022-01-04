@@ -26,7 +26,7 @@ export interface IEditorState {
   designId: string,
   assetId: string,
   groupId: string,
-  exportId: string,
+  exportIds: string,
   groupType: number,
   folderInfo: {
     isRoot: boolean,

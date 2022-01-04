@@ -78,7 +78,7 @@ class UploadUtils {
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
-  get exportId(): string { return store.state.exportId }
+  get exportIds(): string { return store.state.exportIds }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -441,7 +441,7 @@ class UploadUtils {
     const type = router.currentRoute.query.type
     const designId = router.currentRoute.query.design_id
     const teamId = router.currentRoute.query.team_id
-    const exportId = router.currentRoute.query.export_id
+    // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
     if (designId && teamId && type && !this.hasGottenDesign) {
@@ -449,10 +449,7 @@ class UploadUtils {
     }
     if (!type || !designId || !teamId) {
       putAssetDesignType = PutAssetDesignType.UPDATE_DB
-      if (!exportId) {
-        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
-      } else {
-      }
+      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
     }
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
@@ -478,13 +475,12 @@ class UploadUtils {
       return newPage
     })
 
-    console.log(this.exportId)
     const resultJSON = {
       name: pageUtils.pagesName,
       pages: pagesJSON,
       groupId: store.state.groupId,
       groupType: store.state.groupType,
-      exportId: this.exportId
+      exportIds: this.exportIds
     }
 
     const formData = new FormData()
@@ -1025,8 +1021,7 @@ class UploadUtils {
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
-                router.replace({ query: Object.assign({}, router.currentRoute.query, { export_id: json.exportId }) })
-                console.log(json)
+                router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
@@ -1288,21 +1283,21 @@ class UploadUtils {
 
   uploadExportJSON(exportId: string, json?: any) {
     return new Promise((resolve) => {
-      console.log(this.exportId)
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_map.path}export/${this.exportId}/page.json`)
+      formData.append('key', `${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
       // console.log(this.loginOutput)
       logUtils.setLog(`Export Design:
-        ExportId: ${this.exportId},
+        ExportId: ${exportId},
+        ExportIds: ${this.exportIds},
         UserId: ${this.userId}
-        Url: ${this.loginOutput.upload_map.path}export/${this.exportId}/page.json`)
+        Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
       const pagesJSON = json || store.getters.getPages
       this.resetControlStates(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })

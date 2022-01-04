@@ -169,6 +169,7 @@ export default Vue.extend({
       currentPageIndex,
       polling: false,
       progress: -1,
+      exportId: '',
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
       detailPageDownloadOptions: [
@@ -192,7 +193,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['name', 'groupType', 'exportId']),
+    ...mapState(['name', 'groupType', 'exportIds']),
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
@@ -238,17 +239,18 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setExportId: 'SET_exportId'
+      addExportId: 'ADD_exportIds'
     }),
     handleUploadJSON(id: string) {
-      this.setExportId(id)
       return uploadUtils.uploadExportJSON(id)
         .then((res: any) => {
           const { status } = res?.target
           if (status === 204) {
-            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_id: this.exportId }) })
+            this.addExportId(id)
+            this.exportId = id
+            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_ids: this.exportIds }) })
+            uploadUtils.uploadDesign()
           } else {
-            this.setExportId('')
             this.$notify({ group: 'error', text: `設計上傳失敗，請重新點擊下載 (status: ${status})` })
             this.$emit('close')
           }
