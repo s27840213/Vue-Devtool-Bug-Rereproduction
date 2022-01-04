@@ -137,6 +137,9 @@ export default Vue.extend({
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
       this.setSpacing(value)
     })
+    popupUtils.on(PopupSliderEventType.stop, () => {
+      tiptapUtils.focus({ scrollIntoView: false })
+    })
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
@@ -446,7 +449,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000)
+          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000, false)
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -455,7 +458,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)))
+          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)), false)
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }
