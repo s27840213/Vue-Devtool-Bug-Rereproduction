@@ -94,9 +94,9 @@ new Vue({
   router,
   store,
   i18n,
-  // mounted() {
-  //   document.dispatchEvent(new Event('render-event'))
-  // },
+  mounted() {
+    document.dispatchEvent(new Event('render-event'))
+  },
   render: (h) => h(App)
 }).$mount('#app')
 

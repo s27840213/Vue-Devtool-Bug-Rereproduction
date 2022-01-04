@@ -53,23 +53,23 @@ module.exports = {
     }
   },
 
-  // configureWebpack: {
-  //   plugins: [
-  //     new PrerenderSPAPlugin({
-  //       staticDir: path.join(__dirname, 'dist'),
-  //       routes: ['/', '/tw', '/us', '/jp', '/signup', '/templates'],
-  //       renderer: new Renderer({
-  //         renderAfterDocumentEvent: 'render-event',
-  //         headless: true
-  //       }),
-  //       injectProperty: '__PRERENDER_INJECTED',
-  //       // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
-  //       inject: {
-  //         isPrerender: true
-  //       }
-  //     })
-  //   ]
-  // },
+  configureWebpack: {
+    plugins: [
+      new PrerenderSPAPlugin({
+        staticDir: path.join(__dirname, 'dist'),
+        routes: ['/', '/tw', '/us', '/jp', '/signup', '/templates'],
+        renderer: new Renderer({
+          renderAfterDocumentEvent: 'render-event',
+          headless: true
+        }),
+        injectProperty: '__PRERENDER_INJECTED',
+        // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
+        inject: {
+          isPrerender: true
+        }
+      })
+    ]
+  },
 
   css: {
     loaderOptions: {
