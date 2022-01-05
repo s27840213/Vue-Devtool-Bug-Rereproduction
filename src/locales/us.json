@@ -73,7 +73,7 @@
   "NN0072": "Create new design",
   "NN0073": "Show rulers",
   "NN0074": "Hide guides",
-  "NN0075": "Show guides",
+  "NN0075": "Delete guides",
   "NN0076": "Add a headline",
   "NN0077": "Add a subhead",
   "NN0078": "Add a body text",
@@ -364,5 +364,6 @@
   "NN0357": "All changes saved.",
   "NN0358": "Got it",
   "NN0359": "Close",
-  "NN0360": "Failed to save the changes you made."
+  "NN0360": "Failed to save the changes you made.",
+  "NN0361": "Show guides"
 }

@@ -25,7 +25,7 @@
             svg-icon(
               class="popup-line-template__icon pointer"
               :iconName="template"
-              :iconWidth="'65px'"
+              :iconWidth="'60px'"
               :iconColor="'gray-1'")
 </template>
 
