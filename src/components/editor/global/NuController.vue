@@ -901,8 +901,6 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            // const clipPath = `M0,0h${width}v${height}h${-width}z`
-            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break

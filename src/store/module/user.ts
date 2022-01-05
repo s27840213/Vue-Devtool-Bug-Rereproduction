@@ -177,6 +177,7 @@ const mutations: MutationTree<IUserModule> = {
     state.isAuthenticated = token.length > 0
     state.token = token
     localStorage.setItem('token', token)
+    console.log(token)
   },
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
     const newState = data || getDefaultState()
