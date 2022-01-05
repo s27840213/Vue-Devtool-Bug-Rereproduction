@@ -381,6 +381,7 @@ class LayerFactary {
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
+    config.backgroundImage.id = GeneralUtils.generateRandomString(8)
 
     return config
   }
