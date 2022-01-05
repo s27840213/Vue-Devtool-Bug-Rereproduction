@@ -390,8 +390,7 @@ export default Vue.extend({
       })
     },
     composeKeyword() {
-      const res = [`locale::${this.$i18n.locale}`]
-      // const res = ['group::0']
+      const res = ['group::0']
       const tags = []
       let themes: string[] = []
       if (this.searchbarKeyword !== '') {
