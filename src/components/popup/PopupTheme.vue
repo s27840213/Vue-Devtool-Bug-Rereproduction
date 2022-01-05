@@ -30,7 +30,7 @@
       btn(class="popup-theme__btn rounded"
         type="primary-sm"
         :disabled="isConfirmDisabled"
-        @click.native="handleSubmit") {{$t('NN0164')}}
+        @click.native="handleSubmit") {{$tc('NN0164', 1)}}
 </template>
 
 <script lang="ts">
