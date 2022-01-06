@@ -75,7 +75,7 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
       } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
-        console.log(textHW)
+        console.log(textHW.width, textHW.height)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
@@ -154,8 +154,9 @@ export default Vue.extend({
       let autoSize = TextUtils.getTextHW(this.config, widthLimit)
       const originDimension = this.config.styles[dimension]
       while (shouldContinue) {
-        console.log(widthLimit, autoSize, direction)
+        console.log(widthLimit, direction)
         const autoDimension = autoSize[dimension]
+        console.log(autoDimension, originDimension, this.config.scale)
         if (autoDimension - originDimension > 5 * this.config.scale) {
           if (direction < 0) break
           if (direction >= 20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
