@@ -153,7 +153,8 @@ export default Vue.extend({
             type: 'category-template-item',
             list: templates,
             title: !keyword && !idx ? `${this.$t('NN0083')}` : '',
-            size: title ? (templates[0].preview.height + 70) : templates[0].preview.height + 24
+            // 上下margin 10px, 如果有title則再加上title的高度46px
+            size: title ? (templates[0].preview.height + 56) : templates[0].preview.height + 10
           }
         })
       if (result.length) {
