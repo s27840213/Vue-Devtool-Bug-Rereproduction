@@ -171,7 +171,7 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     stepsUtils.record()
@@ -209,7 +209,7 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     stepsUtils.record()
@@ -250,7 +250,7 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     stepsUtils.record()
@@ -277,7 +277,7 @@ class AssetUtils {
       },
       ...json
     }
-    const index = LayerUtils.getUpmostNonTextLayerIndex(currentPage.layers) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     stepsUtils.record()
@@ -436,7 +436,7 @@ class AssetUtils {
         imgHeight: photoHeight
       }
     }
-    const index = LayerUtils.getUpmostNonTextLayerIndex(this.getPage(targePageIndex).layers) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targePageIndex).layers, config) + 1
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     stepsUtils.record()

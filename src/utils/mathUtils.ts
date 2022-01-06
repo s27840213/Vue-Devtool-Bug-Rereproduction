@@ -2,6 +2,7 @@ import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import Flatten from '@flatten-js/core'
 
 class MathUtils {
   cos(angle: number) {
@@ -174,6 +175,24 @@ class MathUtils {
       }
     })
     return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
+  }
+
+  generatePolygon(styles: {x: number, y: number, width: number, height: number, scale: number, rotate: number}): Flatten.Polygon {
+    const { x, y, width, height, scale = 1, rotate = 0 } = styles
+    const angle = rotate / 180 * Math.PI
+    const object = new Flatten.Polygon([
+      Flatten.point(x, y),
+      Flatten.point(x, y + height),
+      Flatten.point(x + width, y + height),
+      Flatten.point(x + width, y)
+    ])
+    const center = Flatten.point(x + width / 2, y + height / 2)
+    return object.rotate(angle, center)
+  }
+
+  getIntersectArea(polygon1: Flatten.Polygon, polygon2: Flatten.Polygon): number {
+    const { intersect } = Flatten.BooleanOperations
+    return intersect(polygon1, polygon2).area()
   }
 }
 

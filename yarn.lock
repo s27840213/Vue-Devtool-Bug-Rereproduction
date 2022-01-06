@@ -899,6 +899,18 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
+"@flatten-js/core@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@flatten-js/core/-/core-1.3.3.tgz#c411501ca304bb36564d803908f52910252e0177"
+  integrity sha512-tO+pkEqge2wZoJF72knT5rDHZUqITFiJsoXlp7j3sbUaofqSPX0v2uQ9PR2umR1kP++Nn0LsL6ZXrdhz6yPJNw==
+  dependencies:
+    "@flatten-js/interval-tree" "^1.0.15"
+
+"@flatten-js/interval-tree@^1.0.15":
+  version "1.0.16"
+  resolved "https://registry.yarnpkg.com/@flatten-js/interval-tree/-/interval-tree-1.0.16.tgz#8ca8ea684dbe5a5dc2cc7d08f4b11aadaf8c5dcb"
+  integrity sha512-i01liq+8EVY4P7gdpOHvJMGqkK+SVSoHAog7z0Iwtjp7MgrQ/X6rhfDzZEIpCFnT4xrTg1SxklUHyn6ZjhJjxw==
+
 "@hapi/address@2.x.x":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.1.4.tgz#5d67ed43f3fd41a69d4b9ff7b56e7c0d1d0a81e5"
