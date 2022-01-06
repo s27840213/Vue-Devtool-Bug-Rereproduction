@@ -928,106 +928,131 @@ class TextPropUtils {
   }
 
   fontSizeStepping(step: number) {
-    tiptapUtils.agent(editor => {
-      const selection = editor.view.state.selection
-      const from = selection.$from
-      const to = selection.$to
-      const startPIndex = from.index(0)
-      const startSIndex = from.index(1)
-      const endPIndex = to.index(0)
-      let endSIndex = to.index(1)
-      const tiptapJSON = editor.getJSON()
-      const paragraphs = tiptapJSON.content ?? []
+    const currLayer = LayerUtils.getCurrLayer
+    if (currLayer.type === 'text' || (['tmp', 'group'].includes(currLayer.type) && LayerUtils.subLayerIdx !== -1)) {
+      tiptapUtils.agent(editor => {
+        const selection = editor.view.state.selection
+        const from = selection.$from
+        const to = selection.$to
+        const startPIndex = from.index(0)
+        const startSIndex = from.index(1)
+        const endPIndex = to.index(0)
+        let endSIndex = to.index(1)
+        const tiptapJSON = editor.getJSON()
+        const paragraphs = tiptapJSON.content ?? []
 
-      if (selection.empty) {
-        const sAttrs = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(editor.storage.nuTextStyle.spanStyle))
-        sAttrs.size += step
-        editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
-        editor.chain().focus().setMark('textStyle', sAttrs).run()
-        this.updateTextPropsState({ fontSize: sAttrs.size })
-      } else {
-        if (to.textOffset === 0 && endSIndex !== 0) {
-          endSIndex--
-        }
-
-        let tempStartSIndex = startSIndex
-        let tempEndSIndex
-        for (let i = startPIndex; i <= endPIndex; i++) {
-          let startSplit = false
-          const spans = paragraphs[i].content ?? []
-          if (i === endPIndex) {
-            tempEndSIndex = endSIndex
-          } else {
-            tempEndSIndex = spans.length - 1
+        if (selection.empty) {
+          const sAttrs = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(editor.storage.nuTextStyle.spanStyle))
+          sAttrs.size += step
+          editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
+          editor.chain().focus().setMark('textStyle', sAttrs).run()
+          this.updateTextPropsState({ fontSize: sAttrs.size })
+        } else {
+          if (to.textOffset === 0 && endSIndex !== 0) {
+            endSIndex--
           }
-          if (spans.length > 0) {
-            const newSpans = GeneralUtils.deepCopy(spans) as any[]
-            for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
-              let splitHandled = false
-              let splitLength = 0
-              if (i === startPIndex && j === startSIndex && from.textOffset !== 0) {
-                startSplit = true
-                const itemBefore = GeneralUtils.deepCopy(spans[j])
-                const itemAfter = GeneralUtils.deepCopy(itemBefore)
-                const text = itemBefore.text
-                const textBefore = text.substring(0, from.textOffset)
-                itemBefore.text = textBefore
-                splitLength = textBefore.length
-                const textAfter = text.substring(from.textOffset)
-                itemAfter.text = textAfter
-                const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
-                if (spanAttrsAfter) {
-                  spanAttrsAfter.size += step
-                }
-                newSpans.splice(j, 1, itemBefore, itemAfter)
-                splitHandled = true
-              }
-              if (i === endPIndex && j === endSIndex && to.textOffset !== 0) {
-                const realSIndex = startSplit ? j + 1 : j
-                const itemBefore = GeneralUtils.deepCopy(newSpans[realSIndex])
-                const itemAfter = GeneralUtils.deepCopy(itemBefore)
-                const text = itemBefore.text
-                const textBefore = text.substring(0, to.textOffset - splitLength)
-                itemBefore.text = textBefore
-                const spanAttrsBefore = itemBefore.marks?.[0]?.attrs
-                if (spanAttrsBefore) {
-                  spanAttrsBefore.size += step
-                }
-                const textAfter = text.substring(to.textOffset - splitLength)
-                itemAfter.text = textAfter
-                const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
-                if (spanAttrsAfter && startSplit && endSIndex === startSIndex) { // if this span has been startSplit
-                  spanAttrsAfter.size -= step
-                }
-                newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
-                splitHandled = true
-              }
-              if (!splitHandled) {
-                const realSIndex = startSplit ? j + 1 : j
-                const spanAttrs = newSpans[realSIndex].marks?.[0]?.attrs
-                if (spanAttrs) {
-                  spanAttrs.size += step
-                }
-              }
+
+          let tempStartSIndex = startSIndex
+          let tempEndSIndex
+          for (let i = startPIndex; i <= endPIndex; i++) {
+            let startSplit = false
+            const spans = paragraphs[i].content ?? []
+            if (i === endPIndex) {
+              tempEndSIndex = endSIndex
+            } else {
+              tempEndSIndex = spans.length - 1
             }
-            tempStartSIndex = 0
-            paragraphs[i].content = newSpans
-          } else {
-            const pAttrs = paragraphs[i].attrs ?? {}
-            pAttrs.size += step
-            const spanStyle = pAttrs.spanStyle ?? ''
-            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
-            sStyles.size += step
-            pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
+            if (spans.length > 0) {
+              const newSpans = GeneralUtils.deepCopy(spans) as any[]
+              for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
+                let splitHandled = false
+                let splitLength = 0
+                if (i === startPIndex && j === startSIndex && from.textOffset !== 0) {
+                  startSplit = true
+                  const itemBefore = GeneralUtils.deepCopy(spans[j])
+                  const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                  const text = itemBefore.text
+                  const textBefore = text.substring(0, from.textOffset)
+                  itemBefore.text = textBefore
+                  splitLength = textBefore.length
+                  const textAfter = text.substring(from.textOffset)
+                  itemAfter.text = textAfter
+                  const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
+                  if (spanAttrsAfter) {
+                    spanAttrsAfter.size += step
+                  }
+                  newSpans.splice(j, 1, itemBefore, itemAfter)
+                  splitHandled = true
+                }
+                if (i === endPIndex && j === endSIndex && to.textOffset !== 0) {
+                  const realSIndex = startSplit ? j + 1 : j
+                  const itemBefore = GeneralUtils.deepCopy(newSpans[realSIndex])
+                  const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                  const text = itemBefore.text
+                  const textBefore = text.substring(0, to.textOffset - splitLength)
+                  itemBefore.text = textBefore
+                  const spanAttrsBefore = itemBefore.marks?.[0]?.attrs
+                  if (spanAttrsBefore) {
+                    spanAttrsBefore.size += step
+                  }
+                  const textAfter = text.substring(to.textOffset - splitLength)
+                  itemAfter.text = textAfter
+                  const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
+                  if (spanAttrsAfter && startSplit && endSIndex === startSIndex) { // if this span has been startSplit
+                    spanAttrsAfter.size -= step
+                  }
+                  newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
+                  splitHandled = true
+                }
+                if (!splitHandled) {
+                  const realSIndex = startSplit ? j + 1 : j
+                  const spanAttrs = newSpans[realSIndex].marks?.[0]?.attrs
+                  if (spanAttrs) {
+                    spanAttrs.size += step
+                  }
+                }
+              }
+              tempStartSIndex = 0
+              paragraphs[i].content = newSpans
+            } else {
+              const pAttrs = paragraphs[i].attrs ?? {}
+              pAttrs.size += step
+              const spanStyle = pAttrs.spanStyle ?? ''
+              const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+              sStyles.size += step
+              pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
+            }
           }
+          editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+          Vue.nextTick(() => {
+            tiptapUtils.forceUpdate()
+            this.updateTextPropsState()
+          })
         }
-        editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
-        Vue.nextTick(() => {
-          tiptapUtils.forceUpdate()
-          this.updateTextPropsState()
+      })
+    } else if (['group', 'tmp'].includes(currLayer.type)) {
+      (currLayer as IGroup | ITmp).layers
+        .forEach((l, idx) => {
+          l.type === 'text' && this.propAppliedAllText(LayerUtils.layerIndex, idx, 'size', step)
+          TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, this.layerIndex, idx)
         })
-      }
-    })
+    }
+  }
+
+  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: string, payload: number) {
+    if (subLayerIndex === -1) return
+
+    const primaryLayer = (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup)
+    if (['group', 'tmp'].includes(primaryLayer.type) && primaryLayer.layers[subLayerIndex].type === 'text') {
+      const targetLayer = primaryLayer.layers[subLayerIndex] as IText
+      const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
+      paragraphs.forEach(p => {
+        p.spans.forEach(s => {
+          typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+        })
+      })
+      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
+    }
   }
 
   propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {

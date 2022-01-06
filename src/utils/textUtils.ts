@@ -656,28 +656,56 @@ class TextUtils {
   }
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
-    const currLayer = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (subLayerIndex !== -1) {
-      const config = currLayer.layers[subLayerIndex] as IText
+      const config = group.layers[subLayerIndex] as IText
+      const originSize = { width: config.styles.width, height: config.styles.height }
       const textHW = this.getTextHW(config, config.widthLimit)
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      /**
+       * Group layout height compensate
+       */
+      const isAllHorizon = !group.layers
+        .some(l => l.type === 'text' &&
+          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+      if (isAllHorizon) {
+        const lowLine = config.styles.y + originSize.height
+        const diff = textHW.height - originSize.height
+        const targetSubLayers: Array<[number, number]> = []
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
+              y: data[1] + diff
+            })
+          })
+      }
     }
-    let { width, height } = calcTmpProps(currLayer.layers)
-    width *= currLayer.styles.scale
-    height *= currLayer.styles.scale
+    let { width, height } = calcTmpProps(group.layers)
+    width *= group.styles.scale
+    height *= group.styles.scale
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
+
+    /**
+     * Compensate the offset difference to the left-edge of group layer
+     */
     let minX = Number.MAX_SAFE_INTEGER
-    currLayer.layers
+    group.layers
       .forEach(l => {
         minX = Math.min(minX, l.styles.x)
       })
     if (minX > 0) {
-      for (const [idx, layer] of Object.entries(currLayer.layers)) {
+      for (const [idx, layer] of Object.entries(group.layers)) {
         LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
           x: layer.styles.x - minX
         })
       }
     }
-    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {

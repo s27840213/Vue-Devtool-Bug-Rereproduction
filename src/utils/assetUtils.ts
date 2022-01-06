@@ -19,7 +19,7 @@ import ZindexUtils from './zindexUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 
-const STANDARD_TEXT_FONT: { [key: string]: string } = {
+export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
   us: 'cRgaSK5ZVXnLDpWTL8MN',
   en: 'cRgaSK5ZVXnLDpWTL8MN',

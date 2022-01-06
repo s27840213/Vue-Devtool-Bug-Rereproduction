@@ -68,13 +68,12 @@ export default Vue.extend({
     if (this.config.styles.textShape?.name) {
       return
     }
-
     if (!this.isDestroyed) {
       // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
       const textHW = this.autoResize()
       if (typeof this.subLayerIndex === 'undefined') {
         ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
-      } else if (this.subLayerIndex === this.getLayer(this.pageIndex, this.layerIndex).layers.length - 1) {
+      } else if (typeof this.subLayerIndex !== 'undefined') {
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
@@ -125,9 +124,9 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
-      const { editing, contentEditable } = this.config
+      const { active, contentEditable } = this.config
       const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : (isCurveText ? 1 : (isFlipped ? 0.2 : 0))) : 1
+      const opacity = active ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : (isCurveText ? 0.2 : (isFlipped ? 0.2 : 0))) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity
