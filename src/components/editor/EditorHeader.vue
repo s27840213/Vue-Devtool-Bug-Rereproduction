@@ -6,7 +6,7 @@
         template(#signUp)
           a(:href="`/signup?redirect=${path}`") {{$tc('NN0169',1)}}
         template(#logIn)
-          a(:href="`/signup?redirect=${path}`") {{$tc('NN0168',1)}}
+          a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
     template(v-else)
       span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{$t('NN0080')}}
       span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}

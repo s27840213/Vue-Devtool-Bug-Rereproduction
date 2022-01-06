@@ -62,15 +62,18 @@
               class="home-content__feature-item"
               :class="{'selected': featureSelected === idx}"
               @click.native="featureItemClicked(idx)")
-              svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
+              svg-icon(v-if="currLocale === 'us' && idx === 3"
+                :iconName="featureSelected === idx ? `feature-icon-us${item.name}-s` : `feature-icon-us${item.name}`"
+                :iconWidth="isMobile ? '20px' : '40px'")
+              svg-icon(v-else
+                :iconName="featureSelected === idx ? `feature-icon${item.name}-s` : `feature-icon${item.name}`"
                 :iconWidth="isMobile ? '20px' : '40px'")
               div(class="home-content__feature-item-title pt-10 body-2") {{item.title}}
         div(class="home-content__feature-content")
           div(class="home-content__feature-img")
-            img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
+            img(:src="require(`@/assets/img/jpg/homepage/feature_${currLocale}_${featureSelected+1}.jpg`)")
           div(class="home-content__feature-text")
-            div(v-if="isMobile"
-              class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
+            div(class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") {{$t('NN0274')}}
@@ -525,11 +528,15 @@ export default Vue.extend({
         flex-direction: column;
       }
       &-title {
+        display: none;
         color: setColor(dark-blue-2);
         text-align: center;
         font-weight: 600;
         font-size: 18px;
         line-height: 28px;
+        @include layout-mobile {
+          display: block;
+        }
       }
     }
     &-img {
