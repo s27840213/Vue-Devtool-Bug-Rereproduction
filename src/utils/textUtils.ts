@@ -663,7 +663,7 @@ class TextUtils {
       const textHW = this.getTextHW(config, config.widthLimit)
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       /**
-       * Group layout height compensate
+       * Group layout height compensation
        */
       const isAllHorizon = !group.layers
         .some(l => l.type === 'text' &&

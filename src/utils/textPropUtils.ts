@@ -697,13 +697,13 @@ class TextPropUtils {
       case 'group': {
         try {
           if (subLayerIdx === -1) {
-            let propBuff: number | string | undefined
+            let propBuff: number | string | undefined = 'init'
             for (let i = 0; i < (currLayer as IGroup).layers.length; i++) {
               if ((currLayer as IGroup).layers[i].type === 'text') {
                 const tmpLayer = (currLayer as IGroup).layers[i] as IText
-                if (typeof propBuff === 'undefined') {
-                  propBuff = this.propReadOfLayer(propName, tmpLayer)
-                } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+                if (propBuff === 'init') {
+                  propBuff = this.propReadOfLayer(propName, tmpLayer, true)
+                } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
                   return undefined
                 }
               }
@@ -734,38 +734,12 @@ class TextPropUtils {
         return propBuff
       }
     }
-
-    // if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
-    //   return this.propReadOfLayer(propName)
-    // } else if (this.targetInfo.type === 'group' && this.targetInfo.subLayerIndex !== -1) {
-    //   try {
-    //     const layer = (LayerUtils.getCurrLayer as IGroup).layers[this.targetInfo.subLayerIndex]
-    //     return this.propReadOfLayer(propName, layer as IText)
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // } else {
-    //   const tmpLayerGroup = this.getCurrLayer as ITmp
-    //   let propBuff: number | string | undefined
-    //   for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
-    //     if (tmpLayerGroup.layers[i].type === 'text') {
-    //       const tmpLayer = tmpLayerGroup.layers[i] as IText
-    //       if (typeof propBuff === 'undefined') {
-    //         propBuff = this.propReadOfLayer(propName, tmpLayer)
-    //       } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
-    //         return undefined
-    //       }
-    //     }
-    //   }
-    //   return propBuff
-    // }
   }
 
-  propReadOfLayer(_prop: string, layer?: IText) {
+  propReadOfLayer(_prop: string, layer?: IText, allText = false) {
     let res
     const prop = fontPropsMap[_prop]
-
-    if (tiptapUtils.editor) {
+    if (!allText) {
       tiptapUtils.agent(editor => {
         let isMulti = false
         const selection = editor.view.state.selection

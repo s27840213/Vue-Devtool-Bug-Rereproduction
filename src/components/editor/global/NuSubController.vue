@@ -395,13 +395,6 @@ export default Vue.extend({
 
       TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
-    onKeyUp(e: KeyboardEvent) {
-      if (this.getLayerType === 'text' && TextUtils.isArrowKey(e)) {
-        const sel = TextUtils.getSelection()
-        TextUtils.updateSelection(sel?.start as ISelection, sel?.end as ISelection)
-        TextPropUtils.updateTextPropsState()
-      }
-    },
     onClickEvent(e: MouseEvent) {
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {

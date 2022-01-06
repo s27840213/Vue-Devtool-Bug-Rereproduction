@@ -350,9 +350,8 @@ export default Vue.extend({
         }
         popupUtils.closePopup()
       } else {
-        if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-        }
+        this.getLayerType === 'text' && LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
+        TextPropUtils.updateTextPropsState()
       }
     },
     isTextEditing(editing) {
