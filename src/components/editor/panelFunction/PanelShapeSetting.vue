@@ -314,15 +314,16 @@ export default Vue.extend({
 
         if (subSelectedIdx === -1) {
           if (!this.inGrouped) {
-            return (layer as IGroup).layers
-              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1)[0].color as string[]
+            const layers = (layer as IGroup).layers
+              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
+            return (layers.length ? layers[0].color : []) as string[]
           } else return []
         } else {
           const colors = (layer as IGroup).layers[subSelectedIdx].color as string[]
           return colors
         }
       } else {
-        console.error('Wrong with the right-side-panel wrong')
+        console.error('Wrong with the right-side-panel color')
         return []
       }
     },
@@ -602,16 +603,18 @@ export default Vue.extend({
       return this.markerContentMap[markerId] ?? this.markerContentMap.none
     },
     initilizeRecord() {
-      this.paletteRecord = []
-      for (let i = 0; i < this.getColors.length; i++) {
-        const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
-        this.paletteRecord.push(record)
-      }
-      if (this.currSelectedColorIndex < 0) {
-        this.currSelectedColorIndex = 0
-      }
-      while (this.currSelectedColorIndex > this.paletteRecord.length - 1) {
-        this.currSelectedColorIndex--
+      if (this.getColors.length) {
+        this.paletteRecord = []
+        for (let i = 0; i < this.getColors.length; i++) {
+          const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
+          this.paletteRecord.push(record)
+        }
+        if (this.currSelectedColorIndex < 0) {
+          this.currSelectedColorIndex = 0
+        }
+        while (this.currSelectedColorIndex > this.paletteRecord.length - 1) {
+          this.currSelectedColorIndex--
+        }
       }
     }
   }

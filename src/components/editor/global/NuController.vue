@@ -505,7 +505,8 @@ export default Vue.extend({
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        // opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        opacity: this.isActive ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
       return !this.isCurveText ? textstyles
         : Object.assign(this.textScaleStyle, {
