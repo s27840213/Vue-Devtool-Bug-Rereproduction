@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="category-template-item" @click="handleClickGroup")
+  div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
     div(class="relative pointer"
       @mouseover="() => handleCarouse()"
       @mouseleave="showCarousel = false")
@@ -11,6 +11,7 @@
       img(v-else
         class="category-template-item__img pointer"
         :src="fallbackSrc || previewImage"
+        :style="previewStyle"
         @error="handleNotFound")
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
     div(v-if="showId"
@@ -48,6 +49,14 @@ export default Vue.extend({
     previewImage (): string {
       const { match_cover: cover, ver, id } = this.item
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
+    },
+    previewStyle(): any {
+      const { width, height } = this.item.preview || {}
+      return { width: `${width}px`, height: `${height}px` }
+    },
+    itemStyle(): any {
+      const { width } = this.item.preview || {}
+      return { width: `${width || 145}px` }
     }
   },
   methods: {
