@@ -140,6 +140,7 @@ export default Vue.extend({
       } else {
         galleryUtils = new GalleryUtils(300, 140, 10)
       }
+      const idContainerHeight = this.showTemplateId ? 24 : 0
       const result = galleryUtils
         .generate(list.map((template: any) => ({
           ...template,
@@ -148,13 +149,14 @@ export default Vue.extend({
         })))
         .map((templates, idx) => {
           const title = !keyword && !idx ? `${this.$t('NN0083')}` : ''
+          const height = idContainerHeight + templates[0].preview.height
           return {
             id: `result_${templates.map(item => item.id).join('_')}`,
             type: 'category-template-item',
             list: templates,
             title: !keyword && !idx ? `${this.$t('NN0083')}` : '',
             // 上下margin 10px, 如果有title則再加上title的高度46px
-            size: title ? (templates[0].preview.height + 56) : templates[0].preview.height + 10
+            size: title ? (height + 56) : height + 10
           }
         })
       if (result.length) {

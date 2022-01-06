@@ -3,7 +3,7 @@
     div(class="relative")
       img(class="category-template-item__img pointer"
         draggable="true"
-        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_4x?ver=${item.ver}`"
         :style="previewStyle"
         @error="handleNotFound"
         @dragstart="dragStart($event)"

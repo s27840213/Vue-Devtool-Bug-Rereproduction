@@ -50,7 +50,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .image-carousel {
-    width: 100%;
+    height: 100%;
     pointer-events: none;
     &__overflow {
       overflow: hidden;

@@ -7,7 +7,7 @@
         :imgs="groupImages"
         @change="handleCarouselIdx")
         template(v-slot="{ url }")
-          img(:src="url" class="category-template-item__img")
+          img(:src="url" :style="previewStyle" class="category-template-item__img")
       img(v-else
         class="category-template-item__img pointer"
         :src="fallbackSrc || previewImage"
@@ -44,11 +44,11 @@ export default Vue.extend({
   },
   computed: {
     groupImages (): string[] {
-      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev?ver=${content.ver}`)
+      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_4x?ver=${content.ver}`)
     },
     previewImage (): string {
       const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
+      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_4x?ver=${ver}`
     },
     previewStyle(): any {
       const { width, height } = this.item.preview || {}
