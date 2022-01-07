@@ -156,6 +156,60 @@
     //-       class="shape-setting__color palette"
     //-       :style="paletteColorStyle(color, index)"
     //-       @click="setColor(color, index)")
+
+    //- 管理介面
+    div(class="shape-setting__info")
+      div(v-if="inAdminMode")
+        div(class="shape-setting__info__divider pb-10")
+        btn(:type="'primary-sm'"
+          class="shape-setting__info__button rounded my-5"
+          @click.native="getDataClicked()") 取 得 元 素 資 料
+        div(class="shape-setting__info__divider2 pb-10")
+        span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
+        div(class="shape-setting__info__line" style="background: #eee;")
+          span(class="body-1") id
+          span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
+        img(v-if="focusDesignId.length > 0"
+          class="shape-setting__info__image"
+          :src="`https://template.vivipic.com/svg/${focusDesignId}/prev?ver=${imgRandQuery}`")
+        div(v-if="isGetSvgInfo")
+          div(class="shape-setting__info__line")
+            span(class="body-1") id
+            span(class="pl-15 body-2"
+              @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
+          //- div(class="shape-setting__info__line")
+          //-   span(class="body-1") 修改者
+          //-   span(class="pl-15 body-2"
+          //-     @click="copyText(svgInfo.author)") {{svgInfo.author}}
+          //- div(class="shape-setting__info__line")
+          //-   span(class="body-1") 上次更新
+          //-   span(class="pl-15 body-2") {{svgInfo.edit_time}}
+          div(class="shape-setting__info__line")
+            span(class="body-1") 語系
+            select(class="shape-setting__info__select"
+              v-model="svgInfo.locale")
+              option(v-for="locale in localeOptions"
+                :value="locale") {{locale}}
+          div(class="shape-setting__info__line") tags_tw
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="svgInfo.tags_tw")
+          div(class="shape-setting__info__line") tags_us
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="svgInfo.tags_us")
+          div(class="shape-setting__info__line") tags_jp
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="svgInfo.tags_jp")
+          div(class="pt-10")
+            btn(:type="'primary-sm'"
+              class="shape-setting__info__button rounded my-5"
+              @click.native="updateDataClicked()") 更新
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -181,6 +235,8 @@ import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import designApis from '@/apis/design-info'
 
 export default Vue.extend({
   components: {
@@ -216,7 +272,20 @@ export default Vue.extend({
           trimOffset: -1
         }
       } as { [key: string]: IMarker }),
-      markerListReady: false
+      markerListReady: false,
+      isLoading: false,
+      imgRandQuery: '',
+      isGetSvgInfo: false,
+      svgInfo: {
+        key_id: '' as string,
+        author: '' as string,
+        edit_time: '' as string,
+        tags_tw: '' as string,
+        tags_us: '' as string,
+        tags_jp: '' as string,
+        locale: '' as string
+      },
+      localeOptions: ['tw', 'us', 'jp']
     }
   },
   mounted() {
@@ -261,14 +330,21 @@ export default Vue.extend({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      token: 'user/getToken'
     }),
+    ...mapState('user', [
+      'role',
+      'adminMode']),
     ...mapState(
       'markers',
       [
         'categories'
       ]
     ),
+    inAdminMode(): boolean {
+      return this.role === 0 && this.adminMode === true
+    },
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0
@@ -338,11 +414,27 @@ export default Vue.extend({
     },
     endMarker(): string {
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
+    },
+    focusDesignId(): string {
+      return this.currSelectedInfo.layers[0].designId
     }
   },
   watch: {
     'currSelectedInfo.id': function () {
       this.initilizeRecord()
+    },
+    focusDesignId: function () {
+      this.isGetSvgInfo = false
+      this.svgInfo = {
+        key_id: '',
+        author: '',
+        edit_time: '',
+        tags_tw: '',
+        tags_us: '',
+        tags_jp: '',
+        locale: ''
+      }
+      this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
     getColors: function () {
       const currLayer = LayerUtils.getCurrLayer
@@ -616,6 +708,59 @@ export default Vue.extend({
           this.currSelectedColorIndex--
         }
       }
+    },
+    copyText(text: string) {
+      if (text.length === 0) {
+        return
+      }
+      GeneralUtils.copyText(text)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${text} 已複製` })
+        })
+    },
+    async getDataClicked() {
+      this.isLoading = true
+
+      const data = {}
+      if (this.focusDesignId.length === 0) {
+        this.$notify({ group: 'copy', text: '無元素id' })
+      }
+
+      if (this.focusDesignId.length > 0) {
+        const res = await designApis.getDesignInfo(this.token, 'svg', this.focusDesignId, 'select', JSON.stringify(data))
+        if (res.data.flag === 0) {
+          this.isGetSvgInfo = true
+          this.svgInfo = res.data.data
+          this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+        } else {
+          this.$notify({ group: 'copy', text: '找不到模板資料' })
+        }
+      }
+
+      this.isLoading = false
+    },
+    async updateDataClicked() {
+      if (!this.svgInfo.key_id) {
+        this.$notify({ group: 'copy', text: '請先取得元素資料' })
+        return
+      }
+
+      this.isLoading = true
+      const data = {
+        locale: this.svgInfo.locale,
+        tags_tw: this.svgInfo.tags_tw,
+        tags_us: this.svgInfo.tags_us,
+        tags_jp: this.svgInfo.tags_jp
+      }
+      const res = await designApis.updateDesignInfo(this.token, 'svg', this.svgInfo.key_id, 'update', JSON.stringify(data))
+      if (res.data.flag === 0) {
+        this.$notify({ group: 'copy', text: '元素資料更新成功' })
+        this.svgInfo = res.data.data
+        this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+      } else {
+        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+      }
+      this.isLoading = false
     }
   }
 })
@@ -784,6 +929,45 @@ export default Vue.extend({
     align-items: center;
     > div {
       width: 42px;
+    }
+  }
+  &__info {
+    &__divider {
+      width: 100%;
+      border-top: 2px solid #000;
+      margin-top: 10px;
+      padding-bottom: 5px;
+    }
+    &__divider2 {
+      width: 100%;
+      border-top: 2px dotted #000;
+      margin-top: 10px;
+      padding-bottom: 5px;
+    }
+    &__button {
+      margin: 0 auto;
+      width: 70%;
+      padding: 8px 0;
+    }
+    &__line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 5px;
+    }
+    &__image {
+      margin: 0 auto;
+      max-width: 100px;
+      max-height: 100px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    &__select {
+      width: 40%;
+      height: 35px;
+      font-size: 18px;
+      border: 1px solid #d9dbe1;
+      padding-left: 15px;
     }
   }
 }
