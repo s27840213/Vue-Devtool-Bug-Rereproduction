@@ -146,25 +146,27 @@ export default Vue.extend({
     autoResize(): {width: number, height: number} {
       if (this.$route.name !== 'Preview' || this.config.widthLimit === -1) return TextUtils.getTextHW(this.config, this.config.widthLimit)
       const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+      const scale = this.config.styles.scale
       let direction = 0
       let shouldContinue = true
       let widthLimit = this.config.widthLimit
       let autoSize = TextUtils.getTextHW(this.config, widthLimit)
       const originDimension = this.config.styles[dimension]
       while (shouldContinue) {
+        // console.log(widthLimit, direction)
         const autoDimension = autoSize[dimension]
-        if (autoDimension - originDimension > 5 * this.config.scale) {
+        if (autoDimension - originDimension > 5 * scale) {
           if (direction < 0) break
           if (direction >= 20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
-          widthLimit += this.config.scale
+          widthLimit += scale
           direction += 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue
         }
-        if (originDimension - autoDimension > 5 * this.config.scale) {
+        if (originDimension - autoDimension > 5 * scale) {
           if (direction > 0) break
           if (direction <= -20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
-          widthLimit -= this.config.scale
+          widthLimit -= scale
           direction -= 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
           continue

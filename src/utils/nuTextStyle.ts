@@ -300,7 +300,7 @@ export default Extension.create({
       selectPrevious: () => ({ commands }) => {
         const from = this.storage.from ?? 0
         const to = this.storage.to ?? 0
-        console.log(from, to)
+        // console.log(from, to)
         return commands.setTextSelection({ from, to })
       },
       sync: () => ({ chain }) => {

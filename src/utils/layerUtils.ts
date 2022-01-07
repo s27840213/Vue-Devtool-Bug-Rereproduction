@@ -13,6 +13,7 @@ import stepsUtils from './stepsUtils'
 import Vue from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
+import mathUtils from './mathUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -344,6 +345,33 @@ class LayerUtils {
       return i
     }
     return -1
+  }
+
+  getObjectInsertionLayerIndex(layers: ILayer[], objectLayer: any) {
+    const startIndex = this.getUpmostNonTextLayerIndex(layers)
+    let upmostOverlapTextIndex = startIndex
+    for (let i = startIndex + 1; i < layers.length; i++) {
+      const layer = layers[i]
+      if (layer.type === 'group') {
+        const groupLayer = layer as IGroup
+        const types = groupLayer.layers.map(l => l.type)
+        if (!types.includes('text')) continue
+      } else if (layer.type !== 'text') continue
+      const intersectAreaRatio = this.calculateIntersectAreaRatio(objectLayer, layer)
+      console.log('intersect ratio:', intersectAreaRatio)
+      if (intersectAreaRatio > 0.8 && i > upmostOverlapTextIndex) {
+        upmostOverlapTextIndex = i
+      }
+    }
+    return upmostOverlapTextIndex
+  }
+
+  calculateIntersectAreaRatio(objectLayer: any, textLayer: ILayer) {
+    const polygon1 = mathUtils.generatePolygon(objectLayer.styles)
+    const polygon2 = mathUtils.generatePolygon(textLayer.styles)
+    const objectArea = polygon1.area()
+    const intersectArea = mathUtils.getIntersectArea(polygon1, polygon2)
+    return intersectArea / objectArea
   }
 }
 

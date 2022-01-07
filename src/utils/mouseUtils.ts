@@ -60,7 +60,7 @@ class MouseUtils {
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
-      const index = LayerUtils.getUpmostNonTextLayerIndex(store.getters.getPage(pageIndex).layers) + 1
+      const index = LayerUtils.getObjectInsertionLayerIndex(store.getters.getPage(pageIndex).layers, layer) + 1
       LayerUtils.addLayersToPos(pageIndex, [layer], index)
       zindexUtils.reassignZindex(pageIndex)
       StepsUtils.record()
