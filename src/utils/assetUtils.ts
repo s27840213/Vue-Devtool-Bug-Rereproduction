@@ -16,6 +16,7 @@ import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
 import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
+import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 
@@ -172,8 +173,10 @@ class AssetUtils {
       }
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    GroupUtils.deselect()
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    GroupUtils.select(targePageIndex, [index])
     stepsUtils.record()
   }
 
@@ -210,8 +213,10 @@ class AssetUtils {
       }
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    GroupUtils.deselect()
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    GroupUtils.select(targePageIndex, [index])
     stepsUtils.record()
   }
 
@@ -251,8 +256,10 @@ class AssetUtils {
       }
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    GroupUtils.deselect()
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    GroupUtils.select(targePageIndex, [index])
     stepsUtils.record()
   }
 
@@ -278,8 +285,10 @@ class AssetUtils {
       ...json
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    GroupUtils.deselect()
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    GroupUtils.select(targePageIndex, [index])
     stepsUtils.record()
   }
 
@@ -437,8 +446,10 @@ class AssetUtils {
       }
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targePageIndex).layers, config) + 1
+    GroupUtils.deselect()
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
+    GroupUtils.select(targePageIndex, [index])
     stepsUtils.record()
   }
 
