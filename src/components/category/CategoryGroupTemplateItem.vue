@@ -2,7 +2,7 @@
   div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
     div(class="relative pointer"
       @mouseover="() => handleCarouse()"
-      @mouseleave="showCarousel = false")
+      @mouseleave="stopCarouse()")
       image-carousel(v-if="showCarousel"
         :imgs="groupImages"
         @change="handleCarouselIdx")
@@ -35,7 +35,9 @@ export default Vue.extend({
     return {
       showCarousel: false,
       carouselIdx: 0,
-      fallbackSrc: ''
+      fallbackSrc: '',
+      isHover: false,
+      waitTimer: 0 as number
     }
   },
   mounted () {
@@ -76,7 +78,17 @@ export default Vue.extend({
       this.$emit('click', this.item)
     },
     handleCarouse () {
-      this.showCarousel = true
+      this.isHover = true
+      this.waitTimer = setTimeout(() => {
+        if (this.isHover) {
+          this.showCarousel = true
+        }
+      }, 1000)
+    },
+    stopCarouse () {
+      this.isHover = false
+      this.showCarousel = false
+      window.clearInterval(this.waitTimer)
     }
   }
 })
