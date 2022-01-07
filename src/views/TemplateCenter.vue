@@ -487,6 +487,12 @@ export default Vue.extend({
 })
 </script>
 
+<style lang="scss">
+html, body {
+  overflow: hidden;
+}
+</style>
+
 <style lang="scss" scoped>
 .template-center {
   @include size(100%, 100%);
@@ -649,6 +655,7 @@ export default Vue.extend({
     gap: 24px;
     &.mobile {
       gap: 15px;
+      padding: 2px;
     }
     &__column {
       width: 100%;
