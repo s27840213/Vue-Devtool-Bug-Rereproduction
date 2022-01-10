@@ -191,6 +191,7 @@ router.beforeEach(async (to, from, next) => {
   // hence we should guarantee to receive login response before navigate to these pages
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     logUtils.setLog(`Read device width: ${window.screen.width}`)
+    logUtils.setLog(`User agent: ${navigator.userAgent}`)
     if (window.screen.width <= 1300) {
       logUtils.setLog('=> as mobile')
       next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
