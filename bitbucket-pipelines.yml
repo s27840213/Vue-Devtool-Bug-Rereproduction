@@ -8,16 +8,16 @@ pipelines:
             script: #show node and yarn version
               - node -v
               - yarn -v
-        - step:
-            name: "Start build with node module cache"
-            caches: #set caches for node modules to speed up building
-              - node
-            image: cypress/browsers:node14.17.0-chrome88-ff89
-            script:
-              - yarn install
-              - yarn build
-            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-              - dist/**
+        #- step:
+        #    name: "Start build with node module cache"
+        #    caches: #set caches for node modules to speed up building
+        #      - node
+        #    image: cypress/browsers:node14.17.0-chrome88-ff89
+        #    script:
+        #      - yarn install
+        #      - yarn build
+        #    artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+        #      - dist/**
         # - step:
         #     name: 'Run E2E Tests'
         #     caches:
@@ -103,6 +103,8 @@ pipelines:
             name: "create pull request"
             trigger: manual
             script:
+              - apt-get update
+              - apt-get -y install curl jq
               - export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
               - >
                 export DEFAULT_REVIEWERS=$(curl https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/default-reviewers \
