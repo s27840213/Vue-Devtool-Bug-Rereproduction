@@ -78,7 +78,6 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
 import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import { parseInt, toNumber } from 'lodash'
-import { ISelection } from '@/interfaces/text'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -136,6 +135,9 @@ export default Vue.extend({
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
       this.setSpacing(value)
+    })
+    popupUtils.on(PopupSliderEventType.stop, () => {
+      tiptapUtils.focus({ scrollIntoView: false })
     })
   },
   destroyed() {
@@ -446,7 +448,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000)
+          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000, false)
           TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
         })
       }
@@ -455,7 +457,7 @@ export default Vue.extend({
       if (this.isValidFloat(value.toString())) {
         value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
         window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)))
+          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)), false)
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
         })
       }

@@ -14,7 +14,7 @@ div(class="popup-file")
       :iconColor="'gray-2'"
       :iconWidth="'14px'")
   div(class="popup-file__item" @click="toggleGuideline()")
-    span {{showGuideline ?$t('NN0074'):$t('NN0075')}}
+    span {{showGuideline ?$t('NN0074'):$t('NN0361')}}
   div(class="popup-file__item" @click="clearGuideline()")
     span {{$t('NN0075')}}
   template(v-if="isAdmin")

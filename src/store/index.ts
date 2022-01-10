@@ -37,6 +37,7 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
+  exportIds: '',
   folderInfo: {
     isRoot: true,
     parentFolder: '',
@@ -221,7 +222,7 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number }) {
+  SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
       state.pages = newPages
@@ -230,6 +231,7 @@ const mutations: MutationTree<IEditorState> = {
       state.name = newPages.name
       state.groupId = newPages.groupId || state.groupId
       state.groupType = newPages.groupType || state.groupType
+      state.exportIds = newPages.exportIds || state.exportIds
     }
     // reset page index
     state.middlemostPageIndex = 0
@@ -255,6 +257,14 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_groupId(state: IEditorState, groupId: string) {
     state.groupId = groupId
+  },
+  ADD_exportIds(state: IEditorState, exportId: string) {
+    const exportIds = state.exportIds.split(',').filter((id) => id.length !== 0)
+    exportIds.push(exportId)
+    if (exportIds.length > 10) {
+      exportIds.shift()
+    }
+    state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
     state.groupType = groupType
@@ -289,7 +299,6 @@ const mutations: MutationTree<IEditorState> = {
     state.middlemostPageIndex = index
   },
   SET_currActivePageIndex(state: IEditorState, index: number) {
-    console.log(index)
     state.currActivePageIndex = index
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
@@ -559,7 +568,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
-    console.log(state.isColorPickerOpened)
   },
   SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedPhotoInfo = data
@@ -663,6 +671,7 @@ const mutations: MutationTree<IEditorState> = {
     state.groupId = ''
     state.groupType = 0
     state.name = ''
+    state.exportIds = ''
     Object.assign(state.folderInfo, {
       isRoot: true,
       parentFolder: '',

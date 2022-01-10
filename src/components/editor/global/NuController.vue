@@ -350,9 +350,8 @@ export default Vue.extend({
         }
         popupUtils.closePopup()
       } else {
-        if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-        }
+        this.getLayerType === 'text' && LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
+        TextPropUtils.updateTextPropsState()
       }
     },
     isTextEditing(editing) {
@@ -508,13 +507,14 @@ export default Vue.extend({
         opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
       return !this.isCurveText ? textstyles
-        : Object.assign(this.textScaleStyle, {
+        : {
           width: 'auto',
           height: 'auto',
           position: 'absolute',
           top: 0,
-          left: 0
-        })
+          left: 0,
+          opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        }
     },
     groupControllerStyle() {
       return {
@@ -901,8 +901,6 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            // const clipPath = `M0,0h${width}v${height}h${-width}z`
-            // FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { clipPath })
             scale = 1
           }
           break

@@ -1021,6 +1021,7 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_addDesign(state: IDesignState, design: IDesign) {
     const index = designUtils.getInsertIndex(state.allDesigns, state.sortByField, state.sortByDescending, design)
     state.allDesigns.splice(index, 0, design)
+    state.folderDesignCount += 1
   },
   UPDATE_replaceDesign(state: IDesignState, updateInfo: { id: string, design: IDesign }) {
     const index = state.allDesigns.findIndex((design_) => design_.id === updateInfo.id) // placeholder design uses special id, so replace by id
@@ -1030,6 +1031,7 @@ const mutations: MutationTree<IDesignState> = {
     const index = state.allDesigns.findIndex((design_) => design_.asset_index === design.asset_index)
     if (index >= 0) {
       state.allDesigns.splice(index, 1)
+      state.folderDesignCount -= 1
     }
   },
   UPDATE_setFolderName(state: IDesignState, updateInfo: { name: string, parents: string[], folder: IFolder }) {
@@ -1049,11 +1051,13 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_addFolder(state: IDesignState, folder: IFolder) {
     const index = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
     state.allFolders.splice(index, 0, folder)
+    state.folderFolderCount += 1
   },
   UPDATE_deleteFolder(state: IDesignState, folder: IFolder) {
     const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
     if (index >= 0) {
       state.allFolders.splice(index, 1)
+      state.folderFolderCount -= 1
     }
   },
   UPDATE_removeFolder(state: IDesignState, pathedFolder: IPathedFolder) {

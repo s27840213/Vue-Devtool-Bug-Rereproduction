@@ -61,7 +61,7 @@ export function getDocumentColor(pageIndex: number, color: string): Array<string
             break
           case 'shape': {
             const shape = l as IShape
-            for (let i = 0; i < shape.color.length && i < 20; i++) {
+            for (let i = 0; shape.color && i < shape.color.length && i < 20; i++) {
               if (!docColors.has(shape.color[i])) {
                 docColors.add(shape.color[i])
               }

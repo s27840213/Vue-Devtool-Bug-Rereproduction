@@ -17,6 +17,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
+    console.log(url, from.name)
     if (type && designId) {
       switch (type) {
         case 'export': {

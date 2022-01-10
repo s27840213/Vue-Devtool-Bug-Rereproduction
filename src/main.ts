@@ -11,10 +11,12 @@ import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
 import hintUtils from './utils/hintUtils'
+import VueMeta from 'vue-meta'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
+Vue.use(VueMeta)
 Vue.component('RecycleScroller', RecycleScroller)
 
 Vue.directive('ratio-change', {
@@ -92,19 +94,19 @@ new Vue({
   router,
   store,
   i18n,
-  // mounted() {
-  //   document.dispatchEvent(new Event('render-event'))
-  // },
+  mounted() {
+    document.dispatchEvent(new Event('render-event'))
+  },
   render: (h) => h(App)
 }).$mount('#app')
 
 // Here is a testing code to export whole porject as a Library
-export default {
-  install(Vue: { component: (arg0: string, arg1: VueConstructor<Vue>) => void }, options: { store: { registerModule: (arg0: string, arg1: Store<IEditorState>) => void } }): void {
-    if (!options || !options.store) {
-      throw new Error('Please initialise plugin with a Vuex store.')
-    }
-    options.store.registerModule('nu-editor', store)
-    Vue.component('nu-editor', App as VueConstructor<Vue>)
-  }
-}
+// export default {
+//   install(Vue: { component: (arg0: string, arg1: VueConstructor<Vue>) => void }, options: { store: { registerModule: (arg0: string, arg1: Store<IEditorState>) => void } }): void {
+//     if (!options || !options.store) {
+//       throw new Error('Please initialise plugin with a Vuex store.')
+//     }
+//     options.store.registerModule('nu-editor', store)
+//     Vue.component('nu-editor', App as VueConstructor<Vue>)
+//   }
+// }

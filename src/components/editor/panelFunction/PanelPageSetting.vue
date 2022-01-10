@@ -1010,7 +1010,7 @@ export default Vue.extend({
     max-height: 500px;
     margin-right: -5px;
     padding-right: 5px;
-    overflow-y: overlay;
+    overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {
       width: 4px;
@@ -1019,7 +1019,7 @@ export default Vue.extend({
     }
     &::-webkit-scrollbar-thumb {
       border-radius: 2px;
-      background-color: setColor(gray-2);
+      background-color: setColor(gray-3);
     }
   }
 }

@@ -213,7 +213,7 @@ export default Vue.extend({
           const newLocale = this.getLocaleValue(this.inputLocale) as string
           localStorage.setItem('locale', newLocale)
           this.$i18n.locale = newLocale
-          // this.$router.go(0)
+          this.$router.go(0)
         }
         this.isConfirmClicked = false
         this.isEmailVerified = false

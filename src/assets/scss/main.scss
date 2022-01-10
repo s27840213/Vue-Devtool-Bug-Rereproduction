@@ -15,3 +15,6 @@ body {
     -webkit-user-select: text;
     user-select: text;
 }
+input[type=number] {
+    -moz-appearance:textfield;
+}

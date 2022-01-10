@@ -249,9 +249,10 @@ const mutations: MutationTree<IUserModule> = {
     })
     state.images[targetIndex].progress = progress
   },
-  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex }) {
+  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
     const { images, teamId, userId } = state
-    const isAdmin = state.role === 0
+    console.log(type)
+    const isAdmin = type === 'public'
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
@@ -280,7 +281,7 @@ const mutations: MutationTree<IUserModule> = {
     } else {
       images[targetIndex].urls = targetUrls
       images[targetIndex].id = isAdmin ? assetId : undefined
-      images[targetIndex].assetIndex = assetIndex
+      images[targetIndex].assetIndex = assetIndex ?? assetId
     }
   },
   [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
@@ -383,14 +384,14 @@ const actions: ActionTree<IUserModule, unknown> = {
       if (flag === 0) {
         console.log('Put asset success')
         dispatch('getAllAssets', { token: state.token })
-        Vue.notify({ group: 'copy', text: '檔案資料已儲存' })
+        Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
         console.log('Put asset failed')
-        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       } else if (flag === 2) {
         console.log('Token invalid!')
-        Vue.notify({ group: 'copy', text: '檔案資料儲存失敗' })
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
     } catch (error) {
       console.log(error)

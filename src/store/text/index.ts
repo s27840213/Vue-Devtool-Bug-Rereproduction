@@ -1,7 +1,6 @@
 import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
-import font from '../module/font'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const

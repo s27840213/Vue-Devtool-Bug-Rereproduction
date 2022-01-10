@@ -15,13 +15,13 @@ class LocaleUtils {
     this.SUPPORTED_LOCALES = [{
       abbreviation: 'us',
       code: 'us',
-      base: '/us',
+      base: '',
       name: 'English'
     },
     {
       abbreviation: 'tw',
       code: 'tw',
-      base: '',
+      base: '/tw',
       name: '繁體中文'
     },
     {
@@ -37,7 +37,7 @@ class LocaleUtils {
       jp: 'jp'
     }
 
-    this.defaultLocale = 'tw'
+    this.defaultLocale = 'us'
   }
 
   isDefaultLocale(): boolean {

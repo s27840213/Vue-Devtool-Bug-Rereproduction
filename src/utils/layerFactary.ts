@@ -3,7 +3,9 @@ import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer } from '@/i
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
+import localeUtils from './localeUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -246,6 +248,14 @@ class LayerFactary {
           })
         }
       })
+      config.paragraphs.forEach((p, pidx) => {
+        for (let i = 0; i < p.spans.length; i++) {
+          if (!p.spans[i].styles.font) {
+            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
+            (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+          }
+        }
+      })
     }
     return Object.assign(basicConfig, config)
   }
@@ -381,6 +391,7 @@ class LayerFactary {
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
+    config.backgroundImage.id = GeneralUtils.generateRandomString(8)
 
     return config
   }

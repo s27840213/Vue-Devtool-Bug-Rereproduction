@@ -17,6 +17,7 @@
 </template>
 
 <script lang="ts">
+import { PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import Vue from 'vue'
@@ -62,6 +63,7 @@ export default Vue.extend({
   methods: {
     handleChangeStop() {
       stepsUtils.record()
+      popupUtils.event.emit(PopupSliderEventType.stop)
     }
   }
 })

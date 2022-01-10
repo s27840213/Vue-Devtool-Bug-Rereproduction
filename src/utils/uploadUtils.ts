@@ -78,6 +78,7 @@ class UploadUtils {
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
+  get exportIds(): string { return store.state.exportIds }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -226,7 +227,7 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url })
+                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
@@ -328,7 +329,7 @@ class UploadUtils {
                             progress: 100
                           })
 
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
+                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                         }
                       } else {
@@ -440,6 +441,7 @@ class UploadUtils {
     const type = router.currentRoute.query.type
     const designId = router.currentRoute.query.design_id
     const teamId = router.currentRoute.query.team_id
+    // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
     if (designId && teamId && type && !this.hasGottenDesign) {
@@ -477,7 +479,8 @@ class UploadUtils {
       name: pageUtils.pagesName,
       pages: pagesJSON,
       groupId: store.state.groupId,
-      groupType: store.state.groupType
+      groupType: store.state.groupType,
+      exportIds: this.exportIds
     }
 
     const formData = new FormData()
@@ -951,16 +954,7 @@ class UploadUtils {
         fetchTarget = designParams.fetchTarget ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
         break
       }
-      // case GetDesignType.PRIVATE_DESIGN: {
-      //   if (!this.isLogin) {
-      //     this.getDesignInfo.flag = 1
-      //     this.getDesignInfo.id = designId
-      //     this.getDesignInfo.type = GetDesignType.PRIVATE_DESIGN
-      //     return
-      //   }
-      //   fetchTarget = signedUrl
-      //   break
-      // }
+
       case GetDesignType.PRODUCT_PAGE_TEMPLATE: {
         return listService.getList({ type: 'group', groupId: designId })
           .then(result => {
@@ -1018,6 +1012,8 @@ class UploadUtils {
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
+                console.log(json.exportIds)
+                router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
@@ -1291,10 +1287,27 @@ class UploadUtils {
       // console.log(this.loginOutput)
       logUtils.setLog(`Export Design:
         ExportId: ${exportId},
+        ExportIds: ${this.exportIds},
         UserId: ${this.userId}
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
-      const pagesJSON = json || store.getters.getPages
-      this.resetControlStates(pagesJSON)
+
+      // ref: uploadUtils.ts:L466
+      const pagesJSON = (json || store.getters.getPages).map((page: IPage) => {
+        const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+        for (const [i, layer] of newPage.layers.entries()) {
+          if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          } else if (layer.type !== 'shape') {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          }
+        }
+        newPage.backgroundImage.config.imgControl = false
+        newPage.width = parseInt(newPage.width.toString(), 10)
+        newPage.height = parseInt(newPage.height.toString(), 10)
+        return newPage
+      })
+
+      // this.resetControlStates(pagesJSON)
       const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)

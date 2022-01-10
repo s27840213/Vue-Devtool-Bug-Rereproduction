@@ -62,15 +62,18 @@
               class="home-content__feature-item"
               :class="{'selected': featureSelected === idx}"
               @click.native="featureItemClicked(idx)")
-              svg-icon(:iconName="featureSelected === idx ? `${item.name}-s` : `${item.name}`"
+              svg-icon(v-if="currLocale === 'us' && idx === 3"
+                :iconName="featureSelected === idx ? `feature-icon-us${item.name}-s` : `feature-icon-us${item.name}`"
+                :iconWidth="isMobile ? '20px' : '40px'")
+              svg-icon(v-else
+                :iconName="featureSelected === idx ? `feature-icon${item.name}-s` : `feature-icon${item.name}`"
                 :iconWidth="isMobile ? '20px' : '40px'")
               div(class="home-content__feature-item-title pt-10 body-2") {{item.title}}
         div(class="home-content__feature-content")
           div(class="home-content__feature-img")
-            img(:src="require(`@/assets/img/jpg/homepage/feature${featureSelected+1}.jpg`)")
+            img(:src="require(`@/assets/img/jpg/homepage/feature_${currLocale}_${featureSelected+1}.jpg`)")
           div(class="home-content__feature-text")
-            div(v-if="isMobile"
-              class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
+            div(class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
             div(class="pb-20") {{featureContent}}
             btn(:type="'primary-mid'" class="rounded"
               @click.native="newDesign()") {{$t('NN0274')}}
@@ -175,6 +178,39 @@ export default Vue.extend({
       CoolDownTimer: 0 as number
     }
   },
+  metaInfo() {
+    const meta = [
+      {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      },
+      {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      },
+      {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      },
+      {
+        property: 'og:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'og:description'
+      }
+    ]
+    const title = `${this.$t('SE0001')}`
+    const htmlAttrs = {
+      lang: `${this.$t('SE0003')}`
+    }
+    return {
+      title,
+      meta,
+      htmlAttrs
+    }
+  },
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
@@ -231,11 +267,11 @@ export default Vue.extend({
     const tagTemplate = await this.getTagContent({ keyword, theme })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
-    keyword = 'locale::' + localeUtils.currLocale() + ';;order_by::popular'
+    keyword = 'group::0;;order_by::popular'
     const popularTemplate = await this.getTagContent({ keyword, theme })
     this.popularTemplateList = popularTemplate.data.content[0].list
 
-    keyword = 'locale::' + localeUtils.currLocale() + ';;order_by::time'
+    keyword = 'group::0;;order_by::time'
     const latestTemplate = await this.getTagContent({ keyword, theme })
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
@@ -492,11 +528,15 @@ export default Vue.extend({
         flex-direction: column;
       }
       &-title {
+        display: none;
         color: setColor(dark-blue-2);
         text-align: center;
         font-weight: 600;
         font-size: 18px;
         line-height: 28px;
+        @include layout-mobile {
+          display: block;
+        }
       }
     }
     &-img {

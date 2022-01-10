@@ -390,7 +390,7 @@ export default Vue.extend({
       })
     },
     composeKeyword() {
-      const res = [`locale::${this.$i18n.locale}`]
+      const res = ['group::0']
       const tags = []
       let themes: string[] = []
       if (this.searchbarKeyword !== '') {
@@ -486,6 +486,12 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="scss">
+html, body {
+  overflow: hidden;
+}
+</style>
 
 <style lang="scss" scoped>
 .template-center {
@@ -649,6 +655,7 @@ export default Vue.extend({
     gap: 24px;
     &.mobile {
       gap: 15px;
+      padding: 2px;
     }
     &__column {
       width: 100%;

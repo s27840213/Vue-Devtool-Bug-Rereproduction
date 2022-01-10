@@ -26,6 +26,7 @@ export interface IEditorState {
   designId: string,
   assetId: string,
   groupId: string,
+  exportIds: string,
   groupType: number,
   folderInfo: {
     isRoot: boolean,
@@ -101,6 +102,7 @@ export enum ColorEventType {
 }
 
 export enum PopupSliderEventType {
+  stop = 'changeStop',
   opacity = 'setLayerOpacity',
   lineHeight = 'setTextLineHeight',
   letterSpacing = 'setTextSpacing',

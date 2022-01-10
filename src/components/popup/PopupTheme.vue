@@ -26,11 +26,11 @@
     div(class="flex px-20 flex-between")
       btn(class="popup-theme__btn popup-theme__btn--cancel rounded"
         type="primary-sm"
-        @click.native="handleCancel") 取消
+        @click.native="handleCancel") {{$t('NN0203')}}
       btn(class="popup-theme__btn rounded"
         type="primary-sm"
         :disabled="isConfirmDisabled"
-        @click.native="handleSubmit") 確定
+        @click.native="handleSubmit") {{$tc('NN0164', 1)}}
 </template>
 
 <script lang="ts">
@@ -52,49 +52,49 @@ export default Vue.extend({
       default: () => []
     }
   },
-  data () {
+  data() {
     return {
       all: false,
       selected: {} as { [key: string]: boolean }
     }
   },
-  mounted () {
+  mounted() {
     this.initSelected(this.preSelected as string[])
   },
   computed: {
     ...mapGetters({
       themes: 'getThemes'
     }),
-    isConfirmDisabled (): boolean {
+    isConfirmDisabled(): boolean {
       return !(Object.values(this.selected).some(Boolean))
     }
   },
   methods: {
-    initSelected (preSelected: string[]) {
+    initSelected(preSelected: string[]) {
       const { themes } = this
       this.selected = themes.reduce((prev: { [key: string]: boolean }, curr: Itheme) => {
         prev[curr.id] = preSelected.includes(`${curr.id}`)
         return prev
       }, {})
     },
-    handleAllCheck (event: { value: string, checked: boolean }) {
+    handleAllCheck(event: { value: string, checked: boolean }) {
       this.all = event.checked
       Object.keys(this.selected)
         .forEach((id: string) => {
           this.selected[id] = event.checked
         })
     },
-    handleChange (event: { value: string, checked: boolean }) {
+    handleChange(event: { value: string, checked: boolean }) {
       !event.checked && (this.all = false)
       this.selected[event.value] = event.checked
     },
-    handleSubmit () {
+    handleSubmit() {
       this.$emit('change', this.selected)
     },
-    handleCancel () {
+    handleCancel() {
       this.$emit('close')
     },
-    handleRecommend () {
+    handleRecommend() {
       const currFocusPageSize = themeUtils.getFocusPageSize()
       const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
       this.all = false
@@ -105,36 +105,36 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .popup-theme {
-    padding: 16px 10px 20px;
-    display: grid;
-    grid-template-columns: 1fr;
-    box-sizing: border-box;
-    border-radius: 5px;
-    box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-    background-color: setColor(white);
-    &__recommend {
-      border-bottom: 1px solid #E0E0E0;
-    }
-    &__title {
-      font-weight: 800;
-      letter-spacing: 2px;
-    }
-    &__checkbox {
-      line-height: 24px;
-      margin-bottom: 4px;
-    }
-    &__btn.btn-inactive-sm,
-    &__btn.btn-primary-sm {
-      width: 80px;
-      padding: 4px 10px;
-      &:disabled {
-        background-color: setColor(gray-3);
-      }
-    }
-    &__btn--cancel.btn-primary-sm {
-      color: setColor(gray-2);
-      background-color: setColor(gray-5);
+.popup-theme {
+  padding: 16px 10px 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+  background-color: setColor(white);
+  &__recommend {
+    border-bottom: 1px solid #e0e0e0;
+  }
+  &__title {
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+  &__checkbox {
+    line-height: 24px;
+    margin-bottom: 4px;
+  }
+  &__btn.btn-inactive-sm,
+  &__btn.btn-primary-sm {
+    width: 80px;
+    padding: 4px 10px;
+    &:disabled {
+      background-color: setColor(gray-3);
     }
   }
+  &__btn--cancel.btn-primary-sm {
+    color: setColor(gray-2);
+    background-color: setColor(gray-5);
+  }
+}
 </style>
