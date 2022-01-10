@@ -39,14 +39,11 @@ export default Vue.extend({
   },
   mounted() {
     const urlParams = new URLSearchParams(window.location.search)
-    const width = urlParams.get('width')
-    if (width) {
-      this.width = parseInt(width)
-    }
     const url = urlParams.get('url')
     if (url) {
       this.url = url
     }
+    this.width = window.screen.width
   },
   methods: {
     goToHome() {
