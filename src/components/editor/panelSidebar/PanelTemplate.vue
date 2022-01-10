@@ -52,8 +52,8 @@
               :item="item"
               @click="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
+        div(v-if="title" class="panel-template__header") {{ title }}
         div(class="panel-template__items")
-          div(v-if="title" class="panel-template__header") {{ title }}
           component(v-for="item in list"
             class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
@@ -75,6 +75,7 @@ import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import themeUtils from '@/utils/themeUtils'
+import GalleryUtils from '@/utils/galleryUtils'
 
 export default Vue.extend({
   components: {
@@ -130,19 +131,32 @@ export default Vue.extend({
         }))
     },
     listResult(): any[] {
-      const { keyword, itemHeight } = this
+      const { keyword, theme } = this
+      let galleryUtils = null
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 2))
-        .fill('')
-        .map((_, idx) => {
-          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+      if (['3', '7'].includes(theme)) {
+        // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
+        galleryUtils = new GalleryUtils(300, 200, 10)
+      } else {
+        galleryUtils = new GalleryUtils(300, 140, 10)
+      }
+      const idContainerHeight = this.showTemplateId ? 24 : 0
+      const result = galleryUtils
+        .generate(list.map((template: any) => ({
+          ...template,
+          width: template.match_cover.width,
+          height: template.match_cover.height
+        })))
+        .map((templates, idx) => {
           const title = !keyword && !idx ? `${this.$t('NN0083')}` : ''
+          const height = idContainerHeight + templates[0].preview.height
           return {
-            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            id: `result_${templates.map(item => item.id).join('_')}`,
             type: 'category-template-item',
-            list: rowItems,
-            title,
-            size: title ? (itemHeight + 46) : itemHeight
+            list: templates,
+            title: !keyword && !idx ? `${this.$t('NN0083')}` : '',
+            // 上下margin 10px, 如果有title則再加上title的高度46px
+            size: title ? (height + 56) : height + 10
           }
         })
       if (result.length) {
@@ -250,14 +264,13 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   &__item {
-    width: 145px;
     text-align: center;
     vertical-align: middle;
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
     column-gap: 10px;
+    grid-auto-flow: column;
   }
   &__header {
     grid-column: 1 / 3;

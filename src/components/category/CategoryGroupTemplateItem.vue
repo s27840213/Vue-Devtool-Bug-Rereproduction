@@ -1,16 +1,17 @@
 <template lang="pug">
-  div(class="category-template-item" @click="handleClickGroup")
+  div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
     div(class="relative pointer"
       @mouseover="() => handleCarouse()"
-      @mouseleave="showCarousel = false")
+      @mouseleave="stopCarouse()")
       image-carousel(v-if="showCarousel"
         :imgs="groupImages"
         @change="handleCarouselIdx")
         template(v-slot="{ url }")
-          img(:src="url" class="category-template-item__img")
+          img(:src="url" :style="previewStyle" class="category-template-item__img")
       img(v-else
         class="category-template-item__img pointer"
         :src="fallbackSrc || previewImage"
+        :style="previewStyle"
         @error="handleNotFound")
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
     div(v-if="showId"
@@ -34,7 +35,9 @@ export default Vue.extend({
     return {
       showCarousel: false,
       carouselIdx: 0,
-      fallbackSrc: ''
+      fallbackSrc: '',
+      isHover: false,
+      waitTimer: 0 as number
     }
   },
   mounted () {
@@ -43,11 +46,19 @@ export default Vue.extend({
   },
   computed: {
     groupImages (): string[] {
-      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev?ver=${content.ver}`)
+      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_4x?ver=${content.ver}`)
     },
     previewImage (): string {
       const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
+      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_4x?ver=${ver}`
+    },
+    previewStyle(): any {
+      const { width, height } = this.item.preview || {}
+      return { width: `${width}px`, height: `${height}px` }
+    },
+    itemStyle(): any {
+      const { width } = this.item.preview || {}
+      return { width: `${width || 145}px` }
     }
   },
   methods: {
@@ -67,7 +78,17 @@ export default Vue.extend({
       this.$emit('click', this.item)
     },
     handleCarouse () {
-      this.showCarousel = true
+      this.isHover = true
+      this.waitTimer = setTimeout(() => {
+        if (this.isHover) {
+          this.showCarousel = true
+        }
+      }, 1000)
+    },
+    stopCarouse () {
+      this.isHover = false
+      this.showCarousel = false
+      window.clearInterval(this.waitTimer)
     }
   }
 })

@@ -1,9 +1,10 @@
 <template lang="pug">
-  div(class="category-template-item")
+  div(class="category-template-item" :style="itemStyle")
     div(class="relative")
       img(class="category-template-item__img pointer"
         draggable="true"
-        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev?ver=${item.ver}`"
+        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_4x?ver=${item.ver}`"
+        :style="previewStyle"
         @error="handleNotFound"
         @dragstart="dragStart($event)"
         @click="addTemplate")
@@ -44,6 +45,14 @@ export default Vue.extend({
     },
     isDetailPage(): boolean {
       return this.designGroupType === 1 || this.groupItem?.group_type === 1
+    },
+    previewStyle(): any {
+      const { width, height } = this.item.preview || {}
+      return { width: `${width}px`, height: `${height}px` }
+    },
+    itemStyle(): any {
+      const { width } = this.item.preview || {}
+      return { width: `${width || 145}px` }
     }
   },
   methods: {
