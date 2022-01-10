@@ -103,24 +103,25 @@ pipelines:
             name: "create pull request"
             trigger: manual
             script:
-              - curl --request POST \
-                --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
-                --header "Accept: application/json" \
-                --header "Content-Type: application/json" \
-                --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
-                --data '{
-                  "title": "Pull request to develop",
-                  "source": {
-                    "branch": {
-                      "name": "'"${BITBUCKET_BRANCH}"'"
+              - >
+                curl --request POST \
+                  --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
+                  --header "Accept: application/json" \
+                  --header "Content-Type: application/json" \
+                  --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
+                  --data '{
+                    "title": "Pull request to develop",
+                    "source": {
+                      "branch": {
+                        "name": "'"${BITBUCKET_BRANCH}"'"
+                      }
+                    },
+                    "destination": {
+                      "branch": {
+                        "name": "develop"
+                      }
                     }
-                  },
-                  "destination": {
-                    "branch": {
-                      "name": "develop"
-                    }
-                  }
-                }'
+                  }'
   branches:
     master:
       - parallel:
