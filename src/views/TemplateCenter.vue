@@ -430,6 +430,7 @@ export default Vue.extend({
     },
     handleTemplateClick(content: IContentTemplate) {
       if (content.themes.length > 1) {
+        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
         if (this.isMobile) {
           const route = this.$router.resolve({
             name: 'Editor',
@@ -445,7 +446,6 @@ export default Vue.extend({
         }
         this.modal = 'template'
         this.contentBuffer = content
-        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
         this.selectedTheme = undefined
       } else {
         const matchedTheme = this.themes.find(theme => theme.id.toString() === content.themes[0])
