@@ -159,7 +159,7 @@
           div(class="template-center__multi__button"
               :class="selectedTheme ? '' : 'disabled'"
               @click="handleThemeSubmit")
-            span {{$t('NN0229')}}
+            span(:style="multiThemeButtonStyles()") {{$t('NN0229')}}
     div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
 </template>
 
@@ -311,8 +311,13 @@ export default Vue.extend({
       }
     },
     templateStyles(aspectRatio: number) {
-      // return { paddingTop: `${heightPercent}%` }
       return { aspectRatio: `${aspectRatio}` }
+    },
+    multiThemeButtonStyles() {
+      return this.$i18n.locale === 'tw' ? {
+        letterSpacing: '1.21em',
+        textIndent: '1.21em'
+      } : {}
     },
     handleScroll() {
       if (this.isMobile) return
@@ -901,8 +906,6 @@ html, body {
         font-weight: 700;
         font-size: 12px;
         line-height: 18px;
-        letter-spacing: 1.21em;
-        text-indent: 1.21em;
         color: white;
       }
       &.disabled {
