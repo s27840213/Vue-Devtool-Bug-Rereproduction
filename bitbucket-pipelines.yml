@@ -1,7 +1,7 @@
 image: node:14.16.0
 
 pipelines:
-  default:
+  default: #for non-master and non-develop branch, i.e., feature or hotfix...
     - parallel:
         - step:
             name: "Verify build environment"
@@ -201,3 +201,44 @@ pipelines:
                 EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
             #remove cache in cloudflare after successfully sync S3
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+    develop:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and yarn version
+                - node -v
+                - yarn -v
+          - step:
+              name: "Start build with node module cache"
+              caches: #set caches for node modules to speed up building
+                - node
+              image: cypress/browsers:node14.17.0-chrome88-ff89
+              script:
+                - yarn install
+                - yarn build
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - dist/**
+          # - step:
+          #     name: 'Run E2E Tests'
+          #     caches:
+          #       - node
+          #     image: cypress/browsers:node14.17.0-chrome88-ff89
+          #     script:
+          #       - npx cypress install
+          #       - yarn install
+          #       - yarn serve & npx wait-on http://localhost:8080
+          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+      - step:
+          name: "deploy rd"
+          deployment: rd
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:0.5.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_RD
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
+              #no cache for test environment (since free cloudflare can not remove cache by host)
