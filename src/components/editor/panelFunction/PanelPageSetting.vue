@@ -859,6 +859,9 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
+    &:hover {
+      background-color: setColor(blue-hover);
+    }
     &__text {
       font-weight: 700;
       font-size: 12px;

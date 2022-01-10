@@ -351,7 +351,9 @@ export default Vue.extend({
         popupUtils.closePopup()
       } else {
         this.getLayerType === 'text' && LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-        TextPropUtils.updateTextPropsState()
+        if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
+          TextPropUtils.updateTextPropsState()
+        }
       }
     },
     isTextEditing(editing) {
