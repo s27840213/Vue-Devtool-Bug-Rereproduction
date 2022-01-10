@@ -429,11 +429,20 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
-      if (this.isMobile) {
-        this.$router.push({ name: 'MobileWarning', query: { isMobile: 'aspect-ratio' } })
-        return
-      }
       if (content.themes.length > 1) {
+        if (this.isMobile) {
+          const route = this.$router.resolve({
+            name: 'Editor',
+            query: {
+              type: 'new-design-template',
+              design_id: content.id,
+              width: this.matchedThemes[0].width.toString(),
+              height: this.matchedThemes[0].height.toString()
+            }
+          })
+          window.open(route.href, '_blank')
+          return
+        }
         this.modal = 'template'
         this.contentBuffer = content
         this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
