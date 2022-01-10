@@ -103,6 +103,11 @@ pipelines:
             name: "create pull request"
             trigger: manual
             script:
+              - export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
+              - >
+                export DEFAULT_REVIEWERS=$(curl https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/default-reviewers \
+                  -s -S -f -X GET \
+                  -H "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" | jq '.values' | jq 'map({uuid})' )              
               - >
                 curl --request POST \
                   --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
@@ -110,7 +115,7 @@ pipelines:
                   --header "Content-Type: application/json" \
                   --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
                   --data '{
-                    "title": "Pull request to develop",
+                    "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
                     "source": {
                       "branch": {
                         "name": "'"${BITBUCKET_BRANCH}"'"
@@ -120,7 +125,8 @@ pipelines:
                       "branch": {
                         "name": "develop"
                       }
-                    }
+                    },
+                    "reviewers": '"${DEFAULT_REVIEWERS}"'
                   }'
   branches:
     master:
