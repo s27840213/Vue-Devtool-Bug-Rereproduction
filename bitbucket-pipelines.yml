@@ -8,16 +8,16 @@ pipelines:
             script: #show node and yarn version
               - node -v
               - yarn -v
-        #- step:
-        #    name: "Start build with node module cache"
-        #    caches: #set caches for node modules to speed up building
-        #      - node
-        #    image: cypress/browsers:node14.17.0-chrome88-ff89
-        #    script:
-        #      - yarn install
-        #      - yarn build
-        #    artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-        #      - dist/**
+        - step:
+            name: "Start build with node module cache"
+            caches: #set caches for node modules to speed up building
+              - node
+            image: cypress/browsers:node14.17.0-chrome88-ff89
+            script:
+              - yarn install
+              - yarn build
+            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+              - dist/**
         # - step:
         #     name: 'Run E2E Tests'
         #     caches:
@@ -234,6 +234,11 @@ pipelines:
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
                 #no cache for test environment (since free cloudflare can not remove cache by host)
+        - step:
+            name: "create pull request"
+            trigger: manual
+            script:
+              - ./bash/create_pull_request.sh
     hotfix: #for non-master and non-develop branch, i.e., feature or hotfix...
       - parallel:
           - step:
