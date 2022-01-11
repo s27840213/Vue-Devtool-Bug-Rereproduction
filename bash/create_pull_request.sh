@@ -64,7 +64,7 @@ then
           }
         }'
 else
-    echo "create pull request to master"
+    echo "create pull request to develop"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
         --header "Accept: application/json" \
@@ -79,7 +79,7 @@ else
           },
           "destination": {
             "branch": {
-              "name": "master"
+              "name": "develop"
             }
           }
         }'
