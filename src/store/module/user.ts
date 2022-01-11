@@ -449,6 +449,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
+      console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
         i18n.locale = data.data.locale

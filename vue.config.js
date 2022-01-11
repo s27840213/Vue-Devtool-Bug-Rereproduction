@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+const { argv } = require('yargs')
 
 function resolve (dir) {
     return path.join(__dirname, dir)
@@ -45,6 +46,7 @@ module.exports = {
                     ignore: ['node_modules', 'vue.config.js']
                 }])
         }
+        console.log(argv)
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
                 let name = 'process.env'
@@ -52,46 +54,41 @@ module.exports = {
                 return args
             })
         }
-        // config.plugin('define').tap(args => {
-        //     let name = 'process.env'
-        //     args[0][name]['VUE_APP_1234567123123'] = '123456'
-        //     return args
-        // })
-        // if (process.env.PRERENDER) {
-        //     config.plugin('define').tap(args => {
-        //         let name = 'process.env'
-        //         args[0][name]['VUE_APP_PRERENDER'] = process.env.BITBUCKET_BUILD_NUMBER || ''
-        //         return args
-        //     })
-        //     config.plugin('prerender')
-        //         .use(PrerenderSPAPlugin, [{
-        //             staticDir: path.join(__dirname, 'dist'),
-        //             routes: ['/', '/tw', '/us', '/jp', '/templates'],
-        //             renderer: new Renderer({
-        //                 renderAfterDocumentEvent: 'render-event',
-        //                 headless: true
-        //             })
-        //         }])
-        // }
+        if (argv.PRERENDER) {
+            config.plugin('define').tap(args => {
+                let name = 'process.env'
+                args[0][name]['VUE_APP_PRERENDER'] = argv.PRERENDER || ''
+                return args
+            })
+            config.plugin('prerender')
+                .use(PrerenderSPAPlugin, [{
+                    staticDir: path.join(__dirname, 'dist'),
+                    routes: ['/', '/tw', '/us', '/jp', '/templates'],
+                    renderer: new Renderer({
+                        renderAfterDocumentEvent: 'render-event',
+                        headless: true
+                    })
+                }])
+        }
     },
 
-    configureWebpack: {
-        plugins: [
-            new PrerenderSPAPlugin({
-                staticDir: path.join(__dirname, 'dist'),
-                routes: ['/', '/tw', '/us', '/jp', '/templates'],
-                renderer: new Renderer({
-                    renderAfterDocumentEvent: 'render-event',
-                    headless: true
-                }),
-                injectProperty: '__PRERENDER_INJECTED',
-                // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
-                inject: {
-                    isPrerender: true
-                }
-            })
-        ]
-    },
+    // configureWebpack: {
+    //     plugins: [
+    //         new PrerenderSPAPlugin({
+    //             staticDir: path.join(__dirname, 'dist'),
+    //             routes: ['/', '/tw', '/us', '/jp', '/templates'],
+    //             renderer: new Renderer({
+    //                 renderAfterDocumentEvent: 'render-event',
+    //                 headless: true
+    //             }),
+    //             injectProperty: '__PRERENDER_INJECTED',
+    //             // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
+    //             inject: {
+    //                 isPrerender: true
+    //             }
+    //         })
+    //     ]
+    // },
 
     css: {
         loaderOptions: {
