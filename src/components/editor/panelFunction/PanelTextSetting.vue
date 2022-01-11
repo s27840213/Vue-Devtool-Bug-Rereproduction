@@ -72,7 +72,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -131,10 +131,12 @@ export default Vue.extend({
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
-      this.setHeight(value)
+      // this.setHeight(value)
+      this.setParagraphProp('lineHeight', value)
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
-      this.setSpacing(value)
+      // this.setSpacing(value)
+      this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
       tiptapUtils.focus({ scrollIntoView: false })
@@ -304,11 +306,8 @@ export default Vue.extend({
       return origin
     },
     textInfoRecorder() {
-      console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
-      // let start
-      // let end
       let subLayerIndex
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
@@ -459,6 +458,32 @@ export default Vue.extend({
         window.requestAnimationFrame(() => {
           tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)), false)
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
+        })
+      }
+    },
+    setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
+      if (this.isValidFloat(_value.toString())) {
+        let value = parseFloat(this.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+        switch (prop) {
+          case 'lineHeight':
+            value = toNumber((value).toFixed(2))
+            break
+          case 'fontSpacing':
+            value = value / 1000
+        }
+        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+        window.requestAnimationFrame(() => {
+          if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
+            (currLayer as IGroup | ITmp).layers
+              .forEach((l, idx) => {
+                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
+                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, idx)
+              })
+          } else {
+            tiptapUtils.applyParagraphStyle(prop, value, false)
+            // TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIdx)
+            TextPropUtils.updateTextPropsState({ [prop]: value })
+          }
         })
       }
     },
