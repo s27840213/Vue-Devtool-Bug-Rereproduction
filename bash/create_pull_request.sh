@@ -5,7 +5,7 @@ apt-get -y install curl jq
 export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
 export DEFAULT_REVIEWERS=$(curl https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/default-reviewers \
     -s -S -f -X GET \
-    -H "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" | jq '.values' | jq 'map({uuid})' |  jq '.[] | select(.uuid!="{'"${BITBUCKET_STEP_TRIGGERER_UUID}"'}")')
+    -H "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" | jq '.values' | jq 'map({uuid})' |  jq '[.[] | select(.uuid!="{'"${BITBUCKET_STEP_TRIGGERER_UUID}"'}")]')
 curl --request POST \
     --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
     --header "Accept: application/json" \
