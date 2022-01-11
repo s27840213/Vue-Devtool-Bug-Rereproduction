@@ -202,13 +202,13 @@ export default Vue.extend({
       }
     ]
     const title = `${this.$t('SE0001')}`
-    const htmlAttrs = {
-      lang: `${this.$t('SE0003')}`
-    }
+    // const htmlAttrs = {
+    //   lang: `${this.$t('SE0003')}`
+    // }
     return {
       title,
-      meta,
-      htmlAttrs
+      meta
+      // htmlAttrs
     }
   },
   computed: {
