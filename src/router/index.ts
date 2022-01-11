@@ -190,9 +190,30 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
-    if (window.screen.width <= 1300) {
-      next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+    let isMobile = false
+    const userAgent = navigator.userAgent || navigator.vendor
+    logUtils.setLog(`Read device width: ${window.screen.width}`)
+    logUtils.setLog(`User agent: ${userAgent}`)
+    if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+      // is Desktop
+      if (userAgent.indexOf('Mac OS X') > 0) {
+        // is Mac (could be iPad)
+        if (window.screen.width <= 1024) {
+          // less than iPad Pro width
+          isMobile = true
+        } // wider
+      }
+      // not Mac
+    } else {
+      // is Mobile
+      isMobile = true
     }
+    if (isMobile) {
+      logUtils.setLog('=> as mobile')
+      next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+      return
+    }
+    logUtils.setLog('=> as non-mobile')
   }
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
