@@ -24,6 +24,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import stepsUtils from '@/utils/stepsUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   props: {
@@ -33,55 +34,9 @@ export default Vue.extend({
     }
   },
   data() {
-    const fields = [
-      {
-        name: 'brightness',
-        label: `${this.$t('NN0055')}`,
-        max: 100,
-        min: -100
-      },
-      {
-        name: 'contrast',
-        label: `${this.$t('NN0056')}`,
-        max: 100,
-        min: -100
-      },
-      {
-        name: 'saturate',
-        label: `${this.$t('NN0057')}`,
-        max: 100,
-        min: -100
-      },
-      {
-        name: 'hue',
-        label: `${this.$t('NN0058')}`,
-        max: 100,
-        min: -100
-      },
-      {
-        name: 'blur',
-        label: `${this.$t('NN0059')}`,
-        max: 100,
-        min: -100
-      },
-      {
-        name: 'halation',
-        label: `${this.$t('NN0060')}`,
-        max: 100,
-        min: 0
-      },
-      {
-        name: 'warm',
-        label: `${this.$t('NN0061')}`,
-        max: 100,
-        min: -100
-      }
-    ]
+    const fields = imageAdjustUtil.fields
     const adjustTmp = Object.assign(
-      fields.reduce((prev, curr) => {
-        prev[curr.name] = 0
-        return prev
-      }, {} as any),
+      imageAdjustUtil.getDefaultProps(),
       this.imageAdjust
     )
     return {
