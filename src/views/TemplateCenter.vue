@@ -159,7 +159,7 @@
           div(class="template-center__multi__button"
               :class="selectedTheme ? '' : 'disabled'"
               @click="handleThemeSubmit")
-            span {{$t('NN0229')}}
+            span(:style="multiThemeButtonStyles()") {{$t('NN0229')}}
     div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
 </template>
 
@@ -311,8 +311,13 @@ export default Vue.extend({
       }
     },
     templateStyles(aspectRatio: number) {
-      // return { paddingTop: `${heightPercent}%` }
       return { aspectRatio: `${aspectRatio}` }
+    },
+    multiThemeButtonStyles() {
+      return this.$i18n.locale === 'tw' ? {
+        letterSpacing: '1.21em',
+        textIndent: '1.21em'
+      } : {}
     },
     handleScroll() {
       if (this.isMobile) return
@@ -424,14 +429,23 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
-      if (this.isMobile) {
-        this.$router.push({ name: 'MobileWarning', query: { isMobile: 'aspect-ratio' } })
-        return
-      }
       if (content.themes.length > 1) {
+        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+        if (this.isMobile) {
+          const route = this.$router.resolve({
+            name: 'Editor',
+            query: {
+              type: 'new-design-template',
+              design_id: content.id,
+              width: this.matchedThemes[0].width.toString(),
+              height: this.matchedThemes[0].height.toString()
+            }
+          })
+          window.open(route.href, '_blank')
+          return
+        }
         this.modal = 'template'
         this.contentBuffer = content
-        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
         this.selectedTheme = undefined
       } else {
         const matchedTheme = this.themes.find(theme => theme.id.toString() === content.themes[0])
@@ -901,8 +915,6 @@ html, body {
         font-weight: 700;
         font-size: 12px;
         line-height: 18px;
-        letter-spacing: 1.21em;
-        text-indent: 1.21em;
         color: white;
       }
       &.disabled {

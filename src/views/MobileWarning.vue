@@ -13,12 +13,17 @@
         div(class="mobile-warning__description-line")
           span {{$t('NN0260')}}
         div(class="mobile-warning__description-line")
-          span {{$t('NN0261')}}
+          span {{`${$t('NN0261')} (${width})`}}
       div(class="mobile-warning__button-outter")
         div(class="mobile-warning__button-wrapper")
           div(class="mobile-warning__button"
               @click="goToHome")
             span {{$t('NN0262')}}
+      div(class="mobile-warning__button-outter secondary")
+        div(class="mobile-warning__button-wrapper secondary")
+          div(class="mobile-warning__button secondary"
+              @click="continueToUrl")
+            span {{$t('NN0362')}}
 </template>
 
 <script lang="ts">
@@ -26,9 +31,27 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'MobileWarning',
+  data() {
+    return {
+      width: 0,
+      url: ''
+    }
+  },
+  mounted() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const url = urlParams.get('url')
+    if (url) {
+      this.url = url
+    }
+    this.width = window.screen.width
+  },
   methods: {
     goToHome() {
       this.$router.push({ name: 'Home' })
+    },
+    continueToUrl() {
+      localStorage.setItem('not-mobile', 'true')
+      window.location.href = this.url
     }
   }
 })
@@ -109,7 +132,7 @@ export default Vue.extend({
     justify-content: center;
     > span {
       font-family: NotoSansTC;
-      font-weight: 700;
+      font-weight: 400;
       font-size: min(3vw, 14px);
       display: block;
       color: black;
@@ -119,8 +142,21 @@ export default Vue.extend({
     margin-top: min(3vw, 25px);
     width: min(40%, 139px);
     background-color: setColor(blue-1);
+    border-radius: 1px;
     @media (min-aspect-ratio: 1/1) {
       margin-top: 3vh;
+    }
+    &.secondary {
+      margin-top: min(2vw, 20px);
+      background-color: white;
+      border: 1px solid setColor(blue-1);
+      box-sizing: border-box;
+      @media (min-aspect-ratio: 1/1) {
+        margin-top: 2vh;
+      }
+      &:hover {
+        background-color: setColor(blue-1);
+      }
     }
   }
   &__button-wrapper {
@@ -145,6 +181,14 @@ export default Vue.extend({
       letter-spacing: 0.355em;
       text-indent: 0.355em;
       color: white;
+    }
+    &.secondary{
+      & > span {
+        color: setColor(blue-1);
+      }
+      &:hover > span {
+        color: white;
+      }
     }
   }
 }

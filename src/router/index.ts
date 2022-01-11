@@ -189,10 +189,14 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  if (!MOBILE_ROUTES.includes(to.name ?? '')) {
-    if (window.screen.width <= 1300) {
-      next({ name: 'MobileWarning', query: { isMobile: 'width' } })
+  if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
+    logUtils.setLog(`Read device width: ${window.screen.width}`)
+    logUtils.setLog(`User agent: ${navigator.userAgent}`)
+    if (window.screen.width <= 1280) {
+      logUtils.setLog('=> as mobile')
+      next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
     }
+    logUtils.setLog('=> as non-mobile')
   }
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
