@@ -1,9 +1,9 @@
 <template lang="pug">
   div(class="panel-template")
-    div(v-if="showPrompt"
+    div(v-if="showPrompt && !currentGroup"
       class="panel-template__prompt body-2")
       span {{$t('NN0247')}}
-      svg-icon(class="pointer"
+      svg-icon(class="pl-5 pointer"
         iconColor="gray-2"
         iconName="close"
         iconWidth="24px"
@@ -24,7 +24,7 @@
             iconName="advanced"
             iconColor="gray-6"
             iconWidth="20px"
-            @click.native="showTheme = !showTheme")
+            @click.native="onAdvancedClicked()")
         popup-theme(v-if="showTheme"
           class="panel-template__theme"
           :preSelected="theme.split(',')"
@@ -250,6 +250,12 @@ export default Vue.extend({
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
+    },
+    onAdvancedClicked() {
+      this.showTheme = !this.showTheme
+      if (this.showPrompt) {
+        this.handleClosePrompt()
+      }
     }
   }
 })
@@ -307,21 +313,28 @@ export default Vue.extend({
     position: absolute;
     display: flex;
     align-items: center;
-    right: -15px;
-    top: 10px;
-    padding: 8px;
+    text-align: left;
+    left: 10px;
+    top: 55px;
+    width: 284px;
+    padding: 12px 8px;
     line-height: 20px;
     border-radius: 5px;
     background-color: setColor(gray-4);
-    transform: translateX(100%);
+    z-index: 99;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    > span {
+      width: 255px;
+    }
     &:before {
       content: "";
       display: block;
       width: 0;
       height: 0;
       position: absolute;
-      left: -8px;
-      top: 12px;
+      right: 20px;
+      top: -12px;
+      transform: rotate(90deg);
       border-style: solid;
       border-width: 8px 10px 8px 0;
       border-color: transparent setColor(gray-4) transparent transparent;
