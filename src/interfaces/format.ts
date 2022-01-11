@@ -7,8 +7,15 @@ export interface ITextEffect {
   [key: string]: string | number | undefined
 }
 
+export interface ITextShape {
+  bend: number | string,
+  focus: boolean,
+  name: string
+}
+
 export interface ITextFormat {
-  textEffect: ITextEffect,
+  textEffect: ITextEffect | {},
+  textShape: ITextShape | {},
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle
 }

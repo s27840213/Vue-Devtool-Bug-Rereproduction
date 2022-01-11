@@ -34,7 +34,7 @@ export default Vue.extend({
     }
   },
   data() {
-    const fields = imageAdjustUtil.fields
+    const fields = imageAdjustUtil.getFields()
     const adjustTmp = Object.assign(
       imageAdjustUtil.getDefaultProps(),
       this.imageAdjust

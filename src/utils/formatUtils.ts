@@ -1,6 +1,5 @@
-import { ITextFormat, IImageFormat, IFormat, ITextEffect } from '@/interfaces/format'
+import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
 import { IImage, IText } from '@/interfaces/layer'
-import imageAdjustUtil from './imageAdjustUtil'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
@@ -13,12 +12,13 @@ class FormatUtils {
     return {
       paragraphStyle: lastParagraph.styles,
       spanStyle: lastSpan.styles,
-      textEffect: (text.styles.textEffect as ITextEffect | undefined) ?? { name: 'none' }
+      textEffect: (text as any).styles.textEffect,
+      textShape: (text as any).styles.textShape
     }
   }
 
   extractImageFormat(image: any): IImageFormat {
-    return image.styles.adjust ?? imageAdjustUtil.getDefaultProps()
+    return image.styles.adjust
   }
 
   copyTextFormat(text: IText) {
@@ -39,7 +39,6 @@ class FormatUtils {
 
   saveFormat(format: IFormat) {
     this.copiedFormat = format
-    console.log(format)
   }
 }
 

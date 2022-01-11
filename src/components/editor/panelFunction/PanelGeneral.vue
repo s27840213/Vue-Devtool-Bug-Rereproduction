@@ -30,10 +30,10 @@
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
         v-hint="$t('NN0034')")
-      //- svg-icon(:class="{'pointer': !isLocked}"
-      //-   iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-      //-   @click.native=""
-      //-   v-hint="'複製樣式'")
+      svg-icon(:class="{'pointer': !isCopyFormatDisabled}"
+        iconName="brush" :iconWidth="'20px'" :iconColor="isCopyFormatDisabled ? 'gray-4' : 'gray-2'"
+        @click.native="handleCopyFormat"
+        v-hint="$t('NN0035')")
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") {{$t('NN0044')}}
@@ -52,6 +52,7 @@ import popupUtils from '@/utils/popupUtils'
 import { IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   data() {
@@ -71,6 +72,21 @@ export default Vue.extend({
     },
     isLocked(): boolean {
       return LayerUtils.getTmpLayer().locked
+    },
+    isCopyFormatDisabled(): boolean {
+      if (this.layerNum === 1) {
+        const types = this.currSelectedInfo.types
+        if (types.has('group')) {
+          if (this.hasSubSelectedLayer && ['text', 'image'].includes(this.subLayerType)) {
+            return this.isLocked
+          }
+        } else {
+          if (types.has('text') || types.has('image')) {
+            return this.isLocked
+          }
+        }
+      }
+      return true
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
@@ -179,6 +195,29 @@ export default Vue.extend({
               opacity: value
             }
           })
+        }
+      }
+    },
+    handleCopyFormat() {
+      if (this.isCopyFormatDisabled) return
+      // TODO: setCursorStyle
+      const types = this.currSelectedInfo.types
+      const layer = this.currSelectedInfo.layers[0]
+      if (types.has('group')) {
+        const type = this.subLayerType
+        const subLayer = layer.layers[this.subLayerIndex]
+        if (type === 'text') {
+          formatUtils.copyTextFormat(subLayer)
+        }
+        if (type === 'image') {
+          formatUtils.copyImageFormat(subLayer)
+        }
+      } else {
+        if (types.has('text')) {
+          formatUtils.copyTextFormat(layer)
+        }
+        if (types.has('image')) {
+          formatUtils.copyImageFormat(layer)
         }
       }
     }
