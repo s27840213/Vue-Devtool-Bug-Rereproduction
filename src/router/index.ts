@@ -170,9 +170,8 @@ const router = new VueRouter({
         let locale = localStorage.getItem('locale')
         if (locale === '' || !locale) {
           locale = to.params.locale
-        }
-        if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
-          console.log(navigator.language)
+          i18n.locale = localeUtils.getBrowserLang()
+        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
           i18n.locale = locale
           localStorage.setItem('locale', locale)
         }
