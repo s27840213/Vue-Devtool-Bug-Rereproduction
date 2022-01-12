@@ -16,8 +16,6 @@ pipelines:
             script:
               - yarn install
               - yarn build
-            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-              - dist/**
         # - step:
         #     name: 'Run E2E Tests'
         #     caches:
@@ -28,6 +26,16 @@ pipelines:
         #       - yarn install
         #       - yarn serve & npx wait-on http://localhost:8080
         #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+    - step:
+        name: "Build with prerender"
+        caches: #set caches for node modules to speed up building
+          - node
+        image: cypress/browsers:node14.17.0-chrome88-ff89
+        script:
+          - yarn install
+          - yarn build:prerender
+        artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+          - dist/**
     - parallel:
         - step:
             name: "dev5 Alan"
@@ -119,7 +127,7 @@ pipelines:
               image: cypress/browsers:node14.17.0-chrome88-ff89
               script:
                 - yarn install
-                - yarn build
+                - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
           # - step:
@@ -206,7 +214,7 @@ pipelines:
               image: cypress/browsers:node14.17.0-chrome88-ff89
               script:
                 - yarn install
-                - yarn build
+                - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
           # - step:
@@ -253,7 +261,7 @@ pipelines:
               image: cypress/browsers:node14.17.0-chrome88-ff89
               script:
                 - yarn install
-                - yarn build
+                - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
           # - step:
