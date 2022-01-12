@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --PRERENDER=1",
+    "build": "vue-cli-service build",
     "build:prerender": "vue-cli-service build --PRERENDER=1",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
