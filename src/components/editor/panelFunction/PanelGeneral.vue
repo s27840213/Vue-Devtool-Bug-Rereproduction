@@ -52,6 +52,7 @@ import popupUtils from '@/utils/popupUtils'
 import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data() {
@@ -143,11 +144,11 @@ export default Vue.extend({
       })
     },
     setOpacity(value: number): void {
-      console.log(typeof value)
       if (value > 100) {
         value = 100
       }
-      if (!this.isGroup) {
+      const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = LayerUtils
+      if (subLayerIdx === -1) {
         if (this.currSelectedInfo.layers.length === 1) {
           this.$store.commit('UPDATE_layerStyles', {
             pageIndex: this.currSelectedInfo.pageIndex,
@@ -164,10 +165,11 @@ export default Vue.extend({
           })
         }
       } else {
-        const { primaryLayerIndex } = this
-        const { subLayerIdx } = LayerUtils
         if (subLayerIdx !== -1) {
-          LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, primaryLayerIndex, subLayerIdx, {
+          currLayer.type === 'group' && LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
+            opacity: value
+          })
+          currLayer.type === 'frame' && frameUtils.updateFrameLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
             opacity: value
           })
         } else {

@@ -197,12 +197,13 @@ class MouseUtils {
       scaleRatio = ratio.width
       scaleImg(scaleRatio)
     }
-    if (img.width < clipperStyles.initWidth || img.height < clipperStyles.initHeight) {
+    while (img.width < clipperStyles.initWidth || img.height < clipperStyles.initHeight) {
       const scaleRatio = img.height < clipperStyles.initHeight ? clipperStyles.initHeight / img.height
         : clipperStyles.initWidth / img.width
       scaleImg(scaleRatio)
     }
-
+    console.log(clipperStyles.height)
+    console.log(img.height)
     const newStyles = {
       width: clipperStyles.width,
       height: clipperStyles.height,
