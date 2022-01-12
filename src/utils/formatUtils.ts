@@ -91,6 +91,7 @@ class FormatUtils {
           //   styles: { textEffect, textShape }
           // })
         }
+        stepsUtils.record()
       }
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat
@@ -101,6 +102,7 @@ class FormatUtils {
           type: ['image'],
           styles: { adjust }
         })
+        stepsUtils.record()
       }
     } else { // non-group controller
       if (layer.type !== type) return // TODO: frame
