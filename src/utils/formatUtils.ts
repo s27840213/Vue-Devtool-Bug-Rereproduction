@@ -1,12 +1,13 @@
 import store from '@/store'
 import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
-import { IGroup, IImage, IParagraph, IText } from '@/interfaces/layer'
+import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import generalUtils from './generalUtils'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import textUtils from './textUtils'
 import controlUtils from './controlUtils'
 import stepsUtils from './stepsUtils'
+import imageAdjustUtil from './imageAdjustUtil'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
@@ -17,16 +18,16 @@ class FormatUtils {
     const spans = lastParagraph.spans
     const lastSpan = spans[spans.length - 1]
     return {
-      paragraphStyle: lastParagraph.styles,
-      spanStyle: lastSpan.styles,
+      paragraphStyle: generalUtils.deepCopy(lastParagraph.styles),
+      spanStyle: generalUtils.deepCopy(lastSpan.styles),
       scale: text.styles.scale,
-      textEffect: (text as any).styles.textEffect,
-      textShape: (text as any).styles.textShape
+      textEffect: generalUtils.deepCopy((text as any).styles.textEffect),
+      textShape: generalUtils.deepCopy((text as any).styles.textShape)
     }
   }
 
   extractImageFormat(image: any): IImageFormat {
-    return image.styles.adjust
+    return generalUtils.deepCopy(image.styles.adjust)
   }
 
   copyTextFormat(text: IText) {
@@ -54,12 +55,28 @@ class FormatUtils {
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
     const layer = store.getters.getLayer(pageIndex, layerIndex)
-    if (subLayerIndex >= 0) { // subController
-      const subLayer = (layer as IGroup).layers[subLayerIndex]
-      if (subLayer.type !== type) return
+    if (layer.type === 'group') { // subController or whole-group controller
+      const subLayers = (layer as IGroup).layers
+      let layers: ILayer[]
+      if (subLayerIndex >= 0) {
+        const subLayer = subLayers[subLayerIndex]
+        if (subLayer.type !== type) return // TODO: frame
+        layers = [subLayer]
+      } else {
+        layers = subLayers
+      }
+      for (const targetLayer of subLayers) {
+        // layerUtils.updateSpecLayerData({
+        //   pageIndex,
+        //   layerIndex,
+        //   subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined, // undefined means update all subLayers
+        //   type,
+        //   styles: { textEffect, textShape }
+        // })
+      }
       console.log('NOT IMPLEMENT YET!')
-    } else { // controller
-      if (layer.type !== type) return // TODO: handle group as well
+    } else { // non-group controller
+      if (layer.type !== type) return // TODO: frame
       if (type === 'text') {
         const { paragraphStyle, spanStyle, scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
         const paragraphs = generalUtils.deepCopy(layer.paragraphs) as IParagraph[]
@@ -84,6 +101,14 @@ class FormatUtils {
           const newSize = textUtils.getTextHW(text, text.styles.widthLimit)
           controlUtils.updateLayerSize(pageIndex, layerIndex, newSize.width, newSize.height, text.styles.scale)
         }
+        stepsUtils.record()
+      }
+      if (type === 'image') {
+        imageAdjustUtil.setAdjust({
+          pageIndex,
+          layerIndex,
+          adjust: this.copiedFormat.content as IImageFormat
+        })
         stepsUtils.record()
       }
     }
