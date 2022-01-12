@@ -51,6 +51,22 @@ class FormatUtils {
     this.copiedFormat = format
   }
 
+  applyTextStyles(oldParagraphs: IParagraph[]): IParagraph[] {
+    if (!this.copiedFormat) return oldParagraphs
+    const { paragraphStyle, spanStyle } = this.copiedFormat.content as ITextFormat
+    const paragraphs = generalUtils.deepCopy(oldParagraphs) as IParagraph[]
+    for (const paragraph of paragraphs) {
+      paragraph.styles = paragraphStyle
+      if (paragraph.spanStyle) {
+        paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
+      }
+      for (const span of paragraph.spans) {
+        span.styles = spanStyle
+      }
+    }
+    return paragraphs
+  }
+
   applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
@@ -78,17 +94,8 @@ class FormatUtils {
     } else { // non-group controller
       if (layer.type !== type) return // TODO: frame
       if (type === 'text') {
-        const { paragraphStyle, spanStyle, scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
-        const paragraphs = generalUtils.deepCopy(layer.paragraphs) as IParagraph[]
-        for (const paragraph of paragraphs) {
-          paragraph.styles = paragraphStyle
-          if (paragraph.spanStyle) {
-            paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
-          }
-          for (const span of paragraph.spans) {
-            span.styles = spanStyle
-          }
-        }
+        const { scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
+        const paragraphs = this.applyTextStyles(layer.paragraphs)
         layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs })
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale })
         layerUtils.updateSpecLayerData({
