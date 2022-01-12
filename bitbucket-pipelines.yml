@@ -28,6 +28,7 @@ pipelines:
         #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
     - step:
         name: "Build with prerender"
+        trigger: manual
         caches: #set caches for node modules to speed up building
           - node
         image: cypress/browsers:node14.17.0-chrome88-ff89
