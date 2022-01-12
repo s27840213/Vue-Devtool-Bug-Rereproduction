@@ -16,6 +16,7 @@ export interface ITextShape {
 export interface ITextFormat {
   textEffect: ITextEffect | {},
   textShape: ITextShape | {},
+  scale: number,
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle
 }

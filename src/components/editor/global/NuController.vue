@@ -625,6 +625,7 @@ export default Vue.extend({
       if (!this.isLocked) {
         e.stopPropagation()
       }
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
