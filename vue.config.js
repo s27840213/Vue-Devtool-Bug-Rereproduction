@@ -1,10 +1,12 @@
+/* eslint-disable indent */
 const path = require('path')
 const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+const { argv } = require('yargs')
 
-function resolve(dir) {
+function resolve (dir) {
     return path.join(__dirname, dir)
 }
 
@@ -12,7 +14,7 @@ module.exports = {
     chainWebpack: (config) => {
         // 先刪除預設的svg配置，否則svg-sprite-loader會失效
         config.module.rules.delete('svg')
-            // 新增 svg-sprite-loader 設定
+        // 新增 svg-sprite-loader 設定
         config.module
             .rule('svg-sprite-loader')
             .test(/\.svg$/)
@@ -21,7 +23,7 @@ module.exports = {
             .use('svg-sprite-loader')
             .loader('svg-sprite-loader')
             .options({ symbolId: '[name]' })
-            /**
+        /**
              * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
              * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg
              */
@@ -44,6 +46,7 @@ module.exports = {
                     ignore: ['node_modules', 'vue.config.js']
                 }])
         }
+        console.log(argv)
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
                 let name = 'process.env'
@@ -51,25 +54,41 @@ module.exports = {
                 return args
             })
         }
+        if (argv.PRERENDER) {
+            config.plugin('define').tap(args => {
+                let name = 'process.env'
+                args[0][name]['VUE_APP_PRERENDER'] = argv.PRERENDER || ''
+                return args
+            })
+            config.plugin('prerender')
+                .use(PrerenderSPAPlugin, [{
+                    staticDir: path.join(__dirname, 'dist'),
+                    routes: ['/', '/tw', '/us', '/jp', '/templates'],
+                    renderer: new Renderer({
+                        renderAfterDocumentEvent: 'render-event',
+                        headless: true
+                    })
+                }])
+        }
     },
 
-    configureWebpack: {
-        plugins: [
-            new PrerenderSPAPlugin({
-                staticDir: path.join(__dirname, 'dist'),
-                routes: ['/', '/tw', '/us', '/jp', '/signup', '/templates'],
-                renderer: new Renderer({
-                    renderAfterDocumentEvent: 'render-event',
-                    headless: true
-                }),
-                injectProperty: '__PRERENDER_INJECTED',
-                // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
-                inject: {
-                    isPrerender: true
-                }
-            })
-        ]
-    },
+    // configureWebpack: {
+    //     plugins: [
+    //         new PrerenderSPAPlugin({
+    //             staticDir: path.join(__dirname, 'dist'),
+    //             routes: ['/', '/tw', '/us', '/jp', '/templates'],
+    //             renderer: new Renderer({
+    //                 renderAfterDocumentEvent: 'render-event',
+    //                 headless: true
+    //             }),
+    //             injectProperty: '__PRERENDER_INJECTED',
+    //             // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
+    //             inject: {
+    //                 isPrerender: true
+    //             }
+    //         })
+    //     ]
+    // },
 
     css: {
         loaderOptions: {

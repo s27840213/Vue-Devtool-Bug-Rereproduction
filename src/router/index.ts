@@ -170,14 +170,13 @@ const router = new VueRouter({
         let locale = localStorage.getItem('locale')
         if (locale === '' || !locale) {
           locale = to.params.locale
-        }
-        if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+          i18n.locale = localeUtils.getBrowserLang()
+        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
           i18n.locale = locale
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED && !(window as any).__PRERENDER_INJECTED.isPrerender) {
-          console.log('not in prerender mode')
+        if (!process.env.VUE_APP_PRERENDER) {
           router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
         }
       },
@@ -189,6 +188,7 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
+  document.title = to.meta.title || i18n.t('SE0001')
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
@@ -215,6 +215,7 @@ router.beforeEach(async (to, from, next) => {
     }
     logUtils.setLog('=> as non-mobile')
   }
+
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
@@ -242,20 +243,5 @@ router.beforeEach(async (to, from, next) => {
     next()
   }
 })
-
-// router.beforeEach((to, from, next) => {
-//   // set the current language for vuex-i18n. note that translation data
-//   // for the language might need to be loaded first
-//   const locale = to.params.locale
-//   if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
-//     i18n.locale = mappingUtils.mappingLocales(locale)
-//     next({
-//       params: {
-//         locale
-//       }
-//     })
-//   }
-//   next()
-// })
 
 export default router

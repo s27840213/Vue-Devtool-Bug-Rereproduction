@@ -59,6 +59,10 @@ class LocaleUtils {
   getLocaleInfo(): ILocale {
     return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.locale) as ILocale
   }
+
+  getBrowserLang(): string {
+    return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
+  }
 }
 
 export default new LocaleUtils()

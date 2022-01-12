@@ -95,7 +95,10 @@ new Vue({
   store,
   i18n,
   mounted() {
-    document.dispatchEvent(new Event('render-event'))
+    if (process.env.VUE_APP_PRERENDER) {
+      console.log('Trigger render event')
+      document.dispatchEvent(new Event('render-event'))
+    }
   },
   render: (h) => h(App)
 }).$mount('#app')
