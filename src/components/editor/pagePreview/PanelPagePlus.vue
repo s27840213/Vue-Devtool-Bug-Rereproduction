@@ -125,8 +125,8 @@ export default Vue.extend({
         pos: newPos
       })
       GroupUtils.deselect()
-      this._setmiddlemostPageIndex(indexTo)
-      this._setCurrActivePageIndex(indexTo)
+      this._setmiddlemostPageIndex(newPos)
+      this._setCurrActivePageIndex(newPos)
       StepsUtils.record()
     },
     addPage(position: number) {
