@@ -20,7 +20,6 @@
         @mousedown.left="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
-        @click="onClick"
         @dblclick="onDblClick")
       svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
         g(v-for="(clip, index) in config.clips"
@@ -626,6 +625,7 @@ export default Vue.extend({
         e.stopPropagation()
       }
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
@@ -1461,9 +1461,6 @@ export default Vue.extend({
         x: layerX,
         y: layerY
       })
-    },
-    onClick(e: MouseEvent) {
-      formatUtils.clearCopiedFormat()
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return

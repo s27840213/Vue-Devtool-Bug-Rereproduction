@@ -276,6 +276,8 @@ export default Vue.extend({
       }
     },
     onMousedown() {
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x
@@ -397,7 +399,6 @@ export default Vue.extend({
       TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onClickEvent(e: MouseEvent) {
-      formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
           groupUtils.deselectTargetLayer(this.layerIndex)

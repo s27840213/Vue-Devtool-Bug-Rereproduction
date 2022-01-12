@@ -228,7 +228,7 @@ class ImageAdjustUtil {
       layerIndex,
       subLayerIndex,
       styles: { adjust },
-      type: 'image'
+      type: ['image']
     })
   }
 }

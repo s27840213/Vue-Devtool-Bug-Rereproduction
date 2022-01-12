@@ -81,16 +81,27 @@ class FormatUtils {
       } else {
         layers = subLayers
       }
-      for (const targetLayer of subLayers) {
-        // layerUtils.updateSpecLayerData({
-        //   pageIndex,
-        //   layerIndex,
-        //   subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined, // undefined means update all subLayers
-        //   type,
-        //   styles: { textEffect, textShape }
-        // })
+      if (type === 'text') {
+        for (const targetLayer of subLayers) {
+          // layerUtils.updateSpecLayerData({
+          //   pageIndex,
+          //   layerIndex,
+          //   subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined, // undefined means update all subLayers
+          //   type,
+          //   styles: { textEffect, textShape }
+          // })
+        }
       }
-      console.log('NOT IMPLEMENT YET!')
+      if (type === 'image') {
+        const adjust = this.copiedFormat.content as IImageFormat
+        layerUtils.updateSpecLayerData({
+          pageIndex,
+          layerIndex,
+          subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined,
+          type: ['image'],
+          styles: { adjust }
+        })
+      }
     } else { // non-group controller
       if (layer.type !== type) return // TODO: frame
       if (type === 'text') {
