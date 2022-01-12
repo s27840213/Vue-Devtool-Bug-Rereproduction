@@ -68,7 +68,8 @@ export interface IEditorState {
   },
   showRuler: boolean,
   showGuideline: boolean,
-  themes: Itheme[]
+  themes: Itheme[],
+  hasCopiedFormat: boolean
 }
 
 export enum SidebarPanelType {

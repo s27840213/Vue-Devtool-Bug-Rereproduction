@@ -85,7 +85,8 @@ const getDefaultState = (): IEditorState => ({
   isMoving: false,
   showRuler: false,
   showGuideline: true,
-  themes: []
+  themes: [],
+  hasCopiedFormat: false
 })
 
 const state = getDefaultState()
@@ -218,6 +219,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getThemes(state: IEditorState) {
     return state.themes
+  },
+  getHasCopiedFormat(state: IEditorState) {
+    return state.hasCopiedFormat
   }
 }
 
@@ -365,6 +369,9 @@ const mutations: MutationTree<IEditorState> = {
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
+  },
+  SET_hasCopiedFormat(state: IEditorState, value: boolean) {
+    state.hasCopiedFormat = value
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {

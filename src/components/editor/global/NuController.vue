@@ -20,6 +20,7 @@
         @mousedown.left="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+        @click="onClick"
         @dblclick="onDblClick")
       svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
         g(v-for="(clip, index) in config.clips"
@@ -162,6 +163,7 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
+import formatUtils from '@/utils/formatUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -386,7 +388,7 @@ export default Vue.extend({
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
     this.isControlling = false
-    this.setCursorStyle('initial')
+    this.setCursorStyle('')
     this.setMoving(false)
   },
   methods: {
@@ -774,7 +776,7 @@ export default Vue.extend({
           }
         }
         this.isControlling = false
-        this.setCursorStyle('initial')
+        this.setCursorStyle('')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
@@ -951,7 +953,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
       this.$emit('setFocus')
@@ -1014,7 +1016,7 @@ export default Vue.extend({
       this.isLineEndMoving = false
       StepsUtils.record()
 
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
       document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
@@ -1194,7 +1196,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
@@ -1258,7 +1260,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
       this.$emit('setFocus')
@@ -1326,7 +1328,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.lineRotating)
       window.removeEventListener('mouseup', this.lineRotateEnd)
       this.$emit('setFocus')
@@ -1458,6 +1460,9 @@ export default Vue.extend({
         x: layerX,
         y: layerY
       })
+    },
+    onClick(e: MouseEvent) {
+      formatUtils.clearCopiedFormat()
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return

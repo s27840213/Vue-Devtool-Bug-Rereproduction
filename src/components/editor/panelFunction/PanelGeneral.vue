@@ -200,7 +200,6 @@ export default Vue.extend({
     },
     handleCopyFormat() {
       if (this.isCopyFormatDisabled) return
-      // TODO: setCursorStyle
       const types = this.currSelectedInfo.types
       const layer = this.currSelectedInfo.layers[0]
       if (types.has('group')) {

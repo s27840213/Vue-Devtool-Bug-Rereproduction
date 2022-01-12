@@ -61,6 +61,7 @@ import { FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   props: {
@@ -396,6 +397,7 @@ export default Vue.extend({
       TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onClickEvent(e: MouseEvent) {
+      formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
           groupUtils.deselectTargetLayer(this.layerIndex)

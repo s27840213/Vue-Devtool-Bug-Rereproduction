@@ -1,3 +1,4 @@
+import store from '@/store'
 import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
 import { IImage, IText } from '@/interfaces/layer'
 
@@ -38,7 +39,13 @@ class FormatUtils {
   }
 
   saveFormat(format: IFormat) {
+    store.commit('SET_hasCopiedFormat', true)
     this.copiedFormat = format
+  }
+
+  clearCopiedFormat() {
+    store.commit('SET_hasCopiedFormat', false)
+    this.copiedFormat = undefined
   }
 }
 
