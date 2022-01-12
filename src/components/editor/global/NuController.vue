@@ -216,6 +216,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log(this.config.styles)
     this.setLastSelectedLayerIndex(this.layerIndex)
     if (this.config.active) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
