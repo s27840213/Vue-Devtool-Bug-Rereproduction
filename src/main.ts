@@ -96,7 +96,6 @@ new Vue({
   i18n,
   mounted() {
     if (process.env.VUE_APP_PRERENDER) {
-      console.log('Trigger render event')
       document.dispatchEvent(new Event('render-event'))
     }
   },

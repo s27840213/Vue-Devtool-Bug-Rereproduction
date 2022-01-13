@@ -256,7 +256,9 @@ class GroupUtils {
         const tmpLayer = this.tmpLayer
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
-        LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex, [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)], store.getters.getCurrSelectedIndex)
+        LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex,
+          [...this.mapLayersToPage(store.getters.getCurrSelectedLayers, tmpLayer)],
+          store.getters.getCurrSelectedIndex)
         LayerUtils.updateLayersOrder(this.currSelectedInfo.pageIndex)
       }
       this.reset()
