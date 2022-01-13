@@ -26,7 +26,8 @@ const MOBILE_ROUTES = [
   'Settings',
   'SignUp',
   'Login',
-  'MobileWarning'
+  'MobileWarning',
+  'Preview',
 ]
 
 const routes: Array<RouteConfig> = [
