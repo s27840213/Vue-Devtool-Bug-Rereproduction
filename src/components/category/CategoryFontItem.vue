@@ -2,7 +2,7 @@
   div(class="category-fonts pointer" draggable="false" @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${host}/${item.id}/${preview}`"
+        :src="fallbackSrc || `${host}/${item.id}/${preview}?ver=${item.ver}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"

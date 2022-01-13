@@ -68,14 +68,16 @@ class FrameUtils {
           height: imgHeight * currLayer.styles.scale,
           horizontalFlip: currLayer.styles.horizontalFlip,
           verticalFlip: currLayer.styles.verticalFlip,
+          opacity: clips[idx].styles.opacity,
           adjust // inherit adjust to the new layer,
         }
       })])
       Object.assign(clips[idx].styles, {
-        imgWidth: currLayer.styles.initWidth,
-        imgHeight: currLayer.styles.initHeight,
+        imgWidth: clips[idx].styles.initWidth,
+        imgHeight: clips[idx].styles.initHeight,
         imgX: 0,
         imgY: 0,
+        opacity: 100,
         adjust: {}
       })
       LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
