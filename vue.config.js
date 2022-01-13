@@ -60,8 +60,17 @@ module.exports = {
                 args[0][name]['VUE_APP_PRERENDER'] = argv.PRERENDER || ''
                 return args
             })
+            // Tell Vue (CLI 3) to provide this file to Pre-SPA:
+            config.plugin('html')
+                .tap(args => {
+                    args[0].template = path.join(__dirname, 'public', 'index.html')
+                    args[0].filename = 'app.html'
+                    return args
+                })
             config.plugin('prerender')
                 .use(PrerenderSPAPlugin, [{
+                    // Tell the Pre-SPA plugin not to use index.html as its template file.
+                    indexPath: path.join(__dirname, 'dist', 'app.html'),
                     staticDir: path.join(__dirname, 'dist'),
                     routes: ['/', '/tw', '/us', '/jp', '/templates'],
                     renderer: new Renderer({
@@ -89,7 +98,7 @@ module.exports = {
     //         })
     //     ]
     // },
-
+    // indexPath: 'app.html',
     css: {
         loaderOptions: {
             scss: {
