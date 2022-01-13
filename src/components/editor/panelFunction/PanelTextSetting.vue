@@ -307,8 +307,6 @@ export default Vue.extend({
       console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
-      // let start
-      // let end
       let subLayerIndex
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
