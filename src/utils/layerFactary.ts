@@ -248,13 +248,14 @@ class LayerFactary {
           })
         }
       })
-      config.paragraphs.forEach((p, pidx) => {
+      config.paragraphs.forEach((p) => {
         for (let i = 0; i < p.spans.length; i++) {
           if (!p.spans[i].styles.font) {
             Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
             (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
           }
         }
+        !p.styles.font && (p.styles.font = p.spans[0].styles.font)
       })
     }
     return Object.assign(basicConfig, config)

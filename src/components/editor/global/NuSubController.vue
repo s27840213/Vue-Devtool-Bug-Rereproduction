@@ -349,36 +349,36 @@ export default Vue.extend({
       }
     },
     textSizeRefresh(text: IText) {
-      const group = LayerUtils.getCurrLayer as IGroup
-      const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
-      const isAllHorizon = !group.layers
-        .some(l => l.type === 'text' &&
-          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+      // const group = LayerUtils.getCurrLayer as IGroup
+      // const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
+      // const isAllHorizon = !group.layers
+      //   .some(l => l.type === 'text' &&
+      //     ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
-      const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
-      if (this.layerSizeBuff === -1) {
-        this.layerSizeBuff = newSize.height
-      } else if (newSize.height === this.layerSizeBuff) {
-        return
-      }
+      // const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
+      // if (this.layerSizeBuff === -1) {
+      //   this.layerSizeBuff = newSize.height
+      // } else if (newSize.height === this.layerSizeBuff) {
+      //   return
+      // }
 
-      if (isAllHorizon) {
-        const lowLine = this.getLayerPos.y + originSize.height
-        const diff = newSize.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-              y: data[1] + diff
-            })
-          })
-      }
+      // if (isAllHorizon) {
+      //   const lowLine = this.getLayerPos.y + originSize.height
+      //   const diff = newSize.height - originSize.height
+      //   const targetSubLayers: Array<[number, number]> = []
+      //   group.layers
+      //     .forEach((l, idx) => {
+      //       if (l.styles.y >= lowLine) {
+      //         targetSubLayers.push([idx, l.styles.y])
+      //       }
+      //     })
+      //   targetSubLayers
+      //     .forEach(data => {
+      //       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+      //         y: data[1] + diff
+      //       })
+      //     })
+      // }
       // @TODO: the vertical kind pending
 
       TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
