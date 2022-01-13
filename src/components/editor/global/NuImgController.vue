@@ -333,7 +333,7 @@ export default Vue.extend({
       }
 
       const ratio = width / height
-      if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
+      if (offsetSize.width < 0 && Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         if (this.control.xSign < 0) {
           imgPos.x = 0
           offsetSize.width = this.initImgPos.imgX
@@ -361,7 +361,7 @@ export default Vue.extend({
         translateLimit.width = (width - this.config.styles.width / this.getLayerScale) / 2
         translateLimit.height = (height - this.config.styles.height / this.getLayerScale) / 2
       }
-      if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
+      if (offsetSize.height < 0 && Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
           imgPos.y = 0
           offsetSize.height = this.initImgPos.imgY
