@@ -370,42 +370,6 @@ class TextUtils {
         }
         const preText = s.text.substring(0, oriOff)
         const lastText = s.text.substr(oriOff)
-
-        // const propsTable = ['color', 'decoration', 'weight', 'style']
-        // const hasNewProps = (() => {
-        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-        //     if (propsTable.includes(k) && v !== s.styles[k]) {
-        //       return true
-        //     }
-        //   }
-        //   return false
-        // })()
-
-        // if (hasNewProps) {
-        //   const newStyles = { ...s.styles }
-        //   for (const [k, v] of Object.entries(TextPropUtils.getCurrTextProps)) {
-        //     if (propsTable.includes(k)) {
-        //       newStyles[k] = v as string
-        //     }
-        //   }
-
-        //   s.text = preText
-        //   p.spans.splice(oriSidx + 1, 0, {
-        //     text: key,
-        //     styles: newStyles
-        //   })
-        //   if (lastText) {
-        //     p.spans.splice(oriSidx + 2, 0, {
-        //       text: lastText,
-        //       styles: { ...s.styles }
-        //     })
-        //   }
-        //   sIndex = oriSidx + 1
-        //   offset = 1
-        //   break
-        // } else {
-        //   s.text = preText + key + lastText
-        // }
         s.text = preText + key + lastText
 
         if (preText) {
@@ -413,7 +377,6 @@ class TextUtils {
         } else offset = 1
       }
     }
-    // console.log('start: pindex: ', pIndex, ' sIndex: ', sIndex, ' offset: ', offset)
     this.updateSelection({ pIndex, sIndex, offset }, this.getNullSel())
     return paragraphs
   }

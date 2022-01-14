@@ -108,45 +108,6 @@ class TextPropUtils {
     }
   }
 
-  //   blockPropertyHandler(propName: string, subLayerIdx = LayerUtils.subLayerIdx, layerIndex = LayerUtils.layerIndex) {
-  //   const handler = (() => {
-  //     const layer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex)
-  //     switch (layer.type) {
-  //       case 'tmp':
-  //       case 'group':
-  //         if (layer.type === 'tmp' || subLayerIdx === -1) {
-  //           return (styles: { [key: string]: string | number | boolean }) => {
-  //             for (let i = 0; i < (layer as ITmp).layers.length; i++) {
-  //               this.updateSelectedLayersProps(styles, i)
-  //               TextUtils.updateLayerSize((layer as IGroup).layers[i] as IText, layerIndex, i)
-  //             }
-  //           }
-  //         } else {
-  //           return (styles: { [key: string]: string | number | boolean }) => {
-  //             this.updateSelectedLayersProps(styles, subLayerIdx)
-  //             TextUtils.updateLayerSize((layer as IGroup).layers[subLayerIdx] as IText, layerIndex, subLayerIdx)
-  //           }
-  //         }
-  //       default:
-  //         return (styles: { [key: string]: string | number | boolean }) => {
-  //           LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, styles)
-  //           TextUtils.updateLayerSize(layer as IText, layerIndex)
-  //           console.warn(layerIndex)
-  //           console.log(GeneralUtils.deepCopy(layer).styles.writingMode)
-  //         }
-  //     }
-  //   })()
-
-  //   switch (propName) {
-  //     case 'font-vertical': {
-  //       const writingMode = this.getTextState.props.isVertical ? 'initial' : 'vertical-lr'
-  //       handler({ writingMode })
-  //       writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
-  //       this.updateTextPropsState({ isVertical: !this.getTextState.props.isVertical })
-  //     }
-  //   }
-  // }
-
   blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
@@ -1013,7 +974,7 @@ class TextPropUtils {
     }
   }
 
-  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: string, payload: number) {
+  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number) {
     if (subLayerIndex === -1) return
 
     const primaryLayer = (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup)
@@ -1021,8 +982,9 @@ class TextPropUtils {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
       paragraphs.forEach(p => {
+        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
         p.spans.forEach(s => {
-          typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
         })
       })
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
