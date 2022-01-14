@@ -8,7 +8,7 @@
     router-view
     div(class="popup-area")
       popup
-      res-info(v-show="currSelectedResInfo.create"
+      res-info(v-show="currSelectedResInfo.type"
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")

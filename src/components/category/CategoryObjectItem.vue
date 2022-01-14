@@ -42,7 +42,7 @@ export default Vue.extend({
     showSvgInfo(evt: Event) {
       const { info = {}, tags } = this.item
       this._setCurrSelectedResInfo({
-        create: 'Created',
+        type: 'object',
         userName: info.author?.name ?? '',
         userLink: info.author?.url ?? '',
         authorCompany: info.author?.company ?? '',

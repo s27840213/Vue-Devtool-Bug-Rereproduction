@@ -180,7 +180,7 @@ export default Vue.extend({
       const { vendor } = this
       const { info = {}, tags } = this.photo
       this._setCurrSelectedResInfo({
-        create: 'Photo',
+        type: 'photo',
         userName: info.user?.name ?? '',
         userLink: info.user?.link ?? '',
         vendor,
