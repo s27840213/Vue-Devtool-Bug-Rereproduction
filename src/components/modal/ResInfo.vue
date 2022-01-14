@@ -148,10 +148,8 @@ export default Vue.extend({
       color: #009fc5;
       padding: 0 5px;
       text-decoration: underline;
-      white-space: nowrap;
       &.__tag, &.__license {
         padding: 0;
-        white-space: normal;
       }
     }
     &__action {
