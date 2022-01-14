@@ -56,6 +56,10 @@ class LocaleUtils {
     return `(${reg})`
   }
 
+  setLangAttr(locale: string) {
+    document.documentElement.lang = locale
+  }
+
   getLocaleInfo(): ILocale {
     return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.locale) as ILocale
   }
