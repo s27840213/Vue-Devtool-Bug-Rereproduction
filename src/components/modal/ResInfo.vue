@@ -1,27 +1,50 @@
 <template lang="pug">
-  div(class="photo-info")
-    strong(class="photo-info__desc")
-      span Photo by
-      a(class="photo-info__link pointer"
+  div(class="res-info")
+    strong(v-if="info.userName || info.vendor"
+      class="res-info__desc")
+      span {{ info.create }} by
+      a(v-if="info.userLink"
+        class="res-info__link pointer"
         :href="userLink"
         target="_blank"
         rel="nofollow noopener noreferrer"
-        @mousedown.prevent) {{ info.userName }}
-      span on
-      a(class="photo-info__link pointer"
+        @mousedown.prevent)
+        span {{ info.userName }}
+        span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+      template(v-else
+        class="px-5")
+        span {{ ' ' + info.userName }}
+        span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+      span(v-if="info.vendor") on
+      a(v-if="info.vendor && vendorLink"
+        class="res-info__link pointer"
         :href="vendorLink"
         target="_blank"
         rel="nofollow noopener noreferrer"
         @mousedown.prevent) {{ info.vendor }}
+      template(v-else)
+        span(v-if="info.vendor"
+          class="pl-5") {{ info.vendor }}
     div(v-if="info.tags && info.tags.length"
-      class="photo-info__tags")
+      class="res-info__tags")
       span tag: {{ info.tags.join(', ') }}
-    //- div(class="photo-info__action")
+    strong(v-if="info.licenseName"
+      class="res-info__desc")
+      span(class="pr-5") License:
+      a(v-if="info.licenseLink"
+        class="res-info__link__license pointer"
+        :href="info.licenseLink"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        @mousedown.prevent) {{ info.licenseName }}
+      span(v-else
+        class="pl-5") {{ info.licenseName }}
+    //- div(class="res-info__action")
     //-   svg-icon(:iconName="'folder'",
     //-     :iconColor="'gray-2'",
     //-     :iconWidth="'20px'")
     //-   span Add to My file
-    //- div(class="photo-info__action")
+    //- div(class="res-info__action")
     //-   svg-icon(:iconName="'search'",
     //-     :iconColor="'gray-2'",
     //-     :iconWidth="'20px'")
@@ -63,7 +86,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  .photo-info {
+  .res-info {
     background-color: setColor(white);
     max-width: 280px;
     padding: 10px;
@@ -78,6 +101,9 @@ export default Vue.extend({
       padding: 0 5px;
       text-decoration: underline;
       white-space: nowrap;
+      &__license {
+        padding: 0;
+      }
     }
     &__action {
       padding: 5px 0;
@@ -87,8 +113,8 @@ export default Vue.extend({
     }
     &__desc {
       display: block;
+      margin-top: 5px;
       margin-bottom: 5px;
-      word-break: break-all;
     }
   }
 </style>
