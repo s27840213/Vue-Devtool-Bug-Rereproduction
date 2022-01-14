@@ -76,6 +76,7 @@ class TextPropUtils {
             for (let i = 0; i < groupLayer.layers.length; i++) {
               if (groupLayer.layers[i].type === 'text') {
                 this.blockPropertyHandler(propName, i)
+                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, i)
               }
             }
           } else {
