@@ -148,7 +148,6 @@ export default Vue.extend({
       this.handleCurveSpan(this.spans)
     },
     spans(newSpans) {
-      console.log('123')
       const heightOri = this.config.styles.height
       this.handleCurveSpan(newSpans, false, () => {
         // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
@@ -255,7 +254,7 @@ export default Vue.extend({
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
-      if (LayerUtils.getCurrLayer.type === 'tmp') return
+      // if (LayerUtils.getCurrLayer.type === 'tmp') return
       const { styles, props } = updateInfo
       const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({
