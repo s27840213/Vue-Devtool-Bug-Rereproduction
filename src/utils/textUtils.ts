@@ -620,6 +620,7 @@ class TextUtils {
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
       const originSize = { width: config.styles.width, height: config.styles.height }
