@@ -18,6 +18,7 @@ import { IGroup } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import textUtils from '@/utils/textUtils'
+import asyncUtils from '@/utils/asyncUtils'
 
 export default Vue.extend({
   props: {
@@ -43,13 +44,16 @@ export default Vue.extend({
     }
   },
   async created () {
-    this.handleCurveSpan(this.spans, true)
-    const { pageIndex, layerIndex } = this
-    typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+    this.handleCurveSpan(this.spans, true, () => {
+      const { pageIndex, layerIndex } = this
+      typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+      asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
+    })
   },
   destroyed() {
     const { pageIndex, layerIndex } = this
     typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+    asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -205,7 +209,8 @@ export default Vue.extend({
     rePosition() {
       const { top, bottom, left, width: areaWidth, height: areaHeight } = this.area
       const y = this.bend >= 0 ? top : bottom - areaHeight
-      const x = Math.max(left - (areaWidth / 2), 0)
+      // const x = Math.max(left - (areaWidth / 2), 0)
+      const x = left - (areaWidth / 2) // keep its center anyway
       this.handleCurveTextUpdate({
         styles: { y, x }
       })

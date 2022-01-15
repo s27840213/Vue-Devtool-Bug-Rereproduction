@@ -618,7 +618,7 @@ class TextUtils {
     return textHW
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
@@ -657,18 +657,37 @@ class TextUtils {
     /**
      * Compensate the offset difference to the left-edge of group layer
      */
+    if (compensateX) {
+      let minX = Number.MAX_SAFE_INTEGER
+      group.layers
+        .forEach(l => {
+          minX = Math.min(minX, l.styles.x)
+        })
+      if (minX > 0) {
+        for (const [idx, layer] of Object.entries(group.layers)) {
+          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+            x: layer.styles.x - minX
+          })
+        }
+      }
+    }
+  }
+
+  fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
     group.layers
       .forEach(l => {
         minX = Math.min(minX, l.styles.x)
       })
-    if (minX > 0) {
-      for (const [idx, layer] of Object.entries(group.layers)) {
-        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
-          x: layer.styles.x - minX
-        })
-      }
+    for (const [idx, layer] of Object.entries(group.layers)) {
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+        x: layer.styles.x - minX
+      })
     }
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      x: group.styles.x + minX
+    })
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {
