@@ -158,6 +158,7 @@ export default Vue.extend({
         //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
         // }
         typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
+        textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
       })
     },
     isFontLoaded (curr) {
@@ -176,6 +177,7 @@ export default Vue.extend({
   },
   methods: {
     calcArea() {
+      this.area.left = this.config.styles.x + this.config.styles.width / 2
       const { transforms } = this
       const { scale, width } = this.config.styles
       const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
