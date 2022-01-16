@@ -624,8 +624,13 @@ class TextUtils {
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
       const originSize = { width: config.styles.width, height: config.styles.height }
-      const textHW = this.getTextHW(config, config.widthLimit)
-      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      let textHW
+      if ((config.styles as any).textShape?.name === 'curve') {
+        textHW = originSize
+      } else {
+        textHW = this.getTextHW(config, config.widthLimit)
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      }
       /**
        * Group layout height compensation
        */
