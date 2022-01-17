@@ -1,7 +1,7 @@
 import generalUtils from './generalUtils'
 
 class AsyncUtils {
-  callbackMap: {[key: string]: any} = {}
+  callbackMap: {[key: string]: any[]} = {}
   observerMap: {[key: string]: boolean[]} = {}
   idMap: {[key: string]: {
     id: string,
@@ -10,7 +10,7 @@ class AsyncUtils {
 
   createObserver(numOfWaitee: number, callback: any): string {
     const id = generalUtils.generateRandomString(8)
-    this.callbackMap[id] = callback
+    this.callbackMap[id] = [callback]
     this.observerMap[id] = Array(numOfWaitee).fill(false)
     return id
   }
@@ -32,11 +32,14 @@ class AsyncUtils {
     this.registerId(key, id, index)
   }
 
-  finishedByIndexes(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+  finishedByIndexes(pageIndex: number, layerIndex: number, subLayerIndex: number, callback?: () => void) {
     const key = this.generateKeyByIndexes(pageIndex, layerIndex, subLayerIndex)
     const mapValues = this.idMap[key]
     if (mapValues) {
       const { id, index } = mapValues
+      if (callback) {
+        this.callbackMap[id].push(callback)
+      }
       this.finished(index, id)
       this.clearId(key)
     }
@@ -45,7 +48,9 @@ class AsyncUtils {
   finished(index: number, id: string) {
     this.observerMap[id][index] = true
     if (this.observerMap[id].reduce((acc, curr) => acc && curr, true)) {
-      this.callbackMap[id]()
+      for (const callback of this.callbackMap[id]) {
+        callback()
+      }
       delete this.callbackMap[id]
       delete this.observerMap[id]
     }

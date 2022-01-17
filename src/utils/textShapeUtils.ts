@@ -63,6 +63,13 @@ class Controller {
     return { styles, props }
   }
 
+  cast2number(value: string | number): number {
+    if (typeof value === 'string') {
+      return parseInt(value, 10)
+    }
+    return value
+  }
+
   setTextShape (shape: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -72,8 +79,12 @@ class Controller {
     let observerId = ''
     let observerIndex = 0
 
+    const bendToSet = attrs?.bend !== undefined ? attrs.bend : this.shapes.curve.bend
     const isCurvedText = (styles: any) => styles.textShape?.name === 'curve'
-    const checkWillChange = shape === 'none' ? isCurvedText : (styles: any) => !isCurvedText(styles)
+    const hasDifferentBend = (styles: any) => this.cast2number(styles.textShape.bend) !== this.cast2number(bendToSet)
+    const checkWillChange = shape === 'none' ? 
+      (styles: any) => isCurvedText(styles):
+      (styles: any) => !isCurvedText(styles) || hasDifferentBend(styles)
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       if (targetLayer.type !== 'text') {
@@ -86,6 +97,7 @@ class Controller {
         }, 0)
         observerId = asyncUtils.createObserver(changeCount, () => {
           TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+          TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
         })
       }
       for (const idx in layers) {
@@ -109,15 +121,13 @@ class Controller {
           })
         }
       }
-      // if (targetLayer.type !== 'text') {
-      //   TextUtils.updateGroupLayerSize(pageIndex, layerIndex)
-      // }
     } else {
       const subLayerStyles = layers[subLayerIndex].styles
       needObserver = checkWillChange(subLayerStyles)
       if (needObserver) {
         observerId = asyncUtils.createObserver(1, () => {
           TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+          TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
         })
         asyncUtils.registerByIndexes(pageIndex, layerIndex, subLayerIndex, observerId, 0)
       }

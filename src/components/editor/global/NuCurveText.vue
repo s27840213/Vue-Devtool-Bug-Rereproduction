@@ -149,9 +149,7 @@ export default Vue.extend({
       this.area.left = x + width / 2
       this.handleCurveSpan(this.spans, false, () => {
         typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
-        textUtils.fixGroupYcoordinates(this.pageIndex, this.layerIndex)
-        this.resetLimitY()
+        asyncUtils.finishedByIndexes(this.pageIndex, this.layerIndex, this.subLayerIndex ?? -1, this.resetLimitY)
       })
     },
     spans(newSpans) {
