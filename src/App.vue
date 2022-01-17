@@ -63,33 +63,6 @@ export default Vue.extend({
       coordinateHeight: 0
     }
   },
-  async created() {
-    const defaultFonts: Array<Promise<void>> = []
-
-    await fetch('https://template.vivipic.com/static/app.json')
-      .then(response => response.json())
-      .then(json => {
-        console.log('static json loaded: ', json)
-        this.$store.commit('user/SET_STATE', {
-          verUni: json.ver_uni,
-          imgSizeMap: json.image_size_map
-        })
-        const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
-        defaultFontsJson
-          .forEach(_font => {
-            const font = {
-              type: 'public',
-              face: _font.id,
-              ver: _font.ver,
-              url: ''
-            }
-            defaultFonts.push(this.addFont(font))
-            this.updateDefaultFonts({ font })
-          })
-        Promise.all(defaultFonts)
-      })
-      .catch(e => console.error(e))
-  },
   beforeMount() {
     networkUtils.registerNetworkListener()
   },
