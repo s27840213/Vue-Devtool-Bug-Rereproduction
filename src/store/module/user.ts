@@ -169,6 +169,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getViewGuide(state): number {
     return state.viewGuide
+  },
+  getImgSizeMap(state): Array<{ [key: string]: string | number }> {
+    return state.imgSizeMap
   }
 }
 
