@@ -682,6 +682,7 @@ class TextUtils {
   fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
+    if (!group.layers) return
     group.layers
       .forEach(l => {
         minX = Math.min(minX, l.styles.x)
@@ -693,6 +694,24 @@ class TextUtils {
     }
     LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
       x: group.styles.x + minX
+    })
+  }
+
+  fixGroupYcoordinates(pageIndex: number, layerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    let minY = Number.MAX_SAFE_INTEGER
+    if (!group.layers) return
+    group.layers
+      .forEach(l => {
+        minY = Math.min(minY, l.styles.y)
+      })
+    for (const [idx, layer] of Object.entries(group.layers)) {
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+        y: layer.styles.y - minY
+      })
+    }
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      y: group.styles.y + minY
     })
   }
 

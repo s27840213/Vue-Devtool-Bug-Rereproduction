@@ -145,10 +145,19 @@ export default Vue.extend({
       }
     },
     bend() {
-      this.handleCurveSpan(this.spans)
+      const { x, width } = this.config.styles
+      this.area.left = x + width / 2
+      this.handleCurveSpan(this.spans, false, () => {
+        typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupYcoordinates(this.pageIndex, this.layerIndex)
+        this.resetLimitY()
+      })
     },
     spans(newSpans) {
       const heightOri = this.config.styles.height
+      const { x, width } = this.config.styles
+      this.area.left = x + width / 2
       this.handleCurveSpan(newSpans, false, () => {
         // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
         // if (this.editing && height > this.area.height) {
@@ -159,6 +168,8 @@ export default Vue.extend({
         // }
         typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
         textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupYcoordinates(this.pageIndex, this.layerIndex)
+        this.resetLimitY()
       })
     },
     isFontLoaded (curr) {
@@ -177,7 +188,6 @@ export default Vue.extend({
   },
   methods: {
     calcArea() {
-      this.area.left = this.config.styles.x + this.config.styles.width / 2
       const { transforms } = this
       const { scale, width } = this.config.styles
       const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
@@ -280,20 +290,36 @@ export default Vue.extend({
         return
       }
       const group = LayerUtils.getCurrLayer as IGroup
-      const lowLine = this.config.styles.y + heightOri
       const targetSubLayers = [] as Array<[number, number]>
-      group.layers
-        .forEach((l, idx) => {
-          if (l.styles.y >= lowLine && idx !== this.subLayerIndex) {
-            targetSubLayers.push([idx, l.styles.y])
-          }
-        })
-      targetSubLayers
-        .forEach(data => {
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
-            y: (height - heightOri) + data[1]
+      if (this.bend >= 0) {
+        const lowLine = this.config.styles.y + heightOri
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine && idx !== this.subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
           })
-        })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
+              y: data[1] + (height - heightOri)
+            })
+          })
+      } else {
+        const highLine = this.config.styles.y
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y <= highLine && idx !== this.subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
+              y: data[1] - (height - heightOri)
+            })
+          })
+      }
       textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
     }
   }
