@@ -416,7 +416,7 @@ export default Vue.extend({
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
     },
     focusDesignId(): string {
-      return this.currSelectedInfo.layers[0].designId
+      return this.currSelectedInfo.layers[0].designId ?? ''
     }
   },
   watch: {

@@ -26,7 +26,8 @@ const MOBILE_ROUTES = [
   'Settings',
   'SignUp',
   'Login',
-  'MobileWarning'
+  'MobileWarning',
+  'Preview'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -186,9 +187,10 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  console.log(`Lang: ${document.documentElement.lang}`)
+  document.title = to.meta.title || i18n.t('SE0001')
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  document.title = to.meta.title || i18n.t('SE0001')
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor

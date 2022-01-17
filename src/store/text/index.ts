@@ -144,7 +144,7 @@ const actions: ActionTree<ITextState, unknown> = {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
         state.pending = face
-        const newFont = new FontFace(face, getFontUrl(type, url || face, ver))
+        const newFont = new FontFace(face, getFontUrl(type, url || face, ver ?? 0))
         commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: false })
         return new Promise<void>(resolve => {
           newFont.load()

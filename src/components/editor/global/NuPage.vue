@@ -125,7 +125,7 @@
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
                                     :config="Object.assign(backImgConfig(getCurrSubSelectedLayerShown), { pointerEvents: 'none' }, { forRender: true })")
-            template(v-else)
+            template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
                 :config="getCurrLayer")

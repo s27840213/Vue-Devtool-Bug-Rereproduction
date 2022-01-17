@@ -49,9 +49,10 @@ import GroupUtils from '@/utils/groupUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
-import { IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data() {
@@ -84,11 +85,6 @@ export default Vue.extend({
     subLayerType(): string {
       return this.currSubSelectedInfo.type
     },
-    subLayerIndex(): number {
-      const primaryLayerIndex = LayerUtils.layerIndex
-      return (LayerUtils.getCurrLayer as IGroup)
-        .layers.findIndex(l => l.active)
-    },
     primaryLayerIndex(): number {
       if (LayerUtils.getCurrLayer.type === 'group') {
         return LayerUtils.layerIndex
@@ -97,14 +93,17 @@ export default Vue.extend({
     },
     opacity(): number {
       const currLayer = LayerUtils.getCurrLayer
-      if (!['tmp', 'group'].includes(currLayer.type)) {
-        return this.currSelectedInfo.layers[0].styles.opacity
+      const { subLayerIdx } = LayerUtils
+      switch (currLayer.type) {
+        case 'tmp':
+          return Math.max(...(LayerUtils.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
+        case 'group':
+          return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        case 'frame':
+          return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        default:
+          return this.currSelectedInfo.layers[0].styles.opacity
       }
-      if (currLayer.type === 'group') {
-        const { subLayerIndex } = this
-        return subLayerIndex !== -1 ? (currLayer as IGroup).layers[subLayerIndex].styles.opacity : currLayer.styles.opacity
-      }
-      return Math.max(...(LayerUtils.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
     },
     isTextEditable(): boolean {
       return this.layerNum === 1 && this.currSelectedInfo.layers[0].type === 'text' && this.currSelectedInfo.layers[0].contentEditable
@@ -145,11 +144,11 @@ export default Vue.extend({
       })
     },
     setOpacity(value: number): void {
-      console.log(typeof value)
       if (value > 100) {
         value = 100
       }
-      if (!this.isGroup) {
+      const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = LayerUtils
+      if (subLayerIdx === -1) {
         if (this.currSelectedInfo.layers.length === 1) {
           this.$store.commit('UPDATE_layerStyles', {
             pageIndex: this.currSelectedInfo.pageIndex,
@@ -166,9 +165,11 @@ export default Vue.extend({
           })
         }
       } else {
-        const { subLayerIndex, primaryLayerIndex } = this
-        if (subLayerIndex !== -1) {
-          LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, primaryLayerIndex, subLayerIndex, {
+        if (subLayerIdx !== -1) {
+          currLayer.type === 'group' && LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
+            opacity: value
+          })
+          currLayer.type === 'frame' && frameUtils.updateFrameLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
             opacity: value
           })
         } else {

@@ -1292,7 +1292,7 @@ class UploadUtils {
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
       // ref: uploadUtils.ts:L466
-      const pagesJSON = (json || store.getters.getPages).map((page: IPage) => {
+      const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
         const newPage = this.default(generalUtils.deepCopy(page)) as IPage
         for (const [i, layer] of newPage.layers.entries()) {
           if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
