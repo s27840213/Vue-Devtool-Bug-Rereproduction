@@ -17,6 +17,6 @@ export interface IPopupOptions {
   icon: string,
   text: string,
   shortcutText: string,
-  action: () => void,
+  action: (event?: MouseEvent) => void,
   condition?: boolean
 }

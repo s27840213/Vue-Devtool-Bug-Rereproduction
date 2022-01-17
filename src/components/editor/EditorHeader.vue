@@ -121,9 +121,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _setPages: 'SET_pages',
-      _setModalInfo: 'modal/SET_MODAL_INFO',
-      _setModalOpen: 'modal/SET_MODAL_OPEN'
+      _setPages: 'SET_pages'
     }),
     goToPage(pageName: string, queryString = '') {
       if (queryString) {

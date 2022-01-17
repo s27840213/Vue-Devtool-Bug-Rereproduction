@@ -47,7 +47,7 @@ export default Vue.extend({
         !show && (this.inprogress = false)
       } else {
         modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(this.$t('NN0323') as string, [])
+        modalUtils.setModalInfo(this.$t('NN0323') as string, [], '')
       }
     }
   }
