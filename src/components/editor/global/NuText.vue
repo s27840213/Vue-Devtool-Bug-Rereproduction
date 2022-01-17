@@ -30,6 +30,7 @@ import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -49,7 +50,17 @@ export default Vue.extend({
       return
     }
     const promises: Array<Promise<void>> = []
+    for (const defaultFont of this.getDefaultFontsList) {
+      promises.push(this.addFont(defaultFont).catch(e => console.error(e)))
+    }
+
     for (const p of (this.config as IText).paragraphs) {
+      promises.push(this.addFont({
+        type: p.styles.type,
+        face: p.styles.font,
+        url: p.styles.fontUrl,
+        ver: this.verUni
+      }).catch(e => console.error(e)))
       for (const span of p.spans) {
         const promise = this.addFont({
           type: span.styles.type,
@@ -92,7 +103,7 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapState('user', ['verUni']),
-    ...mapGetters('text', ['getDefaultFonts']),
+    ...mapGetters('text', ['getDefaultFontsList']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',

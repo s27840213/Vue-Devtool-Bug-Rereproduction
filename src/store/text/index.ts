@@ -75,6 +75,9 @@ const getters: GetterTree<ITextState, unknown> = {
     return state.defaultFonts
       .map(font => font.face).join(',')
   },
+  getDefaultFontsList (state): IFont[] {
+    return state.defaultFonts
+  },
   paragraphs (state): Array<IParagraph> {
     return state.paragraphs
   }
@@ -140,7 +143,7 @@ const mutations: MutationTree<ITextState> = {
 const actions: ActionTree<ITextState, unknown> = {
   async addFont ({ state, commit }, data: { type: string, face: string, url: string, ver: number }): Promise<void> {
     const { face, type, url, ver } = data
-    if (face && !state.fontStore.some(font => font.face === face && font.loaded)) {
+    if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
         state.pending = face
