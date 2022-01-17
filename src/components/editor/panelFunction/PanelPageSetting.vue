@@ -344,6 +344,7 @@ export default Vue.extend({
   watch: {
     key_id: function () {
       this.isGetTemplate = false
+      this.isGetGroup = false
       this.templateInfo = {
         key_id: '',
         creator: '',
