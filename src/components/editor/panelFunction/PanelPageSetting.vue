@@ -161,31 +161,49 @@
             span(class="body-1") 上次更新
             span(class="pl-15 body-2") {{templateInfo.edit_time}}
           div(class="template-information__line")
-            span(class="body-1") 語系
-            select(class="template-information__select" v-model="templateInfo.locale")
-              option(v-for="locale in localeOptions" :value="locale") {{locale}}
+            span(class="body-1") 模板尺寸
+            span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
           div(class="template-information__line")
             span(class="body-1") Theme_ids
+          template(v-if="showDbTemplate")
+            div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
+            div(class="template-information__line")
+              span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+          div(v-if="showDbTemplate"
+            class="square-wrapper wrong")
+            template(v-for="(item, idx) in themeList")
+              div(v-if="dbTemplateThemes[item.id]"
+                class="pt-5 theme-option")
+                span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
+                span(class="body-1") {{item.title}}
+                span(class="body-2 text-gray-2") {{item.description}}
+          div(v-if="showDbTemplate"
+            class="pt-10 template-information__line")
+            span(class="body-1 ") 修正版
           div(class="square-wrapper")
             div(v-for="(item, idx) in themeList"
               class="pt-5 theme-option")
               input(type="checkbox"
                 class="theme-option__check"
-                :disabled="isDisabled(item.width, item.height)"
+                :disabled="isDisabled(item.id, item.width, item.height)"
                 v-model="templateThemes[item.id]")
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div tags_tw
+          div(class="template-information__line pt-10")
+            span(class="body-1") 語系
+            select(class="template-information__select" v-model="templateInfo.locale")
+              option(v-for="locale in localeOptions" :value="locale") {{locale}}
+          div(class="pt-10") tags_tw
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_tw")
-          div tags_us
+          div(class="pt-10") tags_us
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_us")
-          div tags_jp
+          div(class="pt-10") tags_jp
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
@@ -315,7 +333,10 @@ export default Vue.extend({
         groupThemes: [] as ICoverTheme[]
       },
       showDbGroup: false,
+      showDbTemplate: false,
       dbGroupThemes: [] as ICoverTheme[],
+      templateThemes: [] as boolean[],
+      dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[]
     }
@@ -407,14 +428,6 @@ export default Vue.extend({
     },
     key_id(): string {
       return this.getPage(this.middlemostPageIndex).designId
-    },
-    templateThemes(): boolean[] {
-      const themes = this.templateInfo.theme_ids.split(',')
-      const templateThemes = [] as boolean[]
-      themes.forEach((item) => {
-        templateThemes[parseInt(item)] = true
-      })
-      return templateThemes
     }
   },
   methods: {
@@ -574,8 +587,7 @@ export default Vue.extend({
         const res = await designApis.getDesignInfo(this.token, 'template', this.key_id, 'select', JSON.stringify(data))
         if (res.data.flag === 0) {
           this.isGetTemplate = true
-          this.templateInfo = res.data.data
-          this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+          this.setTemplateInfo(res.data)
           if (this.themeList.length === 0) {
             this.themeList = res.data.data.themeList
           }
@@ -636,8 +648,7 @@ export default Vue.extend({
       const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
         this.$notify({ group: 'copy', text: '模板資料更新成功' })
-        this.templateInfo = res.data.data
-        this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+        this.setTemplateInfo(res.data)
       } else {
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
@@ -755,6 +766,17 @@ export default Vue.extend({
         this.showDbGroup = true
       }
     },
+    setTemplateInfo(data: any) {
+      this.showDbTemplate = false
+      this.templateThemes = []
+      this.templateInfo = data.data
+      this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+      const themes = this.templateInfo.theme_ids.split(',')
+      themes.forEach((item) => {
+        this.templateThemes[parseInt(item)] = true
+      })
+      this.dbTemplateThemes = Array.from(this.templateThemes)
+    },
     copyText(text: string) {
       if (text.length === 0) {
         return
@@ -764,7 +786,7 @@ export default Vue.extend({
           this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
-    isDisabled(themeWidth: string, themeHeight: string) {
+    isDisabled(idx: number, themeWidth: string, themeHeight: string) {
       const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
 
@@ -775,7 +797,11 @@ export default Vue.extend({
       } else if ((themeWidth === this.templateInfo.width || parseInt(themeWidth) === 0) &&
         (themeHeight === this.templateInfo.height || parseInt(themeHeight) === 0)) {
         return false
-      } else {
+      } else { // Disabled
+        if (this.templateThemes[idx]) {
+          this.showDbTemplate = true
+          this.templateThemes[idx] = false
+        }
         return true
       }
     },
