@@ -2,47 +2,57 @@
   div(class="res-info")
     strong(v-if="info.userName || info.vendor"
       class="res-info__desc")
-      span {{ create }} by
-      a(v-if="info.userLink"
-        class="res-info__link pointer"
-        :href="userLink"
-        target="_blank"
-        rel="nofollow noopener noreferrer"
-        @mousedown.prevent)
-        span {{ info.userName }}
-        span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
-      template(v-else
-        class="px-5")
-        span {{ ' ' + info.userName }}
-        span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
-      span(v-if="info.vendor") on
-      a(v-if="info.vendor && vendorLink"
-        class="res-info__link pointer"
-        :href="vendorLink"
-        target="_blank"
-        rel="nofollow noopener noreferrer"
-        @mousedown.prevent) {{ info.vendor }}
-      template(v-else)
-        span(v-if="info.vendor"
-          class="pl-5") {{ info.vendor }}
+      i18n(v-if="this.info.type === 'photo'"
+        path="NN0364" tag="span")
+          template(#author)
+            a(v-if="info.userLink"
+              class="res-info__link pointer"
+              :href="userLink"
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              @mousedown.prevent)
+              span {{ info.userName }}
+          template(#site)
+            a(v-if="info.vendor && vendorLink"
+              class="res-info__link pointer"
+              :href="vendorLink"
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              @mousedown.prevent) {{ info.vendor }}
+            span(v-else
+              class="pl-5") {{ info.vendor }}
+      i18n(v-else
+        path="NN0365" tag="span")
+          template(#author)
+            a(v-if="info.userLink"
+              class="res-info__link pointer"
+              :href="userLink"
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              @mousedown.prevent)
+              span {{ info.userName }}
+              span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+            template(v-else
+              class="px-5")
+              span {{ ' ' + info.userName }}
+              span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
     div(v-if="info.tags && info.tags.length"
       class="res-info__tags")
-      span(class="pr-5") tag:
+      span(class="pr-5") {{$t('NN0366')}}:
       template(v-for="tag, idx in info.tags")
-        span(v-if="idx !== 0") {{', '}}
+        span(v-if="idx !== 0") {{' '}}
         span(class="res-info__link __tag"
           @click="onTagClicked(tag)") {{ tag }}
     strong(v-if="info.licenseName"
       class="res-info__desc")
-      span(class="pr-5") License:
+      span(class="pr-5") {{$t('NN0367')}}:
       a(v-if="info.licenseLink"
         class="res-info__link __license pointer"
         :href="info.licenseLink"
         target="_blank"
         rel="nofollow noopener noreferrer"
         @mousedown.prevent) {{ info.licenseName }}
-      span(v-else
-        class="pl-5") {{ info.licenseName }}
+      span(v-else) {{ info.licenseName }}
     //- div(class="res-info__action")
     //-   svg-icon(:iconName="'folder'",
     //-     :iconColor="'gray-2'",
@@ -57,6 +67,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapMutations, mapActions } from 'vuex'
 
 const moduleName = 'unsplash'
@@ -66,15 +77,6 @@ export default Vue.extend({
     info: Object
   },
   computed: {
-    create(): string {
-      const { type } = this.info as any
-      switch (type) {
-        case 'photo':
-          return 'Photo'
-        default:
-          return 'Created'
-      }
-    },
     vendorLink (): string {
       const { vendor } = this.info as any
       const { VUE_APP_UNSPLASH_APP_NAME: unsplashAppName } = process.env
