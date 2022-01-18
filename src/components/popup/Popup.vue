@@ -19,6 +19,7 @@ import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
+import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
@@ -37,7 +38,8 @@ export default Vue.extend({
     PopupLineTemplate,
     PopupGuideline,
     PopupDownload,
-    PopupPageScale
+    PopupPageScale,
+    PopupSubmit
   },
   directives: {
     clickOutside: vClickOutside.directive

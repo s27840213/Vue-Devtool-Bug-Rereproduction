@@ -46,7 +46,6 @@ module.exports = {
                     ignore: ['node_modules', 'vue.config.js']
                 }])
         }
-        console.log(argv)
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
                 let name = 'process.env'

@@ -18,6 +18,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
+import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -191,6 +192,29 @@ router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || i18n.t('SE0001')
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
+  if (store.getters['user/getImgSizeMap'].length === 0) {
+    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+    const json = await response.json()
+
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('user/SET_STATE', {
+      verUni: json.ver_uni,
+      imgSizeMap: json.image_size_map
+    })
+    const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    defaultFontsJson
+      .forEach(_font => {
+        const font = {
+          type: 'public',
+          face: _font.id,
+          ver: _font.ver,
+          url: ''
+        }
+        store.dispatch('text/addFont', font)
+        store.commit('text/UPDATE_DEFAULT_FONT', { font })
+      })
+  }
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor

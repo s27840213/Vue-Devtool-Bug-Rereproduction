@@ -19,12 +19,12 @@ class AlignUtils {
   }
 
   private getTmpAlignPos(tmpStyles: IStyle, layer: IShape | IText | IImage | IGroup | ITmp, type: string): { [key: string]: number } {
-    const layerBounding = mathUtils.getBounding(layer)
-    const offset: { [index: string]: number } = {
-      x: layer.styles.x - layerBounding.x,
-      y: layer.styles.y - layerBounding.y,
-      width: layerBounding.width,
-      height: layerBounding.height
+    const bouding = mathUtils.getBounding(layer)
+    const layerWidth = layer.styles.width
+    const layerHeight = layer.styles.height
+    const offset = layer.styles.rotate === 0 ? { x: 0, y: 0 } : {
+      x: layer.styles.x - bouding.x,
+      y: layer.styles.y - bouding.y
     }
     switch (type) {
       case 'left': {
@@ -34,12 +34,12 @@ class AlignUtils {
       }
       case 'centerHr': {
         return {
-          x: (tmpStyles.initWidth / 2) - (layer.styles.width / 2)
+          x: (tmpStyles.width / 2) - (layerWidth / 2)
         }
       }
       case 'right': {
         return {
-          x: tmpStyles.initWidth - offset.width + offset.x
+          x: tmpStyles.width - bouding.width + offset.x
         }
       }
       case 'top': {
@@ -49,12 +49,12 @@ class AlignUtils {
       }
       case 'centerVr': {
         return {
-          y: (tmpStyles.initHeight / 2) - (layer.styles.height / 2)
+          y: (tmpStyles.height / 2) - (layerHeight / 2)
         }
       }
       case 'bottom': {
         return {
-          y: tmpStyles.initHeight - offset.height + offset.y
+          y: tmpStyles.height - bouding.height + offset.y
         }
       }
       default: {
@@ -120,21 +120,27 @@ class AlignUtils {
       let tmpStyles = LayerUtils.getTmpLayer().styles
       const rotateDeg = tmpStyles.rotate
       if (rotateDeg !== 0) {
+        // Step 3 -> reselect layer to make align calculation much easier
         GroupUtils.reselect()
         tmpStyles = LayerUtils.getTmpLayer().styles
       }
-      layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
+      // Step 4 -> align layers to target position, and then reselect to get the correct bounding rect.
+
+      this.currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
         Object.assign(layer.styles, this.getTmpAlignPos(tmpStyles, layer, type))
       })
       GroupUtils.reselect()
       if (rotateDeg !== 0) {
-        // The formular we used here is record in the google doc Translation Calculation2
-        // If you got some problem, just go to see that document. It's a little bit hard to understand
+        // Step 5 -> rotated tmp layer with -N deg
         LayerUtils.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, { rotate: -rotateDeg })
         const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
         GroupUtils.reselect()
+        // The center point of Step 6 and Step 7
         const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
+        // rotate the center 2 point around center1
         const center3 = mathUtils.getRotatedPoint(rotateDeg, center1, center2)
+        console.log(center1, center2, center3)
+        // and then get the center offset
         const centerOffset = {
           x: center3.x - center2.x,
           y: center3.y - center2.y

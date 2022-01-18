@@ -81,7 +81,7 @@ export default Vue.extend({
         uploadUtils.chooseAssets('image')
       } else {
         modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
+        modalUtils.setModalInfo(`${this.$t('NN0350')}`, [], '')
       }
     },
     onDrop(evt: DragEvent) {
@@ -95,7 +95,7 @@ export default Vue.extend({
           uploadUtils.uploadAsset('image', files)
         } else {
           modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
+          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [], '')
         }
       }
     }

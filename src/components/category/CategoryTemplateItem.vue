@@ -97,6 +97,7 @@ export default Vue.extend({
         modalUtils.setModalInfo(
           `${this.$t('NN0209')}`,
           [],
+          '',
           {
             msg: `${this.$t('NN0208')}`,
             style: { width: btnWidth, height: '32px' },
