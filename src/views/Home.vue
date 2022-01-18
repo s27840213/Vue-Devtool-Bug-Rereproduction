@@ -199,6 +199,11 @@ export default Vue.extend({
         property: 'og:description',
         content: `${this.$t('OG0002')}`,
         vmid: 'og:description'
+      },
+      {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
       }
     ]
     const title = `${this.$t('SE0001')}`
