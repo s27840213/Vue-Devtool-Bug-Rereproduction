@@ -778,6 +778,10 @@ export default Vue.extend({
       this.templateThemes = []
       this.templateInfo = data.data
       this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+      if (this.templateInfo.theme_ids === '0' ||
+        this.templateInfo.theme_ids.length === 0) {
+        this.$notify({ group: 'copy', text: '尚未設定主題' })
+      }
       const themes = this.templateInfo.theme_ids.split(',')
       themes.forEach((item) => {
         this.templateThemes[parseInt(item)] = true
