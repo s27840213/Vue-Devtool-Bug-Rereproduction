@@ -95,7 +95,7 @@ new Vue({
   store,
   i18n,
   mounted() {
-    if (process.env.VUE_APP_PRERENDER) {
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
       document.dispatchEvent(new Event('render-event'))
     }
   },

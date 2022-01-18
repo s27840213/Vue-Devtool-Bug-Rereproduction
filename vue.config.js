@@ -55,11 +55,6 @@ module.exports = {
         }
 
         if (argv.PRERENDER) {
-            config.plugin('define').tap(args => {
-                let name = 'process.env'
-                args[0][name]['VUE_APP_PRERENDER'] = argv.PRERENDER || ''
-                return args
-            })
             // Tell Vue (CLI 3) to provide this file to Pre-SPA:
             config.plugin('html')
                 .tap(args => {
@@ -77,7 +72,7 @@ module.exports = {
                         // The name of the property
                         injectProperty: '__PRERENDER_INJECTED',
                         // The values to have access to via `window.injectProperty` (the above property )
-                        inject: { foo: 'bar' },
+                        inject: { PRERENDER: 1 },
                         renderAfterDocumentEvent: 'render-event',
                         headless: true
                     })
