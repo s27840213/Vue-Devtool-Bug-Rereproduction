@@ -18,6 +18,7 @@ class AsyncUtils {
      * Return: id of the observer that can be used by a target process to claim its completion.
      */
     const id = generalUtils.generateRandomString(8)
+    if (numOfWaitee === 0) return id
     this.callbackMap[id] = [callback]
     this.observerMap[id] = Array(numOfWaitee).fill(false)
     return id
@@ -46,14 +47,14 @@ class AsyncUtils {
   }
 
   generateKeyByIndexes(pageIndex: number, layerIndex: number, subLayerIndex: number) {
-    /** 
+    /**
      * generate a key by pageIndex, layerIndex, and subLayerIndex.
      */
     return `${pageIndex},${layerIndex},${subLayerIndex}`
   }
 
   registerByIndexes(pageIndex: number, layerIndex: number, subLayerIndex: number, id: string, index: number) {
-    /** 
+    /**
      * combination of generating a key and registering it.
      */
     const key = this.generateKeyByIndexes(pageIndex, layerIndex, subLayerIndex)

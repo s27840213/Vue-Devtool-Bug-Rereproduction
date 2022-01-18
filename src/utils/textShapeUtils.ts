@@ -63,11 +63,19 @@ class Controller {
     return { styles, props }
   }
 
-  cast2number(value: string | number): number {
+  cast2number (value: string | number): number {
     if (typeof value === 'string') {
       return parseInt(value, 10)
     }
     return value
+  }
+
+  isCurvedText (styles: any): boolean {
+    return styles.textShape?.name === 'curve'
+  }
+
+  hasDifferentBend (styles: any, bendToSet: string | number): boolean {
+    return this.cast2number(styles.textShape.bend) !== this.cast2number(bendToSet)
   }
 
   setTextShape (shape: string, attrs?: any): void {
@@ -79,12 +87,14 @@ class Controller {
     let observerId = ''
     let observerIndex = 0
 
-    const bendToSet = attrs?.bend !== undefined ? attrs.bend : this.shapes.curve.bend
-    const isCurvedText = (styles: any) => styles.textShape?.name === 'curve'
-    const hasDifferentBend = (styles: any) => this.cast2number(styles.textShape.bend) !== this.cast2number(bendToSet)
-    const checkWillChange = shape === 'none' ? 
-      (styles: any) => isCurvedText(styles):
-      (styles: any) => !isCurvedText(styles) || hasDifferentBend(styles)
+    if (!attrs && shape === 'curve') { // if setting shape type to curve, set attrs.bend to default value.
+      attrs = { bend: this.shapes.curve.bend }
+    }
+
+    const bendToSet = attrs?.bend // is undefined only when setting focus
+    const checkWillChange = shape === 'none'
+      ? (styles: any) => this.isCurvedText(styles)
+      : (styles: any) => !this.isCurvedText(styles) || (bendToSet !== undefined && this.hasDifferentBend(styles, bendToSet))
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       if (targetLayer.type !== 'text') {
