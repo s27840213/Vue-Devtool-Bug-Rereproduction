@@ -185,7 +185,7 @@ const router = new VueRouter({
           localStorage.setItem('locale', locale)
         }
         next()
-        if (!process.env.VUE_APP_PRERENDER) {
+        if ((window as any).__PRERENDER_INJECTED === undefined) {
           router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
         }
       },
@@ -200,8 +200,7 @@ router.beforeEach(async (to, from, next) => {
   // hence we should guarantee to receive login response before navigate to these pages
   console.log(`Prerender mode: ${process.env.VUE_APP_PRERENDER}`)
   console.log(`Current env: ${process.env.NODE_ENV}`)
-  console.log(`Prerender end: ${process.env.VUE_APP_PRERENDER_FINISH}`)
-  if (store.getters['user/getImgSizeMap'].length === 0 && !process.env.VUE_APP_PRERENDER) {
+  if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
     const response = await fetch('https://template.vivipic.com/static/app.json')
     const json = await response.json()
 

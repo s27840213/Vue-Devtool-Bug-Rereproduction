@@ -74,17 +74,13 @@ module.exports = {
                     staticDir: path.join(__dirname, 'dist'),
                     routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates'],
                     renderer: new Renderer({
+                        // The name of the property
+                        injectProperty: '__PRERENDER_INJECTED',
+                        // The values to have access to via `window.injectProperty` (the above property )
+                        inject: { foo: 'bar' },
                         renderAfterDocumentEvent: 'render-event',
                         headless: true
-                    }),
-                    postProcess (renderedRoute) {
-                        config.plugin('define').tap(args => {
-                            let name = 'process.env'
-                            args[0][name]['VUE_APP_PRERENDER_FINISH'] = 1
-                            return args
-                        })
-                        return renderedRoute
-                    }
+                    })
                 }])
         }
     },
