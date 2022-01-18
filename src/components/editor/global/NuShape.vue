@@ -351,10 +351,8 @@ export default Vue.extend({
           }
           // Fix some bug that the color is empty array.
           if (!(this.config as IShape).color?.length) {
-            console.log(this.config.designId)
             if (this.config.designId) {
               const shape = await shapeUtils.fetchSvg(this.config) as IShape
-              console.warn(shape)
               layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
             }
           }

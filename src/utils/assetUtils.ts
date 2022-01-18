@@ -143,8 +143,6 @@ class AssetUtils {
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
-    console.log(json)
-    console.log(attrs)
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || this.middlemostPageIndex
     const { vSize = [] } = json
@@ -511,8 +509,6 @@ class AssetUtils {
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
-      console.log('item ID: ' + item.id)
-      console.log(item)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 7:
