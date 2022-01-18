@@ -47,12 +47,14 @@ class MouseUtils {
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
       if (layer) {
-        groupUtils.deselect()
-        LayerUtils.deleteLayer(layerIndex)
-        LayerUtils.addLayersToPos(pageIndex, [layer], layerIndex)
-        zindexUtils.reassignZindex(pageIndex)
-        groupUtils.select(pageIndex, [layerIndex])
-        StepsUtils.record()
+        // LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        //   srcObj: { ...layer.srcObj }
+        // })
+        // const { imgX, imgY, imgWidth, imgHeight } = layer.styles
+        // LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        //   imgX, imgY, imgWidth, imgHeight
+        // })
+        // StepsUtils.record()
       }
     }
   }
@@ -88,8 +90,6 @@ class MouseUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
-    console.log(data)
-    let layer
     switch (data.type) {
       case 'image': {
         const layerConfig: ILayer = {
@@ -139,22 +139,18 @@ class MouseUtils {
             ...(inFilePanel && uploadUtils.isAdmin && { assetId: data.srcObj.assetId })
           }
           groupUtils.deselect()
-          AssetUtils.addImage(
-            src,
-            photoAspectRatio,
-            attr
-          )
-
-          return
+          // AssetUtils.addImage(
+          //   src,
+          //   photoAspectRatio,
+          //   attr
+          // )
+          return layerConfig as IImage
         }
-        break
       }
       default: {
         AssetUtils.addAsset(data, { pageIndex, styles: { x, y } })
-        return
       }
     }
-    return layer
   }
 
   backgroundHandler(pageIndex: number, config: ILayer) {

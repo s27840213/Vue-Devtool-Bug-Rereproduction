@@ -1,41 +1,49 @@
 <template lang="pug">
   div(class="nu-sub-controller")
-    div(class="nu-sub-controller__content"
-        ref="body"
-        :layer-index="`${layerIndex}`"
-        :style="styles('')"
-        @dblclick="onDblClick()"
-        @click.left.stop="onClickEvent($event)"
-        @mousedown="onMousedown($event)")
-      svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-          :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-          g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
-            :style="frameClipStyles()"
-            @drop="onFrameDrop()"
-            @dragenter="onDrageEnter()"
-            @dragleave="onDragLeave()")
-      template(v-if="config.type === 'text' && config.active")
-        div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-            :style="textBodyStyle()"
-            :pageIndex="pageIndex"
-            :layerIndex="primaryLayerIndex"
-            :subLayerIndex="layerIndex"
-            @keydown.native.37.stop
-            @keydown.native.38.stop
-            @keydown.native.39.stop
-            @keydown.native.40.stop
-            @keydown.native.ctrl.67.exact.stop.self
-            @keydown.native.meta.67.exact.stop.self
-            @keydown.native.ctrl.86.exact.stop.self
-            @keydown.native.meta.86.exact.stop.self
-            @keydown.native.ctrl.65.exact.stop.self
-            @keydown.native.meta.65.exact.stop.self
-            @keydown.native.ctrl.90.exact.stop.self
-            @keydown.native.meta.90.exact.stop.self
-            @keydown.native.ctrl.shift.90.exact.stop.self
-            @keydown.native.meta.shift.90.exact.stop.self
-            @update="handleTextChange")
+    div(class="nu-sub-controller__wrapper" :style="positionStyles()")
+      div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
+        div(class="nu-sub-controller__content"
+            ref="body"
+            :layer-index="`${layerIndex}`"
+            :style="styles('')"
+            @dblclick="onDblClick()"
+            @click.left.stop="onClickEvent($event)"
+            @drop="onFrameDrop($event)"
+            @dragenter="onFrameDragEnter($event)"
+            @dragleave="onFrameDragLeave($event)"
+            @mousedown="onMousedown($event)")
+          //- @drop.prevent="onDrop($event)"
+          //- @dragenter="dragEnter($event)"
+          //- @dragleave="dragLeave($event)"
+          //- svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+          //-     :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
+          //-     g(v-html="getClipPath"
+          //-       :style="frameClipStyles()"
+          //-       @drop="onFrameDrop($event)"
+          //-       @dragenter="onFrameDragEnter($event)"
+          //-       @dragleave="onFrameDragLeave($event)")
+          template(v-if="config.type === 'text' && config.active")
+            div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+              nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+                :style="textBodyStyle()"
+                :pageIndex="pageIndex"
+                :layerIndex="primaryLayerIndex"
+                :subLayerIndex="layerIndex"
+                @keydown.native.37.stop
+                @keydown.native.38.stop
+                @keydown.native.39.stop
+                @keydown.native.40.stop
+                @keydown.native.ctrl.67.exact.stop.self
+                @keydown.native.meta.67.exact.stop.self
+                @keydown.native.ctrl.86.exact.stop.self
+                @keydown.native.meta.86.exact.stop.self
+                @keydown.native.ctrl.65.exact.stop.self
+                @keydown.native.meta.65.exact.stop.self
+                @keydown.native.ctrl.90.exact.stop.self
+                @keydown.native.meta.90.exact.stop.self
+                @keydown.native.ctrl.shift.90.exact.stop.self
+                @keydown.native.meta.shift.90.exact.stop.self
+                @update="handleTextChange")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -44,7 +52,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText } from '@/interfaces/layer'
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
@@ -84,7 +92,12 @@ export default Vue.extend({
       isComposing: false,
       layerSizeBuff: -1,
       posDiff: { x: 0, y: 0 },
-      parentId: ''
+      parentId: '',
+      imgBuff: {} as {
+        index: number,
+        styles: Partial<IImageStyle>,
+        srcObj: { type: string, assetId: string | number, userId: string }
+      }
     }
   },
   mounted() {
@@ -100,6 +113,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState(['currDraggedPhoto']),
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -151,6 +165,13 @@ export default Vue.extend({
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
+    },
+    getClipPath(): string {
+      if (!this.config.isFrameImg) {
+        return FrameUtils.frameClipFormatter(this.config.clipPath)
+      } else {
+        return `<path d='M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z'></path>`
+      }
     }
   },
   watch: {
@@ -299,16 +320,40 @@ export default Vue.extend({
       document.removeEventListener('mouseup', this.onMouseup)
       this.isControlling = false
     },
-    styles(type: string) {
-      const zindex = (type === 'control-point') || (this.isActive && this.getLayerType === 'text')
-        ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
+    positionStyles() {
+      const zindex = (this.config.styles.zindex + 1)
       return {
         transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
+        'pointer-events': 'none'
+      }
+    },
+    wrapperStyles() {
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      return {
+        transformOrigin: '0px 0px',
+        transform: `scale(${scale})`,
+        width: `${this.config.styles.initWidth}px`,
+        height: `${this.config.styles.initHeight}px`,
         outline: this.outlineStyles(),
+        overflow: 'hidden',
+        ...(this.type === 'frame' && { clipPath: `path("${this.config.clipPath}")` })
+      }
+    },
+    styles(type: string) {
+      // const zindex = (type === 'control-point') || (this.isActive && this.getLayerType === 'text')
+      //   ? (this.layerIndex + 1) * 100 : (this.config.styles.zindex + 1)
+      return {
+        // transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
+        // width: `${this.config.styles.width}px`,
+        // height: `${this.config.styles.height}px`,
+        // outline: this.outlineStyles(),
         'pointer-events': 'initial',
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect),
+        width: `${this.config.styles.initWidth}px`,
+        height: `${this.config.styles.initHeight}px`
+        // ...(this.type === 'frame' && { clipPath: `path("${this.config.clipPath}")` })
       }
     },
     outlineStyles() {
@@ -404,21 +449,69 @@ export default Vue.extend({
     onTextBlur() {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
-    onDrageEnter() {
-      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
-        this.$emit('onFrameDragenter', this.layerIndex)
+    onFrameDragEnter(e: DragEvent) {
+      console.log('123456')
+      const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
+      if (!primaryLayer.locked) {
+        // this.$emit('onFrameDragenter', e, this.layerIndex)
+        e.stopPropagation()
+        LayerUtils.setCurrSubSelectedInfo(this.layerIndex, 'clip')
+        if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
+          const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
+          this.imgBuff = {
+            index: this.layerIndex,
+            srcObj: {
+              ...clips[this.layerIndex].srcObj
+            },
+            styles: {
+              imgX: clips[this.layerIndex].styles.imgX,
+              imgY: clips[this.layerIndex].styles.imgY,
+              imgWidth: clips[this.layerIndex].styles.imgWidth,
+              imgHeight: clips[this.layerIndex].styles.imgHeight
+            }
+          }
+          Object.assign(clips[this.layerIndex].srcObj, this.currDraggedPhoto.srcObj)
+          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { clips })
+
+          const clip = clips[this.layerIndex]
+          const {
+            imgWidth, imgHeight,
+            imgX, imgY
+          } = MouseUtils.clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+          FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            imgWidth,
+            imgHeight,
+            imgX,
+            imgY
+          })
+        }
       }
     },
-    onDragLeave() {
-      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
-        this.$emit('onFrameDragleave', this.layerIndex)
+    onFrameDragLeave(e: DragEvent) {
+      e.stopPropagation()
+      console.log('123')
+      const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
+      if (this.currDraggedPhoto.srcObj.type && !primaryLayer.locked) {
+        const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
+        Object.assign(clips[this.layerIndex].styles, this.imgBuff.styles)
+        Object.assign(clips[this.layerIndex].srcObj, this.imgBuff.srcObj)
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { clips })
       }
     },
-    onFrameDrop() {
-      if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
-        this.$emit('onFrameDrop')
-      }
+    // onDragLeave(e: DragEvent) {
+    //   if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+    //     this.$emit('onFrameDragleave', e, this.layerIndex)
+    //   }
+    // },
+    onFrameDrop(e: DragEvent) {
+      e.stopPropagation()
+      StepsUtils.record()
     },
+    // onFrameDrop(e: DragEvent) {
+    //   if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+    //     this.$emit('onFrameDrop', e)
+    //   }
+    // },
     preventDefault(e: Event) {
       e.preventDefault()
     },
@@ -427,6 +520,12 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
       setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+    },
+    dragEnter() {
+      this.$emit('dragenter')
+    },
+    dragLeave() {
+      this.$emit('dragleave')
     }
   }
 })
@@ -435,15 +534,20 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-sub-controller {
   transform-style: preserve-3d;
+  &__wrapper {
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+    top: 0;
+    left: 0;
+    position: absolute;
+  }
   &__content {
     display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    // &:hover {
-    //   cursor: pointer;
-    // }
   }
   &__ctrl-points {
     display: flex;
@@ -451,9 +555,6 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-    // &:hover {
-    //   cursor: pointer;
-    // }
     pointer-events: "none";
   }
 

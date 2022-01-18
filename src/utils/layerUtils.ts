@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph, IImageStyle } from '@/interfaces/layer'
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -161,7 +161,7 @@ class LayerUtils {
     })
   }
 
-  updateLayerStyles(pageIndex: number, layerIndex: number, styles: { [index: string]: number | string | boolean }) {
+  updateLayerStyles(pageIndex: number, layerIndex: number, styles: Partial<IImageStyle> | { [index: string]: number | string | boolean }) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,
@@ -169,7 +169,8 @@ class LayerUtils {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> | ITiptapSelection }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [key: string]: string | number | ITiptapSelection }) {
+  // updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> | ITiptapSelection }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,
@@ -189,7 +190,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean | string}) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle> | { [key: string]: number | boolean | string}) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,
