@@ -77,6 +77,12 @@ module.exports = {
                         headless: true
                     })
                 }])
+        } else {
+            config.plugin('define').tap(args => {
+                let name = 'process.env'
+                args[0][name]['VUE_APP_PRERENDER'] = '0'
+                return args
+            })
         }
     },
 
