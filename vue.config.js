@@ -53,6 +53,8 @@ module.exports = {
                 return args
             })
         }
+
+        console.log(`Prerender mode: ${argv.PRERENDER}`)
         if (argv.PRERENDER) {
             config.plugin('define').tap(args => {
                 let name = 'process.env'
@@ -75,7 +77,15 @@ module.exports = {
                     renderer: new Renderer({
                         renderAfterDocumentEvent: 'render-event',
                         headless: true
-                    })
+                    }),
+                    postProcess (renderedRoute) {
+                        config.plugin('define').tap(args => {
+                            let name = 'process.env'
+                            args[0][name]['VUE_APP_PRERENDER'] = 0
+                            return args
+                        })
+                        return renderedRoute
+                    }
                 }])
         } else {
             config.plugin('define').tap(args => {
