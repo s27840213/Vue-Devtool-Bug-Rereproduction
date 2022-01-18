@@ -199,9 +199,11 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
   if (store.getters['user/getImgSizeMap'].length === 0 && !process.env.VUE_APP_PRERENDER) {
-    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch('https://template.vivipic.com/static/app.json')
     const json = await response.json()
-    console.log('static json loaded: ', json)
+
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
       imgSizeMap: json.image_size_map
