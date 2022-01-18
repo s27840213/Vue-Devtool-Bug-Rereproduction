@@ -589,9 +589,10 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-    Object.assign(layerInfo, { active: false })
-    this.removeComputableInfo(layerInfo)
+    // const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
+    // Object.assign(layerInfo, { active: false })
+    // this.removeComputableInfo(layerInfo)
+    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -606,13 +607,14 @@ class UploadUtils {
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
-      const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
-      targetLayer.active = false
-      targetLayer.isTyping = false
-      targetLayer.locked = false
-      targetLayer.dragging = false
-      targetLayer.editing = false
-      this.removeComputableInfo(targetLayer)
+      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
+      // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
+      // targetLayer.active = false
+      // targetLayer.isTyping = false
+      // targetLayer.locked = false
+      // targetLayer.dragging = false
+      // targetLayer.editing = false
+      // this.removeComputableInfo(targetLayer)
 
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
@@ -655,13 +657,13 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-    layerInfo.active = false
-    layerInfo.isTyping = false
-    layerInfo.locked = false
-    layerInfo.dragging = false
-    layerInfo.editing = false
-    this.removeComputableInfo(layerInfo)
+    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
+    // layerInfo.active = false
+    // layerInfo.isTyping = false
+    // layerInfo.locked = false
+    // layerInfo.dragging = false
+    // layerInfo.editing = false
+    // this.layerInfoFilter(layerInfo)
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -675,9 +677,10 @@ class UploadUtils {
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
-      const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
-      targetLayer.active = false
-      this.removeComputableInfo(targetLayer)
+      // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
+      // targetLayer.active = false
+      // this.layerInfoFilter(targetLayer)
+      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }

@@ -195,7 +195,9 @@ router.beforeEach(async (to, from, next) => {
   if (store.getters['user/getImgSizeMap'].length === 0) {
     const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
-    console.log('static json loaded: ', json)
+
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
       imgSizeMap: json.image_size_map
