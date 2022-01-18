@@ -115,7 +115,10 @@
             span(class="body-1 text-red-1") 原設定內容
           div(v-if="showDbGroup"
             class="mb-10 square-wrapper wrong text-center")
-            div(class="pr-10 cover-option body-4")
+            div(v-if="dbGroupThemes.length === 0"
+              class="body-1") 尚未設定
+            div(v-else
+              class="pr-10 cover-option body-4")
               span theme
               span 封面頁碼
             div(v-for="(item, idx) in dbGroupThemes"
@@ -728,6 +731,9 @@ export default Vue.extend({
       const coverList = this.groupInfo.cover_ids.split(',')
       coverList.map((cover) => {
         const id = parseInt(cover.split(':')[0])
+        if (id === 0) {
+          return
+        }
         const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === id)
         if (index !== -1) {
           const keyId = cover.split(':')[1]
