@@ -763,13 +763,13 @@ export default Vue.extend({
         }
       })
 
-      const groupThemesString = this.groupInfo.groupThemes.map(theme => {
-        return theme.id
-      }).join(',')
-      const dbThemesString = this.dbGroupThemes.map(theme => {
-        return theme.id
-      }).join(',')
-      if (groupThemesString !== dbThemesString) {
+      // 比較 cover_ids 是否有設定錯誤
+      const sameCoverId = this.groupInfo.groupThemes.every((theme, idx) => {
+        const cover1 = theme.id + ':' + theme.coverIndex
+        const cover2 = this.dbGroupThemes[idx].id + ':' + this.dbGroupThemes[idx].coverIndex
+        return cover1 === cover2
+      })
+      if (!sameCoverId) {
         this.showDbGroup = true
       }
     },
