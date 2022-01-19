@@ -164,9 +164,21 @@ export default Vue.extend({
       let widthLimit = this.config.widthLimit
       let autoSize = TextUtils.getTextHW(this.config, widthLimit)
       const originDimension = this.config.styles[dimension]
+      let prevDiff = Number.MAX_VALUE
+      let prevWidthLimit = -1
       while (shouldContinue) {
         console.log(widthLimit, direction)
         const autoDimension = autoSize[dimension]
+        const currDiff = Math.abs(autoDimension - originDimension)
+        if (currDiff > prevDiff) {
+          if (prevWidthLimit !== -1) {
+            return prevWidthLimit
+          } else {
+            return this.config.widthLimit
+          }
+        }
+        prevDiff = currDiff
+        prevWidthLimit = widthLimit
         if (autoDimension - originDimension > 5 * scale) {
           if (direction < 0) break
           if (direction >= 20) return this.config.widthLimit
