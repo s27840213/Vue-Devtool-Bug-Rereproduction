@@ -76,7 +76,7 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    if (this.config.styles.textShape?.name) {
+    if (this.config.styles.textShape?.name === 'curve') {
       return
     }
     if (!this.isDestroyed) {
