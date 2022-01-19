@@ -5,7 +5,7 @@
     template(v-for="option in [...updateOptions, ...layerOptions]")
       template(v-if="option.condition")
         div(class="popup-layer__item"
-            @click="option.action")
+            @click="option.action($event)")
           svg-icon(
             class="pointer"
             :iconName="option.icon"
@@ -185,6 +185,19 @@ export default Vue.extend({
           shortcutText: '',
           action: () => {
             uploadUtils.uploadLayer(this.updateType)
+          }
+        },
+        {
+          icon: 'copy',
+          text: `上傳 ${this.typeMap[this.updateType]} + ID`,
+          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          shortcutText: '',
+          action: (event?: MouseEvent) => {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                popupUtils.openPopup('submit', { event })
+              })
+            }, 0)
           }
         },
         {

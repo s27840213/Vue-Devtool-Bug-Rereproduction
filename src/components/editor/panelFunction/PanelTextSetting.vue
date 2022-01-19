@@ -133,15 +133,17 @@ export default Vue.extend({
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
-      // this.setHeight(value)
       this.setParagraphProp('lineHeight', value)
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
-      // this.setSpacing(value)
       this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
-      tiptapUtils.focus({ scrollIntoView: false })
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
+        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        tiptapUtils.focus({ scrollIntoView: false })
+      }
     })
   },
   destroyed() {
@@ -338,21 +340,46 @@ export default Vue.extend({
       } else {
         switch (iconName) {
           case 'bold':
-            tiptapUtils.applySpanStyle('weight', (this.props.weight === 'bold') ? 'normal' : 'bold')
-            TextPropUtils.updateTextPropsState({ weight: (this.props.weight === 'bold') ? 'normal' : 'bold' })
+            this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
-            tiptapUtils.applySpanStyle('decoration', (this.props.decoration === 'underline') ? 'none' : 'underline')
-            TextPropUtils.updateTextPropsState({ decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' })
+            this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
-            tiptapUtils.applySpanStyle('style', (this.props.style === 'italic') ? 'normal' : 'italic')
-            TextPropUtils.updateTextPropsState({ style: (this.props.style === 'italic') ? 'normal' : 'italic' })
+            this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
       }
       this.updateLayerProps({ isEdited: true })
       StepsUtils.record()
+    },
+    handleSpanPropClick(prop: string, pair: [string, string]) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        const newPropVal = layers
+          .filter(l => l.type === 'text')
+          .every(text => {
+            return (text as IText).paragraphs.every(p => {
+              return p.spans.every(s => s.styles[prop] === pair[0])
+            })
+          }) ? pair[1] : pair[0]
+
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
+            paragraphs.forEach(p => {
+              p.spans.forEach(s => {
+                s.styles[prop] = newPropVal
+              })
+            })
+            LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+      } else {
+        tiptapUtils.applySpanStyle(prop, (this.props[prop] === pair[0]) ? pair[1] : pair[0])
+        TextPropUtils.updateTextPropsState({ [prop]: (this.props[prop] === pair[0]) ? pair[1] : pair[0] })
+      }
     },
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
@@ -376,23 +403,36 @@ export default Vue.extend({
     onParaPropsClick(iconName: string) {
       switch (iconName) {
         case 'text-align-left':
-          tiptapUtils.applyParagraphStyle('align', 'left')
-          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          this.handleTextAlign('left')
           break
         case 'text-align-center':
-          tiptapUtils.applyParagraphStyle('align', 'center')
-          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          this.handleTextAlign('center')
           break
         case 'text-align-right':
-          tiptapUtils.applyParagraphStyle('align', 'right')
-          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          this.handleTextAlign('right')
           break
         case 'text-align-justify':
-          tiptapUtils.applyParagraphStyle('align', 'justify')
-          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          this.handleTextAlign('justify')
           break
       }
       StepsUtils.record()
+    },
+    handleTextAlign(prop: string) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as Array<IParagraph>
+            paragraphs.forEach(p => (p.styles.align = prop))
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      } else {
+        tiptapUtils.applyParagraphStyle('align', prop)
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()

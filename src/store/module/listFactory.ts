@@ -34,7 +34,6 @@ export default function (this: any) {
       commit(SET_STATE, { pending: true, categories: [], locale })
       try {
         const { data } = await this.api({ locale, theme, listAll: 0 })
-        console.log(data.data)
         commit(SET_CATEGORIES, data.data)
       } catch (error) {
         captureException(error)
@@ -49,7 +48,6 @@ export default function (this: any) {
       try {
         const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
         commit(SET_CONTENT, data.data)
-        console.log(data.data)
       } catch (error) {
         captureException(error)
       }

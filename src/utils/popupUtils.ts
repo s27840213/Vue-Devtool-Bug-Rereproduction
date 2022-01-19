@@ -116,7 +116,7 @@ class PopupUtils {
       download: '.btn-download',
       'page-scale': '.btn-page-resize'
     }
-    const onMousePos = ['layer', 'page', 'guideline']
+    const onMousePos = ['layer', 'page', 'guideline', 'submit']
     store.dispatch('popup/openPopup', {
       component: `popup-${type}`,
       properties,

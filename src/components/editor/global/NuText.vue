@@ -30,6 +30,7 @@ import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -49,7 +50,17 @@ export default Vue.extend({
       return
     }
     const promises: Array<Promise<void>> = []
+    for (const defaultFont of this.getDefaultFontsList) {
+      promises.push(this.addFont(defaultFont).catch(e => console.error(e)))
+    }
+
     for (const p of (this.config as IText).paragraphs) {
+      promises.push(this.addFont({
+        type: p.styles.type,
+        face: p.styles.font,
+        url: p.styles.fontUrl,
+        ver: this.verUni
+      }).catch(e => console.error(e)))
       for (const span of p.spans) {
         const promise = this.addFont({
           type: span.styles.type,
@@ -70,14 +81,15 @@ export default Vue.extend({
     }
     if (!this.isDestroyed) {
       // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      const textHW = this.autoResize()
+      const widthLimit = this.autoResize()
+      const textHW = TextUtils.getTextHW(this.config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
-        ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, textHW.width, textHW.height, this.getLayerScale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
       } else if (typeof this.subLayerIndex !== 'undefined') {
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
       }
     }
   },
@@ -92,7 +104,7 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapState('user', ['verUni']),
-    ...mapGetters('text', ['getDefaultFonts']),
+    ...mapGetters('text', ['getDefaultFontsList']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -143,8 +155,8 @@ export default Vue.extend({
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     },
-    autoResize(): {width: number, height: number} {
-      if (this.$route.name !== 'Preview' || this.config.widthLimit === -1) return TextUtils.getTextHW(this.config, this.config.widthLimit)
+    autoResize(): number {
+      if (this.config.widthLimit === -1) return this.config.widthLimit
       const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
       const scale = this.config.styles.scale
       let direction = 0
@@ -152,12 +164,24 @@ export default Vue.extend({
       let widthLimit = this.config.widthLimit
       let autoSize = TextUtils.getTextHW(this.config, widthLimit)
       const originDimension = this.config.styles[dimension]
+      let prevDiff = Number.MAX_VALUE
+      let prevWidthLimit = -1
       while (shouldContinue) {
         console.log(widthLimit, direction)
         const autoDimension = autoSize[dimension]
+        const currDiff = Math.abs(autoDimension - originDimension)
+        if (currDiff > prevDiff) {
+          if (prevWidthLimit !== -1) {
+            return prevWidthLimit
+          } else {
+            return this.config.widthLimit
+          }
+        }
+        prevDiff = currDiff
+        prevWidthLimit = widthLimit
         if (autoDimension - originDimension > 5 * scale) {
           if (direction < 0) break
-          if (direction >= 20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
+          if (direction >= 20) return this.config.widthLimit
           widthLimit += scale
           direction += 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
@@ -165,7 +189,7 @@ export default Vue.extend({
         }
         if (originDimension - autoDimension > 5 * scale) {
           if (direction > 0) break
-          if (direction <= -20) return TextUtils.getTextHW(this.config, this.config.widthLimit)
+          if (direction <= -20) return this.config.widthLimit
           widthLimit -= scale
           direction -= 1
           autoSize = TextUtils.getTextHW(this.config, widthLimit)
@@ -173,7 +197,7 @@ export default Vue.extend({
         }
         shouldContinue = false
       }
-      return autoSize
+      return widthLimit
     }
   }
 })
