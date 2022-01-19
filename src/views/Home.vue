@@ -19,7 +19,8 @@
       template(v-else)
         div(class="home-content__top")
           img(class="home-content__top-img"
-            :style="`height: ${isLogin ? '250px;' : '350px;'}`")
+            :style="`height: ${isLogin ? '500px;' : '350px;'}`")
+          div(class="test")
           div(class="home-content__top-title"
             :class="isLogin ? 'login' : ''")
             i18n(path="NN0148" tag="span")
@@ -385,9 +386,9 @@ export default Vue.extend({
     &-img {
       width: 100%;
       background-size: cover;
-      background-image: url("~@/assets/img/jpg/homepage/home-top.jpg");
+      background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       @include layout-mobile {
-        background-image: url("~@/assets/img/jpg/homepage/home-top-mobile.jpg");
+        background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       }
     }
     &-title {
@@ -613,5 +614,16 @@ export default Vue.extend({
     height: 35px;
     font-size: 16px;
   }
+}
+
+.test{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-color: white transparent;
+  border-width: 0 0 50px 50px;
+  border-style: solid;
 }
 </style>
