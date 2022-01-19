@@ -24,7 +24,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
@@ -93,11 +93,11 @@ export default Vue.extend({
       handler: function() {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const img = new Image()
-        const size = ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)
-        const src = ImageUtils.getSrc(this.config, size)
+        const src = ImageUtils.getSrc(this.config)
         img.src = src
         img.onload = () => {
           this.src = src
+          console.log('dowload OK')
         }
       },
       deep: true
@@ -108,12 +108,13 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    ...mapState('user', ['imgSizeMap']),
     getImgDimension(): number {
       const { type } = this.config.srcObj
-      return ImageUtils.getSrcSize(type, this.sizeMap(ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)))
+      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100))
     },
     getPreviewSize(): number {
-      const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
+      const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150
     },
     isAdjustImage(): boolean {
@@ -154,17 +155,6 @@ export default Vue.extend({
       styles.scaleY = verticalFlip ? -1 : 1
       return {
         transform: `scaleX(${styles.scaleX}) scaleY(${styles.scaleY})`
-      }
-    },
-    sizeMap(width: number) {
-      if (width < 540) {
-        return 540
-      } else if (width < 800) {
-        return 800
-      } else if (width < 1080) {
-        return 1080
-      } else {
-        return 1600
       }
     },
     onError() {
