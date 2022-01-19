@@ -23,7 +23,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { mapActions, mapGetters } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
@@ -73,7 +73,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      isOnError: false
+      isOnError: false,
+      src: ImageUtils.getSrc(this.config)
     }
   },
   watch: {
@@ -81,11 +82,25 @@ export default Vue.extend({
       if (!this.isOnError) {
         const { type } = this.config.srcObj
         if (type === 'background') return
+        this.src = ImageUtils.getSrc(this.config, newVal)
         const preImg = new Image()
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'pre'))
+        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, 'pre'))
         const nextImg = new Image()
-        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'next'))
+        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, 'next'))
       }
+    },
+    srcObj: {
+      handler: function() {
+        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
+        const img = new Image()
+        const size = ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)
+        const src = ImageUtils.getSrc(this.config, size)
+        img.src = src
+        img.onload = () => {
+          this.src = src
+        }
+      },
+      deep: true
     }
   },
   components: { NuAdjustImage },
@@ -94,20 +109,21 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio'
     }),
     getImgDimension(): number {
-      return ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)
+      const { type } = this.config.srcObj
+      return ImageUtils.getSrcSize(type, this.sizeMap(ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)))
     },
-    src(): string {
-      if (this.config.src) {
-        return this.config.src
-      } else {
-        return this.config.previewSrc ?? ImageUtils.getSrc(this.config)
-      }
+    getPreviewSize(): number {
+      const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
+      return sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150
     },
     isAdjustImage(): boolean {
       const { styles } = this.config
       return Object
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
+    },
+    srcObj(): any {
+      return (this.config as IImage).srcObj
     },
     adjustImgStyles(): any {
       const styles = generalUtils.deepCopy(this.config.styles)

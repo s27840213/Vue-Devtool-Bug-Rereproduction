@@ -86,7 +86,8 @@ export default Vue.extend({
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
-      return ImageUtils.getSrc(data, 200)
+      const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
+      return ImageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150)
     },
     fullSrc(): string {
       const { inFilePanel, photo, vendor } = this
@@ -99,7 +100,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _x: 'SET_currSelectedPhotoInfo',
+      setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo',
       addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
       deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
@@ -179,7 +180,7 @@ export default Vue.extend({
     showPhotoInfo(evt: Event) {
       const { vendor } = this
       const { info = {}, tags } = this.photo
-      this._x({
+      this.setCurrSelectedPhotoInfo({
         userName: info.user?.name ?? '',
         userLink: info.user?.link ?? '',
         vendor,
