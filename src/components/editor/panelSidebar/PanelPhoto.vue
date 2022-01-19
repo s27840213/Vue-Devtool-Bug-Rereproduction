@@ -1,8 +1,10 @@
 <template lang="pug">
   div(class="panel-photo")
     search-bar(class="mb-15"
+      :style="searchBarStyle()"
       placeholder="input keywords..."
       clear
+      :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="!pending && !list.length"
       class="text-white") Sorry, we couldn't find any photos for "{{ keyword }}".
@@ -73,6 +75,17 @@ export default Vue.extend({
     },
     handleLoadMore () {
       !this.pending && this.$store.dispatch(`${moduleName}/getMorePhotos`)
+    },
+    searchBarStyle() {
+      if (this.pending) {
+        return {
+          'pointer-events': 'none'
+        }
+      } else {
+        return {
+          'pointer-events': 'unset'
+        }
+      }
     }
   }
 })
