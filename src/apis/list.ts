@@ -18,9 +18,8 @@ class ListService {
       font_list: params.fontList,
       theme: params.theme,
       group_id: params.groupId,
-      cache: params.cache,
-      origin: window.location.hostname
-      //
+      cache: params.cache
+      // [2022.01.19] uncached: font, theme, marker, hashtag
     }
 
     return axios.request<IListServiceResponse>({
