@@ -42,7 +42,7 @@ class Controller {
     const defaultAttrs = this.shapes[shape]
     const styles = {
       textShape: {},
-      writingMode: 'horizontal-tb'
+      writingMode: 'initial'
     } as { [key: string]: any }
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)

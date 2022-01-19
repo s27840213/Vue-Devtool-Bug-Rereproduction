@@ -336,7 +336,7 @@ export default Vue.extend({
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
-        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+        TextPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
       } else {
         switch (iconName) {
           case 'bold':
