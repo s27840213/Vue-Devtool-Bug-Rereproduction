@@ -124,7 +124,7 @@ class TextPropUtils {
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
         const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
         if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          const { width, height } = TextUtils.getTextHW(config)
+          const { width, height } = TextUtils.getTextHW(config, config.widthLimit)
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
           // @TODO: need to reallocate position of each layer
         }
