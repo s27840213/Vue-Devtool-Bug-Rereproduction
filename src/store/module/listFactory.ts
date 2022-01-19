@@ -3,7 +3,7 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
-import authToken from '@/apis/auth-token'
+import store from '@/store'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -35,7 +35,7 @@ export default function (this: any) {
       commit(SET_STATE, { pending: true, categories: [], locale })
       try {
         const { data } = await this.api({
-          token: authToken().token,
+          token: store.getters['user/getToken'],
           locale,
           theme,
           listAll: 0
@@ -57,7 +57,7 @@ export default function (this: any) {
           keyword,
           theme,
           listAll: 1,
-          cache: true
+          cache: store.getters['user/isAdmin'] ? !keyword : true
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -75,7 +75,7 @@ export default function (this: any) {
           keyword,
           theme,
           listAll: 1,
-          cache: true
+          cache: store.getters['user/isAdmin'] ? !keyword : true
         })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
@@ -95,7 +95,7 @@ export default function (this: any) {
           theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1,
-          cache: true
+          cache: store.getters['user/isAdmin'] ? !keyword : true
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -183,7 +183,8 @@ export default function (this: any) {
         keyword,
         theme,
         listAll: 1,
-        pageIndex: nextPage
+        pageIndex: nextPage,
+        cache: store.getters['user/isAdmin'] ? !keyword : true
       }
     },
     hasNextPage (state) {
