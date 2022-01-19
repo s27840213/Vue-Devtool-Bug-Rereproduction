@@ -26,13 +26,14 @@ const getters: GetterTree<IHomeTemplateState, unknown> = {
 }
 
 const actions: ActionTree<IHomeTemplateState, unknown> = {
-  async getTagContent({ commit }, { keyword, theme }) {
+  async getTagContent({ commit }, { keyword, theme, cache }) {
     const locale = localeUtils.currLocale()
     try {
       const { data } = await list.getTemplate({
         locale,
         keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
-        theme: theme
+        theme: theme,
+        cache: cache
       })
       return Promise.resolve(data)
     } catch (error) {
