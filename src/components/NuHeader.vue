@@ -215,8 +215,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-header {
   height: 50px;
-  background-color: #eaf1f6;
-  border: 1px solid #e2e5e6;
+  background-size: cover;
+  background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
   box-sizing: border-box;
   position: sticky;
   top: 0;

@@ -18,31 +18,32 @@
             div(class="pt-30") *{{$t('NN0236')}}
       template(v-else)
         div(class="home-content__top")
-          img(class="home-content__top-img"
-            :style="`height: ${isLogin ? '500px;' : '350px;'}`")
+          img(class="home-content__top-bg"
+            :style="`height: ${isLogin ? '800px;' : '800px;'}`"
+            :src="require('@/assets/img/svg/homepage/top-bg.svg')")
           div(class="test")
           div(class="home-content__top-title"
             :class="isLogin ? 'login' : ''")
-            i18n(path="NN0148" tag="span")
+            i18n(path="NN0148" tag="span" class="text-H2")
               template(#newline)
                 br
-          div(v-if="!isLogin"
-            class="home-content__top-subtitle")
-            span {{$t('NN0237')}}
-            br
-            span {{$t('NN0238')}}
-          div(v-if="isLogin"
-            class="home-content__top-btns"
-            :class="currLocale === 'us' ? 'us' : ''")
-            div(class="rounded home-btn"
-              @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
-            div(class="rounded home-btn"
-              @click="goToPage('MyDesign')") {{$t('NN0080')}}
-          div(v-else
-            class="home-content__top-btn rounded home-btn"
-            :type="'primary-lg'"
-            @click="newDesign()") {{$t('NN0274')}}
-      div(class="home-content-title label-lg") {{$t('NN0154')}}
+            div(v-if="!isLogin"
+              class="home-content__top-subtitle body-LG")
+              span {{$t('NN0237')}}
+            div(v-if="isLogin"
+              class="home-content__top-btns"
+              :class="currLocale === 'us' ? 'us' : ''")
+              div(class="rounded home-btn"
+                @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
+              div(class="rounded home-btn"
+                @click="goToPage('MyDesign')") {{$t('NN0080')}}
+            template(v-else)
+              div(class="home-content__top-btn button-LG"
+                :type="'primary-lg'"
+                @click="newDesign()") {{$t('NN0274')}}
+              img(class="home-content__top-img"
+                :src="require('@/assets/img/svg/homepage/header_img_us.png')")
+      div(class="mt-100 home-content-title label-lg") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
@@ -338,6 +339,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/homepageStyle.scss";
+
 .home {
   position: relative;
   width: 100%;
@@ -383,29 +386,24 @@ export default Vue.extend({
       width: 100%;
       height: 150px;
     }
-    &-img {
+    &-bg {
       width: 100%;
-      background-size: cover;
-      background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
+      object-fit: cover;
+      // background-size: contain;
+      // background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       @include layout-mobile {
-        background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
+        // background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       }
     }
     &-title {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      height: 100px;
       position: absolute;
-      top: 55px;
+      top: 100px;
       color: setColor(dark-blue);
-      font-size: 40px;
-      font-weight: 700;
-      line-height: 1.3;
       &.login {
         top: 40px;
-      }
-      @media screen and (max-width: 990px) {
-        font-size: 32px;
       }
       @include layout-mobile {
         align-items: flex-start;
@@ -414,13 +412,7 @@ export default Vue.extend({
       }
     }
     &-subtitle {
-      position: absolute;
-      top: 160px;
-      font-size: 20px;
-      line-height: 2;
-      @media screen and (max-width: 990px) {
-        font-size: 16px;
-      }
+      padding-top: 20px;
     }
     &-mobile-subtitle {
       position: absolute;
@@ -440,8 +432,21 @@ export default Vue.extend({
       }
     }
     &-btn {
-      position: absolute;
-      top: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 240px;
+      height: 56px;
+      color: setColor(white);
+      background: setColor(blue-1);
+      margin-top: 20px;
+      @media screen and (max-width: 768px) {
+        width: 200px;
+      }
+    }
+    &-img {
+      max-width: 800px;
+      padding-top: 52px;
     }
   }
   &__theme,
@@ -623,7 +628,7 @@ export default Vue.extend({
   width: 0;
   height: 0;
   border-color: white transparent;
-  border-width: 0 0 50px 50px;
+  border-width: 0 0 20vh 100vw;
   border-style: solid;
 }
 </style>

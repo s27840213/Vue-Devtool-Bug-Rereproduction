@@ -1,0 +1,44 @@
+@mixin header(){
+	font-style: normal;
+  font-weight: bold;
+  line-height: 140%;
+}
+
+@mixin body(){
+	font-style: normal;
+  font-weight: normal;
+  line-height: 180%;
+}
+
+.text-H1 {
+  @include header();
+  font-size: 44px;
+}
+
+.text-H2 {
+  @include header();
+  font-size: 40px;
+}
+
+.text-H3 {
+  @include header();
+  font-size: 32px;
+}
+
+.body-XL {
+  @include body();
+  font-size: 20px;
+}
+
+.body-LG {
+  @include body();
+  font-size: 18px;
+}
+  
+
+.button-LG {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+}
