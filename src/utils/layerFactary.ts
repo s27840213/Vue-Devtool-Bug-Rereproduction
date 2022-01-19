@@ -239,7 +239,6 @@ class LayerFactary {
             (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
           }
         }
-        !p.styles.font && (p.styles.font = p.spans[0].styles.font)
       })
     }
     return Object.assign(basicConfig, config)

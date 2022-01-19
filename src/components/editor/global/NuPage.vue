@@ -492,7 +492,7 @@ export default Vue.extend({
             break
           case 'frame':
             (currLayer as IFrame).clips
-              .forEach((img, idx) => {
+              .forEach((_, idx) => {
                 frameUtils.updateFrameLayerProps(pageIndex, layerIndex, idx, { active: false, shown: false, imgControl: false })
               })
             break
