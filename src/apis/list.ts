@@ -8,7 +8,7 @@ import {
 
 class ListService {
   getList (params: IListServiceParams) {
-    const data = {
+    const searchParams = {
       token: authToken().token || '',
       type: params.type,
       locale: params.locale || 'tw',
@@ -17,13 +17,14 @@ class ListService {
       keyword: params.keyword,
       font_list: params.fontList,
       theme: params.theme,
-      group_id: params.groupId
+      group_id: params.groupId,
+      cache: params.cache
     }
 
     return axios.request<IListServiceResponse>({
       url: '/list-design',
-      method: 'POST',
-      data
+      method: 'GET',
+      params: searchParams
     })
   }
 
