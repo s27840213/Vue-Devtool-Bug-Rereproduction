@@ -85,7 +85,7 @@ class Controller {
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       for (const idx in layers) {
-        const { type, styles: layerStyles } = layers[idx] as IText
+        const { type } = layers[idx] as IText
         if (type === 'text') {
           const { styles, props } = this.getTextShapeStyles(
             layers[idx],
