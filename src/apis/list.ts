@@ -18,7 +18,8 @@ class ListService {
       font_list: params.fontList,
       theme: params.theme,
       group_id: params.groupId,
-      cache: params.cache
+      cache: params.cache,
+      platform: params.cache ? window.location.host : null
       // [2022.01.19] uncached: font, theme, marker, hashtag
     }
 
