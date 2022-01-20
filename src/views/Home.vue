@@ -52,9 +52,8 @@
         class="home-content__plaque")
         div(class="home-content__plaque-title") {{$t('NN0276')}}
         div(class="home-content__plaque-subtitle"
-          class="px-20")
-          span(v-if="isMobile") {{$t('NN0237')}}
-          span(v-else) {{$t('NN0277')}}
+          class="px-20") {{$t('NN0277')}}
+        div(class="home-content__plaque-bg")
       div(v-if="!isLogin"
         class="home-content__feature"
         :class="isMobile ? 'mt-10' : ''")
@@ -382,10 +381,6 @@ export default Vue.extend({
     position: relative;
     display: flex;
     justify-content: center;
-    @include layout-mobile {
-      width: 100%;
-      height: 150px;
-    }
     &-bg {
       width: 100%;
       object-fit: cover;
@@ -405,13 +400,9 @@ export default Vue.extend({
       &.login {
         top: 40px;
       }
-      @include layout-mobile {
-        align-items: flex-start;
-        top: 30px;
-        font-size: 16px;
-      }
     }
     &-title {
+      color: setColor(nav);
       @include text-H2;
       @media screen and (max-width: 1440px) {
         @include text-H3;
@@ -421,10 +412,12 @@ export default Vue.extend({
       }
     }
     &-subtitle {
+      color: setColor(gray-2);
       padding-top: 20px;
       @include body-LG;
       @media screen and (max-width: 768px) {
         @include body-SM;
+        max-width: 90%;
       }
     }
     &-mobile-subtitle {
@@ -459,7 +452,8 @@ export default Vue.extend({
       }
     }
     &-img {
-      max-width: 800px;
+      width: 80%;
+      max-width: 1000px;
       padding-top: 52px;
     }
   }
@@ -476,21 +470,48 @@ export default Vue.extend({
   }
   &__plaque {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     position: relative;
     padding: 50px 0;
-    &-title {
-      @include text-H3;
+    &-bg {
+      position: absolute;
+      top: 75px;
+      width: 675px;
+      height: 20px;
+      background: setColor(blue-3);
+      z-index: -1;
+      @media screen and (max-width: 1440px) {
+        width: 500px;
+        top: 65px;
+      }
       @media screen and (max-width: 768px) {
+        width: 425px;
+        top: 62px;
+      }
+      @media screen and (max-width: 540px) {
+        width: 50%;
+        top: 90px;
+      }
+    }
+    &-title {
+      color: setColor(gray-1);
+      @include text-H3;
+      @media screen and (max-width: 1440px) {
         @include text-H4;
       }
-      @media screen and (max-width: 1440px) {
+      @media screen and (max-width: 768px) {
         @include text-H5;
+        max-width: 90%;
       }
     }
     &-subtitle {
-      position: absolute;
-      top: 135px;
+      color: setColor(gray-2);
+      padding-top: 10px;
+      @include body-MD;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+      }
     }
   }
   &__feature {
