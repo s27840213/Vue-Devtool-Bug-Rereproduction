@@ -19,7 +19,7 @@ class ListService {
       theme: params.theme,
       group_id: params.groupId,
       cache: params.cache,
-      platform: params.cache ? window.location.hostname : null
+      platform: params.cache ? window.location.host : null
       // [2022.01.19] uncached: font, theme, marker, hashtag
     }
 
