@@ -91,6 +91,7 @@ export default function (this: any) {
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const { data } = await this.api({
+          token: store.getters['user/isAdmin'] ? store.getters['user/getToken'] : '1',
           locale,
           theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
