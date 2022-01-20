@@ -36,6 +36,7 @@ export default function (this: any) {
       commit(SET_STATE, { pending: true, categories: [], locale })
       try {
         const { data } = await this.api({
+          token: store.getters['user/getToken'],
           locale,
           theme,
           listAll: 0
@@ -52,7 +53,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
-        const needCache = store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0'))
+        const needCache = !store.getters['user/isAdmin'] || (store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
@@ -72,7 +73,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, theme, locale, content: {} })
       try {
-        const needCache = store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0'))
+        const needCache = !store.getters['user/isAdmin'] || (store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
@@ -94,7 +95,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
-        const needCache = store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0'))
+        const needCache = !store.getters['user/isAdmin'] || (store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
@@ -184,7 +185,7 @@ export default function (this: any) {
   const getters: GetterTree<IListModuleState, any> = {
     nextParams (state) {
       const { nextPage, keyword, theme, locale } = state
-      const needCache = store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0'))
+      const needCache = !store.getters['user/isAdmin'] || (store.getters['user/isAdmin'] && (!keyword || keyword.includes('group::0')))
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,

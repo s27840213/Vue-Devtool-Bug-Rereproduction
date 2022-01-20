@@ -9,7 +9,7 @@ import {
 class ListService {
   getList (params: IListServiceParams) {
     const searchParams = {
-      token: params.token || authToken().token,
+      token: params.token || '1',
       type: params.type,
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
