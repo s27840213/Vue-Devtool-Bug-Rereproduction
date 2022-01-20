@@ -51,9 +51,6 @@
               @dragleave="dragLeave($event, index)"
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-              //- @onFrameDrop="getLayerType === 'frame' ? onFrameDrop($event, index) : null"
-              //- @onFrameDragenter="getLayerType === 'frame' ? onFrameDragEnter($event, index) : null",
-              //- @onFrameDragleave="getLayerType === 'frame' ? onFrameDragLeave($event, index) : null",
       template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
@@ -1651,7 +1648,6 @@ export default Vue.extend({
     },
     dragEnter(e: DragEvent, subLayerIdx = -1) {
       this.onImageDragEnter(e, subLayerIdx)
-      // this.currDraggedPhoto
     },
     dragLeave(e: DragEvent, subLayerIdx = -1) {
       this.onImageDragLeave(e, subLayerIdx)

@@ -96,8 +96,10 @@ export default Vue.extend({
         const src = ImageUtils.getSrc(this.config)
         img.src = src
         img.onload = () => {
-          this.src = src
-          console.log('dowload OK')
+          // If after onload the img, the config.srcObj is the same, set the src.
+          if (ImageUtils.getSrc(this.config) === src) {
+            this.src = src
+          }
         }
       },
       deep: true

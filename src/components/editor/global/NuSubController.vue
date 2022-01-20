@@ -12,16 +12,6 @@
             @dragenter="onFrameDragEnter($event)"
             @dragleave="onFrameDragLeave($event)"
             @mousedown="onMousedown($event)")
-          //- @drop.prevent="onDrop($event)"
-          //- @dragenter="dragEnter($event)"
-          //- @dragleave="dragLeave($event)"
-          //- svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-          //-     :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-          //-     g(v-html="getClipPath"
-          //-       :style="frameClipStyles()"
-          //-       @drop="onFrameDrop($event)"
-          //-       @dragenter="onFrameDragEnter($event)"
-          //-       @dragleave="onFrameDragLeave($event)")
           template(v-if="config.type === 'text' && config.active")
             div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
               nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
@@ -95,8 +85,9 @@ export default Vue.extend({
       parentId: '',
       imgBuff: {} as {
         index: number,
-        styles: Partial<IImageStyle>,
-        srcObj: { type: string, assetId: string | number, userId: string }
+        styles: { [key: string]: number },
+        srcObj: { type: string, assetId: string | number, userId: string },
+        cached: boolean
       }
     }
   },
@@ -383,7 +374,6 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      // !this.isCurveText && this.textSizeRefresh(this.config)
       !this.isCurveText && TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
@@ -392,41 +382,6 @@ export default Vue.extend({
           })
         })
       }
-    },
-    textSizeRefresh(text: IText) {
-      // const group = LayerUtils.getCurrLayer as IGroup
-      // const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
-      // const isAllHorizon = !group.layers
-      //   .some(l => l.type === 'text' &&
-      //     ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
-
-      // const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
-      // if (this.layerSizeBuff === -1) {
-      //   this.layerSizeBuff = newSize.height
-      // } else if (newSize.height === this.layerSizeBuff) {
-      //   return
-      // }
-
-      // if (isAllHorizon) {
-      //   const lowLine = this.getLayerPos.y + originSize.height
-      //   const diff = newSize.height - originSize.height
-      //   const targetSubLayers: Array<[number, number]> = []
-      //   group.layers
-      //     .forEach((l, idx) => {
-      //       if (l.styles.y >= lowLine) {
-      //         targetSubLayers.push([idx, l.styles.y])
-      //       }
-      //     })
-      //   targetSubLayers
-      //     .forEach(data => {
-      //       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-      //         y: data[1] + diff
-      //       })
-      //     })
-      // }
-      // @TODO: the vertical kind pending
-
-      TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     onClickEvent(e: MouseEvent) {
       if (this.type === 'tmp') {
@@ -450,15 +405,13 @@ export default Vue.extend({
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
     onFrameDragEnter(e: DragEvent) {
-      console.log('123456')
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
       if (!primaryLayer.locked) {
-        // this.$emit('onFrameDragenter', e, this.layerIndex)
         e.stopPropagation()
         LayerUtils.setCurrSubSelectedInfo(this.layerIndex, 'clip')
         if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
-          this.imgBuff = {
+          Object.assign(this.imgBuff, {
             index: this.layerIndex,
             srcObj: {
               ...clips[this.layerIndex].srcObj
@@ -468,11 +421,12 @@ export default Vue.extend({
               imgY: clips[this.layerIndex].styles.imgY,
               imgWidth: clips[this.layerIndex].styles.imgWidth,
               imgHeight: clips[this.layerIndex].styles.imgHeight
-            }
-          }
-          Object.assign(clips[this.layerIndex].srcObj, this.currDraggedPhoto.srcObj)
-          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { clips })
+            },
+            cached: true
+          })
+          FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
 
+          Object.assign(clips[this.layerIndex].srcObj, this.currDraggedPhoto.srcObj)
           const clip = clips[this.layerIndex]
           const {
             imgWidth, imgHeight,
@@ -489,29 +443,18 @@ export default Vue.extend({
     },
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
-      console.log('123')
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
-      if (this.currDraggedPhoto.srcObj.type && !primaryLayer.locked) {
-        const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
-        Object.assign(clips[this.layerIndex].styles, this.imgBuff.styles)
-        Object.assign(clips[this.layerIndex].srcObj, this.imgBuff.srcObj)
-        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { clips })
+      if (this.imgBuff.cached && !primaryLayer.locked) {
+        FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
+        this.imgBuff.cached = false
       }
     },
-    // onDragLeave(e: DragEvent) {
-    //   if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
-    //     this.$emit('onFrameDragleave', e, this.layerIndex)
-    //   }
-    // },
     onFrameDrop(e: DragEvent) {
       e.stopPropagation()
       StepsUtils.record()
+      this.imgBuff.cached = false
     },
-    // onFrameDrop(e: DragEvent) {
-    //   if (!LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
-    //     this.$emit('onFrameDrop', e)
-    //   }
-    // },
     preventDefault(e: Event) {
       e.preventDefault()
     },
