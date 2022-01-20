@@ -9,7 +9,7 @@ import {
 class ListService {
   getList (params: IListServiceParams) {
     const searchParams = {
-      token: params.token || '1',
+      token: params.token || authToken().token,
       type: params.type,
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
@@ -73,6 +73,8 @@ class ListService {
 
   getMarker (params: IListServiceParams) {
     params.type = 'marker'
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 
@@ -84,11 +86,15 @@ class ListService {
   getTheme (params: IListServiceParams) {
     params.type = 'theme'
     params.locale = localeUtils.currLocale()
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 
   getHashtag (params: IListServiceParams) {
     params.type = 'hashtag'
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 }
