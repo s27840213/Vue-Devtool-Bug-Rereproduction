@@ -99,7 +99,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _x: 'SET_currSelectedPhotoInfo',
+      _setCurrSelectedResInfo: 'SET_currSelectedResInfo',
       addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
       deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
@@ -179,14 +179,15 @@ export default Vue.extend({
     showPhotoInfo(evt: Event) {
       const { vendor } = this
       const { info = {}, tags } = this.photo
-      this._x({
+      this._setCurrSelectedResInfo({
+        type: 'photo',
         userName: info.user?.name ?? '',
         userLink: info.user?.link ?? '',
         vendor,
         tags
       })
       this.$nextTick(() => {
-        const el = document.querySelector('.photo-info') as HTMLElement
+        const el = document.querySelector('.res-info') as HTMLElement
         const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
         el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
         el.focus()
@@ -235,7 +236,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
   }
-  &__photo-info {
+  &__res-info {
     position: absolute;
     top: 0;
     right: 0;

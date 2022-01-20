@@ -146,17 +146,16 @@ export default Vue.extend({
     spans(newSpans) {
       console.log('123')
       const heightOri = this.config.styles.height
-      this.handleCurveSpan(newSpans)
-        .then(() => {
-          // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
-          // if (this.editing && height > this.area.height) {
-          //   LayerUtils.updatecCurrTypeLayerStyles({ height })
-          // }
-          // if (newSpans.length === 1) {
-          //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
-          // }
-          typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
-        })
+      this.handleCurveSpan(newSpans, false, () => {
+        // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
+        // if (this.editing && height > this.area.height) {
+        //   LayerUtils.updatecCurrTypeLayerStyles({ height })
+        // }
+        // if (newSpans.length === 1) {
+        //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
+        // }
+        typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
+      })
     },
     isFontLoaded (curr) {
       curr && this.handleCurveSpan(this.spans, true)
@@ -222,7 +221,7 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    async handleCurveSpan (spans: any[], firstInit = false) {
+    handleCurveSpan (spans: any[], firstInit = false, callback?: () => void) {
       const { bend } = this
       if (spans.length > 1) {
         this.$nextTick(() => {
@@ -243,9 +242,11 @@ export default Vue.extend({
           this.calcArea()
           firstInit && this.resetLimitY()
           this.rePosition()
+          callback && callback()
         })
       } else {
         this.transforms = []
+        callback && callback()
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {

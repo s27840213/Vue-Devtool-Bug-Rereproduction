@@ -131,15 +131,17 @@ export default Vue.extend({
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
-      // this.setHeight(value)
       this.setParagraphProp('lineHeight', value)
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
-      // this.setSpacing(value)
       this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
-      tiptapUtils.focus({ scrollIntoView: false })
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
+        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        tiptapUtils.focus({ scrollIntoView: false })
+      }
     })
   },
   destroyed() {
@@ -388,23 +390,36 @@ export default Vue.extend({
     onParaPropsClick(iconName: string) {
       switch (iconName) {
         case 'text-align-left':
-          tiptapUtils.applyParagraphStyle('align', 'left')
-          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          this.handleTextAlign('left')
           break
         case 'text-align-center':
-          tiptapUtils.applyParagraphStyle('align', 'center')
-          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          this.handleTextAlign('center')
           break
         case 'text-align-right':
-          tiptapUtils.applyParagraphStyle('align', 'right')
-          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          this.handleTextAlign('right')
           break
         case 'text-align-justify':
-          tiptapUtils.applyParagraphStyle('align', 'justify')
-          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          this.handleTextAlign('justify')
           break
       }
       StepsUtils.record()
+    },
+    handleTextAlign(prop: string) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as Array<IParagraph>
+            paragraphs.forEach(p => (p.styles.align = prop))
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      } else {
+        tiptapUtils.applyParagraphStyle('align', prop)
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()

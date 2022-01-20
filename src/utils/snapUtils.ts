@@ -65,61 +65,56 @@ class SnapUtils {
    */
   getLayerSnappingPos(layer: IShape | IText | IImage | IGroup | ITmp, type: string): ISnaplineInfo {
     const layerBounding = MathUtils.getBounding(layer)
-    const layerStyles = {
-      x: layer.styles.x,
-      y: layer.styles.y,
-      width: layer.styles.width,
-      height: layer.styles.height
-    }
+    const { x, y } = layer.styles
 
     return type === 'move' ? {
       v: [
         {
           pos: layerBounding.x,
-          offset: layerStyles.x - layerBounding.x
+          offset: x - layerBounding.x
         },
         {
           pos: layerBounding.x + layerBounding.width / 2,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width / 2
+          offset: x - layerBounding.x - layerBounding.width / 2
         },
         {
           pos: layerBounding.x + layerBounding.width,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width
+          offset: x - layerBounding.x - layerBounding.width
         }
       ],
       h: [
         {
           pos: layerBounding.y,
-          offset: layerStyles.y - layerBounding.y
+          offset: y - layerBounding.y
         },
         {
           pos: layerBounding.y + layerBounding.height / 2,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height / 2
+          offset: y - layerBounding.y - layerBounding.height / 2
         },
         {
           pos: layerBounding.y + layerBounding.height,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height
+          offset: y - layerBounding.y - layerBounding.height
         }
       ]
     } : {
       v: [
         {
           pos: layerBounding.x,
-          offset: layerStyles.x - layerBounding.x
+          offset: x - layerBounding.x
         },
         {
           pos: layerBounding.x + layerBounding.width,
-          offset: layerStyles.x - layerBounding.x - layerBounding.width
+          offset: x - layerBounding.x - layerBounding.width
         }
       ],
       h: [
         {
           pos: layerBounding.y,
-          offset: layerStyles.y - layerBounding.y
+          offset: y - layerBounding.y
         },
         {
           pos: layerBounding.y + layerBounding.height,
-          offset: layerStyles.y - layerBounding.y - layerBounding.height
+          offset: y - layerBounding.y - layerBounding.height
         }
       ]
     }

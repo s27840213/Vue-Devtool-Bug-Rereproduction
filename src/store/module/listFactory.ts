@@ -3,6 +3,7 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
+import store from '@/store'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -33,7 +34,12 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale })
       try {
-        const { data } = await this.api({ locale, theme, listAll: 0 })
+        const { data } = await this.api({
+          token: store.getters['user/getToken'],
+          locale,
+          theme,
+          listAll: 0
+        })
         commit(SET_CATEGORIES, data.data)
       } catch (error) {
         captureException(error)
@@ -46,7 +52,13 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
+        const { data } = await this.api({
+          locale,
+          keyword,
+          theme,
+          listAll: 1,
+          cache: store.getters['user/isAdmin'] ? !keyword : true
+        })
         commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
@@ -58,7 +70,13 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, theme, locale, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
+        const { data } = await this.api({
+          locale,
+          keyword,
+          theme,
+          listAll: 1,
+          cache: store.getters['user/isAdmin'] ? !keyword : true
+        })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
       } catch (error) {
@@ -76,7 +94,8 @@ export default function (this: any) {
           locale,
           theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
-          listAll: 1
+          listAll: 1,
+          cache: store.getters['user/isAdmin'] ? !keyword : true
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -164,7 +183,8 @@ export default function (this: any) {
         keyword,
         theme,
         listAll: 1,
-        pageIndex: nextPage
+        pageIndex: nextPage,
+        cache: store.getters['user/isAdmin'] ? !keyword : true
       }
     },
     hasNextPage (state) {

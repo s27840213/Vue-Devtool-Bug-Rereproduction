@@ -15,6 +15,7 @@ const getDefaultState = (): IModalState => ({
   modalInfo: {
     title: '',
     content: [''],
+    component: '',
     confirmButton: {
       msg: '',
       action: () => {

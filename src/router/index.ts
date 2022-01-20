@@ -170,15 +170,22 @@ const router = new VueRouter({
         }
         logUtils.setLog('App Start')
         let locale = localStorage.getItem('locale')
+        // if local storage is empty
         if (locale === '' || !locale) {
           locale = to.params.locale
-          i18n.locale = localeUtils.getBrowserLang()
+          // without locale param, determine the locale with browser language
+          if (locale === '') {
+            i18n.locale = localeUtils.getBrowserLang()
+          } else {
+            i18n.locale = locale
+          }
         } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+          // if local storage has been set
           i18n.locale = locale
           localStorage.setItem('locale', locale)
         }
         next()
-        if (!process.env.VUE_APP_PRERENDER) {
+        if ((window as any).__PRERENDER_INJECTED === undefined) {
           router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
         }
       },
@@ -188,12 +195,11 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  console.log(`Lang: ${document.documentElement.lang}`)
   document.title = to.meta.title || i18n.t('SE0001')
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
-  if (store.getters['user/getImgSizeMap'].length === 0) {
-    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+  if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
+    const response = await fetch('https://template.vivipic.com/static/app.json')
     const json = await response.json()
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
