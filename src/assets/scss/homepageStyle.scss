@@ -10,33 +10,57 @@
   line-height: 180%;
 }
 
-.text-H1 {
+@mixin text-H1 {
   @include header();
   font-size: 44px;
 }
 
-.text-H2 {
+@mixin text-H2 {
   @include header();
   font-size: 40px;
 }
 
-.text-H3 {
+@mixin text-H3 {
   @include header();
   font-size: 32px;
 }
 
-.body-XL {
+@mixin text-H4 {
+  @include header();
+  font-size: 24px;
+}
+
+@mixin text-H5 {
+  @include header();
+  font-size: 20px;
+}
+
+@mixin body-XL {
   @include body();
   font-size: 20px;
 }
 
-.body-LG {
+@mixin body-LG {
   @include body();
   font-size: 18px;
 }
-  
 
-.button-LG {
+@mixin body-MD {
+  @include body();
+  font-size: 16px;
+}
+  
+@mixin body-SM {
+  @include body();
+  font-size: 14px;
+}
+
+@mixin body-XS {
+  @include body();
+  font-size: 12px;
+}
+
+@mixin button-LG {
   font-style: normal;
   font-weight: 500;
   font-size: 16px;

@@ -22,13 +22,14 @@
             :style="`height: ${isLogin ? '800px;' : '800px;'}`"
             :src="require('@/assets/img/svg/homepage/top-bg.svg')")
           div(class="test")
-          div(class="home-content__top-title"
+          div(class="home-content__top-region"
             :class="isLogin ? 'login' : ''")
-            i18n(path="NN0148" tag="span" class="text-H2")
+            i18n(path="NN0148" tag="span"
+              class="home-content__top-title")
               template(#newline)
                 br
             div(v-if="!isLogin"
-              class="home-content__top-subtitle body-LG")
+              class="home-content__top-subtitle")
               span {{$t('NN0237')}}
             div(v-if="isLogin"
               class="home-content__top-btns"
@@ -38,7 +39,7 @@
               div(class="rounded home-btn"
                 @click="goToPage('MyDesign')") {{$t('NN0080')}}
             template(v-else)
-              div(class="home-content__top-btn button-LG"
+              div(class="home-content__top-btn"
                 :type="'primary-lg'"
                 @click="newDesign()") {{$t('NN0274')}}
               img(class="home-content__top-img"
@@ -47,9 +48,8 @@
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
-      div(v-if="!isLogin && !isMobile"
+      div(v-if="!isLogin"
         class="home-content__plaque")
-        img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
         div(class="home-content__plaque-title") {{$t('NN0276')}}
         div(class="home-content__plaque-subtitle"
           class="px-20")
@@ -395,7 +395,7 @@ export default Vue.extend({
         // background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       }
     }
-    &-title {
+    &-region {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -411,8 +411,21 @@ export default Vue.extend({
         font-size: 16px;
       }
     }
+    &-title {
+      @include text-H2;
+      @media screen and (max-width: 1440px) {
+        @include text-H3;
+      }
+      @media screen and (max-width: 768px) {
+        @include text-H5;
+      }
+    }
     &-subtitle {
       padding-top: 20px;
+      @include body-LG;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+      }
     }
     &-mobile-subtitle {
       position: absolute;
@@ -440,7 +453,8 @@ export default Vue.extend({
       color: setColor(white);
       background: setColor(blue-1);
       margin-top: 20px;
-      @media screen and (max-width: 768px) {
+      @include button-LG;
+      @media screen and (max-width: 1440px) {
         width: 200px;
       }
     }
@@ -465,23 +479,18 @@ export default Vue.extend({
     justify-content: center;
     position: relative;
     padding: 50px 0;
-    > img {
-      width: 100%;
-      height: 150px;
-    }
     &-title {
-      position: absolute;
-      top: 95px;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.3;
-      color: setColor(white);
+      @include text-H3;
+      @media screen and (max-width: 768px) {
+        @include text-H4;
+      }
+      @media screen and (max-width: 1440px) {
+        @include text-H5;
+      }
     }
     &-subtitle {
       position: absolute;
       top: 135px;
-      font-size: 16px;
-      color: setColor(white);
     }
   }
   &__feature {
