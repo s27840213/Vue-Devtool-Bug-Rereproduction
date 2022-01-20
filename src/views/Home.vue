@@ -54,30 +54,6 @@
         div(class="home-content__plaque-subtitle"
           class="px-20") {{$t('NN0277')}}
         div(class="home-content__plaque-bg")
-      div(v-if="!isLogin"
-        class="home-content__feature"
-        :class="isMobile ? 'mt-10' : ''")
-        div(style="width: 100%;")
-          div(class="home-content__feature-items")
-            btn(v-for="item, idx in featureList" :type="'icon-mid'"
-              class="home-content__feature-item"
-              :class="{'selected': featureSelected === idx}"
-              @click.native="featureItemClicked(idx)")
-              svg-icon(v-if="currLocale === 'us' && idx === 3"
-                :iconName="featureSelected === idx ? `feature-icon-us${item.name}-s` : `feature-icon-us${item.name}`"
-                :iconWidth="isMobile ? '20px' : '40px'")
-              svg-icon(v-else
-                :iconName="featureSelected === idx ? `feature-icon${item.name}-s` : `feature-icon${item.name}`"
-                :iconWidth="isMobile ? '20px' : '40px'")
-              div(class="home-content__feature-item-title pt-10 body-2") {{item.title}}
-        div(class="home-content__feature-content")
-          div(class="home-content__feature-img")
-            img(:src="require(`@/assets/img/jpg/homepage/feature_${currLocale}_${featureSelected+1}.jpg`)")
-          div(class="home-content__feature-text")
-            div(class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
-            div(class="pb-20") {{featureContent}}
-            btn(:type="'primary-mid'" class="rounded"
-              @click.native="newDesign()") {{$t('NN0274')}}
       div(v-if="isLogin")
         div(class="home-content-title label-lg")
           span {{$t('NN0080')}}
@@ -140,43 +116,12 @@ export default Vue.extend({
   data() {
     return {
       themeList: [] as Itheme[],
-      featureList: [
-        {
-          name: '1',
-          title: i18n.t('NN0326'),
-          content: ''
-        },
-        {
-          name: '2',
-          title: i18n.t('NN0327'),
-          content: i18n.t('NN0328')
-        },
-        {
-          name: '3',
-          title: i18n.t('NN0329'),
-          content: i18n.t('NN0330')
-        },
-        {
-          name: '4',
-          title: i18n.t('NN0331'),
-          content: i18n.t('NN0332')
-        },
-        {
-          name: '5',
-          title: i18n.t('NN0333'),
-          content: i18n.t('NN0334')
-        }
-      ],
       showSizePopup: false,
-      featureSelected: 0,
       tagString: '',
       tags: [] as string[],
       tagTemplateList: [],
       popularTemplateList: [],
-      latestTemplateList: [],
-      isTimerStop: false,
-      AutoPlayTimer: 0 as number,
-      CoolDownTimer: 0 as number
+      latestTemplateList: []
     }
   },
   metaInfo() {
@@ -226,26 +171,11 @@ export default Vue.extend({
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
-    featureContent(): string {
-      return this.featureList[this.featureSelected].content as string
-    },
     currLocale(): string {
       return localeUtils.currLocale()
     }
   },
   async mounted() {
-    if (!this.isLogin) {
-      this.AutoPlayTimer = setInterval(() => {
-        if (!this.isTimerStop) {
-          if (this.featureSelected === this.featureList.length - 1) {
-            this.featureSelected = 0
-          } else {
-            this.featureSelected++
-          }
-        }
-      }, 4000)
-    }
-
     if (this.isLogin) {
       designUtils.fetchDesigns(this.fetchAllDesigns)
     }
@@ -281,14 +211,6 @@ export default Vue.extend({
     const latestTemplate = await this.getTagContent({ keyword, theme })
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
-  destroyed() {
-    if (this.AutoPlayTimer) {
-      window.clearInterval(this.AutoPlayTimer)
-    }
-    if (this.CoolDownTimer) {
-      window.clearInterval(this.CoolDownTimer)
-    }
-  },
   methods: {
     ...mapActions({
       getTagContent: 'homeTemplate/getTagContent',
@@ -318,14 +240,6 @@ export default Vue.extend({
           designUtils.newDesign()
         })
       }
-    },
-    featureItemClicked(idx: number) {
-      this.isTimerStop = true
-      this.featureSelected = idx
-      window.clearInterval(this.CoolDownTimer) // use the latest cool down time
-      this.CoolDownTimer = setTimeout(() => {
-        this.isTimerStop = false
-      }, 10000)
     },
     openPopup() {
       this.showSizePopup = true
@@ -443,8 +357,6 @@ export default Vue.extend({
       justify-content: center;
       width: 240px;
       height: 56px;
-      color: setColor(white);
-      background: setColor(blue-1);
       margin-top: 20px;
       @include button-LG;
       @media screen and (max-width: 1440px) {
@@ -464,9 +376,6 @@ export default Vue.extend({
     @include layout-mobile {
       padding: 0 5%;
     }
-  }
-  &__feature {
-    padding: 0 10%;
   }
   &__plaque {
     display: flex;
@@ -512,124 +421,6 @@ export default Vue.extend({
       @media screen and (max-width: 768px) {
         @include body-SM;
       }
-    }
-  }
-  &__feature {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    &-items {
-      display: flex;
-      justify-content: center;
-      scroll-behavior: smooth;
-      overflow-x: scroll;
-      overflow-y: hidden;
-      text-align: left;
-      padding-bottom: 50px;
-      @include layout-mobile {
-        justify-content: space-between;
-        padding-bottom: 30px;
-      }
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
-    &-item {
-      cursor: pointer;
-      width: 180px;
-      height: 125px;
-      border: 1px solid #f4f4f5;
-      border-radius: 8px;
-      padding: 10px !important;
-      margin-right: 50px;
-      @include layout-mobile {
-        width: 12vw;
-        height: unset;
-        margin-right: 0;
-      }
-      &:hover {
-        background: setColor("gray-5");
-      }
-      &-title {
-        font-size: 14px;
-        padding-top: 10px;
-        @include layout-mobile {
-          display: none;
-        }
-      }
-    }
-    &-content {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      width: 100%;
-      @include layout-mobile {
-        flex-direction: column;
-      }
-      &-title {
-        display: none;
-        color: setColor(dark-blue-2);
-        text-align: center;
-        font-weight: 600;
-        font-size: 18px;
-        line-height: 28px;
-        @include layout-mobile {
-          display: block;
-        }
-      }
-    }
-    &-img {
-      width: 500px;
-      @include layout-mobile {
-        width: 100%;
-      }
-      > img {
-        width: 100%;
-        filter: drop-shadow(0px 3px 15px rgba(0, 0, 0, 0.25));
-        border-radius: 8px;
-      }
-    }
-    &-text {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      width: 30%;
-      text-align: left;
-      font-size: 18px;
-      line-height: 40px;
-      font-weight: 400;
-      color: setColor(gray-2);
-      padding-left: 5vw;
-      @media screen and (max-width: 1260px) {
-        width: 45%;
-      }
-      @media screen and (max-width: 990px) {
-        width: 60%;
-      }
-      @include layout-mobile {
-        width: unset;
-        text-align: center;
-        font-size: 14px;
-        line-height: 20px;
-        padding: 20px 10px;
-      }
-      > button {
-        width: 200px;
-        height: 45px;
-        font-size: 20px;
-        padding: 5px 10px;
-        @include layout-mobile {
-          width: 50%;
-          padding: 0;
-          margin: 0 25%;
-        }
-      }
-    }
-    .selected {
-      background: #09467e;
-      color: white;
     }
   }
 }

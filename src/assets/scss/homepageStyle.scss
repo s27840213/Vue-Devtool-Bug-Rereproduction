@@ -60,7 +60,15 @@
   font-size: 12px;
 }
 
+@mixin primary-btn {
+  color: setColor(white);
+  background: setColor(blue-1);
+  border-radius: 4px;
+}
+
+
 @mixin button-LG {
+  @include primary-btn;
   font-style: normal;
   font-weight: 500;
   font-size: 16px;
