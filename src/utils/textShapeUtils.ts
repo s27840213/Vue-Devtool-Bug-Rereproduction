@@ -4,7 +4,6 @@ import { ILayer, IText } from '@/interfaces/layer'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
-import asyncUtils from './asyncUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -83,40 +82,11 @@ class Controller {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
     const subLayerIndex = layerUtils.subLayerIdx
-    let needObserver = false
-    let observerId = ''
-    let observerIndex = 0
-
-    if (!attrs && shape === 'curve') { // if setting shape type to curve, set attrs.bend to default value.
-      attrs = { bend: this.shapes.curve.bend }
-    }
-
-    const bendToSet = attrs?.bend // is undefined only when setting focus
-    const checkWillChange = shape === 'none'
-      ? (styles: any) => this.isCurvedText(styles)
-      : (styles: any) => !this.isCurvedText(styles) || (bendToSet !== undefined && this.hasDifferentBend(styles, bendToSet))
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
-      if (targetLayer.type !== 'text') {
-        needObserver = true
-        const changeCount = (layers as ILayer[]).reduce((count, l) => {
-          if (l.type === 'text' && checkWillChange(l.styles)) {
-            return count + 1
-          }
-          return count
-        }, 0)
-        observerId = asyncUtils.createObserver(changeCount, () => {
-          TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
-          TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
-        })
-      }
       for (const idx in layers) {
         const { type, styles: layerStyles } = layers[idx] as IText
         if (type === 'text') {
-          if (needObserver && checkWillChange(layerStyles)) {
-            asyncUtils.registerByIndexes(pageIndex, layerIndex, +idx, observerId, observerIndex)
-            observerIndex++
-          }
           const { styles, props } = this.getTextShapeStyles(
             layers[idx],
             shape,
@@ -132,15 +102,6 @@ class Controller {
         }
       }
     } else {
-      const subLayerStyles = layers[subLayerIndex].styles
-      needObserver = checkWillChange(subLayerStyles)
-      if (needObserver) {
-        observerId = asyncUtils.createObserver(1, () => {
-          TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
-          TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
-        })
-        asyncUtils.registerByIndexes(pageIndex, layerIndex, subLayerIndex, observerId, 0)
-      }
       const { styles, props } = this.getTextShapeStyles(
         layers[subLayerIndex],
         shape,

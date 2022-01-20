@@ -44,16 +44,30 @@ export default Vue.extend({
     }
   },
   async created () {
+    const { pageIndex, layerIndex } = this
+    const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+    asyncUtils.registerFinalExecutor(key, () => {
+      textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+    })
     this.handleCurveSpan(this.spans, true, () => {
-      const { pageIndex, layerIndex } = this
       typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
-      asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
+      // asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
+      asyncUtils.completed(key)
     })
   },
   destroyed() {
     const { pageIndex, layerIndex } = this
+    const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+    asyncUtils.registerFinalExecutor(key, () => {
+      textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+    })
     typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
-    asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
+    this.$nextTick(() => {
+      asyncUtils.completed(key)
+    })
+    // asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -147,9 +161,16 @@ export default Vue.extend({
     bend() {
       const { x, width } = this.config.styles
       this.area.left = x + width / 2
+      const { pageIndex, layerIndex } = this
+      const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+      asyncUtils.registerFinalExecutor(key, () => {
+        textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+        textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+      })
       this.handleCurveSpan(this.spans, false, () => {
         typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        asyncUtils.finishedByIndexes(this.pageIndex, this.layerIndex, this.subLayerIndex ?? -1, this.resetLimitY)
+        // asyncUtils.finishedByIndexes(this.pageIndex, this.layerIndex, this.subLayerIndex ?? -1, this.resetLimitY)
+        asyncUtils.completed(key, this.resetLimitY)
       })
     },
     spans(newSpans) {

@@ -3,6 +3,7 @@ import generalUtils from './generalUtils'
 class AsyncUtils {
   callbackMap: {[key: string]: any[]} = {}
   observerMap: {[key: string]: boolean[]} = {}
+  finalExecutorMap: {[key: string]: number} = {}
   idMap: {[key: string]: {
     id: string,
     index: number
@@ -22,6 +23,15 @@ class AsyncUtils {
     this.callbackMap[id] = [callback]
     this.observerMap[id] = Array(numOfWaitee).fill(false)
     return id
+  }
+
+  registerFinalExecutor(key: string, callback: any) {
+    if (this.finalExecutorMap[key] !== undefined) {
+      this.finalExecutorMap[key] += 1
+    } else {
+      this.finalExecutorMap[key] = 1
+      this.callbackMap[key] = [callback]
+    }
   }
 
   registerId(key: string, id: string, index: number) {
@@ -96,6 +106,20 @@ class AsyncUtils {
       }
       delete this.callbackMap[id]
       delete this.observerMap[id]
+    }
+  }
+
+  completed(key: string, callback?: () => void) {
+    if (callback) {
+      this.callbackMap[key].push(callback)
+    }
+    this.finalExecutorMap[key] -= 1
+    if (this.finalExecutorMap[key] === 0) {
+      for (const callback of this.callbackMap[key]) {
+        callback()
+      }
+      delete this.callbackMap[key]
+      delete this.finalExecutorMap[key]
     }
   }
 }
