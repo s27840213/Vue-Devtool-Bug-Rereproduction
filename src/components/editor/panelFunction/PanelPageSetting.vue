@@ -764,11 +764,13 @@ export default Vue.extend({
       })
 
       // 比較 cover_ids 是否有設定錯誤
-      const sameCoverId = this.groupInfo.groupThemes.every((theme, idx) => {
-        const cover1 = theme.id + ':' + theme.coverIndex
-        const cover2 = this.dbGroupThemes[idx].id + ':' + this.dbGroupThemes[idx].coverIndex
-        return cover1 === cover2
+      const coverIds = this.groupInfo.groupThemes.map(theme => {
+        return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
       })
+      const dbCoverIds = this.dbGroupThemes.map(theme => {
+        return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
+      })
+      const sameCoverId = coverIds.join(',') === dbCoverIds.join(',')
       if (!sameCoverId) {
         this.showDbGroup = true
       }

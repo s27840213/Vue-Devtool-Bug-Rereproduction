@@ -6,7 +6,7 @@
         :style="styles('')"
         @dblclick="onDblClick()"
         @click.left.stop="onClickEvent($event)"
-        @mousedown="onMousedown($event)")
+        @mousedown.left="onMousedown($event)")
       svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
           :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
           g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
