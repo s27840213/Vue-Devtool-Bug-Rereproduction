@@ -46,6 +46,7 @@ export default Vue.extend({
       const y = ((event.clientY - rect.y) / rect.height * image.height) * (this.scaleRatio / 100)
 
       dataTransfer.setDragImage(image, x, y)
+      console.log(this.item)
       dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addText() {

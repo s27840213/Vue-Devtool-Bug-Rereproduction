@@ -9,6 +9,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import AssetUtils from '@/utils/assetUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -22,8 +23,9 @@ export default Vue.extend({
       dataTransfer.effectAllowed = 'move'
       const image = new Image()
       image.src = (event.target as HTMLImageElement).src
-      dataTransfer.setDragImage(image, -10, -10)
+      dataTransfer.setDragImage(image, -50, -50)
       dataTransfer.setData('data', JSON.stringify(this.item))
+      console.log(generalUtils.deepCopy(this.item))
     },
     addSvg() {
       AssetUtils.addAsset(this.item)
