@@ -34,7 +34,7 @@
     div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
     div(v-if="showTemplateId && keyword && !pending && !emptyResultMessage"
       class="text-white text-left pb-10")
-      span {{sum}} items in total
+      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
