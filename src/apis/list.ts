@@ -18,7 +18,8 @@ class ListService {
       font_list: params.fontList,
       theme: params.theme,
       group_id: params.groupId,
-      cache: params.cache
+      cache: params.cache,
+      platform: params.cache ? window.location.host : null
       // [2022.01.19] uncached: font, theme, marker, hashtag
     }
 
@@ -72,6 +73,8 @@ class ListService {
 
   getMarker (params: IListServiceParams) {
     params.type = 'marker'
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 
@@ -83,11 +86,15 @@ class ListService {
   getTheme (params: IListServiceParams) {
     params.type = 'theme'
     params.locale = localeUtils.currLocale()
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 
   getHashtag (params: IListServiceParams) {
     params.type = 'hashtag'
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 }

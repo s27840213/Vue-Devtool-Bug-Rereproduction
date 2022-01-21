@@ -618,13 +618,19 @@ class TextUtils {
     return textHW
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
       const originSize = { width: config.styles.width, height: config.styles.height }
-      const textHW = this.getTextHW(config, config.widthLimit)
-      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      let textHW
+      if ((config.styles as any).textShape?.name === 'curve') {
+        textHW = originSize
+      } else {
+        textHW = this.getTextHW(config, config.widthLimit)
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+      }
       /**
        * Group layout height compensation
        */
@@ -657,18 +663,56 @@ class TextUtils {
     /**
      * Compensate the offset difference to the left-edge of group layer
      */
+    if (compensateX) {
+      let minX = Number.MAX_SAFE_INTEGER
+      group.layers
+        .forEach(l => {
+          minX = Math.min(minX, l.styles.x)
+        })
+      if (minX > 0) {
+        for (const [idx, layer] of Object.entries(group.layers)) {
+          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+            x: layer.styles.x - minX
+          })
+        }
+      }
+    }
+  }
+
+  fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
+    if (!group.layers) return
     group.layers
       .forEach(l => {
         minX = Math.min(minX, l.styles.x)
       })
-    if (minX > 0) {
-      for (const [idx, layer] of Object.entries(group.layers)) {
-        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
-          x: layer.styles.x - minX
-        })
-      }
+    for (const [idx, layer] of Object.entries(group.layers)) {
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+        x: layer.styles.x - minX
+      })
     }
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      x: group.styles.x + minX
+    })
+  }
+
+  fixGroupYcoordinates(pageIndex: number, layerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    let minY = Number.MAX_SAFE_INTEGER
+    if (!group.layers) return
+    group.layers
+      .forEach(l => {
+        minY = Math.min(minY, l.styles.y)
+      })
+    for (const [idx, layer] of Object.entries(group.layers)) {
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+        y: layer.styles.y - minY
+      })
+    }
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      y: group.styles.y + minY
+    })
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {

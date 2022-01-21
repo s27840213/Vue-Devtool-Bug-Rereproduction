@@ -52,12 +52,13 @@
           v-tooltip="$hintConfig(`${$t('NN0110')}`)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="pointer record-selection"
+        class="record-selection"
+        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
         v-tooltip="$hintConfig(hintMap[icon])"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer"
@@ -87,6 +88,7 @@ import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   components: {
@@ -196,6 +198,16 @@ export default Vue.extend({
         scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
       }
       return 1 / scale
+    },
+    hasCurveText(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (subLayerIdx !== -1) {
+        return textShapeUtils.isCurvedText((currLayer as IGroup).layers[subLayerIdx].styles)
+      }
+      if (currLayer.type === 'text') {
+        return textShapeUtils.isCurvedText(currLayer.styles)
+      }
+      return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
     }
   },
   methods: {
@@ -324,7 +336,8 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
-        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+        if (this.hasCurveText) return
+        TextPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
       } else {
         switch (iconName) {
           case 'bold':

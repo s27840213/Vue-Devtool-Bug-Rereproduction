@@ -4,6 +4,7 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
+import authToken from '@/apis/auth-token'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -52,12 +53,14 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           keyword,
           theme,
           listAll: 1,
-          cache: store.getters['user/isAdmin'] ? !keyword : true
+          cache: needCache
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -70,12 +73,14 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, theme, locale, content: {} })
       try {
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           keyword,
           theme,
           listAll: 1,
-          cache: store.getters['user/isAdmin'] ? !keyword : true
+          cache: needCache
         })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
@@ -90,12 +95,14 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1,
-          cache: store.getters['user/isAdmin'] ? !keyword : true
+          cache: needCache
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -178,13 +185,15 @@ export default function (this: any) {
   const getters: GetterTree<IListModuleState, any> = {
     nextParams (state) {
       const { nextPage, keyword, theme, locale } = state
+      const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
       return {
+        token: needCache ? '1' : store.getters['user/getToken'],
         locale,
         keyword,
         theme,
         listAll: 1,
         pageIndex: nextPage,
-        cache: store.getters['user/isAdmin'] ? !keyword : true
+        cache: needCache
       }
     },
     hasNextPage (state) {

@@ -131,7 +131,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import textUtils from '@/utils/textUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: {
@@ -244,6 +244,7 @@ export default Vue.extend({
     },
     onShapeClick(shapeName: string): void {
       TextShapeUtils.setTextShape(shapeName)
+      TextPropUtils.updateTextPropsState()
       this.recordChange()
     },
     handleEffectUpdate(event: Event): void {
