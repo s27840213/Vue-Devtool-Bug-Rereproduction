@@ -32,7 +32,7 @@
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
     div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
-    div(v-if="keyword && !pending && showTemplateId"
+    div(v-if="showTemplateId && keyword && !pending && !emptyResultMessage"
       class="text-white text-left pb-10")
       span {{sum}} items in total
     category-list(ref="list"
