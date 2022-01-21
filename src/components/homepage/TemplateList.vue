@@ -18,8 +18,8 @@
       :class="{'items-theme': type === 'theme'}"
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
-        design-item(v-for="design in list"
-          class="py-20 scroll-list__item"
+        design-item(v-for="design in designList"
+          class="py-20 scroll-list__design"
           :key="design.id"
           :config="design")
         div(v-if="isLoading")
@@ -38,7 +38,9 @@
           img(:src="require('@/assets/img/png/plus-origin.png')"
             @click="openPopup()")
           div(class="pt-10 scroll-list__item-title") {{$t('NN0023')}}
-        div(v-for="item, idx in list" class="scroll-list__item py-10"
+        div(v-for="item, idx in list"
+          class="scroll-list__item pt-10"
+          :style="previewStyle"
           :class="{'pb-90 item-theme': type === 'theme'}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
@@ -66,8 +68,9 @@ export default Vue.extend({
     DesignItem
   },
   props: {
-    theme: String,
     type: String,
+    theme: String,
+    designList: Array,
     isLoading: Boolean
   },
   data() {
@@ -75,12 +78,21 @@ export default Vue.extend({
       prevIcon: false,
       nextIcon: false,
       fallbackSrc: '',
-      list: []
+      list: [] as any[]
     }
   },
   computed: {
     items() {
       return this.$refs.items as HTMLElement
+    },
+    previewStyle(): any {
+      const { width, height } = this.list[0].match_cover || {}
+      const aspectRatio = width / height
+      if (aspectRatio > 1) {
+        return { width: `${160 * aspectRatio}px`, height: '160px' }
+      } else {
+        return { width: '160px', height: `${160 / aspectRatio}px` }
+      }
     }
   },
   async mounted() {
@@ -88,6 +100,7 @@ export default Vue.extend({
     const keyword = 'group::0;;order_by::popular'
     const res = await this.getTagContent({ keyword, theme: this.theme })
     this.list = res.data.content[0].list
+    console.log(this.list[0].match_cover)
   },
   methods: {
     ...mapActions({
@@ -176,7 +189,6 @@ export default Vue.extend({
   position: relative;
   &__items {
     display: grid;
-    column-gap: 30px;
     grid-template-columns: auto;
     justify-content: start;
     align-items: center;
@@ -185,6 +197,10 @@ export default Vue.extend({
     overflow-x: scroll;
     overflow-y: hidden;
     text-align: left;
+    column-gap: 16px;
+    @media (max-width: 768px) {
+      column-gap: 10px;
+    }
     &.items-theme {
       @include layout-mobile {
         column-gap: 0px;
@@ -229,25 +245,6 @@ export default Vue.extend({
     }
   }
   &__item {
-    width: 100px;
-    height: 100px;
-    text-align: center;
-    @include layout-mobile {
-      width: 35vw;
-      height: 35vw;
-    }
-    @media (min-width: 976px) {
-      width: 140px;
-      height: 140px;
-    }
-    @media (min-width: 1260px) {
-      width: 170px;
-      height: 170px;
-    }
-    @media (min-width: 1560px) {
-      width: 200px;
-      height: 200px;
-    }
     &-title {
       font-size: 16px;
       line-height: 26px;
@@ -284,7 +281,6 @@ export default Vue.extend({
     .square {
       width: 100%;
       object-fit: contain;
-      box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%);
       &:hover {
         transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
@@ -297,6 +293,10 @@ export default Vue.extend({
         height: 30vw;
       }
     }
+  }
+  &__design {
+    width: 160px;
+    height: 160px;
   }
   &-icon {
     display: flex;

@@ -25,8 +25,8 @@
   "NN0024": "Recently Used",
   "NN0025": "Common Layout",
   "NN0026": "Instagram Story",
-  "NN0027": "eCommerce Product Image",
-  "NN0028": "eCommerce Banner",
+  "NN0027": "Product Image",
+  "NN0028": "Banner",
   "NN0029": "Group",
   "NN0030": "Opacity",
   "NN0031": "Layering",
@@ -373,5 +373,7 @@
   "NN0365": "Created by{author}",
   "NN0366": "Tag",
   "NN0367": "\bLicense",
-  "NN0368": "Instagram / Facebook Post"
+  "NN0368": "Instagram / Facebook Post",
+  "NN0369": "Email Marketing",
+  "NN0370": "Youtube Thumbnail"
 }

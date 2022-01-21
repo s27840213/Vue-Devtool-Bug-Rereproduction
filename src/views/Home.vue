@@ -60,9 +60,9 @@
           span(class="pointer body-1 more"
           @click="goToPage('MyDesign')") {{$t('NN0082')}}
         div(class="home-content__mydesign")
-          scroll-list(:list="allDesigns" type='design'
+          template-list(:designList="allDesigns" type='design'
             :isLoading="isDesignsLoading")
-      template(v-for="list in templates")
+      template(v-for="list in (isLogin ? templates : templates2)")
         div(class="home-content-title label-lg")
           span {{list.title}}
           span(class="pointer body-1"
@@ -107,15 +107,36 @@ export default Vue.extend({
       tags: [] as string[],
       templates1: [] as ITemplate[],
       templates: [
-        // {
-        //   title: i18n.t('NN0368'),
-        //   theme: '1,2'
-        // },
+        {
+          title: i18n.t('NN0368'),
+          theme: '1,2'
+        },
         {
           title: i18n.t('NN0026'),
           theme: '3'
+        },
+        {
+          title: i18n.t('NN0151', { media: 'Facebook' }),
+          theme: '8'
+        },
+        {
+          title: i18n.t('NN0028'),
+          theme: '6'
+        },
+        {
+          title: i18n.t('NN0027'),
+          theme: '5'
+        },
+        {
+          title: i18n.t('NN0369'),
+          theme: '7'
+        },
+        {
+          title: i18n.t('NN0370'),
+          theme: '9'
         }
-      ],
+      ] as { title: string; theme: string; }[],
+      templates2: [] as { title: string; theme: string; }[],
       tagTemplateList: [],
       popularTemplateList: [],
       latestTemplateList: []
@@ -179,6 +200,10 @@ export default Vue.extend({
 
     await themeUtils.checkThemeState().then(() => {
       this.themeList = themeUtils.themes
+    })
+
+    this.templates2 = this.templates.filter((value, idx) => {
+      return idx <= 4
     })
   },
   methods: {
@@ -255,7 +280,7 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
     text-align: left;
-    padding: 40px 10vw 20px 10vw;
+    padding: 38px 10vw 6px 10vw;
     @include layout-mobile {
       font-size: 18px;
       padding: 25px 5vw 20px 5vw;

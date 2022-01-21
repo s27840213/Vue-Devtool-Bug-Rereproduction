@@ -106,6 +106,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/homepageStyle.scss";
+
 .design-item {
   display: flex;
   flex-direction: column;
@@ -166,11 +168,8 @@ export default Vue.extend({
       border: none;
       padding-top: 10px;
       > span {
+        @include body-XS;
         height: 20px;
-        font-family: Mulish;
-        font-size: 14px;
-        font-weight: 400;
-        color: setColor(gray-1);
         white-space: nowrap;
         text-overflow: ellipsis;
         display: block;
