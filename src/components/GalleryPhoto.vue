@@ -132,7 +132,7 @@ export default Vue.extend({
           assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
         }
 
-        dragUtils.dragStart(e, 'image', { srcObj }, {
+        dragUtils.itemDragStart(e, 'image', { type: 'image', srcObj }, {
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,

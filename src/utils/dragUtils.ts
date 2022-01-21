@@ -1,10 +1,12 @@
 import { IImage, IShape } from '@/interfaces/layer'
 import store from '@/store'
+import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
+import mouseUtils from './mouseUtils'
 
 class DragUtils {
-  dragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
+  itemDragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
     let { offsetX = 10, offsetY = 15, width, height } = attrs
     const scaleRatio = store.getters.getPageScaleRatio
     const { width: rowWidth, height: rowHeight, x, y } = (e.target as Element).getBoundingClientRect()
@@ -38,7 +40,6 @@ class DragUtils {
     dataTransfer.dropEffect = 'move'
     dataTransfer.effectAllowed = 'move'
     dataTransfer.setData('data', JSON.stringify(data))
-    console.log(payload)
 
     const dragImage = new Image()
     dragImage.src = iconImg.src
@@ -65,6 +66,25 @@ class DragUtils {
     setTimeout(() => {
       document.body.removeChild(wrapper)
     }, 0)
+  }
+
+  itemOnDrop(e: DragEvent) {
+    const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
+    if (dropData === null || typeof dropData !== 'string') return
+    const data = JSON.parse(dropData)
+
+    if (data.type === 'image') {
+      mouseUtils.onDrop(e, layerUtils.pageIndex)
+    } else {
+      const target = e.target as HTMLElement
+      const targetPos = {
+        x: target.getBoundingClientRect().x,
+        y: target.getBoundingClientRect().y
+      }
+      const x = (e.clientX - targetPos.x) * (100 / store.state.pageScaleRatio)
+      const y = (e.clientY - targetPos.y) * (100 / store.state.pageScaleRatio)
+      assetUtils.addAsset(data, { styles: { x, y } })
+    }
   }
 }
 

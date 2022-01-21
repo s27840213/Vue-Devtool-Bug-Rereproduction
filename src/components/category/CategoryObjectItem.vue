@@ -57,10 +57,9 @@ export default Vue.extend({
 
       console.log(generalUtils.deepCopy(this.item))
       const type = assetUtils.getLayerType(this.item.type)?.includes('shape') ? 'shape' : assetUtils.getLayerType(this.item.type)
-      const category = assetUtils.getLayerType(this.item.type)?.substr('shape'.length)
-      dragUtils.dragStart(e, type || '', {
-        designId: this.item.id,
-        ...(type === 'shape' && { category })
+      // const category = assetUtils.getLayerType(this.item.type)?.substr('shape'.length)
+      dragUtils.itemDragStart(e, type || '', {
+        ...this.item
       }, {
         resizeRatio: RESIZE_RATIO_SVG
       })
