@@ -52,7 +52,6 @@ export default Vue.extend({
     })
     this.handleCurveSpan(this.spans, true, () => {
       typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
-      // asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
       asyncUtils.completed(key)
     })
   },
@@ -67,7 +66,6 @@ export default Vue.extend({
     this.$nextTick(() => {
       asyncUtils.completed(key)
     })
-    // asyncUtils.finishedByIndexes(pageIndex, layerIndex, this.subLayerIndex ?? -1)
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -108,8 +106,6 @@ export default Vue.extend({
         margin: 0,
         height: `${config.styles.height / config.styles.scale}px`,
         width: `${config.styles.width / config.styles.scale}px`
-        // minHeight: `${area.height / config.styles.scale}px`,
-        // minWidth: `${area.width / config.styles.scale}px`
       }
     },
     circleStyle(): any {
@@ -169,7 +165,6 @@ export default Vue.extend({
       })
       this.handleCurveSpan(this.spans, false, () => {
         typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        // asyncUtils.finishedByIndexes(this.pageIndex, this.layerIndex, this.subLayerIndex ?? -1, this.resetLimitY)
         asyncUtils.completed(key, this.resetLimitY)
       })
     },
@@ -178,13 +173,6 @@ export default Vue.extend({
       const { x, width } = this.config.styles
       this.area.left = x + width / 2
       this.handleCurveSpan(newSpans, false, () => {
-        // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
-        // if (this.editing && height > this.area.height) {
-        //   LayerUtils.updatecCurrTypeLayerStyles({ height })
-        // }
-        // if (newSpans.length === 1) {
-        //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
-        // }
         typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
         textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
         textUtils.fixGroupYcoordinates(this.pageIndex, this.layerIndex)
@@ -194,16 +182,6 @@ export default Vue.extend({
     isFontLoaded (curr) {
       curr && this.handleCurveSpan(this.spans, true)
     }
-    // editing(val) {
-    //   const { height } = textUtils.getTextHW(this.config, this.config.widthLimit)
-    //   if (val && height > this.config.styles.height) {
-    //     LayerUtils.updatecCurrTypeLayerStyles({ height })
-    //     return
-    //   }
-    //   if (!val && this.config.styles.height > this.area.height) {
-    //     LayerUtils.updatecCurrTypeLayerStyles({ height: this.area.height }, this.layerIndex)
-    //   }
-    // }
   },
   methods: {
     calcArea() {
@@ -285,7 +263,6 @@ export default Vue.extend({
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
-      // if (LayerUtils.getCurrLayer.type === 'tmp') return
       const { styles, props } = updateInfo
       const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({
