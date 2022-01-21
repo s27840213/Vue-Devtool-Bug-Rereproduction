@@ -19,32 +19,29 @@
       template(v-else)
         div(class="home-content__top")
           img(class="home-content__top-bg"
-            :style="`height: ${isLogin ? '800px;' : '800px;'}`"
+            :style="`height: ${isLogin ? '420px;' : '700px;'}`"
             :src="require('@/assets/img/svg/homepage/top-bg.svg')")
-          div(class="test")
-          div(class="home-content__top-region"
-            :class="isLogin ? 'login' : ''")
+          div(v-if="!isLogin"
+            class="home-content__top-white")
+          div(class="home-content__top-region")
             i18n(path="NN0148" tag="span"
               class="home-content__top-title")
               template(#newline)
                 br
-            div(v-if="!isLogin"
-              class="home-content__top-subtitle")
+            div(class="home-content__top-subtitle")
               span {{$t('NN0237')}}
-            div(v-if="isLogin"
-              class="home-content__top-btns"
-              :class="currLocale === 'us' ? 'us' : ''")
-              div(class="rounded home-btn"
-                @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
-              div(class="rounded home-btn"
-                @click="goToPage('MyDesign')") {{$t('NN0080')}}
+            div(v-if="isLogin")
+              search-bar(class="home-content__top-search"
+                :placeholder="$t('NN0037')"
+                @search="handleSearch")
             template(v-else)
               div(class="home-content__top-btn"
                 :type="'primary-lg'"
                 @click="newDesign()") {{$t('NN0274')}}
               img(class="home-content__top-img"
                 :src="require('@/assets/img/svg/homepage/header_img_us.png')")
-      div(class="mt-100 home-content-title label-lg") {{$t('NN0154')}}
+      div(class="home-content-title label-lg"
+        :class="!isLogin ? 'mt-100' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
@@ -80,6 +77,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TemplateList from '@/components/homepage/TemplateList.vue'
@@ -94,6 +92,7 @@ export default Vue.extend({
   name: 'Home',
   components: {
     NuHeader,
+    SearchBar,
     NuFooter,
     ScrollList,
     TemplateList,
@@ -244,6 +243,9 @@ export default Vue.extend({
     },
     closePopup() {
       this.showSizePopup = false
+    },
+    handleSearch(keyword: string) {
+      this.goToPage('TemplateCenter', keyword)
     }
   }
 })
@@ -302,6 +304,16 @@ export default Vue.extend({
         // background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
       }
     }
+    &-white {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      border-color: white transparent;
+      border-width: 0 0 35vh 100vw;
+      border-style: solid;
+    }
     &-region {
       display: flex;
       flex-direction: column;
@@ -309,9 +321,6 @@ export default Vue.extend({
       position: absolute;
       top: 100px;
       color: setColor(dark-blue);
-      &.login {
-        top: 40px;
-      }
     }
     &-title {
       color: setColor(nav);
@@ -339,16 +348,6 @@ export default Vue.extend({
       top: 75px;
       transform: scale(0.9);
     }
-    &-btns {
-      position: absolute;
-      top: 140px;
-      display: flex;
-      justify-content: space-evenly;
-      width: 500px;
-      &.us {
-        top: 160px;
-      }
-    }
     &-btn {
       display: flex;
       align-items: center;
@@ -360,6 +359,15 @@ export default Vue.extend({
       @media screen and (max-width: 1440px) {
         width: 200px;
       }
+    }
+    &-search {
+      width: 380px;
+      height: 40px;
+      background-color: white;
+      border-radius: 3px;
+      border: 1px solid setColor(gray-4);
+      box-sizing: border-box;
+      margin-top: 20px;
     }
     &-img {
       width: 80%;
@@ -438,16 +446,5 @@ export default Vue.extend({
     height: 35px;
     font-size: 16px;
   }
-}
-
-.test{
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 0;
-  height: 0;
-  border-color: white transparent;
-  border-width: 0 0 20vh 100vw;
-  border-style: solid;
 }
 </style>
