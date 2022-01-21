@@ -61,11 +61,14 @@
 }
 
 @mixin primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
   color: setColor(white);
   background: setColor(blue-1);
   border-radius: 4px;
 }
-
 
 @mixin button-LG {
   @include primary-btn;
