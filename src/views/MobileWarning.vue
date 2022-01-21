@@ -8,7 +8,7 @@
       img(class="mobile-warning__image"
           :src="require('@/assets/img/jpg/mobilewarning/mobile.jpg')")
       div(class="mobile-warning__title")
-        span {{$t('NN0259')}}
+        span(:style="titleStyles()") {{$t('NN0259')}}
       div(class="mobile-warning__description")
         div(class="mobile-warning__description-line")
           span {{$t('NN0260')}}
@@ -18,12 +18,12 @@
         div(class="mobile-warning__button-wrapper")
           div(class="mobile-warning__button"
               @click="goToHome")
-            span {{$t('NN0262')}}
+            span(:style="buttonStyles()") {{$t('NN0262')}}
       div(class="mobile-warning__button-outter secondary")
         div(class="mobile-warning__button-wrapper secondary")
           div(class="mobile-warning__button secondary"
               @click="continueToUrl")
-            span {{$t('NN0362')}}
+            span(:style="buttonStyles()") {{$t('NN0362')}}
 </template>
 
 <script lang="ts">
@@ -46,6 +46,18 @@ export default Vue.extend({
     this.width = window.screen.width
   },
   methods: {
+    titleStyles() {
+      return this.$i18n.locale === 'tw' ? {
+        letterSpacing: '0.165em',
+        textIndent: '0.165em'
+      } : {}
+    },
+    buttonStyles() {
+      return this.$i18n.locale === 'tw' ? {
+        letterSpacing: '0.355em',
+        textIndent: '0.355em'
+      } : {}
+    },
     goToHome() {
       this.$router.push({ name: 'Home' })
     },
@@ -108,8 +120,6 @@ export default Vue.extend({
       font-weight: 700;
       font-size: min(4vw, 20px);
       display: block;
-      letter-spacing: 0.165em;
-      text-indent: 0.165em;
       color: black;
     }
     @media (min-aspect-ratio: 1/1) {
@@ -178,8 +188,6 @@ export default Vue.extend({
       font-weight: 700;
       font-size: 14px;
       display: block;
-      letter-spacing: 0.355em;
-      text-indent: 0.355em;
       color: white;
     }
     &.secondary{
