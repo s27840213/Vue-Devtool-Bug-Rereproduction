@@ -18,6 +18,7 @@ import { IGroup } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import textUtils from '@/utils/textUtils'
+import asyncUtils from '@/utils/asyncUtils'
 
 export default Vue.extend({
   props: {
@@ -43,13 +44,28 @@ export default Vue.extend({
     }
   },
   async created () {
-    this.handleCurveSpan(this.spans, true)
     const { pageIndex, layerIndex } = this
-    typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+    const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+    asyncUtils.registerFinalExecutor(key, () => {
+      textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+    })
+    this.handleCurveSpan(this.spans, true, () => {
+      typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+      asyncUtils.completed(key)
+    })
   },
   destroyed() {
     const { pageIndex, layerIndex } = this
+    const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+    asyncUtils.registerFinalExecutor(key, () => {
+      textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+    })
     typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+    this.$nextTick(() => {
+      asyncUtils.completed(key)
+    })
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -90,8 +106,6 @@ export default Vue.extend({
         margin: 0,
         height: `${config.styles.height / config.styles.scale}px`,
         width: `${config.styles.width / config.styles.scale}px`
-        // minHeight: `${area.height / config.styles.scale}px`,
-        // minWidth: `${area.width / config.styles.scale}px`
       }
     },
     circleStyle(): any {
@@ -141,36 +155,33 @@ export default Vue.extend({
       }
     },
     bend() {
-      this.handleCurveSpan(this.spans)
+      const { x, width } = this.config.styles
+      this.area.left = x + width / 2
+      const { pageIndex, layerIndex } = this
+      const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+      asyncUtils.registerFinalExecutor(key, () => {
+        textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+        textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+      })
+      this.handleCurveSpan(this.spans, false, () => {
+        typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+        asyncUtils.completed(key, this.resetLimitY)
+      })
     },
     spans(newSpans) {
-      console.log('123')
       const heightOri = this.config.styles.height
-      this.handleCurveSpan(newSpans)
-        .then(() => {
-          // const { height } = textUtils.getTextHW(this.config, this.config.styles.width)
-          // if (this.editing && height > this.area.height) {
-          //   LayerUtils.updatecCurrTypeLayerStyles({ height })
-          // }
-          // if (newSpans.length === 1) {
-          //   LayerUtils.updatecCurrTypeLayerStyles(textUtils.getTextHW(this.config))
-          // }
-          typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
-        })
+      const { x, width } = this.config.styles
+      this.area.left = x + width / 2
+      this.handleCurveSpan(newSpans, false, () => {
+        typeof this.subLayerIndex !== 'undefined' && this.asSubLayerSizeRefresh(this.config.styles.height, heightOri)
+        textUtils.fixGroupXcoordinates(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupYcoordinates(this.pageIndex, this.layerIndex)
+        this.resetLimitY()
+      })
     },
     isFontLoaded (curr) {
       curr && this.handleCurveSpan(this.spans, true)
     }
-    // editing(val) {
-    //   const { height } = textUtils.getTextHW(this.config, this.config.widthLimit)
-    //   if (val && height > this.config.styles.height) {
-    //     LayerUtils.updatecCurrTypeLayerStyles({ height })
-    //     return
-    //   }
-    //   if (!val && this.config.styles.height > this.area.height) {
-    //     LayerUtils.updatecCurrTypeLayerStyles({ height: this.area.height }, this.layerIndex)
-    //   }
-    // }
   },
   methods: {
     calcArea() {
@@ -206,7 +217,8 @@ export default Vue.extend({
     rePosition() {
       const { top, bottom, left, width: areaWidth, height: areaHeight } = this.area
       const y = this.bend >= 0 ? top : bottom - areaHeight
-      const x = Math.max(left - (areaWidth / 2), 0)
+      // const x = Math.max(left - (areaWidth / 2), 0)
+      const x = left - (areaWidth / 2) // keep its center anyway
       this.handleCurveTextUpdate({
         styles: { y, x }
       })
@@ -222,7 +234,7 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    async handleCurveSpan (spans: any[], firstInit = false) {
+    handleCurveSpan (spans: any[], firstInit = false, callback?: () => void) {
       const { bend } = this
       if (spans.length > 1) {
         this.$nextTick(() => {
@@ -243,13 +255,14 @@ export default Vue.extend({
           this.calcArea()
           firstInit && this.resetLimitY()
           this.rePosition()
+          callback && callback()
         })
       } else {
         this.transforms = []
+        callback && callback()
       }
     },
     handleCurveTextUpdate (updateInfo: { [key: string]: any }) {
-      if (LayerUtils.getCurrLayer.type === 'tmp') return
       const { styles, props } = updateInfo
       const { pageIndex, layerIndex, subLayerIndex } = this
       LayerUtils.updateSpecLayerData({
@@ -273,20 +286,36 @@ export default Vue.extend({
         return
       }
       const group = LayerUtils.getCurrLayer as IGroup
-      const lowLine = this.config.styles.y + heightOri
       const targetSubLayers = [] as Array<[number, number]>
-      group.layers
-        .forEach((l, idx) => {
-          if (l.styles.y >= lowLine && idx !== this.subLayerIndex) {
-            targetSubLayers.push([idx, l.styles.y])
-          }
-        })
-      targetSubLayers
-        .forEach(data => {
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
-            y: (height - heightOri) + data[1]
+      if (this.bend >= 0) {
+        const lowLine = this.config.styles.y + heightOri
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine && idx !== this.subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
           })
-        })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
+              y: data[1] + (height - heightOri)
+            })
+          })
+      } else {
+        const highLine = this.config.styles.y
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y <= highLine && idx !== this.subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, data[0], {
+              y: data[1] - (height - heightOri)
+            })
+          })
+      }
       textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
     }
   }

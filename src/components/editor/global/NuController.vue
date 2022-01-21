@@ -28,12 +28,10 @@
           @mouseenter="onFrameMouseEnter(index)"
           @mouseleave="onFrameMouseLeave(index)"
           @mouseup="onFrameMouseUp(index)"
-          @dragenter="onFrameDragEnter(index)",
-          @dragleave="onFrameDragLeave(index)",
           @drop.stop="onFrameDrop(index)",
           @click="clickSubController(index)"
           @dblclick="dblSubController(index)")
-      template(v-if="(['group', 'frame', 'tmp'].includes(getLayerType)) && isActive")
+      template(v-if="((['group', 'tmp'].includes(getLayerType)) && isActive) || (getLayerType === 'frame' && isActive)")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -47,8 +45,8 @@
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               @onFrameDrop="getLayerType === 'frame' ? onFrameDrop(index) : null"
-              @onFrameDragenter="onFrameDragEnter(index)",
-              @onFrameDragleave="onFrameDragLeave(index)",
+              @onFrameDragenter="getLayerType === 'frame' ? onFrameDragEnter(index) : null",
+              @onFrameDragleave="getLayerType === 'frame' ? onFrameDragLeave(index) : null",
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
       template(v-if="config.type === 'text' && isActive")
@@ -537,7 +535,8 @@ export default Vue.extend({
       const zindex = (() => {
         // const isFrame = this.getLayerType === 'frame' && (this.imgControl.layerIndex === this.layerIndex || this.isMoving)
         const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-        const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
+        const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
+        // const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
         }

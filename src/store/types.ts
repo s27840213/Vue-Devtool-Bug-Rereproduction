@@ -44,7 +44,7 @@ export interface IEditorState {
   currSubSelectedInfo: ICurrSubSelectedInfo,
   isColorPickerOpened: boolean,
   isMoving: boolean,
-  currSelectedPhotoInfo: Record<string, never> | {
+  currSelectedResInfo: Record<string, never> | {
     userName: string,
     userLink: string,
     vendor: string,

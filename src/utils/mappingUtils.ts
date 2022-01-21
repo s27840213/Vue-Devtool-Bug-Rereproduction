@@ -70,32 +70,32 @@ class MappingUtils {
   mappingIconAction(icon: string) {
     switch (icon) {
       case 'left-align': {
-        AlignUtils.leftAlign()
+        AlignUtils.align('left')
         stepsUtils.record()
         break
       }
       case 'center-horizontally': {
-        AlignUtils.centerHrAlign()
+        AlignUtils.align('centerHr')
         stepsUtils.record()
         break
       }
       case 'right-align': {
-        AlignUtils.rightAlign()
+        AlignUtils.align('right')
         stepsUtils.record()
         break
       }
       case 'top-align': {
-        AlignUtils.topAlign()
+        AlignUtils.align('top')
         stepsUtils.record()
         break
       }
       case 'center-vertically': {
-        AlignUtils.centerVrAlign()
+        AlignUtils.align('centerVr')
         stepsUtils.record()
         break
       }
       case 'bottom-align': {
-        AlignUtils.bottomAlign()
+        AlignUtils.align('bottom')
         stepsUtils.record()
         break
       }

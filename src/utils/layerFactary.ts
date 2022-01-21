@@ -127,7 +127,7 @@ class LayerFactary {
         initWidth: initWidth,
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
-        opacity: styles.opacity,
+        opacity: styles.opacity || 100,
         horizontalFlip: styles.horizontalFlip,
         verticalFlip: styles.verticalFlip
       },
@@ -224,31 +224,15 @@ class LayerFactary {
      * below fix the wrong part
      */
     if (config.paragraphs) {
-      config.paragraphs.forEach((p, pidx) => {
-        for (let i = 0; i < p.spans.length; i++) {
-          if (typeof p.spans[i] === 'undefined' || (!p.spans[i].text && p.spans.length !== 1)) {
-            console.warn('some empty span detected', pidx, i)
-            p.spans.splice(i, 1)
-            i--
-            continue
-          }
-          if (typeof p.spans[i].text === 'undefined') {
-            p.spans.splice(i, 1)
-          } else if (p.spans[i].text.includes('\n')) {
-            console.warn('some /n detected:', p.spans[i].text)
-            p.spans[i].text.replace('\n', '')
-          }
+      const paragraphs = config.paragraphs
+      // some paragraphs contain empty spans.
+      for (let pidx = 0; pidx < paragraphs.length; pidx++) {
+        if (paragraphs[pidx].spans.length === 0) {
+          paragraphs.splice(pidx, 1)
+          pidx--
         }
-      })
-      config.paragraphs.forEach(p => {
-        if (p.spans.length) {
-          p.id = GeneralUtils.generateRandomString(8)
-          p.spans.forEach(s => {
-            s.id = GeneralUtils.generateRandomString(8)
-          })
-        }
-      })
-      config.paragraphs.forEach((p, pidx) => {
+      }
+      config.paragraphs.forEach((p) => {
         for (let i = 0; i < p.spans.length; i++) {
           if (!p.spans[i].styles.font) {
             Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&

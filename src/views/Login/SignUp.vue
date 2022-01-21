@@ -214,10 +214,6 @@ export default Vue.extend({
     }
 
     switch (this.currLocale) {
-      case 'us':
-        this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
-        this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
-        break
       case 'tw':
         this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
         this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
@@ -225,6 +221,10 @@ export default Vue.extend({
       case 'jp':
         this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
         this.termsPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+        break
+      default:
+        this.privacyPage = 'https://blog.vivipic.com/us-privacy-policy/'
+        this.termsPage = 'https://blog.vivipic.com/us-terms-of-use/'
         break
     }
   },

@@ -45,13 +45,18 @@ class Controller {
 
   getCurrentLayer (): IText {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const subLayerIndex = LayerUtils.subLayerIdx
     const currLayer = store.getters.getLayer(pageIndex, layerIndex)
     const multiLayers = currLayer && currLayer.layers as any[]
     if (multiLayers) {
-      for (const index in multiLayers) {
-        if (multiLayers[index].type === 'text') {
-          return multiLayers[index]
+      if (subLayerIndex === -1) {
+        for (const index in multiLayers) {
+          if (multiLayers[index].type === 'text') {
+            return multiLayers[index]
+          }
         }
+      } else {
+        return multiLayers[subLayerIndex]
       }
     }
     return currLayer || {}

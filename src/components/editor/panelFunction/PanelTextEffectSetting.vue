@@ -10,7 +10,8 @@
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shadow-${icon}`])"
+        )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -52,7 +53,8 @@
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shadow-${icon}`])"
+        )
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -95,7 +97,8 @@
           :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shape-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shape-${icon}`])"
+        )
       div(class="w-full text-effect-setting__form")
         div(v-for="field in shapeFields"
           :key="field"
@@ -128,7 +131,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import textUtils from '@/utils/textUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 
 export default Vue.extend({
   components: {
@@ -241,6 +244,7 @@ export default Vue.extend({
     },
     onShapeClick(shapeName: string): void {
       TextShapeUtils.setTextShape(shapeName)
+      TextPropUtils.updateTextPropsState()
       this.recordChange()
     },
     handleEffectUpdate(event: Event): void {

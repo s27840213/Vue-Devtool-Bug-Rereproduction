@@ -22,7 +22,8 @@
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
     div(class="text-setting__row2")
-      div(class="text-setting__color" v-hint="`${$t('NN0099')}`")
+      div(class="text-setting__color"
+          v-tooltip="$hintConfig(`${$t('NN0099')}`)")
         div(class="color-slip record-selection"
           @click="handleColorModal")
           svg-icon(iconName="text-color"
@@ -44,25 +45,26 @@
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-hint="`${$t('NN0109')}`")
+          v-tooltip="$hintConfig(`${$t('NN0109')}`)")
         svg-icon(class="pointer record-selection btn-ls"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-hint="`${$t('NN0110')}`")
+          v-tooltip="$hintConfig(`${$t('NN0110')}`)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="pointer record-selection"
+        class="record-selection"
+        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
-        v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        v-tooltip="$hintConfig(hintMap[icon])"
+        :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer"
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
-        v-hint="hintMap[icon]"
+        v-tooltip="$hintConfig(hintMap[icon])"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
 
@@ -72,7 +74,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -86,6 +88,7 @@ import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   components: {
@@ -131,13 +134,17 @@ export default Vue.extend({
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
-      this.setHeight(value)
+      this.setParagraphProp('lineHeight', value)
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
-      this.setSpacing(value)
+      this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
-      tiptapUtils.focus({ scrollIntoView: false })
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
+        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        tiptapUtils.focus({ scrollIntoView: false })
+      }
     })
   },
   destroyed() {
@@ -191,6 +198,16 @@ export default Vue.extend({
         scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
       }
       return 1 / scale
+    },
+    hasCurveText(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (subLayerIdx !== -1) {
+        return textShapeUtils.isCurvedText((currLayer as IGroup).layers[subLayerIdx].styles)
+      }
+      if (currLayer.type === 'text') {
+        return textShapeUtils.isCurvedText(currLayer.styles)
+      }
+      return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
     }
   },
   methods: {
@@ -304,11 +321,8 @@ export default Vue.extend({
       return origin
     },
     textInfoRecorder() {
-      console.log('text info recoreder')
       const currLayer = LayerUtils.getCurrLayer
       let config = currLayer
-      // let start
-      // let end
       let subLayerIndex
       if (currLayer.type === 'group') {
         subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
@@ -322,25 +336,51 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
-        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+        if (this.hasCurveText) return
+        TextPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
       } else {
         switch (iconName) {
           case 'bold':
-            tiptapUtils.applySpanStyle('weight', (this.props.weight === 'bold') ? 'normal' : 'bold')
-            TextPropUtils.updateTextPropsState({ weight: (this.props.weight === 'bold') ? 'normal' : 'bold' })
+            this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
-            tiptapUtils.applySpanStyle('decoration', (this.props.decoration === 'underline') ? 'none' : 'underline')
-            TextPropUtils.updateTextPropsState({ decoration: (this.props.decoration === 'underline') ? 'none' : 'underline' })
+            this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
-            tiptapUtils.applySpanStyle('style', (this.props.style === 'italic') ? 'normal' : 'italic')
-            TextPropUtils.updateTextPropsState({ style: (this.props.style === 'italic') ? 'normal' : 'italic' })
+            this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
       }
       this.updateLayerProps({ isEdited: true })
       StepsUtils.record()
+    },
+    handleSpanPropClick(prop: string, pair: [string, string]) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        const newPropVal = layers
+          .filter(l => l.type === 'text')
+          .every(text => {
+            return (text as IText).paragraphs.every(p => {
+              return p.spans.every(s => s.styles[prop] === pair[0])
+            })
+          }) ? pair[1] : pair[0]
+
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
+            paragraphs.forEach(p => {
+              p.spans.forEach(s => {
+                s.styles[prop] = newPropVal
+              })
+            })
+            LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+      } else {
+        tiptapUtils.applySpanStyle(prop, (this.props[prop] === pair[0]) ? pair[1] : pair[0])
+        TextPropUtils.updateTextPropsState({ [prop]: (this.props[prop] === pair[0]) ? pair[1] : pair[0] })
+      }
     },
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
@@ -364,23 +404,36 @@ export default Vue.extend({
     onParaPropsClick(iconName: string) {
       switch (iconName) {
         case 'text-align-left':
-          tiptapUtils.applyParagraphStyle('align', 'left')
-          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          this.handleTextAlign('left')
           break
         case 'text-align-center':
-          tiptapUtils.applyParagraphStyle('align', 'center')
-          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          this.handleTextAlign('center')
           break
         case 'text-align-right':
-          tiptapUtils.applyParagraphStyle('align', 'right')
-          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          this.handleTextAlign('right')
           break
         case 'text-align-justify':
-          tiptapUtils.applyParagraphStyle('align', 'justify')
-          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          this.handleTextAlign('justify')
           break
       }
       StepsUtils.record()
+    },
+    handleTextAlign(prop: string) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as Array<IParagraph>
+            paragraphs.forEach(p => (p.styles.align = prop))
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      } else {
+        tiptapUtils.applyParagraphStyle('align', prop)
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
@@ -459,6 +512,32 @@ export default Vue.extend({
         window.requestAnimationFrame(() => {
           tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)), false)
           TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
+        })
+      }
+    },
+    setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
+      if (this.isValidFloat(_value.toString())) {
+        let value = parseFloat(this.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+        switch (prop) {
+          case 'lineHeight':
+            value = toNumber((value).toFixed(2))
+            break
+          case 'fontSpacing':
+            value = value / 1000
+        }
+        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+        window.requestAnimationFrame(() => {
+          if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
+            (currLayer as IGroup | ITmp).layers
+              .forEach((l, idx) => {
+                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
+                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, idx)
+              })
+          } else {
+            tiptapUtils.applyParagraphStyle(prop, value, false)
+            // TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIdx)
+            TextPropUtils.updateTextPropsState({ [prop]: value })
+          }
         })
       }
     },

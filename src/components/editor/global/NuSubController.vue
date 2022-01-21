@@ -6,10 +6,10 @@
         :style="styles('')"
         @dblclick="onDblClick()"
         @click.left.stop="onClickEvent($event)"
-        @mousedown="onMousedown($event)")
+        @mousedown.left="onMousedown($event)")
       svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
           :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-          g(v-html="config.clipPath ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
+          g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
             :style="frameClipStyles()"
             @drop="onFrameDrop()"
             @dragenter="onDrageEnter()"
@@ -207,9 +207,6 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      // if (!newVal) {
-      //   tiptapUtils.agent(editor => editor.commands.selectAll())
-      // }
       tiptapUtils.agent(editor => editor.setEditable(newVal))
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
@@ -257,7 +254,7 @@ export default Vue.extend({
         // width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
         // height: isVertical ? '' : 'auto',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? 1 : 0
+        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
     },
     textStyles(styles: any) {
@@ -331,16 +328,6 @@ export default Vue.extend({
         return 'none'
       }
     },
-    composingStart() {
-      this.isComposing = true
-    },
-    composingEnd() {
-      this.isComposing = false
-      const start = TextUtils.getSelection()?.start
-      TextUtils.updateSelection(start ?? TextUtils.getNullSel(), TextUtils.getNullSel())
-      const paragraphs: IParagraph[] = TextUtils.textParser(this.$refs.text as HTMLElement)
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs })
-    },
     onRightClick(event: MouseEvent) {
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
@@ -354,7 +341,8 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      !this.isCurveText && this.textSizeRefresh(this.config)
+      // !this.isCurveText && this.textSizeRefresh(this.config)
+      !this.isCurveText && TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -364,36 +352,36 @@ export default Vue.extend({
       }
     },
     textSizeRefresh(text: IText) {
-      const group = LayerUtils.getCurrLayer as IGroup
-      const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
-      const isAllHorizon = !group.layers
-        .some(l => l.type === 'text' &&
-          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+      // const group = LayerUtils.getCurrLayer as IGroup
+      // const originSize = { width: this.getLayerWidth, height: this.getLayerHeight }
+      // const isAllHorizon = !group.layers
+      //   .some(l => l.type === 'text' &&
+      //     ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
 
-      const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
-      if (this.layerSizeBuff === -1) {
-        this.layerSizeBuff = newSize.height
-      } else if (newSize.height === this.layerSizeBuff) {
-        return
-      }
+      // const newSize = TextUtils.getTextHW(text, this.config.widthLimit)
+      // if (this.layerSizeBuff === -1) {
+      //   this.layerSizeBuff = newSize.height
+      // } else if (newSize.height === this.layerSizeBuff) {
+      //   return
+      // }
 
-      if (isAllHorizon) {
-        const lowLine = this.getLayerPos.y + originSize.height
-        const diff = newSize.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
-              y: data[1] + diff
-            })
-          })
-      }
+      // if (isAllHorizon) {
+      //   const lowLine = this.getLayerPos.y + originSize.height
+      //   const diff = newSize.height - originSize.height
+      //   const targetSubLayers: Array<[number, number]> = []
+      //   group.layers
+      //     .forEach((l, idx) => {
+      //       if (l.styles.y >= lowLine) {
+      //         targetSubLayers.push([idx, l.styles.y])
+      //       }
+      //     })
+      //   targetSubLayers
+      //     .forEach(data => {
+      //       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, data[0], {
+      //         y: data[1] + diff
+      //       })
+      //     })
+      // }
       // @TODO: the vertical kind pending
 
       TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)

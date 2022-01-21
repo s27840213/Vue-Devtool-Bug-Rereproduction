@@ -8,9 +8,9 @@
     router-view
     div(class="popup-area")
       popup
-      photo-info(v-show="currSelectedPhotoInfo.userName"
-        :info="currSelectedPhotoInfo"
-        @blur.native="setCurrSelectedPhotoInfo()"
+      res-info(v-show="currSelectedResInfo.type"
+        :info="currSelectedResInfo"
+        @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
       hint
     div(class="modal-container"
@@ -40,7 +40,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
-import PhotoInfo from '@/components/modal/PhotoInfo.vue'
+import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
@@ -50,7 +50,7 @@ export default Vue.extend({
   components: {
     Popup,
     'chrome-picker': Chrome,
-    PhotoInfo,
+    ResInfo,
     ModalCard
   },
   directives: {
@@ -62,33 +62,6 @@ export default Vue.extend({
       coordinateWidth: 0,
       coordinateHeight: 0
     }
-  },
-  async created() {
-    const defaultFonts: Array<Promise<void>> = []
-
-    await fetch('https://template.vivipic.com/static/app.json')
-      .then(response => response.json())
-      .then(json => {
-        console.log('static json loaded: ', json)
-        this.$store.commit('user/SET_STATE', {
-          verUni: json.ver_uni,
-          imgSizeMap: json.image_size_map
-        })
-        const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
-        defaultFontsJson
-          .forEach(_font => {
-            const font = {
-              type: 'public',
-              face: _font.id,
-              ver: _font.ver,
-              url: ''
-            }
-            defaultFonts.push(this.addFont(font))
-            this.updateDefaultFonts({ font })
-          })
-        Promise.all(defaultFonts)
-      })
-      .catch(e => console.error(e))
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -102,7 +75,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
-      currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
+      currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen'
     }),
     currLocale(): string {
@@ -116,7 +89,7 @@ export default Vue.extend({
     }),
     ...mapMutations({
       setDropdown: 'popup/SET_STATE',
-      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
+      _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
     appStyles() {
       if (this.$route.name === 'Preview') {
@@ -139,9 +112,9 @@ export default Vue.extend({
     closeDropdown(type: string) {
       popupUtils.closePopup()
     },
-    setCurrSelectedPhotoInfo() {
+    setCurrSelectedResInfo() {
       this.$nextTick(() => {
-        this._setCurrSelectedPhotoInfo({})
+        this._setCurrSelectedResInfo({})
       })
     },
     vcoConfig(type: string) {

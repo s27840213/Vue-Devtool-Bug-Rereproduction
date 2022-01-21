@@ -75,11 +75,12 @@ class TextPropUtils {
           if (typeof subLayerIndex === 'undefined') {
             for (let i = 0; i < groupLayer.layers.length; i++) {
               if (groupLayer.layers[i].type === 'text') {
-                this.blockPropertyHandler(propName, i)
+                this.blockPropertyHandler(propName, value, i)
+                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, i)
               }
             }
           } else {
-            this.blockPropertyHandler(propName, subLayerIndex)
+            this.blockPropertyHandler(propName, value, subLayerIndex)
             TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIndex)
           }
           break
@@ -92,7 +93,7 @@ class TextPropUtils {
     if (currLayer.type === 'text') {
       switch (this.propTypeSorter(propName)) {
         case textPropType.block:
-          this.blockPropertyHandler(propName)
+          this.blockPropertyHandler(propName, value)
           break
         case textPropType.span: {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
@@ -108,46 +109,7 @@ class TextPropUtils {
     }
   }
 
-  //   blockPropertyHandler(propName: string, subLayerIdx = LayerUtils.subLayerIdx, layerIndex = LayerUtils.layerIndex) {
-  //   const handler = (() => {
-  //     const layer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex)
-  //     switch (layer.type) {
-  //       case 'tmp':
-  //       case 'group':
-  //         if (layer.type === 'tmp' || subLayerIdx === -1) {
-  //           return (styles: { [key: string]: string | number | boolean }) => {
-  //             for (let i = 0; i < (layer as ITmp).layers.length; i++) {
-  //               this.updateSelectedLayersProps(styles, i)
-  //               TextUtils.updateLayerSize((layer as IGroup).layers[i] as IText, layerIndex, i)
-  //             }
-  //           }
-  //         } else {
-  //           return (styles: { [key: string]: string | number | boolean }) => {
-  //             this.updateSelectedLayersProps(styles, subLayerIdx)
-  //             TextUtils.updateLayerSize((layer as IGroup).layers[subLayerIdx] as IText, layerIndex, subLayerIdx)
-  //           }
-  //         }
-  //       default:
-  //         return (styles: { [key: string]: string | number | boolean }) => {
-  //           LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, styles)
-  //           TextUtils.updateLayerSize(layer as IText, layerIndex)
-  //           console.warn(layerIndex)
-  //           console.log(GeneralUtils.deepCopy(layer).styles.writingMode)
-  //         }
-  //     }
-  //   })()
-
-  //   switch (propName) {
-  //     case 'font-vertical': {
-  //       const writingMode = this.getTextState.props.isVertical ? 'initial' : 'vertical-lr'
-  //       handler({ writingMode })
-  //       writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
-  //       this.updateTextPropsState({ isVertical: !this.getTextState.props.isVertical })
-  //     }
-  //   }
-  // }
-
-  blockPropertyHandler(propName: string, tmpLayerIndex?: number) {
+  blockPropertyHandler(propName: string, value?: string | number, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
@@ -157,17 +119,17 @@ class TextPropUtils {
     const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersProps
     switch (propName) {
       case 'font-vertical': {
+        const targetIsVertical = !!value
+        const targetWritingMode = targetIsVertical ? 'vertical-lr' : 'initial'
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = !config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
-        if (typeof tmpLayerIndex === 'undefined') {
-          Object.assign(config.styles, writingMode)
-          const { width, height } = TextUtils.getTextHW(config)
-          writingMode.includes('vertical') && TextShapeUtils.setTextShape('none')
+        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
+        if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
+          const { width, height } = TextUtils.getTextHW(config, config.widthLimit)
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
           // @TODO: need to reallocate position of each layer
         }
-        handler({ writingMode })
-        this.updateTextPropsState({ isVertical: !this.getTextState.props.isVertical })
+        handler({ writingMode: targetWritingMode })
+        this.updateTextPropsState({ isVertical: targetIsVertical })
       }
     }
   }
@@ -1013,7 +975,7 @@ class TextPropUtils {
     }
   }
 
-  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: string, payload: number) {
+  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number) {
     if (subLayerIndex === -1) return
 
     const primaryLayer = (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup)
@@ -1021,8 +983,9 @@ class TextPropUtils {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
       paragraphs.forEach(p => {
+        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
         p.spans.forEach(s => {
-          typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
         })
       })
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
@@ -1144,6 +1107,8 @@ class TextPropUtils {
       'decoration',
       'isVertical'
     ]
+    const subLayerIdx = LayerUtils.subLayerIdx
+    const currLayer = this.getCurrLayer
     props.forEach(k => {
       let value
       switch (k) {
@@ -1177,7 +1142,7 @@ class TextPropUtils {
           break
         }
         case 'opacity': {
-          value = (this.getCurrLayer as IText).styles.opacity
+          value = (currLayer as IText).styles.opacity
           break
         }
         case 'decoration': {
@@ -1193,15 +1158,16 @@ class TextPropUtils {
           break
         }
         case 'isVertical': {
-          if (this.currSelectedInfo.layers.length === 1 && !this.currSelectedInfo.types.has('group')) {
-            value = this.getCurrLayer.styles.writingMode.includes('vertical')
-          } else {
-            const tmpLayerGroup = this.getCurrLayer as ITmp
+          if (currLayer.type === 'text') {
+            value = currLayer.styles.writingMode.includes('vertical')
+          } else if (subLayerIdx !== -1) {
+            value = currLayer.layers[subLayerIdx].styles.writingMode.includes('vertical')
+          } else { // tmp or group w/ subLayerIdx
             value = true
-            for (let i = 0; i < this.currSelectedInfo.layers.length && value; i++) {
-              if (tmpLayerGroup.layers[i].type === 'text') {
-                const tmpLayer = tmpLayerGroup.layers[i] as IText
-                value = tmpLayer.styles.writingMode.includes('vertical')
+            for (let i = 0; i < currLayer.layers.length; i++) {
+              if (currLayer.layers[i].type === 'text') {
+                const tmpLayer = currLayer.layers[i] as IText
+                value = value && tmpLayer.styles.writingMode.includes('vertical')
               }
             }
           }

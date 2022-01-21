@@ -29,6 +29,7 @@ export interface IUserModule {
   userId: string,
   teamId: string,
   role: number,
+  roleRaw: number,
   adminMode: boolean,
   isAuthenticated: boolean,
   account: string,
@@ -57,6 +58,7 @@ const getDefaultState = (): IUserModule => ({
   userId: '',
   teamId: '',
   role: -1,
+  roleRaw: -1,
   adminMode: true,
   isAuthenticated: false,
   account: '',
@@ -169,6 +171,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getViewGuide(state): number {
     return state.viewGuide
+  },
+  getImgSizeMap(state): Array<{ [key: string]: string | number }> {
+    return state.imgSizeMap
   }
 }
 
@@ -349,21 +354,21 @@ const actions: ActionTree<IUserModule, unknown> = {
       if (flag === 0) {
         commit('SET_groupId', groupId, { root: true })
         if (!isDelete) {
-          modalUtils.setModalInfo('上傳成功', [`Group ID: ${groupId}`])
+          modalUtils.setModalInfo('上傳成功', [`Group ID: ${groupId}`], '')
           commit('SET_groupType', params.ecomm, { root: true })
         } else {
-          modalUtils.setModalInfo('刪除成功', [])
+          modalUtils.setModalInfo('刪除成功', [], '')
           commit('SET_groupId', '', { root: true })
           commit('SET_groupType', 0, { root: true })
         }
         themeUtils.fetchTemplateContent()
         console.log(`Success: ${groupId}}`)
       } else if (flag === 1) {
-        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`], '')
         commit('SET_groupId', '', { root: true })
         console.log(`Failed: ${msg}`)
       } else if (flag === 2) {
-        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
+        modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`], '')
         commit('SET_groupId', '', { root: true })
       }
     } catch (error) {
@@ -441,6 +446,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         shortName: shortName,
         userId: data.data.user_id,
         role: data.data.role,
+        roleRaw: data.data.roleRaw,
         account: data.data.account,
         upassUpdate: data.data.upass_update,
         subscribe: data.data.subscribe,
@@ -449,6 +455,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
+      process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
         i18n.locale = data.data.locale

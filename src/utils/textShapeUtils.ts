@@ -1,6 +1,6 @@
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
-import { IText } from '@/interfaces/layer'
+import { ILayer, IText } from '@/interfaces/layer'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -41,7 +41,7 @@ class Controller {
     const defaultAttrs = this.shapes[shape]
     const styles = {
       textShape: {},
-      writingMode: 'horizontal-tb'
+      writingMode: 'initial'
     } as { [key: string]: any }
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)
@@ -60,6 +60,21 @@ class Controller {
       props.widthLimit = -1
     }
     return { styles, props }
+  }
+
+  cast2number (value: string | number): number {
+    if (typeof value === 'string') {
+      return parseInt(value, 10)
+    }
+    return value
+  }
+
+  isCurvedText (styles: any): boolean {
+    return styles.textShape?.name === 'curve'
+  }
+
+  hasDifferentBend (styles: any, bendToSet: string | number): boolean {
+    return this.cast2number(styles.textShape.bend) !== this.cast2number(bendToSet)
   }
 
   setTextShape (shape: string, attrs?: any): void {
@@ -86,9 +101,6 @@ class Controller {
           })
         }
       }
-      // if (targetLayer.type !== 'text') {
-      //   TextUtils.updateGroupLayerSize(pageIndex, layerIndex)
-      // }
     } else {
       const { styles, props } = this.getTextShapeStyles(
         layers[subLayerIndex],

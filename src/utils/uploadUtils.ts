@@ -234,7 +234,7 @@ class UploadUtils {
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
                     modalUtils.setIsModalOpen(true)
-                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`])
+                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`], '')
                   }
                 })
               }
@@ -376,7 +376,7 @@ class UploadUtils {
           xhr.send(formData)
           modalUtils.setIsModalOpen(true)
           modalUtils.setIsPending(true)
-          modalUtils.setModalInfo(`${i18n.t('NN0136')}`)
+          modalUtils.setModalInfo(`${i18n.t('NN0136')}`, [], '')
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -396,10 +396,10 @@ class UploadUtils {
                         avatar: targetUrls
                       })
                       modalUtils.setIsPending(false)
-                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`)
+                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`, [], '')
                     } else {
                       console.log('Failed to upload the file')
-                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`)
+                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [], '')
                     }
                   })
                 }
@@ -569,9 +569,10 @@ class UploadUtils {
     })
   }
 
-  uploadLayer(type: string) {
+  uploadLayer(type: string, id?: string) {
+    console.log('upload layer')
     const targetBucket = type === 'shape' ? 'svg' : type
-    const designId = generalUtils.generateRandomString(20)
+    const designId = id ?? generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
     LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
@@ -589,9 +590,10 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-    Object.assign(layerInfo, { active: false })
-    this.removeComputableInfo(layerInfo)
+    // const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
+    // Object.assign(layerInfo, { active: false })
+    // this.removeComputableInfo(layerInfo)
+    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -606,13 +608,14 @@ class UploadUtils {
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
-      const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
-      targetLayer.active = false
-      targetLayer.isTyping = false
-      targetLayer.locked = false
-      targetLayer.dragging = false
-      targetLayer.editing = false
-      this.removeComputableInfo(targetLayer)
+      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
+      // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
+      // targetLayer.active = false
+      // targetLayer.isTyping = false
+      // targetLayer.locked = false
+      // targetLayer.dragging = false
+      // targetLayer.editing = false
+      // this.removeComputableInfo(targetLayer)
 
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
@@ -634,7 +637,8 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        // console.log(designId)
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
       }
     }
   }
@@ -655,13 +659,13 @@ class UploadUtils {
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
-    layerInfo.active = false
-    layerInfo.isTyping = false
-    layerInfo.locked = false
-    layerInfo.dragging = false
-    layerInfo.editing = false
-    this.removeComputableInfo(layerInfo)
+    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
+    // layerInfo.active = false
+    // layerInfo.isTyping = false
+    // layerInfo.locked = false
+    // layerInfo.dragging = false
+    // layerInfo.editing = false
+    // this.layerInfoFilter(layerInfo)
 
     const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -675,9 +679,10 @@ class UploadUtils {
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
-      const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
-      targetLayer.active = false
-      this.removeComputableInfo(targetLayer)
+      // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
+      // targetLayer.active = false
+      // this.layerInfoFilter(targetLayer)
+      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
       pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
@@ -700,6 +705,8 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
         // console.log(designId)
       }
     }
@@ -718,7 +725,7 @@ class UploadUtils {
       if (ecomm) {
         if (!pageUtils.isAllPageSizeEqual()) {
           modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'])
+          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'], '')
           return
         }
       }
@@ -796,11 +803,11 @@ class UploadUtils {
 
     modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
-    modalUtils.setModalInfo('上傳中')
+    modalUtils.setModalInfo('上傳中', [], '')
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
+      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
     }
   }
 
@@ -842,14 +849,14 @@ class UploadUtils {
     xhr.send(formData)
     modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
-    modalUtils.setModalInfo('更新模板中')
+    modalUtils.setModalInfo('更新模板中', [], '')
     xhr.onload = () => {
       modalUtils.setIsPending(false)
       const status = xhr.status
       if (status >= 200 && status < 300) {
-        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`], '')
       } else if (status >= 400 && status < 500) {
-        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
+        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'], '')
         navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
       }
     }
@@ -1292,7 +1299,7 @@ class UploadUtils {
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
       // ref: uploadUtils.ts:L466
-      const pagesJSON = (json || store.getters.getPages).map((page: IPage) => {
+      const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
         const newPage = this.default(generalUtils.deepCopy(page)) as IPage
         for (const [i, layer] of newPage.layers.entries()) {
           if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {

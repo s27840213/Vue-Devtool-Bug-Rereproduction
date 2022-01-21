@@ -222,6 +222,40 @@ export default Vue.extend({
       mouseInTemplate: ''
     }
   },
+  metaInfo(): any {
+    const meta = [
+      {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      },
+      {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      },
+      {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      },
+      {
+        property: 'og:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'og:description'
+      },
+      {
+        property: 'og:url',
+        content: `${this.$t('OG0006')}`,
+        vmid: 'og:url'
+      }
+    ]
+    const title = `${this.$t('SE0001')}`
+    return {
+      title,
+      meta
+    }
+  },
   mounted() {
     const urlParams = new URLSearchParams(window.location.search)
     const q = urlParams.get('q')
@@ -502,7 +536,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-html, body {
+html,
+body {
   overflow: hidden;
 }
 </style>

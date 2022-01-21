@@ -7,20 +7,23 @@
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         @click.native="openSliderPopup()"
-        v-hint="`${$t('NN0030')}`")
+        v-tooltip="$hintConfig(`${$t('NN0030')}`)"
+      )
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'active': backgroundLocked }"
         :iconName="backgroundLocked ? 'unlock' : 'lock'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
         @click.native="handleLockBackground"
-        v-hint="`${$t('NN0143')}`")
+        v-tooltip="$hintConfig(backgroundLocked ? `${$t('NN0382')}`: `${$t('NN0143')}`)"
+      )
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         iconName="trash" :iconWidth="'20px'"
         @click.native="handleDeleteBackground"
-        v-hint="`${$t('NN0034')}`")
+        v-tooltip="$hintConfig(`${$t('NN0034')}`)"
+      )
     div(class="mb-10")
       btn(class="full-width"
         :class="backgroundImgControl ? 'active' : ''"

@@ -12,11 +12,34 @@ import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
 import hintUtils from './utils/hintUtils'
 import VueMeta from 'vue-meta'
+import 'floating-vue/dist/style.css'
+import FloatingVue from 'floating-vue'
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
+Vue.use(FloatingVue, {
+  themes: {
+    hint: {
+      $extend: 'tooltip',
+      $resetCss: true
+    }
+  }
+})
+
+Vue.prototype.$hintConfig = (content: string, placement: string, delay?: { show: number, hide: number }) => {
+  return {
+    content,
+    theme: 'hint',
+    placement: placement ?? 'bottom',
+    delay: delay ?? {
+      show: 200,
+      hide: 0
+    }
+  }
+}
+
 Vue.component('RecycleScroller', RecycleScroller)
 
 Vue.directive('ratio-change', {
@@ -95,7 +118,9 @@ new Vue({
   store,
   i18n,
   mounted() {
-    document.dispatchEvent(new Event('render-event'))
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+    }
   },
   render: (h) => h(App)
 }).$mount('#app')

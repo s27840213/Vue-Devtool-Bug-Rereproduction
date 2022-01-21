@@ -18,6 +18,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
+import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -26,7 +27,8 @@ const MOBILE_ROUTES = [
   'Settings',
   'SignUp',
   'Login',
-  'MobileWarning'
+  'MobileWarning',
+  'Preview'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -168,16 +170,22 @@ const router = new VueRouter({
         }
         logUtils.setLog('App Start')
         let locale = localStorage.getItem('locale')
+        // if local storage is empty
         if (locale === '' || !locale) {
           locale = to.params.locale
-        }
-        if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+          // without locale param, determine the locale with browser language
+          if (locale === '' || !locale) {
+            i18n.locale = localeUtils.getBrowserLang()
+          } else {
+            i18n.locale = locale
+          }
+        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+          // if local storage has been set
           i18n.locale = locale
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED && !(window as any).__PRERENDER_INJECTED.isPrerender) {
-          console.log('not in prerender mode')
+        if ((window as any).__PRERENDER_INJECTED === undefined) {
           router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
         }
       },
@@ -187,8 +195,32 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  document.title = to.meta.title || i18n.t('SE0001')
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response before navigate to these pages
+  if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
+    const response = await fetch('https://template.vivipic.com/static/app.json')
+    const json = await response.json()
+
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('user/SET_STATE', {
+      verUni: json.ver_uni,
+      imgSizeMap: json.image_size_map
+    })
+    const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    defaultFontsJson
+      .forEach(_font => {
+        const font = {
+          type: 'public',
+          face: _font.id,
+          ver: _font.ver,
+          url: ''
+        }
+        store.dispatch('text/addFont', font)
+        store.commit('text/UPDATE_DEFAULT_FONT', { font })
+      })
+  }
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
@@ -215,6 +247,7 @@ router.beforeEach(async (to, from, next) => {
     }
     logUtils.setLog('=> as non-mobile')
   }
+
   if (to.name === 'Settings' || to.name === 'MyDesign') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
@@ -242,20 +275,5 @@ router.beforeEach(async (to, from, next) => {
     next()
   }
 })
-
-// router.beforeEach((to, from, next) => {
-//   // set the current language for vuex-i18n. note that translation data
-//   // for the language might need to be loaded first
-//   const locale = to.params.locale
-//   if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
-//     i18n.locale = mappingUtils.mappingLocales(locale)
-//     next({
-//       params: {
-//         locale
-//       }
-//     })
-//   }
-//   next()
-// })
 
 export default router

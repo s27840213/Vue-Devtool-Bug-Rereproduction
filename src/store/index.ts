@@ -75,7 +75,7 @@ const getDefaultState = (): IEditorState => ({
     type: ''
   },
   isColorPickerOpened: false,
-  currSelectedPhotoInfo: {},
+  currSelectedResInfo: {},
   asset: {},
   textInfo: {
     heading: [],
@@ -140,7 +140,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
       const page = state.pages[pageIndex]
-      return page?.layers[layerIndex >= 0 ? layerIndex : page.layers.length + layerIndex] ?? {}
+      return page?.layers[layerIndex] ?? {}
     }
   },
   getLayers(state: IEditorState) {
@@ -202,8 +202,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getIsColorPickerOpened(state: IEditorState) {
     return state.isColorPickerOpened
   },
-  getCurrSelectedPhotoInfo(state: IEditorState) {
-    return state.currSelectedPhotoInfo
+  getCurrSelectedResInfo(state: IEditorState) {
+    return state.currSelectedResInfo
   },
   getAsset(state: IEditorState) {
     return (id: string) => state.asset[id]
@@ -576,8 +576,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
   },
-  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
-    state.currSelectedPhotoInfo = data
+  SET_currSelectedResInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
+    state.currSelectedResInfo = data
   },
   SET_subLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
