@@ -10,7 +10,8 @@
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shadow-${icon}`])"
+        )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -52,7 +53,8 @@
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shadow-${icon}`])"
+        )
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
         class="w-full text-effect-setting__form")
         div(v-for="field in shadowFields"
@@ -95,7 +97,8 @@
           :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shape-${icon}`]")
+          v-tooltip="$hintConfig(hintMap[`shape-${icon}`])"
+        )
       div(class="w-full text-effect-setting__form")
         div(v-for="field in shapeFields"
           :key="field"

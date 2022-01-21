@@ -5,7 +5,9 @@
         :type="'primary-mid'"
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
-      div(class="border-gray-4 p-5 btn-opacity"  v-hint="$t('NN0030')")
+      div(class="border-gray-4 p-5 btn-opacity"
+        v-tooltip="$hintConfig(`${$t('NN0030')}`)"
+      )
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
@@ -14,22 +16,26 @@
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="openOrderPopup()"
-        v-hint="$t('NN0031')")
+        v-tooltip="$hintConfig(`${$t('NN0031')}`)"
+      )
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')"
-        v-hint="$t('NN0032')")
+        v-tooltip="$hintConfig(`${$t('NN0032')}`)"
+      )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
-        v-hint="$t('NN0033')")
+        v-tooltip="$hintConfig(isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}` )"
+      )
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
-        v-hint="$t('NN0034')")
+        v-tooltip="$hintConfig(`${$t('NN0034')}`)"
+      )
       //- svg-icon(:class="{'pointer': !isLocked}"
       //-   iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
       //-   @click.native=""

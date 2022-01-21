@@ -19,7 +19,8 @@
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="openLineTemplatePopup()"
-          v-hint="`${$t('NN0138')}`")
+          v-tooltip="$hintConfig(`${$t('NN0138')}`)"
+        )
         //- svg-icon(class="pointer mr-5"
         //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
         //-   @click.native="")
@@ -29,16 +30,19 @@
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="addPage()"
-          v-hint="`${$t('NN0139')}`")
+          v-tooltip="$hintConfig(`${$t('NN0139')}`)"
+        )
         svg-icon(class="pointer"
           :class="[{'mr-10': getPageCount > 1}]"
           :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="duplicatePage()"
-          v-hint="`${$t('NN0140')}`")
+          v-tooltip="$hintConfig(`${$t('NN0140')}`)"
+        )
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
           @click.native="deletePage()"
-          v-hint="`${$t('NN0141')}`")
+          v-tooltip="$hintConfig(`${$t('NN0141')}`)"
+        )
     div(v-if="isDetailPage" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
