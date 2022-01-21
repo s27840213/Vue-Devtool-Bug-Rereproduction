@@ -62,30 +62,13 @@
         div(class="home-content__mydesign")
           scroll-list(:list="allDesigns" type='design'
             :isLoading="isDesignsLoading")
-      div(class="home-content-title label-lg")
-        div
-          span(v-for="tag in tags"
-            class="pointer mr-10"
-            @click="newDesign(tag)") {{'#' + tag}}
-        span(class="pointer body-1 more"
-          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="tagTemplateList" type='template'
-          :isLoading="tagTemplateList.length === 0")
-      div(class="home-content-title label-lg")
-        span {{$t('NN0278')}}
-        span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('popular')") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="popularTemplateList" type='template'
-          :isLoading="popularTemplateList.length === 0")
-      div(class="home-content-title label-lg")
-        span {{$t('NN0279')}}
-        span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('recent')") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="latestTemplateList" type='template'
-          :isLoading="latestTemplateList.length === 0")
+      template(v-for="list in templates")
+        div(class="home-content-title label-lg")
+          span {{list.title}}
+          span(class="pointer body-1"
+            @click="goToTemplateCenterTheme(list.theme)") {{$t('NN0082')}}
+        div(class="home-content__template")
+          template-list(:theme="list.theme" type='template')
       nu-footer(class="mt-50")
       div(v-if="showSizePopup"
         class="home__size")
@@ -99,11 +82,13 @@ import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
+import TemplateList from '@/components/homepage/TemplateList.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
 import localeUtils from '@/utils/localeUtils'
+import { ITemplate } from '@/interfaces/template'
 
 export default Vue.extend({
   name: 'Home',
@@ -111,6 +96,7 @@ export default Vue.extend({
     NuHeader,
     NuFooter,
     ScrollList,
+    TemplateList,
     PopupSize
   },
   data() {
@@ -119,6 +105,17 @@ export default Vue.extend({
       showSizePopup: false,
       tagString: '',
       tags: [] as string[],
+      templates1: [] as ITemplate[],
+      templates: [
+        // {
+        //   title: i18n.t('NN0368'),
+        //   theme: '1,2'
+        // },
+        {
+          title: i18n.t('NN0026'),
+          theme: '3'
+        }
+      ],
       tagTemplateList: [],
       popularTemplateList: [],
       latestTemplateList: []
@@ -183,33 +180,6 @@ export default Vue.extend({
     await themeUtils.checkThemeState().then(() => {
       this.themeList = themeUtils.themes
     })
-    const squareTheme = [] as number[]
-    this.themeList.forEach((theme: Itheme) => {
-      if (theme.width / theme.height === 1) {
-        squareTheme.push(theme.id)
-      }
-    })
-    const theme = squareTheme.join(',')
-
-    if (this.currLocale === 'tw') {
-      this.tagString = '免運,新品,內容行銷,聖誕節'
-    } else if (this.currLocale === 'us') {
-      this.tagString = 'Free Shipping,New Arrivals,Content Marketing,Christmas Day'
-    } else {
-      this.tagString = '送料無料,新商品,コンテンツマーケティング,クリスマス'
-    }
-    let keyword = this.tagString.replace(/,/gi, ' ')
-    this.tags = this.tagString.split(',')
-    const tagTemplate = await this.getTagContent({ keyword, theme })
-    this.tagTemplateList = tagTemplate.data.content[0].list
-
-    keyword = 'group::0;;order_by::popular'
-    const popularTemplate = await this.getTagContent({ keyword, theme })
-    this.popularTemplateList = popularTemplate.data.content[0].list
-
-    keyword = 'group::0;;order_by::time'
-    const latestTemplate = await this.getTagContent({ keyword, theme })
-    this.latestTemplateList = latestTemplate.data.content[0].list
   },
   methods: {
     ...mapActions({
@@ -229,6 +199,9 @@ export default Vue.extend({
     },
     goToTemplateCenterSortBy(sortBy = '') {
       this.$router.push({ name: 'TemplateCenter', query: { sort: sortBy } })
+    },
+    goToTemplateCenterTheme(themes = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { themes: themes } })
     },
     newDesign(search = '') {
       if (search) {
