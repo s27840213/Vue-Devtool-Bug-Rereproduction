@@ -32,6 +32,9 @@
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
     div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    div(v-if="keyword && !pending && showTemplateId"
+      class="text-white text-left pb-10")
+      span {{sum}} items in total
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -105,7 +108,8 @@ export default Vue.extend({
         'host',
         'preview',
         'keyword',
-        'theme'
+        'theme',
+        'sum'
       ]
     ),
     ...mapState('user', ['userId', 'role', 'adminMode']),
@@ -204,7 +208,8 @@ export default Vue.extend({
         'getContent',
         'getTagContent',
         'getCategories',
-        'getMoreContent'
+        'getMoreContent',
+        'getSum'
       ]
     ),
     ...mapMutations('templates', {
@@ -213,7 +218,9 @@ export default Vue.extend({
     async handleSearch(keyword?: string) {
       this.resetContent()
       if (keyword) {
+        console.log('do')
         this.getTagContent({ keyword })
+        this.getSum({ keyword })
       } else {
         await this.getCategories()
         this.getContent()
