@@ -7,13 +7,14 @@
         :iconWidth="'20px'"
         :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
         @click.native="undo"
-        v-hint="`${$t('NN0119')}`")
+        v-tooltip="$hintConfig(`${$t('NN0119')}`)"
+      )
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
         :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
         @click.native="redo"
-        v-hint="`${$t('NN0120')}`")
+        v-tooltip="$hintConfig(`${$t('NN0120')}`)")
       download-btn
       btn(:hasIcon="true"
         :iconName="'menu'"

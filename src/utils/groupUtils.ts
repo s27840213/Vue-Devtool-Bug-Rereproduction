@@ -126,7 +126,6 @@ class GroupUtils {
         layer.styles.zindex = targetLayer.styles.zindex + index
         layer.active = false
       })
-      const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         type: 'tmp',
         active: true
@@ -137,7 +136,7 @@ class GroupUtils {
       const tmpPageIndex = this.currSelectedInfo.pageIndex
       const tmpIndex = this.currSelectedInfo.index
       this.reset()
-      this.set(tmpPageIndex, tmpIndex, tmpLayer.layers)
+      this.set(tmpPageIndex, tmpIndex, targetLayer.layers)
     }
   }
 
