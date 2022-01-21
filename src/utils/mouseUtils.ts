@@ -54,7 +54,7 @@ class MouseUtils {
         // LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
         //   imgX, imgY, imgWidth, imgHeight
         // })
-        // StepsUtils.record()
+        // StepsUtils.record()~
       }
     }
   }
@@ -92,7 +92,7 @@ class MouseUtils {
       locked: false,
       moved: false,
       dragging: false,
-      designId: '',
+      designId: data.designId || '',
       styles: {
         x: x,
         y: y,
@@ -106,8 +106,8 @@ class MouseUtils {
         initHeight: data.styles.initHeight || data.styles.height,
         zindex: -1,
         opacity: 100,
-        horizontalFlip: data.styles.horizontalFlip,
-        verticalFlip: data.styles.verticalFlip
+        horizontalFlip: data.styles.horizontalFlip || false,
+        verticalFlip: data.styles.verticalFlip || false
       }
     }
 
@@ -122,7 +122,9 @@ class MouseUtils {
         }
       }
       case 'shape': {
-        break
+        console.log(data.category)
+        Object.assign(layerConfig, { category: data.category })
+        return LayerFactary.newShape(layerConfig)
       }
       default: {
         AssetUtils.addAsset(data, { pageIndex, styles: { x, y } })

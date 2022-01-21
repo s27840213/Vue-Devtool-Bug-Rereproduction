@@ -80,7 +80,7 @@ class ResizeUtils {
           scale = layer.styles.scale
         }
         if (layer.category === 'E') {
-          scale = layer.styles.scale
+          scale = 1
           const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, layer.size ?? [], layer.shapeType ?? ''), layer.shapeType ?? '')
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])
           controlUtils.updateShapeCorRad(pageIndex, layerIndex, layer.size ?? [], corRad)

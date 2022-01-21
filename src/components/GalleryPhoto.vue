@@ -29,7 +29,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
-import AssetUtils from '@/utils/assetUtils'
+import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
@@ -118,7 +118,7 @@ export default Vue.extend({
         e.preventDefault()
       } else {
         const pageSize = this.$store.getters.getPageSize(layerUtils.pageIndex)
-        const resizeRatio = 0.8
+        const resizeRatio = RESIZE_RATIO_IMAGE
         const pageAspectRatio = pageSize.width / pageSize.height
         const photoAspectRatio = photo.width / photo.height
         const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio

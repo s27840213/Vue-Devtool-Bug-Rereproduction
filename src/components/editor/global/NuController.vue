@@ -214,7 +214,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log(this.getLayerType)
     this.setLastSelectedLayerIndex(this.layerIndex)
     if (this.config.active) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
@@ -223,10 +222,6 @@ export default Vue.extend({
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
-  },
-  updated() {
-    // console.log(this.config)
-    // console.log(this.layerIndex)
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -909,7 +904,7 @@ export default Vue.extend({
         }
         case 'shape':
           if (this.config.category === 'E') {
-            scale = this.getLayerScale
+            scale = 1
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
             const corRad = ControlUtils.getCorRadValue([width, height], this.initCorRadPercentage, this.config.shapeType)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
@@ -1127,7 +1122,6 @@ export default Vue.extend({
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
-
           if (this.config.category === 'E') {
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
           }

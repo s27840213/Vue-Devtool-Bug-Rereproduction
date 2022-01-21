@@ -1,18 +1,36 @@
 import { IImage, IShape } from '@/interfaces/layer'
 import store from '@/store'
+import generalUtils from './generalUtils'
+import layerUtils from './layerUtils'
 
 class DragUtils {
   dragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
-    const rect = (e.target as Element).getBoundingClientRect()
+    let { offsetX = 10, offsetY = 15, width, height } = attrs
     const scaleRatio = store.getters.getPageScaleRatio
-    const { offsetX, offsetY, width, height } = attrs
+    const { width: rowWidth, height: rowHeight, x, y } = (e.target as Element).getBoundingClientRect()
+
+    const iconImg = new Image()
+    iconImg.src = (e.target as HTMLImageElement).src
+    let { width: iconWidth, height: iconHeight } = iconImg
+    iconWidth > iconHeight ? ((iconHeight *= rowWidth / iconWidth) && (iconWidth = rowWidth))
+      : ((iconWidth *= rowHeight / iconHeight) && (iconHeight = rowHeight))
+
+    if (typeof width === 'undefined' || typeof height === 'undefined') {
+      const currentPage = store.getters.getPage(layerUtils.pageIndex)
+      const pageAspectRatio = currentPage.width / currentPage.height
+      const aspectRatio = iconWidth / iconHeight
+      const resizeRatio = attrs.resizeRatio && typeof attrs.resizeRatio === 'number' ? attrs.resizeRatio : 0.5
+      width = aspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * aspectRatio
+      height = aspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / aspectRatio : currentPage.height * resizeRatio
+    }
+
     const data = {
       type,
       styles: {
-        x: (e.clientX - rect.x) * (scaleRatio / 100),
-        y: (e.clientY - rect.y) * (scaleRatio / 100),
-        width: width,
-        height: height
+        x: (e.clientX - x) * (scaleRatio / 100),
+        y: (e.clientY - y) * (scaleRatio / 100),
+        width,
+        height
       },
       ...payload
     }
@@ -20,9 +38,10 @@ class DragUtils {
     dataTransfer.dropEffect = 'move'
     dataTransfer.effectAllowed = 'move'
     dataTransfer.setData('data', JSON.stringify(data))
+    console.log(payload)
 
     const dragImage = new Image()
-    dragImage.src = (e.target as HTMLImageElement).src
+    dragImage.src = iconImg.src
     dragImage.setAttribute('style',
       'width: 100%;' +
       'height: 100%;' +
@@ -30,12 +49,11 @@ class DragUtils {
       `transform: translate(${offsetX}px, ${offsetY}px);`
     )
 
-    const { width: rectWidth, height: rectHeight } = (e.target as HTMLElement).getBoundingClientRect()
     const wrapper = document.createElement('div')
     wrapper.appendChild(dragImage)
     wrapper.setAttribute('style',
-      `width: ${Math.floor(rectWidth)}px;` +
-      `height: ${Math.floor(rectHeight)}px;` +
+      `width: ${Math.floor(iconWidth)}px;` +
+      `height: ${Math.floor(iconHeight)}px;` +
       'position: absolute;'
     )
     document.body.appendChild(wrapper)
