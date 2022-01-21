@@ -379,7 +379,8 @@ class GroupUtils {
         layer.styles.imgX *= tmpLayer.styles.scale
         layer.styles.imgY *= tmpLayer.styles.scale
 
-        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        const ratio = tmpLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -402,7 +403,8 @@ class GroupUtils {
           layer.styles.initHeight = realHeight
           layer.styles.scale = 1
 
-          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const ratio = tmpLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -417,7 +419,8 @@ class GroupUtils {
           layer.size = [Math.round(lineWidth * tmpLayer.styles.scale), corRad * tmpLayer.styles.scale]
           layer.styles.scale = 1
 
-          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const ratio = tmpLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -443,7 +446,8 @@ class GroupUtils {
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
-        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        const ratio = tmpLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -545,7 +549,8 @@ class GroupUtils {
         layer.styles.imgY *= groupLayer.styles.scale
 
         layer.clipPath = `M0,0h${width}v${height}h${-width}z`
-        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const ratio = groupLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -568,7 +573,8 @@ class GroupUtils {
           layer.styles.initHeight = realHeight
           layer.styles.scale = 1
 
-          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const ratio = groupLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -583,7 +589,8 @@ class GroupUtils {
           layer.size = [Math.round(lineWidth * groupLayer.styles.scale), corRad * groupLayer.styles.scale]
           layer.styles.scale = 1
 
-          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const ratio = groupLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -601,7 +608,8 @@ class GroupUtils {
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
-        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const ratio = groupLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
