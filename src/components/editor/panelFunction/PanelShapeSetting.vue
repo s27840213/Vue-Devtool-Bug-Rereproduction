@@ -382,7 +382,7 @@ export default Vue.extend({
     getColors(): string[] {
       const layer = LayerUtils.getCurrLayer
       if (layer.type === 'shape') {
-        return (layer as IShape).color
+        return (layer as IShape).color ?? []
       }
       if (layer.type === 'group' || layer.type === 'tmp') {
         const subSelectedIdx = (layer as IGroup).layers
