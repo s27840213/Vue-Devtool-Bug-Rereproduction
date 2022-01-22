@@ -293,10 +293,14 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
     text-align: left;
-    padding: 38px 10vw 6px 10vw;
-    @include layout-mobile {
-      font-size: 18px;
-      padding: 25px 5vw 20px 5vw;
+    @include text-H5;
+    padding: 38px 150px 6px 150px;
+    @media screen and (max-width: 1440px) {
+      padding: 38px 75px 6px 75px;
+    }
+    @media screen and (max-width: 768px) {
+      @include text-H6;
+      padding: 38px 3% 6px 3%;
     }
     .more {
       white-space: nowrap;
@@ -380,9 +384,12 @@ export default Vue.extend({
   &__theme,
   &__mydesign,
   &__template {
-    padding: 0 10%;
-    @include layout-mobile {
-      padding: 0 5%;
+    padding: 0 150px;
+    @media screen and (max-width: 1440px) {
+      padding: 0 75px;
+    }
+    @media screen and (max-width: 768px) {
+      padding: 0 3%;
     }
   }
   &__plaque {
