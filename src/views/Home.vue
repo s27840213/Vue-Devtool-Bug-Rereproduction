@@ -348,7 +348,7 @@ export default Vue.extend({
       @include body-LG;
       @media screen and (max-width: 768px) {
         @include body-SM;
-        max-width: 90%;
+        max-width: 75%;
       }
     }
     &-mobile-subtitle {
@@ -367,13 +367,18 @@ export default Vue.extend({
       }
     }
     &-search {
+      display: flex;
+      justify-content: center;
       width: 380px;
       height: 40px;
       background-color: white;
       border-radius: 3px;
       border: 1px solid setColor(gray-4);
       box-sizing: border-box;
-      margin-top: 20px;
+      margin: 20px auto;
+      @media screen and (max-width: 1440px) {
+        max-width: 75%;
+      }
     }
     &-img {
       width: 80%;
