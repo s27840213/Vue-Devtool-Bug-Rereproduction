@@ -89,6 +89,7 @@ import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -156,7 +157,6 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
-      pageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
@@ -169,7 +169,7 @@ export default Vue.extend({
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
     scale(): number {
-      const layer = this.getLayer(this.pageIndex, this.layerIndex)
+      const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
       if (layer && layer.layers) {
         const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
           if (c.type === 'text') { p.add(c.styles.scale) }
@@ -273,10 +273,10 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+      LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
       tiptapUtils.applySpanStyle('size', value)
       tiptapUtils.agent(editor => {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+        LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
         StepsUtils.record()
       })
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -459,7 +459,7 @@ export default Vue.extend({
         clearInterval(interval)
         tiptapUtils.agent(editor => {
           if (!editor.state.selection.empty) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
           }
         })
@@ -484,12 +484,12 @@ export default Vue.extend({
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
-        LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+        LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
           tiptapUtils.applySpanStyle('size', value)
           tiptapUtils.agent(editor => {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
           })
           TextPropUtils.updateTextPropsState({ fontSize: value })
@@ -548,7 +548,7 @@ export default Vue.extend({
         if (!this.isGroup) {
           if (this.currSelectedInfo.layers.length === 1) {
             this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: this.pageIndex,
+              pageIndex: pageUtils.currFocusPageIndex,
               layerIndex: this.currSelectedIndex,
               styles: {
                 opacity: parseInt(value)

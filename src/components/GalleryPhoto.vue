@@ -63,7 +63,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',

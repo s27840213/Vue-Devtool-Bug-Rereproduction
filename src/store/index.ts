@@ -168,6 +168,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   getCurrActivePageIndex(state: IEditorState): number {
     return state.currActivePageIndex
   },
+  getCurrFocusPageIndex(state: IEditorState): number {
+    const { pageIndex } = state.currSelectedInfo
+    return pageIndex >= 0 ? pageIndex
+      : state.currActivePageIndex >= 0
+        ? state.currActivePageIndex : state.middlemostPageIndex
+  },
   getLastSelectedLayerIndex(state: IEditorState): number {
     return state.lastSelectedLayerIndex
   },
@@ -511,7 +517,6 @@ const mutations: MutationTree<IEditorState> = {
         layer.styles[k] = v
       })
     })
-    // state.currSelectedInfo.layers[0].layers = (state.pages[state.middlemostPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
   },
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number }, layerIndex?: number }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {

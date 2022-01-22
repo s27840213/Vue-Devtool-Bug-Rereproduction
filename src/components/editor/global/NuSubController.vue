@@ -101,7 +101,6 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType'

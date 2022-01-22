@@ -14,10 +14,11 @@ import Vue from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
+import pageUtils from './pageUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
-  get pageIndex(): number { return store.getters.getMiddlemostPageIndex }
+  get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
@@ -189,7 +190,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean | string}) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | boolean | string }) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,

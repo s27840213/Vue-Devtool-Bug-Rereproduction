@@ -12,6 +12,7 @@ import ShapeUtils from './shapeUtils'
 import ImageUtils from './imageUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
+import pageUtils from './pageUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -58,7 +59,6 @@ class GroupUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
-  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
@@ -233,7 +233,7 @@ class GroupUtils {
 
   selectAll() {
     this.deselect()
-    this.select(store.getters.getMiddlemostPageIndex, [...Array(store.getters.getLayersNum(store.getters.getMiddlemostPageIndex)).keys()])
+    this.select(pageUtils.currFocusPageIndex, [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()])
   }
 
   deselect() {

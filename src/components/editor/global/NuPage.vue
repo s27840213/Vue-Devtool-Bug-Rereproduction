@@ -259,7 +259,6 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
@@ -367,7 +366,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
@@ -617,7 +615,6 @@ export default Vue.extend({
     },
     pageNameFocused() {
       ShortcutUtils.deselect()
-      this.setMiddlemostPageIndex(this.pageIndex)
     },
     stepRecord() {
       StepsUtils.record()
