@@ -81,11 +81,29 @@ export default Vue.extend({
       return LayerUtils.getTmpLayer().locked
     },
     isCopyFormatDisabled(): boolean {
-      if (this.layerNum === 1) {
+      if (this.layerNum === 1) { // not tmp
         const types = this.currSelectedInfo.types
+        const currLayer = LayerUtils.getCurrLayer
         if (types.has('group')) {
-          if (this.hasSubSelectedLayer && ['text', 'image'].includes(this.subLayerType)) {
+          if (this.subActiveLayerIndex !== -1) {
+            if (['text', 'image'].includes(this.subActiveLayerType)) {
+              return this.isLocked
+            }
+            if (this.subActiveLayerType === 'frame') {
+              const frame = this.subActiveLayer as IFrame
+              if (frame.clips.length === 1) {
+                return this.isLocked
+              }
+            }
+          }
+        } else if (types.has('frame')) {
+          const frame = currLayer as IFrame
+          if (frame.clips.length === 1) {
             return this.isLocked
+          } else {
+            if (this.subActiveLayerIndex !== -1 && frame.clips[this.subActiveLayerIndex].type === 'image') {
+              return this.isLocked
+            }
           }
         } else {
           if (types.has('text') || types.has('image')) {
@@ -106,6 +124,22 @@ export default Vue.extend({
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
+    },
+    subActiveLayerIndex(): number {
+      return LayerUtils.subLayerIdx
+    },
+    subActiveLayer(): any {
+      if (this.subActiveLayerIndex !== -1) {
+        return (LayerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
+      }
+      return undefined
+    },
+    subActiveLayerType(): string {
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer.type === 'group' && this.subActiveLayerIndex !== -1) {
+        return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
+      }
+      return ''
     },
     primaryLayerIndex(): number {
       if (LayerUtils.getCurrLayer.type === 'group') {
@@ -210,13 +244,16 @@ export default Vue.extend({
       const types = this.currSelectedInfo.types
       const layer = this.currSelectedInfo.layers[0]
       if (types.has('group')) {
-        const type = this.subLayerType
-        const subLayer = layer.layers[LayerUtils.subLayerIdx]
+        const type = this.subActiveLayerType
+        const subLayer = this.subActiveLayer
         if (type === 'text') {
           formatUtils.copyTextFormat(subLayer)
         }
         if (type === 'image') {
           formatUtils.copyImageFormat(subLayer)
+        }
+        if (type === 'frame') {
+          formatUtils.copyImageFormat(subLayer.clips[0])
         }
       } else {
         if (types.has('text')) {
@@ -224,6 +261,9 @@ export default Vue.extend({
         }
         if (types.has('image')) {
           formatUtils.copyImageFormat(layer)
+        }
+        if (types.has('frame')) {
+          formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
         }
       }
     }

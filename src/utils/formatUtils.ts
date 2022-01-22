@@ -51,6 +51,7 @@ class FormatUtils {
   }
 
   saveFormat(format: IFormat) {
+    console.log(format)
     store.commit('SET_hasCopiedFormat', true)
     this.copiedFormat = format
   }
