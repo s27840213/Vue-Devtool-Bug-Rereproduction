@@ -2,43 +2,28 @@
   div(class="home")
     nu-header
     div(class="home-content")
-      template(v-if="isMobile")
-        div(class="home-content__top")
-          img(class="home-content__top-img"
-            style="height: 150px;")
-          div(class="home-content__top-title")
-            i18n(path="NN0148" tag="span")
-              template(#newline)
-                br
-          div(class="home-content__top-mobile-subtitle")
-            div
-              i18n(path="NN0235" tag="span")
-                template(#newline)
-                  br
-            div(class="pt-30") *{{$t('NN0236')}}
-      template(v-else)
-        div(class="home-content__top")
-          img(class="home-content__top-bg"
-            :style="`height: ${isLogin ? '420px;' : '700px;'}`"
-            :src="require('@/assets/img/svg/homepage/top-bg.svg')")
-          div(v-if="!isLogin"
-            class="home-content__top-white")
-          div(class="home-content__top-region")
-            i18n(path="NN0148" tag="span"
-              class="home-content__top-title")
-              template(#newline)
-                br
-            div(class="home-content__top-subtitle")
-              span {{$t('NN0237')}}
-            div(v-if="isLogin")
-              search-bar(class="home-content__top-search"
-                :placeholder="$t('NN0037')"
-                @search="handleSearch")
-            template(v-else)
-              div(class="home-content__top-btn"
-                @click="newDesign()") {{$t('NN0274')}}
-              img(class="home-content__top-img"
-                :src="require('@/assets/img/svg/homepage/header_img_us.png')")
+      div(class="home-content__top")
+        img(class="home-content__top-bg"
+          :style="`height: ${isLogin ? '420px;' : '700px;'}`"
+          :src="require('@/assets/img/svg/homepage/top-bg.svg')")
+        div(v-if="!isLogin"
+          class="home-content__top-white")
+        div(class="home-content__top-region")
+          i18n(path="NN0148" tag="span"
+            class="home-content__top-title")
+            template(#newline)
+              br
+          div(class="home-content__top-subtitle")
+            span {{$t('NN0237')}}
+          div(v-if="isLogin")
+            search-bar(class="home-content__top-search"
+              :placeholder="$t('NN0037')"
+              @search="handleSearch")
+          template(v-else)
+            div(class="home-content__top-btn"
+              @click="newDesign()") {{$t('NN0274')}}
+            img(class="home-content__top-img"
+              :src="require('@/assets/img/svg/homepage/header_img_us.png')")
       div(class="home-content-title label-lg"
         :class="!isLogin ? 'mt-100' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
@@ -334,6 +319,7 @@ export default Vue.extend({
     }
     &-title {
       color: setColor(nav);
+      padding: 0 5%;
       @include text-H2;
       @media screen and (max-width: 1440px) {
         @include text-H3;
