@@ -88,9 +88,6 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   computed: {
-    ...mapState('page', [
-      'focusPageIndex'
-    ]),
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       getPage: 'getPage',
@@ -116,7 +113,7 @@ export default Vue.extend({
     },
     styles2() {
       if (this.type === 'panel' &&
-        this.isDragged && this.index !== this.middlemostPageIndex) {
+        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
         return {
           'z-index': '-1'
         }
@@ -163,7 +160,7 @@ export default Vue.extend({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(this.middlemostPageIndex)
+        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
