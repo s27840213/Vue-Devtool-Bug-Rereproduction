@@ -1,6 +1,6 @@
 import store from '@/store'
 import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
+import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import generalUtils from './generalUtils'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
@@ -60,7 +60,6 @@ class FormatUtils {
   }
 
   saveFormat(format: IFormat) {
-    console.log(format)
     store.commit('SET_hasCopiedFormat', true)
     this.copiedFormat = format
   }
