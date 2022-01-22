@@ -23,6 +23,7 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -100,6 +101,10 @@ export default Vue.extend({
     styles() {
       const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
+      console.log(this.config.styles.imgWidth * this.getLayerScale)
+      console.log(this.config.styles.imgWidth)
+      console.log(this.getLayerScale)
+      console.log(generalUtils.deepCopy(this.config))
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,

@@ -161,21 +161,28 @@ class LayerUtils {
     })
   }
 
-  updateLayerStyles(pageIndex: number, layerIndex: number, styles: Partial<IImageStyle> | { [index: string]: number | string | boolean }) {
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles
-    })
+  updateLayerStyles(pageIndex: number, layerIndex: number, styles: Partial<IImageStyle> | { [index: string]: number | string | boolean }, subLayerIdx = -1) {
+    if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
+      store.commit('UPDATE_layerStyles', {
+        pageIndex,
+        layerIndex,
+        styles
+      })
+    } else {
+      this.updateSubLayerStyles(pageIndex, layerIndex, subLayerIdx, styles)
+    }
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [key: string]: string | number | ITiptapSelection }) {
-  // updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: string | number | boolean | string[] | number[] | (boolean | undefined)[] | Array<string | IParagraph> | Array<IShape | IText | IImage | IGroup> | ITiptapSelection }) {
-    store.commit('UPDATE_layerProps', {
-      pageIndex,
-      layerIndex,
-      props
-    })
+  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [key: string]: string | number | ITiptapSelection }, subLayerIdx = -1) {
+    if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
+      store.commit('UPDATE_layerProps', {
+        pageIndex,
+        layerIndex,
+        props
+      })
+    } else {
+      this.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+    }
   }
 
   updateAllGroupStyles(styles: { [key: string]: string | number | boolean }) {
@@ -199,7 +206,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,

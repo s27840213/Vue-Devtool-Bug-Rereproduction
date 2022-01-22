@@ -51,9 +51,6 @@
               @dragleave="dragLeave($event, index)"
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
-              //- @onFrameDrop="getLayerType === 'frame' ? onFrameDrop($event, index) : null"
-              //- @onFrameDragenter="getLayerType === 'frame' ? onFrameDragEnter($event, index) : null",
-              //- @onFrameDragleave="getLayerType === 'frame' ? onFrameDragLeave($event, index) : null",
       template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
@@ -225,10 +222,6 @@ export default Vue.extend({
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
-  },
-  updated() {
-    // console.log(this.config)
-    // console.log(this.layerIndex)
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -911,7 +904,7 @@ export default Vue.extend({
         }
         case 'shape':
           if (this.config.category === 'E') {
-            scale = this.getLayerScale
+            scale = 1
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
             const corRad = ControlUtils.getCorRadValue([width, height], this.initCorRadPercentage, this.config.shapeType)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
@@ -1129,7 +1122,6 @@ export default Vue.extend({
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
-
           if (this.config.category === 'E') {
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
           }
@@ -1506,6 +1498,9 @@ export default Vue.extend({
           break
         case 'frame':
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
+          break
+        default:
+          return
       }
       if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
         return
@@ -1651,7 +1646,6 @@ export default Vue.extend({
     },
     dragEnter(e: DragEvent, subLayerIdx = -1) {
       this.onImageDragEnter(e, subLayerIdx)
-      // this.currDraggedPhoto
     },
     dragLeave(e: DragEvent, subLayerIdx = -1) {
       this.onImageDragLeave(e, subLayerIdx)

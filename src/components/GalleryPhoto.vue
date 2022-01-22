@@ -29,12 +29,15 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
-import AssetUtils from '@/utils/assetUtils'
+import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
 import networkUtils from '@/utils/networkUtils'
 import modalUtils from '@/utils/modalUtils'
+import { wrap } from '@sentry/browser/dist/helpers'
+import layerUtils from '@/utils/layerUtils'
+import dragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -114,39 +117,41 @@ export default Vue.extend({
       if (this.isUploading) {
         e.preventDefault()
       } else {
-        const dataTransfer = e.dataTransfer as DataTransfer
-        dataTransfer.dropEffect = 'move'
-        dataTransfer.effectAllowed = 'move'
-        const width = photo.width / 20
-        const height = photo.height / 20
-        const rect = (e.target as Element).getBoundingClientRect()
+        const pageSize = this.$store.getters.getPageSize(layerUtils.pageIndex)
+        const resizeRatio = RESIZE_RATIO_IMAGE
+        const pageAspectRatio = pageSize.width / pageSize.height
+        const photoAspectRatio = photo.width / photo.height
+        const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+        const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+
         const src = this.fullSrc
         const type = ImageUtils.getSrcType(this.fullSrc)
-        const data = {
-          type: 'image',
-          // @/assets/img/svg/img-tmp.svg
-          srcObj: {
-            type,
-            userId: ImageUtils.getUserId(src, type),
-            assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
-          },
-          styles: {
-            x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
-            y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
-            width: width,
-            height: height
-          }
+        const srcObj = {
+          type,
+          userId: ImageUtils.getUserId(src, type),
+          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
         }
-        dataTransfer.setData('data', JSON.stringify(data))
-        fetch(ImageUtils.getSrc(data as IImage))
-        fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type,
-          ImageUtils.getSignificantDimension(data.styles.width, data.styles.height),
-          'next')))
+
+        dragUtils.itemDragStart(e, 'image', { type: 'image', srcObj }, {
+          width: photoWidth,
+          height: photoHeight,
+          offsetX: 10,
+          offsetY: 15
+        })
+
+        const significantSize = ImageUtils.getSignificantDimension(photoWidth, photoHeight)
+        const imgPreload = new Image()
+        imgPreload.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize))
+        const imgPreloadPre = new Image()
+        imgPreloadPre.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'pre'))
+        const imgPreloadNext = new Image()
+        imgPreloadNext.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'next'))
+
         this.setCurrDraggedPhoto({
           srcObj: {
-            ...data.srcObj
+            ...srcObj
           },
-          styles: { width, height },
+          styles: { photoWidth, photoHeight },
           isPreview: this.isUploading
         })
       }

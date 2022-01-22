@@ -16,6 +16,8 @@ import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import generalUtils from '@/utils/generalUtils'
+import controlUtils from '@/utils/controlUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -60,7 +62,6 @@ export default Vue.extend({
   },
   async created() {
     await this.checkAndFetchSvg()
-    console.log(this.config.designId)
   },
   destroyed () {
     if (this.styleNode && this.styleNode.parentElement) {
@@ -275,7 +276,8 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    subLayerIndex: Number
   },
   methods: {
     styles() {
@@ -340,24 +342,27 @@ export default Vue.extend({
         }
         default: {
           if (!svg && this.config.designId) {
-            const shape = await shapeUtils.fetchSvg(this.config) as IShape
-            shape.color = this.config.color
-            Object.assign(this.config, shape)
-            if (!this.config.className) {
-              this.config.className = shapeUtils.classGenerator()
-            }
-            this.config.styles.initWidth = shape.vSize[0]
-            this.config.styles.initHeight = shape.vSize[1]
+            const shape = await shapeUtils.fetchSvg(this.config) as Partial<IShape>
+            this.config.color && this.config.color.length && (shape.color = this.config.color)
+            !this.config.className && (this.config.className = shapeUtils.classGenerator())
+
+            const vSize = shape.vSize as number[]
+            delete shape.styles
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              ...shape
+            }, this.subLayerIndex)
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              initWidth: vSize[0],
+              initHeight: vSize[1]
+            }, this.subLayerIndex)
           }
-          // Fix some bug that the color is empty array.
-          if (!(this.config as IShape).color?.length) {
-            console.log(this.config.designId)
-            if (this.config.designId) {
-              const shape = await shapeUtils.fetchSvg(this.config) as IShape
-              console.warn(shape)
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
-            }
-          }
+        }
+      }
+      // Fix some bug that the color is empty array.
+      if (!(this.config as IShape).color?.length) {
+        if (this.config.designId) {
+          const shape = await shapeUtils.fetchSvg(this.config) as IShape
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
         }
       }
       const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
