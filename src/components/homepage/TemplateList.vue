@@ -3,16 +3,16 @@
     div(v-if="prevIcon"
       class="scroll-list-move scroll-list-move-left"
       @click="handlePrev")
-      div
+      div(class="scroll-list-move__icon")
         svg-icon(iconName="chevron-left"
-          iconWidth="40px"
+          iconWidth="25px"
           iconColor="gray-3")
     div(v-if="nextIcon"
       class="scroll-list-move scroll-list-move-right"
       @click="handleNext")
-      div
-        svg-icon(iconName="chevron-right"
-          iconWidth="40px"
+      div(class="scroll-list-move__icon")
+        svg-icon(iconName="chevron-left"
+          iconWidth="25px"
           iconColor="gray-3")
     div(class="scroll-list__items"
       :class="{'items-theme': type === 'theme'}"
@@ -311,16 +311,29 @@ export default Vue.extend({
     bottom: 0;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    width: 50px;
     z-index: 1;
     cursor: pointer;
+    background: linear-gradient(90deg, #FFFFFF 8.93%, rgba(245, 238, 231, 0) 76.79%);
+    &__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 36px;
+      height: 36px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 4px 8px rgba(38, 49, 71, 0.08);
+    }
     &-left {
-      left: -75px;
       @include layout-mobile {
         display: none;
       }
     }
     &-right {
-      right: -75px;
+      right: 0px;
+      transform: matrix(-1, 0, 0, 1, 0, 0);
       @include layout-mobile {
         display: none;
       }
