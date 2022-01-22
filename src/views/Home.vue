@@ -369,16 +369,14 @@ export default Vue.extend({
     &-search {
       display: flex;
       justify-content: center;
-      width: 380px;
+      width: 75vw;
+      max-width: 380px;
       height: 40px;
       background-color: white;
       border-radius: 3px;
       border: 1px solid setColor(gray-4);
       box-sizing: border-box;
       margin: 20px auto;
-      @media screen and (max-width: 1440px) {
-        max-width: 75%;
-      }
     }
     &-img {
       width: 80%;

@@ -37,7 +37,8 @@
           div
           div
       div(class="body-2")
-        div(style="width: 180px;")
+        div(v-if="!isLogin"
+          style="width: 180px;")
           search-bar(v-if="!noSearchbar"
             class="nu-header__search"
             :placeholder="$t('NN0037')"
