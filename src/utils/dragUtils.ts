@@ -1,9 +1,10 @@
-import { IImage, IShape } from '@/interfaces/layer'
+import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
 import store from '@/store'
 import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
+import stepsUtils from './stepsUtils'
 
 class DragUtils {
   itemDragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
@@ -86,6 +87,59 @@ class DragUtils {
       assetUtils.addAsset(data, { styles: { x, y } })
     }
   }
+
+  constructor(layerIndex = -1, subLayerIdx = -1) {
+    this.imgBuff.layerIndex = layerIndex
+    this.imgBuff.subLayerIdx = subLayerIdx
+  }
+
+  imgBuff: {
+    layerIndex: number,
+    subLayerIdx: number,
+    styles: Partial<IImageStyle>,
+    srcObj: { type: string, assetId: string | number, userId: string }
+  } = {
+    layerIndex: -1,
+    subLayerIdx: -1,
+    styles: {},
+    srcObj: { type: '', assetId: '', userId: '' }
+  }
+
+  onImageDragEnter(e: DragEvent, config: IImage) {
+    const DragSrcObj = store.state.currDraggedPhoto.srcObj
+    const { layerIndex, subLayerIdx } = this.imgBuff
+    if (DragSrcObj) {
+      const { imgWidth, imgHeight } = config.styles
+      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+      const styles = mouseUtils.clipperHandler(store.state.currDraggedPhoto as any, path, config.styles).styles
+      Object.assign(this.imgBuff, {
+        srcObj: {
+          ...config.srcObj
+        },
+        styles: {
+          imgX: config.styles.imgX,
+          imgY: config.styles.imgY,
+          imgWidth: config.styles.imgWidth,
+          imgHeight: config.styles.imgHeight
+        }
+      })
+      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
+      layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+    }
+  }
+
+  onImageDragLeave(e: DragEvent) {
+    const { layerIndex, subLayerIdx, styles, srcObj } = this.imgBuff
+    if (store.state.currDraggedPhoto.srcObj) {
+      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+    }
+  }
+
+  onImgDrop(e: DragEvent) {
+    e.stopPropagation()
+    stepsUtils.record()
+  }
 }
 
-export default new DragUtils()
+export default DragUtils

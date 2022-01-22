@@ -72,7 +72,7 @@ class AssetUtils {
       8: 'frame',
       9: 'shape',
       10: 'shape',
-      11: 'shapeE'
+      11: 'shape'
     } as { [key: number]: string }
     return typeStrMap[type]
   }

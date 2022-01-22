@@ -13,7 +13,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import dragUtils from '@/utils/dragUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   props: {
@@ -49,7 +49,7 @@ export default Vue.extend({
       // dataTransfer.setDragImage(image, x, y)
       // console.log(this.item)
       // dataTransfer.setData('data', JSON.stringify(this.item))
-      dragUtils.itemDragStart(e, 'group', {
+      new DragUtils().itemDragStart(e, 'group', {
         ...this.item
       })
     },

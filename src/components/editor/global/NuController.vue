@@ -23,17 +23,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      //- svg(v-if="getLayerType === 'frame' && !isLocked" class="full-width" :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-      //-   g(v-for="(clip, index) in config.clips"
-      //-     v-html="clip.clipPath ? FrameUtils.frameClipFormatter(clip.clipPath) : `<path d='M0,0h${getLayerWidth}v${getLayerHeight}h${-getLayerWidth}z'></path>`"
-      //-     :style="frameClipStyles(clip, index)"
-      //-     @mouseenter="onFrameMouseEnter(index)"
-      //-     @mouseleave="onFrameMouseLeave(index)"
-      //-     @mouseup="onFrameMouseUp(index)"
-      //-     @drop="onFrameDrop(index)",
-      //-     @click="clickSubController(index)"
-      //-     @dblclick="dblSubController(index)")
-      template(v-if="((['group', 'tmp'].includes(getLayerType)) && isActive) || (getLayerType === 'frame')")
+      template(v-if="((['group', 'tmp'].includes(getLayerType))) || (getLayerType === 'frame')")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -160,6 +150,7 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
+import DragUtils from '@/utils/dragUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -182,6 +173,7 @@ export default Vue.extend({
       MappingUtils,
       FrameUtils,
       ShortcutUtils,
+      dragUtils: new DragUtils(this.layerIndex),
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isLineEndMoving: false,
@@ -202,11 +194,6 @@ export default Vue.extend({
       scale: { scaleX: 1, scaleY: 1 },
       isComposing: false,
       isSnapping: false,
-      imgBuff: {} as {
-        index: number,
-        styles: Partial<IImageStyle>,
-        srcObj: { type: string, assetId: string | number, userId: string }
-      },
       subControlerIndexs: [],
       hasChangeTextContent: false,
       movingByControlPoint: false,
@@ -599,14 +586,6 @@ export default Vue.extend({
         }
       } else {
         return 'none'
-      }
-    },
-    frameClipStyles(clip: any) {
-      return {
-        transform: `translate(${clip.styles.x}px, ${clip.styles.y}px)`,
-        fill: '#00000000',
-        stroke: clip.active ? '#7190CC' : 'none',
-        strokeWidth: this.config.clips[0].isFrameImg ? '0px' : `${5 * (100 / this.scaleRatio)}px`
       }
     },
     hintStyles() {
@@ -1523,169 +1502,11 @@ export default Vue.extend({
         }
       })
     },
-    onFrameMouseEnter(clipIndex: number) {
-      if (LayerUtils.layerIndex !== this.layerIndex && ImageUtils.isImgControl()) {
-        return
-      }
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        this.imgBuff = {
-          index: clipIndex,
-          srcObj: {
-            ...clips[clipIndex].srcObj
-          },
-          styles: {
-            imgX: clips[clipIndex].styles.imgX,
-            imgY: clips[clipIndex].styles.imgY,
-            imgWidth: clips[clipIndex].styles.imgWidth,
-            imgHeight: clips[clipIndex].styles.imgHeight,
-            horizontalFlip: clips[clipIndex].styles.horizontalFlip,
-            verticalFlip: clips[clipIndex].styles.verticalFlip
-          }
-        }
-        Object.assign(clips[clipIndex].srcObj, currLayer.srcObj)
-        Object.assign(clips[clipIndex].styles.adjust, currLayer.styles.adjust)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-
-        const clip = clips[clipIndex]
-        const {
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(currLayer, clip.clipPath, clip.styles).styles
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, clipIndex, {
-          imgWidth,
-          imgHeight,
-          imgX,
-          imgY
-        })
-        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
-        clipper && clipper.classList.remove('layer-flip')
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-          horizontalFlip: currLayer.styles.horizontalFlip,
-          verticalFlip: currLayer.styles.verticalFlip
-        })
-      }
-    },
-    onFrameMouseLeave(clipIndex: number) {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
-        const { clips } = GeneralUtils.deepCopy(this.config) as IFrame
-        Object.assign(clips[clipIndex].srcObj, this.imgBuff.srcObj)
-        Object.assign(clips[clipIndex].styles, this.imgBuff.styles)
-
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-          horizontalFlip: false,
-          verticalFlip: false
-        })
-      }
-      setTimeout(() => {
-        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
-        clipper && clipper.classList.add('layer-flip')
-      }, 0)
-    },
-    onFrameMouseUp(clipIndex: number) {
-      const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image') {
-        LayerUtils.deleteLayer(LayerUtils.layerIndex)
-        const newIndex = this.layerIndex > LayerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
-        GroupUtils.set(this.pageIndex, newIndex, [this.config])
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, clipIndex, { active: true })
-        StepsUtils.record()
-      }
-    },
-    onFrameDragEnter(e: DragEvent, clipIndex: number) {
-      e.stopPropagation()
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
-      if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
-        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        this.imgBuff = {
-          index: clipIndex,
-          srcObj: {
-            ...clips[clipIndex].srcObj
-          },
-          styles: {
-            imgX: clips[clipIndex].styles.imgX,
-            imgY: clips[clipIndex].styles.imgY,
-            imgWidth: clips[clipIndex].styles.imgWidth,
-            imgHeight: clips[clipIndex].styles.imgHeight
-          }
-        }
-        Object.assign(clips[clipIndex].srcObj, this.currDraggedPhoto.srcObj)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-
-        const clip = clips[clipIndex]
-        const {
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, clipIndex, {
-          imgWidth,
-          imgHeight,
-          imgX,
-          imgY
-        })
-      }
-    },
-    onFrameDragLeave(e: DragEvent, clipIndex: number) {
-      e.stopPropagation()
-      if (this.currDraggedPhoto.srcObj.type) {
-        const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
-        Object.assign(clips[clipIndex].styles, this.imgBuff.styles)
-        Object.assign(clips[clipIndex].srcObj, this.imgBuff.srcObj)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips })
-      }
-    },
-    onFrameDrop(e: DragEvent, clipIndex: number) {
-      e.stopPropagation()
-      StepsUtils.record()
-    },
     dragEnter(e: DragEvent, subLayerIdx = -1) {
-      this.onImageDragEnter(e, subLayerIdx)
+      this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
     },
     dragLeave(e: DragEvent, subLayerIdx = -1) {
-      this.onImageDragLeave(e, subLayerIdx)
-    },
-    onImageDragEnter(e: DragEvent, subLayerIdx = -1) {
-      if (this.currDraggedPhoto.srcObj && (this.getLayerType === 'image' || (subLayerIdx !== -1 && this.getLayerType === 'group'))) {
-        const config = (subLayerIdx === -1 ? this.config : (this.config as IGroup).layers[subLayerIdx]) as IImage
-        const path = `path('M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z`
-        const styles = MouseUtils.clipperHandler(this.currDraggedPhoto, path, this.config.styles).styles
-        this.imgBuff = {
-          index: subLayerIdx,
-          srcObj: {
-            ...config.srcObj
-          },
-          styles: {
-            imgX: config.styles.imgX,
-            imgY: config.styles.imgY,
-            imgWidth: config.styles.imgWidth,
-            imgHeight: config.styles.imgHeight
-          }
-        }
-        if (subLayerIdx === -1) {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj: this.currDraggedPhoto.srcObj })
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
-        } else {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { srcObj: this.currDraggedPhoto.srcObj })
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, styles)
-        }
-      }
-    },
-    onImageDragLeave(e: DragEvent, subLayerIdx = -1) {
-      if (this.currDraggedPhoto.srcObj && (this.getLayerType === 'image' || (subLayerIdx !== -1 && this.getLayerType === 'group'))) {
-        if (subLayerIdx === -1) {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj: this.imgBuff.srcObj })
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, this.imgBuff.styles)
-        } else {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { srcObj: this.imgBuff.srcObj })
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, this.imgBuff.styles)
-        }
-      }
+      this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
     }
   }
 })

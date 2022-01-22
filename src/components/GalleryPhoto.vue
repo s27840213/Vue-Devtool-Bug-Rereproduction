@@ -37,7 +37,7 @@ import networkUtils from '@/utils/networkUtils'
 import modalUtils from '@/utils/modalUtils'
 import { wrap } from '@sentry/browser/dist/helpers'
 import layerUtils from '@/utils/layerUtils'
-import dragUtils from '@/utils/dragUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -132,7 +132,7 @@ export default Vue.extend({
           assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
         }
 
-        dragUtils.itemDragStart(e, 'image', { type: 'image', srcObj }, {
+        new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,
@@ -151,7 +151,7 @@ export default Vue.extend({
           srcObj: {
             ...srcObj
           },
-          styles: { photoWidth, photoHeight },
+          styles: { width: photoWidth, height: photoHeight },
           isPreview: this.isUploading
         })
       }

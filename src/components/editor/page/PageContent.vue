@@ -41,7 +41,7 @@ import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
-import dragUtils from '@/utils/dragUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -90,7 +90,7 @@ export default Vue.extend({
       }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        dragUtils.itemOnDrop(e)
+        new DragUtils().itemOnDrop(e)
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)

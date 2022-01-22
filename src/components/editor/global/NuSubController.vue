@@ -1,17 +1,21 @@
 <template lang="pug">
   div(class="nu-sub-controller")
     div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-      div(class="nu-sub-controller__wrapper test" :style="wrapperStyles()")
+      div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
         div(class="nu-sub-controller__content"
             ref="body"
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
             @click.left.stop="onClickEvent($event)"
-            @drop="onFrameDrop($event)"
-            @dragenter="onFrameDragEnter($event)"
-            @dragleave="onFrameDragLeave($event)"
+            @drop="onDrop($event)"
+            @dragenter="onDragEnter($event)"
+            @dragleave="onDragLeave($event)"
             @mousedown="onMousedown($event)")
+          svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+            :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
+            g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
+              :style="frameClipStyles()")
           template(v-if="config.type === 'text' && config.active")
             div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
               nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
@@ -46,7 +50,6 @@ import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText } from '@/interf
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
-import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -54,10 +57,10 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { ISelection } from '@/interfaces/text'
 import { FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 
 export default Vue.extend({
@@ -84,11 +87,11 @@ export default Vue.extend({
       posDiff: { x: 0, y: 0 },
       parentId: '',
       imgBuff: {} as {
-        index: number,
         styles: { [key: string]: number },
         srcObj: { type: string, assetId: string | number, userId: string },
         cached: boolean
-      }
+      },
+      dragUitls: new DragUtils(this.primaryLayerIndex, this.layerIndex)
     }
   },
   mounted() {
@@ -238,7 +241,7 @@ export default Vue.extend({
       return {
         fill: '#00000000',
         stroke: this.isActive ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${2.5 * (100 / this.scaleRatio)}px`
+        strokeWidth: `${7 * (100 / this.scaleRatio)}px`
       }
     },
     textScaleStyle() {
@@ -324,21 +327,30 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${scale})`,
-        width: `${this.type === 'frame' ? this.config.styles.initWidth : this.config.styles.width}px`,
-        height: `${this.type === 'frame' ? this.config.styles.initHeight : this.config.styles.height}px`,
+        transform: `scale(${this.type === 'frame' ? scale : 1})`,
         outline: this.outlineStyles(),
         overflow: 'hidden',
+        ...this.sizeStyle(),
         ...(this.type === 'frame' && { clipPath: `path("${this.config.clipPath}")` })
       }
     },
     styles() {
       return {
+        ...this.sizeStyle(),
         'pointer-events': 'initial',
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect),
-        width: `${this.type === 'frame' ? this.config.styles.initWidth : this.config.styles.width}px`,
-        height: `${this.type === 'frame' ? this.config.styles.initHeight : this.config.styles.height}px`
+        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
+    },
+    sizeStyle() {
+      let width, height
+      if (this.type === 'frame') {
+        width = `${this.type === 'frame' ? this.config.styles.initWidth : this.config.styles.width}px`
+        height = `${this.type === 'frame' ? this.config.styles.initHeight : this.config.styles.height}px`
+      } else {
+        width = `${this.config.styles.width}px`
+        height = `${this.config.styles.height}px`
+      }
+      return { width, height }
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
@@ -397,6 +409,33 @@ export default Vue.extend({
     onTextBlur() {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
+    onDragEnter(e: DragEvent) {
+      switch (this.type) {
+        case 'frame':
+          this.getLayerType === 'image' && this.onFrameDragEnter(e)
+          return
+        case 'group':
+          this.getLayerType === 'image' && this.dragUitls.onImageDragEnter(e, this.config as IImage)
+      }
+    },
+    onDragLeave(e: DragEvent) {
+      switch (this.type) {
+        case 'frame':
+          this.getLayerType === 'image' && this.onFrameDragLeave(e)
+          return
+        case 'group':
+          this.getLayerType === 'image' && this.dragUitls.onImageDragLeave(e)
+      }
+    },
+    onDrop(e: DragEvent) {
+      switch (this.type) {
+        case 'frame':
+          this.getLayerType === 'image' && this.onFrameDrop(e)
+          return
+        case 'group':
+          this.getLayerType === 'image' && this.dragUitls.onImgDrop(e)
+      }
+    },
     onFrameDragEnter(e: DragEvent) {
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
       if (!primaryLayer.locked) {
@@ -405,7 +444,6 @@ export default Vue.extend({
         if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           Object.assign(this.imgBuff, {
-            index: this.layerIndex,
             srcObj: {
               ...clips[this.layerIndex].srcObj
             },
@@ -456,12 +494,6 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
       setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
-    },
-    dragEnter() {
-      this.$emit('dragenter')
-    },
-    dragLeave() {
-      this.$emit('dragleave')
     }
   }
 })
