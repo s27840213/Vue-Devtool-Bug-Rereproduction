@@ -589,12 +589,29 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+  SET_frameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, styles } = data
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
+    for (const clip of layers) {
+      Object.assign(clip.styles, generalUtils.deepCopy(styles))
+    }
+  },
+  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, targetIndex, styles } = data
+    const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
+    if (groupLayer.type === 'group') {
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      Object.assign(clipsLayer[targetIndex].styles, styles)
+    }
+  },
+  SET_subFrameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
     if (groupLayer.type === 'group') {
-      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IFrame[]
-      Object.assign(clipsLayer[0].styles, styles)
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      for (const clip of clipsLayer) {
+        Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      }
     }
   },
   SET_assetJson(state: IEditorState, json: { [key: string]: any }) {

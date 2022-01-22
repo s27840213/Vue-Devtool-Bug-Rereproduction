@@ -134,6 +134,7 @@ export default Vue.extend({
           this.middlemostPageIndex,
           this.currSelectedIndex,
           index,
+          0,
           { adjust: { ...adjust } }
         )
       }
