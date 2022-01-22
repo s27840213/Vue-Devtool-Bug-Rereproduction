@@ -17,7 +17,8 @@ export interface IListModuleState {
   preview: string
   preview2?: string
   locale: string
-  error: string
+  error: string,
+  sum?: number
 }
 
 export interface IAsset {

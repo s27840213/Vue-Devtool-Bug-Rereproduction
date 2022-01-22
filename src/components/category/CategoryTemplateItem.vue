@@ -68,11 +68,14 @@ export default Vue.extend({
     },
     addTemplate() {
       const { match_cover: matchCover = {}, height, width } = this.item
+      /*
       const theme = themeUtils
         .getThemesBySize(matchCover.width || width, matchCover.height || height)
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
+      */
       const currLayer = pageUtils.getPage(pageUtils.currFocusPageIndex)
+      const isSameSize = currLayer.width === width && currLayer.height === height
       const cb = this.groupItem
         ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
@@ -84,7 +87,7 @@ export default Vue.extend({
         return cb(resize)
       }
 
-      if (!isSameTheme) {
+      if (!isSameSize) {
         let btnWidth = '120px'
         if (this.$i18n.locale === 'tw') {
           btnWidth = '120px'
@@ -95,7 +98,7 @@ export default Vue.extend({
         }
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
-          `${this.$t('NN0209')}`,
+          `${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currLayer.width}x${currLayer.height}` })}`,
           [],
           '',
           {

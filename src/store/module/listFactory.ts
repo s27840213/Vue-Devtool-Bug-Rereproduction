@@ -26,7 +26,8 @@ export default function (this: any) {
     preview: '',
     preview2: '',
     locale: '',
-    error: ''
+    error: '',
+    sum: 0
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
@@ -130,6 +131,26 @@ export default function (this: any) {
         page: 0,
         nextPage: 0
       })
+    },
+
+    getSum: async ({ commit, state }, params = {}) => {
+      const { theme } = state
+      const { keyword } = params
+      const locale = localeUtils.currLocale()
+      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
+      try {
+        const { data } = await this.api({
+          token: store.getters['user/getToken'],
+          locale,
+          theme,
+          keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
+          listAll: 1
+        })
+        commit(SET_STATE, { sum: data.data.sum })
+        // commit(SET_CONTENT, data.data)
+      } catch (error) {
+        captureException(error)
+      }
     }
   }
 
