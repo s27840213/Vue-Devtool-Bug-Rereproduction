@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="home")
-    nu-header
+    nu-header(:showSearchPage="isShowMobileSearchPage"
+      @isShowSearchPage="showMobileSearchPage")
     div(class="home-content")
       div(class="home-content__top")
         img(class="home-content__top-bg"
@@ -18,7 +19,8 @@
           div(v-if="isLogin")
             search-bar(class="home-content__top-search"
               :placeholder="$t('NN0037')"
-              @search="handleSearch")
+              @search="handleSearch"
+              @click.native="showMobileSearchPage(true)")
           template(v-else)
             div(class="home-content__top-btn"
               @click="newDesign()") {{$t('NN0274')}}
@@ -96,6 +98,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      isShowMobileSearchPage: false,
       themeList: [] as Itheme[],
       showSizePopup: false,
       tagString: '',
@@ -242,6 +245,11 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.goToPage('TemplateCenter', keyword)
+    },
+    showMobileSearchPage(show: boolean) {
+      if (this.isMobile) {
+        this.isShowMobileSearchPage = show
+      }
     }
   }
 })
