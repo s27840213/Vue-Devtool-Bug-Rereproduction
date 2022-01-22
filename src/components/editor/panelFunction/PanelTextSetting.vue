@@ -131,11 +131,9 @@ export default Vue.extend({
     })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
-      // this.setHeight(value)
       this.setParagraphProp('lineHeight', value)
     })
     popupUtils.on(PopupSliderEventType.letterSpacing, (value: number) => {
-      // this.setSpacing(value)
       this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
@@ -506,7 +504,6 @@ export default Vue.extend({
               })
           } else {
             tiptapUtils.applyParagraphStyle(prop, value, false)
-            // TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIdx)
             TextPropUtils.updateTextPropsState({ [prop]: value })
           }
         })

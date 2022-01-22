@@ -372,6 +372,7 @@ export default Vue.extend({
         this.styleNode = shapeUtils.addStyleTag(styleText)
       }
       this.paramsReady = true
+      console.log(generalUtils.deepCopy(this.config))
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
