@@ -12,6 +12,10 @@ import imageAdjustUtil from './imageAdjustUtil'
 class FormatUtils {
   copiedFormat: IFormat | undefined
 
+  isCurveText(textShape: any): boolean {
+    return textShape.name === 'curve'
+  }
+
   extractTextFormat(text: IText): ITextFormat {
     const paragraphs = text.paragraphs
     const lastParagraph = paragraphs[paragraphs.length - 1]
@@ -82,15 +86,37 @@ class FormatUtils {
         layers = subLayers
       }
       if (type === 'text') {
-        for (const targetLayer of subLayers) {
-          // layerUtils.updateSpecLayerData({
-          //   pageIndex,
-          //   layerIndex,
-          //   subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined, // undefined means update all subLayers
-          //   type,
-          //   styles: { textEffect, textShape }
-          // })
+        const { scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
+        layerUtils.updateSpecLayerData({
+          pageIndex,
+          layerIndex,
+          subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined,
+          type: ['text'],
+          styles: { textEffect, textShape, scale }
+        })
+        const isNotCurved = !this.isCurveText(textShape)
+        for (const targetLayerIndex in layers) {
+          const targetLayer = layers[targetLayerIndex]
+          if (targetLayer.type !== 'text') continue
+          const targetTextLayer = targetLayer as any
+          const paragraphs = this.applyTextStyles(targetTextLayer.paragraphs)
+          layerUtils.updateSubLayerProps(
+            pageIndex,
+            layerIndex,
+            subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex,
+            { paragraphs }
+          )
+          if (isNotCurved) {
+            const newSize = textUtils.getTextHW(targetTextLayer, targetTextLayer.styles.widthLimit)
+            layerUtils.updateSubLayerStyles(
+              pageIndex,
+              layerIndex,
+              subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex,
+              newSize
+            )
+          }
         }
+        textUtils.updateGroupLayerSize(pageIndex, layerIndex)
         stepsUtils.record()
       }
       if (type === 'image') {
@@ -116,7 +142,7 @@ class FormatUtils {
           layerIndex,
           styles: { textEffect, textShape }
         })
-        if (Object.keys(textShape).length === 0) {
+        if (!this.isCurveText(textShape)) {
           const text = store.getters.getLayer(pageIndex, layerIndex)
           const newSize = textUtils.getTextHW(text, text.styles.widthLimit)
           controlUtils.updateLayerSize(pageIndex, layerIndex, newSize.width, newSize.height, text.styles.scale)
