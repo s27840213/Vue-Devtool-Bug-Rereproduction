@@ -111,7 +111,7 @@ export default Vue.extend({
       this.pageMoveBack($event)
 
       // move selected to index: copy and delete origin one
-      const indexFrom = this.middlemostPageIndex
+      const indexFrom = pageUtils.currFocusPageIndex
       const indexTo = this.index
       if (indexFrom === indexTo || indexFrom + 1 === indexTo) {
         return

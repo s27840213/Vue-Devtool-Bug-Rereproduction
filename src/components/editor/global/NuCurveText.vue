@@ -180,7 +180,16 @@ export default Vue.extend({
       })
     },
     isFontLoaded (curr) {
-      curr && this.handleCurveSpan(this.spans, true)
+      const { pageIndex, layerIndex } = this
+      const key = asyncUtils.generateKeyByIndexes(pageIndex, layerIndex, -1)
+      asyncUtils.registerFinalExecutor(key, () => {
+        textUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+        textUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+      })
+      curr && this.handleCurveSpan(this.spans, true, () => {
+        typeof this.subLayerIndex !== 'undefined' && textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+        asyncUtils.completed(key)
+      })
     }
   },
   methods: {
