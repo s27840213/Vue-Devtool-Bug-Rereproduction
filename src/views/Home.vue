@@ -45,13 +45,17 @@
         div(class="home-content__mydesign")
           template-list(:designList="allDesigns" type='design'
             :isLoading="isDesignsLoading")
-      template(v-for="list in (isLogin ? templates : templates2)")
+      template(v-for="list, idx in (isLogin ? templates : templates2)")
         div(class="home-content-title label-lg")
           span {{list.title}}
           span(class="pointer body-1"
             @click="goToTemplateCenterTheme(list.theme)") {{$t('NN0082')}}
         div(class="home-content__template")
           template-list(:theme="list.theme" type='template')
+          div(v-if="!isLogin && idx === templates2.length - 1"
+            class="home-content__more")
+            div(class="home-content__more-btn"
+              @click="goToTemplateCenterSortBy") {{$t('NN0371')}}
       template(v-if="!isLogin")
         div(class="home-content__feature-bg bg-f1")
           div(class="home-content__feature-f1")
@@ -61,7 +65,7 @@
                   br
             div(class="home-content__feature-subtitle") {{$t('NN0373')}}
             div(class="home-content__feature-btn"
-              @click="newDesign()") {{$t('NN0374')}}
+              @click="goToPage('SignUp')") {{$t('NN0374')}}
           img(class="home-content__feature-img"
             :src="require('@/assets/img/svg/homepage/Feature 1_us.svg')")
       nu-footer(class="mt-50")
@@ -211,7 +215,9 @@ export default Vue.extend({
     }
     ),
     goToPage(pageName: string, queryString = '') {
-      if (queryString) {
+      if (pageName === 'SignUp') {
+        this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
+      } else if (queryString) {
         this.$router.push({ name: pageName, query: { search: queryString } })
       } else {
         this.$router.push({ name: pageName })
@@ -386,6 +392,7 @@ export default Vue.extend({
   &__theme,
   &__mydesign,
   &__template {
+    position: relative;
     padding: 0 150px;
     @media screen and (max-width: 1440px) {
       padding: 0 75px;
@@ -437,6 +444,29 @@ export default Vue.extend({
       @include body-MD;
       @media screen and (max-width: 768px) {
         @include body-SM;
+      }
+    }
+  }
+  &__more {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    bottom: -25px;
+    width: calc(100% - 300px);
+    height: 128px;
+    background: linear-gradient(0deg, #FFFFFF 70%, rgba(245, 238, 231, 0) 100%);
+    @media screen and (max-width: 1440px) {
+      width: calc(100% - 150px);
+    }
+    @media screen and (max-width: 768px) {
+      width: 100%;
+    }
+    &-btn {
+      width: 280px;
+      @include button-LG;
+      margin-top: 50px;
+      @media screen and (max-width: 768px) {
+        width: 250px;
       }
     }
   }
