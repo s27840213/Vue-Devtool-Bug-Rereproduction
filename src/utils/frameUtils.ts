@@ -2,7 +2,7 @@ import LayerUtils from './layerUtils'
 import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 class FrameUtils {
@@ -100,7 +100,7 @@ class FrameUtils {
     store.commit('SET_popupComponent', { layerIndex: -1 })
   }
 
-  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {
     store.commit('SET_frameLayerStyles', {
       pageIndex,
       primaryLayerIndex,
@@ -109,7 +109,7 @@ class FrameUtils {
     })
   }
 
-  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }) {
+  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage>) {
     store.commit('UPDATE_frameLayerProps', {
       pageIndex,
       layerIndex,
