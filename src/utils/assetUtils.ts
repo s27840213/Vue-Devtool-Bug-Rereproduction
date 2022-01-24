@@ -19,6 +19,7 @@ import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
+import { ITextState } from '@/store/text'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -26,7 +27,9 @@ export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   en: 'cRgaSK5ZVXnLDpWTL8MN',
   jp: 'OyDbjZxjk9r14eZnPELb'
 }
-
+export const RESIZE_RATIO_FRAME = 0.6
+export const RESIZE_RATIO_SVG = 0.55
+export const RESIZE_RATIO_IMAGE = 0.8
 class AssetUtils {
   host = 'https://template.vivipic.com'
   data = 'config.json'
@@ -45,18 +48,31 @@ class AssetUtils {
     return (asset && asset.ver === item.ver) ? Promise.resolve(GeneralUtils.deepCopy(asset)) : this.fetch(item)
   }
 
+  // used for api category
   getTypeCategory(type: number): string | undefined {
     // @TODO 暫時
     const typeStrMap = {
       0: 'font',
       1: 'background',
+      5: 'svg',
       6: 'template',
       7: 'text',
-      5: 'svg',
       8: 'svg',
       9: 'svg',
       10: 'svg',
       11: 'svg'
+    } as { [key: number]: string }
+    return typeStrMap[type]
+  }
+
+  getLayerType(type: number): string | undefined {
+    const typeStrMap = {
+      5: 'shape',
+      7: 'text',
+      8: 'frame',
+      9: 'shape',
+      10: 'shape',
+      11: 'shape'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
@@ -146,7 +162,7 @@ class AssetUtils {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.55
+    const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -183,7 +199,7 @@ class AssetUtils {
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.55
+    const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = width / height
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -222,7 +238,7 @@ class AssetUtils {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.55
+    const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -230,7 +246,7 @@ class AssetUtils {
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
     json.className = ShapeUtils.classGenerator()
-
+    console.log(GeneralUtils.deepCopy(styles))
     const config = {
       ...json,
       vSize: [svgWidth, svgHeight],
@@ -264,7 +280,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = 0.6
+    const resizeRatio = RESIZE_RATIO_FRAME
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
@@ -376,7 +392,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number) {
+  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -392,6 +408,11 @@ class AssetUtils {
           textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
         }
         textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
+
+        if (attrs.styles) {
+          Object.assign(textLayer.styles, attrs.styles)
+        }
+
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
       })
@@ -402,7 +423,7 @@ class AssetUtils {
 
   addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex } = attrs
-    const resizeRatio = 0.8
+    const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
@@ -511,22 +532,6 @@ class AssetUtils {
     try {
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
-        case 7:
-          this.addText(asset.jsonData, attrs)
-          break
-        case 6:
-          this.addTemplate(asset.jsonData, attrs)
-          break
-        case 5:
-        case 9:
-          this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
-          break
-        case 10:
-          this.addLine(asset.jsonData, attrs)
-          break
-        case 11:
-          this.addBasicShape(asset.jsonData, attrs)
-          break
         case 1:
           this.addBackground(
             asset.urls.prev,
@@ -534,8 +539,24 @@ class AssetUtils {
             await ImageUtils.getImageSize(asset.urls.full, asset.width ?? 0, asset.height ?? 0)
           )
           break
+        case 5:
+        case 9:
+          this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          break
+        case 6:
+          this.addTemplate(asset.jsonData, attrs)
+          break
+        case 7:
+          this.addText(asset.jsonData, attrs)
+          break
         case 8:
           this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          break
+        case 10:
+          this.addLine(asset.jsonData, attrs)
+          break
+        case 11:
+          this.addBasicShape(asset.jsonData, attrs)
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
