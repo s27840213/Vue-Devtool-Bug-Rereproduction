@@ -65,6 +65,13 @@
   font-size: 12px;
 }
 
+@mixin body-XXS {
+  @include body();
+  // white-space: nowrap;
+  font-size: 12px;
+  transform: scale(0.8);
+}
+
 @mixin primary-btn {
   display: flex;
   align-items: center;

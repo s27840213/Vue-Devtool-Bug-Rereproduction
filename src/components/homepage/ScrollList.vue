@@ -30,16 +30,16 @@
           div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
-            div(class="pt-10 scroll-list__item-title") {{$t('NN0354')}}
+            div(class="scroll-list__item-title") {{$t('NN0354')}}
           div(class="scroll-list__hint") {{$t('NN0355')}}
       template(v-else)
         div(v-if="type === 'theme'"
-          class="pointer scroll-list__plus")
+          class="pointer scroll-list__plus padding-start")
           img(:src="require('@/assets/img/png/plus-origin.png')"
             @click="openPopup()")
-          div(class="pt-10 scroll-list__item-title") {{$t('NN0023')}}
-        div(v-for="item, idx in list" class="scroll-list__item py-10"
-          :class="{'pb-90 item-theme': type === 'theme'}")
+          div(class="scroll-list__plus-title") {{$t('NN0023')}}
+        div(v-for="item, idx in list" class="scroll-list__item"
+          :class="{'padding-end': idx === list.length - 1}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
@@ -163,53 +163,54 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss" scoped>
+@import "@/assets/scss/homepageStyle.scss";
 .scroll-list {
   $this: &;
   position: relative;
   &__items {
     display: grid;
-    column-gap: 30px;
+    column-gap: 40px;
     grid-template-columns: auto;
     justify-content: start;
-    align-items: center;
     grid-auto-flow: column;
     scroll-behavior: smooth;
     overflow-x: scroll;
     overflow-y: hidden;
-    text-align: left;
-    &.items-theme {
-      @include layout-mobile {
-        column-gap: 0px;
-      }
+    padding-top: 10px;
+    padding-bottom: 10px;
+    @media screen and (max-width: 768px) {
+      column-gap: 20px;
+    }
+    @media screen and (min-width: 1600px) {
+      justify-content: center;
     }
     &::-webkit-scrollbar {
       display: none;
     }
   }
   &__plus {
-    width: 100px;
-    text-align: center;
-    @media (min-width: 976px) {
-      width: 140px;
-    }
-    @media (min-width: 1260px) {
-      width: 170px;
-    }
-    @media (min-width: 1560px) {
-      width: 200px;
-    }
-    @include layout-mobile {
-      width: 60px;
-      padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90px;
+    white-space: nowrap;
+    margin: auto;
+    @media screen and (max-width: 768px) {
+      width: 56px;
     }
     > img {
-      @include layout-mobile {
-        width: 100%;
-      }
+      width: 100%;
       &:hover {
         transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
         transform: translate(0, -10px);
+      }
+    }
+    &-title {
+      padding-top: 10px;
+      @include body-SM;
+      @media screen and (max-width: 768px) {
+        @include body-XXS;
       }
     }
   }
@@ -221,53 +222,22 @@ export default Vue.extend({
     }
   }
   &__item {
-    width: 100px;
-    height: 100px;
+    width: 120px;
     text-align: center;
-    @include layout-mobile {
-      width: 35vw;
-      height: 35vw;
-    }
-    @media (min-width: 976px) {
-      width: 140px;
-      height: 140px;
-    }
-    @media (min-width: 1260px) {
-      width: 170px;
-      height: 170px;
-    }
-    @media (min-width: 1560px) {
-      width: 200px;
-      height: 200px;
+    @media screen and (max-width: 540px) {
+      width: 100px;
     }
     &-title {
-      font-size: 16px;
-      line-height: 26px;
-      font-weight: 400;
-      padding-top: 10px;
-      @media (max-width: 976px) {
-        font-size: 14px;
-      }
-      @include layout-mobile {
-        font-size: 12px;
-        line-height: unset;
-        transform: scale(0.9);
-      }
+      color: setColor(gray-1);
+      padding-top: 5px;
+      @include body-XXS;
     }
     &-subtitle {
       color: setColor(gray-2);
-      font-size: 14px;
-      line-height: 22px;
-      font-weight: 400;
-      @include layout-mobile {
-        font-size: 12px;
-        white-space: nowrap;
-        transform: scale(0.85);
-        padding: 0;
-      }
+      @include body-XXS;
     }
     &-image {
-      height: 100%;
+      width: 100%;
       &:hover {
         transition: all 0.2s ease-in-out;
         transform: translate(0, -5px);
@@ -281,12 +251,6 @@ export default Vue.extend({
         transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
         transform: translate(0, -5px);
-      }
-    }
-    &.item-theme {
-      @include layout-mobile {
-        width: 22vw;
-        height: 30vw;
       }
     }
   }
@@ -307,16 +271,38 @@ export default Vue.extend({
     cursor: pointer;
     &-left {
       left: -75px;
+      @media screen and (max-width: 1440px) {
+        left: -45px;
+      }
       @include layout-mobile {
+        display: none;
+      }
+      @media screen and (min-width: 1600px) {
         display: none;
       }
     }
     &-right {
       right: -75px;
+      @media screen and (max-width: 1440px) {
+        right: -45px;
+      }
       @include layout-mobile {
         display: none;
       }
+      @media screen and (min-width: 1600px) {
+        display: none;
+      }
     }
+  }
+}
+.padding-start {
+  @media screen and (max-width: 768px) {
+    padding-left: 24px;
+  }
+}
+.padding-end {
+  @media screen and (max-width: 768px) {
+    padding-right: 24px;
   }
 }
 </style>

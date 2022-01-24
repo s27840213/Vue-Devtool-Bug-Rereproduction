@@ -212,20 +212,10 @@ export default Vue.extend({
     }
   }
   &__plus {
-    width: 100px;
+    width: 90px;
     text-align: center;
-    @media (min-width: 976px) {
-      width: 140px;
-    }
-    @media (min-width: 1260px) {
-      width: 170px;
-    }
-    @media (min-width: 1560px) {
-      width: 200px;
-    }
-    @include layout-mobile {
-      width: 60px;
-      padding-right: 10px;
+    @media screen and (max-width: 768px) {
+      width: 56px;
     }
     > img {
       @include layout-mobile {
