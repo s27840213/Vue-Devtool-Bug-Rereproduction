@@ -238,12 +238,11 @@ export default Vue.extend({
       )
     },
     handleCurveSpan (spans: any[], firstInit = false, callback?: () => void) {
-      const { bend } = this
       if (spans.length > 1) {
-        const { textWidth, textHeight, minHeight} = TextShapeUtils.getTextHWs(this.config)
+        const { textWidth, textHeight, minHeight} = TextShapeUtils.getTextHWsBySpans(spans)
         this.textHeight = textHeight
         this.minHeight = minHeight
-        this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
+        this.transforms = TextShapeUtils.convertTextShape(textWidth, this.bend)
         this.calcArea()
         firstInit && this.resetLimitY()
         this.rePosition()
