@@ -27,7 +27,7 @@
             img(class="home-content__top-img"
               :src="require('@/assets/img/svg/homepage/header_img_us.png')")
       div(class="home-content-title label-lg"
-        :class="!isLogin ? 'mt-100' : ''") {{$t('NN0154')}}
+        :class="!isLogin ? 'mt-20' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
@@ -304,26 +304,31 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     &-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
+      height: 80vh;
+      z-index: -2;
       object-fit: cover;
     }
     &-white {
       position: absolute;
+      top: 45vh;
       right: 0;
-      bottom: 0;
       width: 0;
       height: 0;
       border-color: white transparent;
       border-width: 0 0 35vh 100vw;
       border-style: solid;
+      z-index: -1;
     }
     &-region {
       display: flex;
       flex-direction: column;
       align-items: center;
-      position: absolute;
-      top: 100px;
       color: setColor(dark-blue);
+      padding-top: 100px;
     }
     &-title {
       color: setColor(nav);
