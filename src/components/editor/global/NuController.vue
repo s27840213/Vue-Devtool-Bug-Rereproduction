@@ -1533,7 +1533,7 @@ export default Vue.extend({
         return
       }
       const currLayer = LayerUtils.getCurrLayer as IImage
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
+      // LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
@@ -1604,7 +1604,7 @@ export default Vue.extend({
       }
     },
     onFrameDragEnter(clipIndex: number) {
-      LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
+      // LayerUtils.setCurrSubSelectedInfo(clipIndex, 'clip')
       if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
         const clips = GeneralUtils.deepCopy(this.config.clips) as Array<IImage>
         this.clipedImgBuff = {
