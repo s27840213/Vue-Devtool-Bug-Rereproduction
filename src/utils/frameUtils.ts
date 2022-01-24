@@ -126,6 +126,15 @@ class FrameUtils {
       styles
     })
   }
+
+  updateFrameClipSrc(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number }) {
+    store.commit('UPDATE_frameClipSrc', {
+      pageIndex: pageIndex,
+      layerIndex: primaryLayerIndex,
+      subLayerIndex: subLayerIndex,
+      srcObj: { ...srcObj }
+    })
+  }
 }
 
 export default new FrameUtils()

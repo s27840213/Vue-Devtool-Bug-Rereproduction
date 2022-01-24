@@ -535,7 +535,6 @@ export default Vue.extend({
               })
           } else {
             tiptapUtils.applyParagraphStyle(prop, value, false)
-            // TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIdx)
             TextPropUtils.updateTextPropsState({ [prop]: value })
           }
         })
