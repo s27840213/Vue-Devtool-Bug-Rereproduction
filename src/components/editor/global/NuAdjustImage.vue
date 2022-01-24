@@ -51,7 +51,7 @@ export default Vue.extend({
     },
     svgFilterElms(): any[] {
       const { adjust } = this.styles
-      return ImageAdjustUtil.convertAdjustToSvgFilter(adjust)
+      return ImageAdjustUtil.convertAdjustToSvgFilter(adjust || {})
     },
     cssFilterElms(): any[] {
       const { styles: { adjust, width, imgX, imgY, height } } = this

@@ -15,8 +15,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import generalUtils from '@/utils/generalUtils'
+import DragUtils from '@/utils/dragUtils'
+import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
 import { mapMutations } from 'vuex'
-import AssetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   props: {
@@ -27,17 +29,16 @@ export default Vue.extend({
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
-    dragStart(event: DragEvent) {
-      const dataTransfer = event.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-      const image = new Image()
-      image.src = (event.target as HTMLImageElement).src
-      dataTransfer.setDragImage(image, -10, -10)
-      dataTransfer.setData('data', JSON.stringify(this.item))
+    dragStart(e: DragEvent) {
+      const type = assetUtils.getLayerType(this.item.type)
+      new DragUtils().itemDragStart(e, type || '', {
+        ...this.item
+      }, {
+        resizeRatio: RESIZE_RATIO_SVG
+      })
     },
     addSvg() {
-      AssetUtils.addAsset(this.item)
+      assetUtils.addAsset(this.item)
     },
     showSvgInfo(evt: Event) {
       const { info = {}, tags } = this.item
