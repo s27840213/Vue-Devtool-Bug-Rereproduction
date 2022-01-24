@@ -85,7 +85,7 @@ export default Vue.extend({
     },
     previewSrc(): string {
       const { inFilePanel, photo, vendor } = this
-      if (inFilePanel || photo.urls) return photo.urls.prev || photo.urls.thumb
+      if (inFilePanel || photo.urls) return photo.urls.tiny || photo.urls.thumb
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
