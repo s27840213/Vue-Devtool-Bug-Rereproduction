@@ -13,10 +13,10 @@ import { IFrame, IGroup, ILayer, IShape, ITmp } from '@/interfaces/layer'
 
 class StepsUtils {
   steps: Array<IStep>
-  /**
-   * @param {Array<number>} pageSteps  used to record the changed page for template update when we're update group template
-   */
-  pageSteps: Array<number>
+  // /**
+  //  * @param {Array<number>} pageSteps  used to record the changed page for template update when we're update group template
+  //  */
+  // pageSteps: Array<number>
   currStep: number
   MAX_STORAGE_COUNT: number
   get isPopupOpen(): boolean {
@@ -34,7 +34,7 @@ class StepsUtils {
   timers: { [key: string]: number }
   constructor() {
     this.steps = []
-    this.pageSteps = []
+    // this.pageSteps = []
     this.currStep = -1
     this.MAX_STORAGE_COUNT = 20
     this.timers = {}
@@ -81,30 +81,29 @@ class StepsUtils {
   }
 
   record() {
-    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-    const modifiedPage = pageUtils.getPage(middlemostPageIndex) as IPage
-    if (modifiedPage.designId.length !== 0) {
-      store.commit('SET_pageIsModified', {
-        pageIndex: middlemostPageIndex,
-        modified: modifiedPage.modified !== undefined
-      })
-    }
+    // const modifiedPage = pageUtils.getPage(middlemostPageIndex) as IPage
+    // if (modifiedPage.designId.length !== 0) {
+    //   store.commit('SET_pageIsModified', {
+    //     pageIndex: middlemostPageIndex,
+    //     modified: modifiedPage.modified !== undefined
+    //   })
+    // }
     const pages = this.filterForShapesInPages(GeneralUtils.deepCopy(store.getters.getPages))
     // Watch out! The deep cody method we use won't work on Set/Map object
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
 
     // There's not any steps before, create the initial step first
     if (this.currStep < 0) {
-      this.steps.push({ pages, middlemostPageIndex, lastSelectedLayerIndex, currSelectedInfo })
-      this.pageSteps.push(middlemostPageIndex)
+      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+      // this.pageSteps.push(middlemostPageIndex)
       this.currStep++
     } else {
       this.steps.length = this.currStep + 1
       if (this.steps.length === this.MAX_STORAGE_COUNT) {
         this.steps.shift()
       }
-      this.steps.push({ pages, middlemostPageIndex, lastSelectedLayerIndex, currSelectedInfo })
+      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {
@@ -123,7 +122,6 @@ class StepsUtils {
     this.currStep--
     const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
     store.commit('SET_pages', pages)
-    store.commit('SET_middlemostPageIndex', this.steps[this.currStep].middlemostPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
     let layers
@@ -178,7 +176,6 @@ class StepsUtils {
     this.currStep++
     const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
     store.commit('SET_pages', pages)
-    store.commit('SET_middlemostPageIndex', this.steps[this.currStep].middlemostPageIndex)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
     let layers

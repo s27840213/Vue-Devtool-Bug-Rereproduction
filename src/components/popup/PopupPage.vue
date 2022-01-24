@@ -23,8 +23,8 @@
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{data.text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(v-if="getBackgroundImage(middlemostPageIndex).config.src !=='none'" class="popup-page__hr")
-    div(v-if="getBackgroundImage(middlemostPageIndex).config.src !=='none'"
+    hr(v-if="getBackgroundImage(currFocusPageIndex).config.src !=='none'" class="popup-page__hr")
+    div(v-if="getBackgroundImage(currFocusPageIndex).config.src !=='none'"
         class="popup-page__item"
         @click="detachBackgroundImage")
       svg-icon(
@@ -44,6 +44,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IPopupOptions } from '@/interfaces/popup'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -90,16 +91,18 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       getBackgroundImage: 'getBackgroundImage',
       isLogin: 'user/isLogin',
       groupId: 'getGroupId'
     }),
     hasDesignId(): boolean {
-      return this.getPage(this.middlemostPageIndex).designId !== ''
+      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
+    },
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
     }
   },
   methods: {
@@ -158,12 +161,12 @@ export default Vue.extend({
     },
     deleteBackgroundImage() {
       this._setBackgroundImage({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         config: this.baseBgImgConfig
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(this.middlemostPageIndex))
+      const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(pageUtils.currFocusPageIndex))
       if (detachedBackgroundImage.config.srcObj.assetId) {
         let { initWidth: width, initHeight: height } = detachedBackgroundImage.config.styles
         while (width > 1000 && height > 1000) {
@@ -176,14 +179,14 @@ export default Vue.extend({
           imgWidth: width,
           imgHeight: height
         })
-        layerUtils.addLayers(this.middlemostPageIndex, [detachedBackgroundImage.config])
+        layerUtils.addLayers(pageUtils.currFocusPageIndex, [detachedBackgroundImage.config])
         this._setBackgroundImage({
-          pageIndex: this.middlemostPageIndex,
+          pageIndex: pageUtils.currFocusPageIndex,
           config: this.baseBgImgConfig
         })
       } else {
         this._setBackgroundColor({
-          pageIndex: this.middlemostPageIndex,
+          pageIndex: pageUtils.currFocusPageIndex,
           color: '#ffffff'
         })
       }

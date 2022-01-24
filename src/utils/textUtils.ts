@@ -10,12 +10,12 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from './tiptapUtils'
+import pageUtils from './pageUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
-  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
 
   isArrowKey(e: KeyboardEvent): boolean {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
@@ -716,12 +716,12 @@ class TextUtils {
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const page = LayerUtils.getPage(targePageIndex)
     const x = (page.width - width) / 2
     const y = (page.height - height) / 2
 
-    if (targePageIndex === this.middlemostPageIndex) {
+    if (targePageIndex === pageUtils.currFocusPageIndex) {
       const currLayer = LayerUtils.getLayer(targePageIndex, LayerUtils.layerIndex)
       if (currLayer.styles) {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2

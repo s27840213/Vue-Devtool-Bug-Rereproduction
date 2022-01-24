@@ -80,15 +80,16 @@ class MouseUtils {
     }
     const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
-
+    console.log(pageIndex)
     const pageSize = store.getters.getPageSize(pageIndex)
+    console.log(pageSize)
+    console.log(data)
     const resizeRatio = 0.8
     const pageAspectRatio = pageSize.width / pageSize.height
     const photoAspectRatio = data.styles.width / data.styles.height
     const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
-    console.log(data)
     let layer
     switch (data.type) {
       case 'image': {

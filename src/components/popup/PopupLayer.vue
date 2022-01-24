@@ -125,7 +125,6 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       isLogin: 'user/isLogin',
       token: 'user/getToken',
       _layerNum: 'getLayersNum',
@@ -159,7 +158,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
     },
     hasPageDesignId(): boolean {
-      return this.getPage(this.middlemostPageIndex).designId !== ''
+      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false
@@ -244,7 +243,6 @@ export default Vue.extend({
               ShortcutUtils.textCopy()
             } else {
               ShortcutUtils.copy()
-              FocusUtils.focusLastSelectedPage()
             }
           }
         },
@@ -256,7 +254,6 @@ export default Vue.extend({
             if (TextUtils.getSelection()) {
               ShortcutUtils.textPaste()
             } else {
-              FocusUtils.focusLastSelectedPage()
               ShortcutUtils.paste()
             }
           }
@@ -267,7 +264,6 @@ export default Vue.extend({
           shortcutText: 'DEL',
           action: () => {
             ShortcutUtils.del()
-            FocusUtils.focusLastSelectedPage()
           }
         }
       ]

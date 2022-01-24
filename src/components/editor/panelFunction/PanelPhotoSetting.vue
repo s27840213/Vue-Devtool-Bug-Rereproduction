@@ -34,6 +34,7 @@ import imageUtils from '@/utils/imageUtils'
 import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -55,7 +56,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
@@ -133,7 +133,7 @@ export default Vue.extend({
           if (index >= 0) {
             // case 1: one clip in one frame layer, index = clip index
             return frameUtils.updateFrameLayerStyles(
-              this.middlemostPageIndex,
+              pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
               index,
               { adjust: { ...adjust } }
@@ -141,7 +141,7 @@ export default Vue.extend({
           } else {
             // case 2: one frame layer w/o selected clip, index = -1
             return frameUtils.updateFrameLayerAllClipsStyles(
-              this.middlemostPageIndex,
+              pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
               { adjust: { ...adjust } }
             )
@@ -149,7 +149,7 @@ export default Vue.extend({
         }
         // case 3: one frame in a group layer, index = frame index in the group
         return frameUtils.updateSubFrameLayerAllClipsStyles(
-          this.middlemostPageIndex,
+          pageUtils.currFocusPageIndex,
           this.currSelectedIndex,
           index,
           { adjust: { ...adjust } }
@@ -162,7 +162,7 @@ export default Vue.extend({
         // case 7: whole group of images, layerIndex = group layer index, subLayerIndex = undefined
         return imageAdjustUtil.setAdjust({
           adjust: { ...adjust },
-          pageIndex: this.middlemostPageIndex,
+          pageIndex: pageUtils.currFocusPageIndex,
           layerIndex: this.currSelectedIndex,
           subLayerIndex: index >= 0 ? index : undefined
         })

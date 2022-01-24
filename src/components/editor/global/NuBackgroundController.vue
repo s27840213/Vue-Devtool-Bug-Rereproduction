@@ -82,9 +82,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex'
-    }),
     styles() {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
@@ -148,7 +145,6 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.moving)
 
       this.setCursorStyle('move')
-      this.setMiddlemostPageIndex(this.pageIndex)
     },
     moving(event: MouseEvent) {
       this.setCursorStyle('move')

@@ -270,12 +270,12 @@ import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import PageUtils from '@/utils/pageUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -404,7 +404,6 @@ export default Vue.extend({
     ),
     ...mapGetters({
       getPage: 'getPage',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       token: 'user/getToken',
       getAsset: 'getAsset',
       groupId: 'getGroupId',
@@ -413,13 +412,13 @@ export default Vue.extend({
       getPageSize: 'getPageSize'
     }),
     currentPageWidth(): number {
-      return Math.round(this.getPage(this.middlemostPageIndex)?.width ?? 0)
+      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
     },
     currentPageHeight(): number {
-      return Math.round(this.getPage(this.middlemostPageIndex)?.height ?? 0)
+      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
     },
     aspectRatio(): number {
-      return (this.getPage(this.middlemostPageIndex)?.width ?? 1) / this.getPage(this.middlemostPageIndex)?.height ?? 1
+      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
       return this.pageWidth !== '' && this.pageHeight !== ''
@@ -431,14 +430,13 @@ export default Vue.extend({
       return this.role === 0 && this.adminMode === true
     },
     key_id(): string {
-      return this.getPage(this.middlemostPageIndex).designId
+      return this.getPage(pageUtils.currFocusPageIndex).designId
     }
   },
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
       addPageToPos: 'ADD_pageToPos',
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     ...mapActions('layouts',
@@ -469,7 +467,7 @@ export default Vue.extend({
       this.resizePage(format)
       if (this.groupType === 1) {
         // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([this.middlemostPageIndex], { width: format.width })
+        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
       }
       listApi.addDesign(format.id, 'layout', format)
       const index = this.recentlyUsed.findIndex((recent) => {
@@ -484,23 +482,22 @@ export default Vue.extend({
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      const page = GeneralUtils.deepCopy(this.getPage(this.middlemostPageIndex))
+      const page = GeneralUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
       page.designId = ''
       this.addPageToPos({
         newPage: page,
-        pos: this.middlemostPageIndex + 1
+        pos: pageUtils.currFocusPageIndex + 1
       })
       GroupUtils.deselect()
-      this.setMiddlemostPageIndex(this.middlemostPageIndex + 1)
-      this.setCurrActivePageIndex(this.middlemostPageIndex + 1)
+      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
       this.applySelectedFormat(false)
       StepsUtils.record()
-      this.$nextTick(() => { PageUtils.scrollIntoPage(this.middlemostPageIndex) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
     resizePage(format: { width: number, height: number }) {
-      ResizeUtils.resizePage(this.middlemostPageIndex, this.getPage(this.middlemostPageIndex), format)
+      ResizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
       this.updatePageProps({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         props: {
           width: format.width,
           height: format.height
@@ -668,7 +665,7 @@ export default Vue.extend({
         return
       }
       this.updatePageProps({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         props: {
           parentId: this.userParentId
         }
