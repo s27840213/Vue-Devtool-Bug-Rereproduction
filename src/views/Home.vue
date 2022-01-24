@@ -57,8 +57,8 @@
             div(class="home-content__more-btn"
               @click="goToTemplateCenterSortBy") {{$t('NN0371')}}
       template(v-if="!isLogin")
-        div(class="home-content__feature-bg bg-f1")
-          div(class="home-content__feature-f1")
+        div(class="home-content__feature home-content__feature-f1")
+          div(class="home-content__feature-text")
             i18n(path="NN0372"
              class="home-content__feature-title" tag="span")
                 template(#newline)
@@ -66,8 +66,19 @@
             div(class="home-content__feature-subtitle") {{$t('NN0373')}}
             div(class="home-content__feature-btn"
               @click="goToPage('SignUp')") {{$t('NN0374')}}
-          img(class="home-content__feature-img"
+          img(class="home-content__feature-f1-img"
             :src="require('@/assets/img/svg/homepage/Feature 1_us.svg')")
+        div(class="home-content__feature home-content__feature-f2")
+          img(class="home-content__feature-f2-img"
+            :src="require('@/assets/img/svg/homepage/Feature 2_us.png')")
+          div(class="home-content__feature-text")
+            i18n(path="NN0375"
+             class="home-content__feature-title" tag="span")
+                template(#newline)
+                  br
+            div(class="home-content__feature-subtitle home-content__feature-f2-subtitle") {{$t('NN0376')}}
+            div(class="home-content__feature-btn"
+              @click="goToTemplateCenterSortBy") {{$t('NN0377')}}
       nu-footer(class="mt-50")
       div(v-if="showSizePopup"
         class="home__size")
@@ -471,27 +482,65 @@ export default Vue.extend({
     }
   }
   &__feature {
-    &-bg {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &-f1 {
       background: #F3F6FA;
       margin-top: 24px;
-      padding: 0 5%;
-      &.bg-f1 {
+      padding: 150px 5%;
+      @media screen and (max-width: 768px) {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        padding: 0;
+      }
+      &-img {
+        width: 50%;
+        max-width: 640px;
         @media screen and (max-width: 768px) {
-          flex-direction: column-reverse;
-          align-items: flex-start;
-          padding: 0;
+          margin:0 auto;
+          width: 95%;
+          max-width: unset;
         }
       }
     }
-    &-f1 {
+    &-text {
       display: flex;
       flex-direction: column;
-      padding: 150px 0;
       @media screen and (max-width: 768px) {
-        padding: 50px 24px 75px 24px;
+        padding: 40px 24px 75px 24px;
+      }
+    }
+    &-f2 {
+      display: flex;
+      flex-direction: row;
+      padding: 50px 24px;
+      @media screen and (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 50px 0;
+      }
+      > div {
+        max-width: 425px;
+      }
+      &-img {
+        width: 45%;
+        max-width: 580px;
+        padding-right: 115px;
+        @media screen and (max-width: 1440px) {
+          padding-right: 24px;
+        }
+        @media screen and (max-width: 768px) {
+          padding-right: 0;
+          margin:0 auto;
+          width: 95%;
+          max-width: unset;
+        }
+      }
+      &-subtitle {
+        @media screen and (min-width: 768px) {
+          margin-bottom: 30px;
+        }
       }
     }
     &-title {
@@ -516,15 +565,6 @@ export default Vue.extend({
       width: 200px;
       margin-top: 20px;
       @include button-LG;
-    }
-    &-img {
-      width: 50%;
-      max-width: 640px;
-      @media screen and (max-width: 768px) {
-        margin:0 auto;
-        width: 95%;
-        max-width: unset;
-      }
     }
   }
 }
