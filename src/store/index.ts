@@ -674,7 +674,7 @@ const mutations: MutationTree<IEditorState> = {
     state.designId = ''
     state.assetId = ''
     state.groupId = ''
-    state.groupType = 0
+    state.groupType = -1
     state.name = ''
     state.exportIds = ''
     Object.assign(state.folderInfo, {

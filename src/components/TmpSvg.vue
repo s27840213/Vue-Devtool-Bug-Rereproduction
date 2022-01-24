@@ -125,7 +125,6 @@ export default Vue.extend({
         }
       }
       Object.assign(config, svgData)
-      console.log(pageUtils.currFocusPageIndex)
       layerUtils.addLayers(pageUtils.currFocusPageIndex, [layerFactary.newShape(config)])
     }
   }

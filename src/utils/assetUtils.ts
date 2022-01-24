@@ -452,8 +452,9 @@ class AssetUtils {
 
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
+    // const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
-    store.commit('SET_groupType', groupType)
+    // store.commit('SET_groupType', groupType)
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)
