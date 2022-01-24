@@ -136,12 +136,14 @@ class FormatUtils {
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat
         if (isSubController) {
-          frameUtils.updateSubFrameLayerAllClipsStyles(
-            pageIndex,
-            layerIndex,
-            subLayerIndex,
-            { adjust: { ...adjust } }
-          )
+          if (layers[0].type === 'frame') {
+            frameUtils.updateSubFrameLayerAllClipsStyles(
+              pageIndex,
+              layerIndex,
+              subLayerIndex,
+              { adjust: { ...adjust } }
+            )
+          }
         } else {
           for (const targetLayerIndex in layers) {
             const targetLayer = layers[targetLayerIndex]
