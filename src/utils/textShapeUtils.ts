@@ -134,6 +134,67 @@ class Controller {
       return `translate(${x}px, ${Math.abs(y - midY) * ratioFix}px) rotate(${angleOffset - init}deg)`
     })
   }
+
+  getTextHWs(_content: IText): { textWidth: number[], textHeight: number[] } {
+    const body = document.createElement('div')
+    // const content = GeneralUtils.deepCopy(_content) as IText
+    // content.paragraphs.forEach(pData => {
+    //   const p = document.createElement('p')
+    //   let fontSize = 0
+    //   pData.spans.forEach(spanData => {
+    //     const span = document.createElement('span')
+    //     span.textContent = spanData.text
+
+    //     const spanStyleObject = {}
+    //     tiptapUtils.textStyles(spanData.styles)
+    //       .split(';')
+    //       .forEach(s => {
+    //         Object.assign(spanStyleObject, {
+    //           [s.split(':')[0].trim()]: s.split(': ')[1].trim()
+    //         })
+    //       })
+    //     Object.assign(span.style, spanStyleObject)
+
+    //     span.classList.add('nu-text__span')
+    //     p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
+    //     if (spanData.styles.size > fontSize) {
+    //       fontSize = spanData.styles.size
+    //     }
+    //   })
+
+    //   const pStyleObject = {}
+    //   tiptapUtils.textStyles(pData.styles)
+    //     .split(';')
+    //     .forEach(s => {
+    //       Object.assign(pStyleObject, {
+    //         [s.split(':')[0].trim()]: s.split(':')[1].trim()
+    //       })
+    //     })
+    //   Object.assign(p.style, pStyleObject)
+
+    //   p.classList.add('nu-text__p')
+    //   body.appendChild(p)
+    // })
+    // if (content.styles.writingMode.includes('vertical')) {
+    //   body.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / content.styles.scale}px`
+    //   body.style.width = 'max-content'
+    // } else {
+    //   body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / content.styles.scale}px`
+    //   body.style.height = 'max-content'
+    // }
+    // body.classList.add('nu-text')
+    // body.style.writingMode = content.styles.writingMode
+    // document.body.appendChild(body)
+
+    // const scale = content.styles.scale ?? 1
+    // const textHW = {
+    //   width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
+    //   height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
+    //   body: body
+    // }
+    // document.body.removeChild(body)
+    // return textHW
+  }
 }
 
 export default new Controller()
