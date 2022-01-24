@@ -392,7 +392,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number) {
+  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
     const targePageIndex = pageIndex || this.middlemostPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -408,6 +408,11 @@ class AssetUtils {
           textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
         }
         textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
+
+        if (attrs.styles) {
+          Object.assign(textLayer.styles, attrs.styles)
+        }
+
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
       })

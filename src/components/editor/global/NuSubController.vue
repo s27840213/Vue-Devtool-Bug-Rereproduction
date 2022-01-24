@@ -265,8 +265,6 @@ export default Vue.extend({
       return {
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
-        // width: isVertical ? 'auto' : `${this.getLayerWidth / this.getLayerScale}px`,
-        // height: isVertical ? '' : 'auto',
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: this.isTextEditing ? 1 : 0
       }
@@ -440,7 +438,6 @@ export default Vue.extend({
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
       if (!primaryLayer.locked) {
         e.stopPropagation()
-        LayerUtils.setCurrSubSelectedInfo(this.layerIndex, 'clip')
         if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           Object.assign(this.imgBuff, {

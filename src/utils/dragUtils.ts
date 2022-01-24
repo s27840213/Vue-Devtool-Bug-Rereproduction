@@ -7,6 +7,11 @@ import mouseUtils from './mouseUtils'
 import stepsUtils from './stepsUtils'
 
 class DragUtils {
+  /**
+   *
+   * @param payload The core data of dragItem, e.g. srcObj for image, designId for svg.
+   * @param attrs offsetX/offsetY for dragImg's offset, width/height for dropped layer size
+   */
   itemDragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
     let { offsetX = 10, offsetY = 15, width, height } = attrs
     const scaleRatio = store.getters.getPageScaleRatio
@@ -52,10 +57,31 @@ class DragUtils {
     )
 
     const wrapper = document.createElement('div')
-    wrapper.appendChild(dragImage)
+    /**
+     * The standard text preivew is not an image element
+     * use the span beneth it as a preview
+     */
+    const previewIsImg = (e.target as HTMLElement).tagName === 'IMG'
+    wrapper.appendChild(previewIsImg ? dragImage : (() => {
+      let div = e.target as Node
+      while (div.nodeName !== 'BUTTON' && div) {
+        div = div.firstChild ?? div
+      }
+      !div && (div = e.target as Node)
+      const span = div.lastChild?.cloneNode(true) as HTMLElement
+      span.classList.add(`btn-text-${payload.type?.toLocaleLowerCase()}`)
+      span.setAttribute('style',
+        'color: black;' +
+        'position: absolute;' +
+        `transform: translate(${offsetX}px, ${offsetY}px);`
+      )
+
+      return span
+    })())
     wrapper.setAttribute('style',
-      `width: ${Math.floor(iconWidth)}px;` +
-      `height: ${Math.floor(iconHeight)}px;` +
+      (previewIsImg ? `width: ${Math.floor(iconWidth)}px;` : '') +
+      (previewIsImg ? `height: ${Math.floor(iconHeight)}px;` : '') +
+      (!previewIsImg ? `padding: ${1}px;` : '') +
       'position: absolute;'
     )
     document.body.appendChild(wrapper)
@@ -82,9 +108,17 @@ class DragUtils {
         x: target.getBoundingClientRect().x,
         y: target.getBoundingClientRect().y
       }
-      const x = (e.clientX - targetPos.x) * (100 / store.state.pageScaleRatio)
-      const y = (e.clientY - targetPos.y) * (100 / store.state.pageScaleRatio)
-      assetUtils.addAsset(data, { styles: { x, y } })
+      const styles = {
+        x: (e.clientX - targetPos.x) * (100 / store.state.pageScaleRatio),
+        y: (e.clientY - targetPos.y) * (100 / store.state.pageScaleRatio)
+      }
+
+      if (data.type === 'standardText') {
+        const { textType, text, locale, pageIndex } = data
+        assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
+      } else {
+        assetUtils.addAsset(data, { styles })
+      }
     }
   }
 

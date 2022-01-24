@@ -171,8 +171,8 @@ class LayerFactary {
       isEdited: false,
       contentEditable: false,
       styles: {
-        x: 0,
-        y: 0,
+        x: config.styles?.x,
+        y: config.styles?.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
