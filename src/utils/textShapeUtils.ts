@@ -194,6 +194,7 @@ class Controller {
     // }
     // document.body.removeChild(body)
     // return textHW
+    return { textWidth: [], textHeight: [] }
   }
 }
 
