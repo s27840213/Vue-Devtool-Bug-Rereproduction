@@ -1,9 +1,10 @@
 import TextEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
-import { ILayer, IText } from '@/interfaces/layer'
+import { ILayer, ISpan, IText } from '@/interfaces/layer'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
+import tiptapUtils from './tiptapUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -135,66 +136,62 @@ class Controller {
     })
   }
 
-  getTextHWs(_content: IText): { textWidth: number[], textHeight: number[] } {
+  flattenSpans(config: IText): ISpan[] {
+    return config.paragraphs.flatMap(
+      p =>
+        p.spans.flatMap(
+          span => [...span.text]
+            .map(t => ({ text: t, styles: { ...p.styles, ...span.styles } }))
+        )
+    )
+  }
+
+  getTextHWsBySpans(spans: ISpan[]): { textWidth: number[], textHeight: number[], minHeight: number } {
     const body = document.createElement('div')
-    // const content = GeneralUtils.deepCopy(_content) as IText
-    // content.paragraphs.forEach(pData => {
-    //   const p = document.createElement('p')
-    //   let fontSize = 0
-    //   pData.spans.forEach(spanData => {
-    //     const span = document.createElement('span')
-    //     span.textContent = spanData.text
+    const p = document.createElement('p')
 
-    //     const spanStyleObject = {}
-    //     tiptapUtils.textStyles(spanData.styles)
-    //       .split(';')
-    //       .forEach(s => {
-    //         Object.assign(spanStyleObject, {
-    //           [s.split(':')[0].trim()]: s.split(': ')[1].trim()
-    //         })
-    //       })
-    //     Object.assign(span.style, spanStyleObject)
+    spans.forEach(spanData => {
+      const span = document.createElement('span')
+      span.textContent = spanData.text
 
-    //     span.classList.add('nu-text__span')
-    //     p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
-    //     if (spanData.styles.size > fontSize) {
-    //       fontSize = spanData.styles.size
-    //     }
-    //   })
+      const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
+      spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
+      Object.assign(span.style, spanStyleObject)
 
-    //   const pStyleObject = {}
-    //   tiptapUtils.textStyles(pData.styles)
-    //     .split(';')
-    //     .forEach(s => {
-    //       Object.assign(pStyleObject, {
-    //         [s.split(':')[0].trim()]: s.split(':')[1].trim()
-    //       })
-    //     })
-    //   Object.assign(p.style, pStyleObject)
+      span.classList.add('nu-curve-text__span')
+      p.appendChild(span)
+    })
 
-    //   p.classList.add('nu-text__p')
-    //   body.appendChild(p)
-    // })
-    // if (content.styles.writingMode.includes('vertical')) {
-    //   body.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / content.styles.scale}px`
-    //   body.style.width = 'max-content'
-    // } else {
-    //   body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / content.styles.scale}px`
-    //   body.style.height = 'max-content'
-    // }
-    // body.classList.add('nu-text')
-    // body.style.writingMode = content.styles.writingMode
-    // document.body.appendChild(body)
+    const pStyleObject = {
+      margin: 0
+    }
+    Object.assign(p.style, pStyleObject)
 
-    // const scale = content.styles.scale ?? 1
-    // const textHW = {
-    //   width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
-    //   height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
-    //   body: body
-    // }
-    // document.body.removeChild(body)
-    // return textHW
-    return { textWidth: [], textHeight: [] }
+    p.classList.add('nu-curve-text__p')
+    body.appendChild(p)
+    body.style.width = 'max-content'
+    body.style.height = 'max-content'
+    body.style.writingMode = 'initial'
+    body.classList.add('nu-text')
+    document.body.appendChild(body)
+
+    const eleSpans = p.querySelectorAll('span.nu-curve-text__span')
+    const textWidth = []
+    const textHeight = []
+    let minHeight = 0
+    for (const eleSpan of eleSpans) {
+      const { offsetWidth, offsetHeight } = eleSpan as HTMLElement
+      textWidth.push(offsetWidth)
+      textHeight.push(offsetHeight)
+      minHeight = Math.max(minHeight, offsetHeight)
+    }
+
+    document.body.removeChild(body)
+    return { textWidth, textHeight, minHeight }
+  }
+
+  getTextHWs(_content: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
+    return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 }
 

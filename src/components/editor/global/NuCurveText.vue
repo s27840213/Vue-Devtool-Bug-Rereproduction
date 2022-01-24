@@ -1,9 +1,9 @@
 <template lang="pug">
-  p(class="nu-text__p" ref="curveText" :style="pStyle")
-    span(v-if="focus"  class="nu-text__circle" :style="circleStyle")
+  p(class="nu-curve-text__p" :style="pStyle")
+    span(v-if="focus"  class="nu-curve-text__circle" :style="circleStyle")
       svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
-      class="nu-text__span"
+      class="nu-curve-text__span"
       :key="sIndex",
       :style="styles(span.styles, sIndex)") {{ span.text }}
 </template>
@@ -14,11 +14,12 @@ import { mapGetters, mapState } from 'vuex'
 import CssConveter from '@/utils/cssConverter'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import LayerUtils from '@/utils/layerUtils'
-import { IGroup } from '@/interfaces/layer'
+import { IGroup, ISpan } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import textUtils from '@/utils/textUtils'
 import asyncUtils from '@/utils/asyncUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -86,15 +87,8 @@ export default Vue.extend({
       const { textShape } = this.config.styles
       return +textShape.bend
     },
-    spans(): any[] {
-      const { paragraphs } = this.config
-      return paragraphs.flatMap(
-        (p: any) =>
-          p.spans.flatMap(
-            (span: any) => [...span.text]
-              .map(t => ({ text: t, styles: { ...p.styles, ...span.styles } }))
-          )
-      )
+    spans(): ISpan[] {
+      return TextShapeUtils.flattenSpans(this.config)
     },
     fonts(): Set<string> {
       const { spans } = this
@@ -246,26 +240,14 @@ export default Vue.extend({
     handleCurveSpan (spans: any[], firstInit = false, callback?: () => void) {
       const { bend } = this
       if (spans.length > 1) {
-        this.$nextTick(() => {
-          if (!this.$refs.curveText) return
-          const eleSpans = (this.$refs.curveText as Element).querySelectorAll('span.nu-text__span')
-          const textWidth = []
-          const textHeight = []
-          let minHeight = 0
-          for (let idx = 0; idx < eleSpans.length; idx++) {
-            const { offsetWidth, offsetHeight } = eleSpans[idx] as HTMLElement
-            textWidth.push(offsetWidth)
-            textHeight.push(offsetHeight)
-            minHeight = Math.max(minHeight, offsetHeight)
-          }
-          this.textHeight = textHeight
-          this.minHeight = minHeight
-          this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
-          this.calcArea()
-          firstInit && this.resetLimitY()
-          this.rePosition()
-          callback && callback()
-        })
+        const { textWidth, textHeight, minHeight} = TextShapeUtils.getTextHWs(this.config)
+        this.textHeight = textHeight
+        this.minHeight = minHeight
+        this.transforms = TextShapeUtils.convertTextShape(textWidth, bend)
+        this.calcArea()
+        firstInit && this.resetLimitY()
+        this.rePosition()
+        callback && callback()
       } else {
         this.transforms = []
         callback && callback()
@@ -331,11 +313,8 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
-.nu-text {
-  height: 'max-content';
-  // margin: auto;
-  position: absolute;
+<style lang="scss">
+.nu-curve-text {
   &__p {
     display: flex;
     justify-content: center;
