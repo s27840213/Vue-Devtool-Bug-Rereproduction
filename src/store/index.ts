@@ -632,8 +632,8 @@ const mutations: MutationTree<IEditorState> = {
         const matchType = type ? type.includes(layer.type) : true
         const matchSubLayerIndex = typeof subLayerIndex === 'undefined' || idx === subLayerIndex
         if (matchType && matchSubLayerIndex) {
-          props && Object.assign(targetLayer.layers[idx], props)
-          styles && Object.assign(targetLayer.layers[idx].styles, styles)
+          props && Object.assign(targetLayer.layers[idx], generalUtils.deepCopy(props))
+          styles && Object.assign(targetLayer.layers[idx].styles, generalUtils.deepCopy(styles))
         }
       })
     } else {
