@@ -31,6 +31,8 @@ class RulerUtils {
     type2: Array<ITemplateSetting>
   }
 
+  fbCover: { v: number, h: number }
+
   splitUnitMap: {
     xxs: number,
     xs: number,
@@ -117,6 +119,11 @@ class RulerUtils {
           h: [33.33, 66.66]
         }
       ]
+    }
+
+    this.fbCover = {
+      v: 120,
+      h: 120
     }
   }
 

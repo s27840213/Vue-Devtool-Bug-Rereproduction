@@ -151,6 +151,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
+import pageUtils from '@/utils/pageUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -215,7 +216,6 @@ export default Vue.extend({
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -372,7 +372,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
@@ -614,11 +613,12 @@ export default Vue.extend({
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
-              this.setMiddlemostPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
-            }
-            if (this.pageIndex === this.middlemostPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
+            } else {
+              if (this.pageIndex === pageUtils.currFocusPageIndex) {
+                GroupUtils.select(this.pageIndex, [targetIndex])
+              }
             }
             if (!this.config.locked) {
               this.isControlling = true
@@ -662,16 +662,16 @@ export default Vue.extend({
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
-              this.setMiddlemostPageIndex(this.pageIndex)
               this.setLastSelectedLayerIndex(this.layerIndex)
-            }
-            // this if statement is used to prevent select the layer in another page
-            if (this.pageIndex === this.middlemostPageIndex) {
               GroupUtils.select(this.pageIndex, [targetIndex])
+            } else {
+              // this if statement is used to prevent select the layer in another page
+              if (this.pageIndex === pageUtils.currFocusPageIndex) {
+                GroupUtils.select(this.pageIndex, [targetIndex])
+              }
             }
           } else {
             targetIndex = this.config.styles.zindex - 1
-            this.setMiddlemostPageIndex(this.pageIndex)
             this.setLastSelectedLayerIndex(this.layerIndex)
             GroupUtils.select(this.pageIndex, [targetIndex])
           }
@@ -1440,10 +1440,11 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
-      if (this.currSelectedInfo.index < 0) {
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
-      }
-      popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
+      GroupUtils.deselect()
+      GroupUtils.select(this.pageIndex, [this.layerIndex])
+      this.$nextTick(() => {
+        popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
+      })
     },
     clickSubController(targetIndex: number, type: string) {
       let updateSubLayerProps = null as any

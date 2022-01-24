@@ -115,7 +115,10 @@
             span(class="body-1 text-red-1") 原設定內容
           div(v-if="showDbGroup"
             class="mb-10 square-wrapper wrong text-center")
-            div(class="pr-10 cover-option body-4")
+            div(v-if="dbGroupThemes.length === 0"
+              class="body-1") 尚未設定
+            div(v-else
+              class="pr-10 cover-option body-4")
               span theme
               span 封面頁碼
             div(v-for="(item, idx) in dbGroupThemes"
@@ -161,31 +164,49 @@
             span(class="body-1") 上次更新
             span(class="pl-15 body-2") {{templateInfo.edit_time}}
           div(class="template-information__line")
-            span(class="body-1") 語系
-            select(class="template-information__select" v-model="templateInfo.locale")
-              option(v-for="locale in localeOptions" :value="locale") {{locale}}
+            span(class="body-1") 模板尺寸
+            span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
           div(class="template-information__line")
             span(class="body-1") Theme_ids
+          template(v-if="showDbTemplate")
+            div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
+            div(class="template-information__line")
+              span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+          div(v-if="showDbTemplate"
+            class="square-wrapper wrong")
+            template(v-for="(item, idx) in themeList")
+              div(v-if="dbTemplateThemes[item.id]"
+                class="pt-5 theme-option")
+                span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
+                span(class="body-1") {{item.title}}
+                span(class="body-2 text-gray-2") {{item.description}}
+          div(v-if="showDbTemplate"
+            class="pt-10 template-information__line")
+            span(class="body-1 ") 修正版
           div(class="square-wrapper")
             div(v-for="(item, idx) in themeList"
               class="pt-5 theme-option")
               input(type="checkbox"
                 class="theme-option__check"
-                :disabled="isDisabled(item.width, item.height)"
+                :disabled="isDisabled(item.id, item.width, item.height)"
                 v-model="templateThemes[item.id]")
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div tags_tw
+          div(class="template-information__line pt-10")
+            span(class="body-1") 語系
+            select(class="template-information__select" v-model="templateInfo.locale")
+              option(v-for="locale in localeOptions" :value="locale") {{locale}}
+          div(class="pt-10") tags_tw
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_tw")
-          div tags_us
+          div(class="pt-10") tags_us
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_us")
-          div tags_jp
+          div(class="pt-10") tags_jp
           div
             property-bar
               input(class="body-2 text-gray-2" min="0"
@@ -249,12 +270,12 @@ import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import PageUtils from '@/utils/pageUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -315,7 +336,10 @@ export default Vue.extend({
         groupThemes: [] as ICoverTheme[]
       },
       showDbGroup: false,
+      showDbTemplate: false,
       dbGroupThemes: [] as ICoverTheme[],
+      templateThemes: [] as boolean[],
+      dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[]
     }
@@ -323,6 +347,7 @@ export default Vue.extend({
   watch: {
     key_id: function () {
       this.isGetTemplate = false
+      this.isGetGroup = false
       this.templateInfo = {
         key_id: '',
         creator: '',
@@ -379,7 +404,6 @@ export default Vue.extend({
     ),
     ...mapGetters({
       getPage: 'getPage',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       token: 'user/getToken',
       getAsset: 'getAsset',
       groupId: 'getGroupId',
@@ -388,13 +412,13 @@ export default Vue.extend({
       getPageSize: 'getPageSize'
     }),
     currentPageWidth(): number {
-      return Math.round(this.getPage(this.middlemostPageIndex)?.width ?? 0)
+      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
     },
     currentPageHeight(): number {
-      return Math.round(this.getPage(this.middlemostPageIndex)?.height ?? 0)
+      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
     },
     aspectRatio(): number {
-      return (this.getPage(this.middlemostPageIndex)?.width ?? 1) / this.getPage(this.middlemostPageIndex)?.height ?? 1
+      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
       return this.pageWidth !== '' && this.pageHeight !== ''
@@ -406,22 +430,13 @@ export default Vue.extend({
       return this.role === 0 && this.adminMode === true
     },
     key_id(): string {
-      return this.getPage(this.middlemostPageIndex).designId
-    },
-    templateThemes(): boolean[] {
-      const themes = this.templateInfo.theme_ids.split(',')
-      const templateThemes = [] as boolean[]
-      themes.forEach((item) => {
-        templateThemes[parseInt(item)] = true
-      })
-      return templateThemes
+      return this.getPage(pageUtils.currFocusPageIndex).designId
     }
   },
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
       addPageToPos: 'ADD_pageToPos',
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     ...mapActions('layouts',
@@ -452,7 +467,7 @@ export default Vue.extend({
       this.resizePage(format)
       if (this.groupType === 1) {
         // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([this.middlemostPageIndex], { width: format.width })
+        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
       }
       listApi.addDesign(format.id, 'layout', format)
       const index = this.recentlyUsed.findIndex((recent) => {
@@ -467,23 +482,22 @@ export default Vue.extend({
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      const page = GeneralUtils.deepCopy(this.getPage(this.middlemostPageIndex))
+      const page = GeneralUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
       page.designId = ''
       this.addPageToPos({
         newPage: page,
-        pos: this.middlemostPageIndex + 1
+        pos: pageUtils.currFocusPageIndex + 1
       })
       GroupUtils.deselect()
-      this.setMiddlemostPageIndex(this.middlemostPageIndex + 1)
-      this.setCurrActivePageIndex(this.middlemostPageIndex + 1)
+      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
       this.applySelectedFormat(false)
       StepsUtils.record()
-      this.$nextTick(() => { PageUtils.scrollIntoPage(this.middlemostPageIndex) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
     resizePage(format: { width: number, height: number }) {
-      ResizeUtils.resizePage(this.middlemostPageIndex, this.getPage(this.middlemostPageIndex), format)
+      ResizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
       this.updatePageProps({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         props: {
           width: format.width,
           height: format.height
@@ -574,8 +588,7 @@ export default Vue.extend({
         const res = await designApis.getDesignInfo(this.token, 'template', this.key_id, 'select', JSON.stringify(data))
         if (res.data.flag === 0) {
           this.isGetTemplate = true
-          this.templateInfo = res.data.data
-          this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+          this.setTemplateInfo(res.data)
           if (this.themeList.length === 0) {
             this.themeList = res.data.data.themeList
           }
@@ -636,8 +649,7 @@ export default Vue.extend({
       const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
         this.$notify({ group: 'copy', text: '模板資料更新成功' })
-        this.templateInfo = res.data.data
-        this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+        this.setTemplateInfo(res.data)
       } else {
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
@@ -653,7 +665,7 @@ export default Vue.extend({
         return
       }
       this.updatePageProps({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         props: {
           parentId: this.userParentId
         }
@@ -716,6 +728,9 @@ export default Vue.extend({
       const coverList = this.groupInfo.cover_ids.split(',')
       coverList.map((cover) => {
         const id = parseInt(cover.split(':')[0])
+        if (id === 0) {
+          return
+        }
         const index = this.groupInfo.groupThemes.findIndex(theme => theme.id === id)
         if (index !== -1) {
           const keyId = cover.split(':')[1]
@@ -745,15 +760,32 @@ export default Vue.extend({
         }
       })
 
-      const groupThemesString = this.groupInfo.groupThemes.map(theme => {
-        return theme.id
-      }).join(',')
-      const dbThemesString = this.dbGroupThemes.map(theme => {
-        return theme.id
-      }).join(',')
-      if (groupThemesString !== dbThemesString) {
+      // 比較 cover_ids 是否有設定錯誤
+      const coverIds = this.groupInfo.groupThemes.map(theme => {
+        return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
+      })
+      const dbCoverIds = this.dbGroupThemes.map(theme => {
+        return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
+      })
+      const sameCoverId = coverIds.join(',') === dbCoverIds.join(',')
+      if (!sameCoverId) {
         this.showDbGroup = true
       }
+    },
+    setTemplateInfo(data: any) {
+      this.showDbTemplate = false
+      this.templateThemes = []
+      this.templateInfo = data.data
+      this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
+      if (this.templateInfo.theme_ids === '0' ||
+        this.templateInfo.theme_ids.length === 0) {
+        this.$notify({ group: 'copy', text: '尚未設定主題' })
+      }
+      const themes = this.templateInfo.theme_ids.split(',')
+      themes.forEach((item) => {
+        this.templateThemes[parseInt(item)] = true
+      })
+      this.dbTemplateThemes = Array.from(this.templateThemes)
     },
     copyText(text: string) {
       if (text.length === 0) {
@@ -764,7 +796,7 @@ export default Vue.extend({
           this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
-    isDisabled(themeWidth: string, themeHeight: string) {
+    isDisabled(idx: number, themeWidth: string, themeHeight: string) {
       const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
 
@@ -775,7 +807,11 @@ export default Vue.extend({
       } else if ((themeWidth === this.templateInfo.width || parseInt(themeWidth) === 0) &&
         (themeHeight === this.templateInfo.height || parseInt(themeHeight) === 0)) {
         return false
-      } else {
+      } else { // Disabled
+        if (this.templateThemes[idx]) {
+          this.showDbTemplate = true
+          this.templateThemes[idx] = false
+        }
         return true
       }
     },

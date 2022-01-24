@@ -64,7 +64,6 @@ export default Vue.extend({
       popupComponent: 'popup/getPopupComponent',
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
       groupType: 'getGroupType'
@@ -73,7 +72,7 @@ export default Vue.extend({
       return (this.popupComponent as IPopupComponent).component
     },
     hasDesignId(): boolean {
-      return this.getPage(this.middlemostPageIndex).designId !== ''
+      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true

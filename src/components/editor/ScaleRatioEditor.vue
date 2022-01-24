@@ -39,7 +39,6 @@ export default Vue.extend({
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       showPagePanel: 'page/getShowPagePanel'
     }),
     isPageScalePopupOpen(): boolean {
@@ -66,7 +65,7 @@ export default Vue.extend({
     setIsShowPagePreview(show: boolean) {
       this._setIsShowPagePreview(show)
       if (!show) {
-        pageUtils.jumpIntoPage(this.middlemostPageIndex)
+        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
         this._setShowPagePanel(false)
       }
     },

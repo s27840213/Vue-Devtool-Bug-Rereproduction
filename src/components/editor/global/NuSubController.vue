@@ -109,7 +109,6 @@ export default Vue.extend({
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapState(['currDraggedPhoto']),
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType'
@@ -266,7 +265,7 @@ export default Vue.extend({
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? 1 : 0
+        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
       }
     },
     textStyles(styles: any) {
@@ -352,8 +351,7 @@ export default Vue.extend({
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const currLayer = LayerUtils.getCurrLayer
-      const primaryScale = currLayer.styles.scale
+      const primaryScale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
           return `${2 * (100 / this.scaleRatio) / primaryScale}px dashed ${outlineColor}`

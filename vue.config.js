@@ -53,12 +53,8 @@ module.exports = {
                 return args
             })
         }
+
         if (argv.PRERENDER) {
-            config.plugin('define').tap(args => {
-                let name = 'process.env'
-                args[0][name]['VUE_APP_PRERENDER'] = argv.PRERENDER || ''
-                return args
-            })
             // Tell Vue (CLI 3) to provide this file to Pre-SPA:
             config.plugin('html')
                 .tap(args => {
@@ -71,8 +67,12 @@ module.exports = {
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
                     indexPath: path.join(__dirname, 'dist', 'app.html'),
                     staticDir: path.join(__dirname, 'dist'),
-                    routes: ['/', '/tw', '/us', '/jp', '/templates'],
+                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates'],
                     renderer: new Renderer({
+                        // The name of the property
+                        injectProperty: '__PRERENDER_INJECTED',
+                        // The values to have access to via `window.injectProperty` (the above property )
+                        inject: { PRERENDER: 1 },
                         renderAfterDocumentEvent: 'render-event',
                         headless: true
                     })

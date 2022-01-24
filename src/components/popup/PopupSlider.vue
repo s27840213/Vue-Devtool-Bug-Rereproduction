@@ -11,7 +11,7 @@
       @mouseup="handleChangeStop")
     input(class="popup-slider__text body-2 text-gray-2"
       v-if="!noText"
-      type="text"
+      type="number"
       v-model.number="value"
       @change="handleChangeStop")
 </template>

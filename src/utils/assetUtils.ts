@@ -19,6 +19,7 @@ import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
+import { ITextState } from '@/store/text'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -39,7 +40,6 @@ class AssetUtils {
   get pageSize() { return store.getters.getPageSize(pageUtils.currFocusPageIndex) }
   get getLayer() { return store.getters.getLayer }
   get layerIndex() { return store.getters.getCurrSelectedIndex }
-  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
@@ -159,7 +159,7 @@ class AssetUtils {
 
   addSvg(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
@@ -195,7 +195,7 @@ class AssetUtils {
 
   async addLine(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targePageIndex)
@@ -235,7 +235,7 @@ class AssetUtils {
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
@@ -278,7 +278,7 @@ class AssetUtils {
 
   addFrame(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_FRAME
     const width = json.width * resizeRatio
@@ -307,7 +307,7 @@ class AssetUtils {
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
     const { pageIndex, styles = {} } = attrs
-    const targetPageIndex = pageIndex || this.middlemostPageIndex
+    const targetPageIndex = pageIndex || pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
     const page = store.getters.getPage(targetPageIndex)
@@ -373,7 +373,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const config = {
       ...json,
       styles: {
@@ -393,7 +393,7 @@ class AssetUtils {
   }
 
   addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
-    const targePageIndex = pageIndex || this.middlemostPageIndex
+    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
         const fieldMap = {
@@ -529,7 +529,6 @@ class AssetUtils {
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
-      process.env.NODE_ENV === 'development' && console.log('item ID:', item.id, item)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 1:

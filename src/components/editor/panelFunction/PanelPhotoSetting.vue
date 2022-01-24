@@ -34,6 +34,7 @@ import imageUtils from '@/utils/imageUtils'
 import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -55,7 +56,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
@@ -124,14 +124,14 @@ export default Vue.extend({
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
           return frameUtils.updateFrameLayerStyles(
-            this.middlemostPageIndex,
+            pageUtils.currFocusPageIndex,
             this.currSelectedIndex,
             0,
             { adjust: { ...adjust } }
           )
         }
         return frameUtils.updateSubFrameLayerStyles(
-          this.middlemostPageIndex,
+          pageUtils.currFocusPageIndex,
           this.currSelectedIndex,
           index,
           { adjust: { ...adjust } }
@@ -140,7 +140,7 @@ export default Vue.extend({
       if (types.has('image') || (types.has('group') && type === 'image')) {
         return imageAdjustUtil.setAdjust({
           adjust: { ...adjust },
-          pageIndex: this.middlemostPageIndex,
+          pageIndex: pageUtils.currFocusPageIndex,
           layerIndex: this.currSelectedIndex,
           subLayerIndex: types.has('group') && index
         })

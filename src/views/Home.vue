@@ -199,6 +199,11 @@ export default Vue.extend({
         property: 'og:description',
         content: `${this.$t('OG0002')}`,
         vmid: 'og:description'
+      },
+      {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
       }
     ]
     const title = `${this.$t('SE0001')}`
@@ -264,15 +269,16 @@ export default Vue.extend({
     }
     let keyword = this.tagString.replace(/,/gi, ' ')
     this.tags = this.tagString.split(',')
-    const tagTemplate = await this.getTagContent({ keyword, theme })
+    const cache = true
+    const tagTemplate = await this.getTagContent({ keyword, theme, cache })
     this.tagTemplateList = tagTemplate.data.content[0].list
 
     keyword = 'group::0;;order_by::popular'
-    const popularTemplate = await this.getTagContent({ keyword, theme })
+    const popularTemplate = await this.getTagContent({ keyword, theme, cache })
     this.popularTemplateList = popularTemplate.data.content[0].list
 
     keyword = 'group::0;;order_by::time'
-    const latestTemplate = await this.getTagContent({ keyword, theme })
+    const latestTemplate = await this.getTagContent({ keyword, theme, cache })
     this.latestTemplateList = latestTemplate.data.content[0].list
   },
   destroyed() {

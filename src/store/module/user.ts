@@ -29,6 +29,7 @@ export interface IUserModule {
   userId: string,
   teamId: string,
   role: number,
+  roleRaw: number,
   adminMode: boolean,
   isAuthenticated: boolean,
   account: string,
@@ -57,6 +58,7 @@ const getDefaultState = (): IUserModule => ({
   userId: '',
   teamId: '',
   role: -1,
+  roleRaw: -1,
   adminMode: true,
   isAuthenticated: false,
   account: '',
@@ -444,6 +446,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         shortName: shortName,
         userId: data.data.user_id,
         role: data.data.role,
+        roleRaw: data.data.roleRaw,
         account: data.data.account,
         upassUpdate: data.data.upass_update,
         subscribe: data.data.subscribe,
@@ -452,7 +455,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
-      console.log(data.data)
+      process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
         i18n.locale = data.data.locale

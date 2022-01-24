@@ -188,7 +188,6 @@ export default Vue.extend({
     async perviewAsLoading() {
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
-        console.log(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
         const src = ImageUtils.getSrc(this.config)
         img.onload = () => {

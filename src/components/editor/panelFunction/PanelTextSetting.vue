@@ -22,7 +22,8 @@
                     v-click-outside="handleValueModal"
                     @update="handleValueUpdate")
     div(class="text-setting__row2")
-      div(class="text-setting__color" v-hint="`${$t('NN0099')}`")
+      div(class="text-setting__color"
+          v-tooltip="$hintConfig(`${$t('NN0099')}`)")
         div(class="color-slip record-selection"
           @click="handleColorModal")
           svg-icon(iconName="text-color"
@@ -44,25 +45,26 @@
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-hint="`${$t('NN0109')}`")
+          v-tooltip="$hintConfig(`${$t('NN0109')}`)")
         svg-icon(class="pointer record-selection btn-ls"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-hint="`${$t('NN0110')}`")
+          v-tooltip="$hintConfig(`${$t('NN0110')}`)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="pointer record-selection"
+        class="record-selection"
+        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
-        v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        v-tooltip="$hintConfig(hintMap[icon])"
+        :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer"
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
-        v-hint="hintMap[icon]"
+        v-tooltip="$hintConfig(hintMap[icon])"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
 
@@ -86,6 +88,8 @@ import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -137,7 +141,11 @@ export default Vue.extend({
       this.setParagraphProp('fontSpacing', value)
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
-      tiptapUtils.focus({ scrollIntoView: false })
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
+        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        tiptapUtils.focus({ scrollIntoView: false })
+      }
     })
   },
   destroyed() {
@@ -149,7 +157,6 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     ...mapGetters({
-      pageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
@@ -162,7 +169,7 @@ export default Vue.extend({
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
     scale(): number {
-      const layer = this.getLayer(this.pageIndex, this.layerIndex)
+      const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
       if (layer && layer.layers) {
         const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
           if (c.type === 'text') { p.add(c.styles.scale) }
@@ -191,6 +198,16 @@ export default Vue.extend({
         scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
       }
       return 1 / scale
+    },
+    hasCurveText(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (subLayerIdx !== -1) {
+        return textShapeUtils.isCurvedText((currLayer as IGroup).layers[subLayerIdx].styles)
+      }
+      if (currLayer.type === 'text') {
+        return textShapeUtils.isCurvedText(currLayer.styles)
+      }
+      return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
     }
   },
   methods: {
@@ -256,10 +273,10 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+      LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
       tiptapUtils.applySpanStyle('size', value)
       tiptapUtils.agent(editor => {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+        LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
         StepsUtils.record()
       })
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -319,7 +336,8 @@ export default Vue.extend({
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
-        TextPropUtils.onPropertyClick(iconName, undefined, this.sel.start, this.sel.end)
+        if (this.hasCurveText) return
+        TextPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
       } else {
         switch (iconName) {
           case 'bold':
@@ -386,23 +404,36 @@ export default Vue.extend({
     onParaPropsClick(iconName: string) {
       switch (iconName) {
         case 'text-align-left':
-          tiptapUtils.applyParagraphStyle('align', 'left')
-          TextPropUtils.updateTextPropsState({ textAlign: 'left' })
+          this.handleTextAlign('left')
           break
         case 'text-align-center':
-          tiptapUtils.applyParagraphStyle('align', 'center')
-          TextPropUtils.updateTextPropsState({ textAlign: 'center' })
+          this.handleTextAlign('center')
           break
         case 'text-align-right':
-          tiptapUtils.applyParagraphStyle('align', 'right')
-          TextPropUtils.updateTextPropsState({ textAlign: 'right' })
+          this.handleTextAlign('right')
           break
         case 'text-align-justify':
-          tiptapUtils.applyParagraphStyle('align', 'justify')
-          TextPropUtils.updateTextPropsState({ textAlign: 'justify' })
+          this.handleTextAlign('justify')
           break
       }
       StepsUtils.record()
+    },
+    handleTextAlign(prop: string) {
+      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+      if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
+        const layers = (currLayer as IGroup | ITmp).layers
+        layers.forEach((l, idx) => {
+          if (l.type === 'text') {
+            const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as Array<IParagraph>
+            paragraphs.forEach(p => (p.styles.align = prop))
+            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, { paragraphs })
+          }
+        })
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      } else {
+        tiptapUtils.applyParagraphStyle('align', prop)
+        TextPropUtils.updateTextPropsState({ textAlign: prop })
+      }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
@@ -428,7 +459,7 @@ export default Vue.extend({
         clearInterval(interval)
         tiptapUtils.agent(editor => {
           if (!editor.state.selection.empty) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
           }
         })
@@ -453,12 +484,12 @@ export default Vue.extend({
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
-        LayerUtils.initialLayerScale(this.pageIndex, this.layerIndex)
+        LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
           tiptapUtils.applySpanStyle('size', value)
           tiptapUtils.agent(editor => {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
           })
           TextPropUtils.updateTextPropsState({ fontSize: value })
@@ -516,7 +547,7 @@ export default Vue.extend({
         if (!this.isGroup) {
           if (this.currSelectedInfo.layers.length === 1) {
             this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: this.pageIndex,
+              pageIndex: pageUtils.currFocusPageIndex,
               layerIndex: this.currSelectedIndex,
               styles: {
                 opacity: parseInt(value)

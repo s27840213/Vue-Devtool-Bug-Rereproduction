@@ -7,20 +7,23 @@
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         @click.native="openSliderPopup()"
-        v-hint="`${$t('NN0030')}`")
+        v-tooltip="$hintConfig(`${$t('NN0030')}`)"
+      )
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'active': backgroundLocked }"
         :iconName="backgroundLocked ? 'unlock' : 'lock'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
         @click.native="handleLockBackground"
-        v-hint="`${$t('NN0143')}`")
+        v-tooltip="$hintConfig(backgroundLocked ? `${$t('NN0382')}`: `${$t('NN0143')}`)"
+      )
       svg-icon(class="pointer p-5 feature-button"
         :class="{ 'disabled': backgroundLocked }"
         :iconColor="'gray-2'"
         iconName="trash" :iconWidth="'20px'"
         @click.native="handleDeleteBackground"
-        v-hint="`${$t('NN0034')}`")
+        v-tooltip="$hintConfig(`${$t('NN0034')}`)"
+      )
     div(class="mb-10")
       btn(class="full-width"
         :class="backgroundImgControl ? 'active' : ''"
@@ -74,6 +77,7 @@ import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: { PopupAdjust },
@@ -91,11 +95,10 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       getPage: 'getPage'
     }),
     currPage(): IPage {
-      return this.getPage(this.middlemostPageIndex)
+      return this.getPage(pageUtils.currFocusPageIndex)
     },
     backgroundColor(): string {
       return this.currPage.backgroundColor
@@ -158,45 +161,45 @@ export default Vue.extend({
     }),
     handleDeleteBackground() {
       if (this.backgroundLocked) return this.handleLockedNotify()
-      this.removeBg({ pageIndex: this.middlemostPageIndex })
+      this.removeBg({ pageIndex: pageUtils.currFocusPageIndex })
       stepsUtils.record()
     },
     handleLockBackground() {
       this.setBgConfig({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         config: {
           locked: !this.backgroundLocked
         }
       })
       this.setBgImageControl({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         imgControl: false
       })
       stepsUtils.record()
     },
     handleChangeBgColor(color: string) {
       this.setBgColor({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         color
       })
       stepsUtils.record()
     },
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         opacity: `${opacity}`
       })
     },
     handleControlBgImage() {
       if (this.backgroundLocked) return this.handleLockedNotify()
       this.setBgImageControl({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         imgControl: !this.backgroundImgControl
       })
     },
     handleChangeBgAdjust(adjust: any) {
       this.setBgImageStyles({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         styles: {
           adjust: { ...adjust }
         }
@@ -228,7 +231,7 @@ export default Vue.extend({
     handleImageFlip(flipIcon: string) {
       const [h, v] = this.backgroundImgFlip
       this.setBgImageStyles({
-        pageIndex: this.middlemostPageIndex,
+        pageIndex: pageUtils.currFocusPageIndex,
         styles: {
           horizontalFlip: flipIcon === 'flip-h' ? !h : h,
           verticalFlip: flipIcon === 'flip-v' ? !v : v

@@ -284,7 +284,7 @@ export default Vue.extend({
       })
     },
     handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
+      const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
@@ -293,21 +293,10 @@ export default Vue.extend({
           layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
         }
       })
-      // const selectionAreaInfo = this.mapSelectionRectToPage(selectionData)
-      // const layers = layerUtils.getLayers(this.getMiddlemostPageIndex)
-      // // const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
-      // const layerIndexs: number[] = []
-      // layers.forEach((layer) => {
-      //   mathUtils.getCornerPoints(0, selectionAreaInfo)
-      //   const layerData = layer.getBoundingClientRect()
-      //   if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-      //     (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-      //     layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-      //   }
-      // })
+
       if (layerIndexs.length > 0) {
         // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(this.getMiddlemostPageIndex, layerIndexs)
+        GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }
     },
     mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {

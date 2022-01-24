@@ -21,7 +21,9 @@
       svg-icon(:iconName="'upload-cloud'"
         :iconWidth="'20px'"
         :iconColor="statusColor"
-        class="upload-cloud ml-10")
+        class="upload-cloud ml-10"
+        v-tooltip="$hintConfig(statusHint)"
+        )
 </template>
 
 <script lang="ts">
@@ -35,7 +37,6 @@ import GeneralUtils from '@/utils/generalUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import hintUtils from '@/utils/hintUtils'
 
 export default Vue.extend({
   data() {
@@ -59,13 +60,9 @@ export default Vue.extend({
 
     this.online = navigator.onLine
   },
-  mounted() {
-    hintUtils.bind(document.getElementsByClassName('upload-cloud')[0] as HTMLElement, this.statusHint, 500)
-  },
   beforeDestroy() {
     networkUtils.offNetworkCahnge()
     uploadUtils.offDesignUploadStatus()
-    hintUtils.unbind(document.getElementsByClassName('upload-cloud')[0] as HTMLElement, this.statusHint, 500)
   },
   computed: {
     ...mapState('user', [
@@ -110,13 +107,6 @@ export default Vue.extend({
         return `${this.$t('NN0349')}`
       }
       return this.designUploadStatus === 'uploading' ? `${this.$t('NN0136')}` : `${this.$t('NN0135')}`
-    }
-  },
-  watch: {
-    statusHint(newVal, oldVal) {
-      const uploadCloud = document.getElementsByClassName('upload-cloud')[0]
-      hintUtils.unbind(uploadCloud as HTMLElement, oldVal, 500)
-      hintUtils.bind(uploadCloud as HTMLElement, newVal, 500)
     }
   },
   methods: {

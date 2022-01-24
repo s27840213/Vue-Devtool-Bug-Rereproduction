@@ -26,15 +26,11 @@ class PageUtils {
   }
 
   get currFocusPageIndex() {
-    const { pageIndex } = this.currSelectedInfo
-    return pageIndex >= 0 ? pageIndex
-      : this.currActivePageIndex >= 0
-        ? this.currActivePageIndex : this.middlemostPageIndex
+    return store.getters.getCurrFocusPageIndex
   }
 
   get currFocusPage(): IPage {
-    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.middlemostPageIndex
-    return this.getPage(targetIndex)
+    return this.getPage(this.currFocusPageIndex)
   }
 
   get pageRect(): { [index: string]: number } {

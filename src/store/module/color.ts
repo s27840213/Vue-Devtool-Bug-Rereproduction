@@ -1,4 +1,5 @@
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import store from '..'
 import { IEditorState } from '../types'
 
 interface IColorState {
@@ -76,11 +77,11 @@ const getters: GetterTree<IColorState, IEditorState> = {
     return state.brandColors
   },
   getDocumentColors(state, getters, rootState): Array<string> {
-    const pageColors = rootState.pages[rootState.middlemostPageIndex].documentColors
+    const pageColors = rootState.pages[store.getters.getCurrFocusPageIndex].documentColors
     if (!pageColors.length) {
       return state.documentColors
     }
-    return rootState.pages[rootState.middlemostPageIndex].documentColors
+    return rootState.pages[store.getters.getCurrFocusPageIndex].documentColors
   }
 }
 

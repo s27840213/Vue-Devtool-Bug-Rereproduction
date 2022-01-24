@@ -60,6 +60,7 @@ class DragUtils {
     /**
      * The standard text preivew is not an image element
      * use the span beneth it as a preview
+     * update at 2022/1/24: the only non-image dragged-item is the standard text.
      */
     const previewIsImg = (e.target as HTMLElement).tagName === 'IMG'
     wrapper.appendChild(previewIsImg ? dragImage : (() => {
@@ -75,14 +76,14 @@ class DragUtils {
         'position: absolute;' +
         `transform: translate(${offsetX}px, ${offsetY}px);`
       )
-
       return span
     })())
     wrapper.setAttribute('style',
       (previewIsImg ? `width: ${Math.floor(iconWidth)}px;` : '') +
       (previewIsImg ? `height: ${Math.floor(iconHeight)}px;` : '') +
-      (!previewIsImg ? `padding: ${1}px;` : '') +
-      'position: absolute;'
+      'position: absolute;' +
+      // If the padding is not set, there would be a problem to the dragImg
+      (!previewIsImg ? `padding: ${1}px;` : '')
     )
     document.body.appendChild(wrapper)
     /**
