@@ -386,7 +386,7 @@ export default Vue.extend({
       padding: 0 75px;
     }
     @media screen and (max-width: 768px) {
-      padding: 0 3%;
+      padding: 0;
     }
   }
   &__plaque {

@@ -18,8 +18,9 @@
       :class="{'items-theme': type === 'theme'}"
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
-        design-item(v-for="design in designList"
+        design-item(v-for="design, idx in designList"
           class="py-20 scroll-list__design"
+          :class="{'padding-start': idx === 0, 'padding-end': idx === designList.length - 1}"
           :key="design.id"
           :config="design")
         div(v-if="isLoading")
@@ -41,7 +42,7 @@
         div(v-for="item, idx in list"
           class="scroll-list__item pt-10"
           :style="previewStyle"
-          :class="{'pb-90 item-theme': type === 'theme'}")
+          :class="{'pb-90 item-theme': type === 'theme', 'padding-start': idx === 0, 'padding-end': idx === list.length - 1}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`)"
@@ -338,6 +339,16 @@ export default Vue.extend({
         display: none;
       }
     }
+  }
+}
+.padding-start {
+  @media screen and (max-width: 768px) {
+    padding-left: 24px;
+  }
+}
+.padding-end {
+  @media screen and (max-width: 768px) {
+    padding-right: 24px;
   }
 }
 </style>
