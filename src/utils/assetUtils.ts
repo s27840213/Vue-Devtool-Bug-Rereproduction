@@ -473,7 +473,7 @@ class AssetUtils {
 
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
-    // const currGroupType = store.getters.getGroupType
+    const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
     // store.commit('SET_groupType', groupType)
     const promises = contents?.filter(content => childId ? content.id === childId : true)
@@ -508,13 +508,13 @@ class AssetUtils {
               props: resize
             })
           }
-          if (groupType === 1 && !resize) {
+          if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
             for (const idx in jsonDataList) {
               const { height, width } = jsonDataList[idx]
               const pageIndex = +idx + targetIndex
-              const newSize = { height: height * width / pageWidth, width: pageWidth }
+              const newSize = { height: height * pageWidth / width, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
               store.commit('UPDATE_pageProps', {
                 pageIndex,
