@@ -6,6 +6,7 @@ import controlUtils from '@/utils/controlUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import rulerUtils from './rulerUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -139,7 +140,7 @@ class ResizeUtils {
     )
   }
 
-  centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number}) {
+  centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height, posX, posY } = imageUtils.adaptToSize({
       width: page.backgroundImage.config.styles.initWidth,
       height: page.backgroundImage.config.styles.initHeight
@@ -152,7 +153,7 @@ class ResizeUtils {
     )
   }
 
-  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number}) {
+  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height } = page
     const aspectRatio = width / height
     const targetAspectRatio = format.width / format.height
@@ -169,6 +170,8 @@ class ResizeUtils {
     } else {
       this.centerBackground(pageIndex, page, format)
     }
+
+    rulerUtils.removeInvalidGuides(pageIndex, format)
   }
 }
 

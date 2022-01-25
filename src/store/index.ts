@@ -678,6 +678,11 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
   },
+  SET_guideline(state: IEditorState, { guidelines, pageIndex }) {
+    const { pages } = state
+    const currFocusPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines = guidelines
+  },
   DELETE_guideline(state: IEditorState, updateInfo: { pageIndex: number, index: number, type: string }) {
     const { pageIndex, index, type } = updateInfo
     const { pages } = state
