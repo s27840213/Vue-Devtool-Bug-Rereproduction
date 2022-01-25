@@ -19,7 +19,6 @@ import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import textUtils from '@/utils/textUtils'
 import asyncUtils from '@/utils/asyncUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -239,7 +238,7 @@ export default Vue.extend({
     },
     handleCurveSpan (spans: any[], firstInit = false, callback?: () => void) {
       if (spans.length > 1) {
-        const { textWidth, textHeight, minHeight} = TextShapeUtils.getTextHWsBySpans(spans)
+        const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(spans)
         this.textHeight = textHeight
         this.minHeight = minHeight
         this.transforms = TextShapeUtils.convertTextShape(textWidth, this.bend)
