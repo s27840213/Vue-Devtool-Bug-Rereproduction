@@ -681,6 +681,7 @@ export default Vue.extend({
       @include button-LG;
     }
     &-textbtn {
+      cursor: pointer;
       display: flex;
       flex-direction: row;
       align-items: center;
