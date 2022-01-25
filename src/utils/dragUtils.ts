@@ -96,13 +96,13 @@ class DragUtils {
     }, 0)
   }
 
-  itemOnDrop(e: DragEvent) {
+  itemOnDrop(e: DragEvent, pageIndex: number) {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
 
     if (data.type === 'image') {
-      mouseUtils.onDrop(e, layerUtils.pageIndex)
+      mouseUtils.onDrop(e, pageIndex)
     } else {
       const target = e.target as HTMLElement
       const targetPos = {
@@ -115,10 +115,10 @@ class DragUtils {
       }
 
       if (data.type === 'standardText') {
-        const { textType, text, locale, pageIndex } = data
+        const { textType, text, locale } = data
         assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
       } else {
-        assetUtils.addAsset(data, { styles })
+        assetUtils.addAsset(data, { styles, pageIndex })
       }
     }
   }
@@ -143,7 +143,7 @@ class DragUtils {
   onImageDragEnter(e: DragEvent, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
     const { layerIndex, subLayerIdx } = this.imgBuff
-    if (DragSrcObj) {
+    if (store.state.currDraggedPhoto.srcObj.type) {
       const { imgWidth, imgHeight } = config.styles
       const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
       const styles = mouseUtils.clipperHandler(store.state.currDraggedPhoto as any, path, config.styles).styles
@@ -165,15 +165,18 @@ class DragUtils {
 
   onImageDragLeave(e: DragEvent) {
     const { layerIndex, subLayerIdx, styles, srcObj } = this.imgBuff
-    if (store.state.currDraggedPhoto.srcObj) {
+    if (store.state.currDraggedPhoto.srcObj.type) {
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
     }
   }
 
   onImgDrop(e: DragEvent) {
-    e.stopPropagation()
-    stepsUtils.record()
+    console.log(generalUtils.deepCopy(store.state.currDraggedPhoto))
+    if (store.state.currDraggedPhoto.srcObj.type) {
+      e.stopPropagation()
+      stepsUtils.record()
+    }
   }
 }
 

@@ -75,7 +75,6 @@ class MouseUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
-    console.log(data)
     const target = e.target as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,

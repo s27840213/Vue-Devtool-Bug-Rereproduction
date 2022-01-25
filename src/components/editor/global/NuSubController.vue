@@ -483,9 +483,11 @@ export default Vue.extend({
       }
     },
     onFrameDrop(e: DragEvent) {
-      e.stopPropagation()
-      StepsUtils.record()
-      this.imgBuff.cached = false
+      if (this.imgBuff.cached) {
+        e.stopPropagation()
+        StepsUtils.record()
+        this.imgBuff.cached = false
+      }
     },
     undo() {
       ShortcutUtils.undo()
