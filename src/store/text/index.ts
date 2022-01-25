@@ -71,24 +71,24 @@ const getDefaultState = (): ITextState => ({
 const state = getDefaultState()
 
 const getters: GetterTree<ITextState, unknown> = {
-  getDefaultFonts (state): string {
+  getDefaultFonts(state): string {
     return state.defaultFonts
       .map(font => font.face).join(',')
   },
-  getDefaultFontsList (state): IFont[] {
+  getDefaultFontsList(state): IFont[] {
     return state.defaultFonts
   },
-  paragraphs (state): Array<IParagraph> {
+  paragraphs(state): Array<IParagraph> {
     return state.paragraphs
   }
 }
 
 const mutations: MutationTree<ITextState> = {
-  UPDATE_selection (state: ITextState, data: { start: ISelection, end: ISelection }) {
+  UPDATE_selection(state: ITextState, data: { start: ISelection, end: ISelection }) {
     Object.assign(state.sel.start, data.start)
     Object.assign(state.sel.end, data.end)
   },
-  [UPDATE_STATE] (state: ITextState, data: Partial<ITextState>) {
+  [UPDATE_STATE](state: ITextState, data: Partial<ITextState>) {
     const keys = Object.keys(data) as Array<keyof ITextState>
     keys
       .forEach(key => {
@@ -97,12 +97,12 @@ const mutations: MutationTree<ITextState> = {
         }
       })
   },
-  UPDATE_props (state: ITextState, data: { [key: string]: string | boolean | number }) {
+  UPDATE_props(state: ITextState, data: { [key: string]: string | boolean | number }) {
     Object.entries(data).forEach(([k, v]) => {
       state.props[k] = v
     })
   },
-  [UPDATE_FONTFACE] (state: ITextState, payload: IFont) {
+  [UPDATE_FONTFACE](state: ITextState, payload: IFont) {
     const font = state.fontStore.find(font => font.face === payload.face)
     if (font) {
       Object.assign(font, payload)
@@ -110,14 +110,14 @@ const mutations: MutationTree<ITextState> = {
       state.fontStore.push(payload)
     }
   },
-  [UPDATE_DEFAULT_FONT] (state: ITextState, payload: { font: IFont, priority?: number }) {
+  [UPDATE_DEFAULT_FONT](state: ITextState, payload: { font: IFont, priority?: number }) {
     if (payload.priority) {
       state.defaultFonts.splice(payload.priority, 0, payload.font)
     } else {
       state.defaultFonts.push(payload.font)
     }
   },
-  SET_default (state: ITextState) {
+  SET_default(state: ITextState) {
     const defaultState = getDefaultState()
     Object.entries(defaultState.props).forEach(([k, v]) => {
       state.props[k] = v
@@ -141,7 +141,7 @@ const mutations: MutationTree<ITextState> = {
 }
 
 const actions: ActionTree<ITextState, unknown> = {
-  async addFont ({ state, commit }, data: { type: string, face: string, url: string, ver: number }): Promise<void> {
+  async addFont({ state, commit }, data: { type: string, face: string, url: string, ver: number }): Promise<void> {
     const { face, type, url, ver } = data
     if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
@@ -161,7 +161,6 @@ const actions: ActionTree<ITextState, unknown> = {
       } else {
         return new Promise<void>(resolve => {
           const checkLoaded = setInterval(() => {
-            console.log('check if loaded', font.face)
             if (font.loaded) {
               clearInterval(checkLoaded)
               resolve()

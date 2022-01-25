@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
 import store from '@/store'
 import assetUtils from './assetUtils'
@@ -96,13 +97,13 @@ class DragUtils {
     }, 0)
   }
 
-  itemOnDrop(e: DragEvent) {
+  itemOnDrop(e: DragEvent, pageIndex?: number): void {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
 
     if (data.type === 'image') {
-      mouseUtils.onDrop(e, layerUtils.pageIndex)
+      mouseUtils.onDrop(e, pageIndex ?? layerUtils.pageIndex)
     } else {
       const target = e.target as HTMLElement
       const targetPos = {
@@ -118,7 +119,7 @@ class DragUtils {
         const { textType, text, locale, pageIndex } = data
         assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
       } else {
-        assetUtils.addAsset(data, { styles })
+        assetUtils.addAsset(data, { styles, pageIndex })
       }
     }
   }
@@ -134,11 +135,11 @@ class DragUtils {
     styles: Partial<IImageStyle>,
     srcObj: { type: string, assetId: string | number, userId: string }
   } = {
-    layerIndex: -1,
-    subLayerIdx: -1,
-    styles: {},
-    srcObj: { type: '', assetId: '', userId: '' }
-  }
+      layerIndex: -1,
+      subLayerIdx: -1,
+      styles: {},
+      srcObj: { type: '', assetId: '', userId: '' }
+    }
 
   onImageDragEnter(e: DragEvent, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj

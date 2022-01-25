@@ -141,7 +141,7 @@ class AssetUtils {
 
   async addTemplate(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(GeneralUtils.deepCopy(json))
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
@@ -159,7 +159,7 @@ class AssetUtils {
 
   addSvg(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
@@ -195,7 +195,7 @@ class AssetUtils {
 
   async addLine(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targePageIndex)
@@ -235,7 +235,7 @@ class AssetUtils {
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
@@ -278,7 +278,7 @@ class AssetUtils {
 
   addFrame(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_FRAME
     const width = json.width * resizeRatio
@@ -307,7 +307,7 @@ class AssetUtils {
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
     const { pageIndex, styles = {} } = attrs
-    const targetPageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
     const page = store.getters.getPage(targetPageIndex)
@@ -373,7 +373,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const config = {
       ...json,
       styles: {
@@ -393,7 +393,7 @@ class AssetUtils {
   }
 
   addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
         const fieldMap = {
@@ -428,7 +428,7 @@ class AssetUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
-    const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
+    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
     const allLayers = this.getLayers(targePageIndex)
     const type = ImageUtils.getSrcType(url)

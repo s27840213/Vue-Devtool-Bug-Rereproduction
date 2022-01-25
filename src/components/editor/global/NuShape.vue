@@ -63,7 +63,7 @@ export default Vue.extend({
   async created() {
     await this.checkAndFetchSvg()
   },
-  destroyed () {
+  destroyed() {
     if (this.styleNode && this.styleNode.parentElement) {
       this.styleNode.parentElement.remove()
     }
@@ -324,7 +324,6 @@ export default Vue.extend({
         case 'D': {
           if (!svg) {
             await shapeUtils.addComputableInfo(this.config)
-            console.log(this.config)
           }
           const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
           if (this.transNode) {
@@ -372,7 +371,6 @@ export default Vue.extend({
         this.styleNode = shapeUtils.addStyleTag(styleText)
       }
       this.paramsReady = true
-      console.log(generalUtils.deepCopy(this.config))
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
