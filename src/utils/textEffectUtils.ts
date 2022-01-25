@@ -3,6 +3,7 @@ import LayerUtils from '@/utils/layerUtils'
 import { IParagraph, IText } from '@/interfaces/layer'
 import CssConverter from './cssConverter'
 import store from '@/store'
+import generalUtils from './generalUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -246,18 +247,26 @@ class Controller {
 
     for (const idx in layers) {
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-      const textEffect = layerTextEffect as any
+      const textEffect = generalUtils.deepCopy(layerTextEffect)
       if (type === 'text') {
         const mainColor = this.getLayerMainColor(paragraphs)
-        Object.assign(textEffect, {
-          strokeColor: mainColor
-        })
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textEffect }
-        })
+        const effectName = textEffect.name
+        if (effectName && effectName !== 'none') {
+          switch (effectName) {
+            case 'hollow':
+              Object.assign(textEffect, { color: mainColor })
+              break
+            case 'splice':
+              Object.assign(textEffect, { strokeColor: mainColor })
+              break
+          }
+          store.commit('UPDATE_specLayerData', {
+            pageIndex,
+            layerIndex,
+            subLayerIndex: +idx,
+            styles: { textEffect }
+          })
+        }
       }
     }
   }
