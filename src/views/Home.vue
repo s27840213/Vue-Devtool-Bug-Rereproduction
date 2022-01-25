@@ -40,7 +40,7 @@
       div(v-if="isLogin")
         div(class="home-content-title")
           span {{$t('NN0080')}}
-          span(class="pointer body-1 more"
+          span(class="pointer home-content__more-text"
           @click="goToPage('MyDesign')") {{$t('NN0082')}}
         div(class="home-content__mydesign")
           template-list(:designList="allDesigns" type='design'
@@ -48,7 +48,7 @@
       template(v-for="list, idx in (isLogin ? templates : templates2)")
         div(class="home-content-title")
           span {{list.title}}
-          span(class="pointer body-1"
+          span(class="pointer home-content__more-text"
             @click="goToTemplateCenterTheme(list.theme)") {{$t('NN0082')}}
         div(class="home-content__template")
           template-list(:theme="list.theme" type='template')
@@ -351,9 +351,12 @@ export default Vue.extend({
       padding: 38px 3% 6px 3%;
     }
     &.top-padding {
-      margin-top: 180px;
+      margin-top: 240px;
+      @media screen and (max-width: 1080px) {
+        margin-top: 180px;
+      }
       @media screen and (max-width: 700px) {
-        margin-top: 120px;
+        margin-top: 150px;
       }
       @media screen and (max-width: 500px) {
         margin-top: 80px;
@@ -464,7 +467,7 @@ export default Vue.extend({
     }
     &-img {
       width: 80%;
-      max-width: 1000px;
+      max-width: 900px;
       padding-top: 52px;
     }
   }
@@ -547,6 +550,13 @@ export default Vue.extend({
       @media screen and (max-width: 768px) {
         width: 250px;
       }
+    }
+  }
+  &__more-text {
+    white-space: nowrap;
+    @include body-MD;
+    @media screen and (max-width: 768px) {
+      @include body-SM;
     }
   }
   &__feature {

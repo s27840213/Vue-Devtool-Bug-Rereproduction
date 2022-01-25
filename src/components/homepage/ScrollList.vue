@@ -3,16 +3,16 @@
     div(v-if="prevIcon"
       class="scroll-list-move scroll-list-move-left"
       @click="handlePrev")
-      div
+      div(class="scroll-list-move__icon")
         svg-icon(iconName="chevron-left"
-          iconWidth="40px"
+          iconWidth="25px"
           iconColor="gray-3")
     div(v-if="nextIcon"
       class="scroll-list-move scroll-list-move-right"
       @click="handleNext")
-      div
-        svg-icon(iconName="chevron-right"
-          iconWidth="40px"
+      div(class="scroll-list-move__icon")
+        svg-icon(iconName="chevron-left"
+          iconWidth="25px"
           iconColor="gray-3")
     div(class="scroll-list__items"
       :class="{'items-theme': type === 'theme'}"
@@ -142,6 +142,7 @@ export default Vue.extend({
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
       this.items.scrollLeft = scrollLeft + (offsetWidth / 2)
+      this.handleIconDisplay(scrollLeft)
     },
     handlePrev() {
       const { scrollLeft, offsetWidth } = this.items
@@ -267,32 +268,31 @@ export default Vue.extend({
   &-move {
     position: absolute;
     top: 0;
-    bottom: 0;
+    bottom: -2px;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    width: 50px;
     z-index: 1;
     cursor: pointer;
+    background: #ffffff;
+    &__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 36px;
+      height: 36px;
+    }
     &-left {
-      left: -75px;
-      @media screen and (max-width: 1440px) {
-        left: -45px;
-      }
+      left: -2px;
       @include layout-mobile {
-        display: none;
-      }
-      @media screen and (min-width: 1600px) {
         display: none;
       }
     }
     &-right {
-      right: -75px;
-      @media screen and (max-width: 1440px) {
-        right: -45px;
-      }
+      right: -2px;
+      transform: matrix(-1, 0, 0, 1, 0, 0);
       @include layout-mobile {
-        display: none;
-      }
-      @media screen and (min-width: 1600px) {
         display: none;
       }
     }

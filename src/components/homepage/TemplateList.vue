@@ -77,7 +77,7 @@ export default Vue.extend({
   data() {
     return {
       prevIcon: false,
-      nextIcon: false,
+      nextIcon: true,
       fallbackSrc: '',
       list: [] as any[]
     }
@@ -97,7 +97,6 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    this.initIcon(1)
     const keyword = 'group::0;;order_by::popular'
     const res = await this.getTagContent({ keyword, theme: this.theme })
     this.list = res.data.content[0].list
@@ -111,15 +110,15 @@ export default Vue.extend({
     ...mapMutations({
       setGroupType: 'SET_groupType'
     }),
-    initIcon(times = 0) {
-      const { scrollWidth, offsetWidth } = this.items
-      if (scrollWidth === offsetWidth && times < 10) {
-        setTimeout(() => {
-          this.initIcon(times + 1)
-        }, 500)
-      }
-      this.nextIcon = scrollWidth > offsetWidth
-    },
+    // initIcon(times = 0) {
+    //   const { scrollWidth, offsetWidth } = this.items
+    //   if (scrollWidth === offsetWidth && times < 10) {
+    //     setTimeout(() => {
+    //       this.initIcon(times + 1)
+    //     }, 500)
+    //   }
+    //   this.nextIcon = scrollWidth > offsetWidth
+    // },
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
@@ -299,31 +298,29 @@ export default Vue.extend({
   &-move {
     position: absolute;
     top: 0;
-    bottom: 0;
+    bottom: -2px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     width: 50px;
     z-index: 1;
     cursor: pointer;
-    background: linear-gradient(90deg, #FFFFFF 8.93%, rgba(245, 238, 231, 0) 76.79%);
+    background: #ffffff;
     &__icon {
       display: flex;
       justify-content: center;
       align-items: center;
       width: 36px;
       height: 36px;
-      background: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0px 4px 8px rgba(38, 49, 71, 0.08);
     }
     &-left {
+      left: -2px;
       @include layout-mobile {
         display: none;
       }
     }
     &-right {
-      right: 0px;
+      right: -2px;
       transform: matrix(-1, 0, 0, 1, 0, 0);
       @include layout-mobile {
         display: none;
