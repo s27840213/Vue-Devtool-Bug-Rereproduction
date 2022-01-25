@@ -5,7 +5,6 @@ import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
-import textUtils from '@/utils/textUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -215,7 +214,7 @@ class Controller {
 
   calcArea(transforms: string[], minHeight: number, scale: number, config: IText): {areaWidth: number, areaHeight: number} {
     if (transforms.length < 2) {
-      const textHW = textUtils.getTextHW(config, -1)
+      const textHW = TextUtils.getTextHW(config, -1)
       return {
         areaWidth: textHW.width,
         areaHeight: textHW.height
