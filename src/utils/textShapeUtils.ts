@@ -5,6 +5,7 @@ import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
+import textUtils from '@/utils/textUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -64,7 +65,7 @@ class Controller {
       const { bend } = styles.textShape as any
       const { textWidth, minHeight } = this.getTextHWs(layer)
       const transforms = this.convertTextShape(textWidth, +bend)
-      const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale)
+      const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, layer)
       const { top, bottom, center } = this.getAnchors(layer, minHeight)
       Object.assign(styles, {
         width: areaWidth,
@@ -72,7 +73,6 @@ class Controller {
         x: center - (areaWidth / 2),
         y: +bend < 0 ? bottom - areaHeight : top
       })
-      props.widthLimit = areaWidth > props.widthLimit ? areaWidth : props.widthLimit
     }
     return { styles, props }
   }
@@ -137,6 +137,7 @@ class Controller {
   }
 
   convertTextShape (textWidth: number[], bend: number): string[] {
+    if (textWidth.length === 0) return []
     const angleOffset = bend >= 0 ? 90 : 270
     const ratioFix = bend >= 0 ? 1 : -1
     const radius = this.getRadiusByBend(bend)
@@ -212,18 +213,27 @@ class Controller {
     return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 
-  calcArea(transforms: string[], minHeight: number, scale: number): {areaWidth: number, areaHeight: number} {
+  calcArea(transforms: string[], minHeight: number, scale: number, config: IText): {areaWidth: number, areaHeight: number} {
+    if (transforms.length < 2) {
+      const textHW = textUtils.getTextHW(config, -1)
+      return {
+        areaWidth: textHW.width,
+        areaHeight: textHW.height
+      }
+    }
     const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
     const midLeng = Math.floor(positionList.length / 2)
     const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
     const maxY = Math.max.apply(null, positionList.map((position: string[]) => position[1]))
-    const minX = Math.max
-      .apply(
+    const minX = Math.max(
+      Math.max.apply(
         null,
         positionList
           .slice(0, midLeng)
           .map((position: string[]) => position[0])
-      )
+      ),
+      0
+    )
     const maxX = Math.max
       .apply(
         null,

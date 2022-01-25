@@ -67,6 +67,7 @@ import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -384,7 +385,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      !this.isCurveText && TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      this.isCurveText ? this.curveTextSizeRefresh(this.config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -392,6 +393,22 @@ export default Vue.extend({
           })
         })
       }
+    },
+    curveTextSizeRefresh(text: IText) {
+      const { scale, height: heightOri, textShape: { bend = 0 } = {} } = text.styles as any
+      const { textWidth, minHeight } = textShapeUtils.getTextHWs(text)
+      const transforms = textShapeUtils.convertTextShape(textWidth, +bend)
+      const { areaWidth, areaHeight } = textShapeUtils.calcArea(transforms, minHeight, scale, text)
+      const { top, bottom, center } = textShapeUtils.getAnchors(text, minHeight)
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        width: areaWidth,
+        height: areaHeight,
+        x: center - (areaWidth / 2),
+        y: +bend < 0 ? bottom - areaHeight : top
+      })
+      TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, areaHeight, heightOri)
+      TextUtils.fixGroupXcoordinates(this.pageIndex, this.primaryLayerIndex)
+      TextUtils.fixGroupYcoordinates(this.pageIndex, this.primaryLayerIndex)
     },
     onClickEvent(e: MouseEvent) {
       if (this.type === 'tmp') {

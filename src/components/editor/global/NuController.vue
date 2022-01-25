@@ -152,6 +152,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import DragUtils from '@/utils/dragUtils'
 import pageUtils from '@/utils/pageUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -1356,7 +1357,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      !this.isCurveText && this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
+      this.isCurveText ? this.curveTextSizeRefresh(this.config) : this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -1435,6 +1436,19 @@ export default Vue.extend({
         height: textHW.height,
         x: layerX,
         y: layerY
+      })
+    },
+    curveTextSizeRefresh(text: IText) {
+      const { scale, textShape: { bend = 0 } = {} } = text.styles as any
+      const { textWidth, minHeight } = textShapeUtils.getTextHWs(text)
+      const transforms = textShapeUtils.convertTextShape(textWidth, +bend)
+      const { areaWidth, areaHeight } = textShapeUtils.calcArea(transforms, minHeight, scale, text)
+      const { top, bottom, center } = textShapeUtils.getAnchors(text, minHeight)
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        width: areaWidth,
+        height: areaHeight,
+        x: center - (areaWidth / 2),
+        y: +bend < 0 ? bottom - areaHeight : top
       })
     },
     onDblClick() {
