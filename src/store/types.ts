@@ -63,6 +63,7 @@ export interface IEditorState {
   },
   showRuler: boolean,
   showGuideline: boolean,
+  lockGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean
 }

@@ -19,6 +19,7 @@ import popup from '@/store/module/popup'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
+import layouts from '@/store/module/layouts'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -85,6 +86,7 @@ const getDefaultState = (): IEditorState => ({
   isMoving: false,
   showRuler: false,
   showGuideline: true,
+  lockGuideline: false,
   themes: [],
   currDraggedItem: {
     type: ''
@@ -225,6 +227,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getShowGuideline(state: IEditorState) {
     return state.showGuideline
+  },
+  getLockGuideline(state: IEditorState) {
+    return state.lockGuideline
   },
   getThemes(state: IEditorState) {
     return state.themes
@@ -703,6 +708,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
   },
+  SET_lockGuideline(state: IEditorState, bool: boolean) {
+    state.lockGuideline = bool
+  },
   CLEAR_pagesInfo(state: IEditorState) {
     state.designId = ''
     state.assetId = ''
@@ -753,6 +761,7 @@ export default new Vuex.Store({
     page,
     homeTemplate,
     design,
+    layouts,
     unsplash
   }
 })

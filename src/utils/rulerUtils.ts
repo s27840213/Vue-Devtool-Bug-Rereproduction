@@ -22,6 +22,7 @@ class RulerUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get showRuler() { return store.getters.getShowRuler }
   get showGuideline() { return store.getters.getShowGuideline }
+  get lockGuideline() { return store.getters.getLockGuideline }
 
   RULER_SIZE = 20
   event: any
@@ -208,6 +209,10 @@ class RulerUtils {
 
   setShowGuideline(bool: boolean) {
     store.commit('SET_showGuideline', bool)
+  }
+
+  setLockGuideline(bool: boolean) {
+    store.commit('SET_lockGuideline', bool)
   }
 
   setIsDragging(bool: boolean) {

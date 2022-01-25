@@ -5,6 +5,7 @@ import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
+import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 
 class DragUtils {
@@ -101,7 +102,6 @@ class DragUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
-
     if (data.type === 'image') {
       mouseUtils.onDrop(e, pageIndex)
     } else {
@@ -119,7 +119,18 @@ class DragUtils {
         const { textType, text, locale } = data
         assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
       } else {
-        assetUtils.addAsset(data, { styles, pageIndex })
+        const currPage = pageUtils.currFocusPage
+        const aspectRatio = data.match_cover.height / data.match_cover.width
+        const resize = {
+          width: currPage.width,
+          height: currPage.width * aspectRatio
+        }
+        assetUtils.addAsset(data, {
+          styles,
+          pageIndex,
+          // for template
+          ...(data.type === 6 && resize)
+        })
       }
     }
   }

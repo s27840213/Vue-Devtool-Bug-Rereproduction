@@ -15,6 +15,8 @@ div(class="popup-file")
       :iconWidth="'14px'")
   div(class="popup-file__item" @click="toggleGuideline()")
     span {{showGuideline ?$t('NN0074'):$t('NN0361')}}
+  div(class="popup-file__item" @click="togglelockGuideline()")
+    span {{lockGuideline ?$t('NN0384'):$t('NN0383')}}
   div(class="popup-file__item" @click="clearGuideline()")
     span {{$t('NN0075')}}
   template(v-if="isAdmin")
@@ -34,7 +36,6 @@ import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { mapGetters } from 'vuex'
-import uploadUtils from '@/utils/uploadUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 
@@ -58,6 +59,9 @@ export default Vue.extend({
     showGuideline(): boolean {
       return rulerUtils.showGuideline
     },
+    lockGuideline(): boolean {
+      return rulerUtils.lockGuideline
+    },
     isShownRuler() {
       return rulerUtils.showRuler
     }
@@ -77,6 +81,9 @@ export default Vue.extend({
     },
     toggleGuideline() {
       rulerUtils.setShowGuideline(!rulerUtils.showGuideline)
+    },
+    togglelockGuideline() {
+      rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
     newDesign() {
       // designUtils.newDesign()
