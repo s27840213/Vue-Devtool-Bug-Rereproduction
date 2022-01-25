@@ -224,8 +224,11 @@ export default Vue.extend({
   &__item {
     width: 120px;
     text-align: center;
-    @media screen and (max-width: 540px) {
+    @media screen and (max-width: 768px) {
       width: 100px;
+    }
+    @media screen and (max-width: 540px) {
+      width: 70px;
     }
     &-title {
       color: setColor(gray-1);
