@@ -82,14 +82,14 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     onDrop(e: DragEvent) {
-      console.log('drop')
       if (!navigator.onLine) {
         networkUtils.notifyNetworkError()
         return
       }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        new DragUtils().itemOnDrop(e)
+        console.log(this.pageIndex)
+        new DragUtils().itemOnDrop(e, this.pageIndex)
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)

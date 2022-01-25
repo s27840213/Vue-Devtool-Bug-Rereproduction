@@ -66,8 +66,7 @@
             @compositionend="handleTextCompositionEnd")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
-          :style="lockIconStyles"
-          v-hint="'unlock'")
+          :style="lockIconStyles")
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
           @click.native="MappingUtils.mappingIconAction('unlock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"

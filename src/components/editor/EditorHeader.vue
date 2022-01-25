@@ -22,7 +22,7 @@
         :iconWidth="'20px'"
         :iconColor="statusColor"
         class="upload-cloud ml-10"
-        v-tooltip="$hintConfig(statusHint)"
+        v-hint="statusHint"
         )
 </template>
 
