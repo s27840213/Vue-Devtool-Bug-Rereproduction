@@ -31,6 +31,7 @@ import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import generalUtils from '@/utils/generalUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -125,7 +126,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('text', ['addFont']),
     styles(styles: any) {
-      return CssConveter.convertFontStyle(styles)
+      return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
       const isVertical = this.config.styles.writingMode.includes('vertical')

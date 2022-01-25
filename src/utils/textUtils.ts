@@ -679,6 +679,44 @@ class TextUtils {
     }
   }
 
+  asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
+    const targetSubLayers = [] as Array<[number, number]>
+    const config = group.layers[subLayerIndex]
+    const { y, textShape: { bend = 0 } = {} } = config.styles as any
+    if (+bend >= 0) {
+      const lowLine = y + heightOri
+      group.layers
+        .forEach((l, idx) => {
+          if (l.styles.y >= lowLine && idx !== subLayerIndex) {
+            targetSubLayers.push([idx, l.styles.y])
+          }
+        })
+      targetSubLayers
+        .forEach(data => {
+          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+            y: data[1] + (height - heightOri)
+          })
+        })
+    } else {
+      const highLine = y
+      group.layers
+        .forEach((l, idx) => {
+          if (l.styles.y <= highLine && idx !== subLayerIndex) {
+            targetSubLayers.push([idx, l.styles.y])
+          }
+        })
+      targetSubLayers
+        .forEach(data => {
+          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+            y: data[1] - (height - heightOri)
+          })
+        })
+    }
+    this.updateGroupLayerSize(pageIndex, layerIndex)
+  }
+
   fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER

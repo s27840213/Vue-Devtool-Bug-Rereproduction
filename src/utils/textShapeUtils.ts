@@ -36,7 +36,8 @@ class Controller {
       width,
       height,
       x,
-      y
+      y,
+      scale
     } = layer.styles
     const props = {} as { [key: string]: any }
     const defaultAttrs = this.shapes[shape]
@@ -59,6 +60,19 @@ class Controller {
         y: +bend < 0 ? y + height - textHW.height : y
       })
       props.widthLimit = -1
+    } else { // curve
+      const { bend } = styles.textShape as any
+      const { textWidth, minHeight } = this.getTextHWs(layer)
+      const transforms = this.convertTextShape(textWidth, +bend)
+      const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale)
+      const { top, bottom, center } = this.getAnchors(layer, minHeight)
+      Object.assign(styles, {
+        width: areaWidth,
+        height: areaHeight,
+        x: center - (areaWidth / 2),
+        y: +bend < 0 ? bottom - areaHeight : top
+      })
+      props.widthLimit = areaWidth > props.widthLimit ? areaWidth : props.widthLimit
     }
     return { styles, props }
   }
@@ -74,10 +88,6 @@ class Controller {
     return styles.textShape?.name === 'curve'
   }
 
-  hasDifferentBend (styles: any, bendToSet: string | number): boolean {
-    return this.cast2number(styles.textShape.bend) !== this.cast2number(bendToSet)
-  }
-
   setTextShape (shape: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -88,6 +98,7 @@ class Controller {
       for (const idx in layers) {
         const { type } = layers[idx] as IText
         if (type === 'text') {
+          const heightOri = layers[idx].styles.height
           const { styles, props } = this.getTextShapeStyles(
             layers[idx],
             shape,
@@ -100,9 +111,13 @@ class Controller {
             styles,
             props
           })
+          TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
         }
       }
+      TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
     } else {
+      const heightOri = layers[subLayerIndex].styles.height
       const { styles, props } = this.getTextShapeStyles(
         layers[subLayerIndex],
         shape,
@@ -115,6 +130,9 @@ class Controller {
         styles,
         props
       })
+      TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
+      TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
+      TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
     }
   }
 
@@ -192,6 +210,50 @@ class Controller {
 
   getTextHWs(_content: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
     return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
+  }
+
+  calcArea(transforms: string[], minHeight: number, scale: number): {areaWidth: number, areaHeight: number} {
+    const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
+    const midLeng = Math.floor(positionList.length / 2)
+    const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
+    const maxY = Math.max.apply(null, positionList.map((position: string[]) => position[1]))
+    const minX = Math.max
+      .apply(
+        null,
+        positionList
+          .slice(0, midLeng)
+          .map((position: string[]) => position[0])
+      )
+    const maxX = Math.max
+      .apply(
+        null,
+        positionList
+          .slice(midLeng)
+          .map((position: string[]) => position[0])
+      )
+    return {
+      areaWidth: Math.abs(maxX + minX) * 1.3 * scale,
+      areaHeight: (Math.abs(maxY - minY) + minHeight) * scale
+    }
+  }
+
+  getAnchors(config: IText, minHeight: number): { top: number, bottom: number, center: number } {
+    const { x, y, width, height } = config.styles
+    const center = x + width / 2
+    if (this.isCurvedText(config.styles)) {
+      const bend = +(config.styles as any).textShape.bend
+      return {
+        top: bend >= 0 ? y : y + height - minHeight,
+        bottom: bend >= 0 ? y + minHeight : y + height,
+        center
+      }
+    } else {
+      return {
+        top: y,
+        bottom: y + minHeight,
+        center
+      }
+    }
   }
 }
 
