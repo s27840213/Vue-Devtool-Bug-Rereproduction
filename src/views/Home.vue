@@ -94,7 +94,17 @@
                 :iconWidth="'25px'")
           img(class="home-content__feature-f3-img"
             :src="require('@/assets/img/svg/homepage/Feature 3_us.svg')")
-      nu-footer(class="mt-50")
+        div(class="home-content__bottom")
+          div(class="home-content__bottom-branch")
+            img(v-for="branch in brandList"
+              class="home-content__bottom-branch-img"
+              :src="require('@/assets/img/svg/homepage/' + branch + '.svg')")
+          div(class="home-content__bottom-text")
+            div(class="home-content__bottom-title") {{$t('NN0380')}}
+            div(class="home-content__bottom-subtitle") {{$t('NN0381')}}
+            div(class="home-content__feature-btn"
+              @click="newDesign()") {{$t('NN0274')}}
+      nu-footer
       div(v-if="showSizePopup"
         class="home__size")
         popup-size(@close="closePopup()")
@@ -219,6 +229,17 @@ export default Vue.extend({
     },
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    brandList(): string[] {
+      if (this.currLocale === 'tw') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      } else if (this.currLocale === 'jp') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      } else if (this.currLocale === 'us') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Amazon', 'Google']
+      } else {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      }
     }
   },
   async mounted() {
@@ -503,6 +524,7 @@ export default Vue.extend({
     &-text {
       display: flex;
       flex-direction: column;
+      text-align: left;
       @media screen and (max-width: 768px) {
         padding: 40px 24px 0 24px;
       }
@@ -594,7 +616,7 @@ export default Vue.extend({
       }
     }
     &-title {
-      text-align: left;
+      // text-align: left;
       @include text-H2;
       width: 400px;
       @media screen and (max-width: 540px) {
@@ -603,7 +625,7 @@ export default Vue.extend({
       }
     }
     &-subtitle {
-      text-align: left;
+      // text-align: left;
       color: setColor(gray-2);
       padding-top: 20px;
       @include body-LG;
@@ -625,6 +647,67 @@ export default Vue.extend({
       padding-top: 32px;
       @media screen and (max-width: 768px) {
         padding-top: 20px;
+      }
+    }
+  }
+  &__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #F3F6FA;
+    padding: 50px 24px 65px 24px;
+    @media screen and (max-width: 768px) {
+      padding-bottom: 50px;
+    }
+    &-branch {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: center;
+      padding-bottom: 30px;
+      @media screen and (max-width: 768px) {
+        padding-bottom: 45px;
+      }
+      > img {
+        padding: 15px 60px;
+        @media screen and (max-width: 1200px) {
+          padding-left: 40px;
+          padding-right: 40px;
+        }
+        @media screen and (max-width: 768px) {
+          padding-top: 20px;
+          padding-bottom: 20px;
+        }
+        @media screen and (max-width: 450px) {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        @media screen and (max-width: 430px) {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+    }
+    &-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    &-title {
+      @include text-H2;
+      @media screen and (max-width: 540px) {
+        @include text-H5;
+      }
+    }
+    &-subtitle {
+      color: setColor(gray-2);
+      max-width: 800px;
+      padding-top: 30px;
+      padding-bottom: 10px;
+      @include body-LG;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
       }
     }
   }
