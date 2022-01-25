@@ -85,6 +85,7 @@ const getDefaultState = (): IEditorState => ({
   isMoving: false,
   showRuler: false,
   showGuideline: true,
+  lockGuideline: false,
   themes: [],
   currDraggedItem: {
     type: ''
@@ -225,6 +226,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getShowGuideline(state: IEditorState) {
     return state.showGuideline
+  },
+  getLockGuideline(state: IEditorState) {
+    return state.lockGuideline
   },
   getThemes(state: IEditorState) {
     return state.themes
@@ -681,6 +685,11 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
   },
+  SET_guideline(state: IEditorState, { guidelines, pageIndex }) {
+    const { pages } = state
+    const currFocusPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines = guidelines
+  },
   DELETE_guideline(state: IEditorState, updateInfo: { pageIndex: number, index: number, type: string }) {
     const { pageIndex, index, type } = updateInfo
     const { pages } = state
@@ -697,6 +706,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
+  },
+  SET_lockGuideline(state: IEditorState, bool: boolean) {
+    state.lockGuideline = bool
   },
   CLEAR_pagesInfo(state: IEditorState) {
     state.designId = ''

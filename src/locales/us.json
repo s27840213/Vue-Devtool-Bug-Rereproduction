@@ -206,7 +206,7 @@
   "NN0206": "Move to folder",
   "NN0207": "Remove from favorites",
   "NN0208": "Template size",
-  "NN0209": "Not the same size as the current design. Which size would you like to add?",
+  "NN0209": "The template ({tsize}) you select is not the same size as the current design ({psize}). Which size would you like to add?",
   "NN0210": "{content} copied",
   "NN0211": "Copy & Resize",
   "NN0212": "Ungroup",
@@ -380,12 +380,14 @@
   "NN0372": "Ready to create?{newline}\nTry Vivipic for FREE today!",
   "NN0373": "Free for a limited time.",
   "NN0374": "Sign up for free",
-  "NN0375": "Thousands of free & pro-looking templates",
+  "NN0375": "Thousands of{newline}free & pro-looking templates",
   "NN0376": "We have tons of templates designed for different selling categories. Select a template for the business you run or a style that resonates with your brand.",
   "NN0377": "Explore all templates",
   "NN0378": "Meet the needs of eCommerce world",
   "NN0379": "Vivipic is designed for entrepreneurs and marketers with no design skills. With us, finding the right template and customizing it for your brand is a breeze.",
   "NN0380": "Make your brand stand out across all platforms.",
   "NN0381": "We offer templates for Facebook, Instagram, Amazon, and more. With us, you can elevate your brand's presence and create brand-consistent images across all your platforms.",
-  "NN0382": "Unlock background"
+  "NN0382": "Unlock background",
+  "NN0383": "未翻譯",
+  "NN0384": "未翻譯"
 }

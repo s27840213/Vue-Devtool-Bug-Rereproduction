@@ -12,9 +12,9 @@ import uploadUtils from './uploadUtils'
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
-  get getPage() { return store.getters.getPage }
+  get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
-  get getPageSize() { return store.getters.getPageSize }
+  get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
