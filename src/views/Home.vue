@@ -5,7 +5,7 @@
     div(class="home-content")
       div(class="home-content__top")
         img(class="home-content__top-bg"
-          :style="`height: ${isLogin ? '420px;' : '700px;'}`"
+          :class="isLogin ? 'login_h' : 'unlogin_h'"
           :src="require('@/assets/img/svg/homepage/top-bg.svg')")
         div(v-if="!isLogin"
           class="home-content__top-white")
@@ -361,20 +361,39 @@ export default Vue.extend({
       top: 0;
       left: 0;
       width: 100%;
-      height: 80vh;
       z-index: -2;
       object-fit: cover;
+      &.login_h {
+        height: 420px;
+      }
+      &.unlogin_h {
+        height: 750px;
+        @media screen and (max-width: 976px) {
+          height: 650px;
+        }
+        @media screen and (max-width: 768px) {
+          height: 500px;
+        }
+      }
     }
     &-white {
       position: absolute;
-      top: 45.5vh;
+      top: 500px;
       right: 0;
       width: 0;
       height: 0;
       border-color: white transparent;
-      border-width: 0 0 35vh 100vw;
+      border-width: 0 0 250px 100vw;
       border-style: solid;
       z-index: -1;
+      @media screen and (max-width: 976px) {
+        top: 450px;
+        border-width: 0 0 200px 100vw;
+      }
+      @media screen and (max-width: 768px) {
+        top: 400px;
+        border-width: 0 0 100px 100vw;
+      }
     }
     &-region {
       display: flex;
