@@ -6,6 +6,7 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
+import resizeUtils from './resizeUtils'
 import uploadUtils from './uploadUtils'
 
 class PageUtils {
@@ -124,6 +125,17 @@ class PageUtils {
   setPagesName(name: string) {
     store.commit('SET_pagesName', name)
     uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+  }
+
+  resizePage(format: { width: number, height: number }) {
+    resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
+    this.updatePageProps({
+      pageIndex: pageUtils.currFocusPageIndex,
+      props: {
+        width: format.width,
+        height: format.height
+      }
+    })
   }
 
   activeMiddlemostPage(): number {

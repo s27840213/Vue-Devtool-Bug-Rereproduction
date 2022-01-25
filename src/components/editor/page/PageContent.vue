@@ -82,7 +82,6 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     onDrop(e: DragEvent) {
-      console.log('drop')
       if (!navigator.onLine) {
         networkUtils.notifyNetworkError()
         return

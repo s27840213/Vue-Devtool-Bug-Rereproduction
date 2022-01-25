@@ -5,6 +5,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -109,7 +110,15 @@ class FrameUtils {
     })
   }
 
-  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage>) {
+  updateFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
+    store.commit('SET_frameLayerAllClipsStyles', {
+      pageIndex,
+      primaryLayerIndex,
+      styles
+    })
+  }
+
+  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }) {
     store.commit('UPDATE_frameLayerProps', {
       pageIndex,
       layerIndex,
@@ -118,8 +127,18 @@ class FrameUtils {
     })
   }
 
-  updateSubFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+  updateSubFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
     store.commit('SET_subFrameLayerStyles', {
+      pageIndex,
+      primaryLayerIndex,
+      subLayerIndex,
+      targetIndex,
+      styles
+    })
+  }
+
+  updateSubFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
+    store.commit('SET_subFrameLayerAllClipsStyles', {
       pageIndex,
       primaryLayerIndex,
       subLayerIndex,

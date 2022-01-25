@@ -66,8 +66,7 @@
             @compositionend="handleTextCompositionEnd")
       div(v-if="isActive && isLocked && (scaleRatio >20)"
           class="nu-controller__lock-icon"
-          :style="lockIconStyles"
-          v-hint="'unlock'")
+          :style="lockIconStyles")
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
           @click.native="MappingUtils.mappingIconAction('unlock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
@@ -150,6 +149,7 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
+import formatUtils from '@/utils/formatUtils'
 import DragUtils from '@/utils/dragUtils'
 import pageUtils from '@/utils/pageUtils'
 
@@ -367,7 +367,7 @@ export default Vue.extend({
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
     this.isControlling = false
-    this.setCursorStyle('initial')
+    this.setCursorStyle('')
     this.setMoving(false)
   },
   methods: {
@@ -596,6 +596,8 @@ export default Vue.extend({
       if (!this.isLocked) {
         e.stopPropagation()
       }
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
@@ -748,7 +750,7 @@ export default Vue.extend({
           }
         }
         this.isControlling = false
-        this.setCursorStyle('initial')
+        this.setCursorStyle('')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
@@ -925,7 +927,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
       this.$emit('setFocus')
@@ -988,7 +990,7 @@ export default Vue.extend({
       this.isLineEndMoving = false
       StepsUtils.record()
 
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
       document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
@@ -1167,7 +1169,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
@@ -1231,7 +1233,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
       this.$emit('setFocus')
@@ -1299,7 +1301,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.lineRotating)
       window.removeEventListener('mouseup', this.lineRotateEnd)
       this.$emit('setFocus')

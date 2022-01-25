@@ -66,6 +66,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   props: {
@@ -284,6 +285,8 @@ export default Vue.extend({
       }
     },
     onMousedown() {
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x

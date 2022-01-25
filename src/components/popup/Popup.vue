@@ -58,6 +58,7 @@ export default Vue.extend({
   computed: {
     ...mapState('user', [
       'role',
+      'roleRaw',
       'adminMode']),
     ...mapGetters({
       isPopupOpen: 'popup/isPopupOpen',
@@ -66,7 +67,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isOutsourcer: 'isOutsourcer'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
@@ -101,7 +103,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳群組模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          condition: this.inAdminMode && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 0)
           }
@@ -110,7 +112,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
           }
@@ -119,7 +121,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0, true)
           }
@@ -128,7 +130,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳詳情頁模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.isLogin && pageUtils.getPages.length > 1,
+          condition: this.inAdminMode && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 1)
           }
@@ -137,7 +139,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新詳情頁模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1)
           }
@@ -146,7 +148,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除詳情頁模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1, true)
           }
@@ -155,7 +157,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新群組成詳情頁',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1)
           }
@@ -164,7 +166,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新詳情頁成群組',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
           }

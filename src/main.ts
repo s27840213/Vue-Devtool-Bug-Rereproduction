@@ -10,37 +10,35 @@ import { Store } from 'vuex'
 import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
-import hintUtils from './utils/hintUtils'
 import VueMeta from 'vue-meta'
 import 'floating-vue/dist/style.css'
-import FloatingVue from 'floating-vue'
+import FloatingVue, { VTooltip } from 'floating-vue'
+import TooltipUtils from './utils/tooltipUtils'
+
+const tooltipUtils = new TooltipUtils()
 
 Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
 Vue.use(FloatingVue, {
-  themes: {
-    hint: {
-      $extend: 'tooltip',
-      $resetCss: true
-    }
-  }
+  themes: tooltipUtils.themes
 })
 
-Vue.prototype.$hintConfig = (content: string, placement: string, delay?: { show: number, hide: number }) => {
-  return {
-    content,
-    theme: 'hint',
-    placement: placement ?? 'bottom',
-    delay: delay ?? {
-      show: 200,
-      hide: 0
-    }
-  }
-}
-
 Vue.component('RecycleScroller', RecycleScroller)
+
+Vue.directive('hint', {
+  // When the bound element is inserted into the DOM...
+  bind: (el, binding, vnode) => {
+    tooltipUtils.bind(el, binding)
+  },
+  update: (el, binding) => {
+    tooltipUtils.bind(el, binding)
+  },
+  unbind: (el) => {
+    tooltipUtils.unbind(el)
+  }
+})
 
 Vue.directive('ratio-change', {
   // When the bound element is inserted into the DOM...
@@ -53,15 +51,6 @@ Vue.directive('ratio-change', {
     el.removeEventListener('change', function () {
       el.blur()
     })
-  }
-})
-
-Vue.directive('hint', {
-  bind: (el, binding, vnode) => {
-    hintUtils.bind(el, binding.value)
-  },
-  unbind: (el, binding) => {
-    hintUtils.unbind(el, binding.value)
   }
 })
 

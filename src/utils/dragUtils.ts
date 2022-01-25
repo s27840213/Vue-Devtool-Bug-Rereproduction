@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
 import store from '@/store'
 import assetUtils from './assetUtils'
@@ -134,11 +135,11 @@ class DragUtils {
     styles: Partial<IImageStyle>,
     srcObj: { type: string, assetId: string | number, userId: string }
   } = {
-    layerIndex: -1,
-    subLayerIdx: -1,
-    styles: {},
-    srcObj: { type: '', assetId: '', userId: '' }
-  }
+      layerIndex: -1,
+      subLayerIdx: -1,
+      styles: {},
+      srcObj: { type: '', assetId: '', userId: '' }
+    }
 
   onImageDragEnter(e: DragEvent, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
