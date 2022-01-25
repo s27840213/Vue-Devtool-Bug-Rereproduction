@@ -287,12 +287,6 @@ export default Vue.extend({
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
   },
-  beforeCreate() {
-    this.$store.registerModule('layouts', layouts)
-  },
-  beforeDestroy() {
-    this.$store.unregisterModule('layouts')
-  },
   data() {
     return {
       formatList: [] as ILayout[],
