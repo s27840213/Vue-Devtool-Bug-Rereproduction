@@ -11,6 +11,9 @@
             @drop="onDrop($event)"
             @dragenter="onDragEnter($event)"
             @dragleave="onDragLeave($event)"
+            @mouseenter="onFrameMouseEnter($event)"
+            @mouseleave="onFrameMouseLeave($event)"
+            @mouseup="onFrameMouseUp($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -62,6 +65,8 @@ import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import imageUtils from '@/utils/imageUtils'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   props: {
@@ -87,7 +92,7 @@ export default Vue.extend({
       posDiff: { x: 0, y: 0 },
       parentId: '',
       imgBuff: {} as {
-        styles: { [key: string]: number },
+        styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         cached: boolean
       },
@@ -107,7 +112,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    ...mapState(['currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -159,12 +164,8 @@ export default Vue.extend({
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
     },
-    getClipPath(): string {
-      if (!this.config.isFrameImg) {
-        return FrameUtils.frameClipFormatter(this.config.clipPath)
-      } else {
-        return `<path d='M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z'></path>`
-      }
+    primaryScale(): number {
+      return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
     }
   },
   watch: {
@@ -240,7 +241,7 @@ export default Vue.extend({
       return {
         fill: '#00000000',
         stroke: this.isActive ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${7 * (100 / this.scaleRatio)}px`
+        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryScale * (100 / this.scaleRatio)}px`
       }
     },
     textScaleStyle() {
@@ -284,6 +285,8 @@ export default Vue.extend({
       }
     },
     onMousedown() {
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x
@@ -328,7 +331,13 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         overflow: 'hidden',
         ...this.sizeStyle(),
-        ...(this.type === 'frame' && { clipPath: `path("${this.config.clipPath}")` })
+        ...(this.type === 'frame' && (() => {
+          if (this.config.isFrameImg) {
+            return { clipPath: `path d='M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z'` }
+          } else {
+            return { clipPath: `path("${this.config.clipPath}")` }
+          }
+        })())
       }
     },
     styles() {
@@ -339,10 +348,11 @@ export default Vue.extend({
       }
     },
     sizeStyle() {
+      const { isFrameImg } = this.config
       let width, height
-      if (this.type === 'frame') {
-        width = `${this.type === 'frame' ? this.config.styles.initWidth : this.config.styles.width}px`
-        height = `${this.type === 'frame' ? this.config.styles.initHeight : this.config.styles.height}px`
+      if (this.type === 'frame' && !isFrameImg) {
+        width = `${this.config.styles.initWidth}px`
+        height = `${this.config.styles.initHeight}px`
       } else {
         width = `${this.config.styles.width}px`
         height = `${this.config.styles.height}px`
@@ -351,12 +361,11 @@ export default Vue.extend({
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      const primaryScale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / primaryScale}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px dashed ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / primaryScale}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -436,7 +445,7 @@ export default Vue.extend({
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
       if (!primaryLayer.locked) {
         e.stopPropagation()
-        if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview) {
+        if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           Object.assign(this.imgBuff, {
             srcObj: {
@@ -477,18 +486,98 @@ export default Vue.extend({
       }
     },
     onFrameDrop(e: DragEvent) {
-      e.stopPropagation()
-      StepsUtils.record()
-      this.imgBuff.cached = false
-    },
-    preventDefault(e: Event) {
-      e.preventDefault()
+      if (this.imgBuff.cached) {
+        e.stopPropagation()
+        StepsUtils.record()
+        this.imgBuff.cached = false
+      }
     },
     undo() {
       ShortcutUtils.undo()
       LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
       setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+    },
+    onFrameMouseEnter(e: MouseEvent) {
+      e.stopPropagation()
+      if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+        return
+      }
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
+        const { styles, srcObj } = this.config
+        Object.assign(this.imgBuff, {
+          srcObj: {
+            ...srcObj
+          },
+          styles: {
+            imgX: styles.imgX,
+            imgY: styles.imgY,
+            imgWidth: styles.imgWidth,
+            imgHeight: styles.imgHeight,
+            horizontalFlip: styles.horizontalFlip,
+            verticalFlip: styles.verticalFlip
+          },
+          cached: true
+        })
+
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          srcObj: { ...currLayer.srcObj }
+        })
+
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+        const {
+          imgWidth, imgHeight,
+          imgX, imgY
+        } = MouseUtils.clipperHandler(currLayer, this.config.clipPath, styles).styles
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          adjust: { ...currLayer.styles.adjust },
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+
+        const clipper = document.getElementById(`nu-clipper-${this.primaryLayerIndex}`) as HTMLElement
+        clipper && clipper.classList.remove('layer-flip')
+        LayerUtils.updateLayerStyles(this.pageIndex, this.primaryLayerIndex, {
+          horizontalFlip: currLayer.styles.horizontalFlip,
+          verticalFlip: currLayer.styles.verticalFlip
+        })
+      }
+    },
+    onFrameMouseLeave(e: MouseEvent) {
+      e.stopPropagation()
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          srcObj: { ...this.imgBuff.srcObj }
+        })
+
+        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          ...this.imgBuff.styles
+        })
+
+        LayerUtils.updateLayerStyles(this.pageIndex, this.primaryLayerIndex, {
+          horizontalFlip: false,
+          verticalFlip: false
+        })
+      }
+      setTimeout(() => {
+        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
+        clipper && clipper.classList.add('layer-flip')
+      }, 0)
+    },
+    onFrameMouseUp(e: MouseEvent) {
+      const currLayer = LayerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === 'image') {
+        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
+        groupUtils.set(this.pageIndex, newIndex, [this.getPrimaryLayer])
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+        StepsUtils.record()
+      }
     }
   }
 })

@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+      :style="brushCursorStyles()"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
       @scroll="scrollUpdate()"
@@ -65,6 +66,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   components: {
@@ -170,7 +172,8 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       showRuler: 'getShowRuler',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -207,6 +210,9 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    brushCursorStyles() {
+      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
@@ -220,6 +226,9 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
+      if (this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
       if (this.isTyping) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })

@@ -149,6 +149,7 @@ import { SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
+import formatUtils from '@/utils/formatUtils'
 import DragUtils from '@/utils/dragUtils'
 import pageUtils from '@/utils/pageUtils'
 
@@ -366,7 +367,7 @@ export default Vue.extend({
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
     this.isControlling = false
-    this.setCursorStyle('initial')
+    this.setCursorStyle('')
     this.setMoving(false)
   },
   methods: {
@@ -595,6 +596,8 @@ export default Vue.extend({
       if (!this.isLocked) {
         e.stopPropagation()
       }
+      formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
+      formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
       switch (this.getLayerType) {
         case 'text': {
@@ -747,7 +750,7 @@ export default Vue.extend({
           }
         }
         this.isControlling = false
-        this.setCursorStyle('initial')
+        this.setCursorStyle('')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
       }
@@ -924,7 +927,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
       this.$emit('setFocus')
@@ -987,7 +990,7 @@ export default Vue.extend({
       this.isLineEndMoving = false
       StepsUtils.record()
 
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
       document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
       this.$emit('setFocus')
@@ -1166,7 +1169,7 @@ export default Vue.extend({
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
       this.$emit('setFocus')
@@ -1230,7 +1233,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.rotating)
       window.removeEventListener('mouseup', this.rotateEnd)
       this.$emit('setFocus')
@@ -1298,7 +1301,7 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       StepsUtils.record()
-      this.setCursorStyle('initial')
+      this.setCursorStyle('')
       window.removeEventListener('mousemove', this.lineRotating)
       window.removeEventListener('mouseup', this.lineRotateEnd)
       this.$emit('setFocus')
@@ -1331,16 +1334,19 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        switch (this.getLayerType) {
-          case 'image': {
-            const config = this.config as IImage
-            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-            break
-          }
-          case 'frame':
-            return
-          default:
-            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        // switch (this.getLayerType) {
+        //   case 'image': {
+        //     const config = this.config as IImage
+        //     MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+        //     break
+        //   }
+        //   case 'frame':
+        //     return
+        //   default:
+        //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        // }
+        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
+          this.dragUtils.itemOnDrop(e, this.pageIndex)
         }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files

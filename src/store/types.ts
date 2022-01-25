@@ -50,6 +50,9 @@ export interface IEditorState {
     },
     isPreview: boolean
   },
+  currDraggedItem: {
+    type: string
+  },
   asset: {
     [key: string]: IAsset
   },
@@ -60,7 +63,8 @@ export interface IEditorState {
   },
   showRuler: boolean,
   showGuideline: boolean,
-  themes: Itheme[]
+  themes: Itheme[],
+  hasCopiedFormat: boolean
 }
 
 export enum SidebarPanelType {

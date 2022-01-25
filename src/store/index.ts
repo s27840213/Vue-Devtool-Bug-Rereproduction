@@ -85,7 +85,11 @@ const getDefaultState = (): IEditorState => ({
   isMoving: false,
   showRuler: false,
   showGuideline: true,
-  themes: []
+  themes: [],
+  currDraggedItem: {
+    type: ''
+  },
+  hasCopiedFormat: false
 })
 
 const state = getDefaultState()
@@ -224,6 +228,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getThemes(state: IEditorState) {
     return state.themes
+  },
+  getHasCopiedFormat(state: IEditorState) {
+    return state.hasCopiedFormat
   }
 }
 
@@ -372,6 +379,9 @@ const mutations: MutationTree<IEditorState> = {
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
+  },
+  SET_hasCopiedFormat(state: IEditorState, value: boolean) {
+    state.hasCopiedFormat = value
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -588,12 +598,29 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+  SET_frameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, styles } = data
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
+    for (const clip of layers) {
+      Object.assign(clip.styles, generalUtils.deepCopy(styles))
+    }
+  },
+  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, targetIndex, styles } = data
+    const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
+    if (groupLayer.type === 'group') {
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      Object.assign(clipsLayer[targetIndex].styles, styles)
+    }
+  },
+  SET_subFrameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
     if (groupLayer.type === 'group') {
-      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IFrame[]
-      Object.assign(clipsLayer[0].styles, styles)
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      for (const clip of clipsLayer) {
+        Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      }
     }
   },
   SET_assetJson(state: IEditorState, json: { [key: string]: any }) {
@@ -614,8 +641,8 @@ const mutations: MutationTree<IEditorState> = {
         const matchType = type ? type.includes(layer.type) : true
         const matchSubLayerIndex = typeof subLayerIndex === 'undefined' || idx === subLayerIndex
         if (matchType && matchSubLayerIndex) {
-          props && Object.assign(targetLayer.layers[idx], props)
-          styles && Object.assign(targetLayer.layers[idx].styles, styles)
+          props && Object.assign(targetLayer.layers[idx], generalUtils.deepCopy(props))
+          styles && Object.assign(targetLayer.layers[idx].styles, generalUtils.deepCopy(styles))
         }
       })
     } else {
@@ -653,6 +680,11 @@ const mutations: MutationTree<IEditorState> = {
         break
       }
     }
+  },
+  SET_guideline(state: IEditorState, { guidelines, pageIndex }) {
+    const { pages } = state
+    const currFocusPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines = guidelines
   },
   DELETE_guideline(state: IEditorState, updateInfo: { pageIndex: number, index: number, type: string }) {
     const { pageIndex, index, type } = updateInfo
@@ -696,6 +728,9 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+  },
+  SET_draggedItemInfo(state: IEditorState, data: { type: string }) {
+    Object.assign(state.currDraggedItem, data)
   }
 }
 

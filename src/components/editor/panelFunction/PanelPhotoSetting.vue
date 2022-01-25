@@ -70,12 +70,19 @@ export default Vue.extend({
       const { index, type } = this.currSubSelectedInfo
       const imageLayers = layers.flatMap(layer => {
         if (layer.type === 'image') return layer
-        if (layer.type === 'frame') return (layer as IFrame).clips[0]
+        if (layer.type === 'frame') {
+          const frame = layer as IFrame
+          return frame.clips[Math.max(0, index)]
+        }
         if (layer.type === 'group') {
           if (type === 'image') return layer.layers[index]
           if (type === 'frame') {
             const frameLayer = (layer.layers as IFrame[])[index]
             return frameLayer.active ? frameLayer.clips[0] : null
+          }
+          // if no subSelectedLayer, it must be a group of all image layers
+          if (layer.layers[0].type === 'image') {
+            return layer.layers[0]
           }
         }
         return null
@@ -123,26 +130,41 @@ export default Vue.extend({
       const { index, type } = this.currSubSelectedInfo
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
-          return frameUtils.updateFrameLayerStyles(
-            pageUtils.currFocusPageIndex,
-            this.currSelectedIndex,
-            0,
-            { adjust: { ...adjust } }
-          )
+          if (index >= 0) {
+            // case 1: one clip in one frame layer, index = clip index
+            return frameUtils.updateFrameLayerStyles(
+              pageUtils.currFocusPageIndex,
+              this.currSelectedIndex,
+              index,
+              { adjust: { ...adjust } }
+            )
+          } else {
+            // case 2: one frame layer w/o selected clip, index = -1
+            return frameUtils.updateFrameLayerAllClipsStyles(
+              pageUtils.currFocusPageIndex,
+              this.currSelectedIndex,
+              { adjust: { ...adjust } }
+            )
+          }
         }
-        return frameUtils.updateSubFrameLayerStyles(
+        // case 3: one frame in a group layer, index = frame index in the group
+        return frameUtils.updateSubFrameLayerAllClipsStyles(
           pageUtils.currFocusPageIndex,
           this.currSelectedIndex,
           index,
           { adjust: { ...adjust } }
         )
       }
-      if (types.has('image') || (types.has('group') && type === 'image')) {
+      if (types.has('image') || types.has('group')) {
+        // case 4: one image layer, layerIndex = image layer index, subLayerIndex = undefined
+        // case 5: multiple image layers, layerIndex = tmp layer index, subLayerIndex = undefined
+        // case 6: one image in a group layer, layerIndex = group layer index, subLayerIndex = sublayer index
+        // case 7: whole group of images, layerIndex = group layer index, subLayerIndex = undefined
         return imageAdjustUtil.setAdjust({
           adjust: { ...adjust },
           pageIndex: pageUtils.currFocusPageIndex,
           layerIndex: this.currSelectedIndex,
-          subLayerIndex: types.has('group') && index
+          subLayerIndex: index >= 0 ? index : undefined
         })
       }
     }

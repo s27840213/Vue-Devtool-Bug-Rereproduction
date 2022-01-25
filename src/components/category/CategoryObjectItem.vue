@@ -36,6 +36,9 @@ export default Vue.extend({
       }, {
         resizeRatio: RESIZE_RATIO_SVG
       })
+      this.$store.commit('SET_draggedItemInfo', {
+        type: 'svg'
+      })
     },
     addSvg() {
       assetUtils.addAsset(this.item)

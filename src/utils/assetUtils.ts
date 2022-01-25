@@ -246,7 +246,6 @@ class AssetUtils {
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
     json.className = ShapeUtils.classGenerator()
-    console.log(GeneralUtils.deepCopy(styles))
     const config = {
       ...json,
       vSize: [svgWidth, svgHeight],

@@ -65,6 +65,9 @@ export default Vue.extend({
       dataTransfer.effectAllowed = 'move'
       dataTransfer.setDragImage((event.target as HTMLImageElement), 0, 0)
       dataTransfer.setData('data', JSON.stringify(this.item))
+      this.$store.commit('SET_draggedItemInfo', {
+        type: 'template'
+      })
     },
     addTemplate() {
       const { match_cover: matchCover = {}, height, width } = this.item

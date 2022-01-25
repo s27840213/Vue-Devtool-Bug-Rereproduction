@@ -540,6 +540,7 @@ class DesignUtils {
   }
 
   newDesignWithTemplae(width: number, height: number, json: any) {
+    console.log(json)
     assetUtils.addTemplate(json).then(() => {
       pageUtils.clearPagesInfo()
       Vue.nextTick(() => {
