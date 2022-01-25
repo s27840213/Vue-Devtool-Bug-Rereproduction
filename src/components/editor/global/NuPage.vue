@@ -172,11 +172,11 @@
           div(v-for="(line,index) in guidelines.v"
             class="snap-area__line snap-area__line--vr"
             :style="snapLineStyles('v', line,true)"
-            @mouseover="showGuideline(line,'v',index)")
+            @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
           div(v-for="(line,index) in guidelines.h"
             class="snap-area__line snap-area__line--hr"
             :style="snapLineStyles('h', line,true)"
-            @mouseover="showGuideline(line,'h',index)")
+            @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
     template(v-else)
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -267,7 +267,8 @@ export default Vue.extend({
       getPage: 'getPage',
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      lockGuideline: 'getLockGuideline'
     }),
     ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
