@@ -36,10 +36,12 @@
         @click.native="iconAction('trash')"
         v-hint="$t('NN0034')"
       )
-      //- svg-icon(:class="{'pointer': !isLocked}"
-      //-   iconName="brush" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-      //-   @click.native=""
-      //-   v-hint="'複製樣式'")
+      svg-icon(class="feature-button p-5"
+        :class="{'pointer': !isCopyFormatDisabled}"
+        iconName="brush" :iconWidth="'20px'" :iconColor="isCopyFormatDisabled ? 'gray-4' : 'gray-2'"
+        @click.native="handleCopyFormat"
+        v-hint="$t('NN0035')"
+      )
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") {{$t('NN0044')}}
@@ -58,6 +60,7 @@ import popupUtils from '@/utils/popupUtils'
 import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
@@ -79,6 +82,39 @@ export default Vue.extend({
     isLocked(): boolean {
       return LayerUtils.getTmpLayer().locked
     },
+    isCopyFormatDisabled(): boolean {
+      if (this.layerNum === 1) { // not tmp
+        const types = this.currSelectedInfo.types
+        const currLayer = LayerUtils.getCurrLayer
+        if (types.has('group')) {
+          if (this.subActiveLayerIndex !== -1) {
+            if (['text', 'image'].includes(this.subActiveLayerType)) {
+              return this.isLocked
+            }
+            if (this.subActiveLayerType === 'frame') {
+              const frame = this.subActiveLayer as IFrame
+              if (frame.clips.length === 1) {
+                return this.isLocked
+              }
+            }
+          }
+        } else if (types.has('frame')) {
+          const frame = currLayer as IFrame
+          if (frame.clips.length === 1) {
+            return this.isLocked
+          } else {
+            if (this.subActiveLayerIndex !== -1 && frame.clips[this.subActiveLayerIndex].type === 'image') {
+              return this.isLocked
+            }
+          }
+        } else {
+          if (types.has('text') || types.has('image')) {
+            return this.isLocked
+          }
+        }
+      }
+      return true
+    },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
@@ -90,6 +126,22 @@ export default Vue.extend({
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
+    },
+    subActiveLayerIndex(): number {
+      return LayerUtils.subLayerIdx
+    },
+    subActiveLayer(): any {
+      if (this.subActiveLayerIndex !== -1) {
+        return (LayerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
+      }
+      return undefined
+    },
+    subActiveLayerType(): string {
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer.type === 'group' && this.subActiveLayerIndex !== -1) {
+        return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
+      }
+      return ''
     },
     primaryLayerIndex(): number {
       if (LayerUtils.getCurrLayer.type === 'group') {
@@ -186,6 +238,34 @@ export default Vue.extend({
               opacity: value
             }
           })
+        }
+      }
+    },
+    handleCopyFormat() {
+      if (this.isCopyFormatDisabled) return
+      const types = this.currSelectedInfo.types
+      const layer = this.currSelectedInfo.layers[0]
+      if (types.has('group')) {
+        const type = this.subActiveLayerType
+        const subLayer = this.subActiveLayer
+        if (type === 'text') {
+          formatUtils.copyTextFormat(subLayer)
+        }
+        if (type === 'image') {
+          formatUtils.copyImageFormat(subLayer)
+        }
+        if (type === 'frame') {
+          formatUtils.copyImageFormat(subLayer.clips[0])
+        }
+      } else {
+        if (types.has('text')) {
+          formatUtils.copyTextFormat(layer)
+        }
+        if (types.has('image')) {
+          formatUtils.copyImageFormat(layer)
+        }
+        if (types.has('frame')) {
+          formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
         }
       }
     }
