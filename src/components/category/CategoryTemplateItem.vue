@@ -70,7 +70,14 @@ export default Vue.extend({
       })
     },
     addTemplate() {
-      const { match_cover: matchCover = {}, height, width } = this.item
+      const { match_cover: matchCover = {} } = this.item
+      let { height, width } = this.item
+
+      // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
+      if (width === undefined) {
+        width = this.item.match_cover.width
+        height = this.item.match_cover.width
+      }
       /*
       const theme = themeUtils
         .getThemesBySize(matchCover.width || width, matchCover.height || height)

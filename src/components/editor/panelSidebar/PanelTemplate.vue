@@ -218,7 +218,6 @@ export default Vue.extend({
     async handleSearch(keyword?: string) {
       this.resetContent()
       if (keyword) {
-        console.log('do')
         this.getTagContent({ keyword })
         this.getSum({ keyword })
       } else {
