@@ -977,13 +977,13 @@ class UploadUtils {
         return listService.getList({ type: 'group', groupId: designId })
           .then(result => {
             const { content } = result.data.data
+            store.commit('SET_groupType', 1)
             return assetUtils.addGroupTemplate({
               id: '',
               type: 6,
               ver: 0,
               content_ids: content[0].list,
-              group_id: designId,
-              group_type: 1
+              group_id: designId
             })
           })
           .then(() => {
