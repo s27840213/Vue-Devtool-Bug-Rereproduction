@@ -86,6 +86,9 @@ const getDefaultState = (): IEditorState => ({
   showRuler: false,
   showGuideline: true,
   themes: [],
+  currDraggedItem: {
+    type: ''
+  },
   hasCopiedFormat: false
 })
 
@@ -725,6 +728,9 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+  },
+  SET_draggedItemInfo(state: IEditorState, data: { type: string }) {
+    Object.assign(state.currDraggedItem, data)
   }
 }
 

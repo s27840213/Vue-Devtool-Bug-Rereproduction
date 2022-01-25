@@ -2,7 +2,7 @@ import LayerUtils from './layerUtils'
 import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
@@ -101,7 +101,7 @@ class FrameUtils {
     store.commit('SET_popupComponent', { layerIndex: -1 })
   }
 
-  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
+  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {
     store.commit('SET_frameLayerStyles', {
       pageIndex,
       primaryLayerIndex,

@@ -50,6 +50,9 @@ export interface IEditorState {
     },
     isPreview: boolean
   },
+  currDraggedItem: {
+    type: string
+  },
   asset: {
     [key: string]: IAsset
   },

@@ -88,7 +88,6 @@ export default Vue.extend({
       }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        console.log(this.pageIndex)
         new DragUtils().itemOnDrop(e, this.pageIndex)
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files

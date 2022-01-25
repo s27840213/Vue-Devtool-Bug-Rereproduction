@@ -1334,16 +1334,19 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        switch (this.getLayerType) {
-          case 'image': {
-            const config = this.config as IImage
-            MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-            break
-          }
-          case 'frame':
-            return
-          default:
-            MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        // switch (this.getLayerType) {
+        //   case 'image': {
+        //     const config = this.config as IImage
+        //     MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
+        //     break
+        //   }
+        //   case 'frame':
+        //     return
+        //   default:
+        //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
+        // }
+        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
+          this.dragUtils.itemOnDrop(e, this.pageIndex)
         }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
