@@ -26,8 +26,8 @@
               @click="newDesign()") {{$t('NN0274')}}
             img(class="home-content__top-img"
               :src="require('@/assets/img/svg/homepage/header_img_us.png')")
-      div(class="home-content-title label-lg"
-        :class="!isLogin ? 'mt-20' : ''") {{$t('NN0154')}}
+      div(class="home-content-title"
+        :class="!isLogin ? 'top-padding' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
@@ -38,7 +38,7 @@
           class="px-20") {{$t('NN0277')}}
         div(class="home-content__plaque-bg")
       div(v-if="isLogin")
-        div(class="home-content-title label-lg")
+        div(class="home-content-title")
           span {{$t('NN0080')}}
           span(class="pointer body-1 more"
           @click="goToPage('MyDesign')") {{$t('NN0082')}}
@@ -46,7 +46,7 @@
           template-list(:designList="allDesigns" type='design'
             :isLoading="isDesignsLoading")
       template(v-for="list, idx in (isLogin ? templates : templates2)")
-        div(class="home-content-title label-lg")
+        div(class="home-content-title")
           span {{list.title}}
           span(class="pointer body-1"
             @click="goToTemplateCenterTheme(list.theme)") {{$t('NN0082')}}
@@ -104,6 +104,8 @@
             div(class="home-content__bottom-subtitle") {{$t('NN0381')}}
             div(class="home-content__feature-btn"
               @click="newDesign()") {{$t('NN0274')}}
+      div(v-else
+        class="pb-40")
       nu-footer
       div(v-if="showSizePopup"
         class="home__size")
@@ -348,6 +350,15 @@ export default Vue.extend({
       @include text-H6;
       padding: 38px 3% 6px 3%;
     }
+    &.top-padding {
+      margin-top: 180px;
+      @media screen and (max-width: 700px) {
+        margin-top: 120px;
+      }
+      @media screen and (max-width: 500px) {
+        margin-top: 80px;
+      }
+    }
     .more {
       white-space: nowrap;
     }
@@ -357,9 +368,6 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     &-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       z-index: -2;
       object-fit: cover;
@@ -396,14 +404,19 @@ export default Vue.extend({
       }
     }
     &-region {
+      position: absolute;
+      top: 0;
+      left: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
       color: setColor(dark-blue);
       padding-top: 100px;
     }
     &-title {
       color: setColor(nav);
+      white-space: nowrap;
       padding: 0 5%;
       @include text-H2;
       @media screen and (max-width: 1440px) {
