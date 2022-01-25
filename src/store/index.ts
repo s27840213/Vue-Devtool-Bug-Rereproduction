@@ -277,6 +277,7 @@ const mutations: MutationTree<IEditorState> = {
     state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
+    console.log('SET_groupType')
     state.groupType = groupType
   },
   SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
@@ -698,7 +699,7 @@ const mutations: MutationTree<IEditorState> = {
     state.designId = ''
     state.assetId = ''
     state.groupId = ''
-    state.groupType = 0
+    state.groupType = -1
     state.name = ''
     state.exportIds = ''
     Object.assign(state.folderInfo, {
@@ -715,6 +716,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes
+  },
+  UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
+    const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
+    Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   }
 }
 

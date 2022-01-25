@@ -163,6 +163,9 @@ const getters: GetterTree<IUserModule, any> = {
   isAdmin(state) {
     return state.role === 0
   },
+  isOutsourcer(state) {
+    return state.role === 0 && state.roleRaw === 3
+  },
   getAvatar(state) {
     return state.avatar
   },

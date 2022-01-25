@@ -47,17 +47,20 @@ class MouseUtils {
     if (layer && clipperStyles && layer.type === 'image') {
       layer = this.clipperHandler(layer, clipPath, clipperStyles)
       if (layer) {
-        groupUtils.deselect()
-        LayerUtils.deleteLayer(layerIndex)
-        LayerUtils.addLayersToPos(pageIndex, [layer], layerIndex)
-        zindexUtils.reassignZindex(pageIndex)
-        groupUtils.select(pageIndex, [layerIndex])
-        StepsUtils.record()
+        // LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        //   srcObj: { ...layer.srcObj }
+        // })
+        // const { imgX, imgY, imgWidth, imgHeight } = layer.styles
+        // LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        //   imgX, imgY, imgWidth, imgHeight
+        // })
+        // StepsUtils.record()~
       }
     }
   }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
+    console.log(pageIndex)
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       groupUtils.deselect()
@@ -73,6 +76,7 @@ class MouseUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
+    console.log(data)
     const target = e.target as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
@@ -80,82 +84,53 @@ class MouseUtils {
     }
     const x = (e.clientX - targetPos.x + targetOffset.x) * (100 / store.state.pageScaleRatio)
     const y = (e.clientY - targetPos.y + targetOffset.y) * (100 / store.state.pageScaleRatio)
-    console.log(pageIndex)
-    const pageSize = store.getters.getPageSize(pageIndex)
-    console.log(pageSize)
-    console.log(data)
-    const resizeRatio = 0.8
-    const pageAspectRatio = pageSize.width / pageSize.height
-    const photoAspectRatio = data.styles.width / data.styles.height
-    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
-    let layer
+    const layerConfig: ILayer = {
+      type: data.type,
+      pageIndex: pageIndex,
+      active: false,
+      shown: false,
+      locked: false,
+      moved: false,
+      dragging: false,
+      designId: data.designId || '',
+      styles: {
+        x: x,
+        y: y,
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
+        rotate: 0,
+        width: data.styles.width,
+        height: data.styles.height,
+        initWidth: data.styles.initWidth || data.styles.width,
+        initHeight: data.styles.initHeight || data.styles.height,
+        zindex: -1,
+        opacity: 100,
+        horizontalFlip: data.styles.horizontalFlip || false,
+        verticalFlip: data.styles.verticalFlip || false
+      }
+    }
+
     switch (data.type) {
       case 'image': {
-        const layerConfig: ILayer = {
-          type: data.type,
-          pageIndex: pageIndex,
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          dragging: false,
-          designId: '',
-          styles: {
-            x: x,
-            y: y,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1,
-            rotate: 0,
-            width: photoWidth,
-            height: photoHeight,
-            initWidth: photoWidth,
-            initHeight: photoHeight,
-            zindex: -1,
-            opacity: 100,
-            horizontalFlip: data.styles.horizontalFlip,
-            verticalFlip: data.styles.verticalFlip
-          }
-        }
-        const imgStyles = {
-          imgX: 0,
-          imgY: 0,
-          imgWidth: layerConfig.styles.initWidth,
-          imgHeight: layerConfig.styles.initHeight
-        }
-        Object.assign(layerConfig.styles, imgStyles)
-        Object.assign(layerConfig, { srcObj: data.srcObj, imgControl: false })
         if (store.getters.getCurrSidebarPanelType === SidebarPanelType.bg) {
           this.backgroundHandler(pageIndex, layerConfig)
-          return
+          break
         } else {
-          const src = imageUtils.getSrc({ srcObj: data.srcObj } as IImage)
-          const photoAspectRatio = photoWidth / photoHeight
-          const inFilePanel = store.getters.getCurrSidebarPanelType === SidebarPanelType.file
-          const attr = {
-            pageIndex: pageUtils.currFocusPageIndex,
-            ...(inFilePanel && !uploadUtils.isAdmin && { assetIndex: data.srcObj.assetId }),
-            ...(inFilePanel && uploadUtils.isAdmin && { assetId: data.srcObj.assetId })
-          }
-          groupUtils.deselect()
-          AssetUtils.addImage(
-            src,
-            photoAspectRatio,
-            attr
-          )
-
-          return
+          Object.assign(layerConfig, { srcObj: data.srcObj })
+          return LayerFactary.newImage(layerConfig)
         }
-        break
+      }
+      case 'shape': {
+        console.log(data.category)
+        Object.assign(layerConfig, { category: data.category })
+        return LayerFactary.newShape(layerConfig)
       }
       default: {
         AssetUtils.addAsset(data, { pageIndex, styles: { x, y } })
-        return
       }
     }
-    return layer
   }
 
   backgroundHandler(pageIndex: number, config: ILayer) {

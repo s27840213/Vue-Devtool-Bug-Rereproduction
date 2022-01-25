@@ -28,7 +28,6 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { IUserImageContentData } from '@/interfaces/api'
 
 export default Vue.extend({
   props: {
@@ -90,7 +89,7 @@ export default Vue.extend({
         }))
       const lastRow = rows.splice(-1)[0]
       this.prevLastRow = (lastRow ? lastRow.list : []) as any
-      this.rows = this.rows.concat(rows as any)
+      // this.rows = this.rows.concat(rows as any)
     }
     // temparaily used for handling user assets
   },

@@ -6,7 +6,7 @@
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
       div(class="border-gray-4 p-5 btn-opacity"
-        v-tooltip="$hintConfig(`${$t('NN0030')}`)"
+        v-hint="$t('NN0030')"
       )
         svg-icon(class="pointer"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
@@ -16,30 +16,32 @@
         :class="{'pointer': !isLocked}"
         iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="openOrderPopup()"
-        v-tooltip="$hintConfig(`${$t('NN0031')}`)"
+        v-hint="$t('NN0031')"
       )
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('copy')"
-        v-tooltip="$hintConfig(`${$t('NN0032')}`)"
+        v-hint="$t('NN0032')"
       )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
         :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
-        v-tooltip="$hintConfig(isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}` )"
+        v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
       )
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isLocked}"
         iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
         @click.native="iconAction('trash')"
-        v-tooltip="$hintConfig(`${$t('NN0034')}`)")
+        v-hint="$t('NN0034')"
+      )
       svg-icon(class="feature-button p-5"
         :class="{'pointer': !isCopyFormatDisabled}"
         iconName="brush" :iconWidth="'20px'" :iconColor="isCopyFormatDisabled ? 'gray-4' : 'gray-2'"
         @click.native="handleCopyFormat"
-        v-tooltip="$hintConfig(`${$t('NN0035')}`)")
+        v-hint="$t('NN0035')"
+      )
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") {{$t('NN0044')}}

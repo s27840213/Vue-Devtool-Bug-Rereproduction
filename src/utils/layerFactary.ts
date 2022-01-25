@@ -171,8 +171,8 @@ class LayerFactary {
       isEdited: false,
       contentEditable: false,
       styles: {
-        x: 0,
-        y: 0,
+        x: config.styles?.x,
+        y: config.styles?.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -306,7 +306,7 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    const { styles } = config
+    const { styles } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -328,6 +328,7 @@ class LayerFactary {
       moved: false,
       dragging: false,
       designId: '',
+      ...(config.category === 'E' && { filled: false }),
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -341,11 +342,10 @@ class LayerFactary {
         initHeight: styles.initHeight,
         zindex: -1,
         opacity: 100,
-        horizontalFlip: false,
-        verticalFlip: false
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       }
     }
-    Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)
   }

@@ -23,7 +23,7 @@
                     @update="handleValueUpdate")
     div(class="text-setting__row2")
       div(class="text-setting__color"
-          v-tooltip="$hintConfig(`${$t('NN0099')}`)")
+          v-hint="$t('NN0099')")
         div(class="color-slip record-selection"
           @click="handleColorModal")
           svg-icon(iconName="text-color"
@@ -45,11 +45,11 @@
         svg-icon(class="pointer record-selection btn-lh"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-tooltip="$hintConfig(`${$t('NN0109')}`)")
+          v-hint="$t('NN0109')")
         svg-icon(class="pointer record-selection btn-ls"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-tooltip="$hintConfig(`${$t('NN0110')}`)")
+          v-hint="$t('NN0110')")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="record-selection"
@@ -57,14 +57,14 @@
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         :style="propsBtnStyles(icon)"
-        v-tooltip="$hintConfig(hintMap[icon])"
+        v-hint="hintMap[icon]"
         :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer"
         :key="`gp-action-icon-${index}`"
         :style="propsBtnStyles(icon)"
-        v-tooltip="$hintConfig(hintMap[icon])"
+        v-hint="hintMap[icon]"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
 
@@ -535,7 +535,6 @@ export default Vue.extend({
               })
           } else {
             tiptapUtils.applyParagraphStyle(prop, value, false)
-            // TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIdx)
             TextPropUtils.updateTextPropsState({ [prop]: value })
           }
         })
