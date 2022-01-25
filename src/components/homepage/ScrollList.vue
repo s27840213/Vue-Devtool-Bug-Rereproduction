@@ -49,7 +49,7 @@
             class="pt-10 scroll-list__item-title") {{item.title}}
           div(v-if="type === 'theme'"
             class="pt-2 scroll-list__item-subtitle") {{item.description}}
-        div(v-if="isLoading")
+        div(v-if="isLoading || list.length === 0")
             svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
